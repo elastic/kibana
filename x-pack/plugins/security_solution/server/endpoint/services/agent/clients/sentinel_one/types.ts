@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  type SearchHitsMetadata,
+  type SearchResponseBody,
+} from '@elastic/elasticsearch/lib/api/types';
+
 export interface RawSentinelOneInfo {
   sentinel_one: {
     agent: {
@@ -17,3 +22,15 @@ export interface RawSentinelOneInfo {
     };
   };
 }
+
+export type SentinelOneSearchResponse = SearchResponseBody & {
+  hits: SearchResponseBody['hits'] & {
+    hits: Array<SearchResponseBody['hits']['hits']> & {
+      inner_hits: {
+        most_recent: {
+          hits: SearchHitsMetadata<RawSentinelOneInfo>;
+        };
+      };
+    };
+  };
+};

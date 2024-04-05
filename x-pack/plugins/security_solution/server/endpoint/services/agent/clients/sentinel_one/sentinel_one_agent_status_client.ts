@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RawSentinelOneInfo, SentinelOneSearchResponse } from './types';
+import { catchAndWrapError } from '../../../../utils';
 import type { AgentStatuses } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
-import type { RawSentinelOneInfo } from './types';
 
 const SENTINEL_ONE_AGENT_INDEX = `logs-sentinel_one.agent-default`;
 
@@ -26,8 +26,6 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatuses> {
-    const dateField = 'sentinel_one.agent.last_active_date';
-
     const query = {
       bool: {
         must: [
@@ -47,57 +45,53 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
     };
 
     try {
-      const searchResult: SearchResponse<
-        RawSentinelOneInfo,
-        Record<string, AggregationsAggregate>
-      > = await this.options.esClient.search(
-        {
-          index: SENTINEL_ONE_AGENT_INDEX,
-          size: 10000,
-          query,
-          aggs: {
-            lastActive: {
-              date_range: {
-                field: dateField,
-                ranges: [
+      const response = (await this.options.esClient
+        .search(
+          {
+            index: SENTINEL_ONE_AGENT_INDEX,
+            from: 0,
+            size: 10000,
+            query,
+            collapse: {
+              field: 'sentinel_one.agent.uuid',
+              inner_hits: {
+                name: 'most_recent',
+                size: 1,
+                sort: [
                   {
-                    from: 'now-30d/d',
-                    to: 'now',
+                    '@timestamp': {
+                      order: 'desc',
+                    },
                   },
                 ],
               },
             },
+            sort: [
+              {
+                'sentinel_one.agent.last_active_date': {
+                  order: 'desc',
+                },
+              },
+            ],
+            _source: false,
           },
-          sort: [
-            {
-              [dateField]: {
-                order: 'desc',
-              },
-            },
-          ],
-        },
-        { ignore: [404] }
-      );
+          { ignore: [404] }
+        )
+        .catch(catchAndWrapError)) as SentinelOneSearchResponse;
 
-      const searchHits = searchResult?.hits?.hits?.map(
-        (hit) =>
-          hit._source ?? {
-            sentinel_one: {
-              agent: {
-                uuid: '',
-                network_status: '',
-                is_pending_uninstall: false,
-                is_uninstalled: false,
-                last_active_date: '',
-                is_active: false,
-              },
-            },
-          }
-      );
+      const mostRecentAgentInfosByAgentId = response?.hits?.hits?.reduce<
+        Record<string, RawSentinelOneInfo>
+      >((acc, hit) => {
+        if (hit.fields?.['sentinel_one.agent.uuid'][0]) {
+          acc[hit.fields?.['sentinel_one.agent.uuid'][0]] =
+            hit.inner_hits?.most_recent.hits.hits[0]._source;
+        }
+
+        return acc;
+      }, {});
 
       return agentIds.reduce<AgentStatuses>((acc, agentId) => {
-        const agentInfo = searchHits?.find((info) => info?.sentinel_one?.agent?.uuid === agentId)
-          ?.sentinel_one?.agent;
+        const agentInfo = mostRecentAgentInfosByAgentId[agentId].sentinel_one.agent;
 
         acc[agentId] = {
           agentId,
