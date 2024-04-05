@@ -10,7 +10,18 @@ import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import { once } from 'lodash';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
-import * as Rx from 'rxjs';
+import {
+  type Observable,
+  fromEvent,
+  map,
+  race,
+  mergeMap,
+  takeUntil,
+  takeLast,
+  takeWhile,
+  defaultIfEmpty,
+  repeatWhen,
+} from 'rxjs';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
@@ -20,38 +31,43 @@ import {
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
-const createDocumentMouseMoveListener = once(() => Rx.fromEvent<MouseEvent>(document, 'mousemove'));
-const createDocumentMouseUpListener = once(() => Rx.fromEvent<MouseEvent>(document, 'mouseup'));
+const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
+const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
 
-// TODO: Handle Enter keypress
 const usePresentationPanelTitleClickHandler = (titleElmRef?: HTMLElement) => {
-  const onClick = useRef<Rx.Observable<{ dragged: boolean }> | null>(null);
+  const onClick = useRef<Observable<{ dragged: boolean }> | null>(null);
 
   const mouseup = createDocumentMouseUpListener();
   const mousemove = createDocumentMouseMoveListener();
 
   useEffect(() => {
     if (titleElmRef) {
-      const mousedown = Rx.fromEvent<MouseEvent>(titleElmRef, 'mousedown');
+      const mousedown = fromEvent<MouseEvent>(titleElmRef, 'mousedown');
+      const keydown = fromEvent<KeyboardEvent>(titleElmRef, 'keydown');
 
-      onClick.current = mousedown
+      const mousedragExclusiveClick$ = mousedown
         .pipe(
-          Rx.mergeMap(function (md) {
+          mergeMap(function (md) {
             // create reference for when mouse is down
             const startX = md.offsetX;
             const startY = md.offsetY;
 
             return mousemove
               .pipe(
-                Rx.map(function (mm) {
+                map(function (mm) {
                   return { dragged: startX !== mm.clientX && startY !== mm.clientY };
                 })
               )
-              .pipe(Rx.takeUntil(mouseup))
-              .pipe(Rx.defaultIfEmpty({ dragged: false }));
+              .pipe(takeUntil(mouseup), takeLast(1))
+              .pipe(defaultIfEmpty({ dragged: false }));
           })
         )
-        .pipe(Rx.repeatWhen(() => mousedown));
+        .pipe(repeatWhen(() => mousedown));
+
+      onClick.current = race(
+        keydown.pipe(takeWhile((kd) => kd.key === 'Enter')).pipe(map(() => ({ dragged: false }))),
+        mousedragExclusiveClick$
+      );
     }
   }, [mousemove, mouseup, titleElmRef]);
 
