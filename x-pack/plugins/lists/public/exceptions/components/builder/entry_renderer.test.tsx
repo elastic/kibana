@@ -36,6 +36,8 @@ import * as i18n from './translations';
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
+const MockedShowValueListModal = (): React.ReactNode => <></>;
+
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 const mockResult = getFoundListsBySizeSchemaMock();
@@ -84,6 +86,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         exceptionItemIndex={0}
         showLabel
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -118,6 +121,7 @@ describe('BuilderEntryItem', () => {
         showLabel
         allowCustomOptions
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -156,6 +160,7 @@ describe('BuilderEntryItem', () => {
         showLabel
         allowCustomOptions
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -192,6 +197,7 @@ describe('BuilderEntryItem', () => {
         showLabel
         allowCustomOptions={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -230,6 +236,7 @@ describe('BuilderEntryItem', () => {
         allowCustomOptions
         getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -267,6 +274,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -307,6 +315,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -347,6 +356,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -387,6 +397,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -428,6 +439,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -470,6 +482,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -511,6 +524,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -555,6 +569,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -599,6 +614,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -643,6 +659,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -678,6 +695,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -738,6 +756,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -782,6 +801,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -824,6 +844,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -866,6 +887,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -908,6 +930,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -950,6 +973,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -998,6 +1022,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -1040,6 +1065,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -1081,6 +1107,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={jest.fn()}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -1131,6 +1158,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -1181,6 +1209,7 @@ describe('BuilderEntryItem', () => {
         setWarningsExist={mockSetWarningsExists}
         showLabel={false}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -1230,6 +1259,7 @@ describe('BuilderEntryItem', () => {
         showLabel={false}
         isDisabled={true}
         exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
       />
     );
     expect(

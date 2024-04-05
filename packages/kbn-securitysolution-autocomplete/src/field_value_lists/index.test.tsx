@@ -67,7 +67,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -89,7 +89,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -117,7 +117,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
     expect(
@@ -138,7 +138,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('@tags')}
         selectedValue=""
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -162,7 +162,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -186,7 +186,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue="some-list-id"
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -210,7 +210,7 @@ describe('AutocompleteFieldListsComponent', () => {
         placeholder="Placeholder text"
         selectedField={getField('ip')}
         selectedValue=""
-        showValueListModal={mockShowValueListModal}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
