@@ -44,6 +44,9 @@ describe('CrowdstrikeActionsClient class', () => {
     classConstructorOptions = CrowdstrikeMock.createConstructorOptions();
     connectorActionsMock = classConstructorOptions.connectorActions;
     crowdstrikeActionsClient = new CrowdstrikeActionsClient(classConstructorOptions);
+    classConstructorOptions.esClient.search.mockResolvedValueOnce(
+      CrowdstrikeMock.createEventSearchResponse()
+    );
   });
 
   it.each([
@@ -82,6 +85,9 @@ describe('CrowdstrikeActionsClient class', () => {
         params: {
           subAction: SUB_ACTION.HOST_ACTIONS,
           subActionParams: {
+            actionParameters: {
+              comment: 'test comment',
+            },
             command: 'contain',
             ids: ['1-2-3'],
           },

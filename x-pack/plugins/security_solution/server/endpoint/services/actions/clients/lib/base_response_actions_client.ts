@@ -13,6 +13,8 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ExpandedEventFieldsObject } from '../../../../../../common/types/response_actions';
+import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import { fetchActionResponses } from '../../fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
@@ -127,8 +129,9 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
 export interface ResponseActionsClientGetEventDetailsOptions {
-  index: string;
-  id: string;
+  index: string | string[];
+  term: Record<string, string>;
+  fields?: Array<Record<'field', string>>;
 }
 
 export type ResponseActionsClientValidateRequestResponse =
@@ -470,16 +473,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     return doc;
   }
 
-  protected async getEventDetailsById(
+  protected async getEventDetailsById<TOutputContent>(
     options: ResponseActionsClientGetEventDetailsOptions
-    // TODO TC: Add proper types
-  ): Promise<unknown> {
-    const doc = this.buildActionResponseEsDoc(options);
-
-    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
-
+  ): Promise<TOutputContent> {
     const search = {
       index: options.index,
+      fields: options.fields ? options.fields : [{ field: '*' }],
+      _source: false,
       body: {
         query: {
           bool: {
@@ -489,9 +489,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       },
     };
     const result = await this.options.esClient
-      // TODO TC: Add proper types
-      .search<unknown>(search, {
+      .search<TOutputContent>(search, {
         ignore: [404],
+      })
+      .then((eventDetails) => {
+        return expandDottedObject(
+          eventDetails.hits.hits?.[0]?.fields as ExpandedEventFieldsObject,
+          true
+        ) as TOutputContent;
       })
       .catch((err) => {
         throw new ResponseActionsClientError(
@@ -501,8 +506,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         );
       });
 
-    // double check after kibana_system has proper access to logs
-    return result?.data?.hits?.hits?.[0]._source;
+    return result;
   }
 
   protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {
