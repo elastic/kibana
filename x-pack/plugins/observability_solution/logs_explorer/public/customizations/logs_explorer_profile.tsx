@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
@@ -135,24 +133,7 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.add({
-          id: 'doc_view_log_overview',
-          title: i18n.translate('xpack.logsExplorer.flyoutDetail.docViews.overview', {
-            defaultMessage: 'Overview',
-          }),
-          order: 0,
-          component: (props) => {
-            const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
-
-            return (
-              <KibanaContextProviderForPlugin>
-                <LogsExplorerControllerProvider controller={controller}>
-                  <LazyCustomFlyoutContent {...props} />
-                </LogsExplorerControllerProvider>
-              </KibanaContextProviderForPlugin>
-            );
-          },
-        });
+        registry.enableById('doc_view_logs_overview');
 
         return registry;
       },

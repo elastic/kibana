@@ -50,6 +50,28 @@ export class DocViewsRegistry {
     this.docViews.delete(id);
   }
 
+  enableById(id: string) {
+    const docView = this.docViews.get(id);
+    if (docView) {
+      docView.enabled = true;
+    } else {
+      throw new Error(
+        `DocViewsRegistry#enableById: there is no DocView registered with id "${id}".`
+      );
+    }
+  }
+
+  disableById(id: string) {
+    const docView = this.docViews.get(id);
+    if (docView) {
+      docView.enabled = false;
+    } else {
+      throw new Error(
+        `DocViewsRegistry#disableById: there is no DocView registered with id "${id}".`
+      );
+    }
+  }
+
   clone() {
     return new DocViewsRegistry(this);
   }

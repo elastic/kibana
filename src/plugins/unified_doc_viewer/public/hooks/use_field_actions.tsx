@@ -9,11 +9,6 @@
 import { useMemo, useState } from 'react';
 import { copyToClipboard, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  copyToClipboardLabel,
-  filterForFieldPresentLabel,
-  toggleColumnLabel,
-} from '../components/common/translations';
 import { useDiscoverActionsContext } from './use_discover_action';
 
 interface HoverActionProps {

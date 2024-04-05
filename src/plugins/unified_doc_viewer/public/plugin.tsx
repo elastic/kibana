@@ -28,6 +28,9 @@ const fallback = (
   </EuiDelayRender>
 );
 
+const LazyDocViewerLogsOverview = dynamic(() => import('./components/doc_viewer_logs_overview'), {
+  fallback,
+});
 const LazyDocViewerLegacyTable = dynamic(() => import('./components/doc_viewer_table/legacy'), {
   fallback,
 });
@@ -54,11 +57,24 @@ export class UnifiedDocViewerPublicPlugin
 
   public setup(core: CoreSetup<UnifiedDocViewerStartDeps, UnifiedDocViewerStart>) {
     this.docViewsRegistry.add({
+      id: 'doc_view_logs_overview',
+      title: i18n.translate('unifiedDocViewer.docViews.logsOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      order: 0,
+      enabled: false, // Disabled doc view by default, can be programmatically enabled using the DocViewsRegistry.prototype.enableById method.
+      component: (props) => {
+        return <LazyDocViewerLogsOverview {...props} />;
+      },
+    });
+
+    this.docViewsRegistry.add({
       id: 'doc_view_table',
       title: i18n.translate('unifiedDocViewer.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
+      enabled: true,
       component: (props) => {
         const { uiSettings } = getUnifiedDocViewerServices();
         const LazyDocView = uiSettings.get(DOC_TABLE_LEGACY)
@@ -75,6 +91,7 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
+      enabled: true,
       component: ({ hit, dataView, textBasedHits }) => {
         return (
           <LazySourceViewer

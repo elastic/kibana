@@ -60,6 +60,7 @@ export interface BaseDocViewInput {
   id: string;
   order: number;
   title: string;
+  enabled: boolean;
 }
 
 export interface RenderDocViewInput extends BaseDocViewInput {
