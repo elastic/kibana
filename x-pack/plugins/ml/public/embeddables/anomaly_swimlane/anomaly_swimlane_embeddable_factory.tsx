@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -181,12 +181,14 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             };
           }, []);
 
-          const [fromPage, perPage, swimlaneType, swimlaneData] = useBatchedPublishingSubjects(
-            api.fromPage,
-            api.perPage,
-            api.swimlaneType,
-            swimLaneData$
-          );
+          const [fromPage, perPage, swimlaneType, swimlaneData, error] =
+            useBatchedPublishingSubjects(
+              api.fromPage,
+              api.perPage,
+              api.swimlaneType,
+              swimLaneData$,
+              api.blockingError
+            );
 
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
@@ -205,6 +207,24 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             // eslint-disable-next-line react-hooks/exhaustive-deps
             [swimlaneData, perPage, setSelectedCells]
           );
+
+          if (error) {
+            return (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.errorMessage"
+                    defaultMessage="Unable to load the ML swim lane data"
+                  />
+                }
+                color="danger"
+                iconType="warning"
+                css={{ width: '100%' }}
+              >
+                <p>{error.message}</p>
+              </EuiCallOut>
+            );
+          }
 
           return (
             <I18nContext>
