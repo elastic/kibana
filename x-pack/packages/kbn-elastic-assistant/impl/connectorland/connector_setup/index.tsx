@@ -179,6 +179,7 @@ export const useConnectorSetup = ({
         apiConfig: {
           ...conversation.apiConfig,
           connectorId: connector.id,
+          actionTypeId: connector.actionTypeId,
           provider: config?.apiProvider,
           model: config?.defaultModel,
         },

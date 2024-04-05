@@ -108,13 +108,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             conversation: selectedConversation,
             apiConfig: {
               ...selectedConversation.apiConfig,
+              actionTypeId: connector.actionTypeId,
               connectorId,
               // With the inline component, prefer config args to handle 'new connector' case
               provider: apiProvider,
               model,
             },
           });
-
           if (conversation) {
             onConnectorSelected(conversation);
           }

@@ -80,7 +80,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
         ) : (
           <FormattedMessage
             id="xpack.fleet.enrollmentStepAgentPolicy.createAgentPolicyText"
-            defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
+            defaultMessage="Settings for the monitored host are configured in the {agentPolicy}. Choose an agent policy or create a new one."
             values={{
               agentPolicy: (
                 <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">

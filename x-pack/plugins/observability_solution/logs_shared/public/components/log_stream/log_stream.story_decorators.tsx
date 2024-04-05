@@ -8,7 +8,7 @@
 import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { defer, of, Subject } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay } from 'rxjs';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,

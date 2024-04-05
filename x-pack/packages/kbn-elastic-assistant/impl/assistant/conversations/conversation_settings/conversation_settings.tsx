@@ -89,6 +89,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
                 ? {
                     apiConfig: {
                       connectorId: defaultConnector.id,
+                      actionTypeId: defaultConnector.actionTypeId,
                       provider: defaultConnector.apiProvider,
                       defaultSystemPromptId: defaultSystemPrompt?.id,
                     },
@@ -230,6 +231,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId: connector.id,
+              actionTypeId: connector.actionTypeId,
               provider: config?.apiProvider,
               model: config?.defaultModel,
             },
@@ -255,6 +257,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
                       : {}
                     ).apiConfig ?? {}),
                     connectorId: connector?.id,
+                    actionTypeId: connector?.actionTypeId,
                     provider: config?.apiProvider,
                     model: config?.defaultModel,
                   },

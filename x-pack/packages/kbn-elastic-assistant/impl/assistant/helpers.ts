@@ -125,3 +125,11 @@ export const getOptionalRequestParams = ({
     ...optionalSize,
   };
 };
+
+export const hasParsableResponse = ({
+  isEnabledRAGAlerts,
+  isEnabledKnowledgeBase,
+}: {
+  isEnabledRAGAlerts: boolean;
+  isEnabledKnowledgeBase: boolean;
+}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
