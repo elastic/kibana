@@ -78,6 +78,7 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
+    "@kbn/core-security-common",
   ],
   "exclude": [
     "target/**/*",
