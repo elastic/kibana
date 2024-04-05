@@ -233,8 +233,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerEmbeddables,
               registerMlUiActions,
               registerSearchLinks,
-              registerMlAlerts,
-              registerMapExtension,
               registerCasesAttachments,
             } = await import('./register_helper');
             registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
@@ -245,6 +243,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 // Register rules for basic license to show them in the UI as disabled
                 !fullLicense)
             ) {
+              // This module contains async imports itself, and it is conditionally loaded based on the license. We'll save
+              // traffic if we load it async.
+              const { registerMlAlerts } = await import('./alerting/register_ml_alerts');
+
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
@@ -264,6 +266,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 }
 
                 if (pluginsSetup.maps) {
+                  // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
+                  // traffic if we load it async.
+                  const { registerMapExtension } = await import('./maps/register_map_extension');
+
                   // Pass canGetJobs as minimum permission to show anomalies card in maps layers
                   await registerMapExtension(pluginsSetup.maps, core, {
                     canGetJobs: mlCapabilities.canGetJobs,

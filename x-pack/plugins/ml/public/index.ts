@@ -51,7 +51,4 @@ type AwaitReturnType<T> = T extends PromiseLike<infer U> ? U : T;
 export type GetMlSharedImportsReturnType = AwaitReturnType<ReturnType<typeof getMlSharedImports>>;
 
 export { MLJobsAwaitingNodeWarning } from './application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared';
-export {
-  MlNodeAvailableWarningShared,
-  useMlNodeAvailableCheck,
-} from './application/components/node_available_warning';
+export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';

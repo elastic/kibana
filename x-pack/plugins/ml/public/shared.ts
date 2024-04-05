@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export {
-  FieldStatsFlyoutProvider,
-  useFieldStatsTrigger,
-  FieldStatsInfoButton,
-} from './application/components/field_stats_flyout';
+export { FieldStatsInfoButton } from './application/components/field_stats_flyout/field_stats_info_button';
+export { useFieldStatsTrigger } from './application/components/field_stats_flyout/use_field_stats_trigger';
+export { FieldStatsFlyoutProvider } from './application/components/field_stats_flyout/field_stats_flyout_provider';
 export { useFieldStatsFlyoutContext } from './application/components/field_stats_flyout/use_field_stats_flytout_context';
