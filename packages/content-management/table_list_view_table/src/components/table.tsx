@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserProfile } from '@kbn/user-profile-components';
 
 import { useServices } from '../services';
 import type { Action } from '../actions';
@@ -35,10 +36,11 @@ import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
+import { UserFilterPanel, UserFilterContextProvider } from './user_filter_panel';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
-  'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
+  'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination' | 'tableFilter'
 >;
 
 type TagManagementProps = Pick<
@@ -59,8 +61,10 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   renderCreateButton: () => React.ReactElement | undefined;
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
+  onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
+  suggestUsers?: () => Promise<UserProfile[]>;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -72,6 +76,7 @@ export function Table<T extends UserContentCommonSchema>({
   pagination,
   tableColumns,
   tableSort,
+  tableFilter,
   hasUpdatedAtMetadata,
   entityName,
   entityNamePlural,
@@ -83,9 +88,11 @@ export function Table<T extends UserContentCommonSchema>({
   onTableChange,
   onTableSearchChange,
   onSortChange,
+  onFilterChange,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
+  suggestUsers,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -200,9 +207,16 @@ export function Table<T extends UserContentCommonSchema>({
     clearTagSelection,
   ]);
 
+  const userFilterPanel = useMemo<SearchFilterConfig>(() => {
+    return {
+      type: 'custom_component',
+      component: UserFilterPanel,
+    };
+  }, []);
+
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel];
-  }, [tableSortSelectFilter, tagFilterPanel]);
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel];
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
     return {
@@ -226,23 +240,41 @@ export function Table<T extends UserContentCommonSchema>({
     />
   );
 
+  const visibleItems = React.useMemo(() => {
+    if (tableFilter?.createdBy?.length > 0) {
+      return items.filter(
+        (item) => item.createdBy && tableFilter.createdBy?.includes(item.createdBy)
+      );
+    }
+
+    return items;
+  }, [items, tableFilter]);
+
   return (
-    <EuiInMemoryTable<T>
-      itemId="id"
-      items={items}
-      columns={tableColumns}
-      pagination={pagination}
-      loading={isFetchingItems}
-      message={noItemsMessage}
-      selection={selection}
-      search={search}
-      executeQueryOptions={{ enabled: false }}
-      sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-      onChange={onTableChange}
-      data-test-subj="itemsInMemTable"
-      rowHeader="attributes.title"
-      tableCaption={tableCaption}
-      isSelectable
-    />
+    <UserFilterContextProvider
+      suggestUsers={suggestUsers}
+      onSelectedUsersChange={(selectedUsers) => {
+        onFilterChange({ createdBy: selectedUsers });
+      }}
+      selectedUsers={tableFilter.createdBy}
+    >
+      <EuiInMemoryTable<T>
+        itemId="id"
+        items={visibleItems}
+        columns={tableColumns}
+        pagination={pagination}
+        loading={isFetchingItems}
+        message={noItemsMessage}
+        selection={selection}
+        search={search}
+        executeQueryOptions={{ enabled: false }}
+        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
+        onChange={onTableChange}
+        data-test-subj="itemsInMemTable"
+        rowHeader="attributes.title"
+        tableCaption={tableCaption}
+        isSelectable
+      />
+    </UserFilterContextProvider>
   );
 }

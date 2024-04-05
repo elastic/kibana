@@ -32,6 +32,7 @@ import type {
   SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserProfile } from '@kbn/user-profile-components';
 
 import {
   Table,
@@ -113,6 +114,9 @@ export interface TableListViewTableProps<
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
+
+  /** Function to suggest users when filtering by user */
+  suggestUsers?: () => Promise<UserProfile[]>;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -139,6 +143,9 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableSort: {
     field: SortColumnField;
     direction: Direction;
+  };
+  tableFilter: {
+    createdBy: string[];
   };
 }
 
@@ -264,6 +271,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
+  suggestUsers,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -345,6 +353,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         field: 'attributes.title' as const,
         direction: 'asc',
       },
+      tableFilter: {
+        createdBy: [],
+      },
     }),
     [initialPageSize]
   );
@@ -365,6 +376,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     hasUpdatedAtMetadata,
     pagination,
     tableSort,
+    tableFilter,
   } = state;
 
   const showFetchError = Boolean(fetchError);
@@ -700,13 +712,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     [updateQuery, buildQueryFromText]
   );
 
-  const updateTableSortAndPagination = useCallback(
+  const updateTableSortFilterAndPagination = useCallback(
     (data: {
       sort?: State<T>['tableSort'];
       page?: {
         pageIndex: number;
         pageSize: number;
       };
+      filter?: Partial<State<T>['tableFilter']>;
     }) => {
       if (data.sort && urlStateEnabled) {
         setUrlState({
@@ -717,7 +730,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.page || !urlStateEnabled) {
+      if (data.page || data.filter || !urlStateEnabled) {
         dispatch({
           type: 'onTableChange',
           data,
@@ -729,14 +742,23 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const onSortChange = useCallback(
     (field: SortColumnField, direction: Direction) => {
-      updateTableSortAndPagination({
+      updateTableSortFilterAndPagination({
         sort: {
           field,
           direction,
         },
       });
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
+  );
+
+  const onFilterChange = useCallback(
+    (filter: Partial<State['tableFilter']>) => {
+      updateTableSortFilterAndPagination({
+        filter,
+      });
+    },
+    [updateTableSortFilterAndPagination]
   );
 
   const onTableChange = useCallback(
@@ -770,9 +792,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         pageSize: criteria.page.size,
       };
 
-      updateTableSortAndPagination(data);
+      updateTableSortFilterAndPagination(data);
     },
-    [updateTableSortAndPagination]
+    [updateTableSortFilterAndPagination]
   );
 
   const deleteSelectedItems = useCallback(async () => {
@@ -996,6 +1018,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
+          tableFilter={tableFilter}
           tableItemsRowActions={tableItemsRowActions}
           pagination={pagination}
           selectedIds={selectedIds}
@@ -1007,9 +1030,11 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           onTableChange={onTableChange}
           onTableSearchChange={onTableSearchChange}
           onSortChange={onSortChange}
+          onFilterChange={onFilterChange}
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
+          suggestUsers={suggestUsers}
         />
 
         {/* Delete modal */}

@@ -57,6 +57,7 @@ export interface OnTableChangeAction<T extends UserContentCommonSchema> {
       pageIndex: number;
       pageSize: number;
     };
+    filter?: Partial<State<T>['tableFilter']>;
   };
 }
 

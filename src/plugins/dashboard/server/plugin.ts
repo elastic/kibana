@@ -14,6 +14,7 @@ import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 import {
   initializeDashboardTelemetryTask,
@@ -38,6 +39,7 @@ interface SetupDeps {
 
 interface StartDeps {
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -88,6 +90,51 @@ export class DashboardPlugin
     );
 
     core.uiSettings.register(getUISettings());
+
+    const router = core.http.createRouter();
+    router.get(
+      { path: '/internal/dashboard/suggest_users', validate: false },
+      async (context, req, res) => {
+        const security = (await core.getStartServices())[1].security;
+        if (!security) {
+          return res.notFound({ body: 'Security plugin is not available' });
+        }
+
+        try {
+          const soClient = (await context.core).savedObjects.client;
+          const response = await soClient.find<
+            never,
+            { users: { buckets: Array<{ key: string }> } }
+          >({
+            type: 'dashboard',
+            perPage: 0,
+            aggs: {
+              users: {
+                terms: {
+                  field: 'created_by',
+                  size: 50,
+                },
+              },
+            },
+          });
+
+          const userProfileIds =
+            response.aggregations?.users.buckets.map((bucket) => bucket.key) ?? [];
+
+          const profiles = await security.userProfiles.bulkGet({
+            uids: new Set(userProfileIds),
+            dataPath: 'avatar',
+          });
+
+          return res.ok({
+            body: profiles,
+          });
+        } catch (e) {
+          this.logger.error(`Failed to suggest users: ${e.message}`, { error: e });
+          return res.customError({ statusCode: 500, body: `Failed to suggest users` });
+        }
+      }
+    );
 
     return {};
   }

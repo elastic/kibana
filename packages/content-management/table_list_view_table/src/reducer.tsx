@@ -93,6 +93,9 @@ export function getReducer<T extends UserContentCommonSchema>() {
         const tableSort = action.data.sort ?? state.tableSort;
         const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
         const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
+        const tableFilter = action.data.filter
+          ? { ...state.tableFilter, ...action.data.filter }
+          : state.tableFilter;
 
         return {
           ...state,
@@ -102,6 +105,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
             pageSize,
           },
           tableSort,
+          tableFilter,
         };
       }
       case 'showConfirmDeleteItemsModal': {

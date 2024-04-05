@@ -187,6 +187,7 @@ enabled:
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
+  - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
   - x-pack/test/api_integration/apis/es/config.ts

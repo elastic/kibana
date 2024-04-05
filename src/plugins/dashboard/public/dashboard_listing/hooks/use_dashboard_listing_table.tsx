@@ -13,6 +13,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+import { UserProfile } from '@kbn/user-profile-components';
 
 import {
   DASHBOARD_CONTENT_ID,
@@ -42,6 +43,7 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     type: 'dashboard',
     id: hit.id,
     updatedAt: hit.updatedAt!,
+    createdBy: hit.createdBy,
     references: hit.references,
     managed: hit.managed,
     attributes: {
@@ -97,6 +99,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
+    http,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -262,6 +265,11 @@ export const useDashboardListingTable = ({
     [goToDashboard]
   );
 
+  const suggestUsers = useCallback<() => Promise<UserProfile[]>>(async () => {
+    const users = await http.get<UserProfile[]>(`/internal/dashboard/suggest_users`);
+    return users;
+  }, [http]);
+
   const onFetchSuccess = useCallback(() => {
     if (!hasInitialFetchReturned) {
       setHasInitialFetchReturned(true);
@@ -297,6 +305,7 @@ export const useDashboardListingTable = ({
       setPageDataTestSubject,
       title,
       urlStateEnabled,
+      suggestUsers,
     }),
     [
       contentEditorValidators,
@@ -319,6 +328,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
+      suggestUsers,
     ]
   );
 
