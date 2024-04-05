@@ -11,6 +11,7 @@ import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } f
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -29,9 +30,9 @@ export type PackageCardProps = IntegrationCardItem;
 
 // Min-height is roughly 3 lines of content.
 // This keeps the cards from looking overly unbalanced because of content differences.
-const Card = styled(EuiCard)<{ isQuickstart?: boolean }>`
+const Card = styled(EuiCard)<{ isquickstart?: boolean }>`
   min-height: 127px;
-  border-color: ${({ isQuickstart }) => (isQuickstart ? '#ba3d76' : null)};
+  border-color: ${({ isquickstart }) => (isquickstart ? '#ba3d76' : null)};
 `;
 
 export function PackageCard({
@@ -147,8 +148,8 @@ export function PackageCard({
       <TrackApplicationView viewId={testid}>
         <Card
           data-test-subj={testid}
-          isQuickstart={isQuickstart}
-          betaBadgeProps={isQuickstart ? { label: 'Quickstart', color: 'accent' } : undefined}
+          isquickstart={isQuickstart}
+          betaBadgeProps={quickstartBadge(isQuickstart)}
           layout="horizontal"
           title={title || ''}
           titleSize="xs"
@@ -176,4 +177,15 @@ export function PackageCard({
       </TrackApplicationView>
     </WithGuidedOnboardingTour>
   );
+}
+
+function quickstartBadge(isQuickstart: boolean): { label: string; color: 'accent' } | undefined {
+  return isQuickstart
+    ? {
+        label: i18n.translate('xpack.fleet.packageCard.quickstartBadge.label', {
+          defaultMessage: 'Quickstart',
+        }),
+        color: 'accent',
+      }
+    : undefined;
 }

@@ -159,7 +159,7 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (authz.fleet.allAgents && diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         key="requestAgentDiagnosticsBtn"

@@ -6,5 +6,16 @@ metadata:
 spec:
   type: url
   targets:
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-esql-grammar-sync.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployments.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/security-solution-ess.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-defend-workflows.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-detection-engine.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-entity-analytics.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-explore.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-gen-ai.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-investigations.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-rule-management.yml

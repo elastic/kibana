@@ -33,7 +33,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
-  const hasFleetAllPrivileges = useAuthz().fleet.allAgents;
+  const authz = useAuthz();
+  const hasFleetAllPrivileges = authz.fleet.allAgents;
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
@@ -151,11 +152,11 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     </EuiContextMenuItem>
   );
 
-  if (hasFleetAllPrivileges && diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
     menuItems.push(
       <EuiContextMenuItem
         icon="download"
-        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
+        disabled={!isAgentRequestDiagnosticsSupported(agent)}
         onClick={() => {
           setIsRequestDiagnosticsModalOpen(true);
         }}
