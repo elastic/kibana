@@ -372,9 +372,7 @@ export function ChatBody({
                   onSendTelemetry={(eventWithPayload) =>
                     chatService.sendAnalyticsEvent(eventWithPayload)
                   }
-                  onStopGenerating={() => {
-                    stop();
-                  }}
+                  onStopGenerating={stop}
                   onActionClick={handleActionClick}
                 />
               )}

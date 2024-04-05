@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { uniq } from 'lodash';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { nonNullable } from '../../utils/non_nullable';
 
@@ -32,19 +33,13 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
 
   const contexts = service.getScreenContexts();
 
-  const starterPrompts = [
-    ...new Set(
-      contexts
-        .reverse()
-        .flatMap((context) => context.starterPrompts)
-        .filter(nonNullable)
-        .slice(0, 4)
-    ),
-  ];
-
-  const handleSelectPrompt = (prompt: string) => {
-    onSelectPrompt(prompt);
-  };
+  const starterPrompts = uniq(
+    [...contexts]
+      .reverse()
+      .flatMap((context) => context.starterPrompts)
+      .filter(nonNullable)
+      .slice(-4)
+  );
 
   return (
     <EuiFlexGroup direction="row" gutterSize="m" wrap>
@@ -54,7 +49,7 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
             paddingSize="m"
             hasShadow={false}
             hasBorder
-            onClick={() => handleSelectPrompt(prompt)}
+            onClick={() => onSelectPrompt(prompt)}
             className={starterPromptInnerClassName}
           >
             <EuiSpacer size="s" />
