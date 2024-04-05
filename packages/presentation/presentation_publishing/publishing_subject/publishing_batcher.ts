@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { combineLatest, debounceTime, skip, tap } from 'rxjs';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
@@ -29,11 +29,13 @@ const hasSubjectsArrayChanged = (
  * @param subjects Publishing subjects array.
  *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
  */
-export const useBatchedOptionalPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
+export const useBatchedOptionalPublishingSubjects = <
+  SubjectsType extends [...AnyPublishingSubject[]]
+>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   const isFirstRender = useRef(true);
-  
+
   const previousSubjects = useRef<SubjectsType>(subjects);
   // Can not use 'useMemo' because 'subjects' gets a new reference on each call because of spread
   const subjectsToUse = (() => {
@@ -75,7 +77,7 @@ export const useBatchedOptionalPublishingSubjects = <SubjectsType extends [...An
       .pipe(
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
         skip(1),
-        debounceTime(0),
+        debounceTime(0)
       )
       .subscribe((values) => {
         setLatestPublishedValues((lastPublishedValues) => {
@@ -99,7 +101,9 @@ export const useBatchedOptionalPublishingSubjects = <SubjectsType extends [...An
  * You should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay.
  * @param subjects Publishing subjects array.
  */
-export const useBatchedPublishingSubjects = <SubjectsType extends [...PublishingSubject<any>[]]>(
+export const useBatchedPublishingSubjects = <
+  SubjectsType extends [...Array<PublishingSubject<any>>]
+>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   /**
@@ -117,17 +121,19 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...Publishing
       .pipe(
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
         skip(1),
-        debounceTime(0),
+        debounceTime(0)
       )
       .subscribe((values) => {
         setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
       });
     return () => subscription.unsubscribe();
+    // 'subjects' gets a new reference on each call because of spread
+    // Use 'useBatchedOptionalPublishingSubjects' when 'subjects' are expected to change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return latestPublishedValues;
 };
-
 
 const unwrapPublishingSubjectArray = <T extends AnyPublishingSubject[]>(
   subjects: T

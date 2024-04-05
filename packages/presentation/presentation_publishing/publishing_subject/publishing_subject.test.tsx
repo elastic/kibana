@@ -11,7 +11,10 @@ import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { useBatchedPublishingSubjects, useBatchedOptionalPublishingSubjects } from './publishing_batcher';
+import {
+  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
+} from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
 import { PublishingSubject } from './types';
 
@@ -117,14 +120,15 @@ describe('publishing subject', () => {
     test('should batch state updates when using useBatchedOptionalPublishingSubjects', async () => {
       let renderCount = 0;
       function Component() {
-        const [value1, value2, value3, value4, value5, value6] = useBatchedOptionalPublishingSubjects(
-          subject1,
-          subject2,
-          subject3,
-          subject4,
-          subject5,
-          subject6
-        );
+        const [value1, value2, value3, value4, value5, value6] =
+          useBatchedOptionalPublishingSubjects(
+            subject1,
+            subject2,
+            subject3,
+            subject4,
+            subject5,
+            subject6
+          );
 
         renderCount++;
         return (
