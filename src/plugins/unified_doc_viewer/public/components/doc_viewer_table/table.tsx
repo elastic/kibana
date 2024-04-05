@@ -399,7 +399,14 @@ export const DocViewerTable = ({
         }
       );
     },
-    [hideActionsColumn, showActionsInsideTableCell, onToggleColumn, onTogglePinned, searchText]
+    [
+      hideActionsColumn,
+      showActionsInsideTableCell,
+      onToggleColumn,
+      onTogglePinned,
+      searchText,
+      dataView.hasEcsFields,
+    ]
   );
 
   const rowElements = [
