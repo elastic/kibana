@@ -176,6 +176,7 @@ export class SentinelOneConnector extends SubActionConnector<
       url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
       method: 'get',
       responseSchema: SentinelOneDownloadAgentFileResponseSchema,
+      responseType: 'stream',
     });
   }
 
