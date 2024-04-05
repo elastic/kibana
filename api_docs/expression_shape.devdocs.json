@@ -635,7 +635,7 @@
             "label": "strokeLinecap",
             "description": [],
             "signature": [
-              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
+              "\"square\" | \"inherit\" | \"butt\" | \"round\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
