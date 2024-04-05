@@ -63,12 +63,14 @@ export const systemActionSchema = schema.object({
 });
 
 /**
- * request action schema, leaves out the actionTypeId field
+ * request action schema, actionTypeId field is optional, it really should not be required at all but
+ * security solution is passing it in.
  */
 export const actionRequestSchema = schema.object({
   uuid: schema.maybe(schema.string()),
   group: schema.string(),
   id: schema.string(),
+  actionTypeId: schema.maybe(schema.string()),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
@@ -77,6 +79,7 @@ export const actionRequestSchema = schema.object({
 
 export const systemActionRequestSchema = schema.object({
   uuid: schema.maybe(schema.string()),
+  actionTypeId: schema.maybe(schema.string()),
   id: schema.string(),
   params: actionParamsSchema,
 });
