@@ -89,11 +89,12 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
           fullWidth
           data-test-subj={fieldKey}
           value={
-            agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name]
+            agentPolicyFormContext?.agentPolicy.advanced_settings?.[
+              settingsConfig.api_field.name
+            ] ?? defaultValue
           }
           min={coercedSchema.minValue ?? undefined}
           max={coercedSchema.maxValue ?? undefined}
-          defaultValue={defaultValue}
           onChange={handleChange}
           isInvalid={!!error}
         />
@@ -149,9 +150,10 @@ settingComponentRegistry.set(z.string()._def.typeName, (settingsConfig) => {
           fullWidth
           data-test-subj={fieldKey}
           value={
-            agentPolicyFormContext?.agentPolicy.advanced_settings?.[settingsConfig.api_field.name]
+            agentPolicyFormContext?.agentPolicy.advanced_settings?.[
+              settingsConfig.api_field.name
+            ] ?? defaultValue
           }
-          defaultValue={defaultValue}
           onChange={handleChange}
           isInvalid={!!error}
         />
