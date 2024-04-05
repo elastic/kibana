@@ -169,6 +169,36 @@ export function Histogram({
     visContext,
     onLoad,
   });
+  console.log('lensProps', lensProps);
+
+  const annotation = undefined;
+  if (annotation) {
+    lensProps.attributes.state.visualization.layers.push({
+      layerId: '8d26ab67-b841-4877-9d02-55bf270f9caf',
+      layerType: 'annotations',
+      annotations: [
+        {
+          type: 'manual',
+          icon: 'triangle',
+          textVisibility: true,
+          label: 'MY LABEL',
+          key: {
+            type: 'point_in_time',
+            timestamp: annotation.timestamp,
+          },
+          id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
+          isHidden: false,
+          color: '#F04E98',
+          lineStyle: 'solid',
+          lineWidth: 1,
+          outside: false,
+        },
+      ],
+      // TODO check if we need to set filter from
+      // the filterManager
+      ignoreGlobalFilters: false,
+    });
+  }
 
   const { euiTheme } = useEuiTheme();
   const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
