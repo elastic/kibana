@@ -262,7 +262,7 @@ export class WebElementWrapper {
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
     const value = await this.getAttribute('value');
-    if (!value.length) {
+    if (!value?.length) {
       return;
     }
 
@@ -344,11 +344,11 @@ export class WebElementWrapper {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
    *
    * @param {string} name
-   * @return {Promise<string>}
+   * @return {Promise<string|null>}
    */
-  public async getAttribute(name: string): Promise<string> {
-    return await this.retryCall(async function getAttribute(wrapper) {
-      return (await wrapper._webElement.getAttribute(name)) ?? ''; // this returns null if not found
+  public async getAttribute(name: string): Promise<string | null> {
+    return await this.retryCall(async function getAttribute(wrapper): Promise<string | null> {
+      return await wrapper._webElement.getAttribute(name); // this returns null if not found
     });
   }
 
