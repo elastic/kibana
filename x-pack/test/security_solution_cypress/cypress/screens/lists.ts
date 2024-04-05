@@ -34,4 +34,5 @@ export const VALUE_LIST_ITEMS_FILE_PICKER = '[data-test-subj="value-list-items-f
 export const VALUE_LIST_ITEMS_UPLOAD = '[data-test-subj="value-list-items-upload"]';
 export const getValueListDeleteItemButton = (name: string) =>
   `[data-test-subj="delete-list-item-${name}"]`;
-export const getValueListUpdateItemButton = (name: string) => `[value-list-item-update-${name}"]`;
+export const getValueListUpdateItemButton = (name: string) =>
+  `[data-test-subj="value-list-item-update-${name}"]`;
