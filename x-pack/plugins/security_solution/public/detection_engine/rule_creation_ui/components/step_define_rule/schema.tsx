@@ -17,6 +17,8 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
+  isEqlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
   isSuppressionRuleConfiguredWithGroupBy,
@@ -39,6 +41,7 @@ import {
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
+  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
 import { getQueryRequiredMessage } from './utils';
 
@@ -134,6 +137,7 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
+    fieldsToValidateOnChange: ['queryBar', 'groupByFields'],
     validations: [
       {
         validator: (
@@ -616,6 +620,25 @@ export const schema: FormSchema<DefineStepRule> = {
               }
             ),
           })(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+          const groupByLength = (value as string[]).length;
+          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
+          if (!needsValidation) {
+            return;
+          }
+
+          const query: string = formData.queryBar?.query?.query ?? '';
+          if (isEqlSequenceQuery(query)) {
+            return {
+              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
+            };
+          }
         },
       },
     ],

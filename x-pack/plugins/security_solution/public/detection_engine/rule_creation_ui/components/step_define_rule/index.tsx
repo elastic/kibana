@@ -65,6 +65,7 @@ import {
   getUseField,
   HiddenField,
   UseField,
+  useFormData,
   UseMultiFields,
 } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
@@ -79,6 +80,7 @@ import {
   isThresholdRule as getIsThresholdRule,
   isQueryRule,
   isEsqlRule,
+  isEqlSequenceQuery,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -191,9 +193,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
-  const [eqlSequenceQueryInUse, setEqlSequenceQueryInUse] = useState(false);
-  const [isEqlSequenceSuppressionFilled, setIsEqlSequenceSuppressionFilled] = useState(false);
-
   const license = useLicense();
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
@@ -280,8 +279,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // reset form when rule type changes
   useEffect(() => {
     reset({ resetValues: false });
-    setEqlSequenceQueryInUse(false);
-    setIsEqlSequenceSuppressionFilled(false);
   }, [reset, ruleType]);
 
   useEffect(() => {
@@ -452,25 +449,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
-  useEffect(() => {
-    if (isUpdateView && isEqlRule(ruleType)) {
-      const { queryBar: currentQuery } = getFields();
-      const currentQueryValue = currentQuery.value as DefineStepRule['queryBar'];
-      const { query } = currentQueryValue;
-      setEqlSequenceQueryInUse(query.query.trim().startsWith('sequence'));
-    }
-  }, [ruleType, isEqlRule, isUpdateView, setEqlSequenceQueryInUse]);
-
-  const onUsingEqlSequenceQuery = (isSequence: boolean) => {
-    setEqlSequenceQueryInUse(isSequence);
-  };
-  /**
-   * Disables the Suppression fields only if the Eql sequence
-   * query is used and the suppression fields are in the
-   * default state
-   */
-  const disableSuppressionFieldsForEQLSequence =
-    eqlSequenceQueryInUse && !isEqlSequenceSuppressionFilled;
+  const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
+  const areSuppressionFieldsDisabledBySequence =
+    isEqlRule(ruleType) &&
+    isEqlSequenceQuery(queryBar?.query?.query as string) &&
+    groupByFields.length === 0;
 
   /**
    * Component that allows selection of suppression intervals disabled:
@@ -479,7 +462,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - Eql sequence is used
    */
   const isGroupByChildrenDisabled =
-    disableSuppressionFieldsForEQLSequence || !isAlertSuppressionLicenseValid || isThresholdRule
+    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule
       ? false
       : !groupByFields?.length;
 
@@ -490,7 +473,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *  - Eql sequence is used and suppression fields are in the default state
    */
   const isPerRuleExecutionDisabled =
-    disableSuppressionFieldsForEQLSequence || !isAlertSuppressionLicenseValid || isThresholdRule;
+    areSuppressionFieldsDisabledBySequence || !isAlertSuppressionLicenseValid || isThresholdRule;
 
   /**
    * Per time period execution radio option is disabled
@@ -499,7 +482,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - Eql sequence is used and suppression fields are in the default state
    */
   const isPerTimePeriodDisabled =
-    disableSuppressionFieldsForEQLSequence ||
+    areSuppressionFieldsDisabledBySequence ||
     !isAlertSuppressionLicenseValid ||
     (isThresholdRule && !enableThresholdSuppression);
 
@@ -511,7 +494,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * -  Eql sequence is used and suppression fields are in the default state
    * */
   const isDurationDisabled =
-    disableSuppressionFieldsForEQLSequence ||
+    areSuppressionFieldsDisabledBySequence ||
     !isAlertSuppressionLicenseValid ||
     (!enableThresholdSuppression && groupByFields?.length === 0);
 
@@ -522,26 +505,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * -  Eql sequence is used and suppression fields are in the default state
    * */
   const isMissingFieldsDisabled =
-    disableSuppressionFieldsForEQLSequence ||
+    areSuppressionFieldsDisabledBySequence ||
     !isAlertSuppressionLicenseValid ||
     !groupByFields.length;
-
-  useEffect(() => {
-    const showInvalidSuppressionConfigurations = !!(eqlSequenceQueryInUse && groupByFields.length);
-    setIsEqlSequenceSuppressionFilled(showInvalidSuppressionConfigurations);
-    form.validateFields(['groupByFields']);
-
-    form.setFieldErrors(
-      'groupByFields',
-      showInvalidSuppressionConfigurations
-        ? [
-            {
-              message: i18n.EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
-            },
-          ]
-        : []
-    );
-  }, [eqlSequenceQueryInUse, groupByFields.length, form]);
 
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
@@ -932,7 +898,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                       indexPattern,
                       showFilterBar: true,
                       dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                      onUsingSequenceQuery: onUsingEqlSequenceQuery,
                     }}
                     config={{
                       ...schema.queryBar,
@@ -1064,7 +1029,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiToolTip
             content={
-              disableSuppressionFieldsForEQLSequence
+              areSuppressionFieldsDisabledBySequence
                 ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
                 : null
             }
@@ -1101,7 +1066,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     browserFields: termsAggregationFields,
                     disabledText: alertSuppressionUpsellingMessage,
                     isDisabled:
-                      !isAlertSuppressionLicenseValid || disableSuppressionFieldsForEQLSequence,
+                      !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
                   }}
                 />
               </RuleTypeEuiFormRow>
