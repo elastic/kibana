@@ -135,7 +135,7 @@ export function SloItemActions({
   const isRemote = !!slo.remote;
   const hasUndefinedRemoteKibanaUrl = !!slo.remote && slo.remote.kibanaUrl === '';
 
-  const showPopUpIcon = isRemote ? (
+  const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
       type="popout"
       size="s"
@@ -180,7 +180,7 @@ export function SloItemActions({
             {i18n.translate('xpack.slo.item.actions.edit', {
               defaultMessage: 'Edit',
             })}
-            {showPopUpIcon}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="createRule"
@@ -208,7 +208,7 @@ export function SloItemActions({
               defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
               values: { count: rules?.length ?? 0 },
             })}
-            {showPopUpIcon}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
@@ -221,7 +221,7 @@ export function SloItemActions({
             }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
-            {showPopUpIcon}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
@@ -234,7 +234,7 @@ export function SloItemActions({
             data-test-subj="sloActionsDelete"
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
-            {showPopUpIcon}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="dashboardApp"

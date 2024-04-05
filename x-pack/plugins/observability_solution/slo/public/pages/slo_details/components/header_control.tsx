@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -130,6 +136,16 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const isRemote = !!slo?.remote;
   const hasUndefinedRemoteKibanaUrl = !!slo?.remote && slo?.remote?.kibanaUrl === '';
 
+  const showRemoteLinkIcon = isRemote ? (
+    <EuiIcon
+      type="popout"
+      size="s"
+      css={{
+        marginLeft: '10px',
+      }}
+    />
+  ) : null;
+
   return (
     <>
       <EuiPopover
@@ -170,6 +186,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
               {i18n.translate('xpack.slo.sloDetails.headerControl.edit', {
                 defaultMessage: 'Edit',
               })}
+              {showRemoteLinkIcon}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="createBurnRateRule"
@@ -197,6 +214,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
                 values: { count: rules.length },
               })}
+              {showRemoteLinkIcon}
             </EuiContextMenuItem>,
           ]
             .concat(
@@ -231,6 +249,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 {i18n.translate('xpack.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
                 })}
+                {showRemoteLinkIcon}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="delete"
@@ -245,6 +264,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
                 {i18n.translate('xpack.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',
                 })}
+                {showRemoteLinkIcon}
               </EuiContextMenuItem>
             )}
         />
