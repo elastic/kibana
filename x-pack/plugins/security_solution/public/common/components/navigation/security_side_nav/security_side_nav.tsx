@@ -14,10 +14,10 @@ import {
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
+import type { SecurityNavLink } from '../../../links';
 import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
-import type { SecurityNavLink } from '../../../links/nav_links';
 import { useSecurityInternalNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
@@ -27,6 +27,11 @@ import { CATEGORIES } from './categories';
 
 export const EUI_HEADER_HEIGHT = '93px';
 export const BOTTOM_BAR_HEIGHT = '50px';
+
+const getNavItemPosition = (id: SecurityPageName): SolutionSideNavItemPosition =>
+  id === SecurityPageName.landing || id === SecurityPageName.administration
+    ? SolutionSideNavItemPosition.bottom
+    : SolutionSideNavItemPosition.top;
 
 const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
 
@@ -39,9 +44,7 @@ const formatLink = (
 ): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,
-  position: navLink.isFooterLink
-    ? SolutionSideNavItemPosition.bottom
-    : SolutionSideNavItemPosition.top,
+  position: getNavItemPosition(navLink.id),
   ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
   ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
   ...(navLink.categories?.length && { categories: navLink.categories }),

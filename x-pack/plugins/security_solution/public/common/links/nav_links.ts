@@ -9,13 +9,9 @@ import type { CoreStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map } from 'rxjs';
-import type { NavigationLink as GenericNavigationLink } from '@kbn/security-solution-navigation';
 import { appLinks$ } from './links';
 import type { SecurityPageName } from '../../app/types';
-import type { AppLinkItems, NavigationLink } from './types';
-import { createSolutionNavLinks$ } from '../../app/solution_navigation/links/nav_links';
-
-export type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
+import type { SecurityNavLink, AppLinkItems, NavigationLink } from './types';
 
 export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[] =>
   appLinks.map<SecurityNavLink>((link) => ({
@@ -51,8 +47,11 @@ export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) =
     currentSubscription.unsubscribe();
   }
   if (isSolutionNavEnabled) {
-    currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
-      navLinksUpdater$.next(links);
+    // import solution nav links only when solution nav is enabled
+    lazyLoadSolutionNavLinks().then((createSolutionNavLinks$) => {
+      currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
+        navLinksUpdater$.next(links);
+      });
     });
   } else {
     currentSubscription = internalNavLinks$.subscribe((links) => {
@@ -74,3 +73,9 @@ export const useNavLinks = (): NavigationLink[] => {
 export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undefined => {
   return useNavLinks().find(({ id }) => id === linkId);
 };
+
+const lazyLoadSolutionNavLinks = async () =>
+  import(
+    /* webpackChunkName: "solutionNavLinks" */
+    '../../app/solution_navigation/links/nav_links'
+  ).then(({ createSolutionNavLinks$ }) => createSolutionNavLinks$);

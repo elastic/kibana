@@ -22,8 +22,9 @@ import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/sec
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
-export type SolutionPageName = SecurityPageName | ExternalPageName;
+export type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
 
+export type SolutionPageName = SecurityPageName | ExternalPageName;
 export type SolutionNavLink = GenericNavigationLink<SolutionPageName>;
 export type SolutionNavLinks$ = Observable<SolutionNavLink[]>;
 export type SolutionLinkCategory = GenericLinkCategory<SolutionPageName>;
