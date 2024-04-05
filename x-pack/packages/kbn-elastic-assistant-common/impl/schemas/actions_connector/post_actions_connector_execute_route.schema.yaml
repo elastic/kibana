@@ -25,6 +25,7 @@ paths:
             schema:
               type: object
               required:
+                - actionTypeId
                 - params
                 - replacements
                 - subAction
@@ -40,6 +41,8 @@ paths:
                   enum:
                     - invokeAI
                     - invokeStream
+                actionTypeId:
+                  type: string
                 alertsIndexPattern:
                   type: string
                 allow:
@@ -55,27 +58,25 @@ paths:
                 isEnabledRAGAlerts:
                   type: boolean
                 replacements:
-                  type: array
-                  items:
-                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:
                   type: number
       responses:
         '200':
-          description: Successful response
+          description: Successful static response
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - connector_id
+                  - status
                 properties:
                   data:
                     type: string
                   connector_id:
                     type: string
-                  replacements:
-                    type: array
-                    items:
-                      $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
                   status:
                     type: string
                   trace_data:

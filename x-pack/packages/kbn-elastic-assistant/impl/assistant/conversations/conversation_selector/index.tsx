@@ -115,11 +115,12 @@ export const ConversationSelector: React.FC<Props> = React.memo(
             title: searchValue,
             category: 'assistant',
             messages: [],
-            replacements: [],
+            replacements: {},
             ...(defaultConnector
               ? {
                   apiConfig: {
                     connectorId: defaultConnector.id,
+                    actionTypeId: defaultConnector.actionTypeId,
                     provider: defaultConnector.apiProvider,
                     defaultSystemPromptId: defaultSystemPrompt?.id,
                     model: config?.defaultModel,

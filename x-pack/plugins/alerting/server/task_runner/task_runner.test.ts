@@ -83,6 +83,7 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
@@ -148,6 +149,7 @@ describe('Task Runner', () => {
   } as DataViewsServerPluginStart;
   const alertsService = alertsServiceMock.create();
   const maintenanceWindowClient = maintenanceWindowClientMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -186,6 +188,7 @@ describe('Task Runner', () => {
     },
     getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
     getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+    connectorAdapterRegistry,
   };
 
   const ephemeralTestParams: Array<
@@ -3308,7 +3311,10 @@ describe('Task Runner', () => {
     });
 
     ruleResultService.getLastRunResults.mockImplementation(() => ({
-      errors: ['an error occurred'],
+      errors: [
+        { message: 'an error occurred', userError: false },
+        { message: 'second error occurred', userError: true },
+      ],
       warnings: [],
       outcomeMessage: '',
     }));
@@ -3322,11 +3328,43 @@ describe('Task Runner', () => {
     testAlertingEventLogCalls({
       status: 'error',
       softErrorFromLastRun: true,
-      errorMessage: 'an error occurred',
+      errorMessage: 'an error occurred,second error occurred',
       errorReason: 'unknown',
     });
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.taskRunError?.message).toBe(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred'
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
+      { tags: ['test', '1', 'rule-run-failed'] }
+    );
+  });
+
+  test('returns user error if all the errors are user error', async () => {
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    ruleResultService.getLastRunResults.mockImplementation(() => ({
+      errors: [
+        { message: 'an error occurred', userError: true },
+        { message: 'second error occurred', userError: true },
+      ],
+      warnings: [],
+      outcomeMessage: '',
+    }));
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   function testAlertingEventLogCalls({

@@ -17,6 +17,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
@@ -39,6 +40,7 @@ export interface AppServicesContext {
   http: HttpStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+  cloud?: CloudSetup;
 }
 
 export enum ChatFormFields {
@@ -49,6 +51,8 @@ export enum ChatFormFields {
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
   summarizationModel = 'summarization_model',
+  sourceFields = 'source_fields',
+  docSize = 'docSize',
 }
 
 export interface ChatForm {
@@ -58,7 +62,9 @@ export interface ChatForm {
   [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: string;
-  [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
+  [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
+  [ChatFormFields.sourceFields]: string[];
+  [ChatFormFields.docSize]: number;
 }
 
 export enum MessageRole {
@@ -128,7 +134,7 @@ export type JSONValue = null | string | number | boolean | { [x: string]: JSONVa
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
-  data?: Record<string, string | boolean>;
+  data?: Record<string, string | number | boolean>;
 }
 
 export type CreateMessage = Omit<Message, 'id'> & {
