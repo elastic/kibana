@@ -155,7 +155,6 @@ describe('Timeline note middleware', () => {
 
   it('should pin the event when the event is not pinned yet', async () => {
     const testTimelineId = 'testTimelineId';
-    const testTimelineVersion = 'testVersion';
     (persistNote as jest.Mock).mockResolvedValue({
       data: {
         persistNote: {
@@ -164,7 +163,6 @@ describe('Timeline note middleware', () => {
           note: {
             noteId: testNote.id,
             timelineId: testTimelineId,
-            timelineVersion: testTimelineVersion,
           },
         },
       },
