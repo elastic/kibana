@@ -94,7 +94,8 @@ export type AlertsTableStateProps = {
    */
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
-} & Partial<EuiDataGridProps>;
+  renderCellPopover?: AlertsTableProps['renderCellPopover'];
+} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -188,6 +189,7 @@ const AlertsTableStateWithQueryProvider = ({
   leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
   rowHeightsOptions,
   renderCellValue,
+  renderCellPopover,
   columns: propColumns,
   gridStyle,
   browserFields: propBrowserFields,
@@ -452,6 +454,7 @@ const AlertsTableStateWithQueryProvider = ({
       query,
       rowHeightsOptions,
       renderCellValue,
+      renderCellPopover,
       gridStyle,
       controls: persistentControls,
       showInspectButton,
@@ -480,6 +483,7 @@ const AlertsTableStateWithQueryProvider = ({
       query,
       rowHeightsOptions,
       renderCellValue,
+      renderCellPopover,
       gridStyle,
       persistentControls,
       showInspectButton,

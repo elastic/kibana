@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback, useRef, useEffect, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiText, EuiAutoSizer } from '@elastic/eui';
 import { VariableSizeList as List } from 'react-window';
@@ -46,6 +46,8 @@ const VirtualizedRow: React.FC<{
     </div>
   );
 };
+
+const CARD_OFFSET = 16;
 
 export const GridColumn = ({
   list,
@@ -105,6 +107,17 @@ export const GridColumn = ({
                 ref={listRef}
                 layout="vertical"
                 itemCount={Math.ceil(list.length / 3)}
+                innerElementType={forwardRef(({ style, children, ...rest }, ref) => (
+                  <div
+                    ref={ref}
+                    // provides extra padding to the top and bottom of the list to prevent clipping and other strange behavior.
+                    // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
+                    style={{ ...style, height: `${parseFloat(style.height) + CARD_OFFSET * 2}px` }}
+                    {...rest}
+                  >
+                    {children}
+                  </div>
+                ))}
                 itemSize={(index) => {
                   const test = itemsSizeRefs.current.get(index) ?? 200;
 
@@ -116,7 +129,13 @@ export const GridColumn = ({
               >
                 {({ index, style }) => {
                   return (
-                    <VirtualizedRow index={index} style={style} onHeightChange={onHeightChange}>
+                    <VirtualizedRow
+                      index={index}
+                      // this is necessary to prevent clipping of the first row during animaiton, or if the cards have a badge.
+                      // for more info see: https://github.com/bvaughn/react-window?tab=readme-ov-file#can-i-add-padding-to-the-top-and-bottom-of-a-list
+                      style={{ ...style, top: `${(Number(style.top) ?? 0) + CARD_OFFSET}px` }}
+                      onHeightChange={onHeightChange}
+                    >
                       <EuiFlexGrid gutterSize="l" columns={3}>
                         {list.slice(index * 3, index * 3 + 3).map((item) => {
                           return (
