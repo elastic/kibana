@@ -16,12 +16,14 @@ interface Props {
   customDashboards: DashboardItemWithTitle[];
   currentDashboardId?: string;
   setCurrentDashboard: (newDashboard: DashboardItemWithTitle) => void;
+  onRefresh: () => void;
 }
 
 export function DashboardSelector({
   customDashboards,
   currentDashboardId,
   setCurrentDashboard,
+  onRefresh,
 }: Props) {
   const [, setUrlState] = useAssetDetailsUrlState();
 
@@ -46,6 +48,7 @@ export function DashboardSelector({
 
   function onChange(newDashboardId?: string) {
     setUrlState({ dashboardId: newDashboardId });
+    onRefresh();
   }
 
   return (

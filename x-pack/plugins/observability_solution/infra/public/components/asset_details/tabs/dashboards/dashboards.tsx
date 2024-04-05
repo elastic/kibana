@@ -146,6 +146,7 @@ export function Dashboards() {
                 currentDashboardId={urlState?.dashboardId}
                 customDashboards={customDashboards}
                 setCurrentDashboard={setCurrentDashboard}
+                onRefresh={reload}
               />
             </EuiFlexItem>
 
