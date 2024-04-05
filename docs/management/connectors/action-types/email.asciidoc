@@ -121,7 +121,6 @@ The subject line of the email.
 Message::
 The message text of the email. Markdown format is supported.
 
-
 [float]
 [[email-connector-networking-configuration]]
 === Connector networking configuration

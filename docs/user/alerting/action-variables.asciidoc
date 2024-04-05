@@ -5,30 +5,14 @@
 :frontmatter-tags-content-type: [reference] 
 :frontmatter-tags-user-goals: [configure]
 
-Alerting rules can use the https://mustache.github.io/mustache.5.html[Mustache] template syntax
-(`{{variable name}}`) to pass values when the actions run.
+Rule actions use variables to customize the notifications for each alert.
 
-[float]
-[[common-rule-action-variables]]
-=== Common variables
-
-The available variables differ by rule type, however there are some common variables:
-
-* <<general-rule-action-variables>>
-* <<alert-summary-action-variables>>
-* <<alert-action-variables>>
-
-Some cases exist where the variable values will be "escaped" when used in a context where escaping is needed. For example:
-
-- For the <<email-action-type,email connector>>, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
-- For the <<slack-action-type,Slack connector>>, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
-- For the <<webhook-action-type,Webhook connector>>, the `body` action configuration property escapes any characters that are invalid in JSON string values.
-
-Mustache also supports "triple braces" of the form `{{{variable name}}}`, which indicates no escaping should be done at all. Use this form with caution, since it could end up rendering the variable content such that the resulting parameter is invalid or formatted incorrectly.
+There is a set of common variables available in all rules, as well as some that are unique to each rule.
+This page covers only the common variables and related tips and examples.
 
 [float]
 [[general-rule-action-variables]]
-==== General
+=== General variables
 
 All rule types pass the following variables:
 
@@ -44,7 +28,7 @@ All rule types pass the following variables:
 [float]
 [role="child_attributes"]
 [[alert-summary-action-variables]]
-==== Action frequency: Summary of alerts
+=== Action frequency: Summary of alerts variables
 
 If the rule's action frequency is a summary of alerts, it passes the following variables:
 
@@ -101,7 +85,7 @@ include::action-variables.asciidoc[tag=alerts-data]
 
 [float]
 [[alert-action-variables]]
-==== Action frequency: For each alert
+=== Action frequency: For each alert variables
 
 If the rule's action frequency is not a summary of alerts, it passes the following variables:
 
@@ -112,41 +96,50 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`:: The ID of the alert that scheduled the action.
 `alert.uuid`:: A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. preview:[]
+`context`:: The context of the alert, which varies by rule type and typically contains multiple variables. 
 
 [float]
-[[defining-rules-actions-variable-context]]
-===== Context
+[[rule-mustache-tips]]
+=== Mustache tips
 
-If the rule's action frequency is not a summary of alerts, the rule defines additional variables as properties of the variable `context`. For example, if a rule type defines a variable `value`, it can be used in an action parameter as `{{context.value}}`.
+Rule actions pass variable values into alert notifications by using https://mustache.github.io/mustache.5.html[Mustache] template syntax (`{{variable name}}`).
 
-For diagnostic or exploratory purposes, action variables whose values are objects, such as `context`, can be referenced directly as variables. The resulting value will be a JSON representation of the object. For example, if an action parameter includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type. To see all alert-specific variables, use `{{.}}`.
+In Mustache templates, all variables are HTML escaped by default.
+Triple braces (`{{{variable name}}}`) indicate no escaping should be done at all.
+Use this form with caution, since it could end up rendering the variable content such that the resulting parameter is invalid or formatted incorrectly. Some connectors automatically escape variable values in specific scenarios. For example:
 
-For situations where your rule response returns arrays of data, you can loop through the `context`:
+- For the <<email-action-type,email connector>>, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
+- For the <<slack-action-type,Slack connector>>, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
+- For the <<webhook-action-type,Webhook connector>>, the `body` action configuration property escapes any characters that are invalid in JSON string values.
+
+For diagnostic or exploratory purposes, rule action variables whose values are objects (such as `rule.params` and `context`) can be referenced directly as variables.
+// TBD: Is context an object (per above) or an array (per below) or a "list" (per mustache syntax)?
+The resulting value will be a JSON representation of the object.
+For example, if the message in an action includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type.
+
+For situations where your rule response returns arrays of data, you can use the Mustache implicit iterator (`{{.}}`):
 
 [source,sh]
 --------------------------------------------------
 {{#context}}{{.}}{{/context}}
 --------------------------------------------------
 
-For example, looping through search result hits:
+// TBD: This example requires more explanation
+// For example, looping through search result hits:
+//
+// [source,sh]
+// --------------------------------------------------
+// triggering data was:
+// {{#context.hits}} - {{_source.message}}
+// {{/context.hits}}
+// --------------------------------------------------
 
-[source,sh]
---------------------------------------------------
-triggering data was:
-{{#context.hits}} - {{_source.message}}
-{{/context.hits}}
---------------------------------------------------
-
-[discrete]
-[[enhance-mustache-variables]]
-=== Enhancing Mustache variables
-
-preview::[]
-
-You can enhance the values contained in Mustache variables when the Mustache template is rendered by rendering objects as JSON or by using Mustache lambdas.
+You can enhance the values contained in Mustache variables when the Mustache template is rendered by rendering objects as JSON or by using Mustache lambdas, as described in the subsequent sections.
 
 [discrete]
 ==== Rendering objects as JSON
+
+preview::[]
 
 Some connectors (such as the <<webhook-action-type,Webhook connector>>) expect JSON values to be passed as parameters when the connector is invoked.
 The following capabilities are available:
@@ -157,6 +150,8 @@ The following capabilities are available:
 
 [discrete]
 ==== Using Mustache lambdas
+
+preview::[]
 
 Mustache lambdas provide additional rendering capabilities for Mustache templates.
 A Mustache lambda is formatted like a Mustache section. For example:
@@ -192,7 +187,7 @@ For example, if the Mustache variable `context.value` is `"3.1234"`, the followi
 
 [discrete]
 [[parse-hjson-lambda]]
-===== ParseHjson
+====== ParseHjson
 
 The ParseHjson lambda provides ease-of-use capabilities when constructing JSON objects.
 https://hjson.github.io/[Hjson] is a syntax extension to JSON. It has the following features:
@@ -330,10 +325,10 @@ If the context variable `context.value.condition0` has a value of `628.4`, it re
 
 [discrete]
 [[mustache-examples]]
-=== Mustache examples
+=== Examples
 
 This example demonstrates a Mustache template for an email action sent from an {es} query rule.
-The template references the following Mustache variables:
+The template references the following rule action variables:
 
 - `date`
 - `context.title`
@@ -344,6 +339,7 @@ The template references the following Mustache variables:
 - `context.hits[]._source.event.duration`
 
 For example, if you have data like this available as Mustache variables:
+//TBD: "Available as Mustache variables" is unclear.
 
 [source,json]
 ----
