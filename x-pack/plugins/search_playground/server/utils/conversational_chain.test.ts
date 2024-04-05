@@ -174,7 +174,7 @@ describe('conversational chain', () => {
     );
   });
 
-  fit('should cope with quotes in the query', async () => {
+  it('should cope with quotes in the query', async () => {
     await createTestChain(
       ['rewrite "the" question', 'the final answer'],
       [
