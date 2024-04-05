@@ -115,7 +115,7 @@ describe('eql_executor', () => {
         });
 
         expect(result.warningMessages).toContain(
-          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
         );
       });
     });

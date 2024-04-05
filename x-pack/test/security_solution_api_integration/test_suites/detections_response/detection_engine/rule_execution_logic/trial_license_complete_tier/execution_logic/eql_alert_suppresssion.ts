@@ -1554,7 +1554,7 @@ export default ({ getService }: FtrProviderContext) => {
         const [{ warnings }] = logs;
 
         expect(warnings).toContain(
-          'Alert suppression does not currently support EQL sequences. The rule will execute without alert suppression.'
+          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
         );
       });
     });
