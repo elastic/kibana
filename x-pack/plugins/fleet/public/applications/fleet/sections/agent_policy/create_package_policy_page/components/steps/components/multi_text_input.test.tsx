@@ -15,8 +15,11 @@ import { MultiTextInput } from './multi_text_input';
 function renderInput(value = ['value1']) {
   const renderer = createFleetTestRendererMock();
   const mockOnChange = jest.fn();
+  const fieldLabel = 'Hosts';
 
-  const utils = renderer.render(<MultiTextInput value={value} onChange={mockOnChange} />);
+  const utils = renderer.render(
+    <MultiTextInput fieldLabel={fieldLabel} value={value} onChange={mockOnChange} />
+  );
 
   return { utils, mockOnChange };
 }
@@ -61,7 +64,9 @@ test('it should allow to remove a row', async () => {
   const { utils, mockOnChange } = renderInput(['value1', 'value2']);
 
   await act(async () => {
-    const deleteRowEl = await utils.container.querySelector('[aria-label="Delete row"]');
+    const deleteRowEl = await utils.container.querySelector(
+      `[aria-label='Delete "Hosts" input 1']`
+    );
     if (!deleteRowEl) {
       throw new Error('Delete row button not found');
     }

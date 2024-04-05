@@ -99,6 +99,13 @@ export function createTelemetryConfigurationTaskConfig() {
           });
         }
 
+        if (configArtifact.pagination_config) {
+          log.l('Updating pagination configuration');
+          telemetryConfiguration.pagination_config = configArtifact.pagination_config;
+          _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
+          _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
+        }
+
         taskMetricsService.end(trace);
 
         log.l(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);

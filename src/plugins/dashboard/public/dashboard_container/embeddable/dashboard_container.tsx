@@ -10,7 +10,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle, PublishingSubject } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -31,7 +31,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
@@ -46,7 +46,6 @@ import { v4 } from 'uuid';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
@@ -84,6 +83,7 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
+import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -135,6 +135,9 @@ export class DashboardContainer
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
+  public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+  public reload$ = new Subject<void>();
+  public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
@@ -203,6 +206,7 @@ export class DashboardContainer
 
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
+    this.searchSessionId$.next(initialSessionId);
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
@@ -258,6 +262,10 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
+    this.timeslice$ = embeddableInputToSubject<
+      [number, number] | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'timeslice');
   }
 
   public getAppContext() {
@@ -445,7 +453,7 @@ export class DashboardContainer
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
       toasts.addSuccess({
-        title: dashboardReplacePanelActionStrings.getSuccessMessage(title),
+        title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
       this.setScrollToPanelId(id);
@@ -543,6 +551,7 @@ export class DashboardContainer
 
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
+    this.reload$.next();
     if (refreshControlGroup) this.controlGroup?.reload();
   }
 
@@ -611,6 +620,7 @@ export class DashboardContainer
     const { input: newInput, searchSessionId } = initializeResult;
 
     this.searchSessionId = searchSessionId;
+    this.searchSessionId$.next(searchSessionId);
 
     batch(() => {
       this.dispatch.setLastSavedInput(
