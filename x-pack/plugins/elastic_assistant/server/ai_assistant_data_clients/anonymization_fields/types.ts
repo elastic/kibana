@@ -13,10 +13,6 @@ export interface EsAnonymizationFieldsSchema {
   field: string;
   anonymized?: boolean;
   allowed?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
   updated_at?: string;
   updated_by?: string;
   namespace: string;
@@ -27,10 +23,6 @@ export interface UpdateAnonymizationFieldSchema {
   '@timestamp'?: string;
   anonymized?: boolean;
   allowed?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
   updated_at?: string;
   updated_by?: string;
 }
@@ -40,10 +32,6 @@ export interface CreateAnonymizationFieldSchema {
   field: string;
   anonymized?: boolean;
   allowed?: boolean;
-  users?: Array<{
-    id?: string;
-    name?: string;
-  }>;
   updated_at?: string;
   updated_by?: string;
   created_at?: string;

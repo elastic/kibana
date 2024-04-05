@@ -53,19 +53,4 @@ export const assistantAnonymizationFieldsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  users: {
-    type: 'nested',
-    array: true,
-    required: false,
-  },
-  'users.id': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'users.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
 };

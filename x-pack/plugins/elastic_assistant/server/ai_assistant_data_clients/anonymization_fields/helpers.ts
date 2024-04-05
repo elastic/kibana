@@ -25,11 +25,6 @@ export const transformESToAnonymizationFields = (
     const anonymizationField: AnonymizationFieldResponse = {
       timestamp: anonymizationFieldSchema['@timestamp'],
       createdAt: anonymizationFieldSchema.created_at,
-      users:
-        anonymizationFieldSchema.users?.map((user) => ({
-          id: user.id,
-          name: user.name,
-        })) ?? [],
       field: anonymizationFieldSchema.field,
       allowed: anonymizationFieldSchema.allowed,
       anonymized: anonymizationFieldSchema.anonymized,
@@ -53,11 +48,6 @@ export const transformESSearchToAnonymizationFields = (
       const anonymizationField: AnonymizationFieldResponse = {
         timestamp: anonymizationFieldSchema['@timestamp'],
         createdAt: anonymizationFieldSchema.created_at,
-        users:
-          anonymizationFieldSchema.users?.map((user) => ({
-            id: user.id,
-            name: user.name,
-          })) ?? [],
         field: anonymizationFieldSchema.field,
         allowed: anonymizationFieldSchema.allowed,
         anonymized: anonymizationFieldSchema.anonymized,

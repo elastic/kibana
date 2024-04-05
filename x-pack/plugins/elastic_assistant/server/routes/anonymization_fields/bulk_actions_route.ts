@@ -203,7 +203,6 @@ export const bulkActionAnonymizationFieldsRoute = (
             ),
             getUpdateScript: (document: UpdateAnonymizationFieldSchema) =>
               getUpdateScript({ anonymizationField: document, isPatch: true }),
-            authenticatedUser,
           });
           const created =
             docsCreated.length > 0

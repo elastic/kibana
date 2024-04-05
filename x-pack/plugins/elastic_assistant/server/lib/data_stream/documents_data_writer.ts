@@ -106,47 +106,46 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     }
   };
 
+  getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'users',
+                },
+              },
+            },
+          },
+          {
+            nested: {
+              path: 'users',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match: authenticatedUser.profile_uid
+                        ? { 'users.id': authenticatedUser.profile_uid }
+                        : { 'users.name': authenticatedUser.username },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  });
+
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
     getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
-    const filterByUser = authenticatedUser
-      ? {
-          filter: {
-            bool: {
-              should: [
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'users',
-                      },
-                    },
-                  },
-                },
-                {
-                  nested: {
-                    path: 'users',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            match: authenticatedUser.profile_uid
-                              ? { 'users.id': authenticatedUser.profile_uid }
-                              : { 'users.name': authenticatedUser.username },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        }
-      : {};
 
     const responseToUpdate = await this.options.esClient.search({
       body: {
@@ -165,7 +164,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                 },
               },
             ],
-            ...filterByUser,
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },
@@ -199,27 +198,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
-    const filterByUser = authenticatedUser
-      ? [
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        ]
-      : [];
-
     const responseToDelete = await this.options.esClient.search({
       body: {
         query: {
@@ -236,8 +214,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },

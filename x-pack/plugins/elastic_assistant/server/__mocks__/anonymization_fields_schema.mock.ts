@@ -44,11 +44,6 @@ export const getAnonymizationFieldsSearchEsMock = () => {
             allowed: true,
             anonymized: false,
             created_by: 'elastic',
-            users: [
-              {
-                name: 'elastic',
-              },
-            ],
           },
         },
       ],
@@ -81,11 +76,6 @@ export const getAnonymizationFieldMock = (
   createdAt: '2019-12-13T16:40:33.400Z',
   updatedAt: '2019-12-13T16:40:33.400Z',
   namespace: 'default',
-  users: [
-    {
-      name: 'elastic',
-    },
-  ],
 });
 
 export const getQueryAnonymizationFieldParams = (
