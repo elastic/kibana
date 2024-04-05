@@ -235,7 +235,7 @@ export function registerGetAiopsLogRateAnalysisFunction({
       const significantCategories: SignificantItem[] = [];
 
       // Get significant categories of text fields
-      if (textFieldCandidates.length > 100) {
+      if (textFieldCandidates.length > 0) {
         significantCategories.push(
           ...(await fetchSignificantCategories(
             esClient,
