@@ -11,6 +11,7 @@ import equal from 'fast-deep-equal';
 import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
 import { IDataStreamsStatsClient } from '../services/data_streams_stats';
+import { IDataStreamDetailsClient } from '../services/data_stream_details';
 import {
   createDatasetQualityControllerStateMachine,
   DEFAULT_CONTEXT,
@@ -23,10 +24,11 @@ type InitialState = DatasetQualityPublicStateUpdate;
 interface Dependencies {
   core: CoreStart;
   dataStreamStatsClient: IDataStreamsStatsClient;
+  dataStreamDetailsClient: IDataStreamDetailsClient;
 }
 
 export const createDatasetQualityControllerFactory =
-  ({ core, dataStreamStatsClient }: Dependencies) =>
+  ({ core, dataStreamStatsClient, dataStreamDetailsClient }: Dependencies) =>
   async ({
     initialState = DEFAULT_CONTEXT,
   }: {
@@ -38,6 +40,7 @@ export const createDatasetQualityControllerFactory =
       initialContext,
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
+      dataStreamDetailsClient,
     });
 
     const service = interpret(machine, {
