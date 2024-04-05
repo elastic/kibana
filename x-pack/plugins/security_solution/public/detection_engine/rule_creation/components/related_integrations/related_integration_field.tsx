@@ -170,6 +170,7 @@ function transformIntegrationToOption(
     key: getKey(integration.package_name, integration.integration_name),
     label,
     value: integration,
+    color: integration.is_enabled ? 'success' : integration.is_installed ? 'primary' : undefined,
   };
 }
 
