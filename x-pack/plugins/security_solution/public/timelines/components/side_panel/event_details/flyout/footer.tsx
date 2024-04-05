@@ -53,6 +53,10 @@ export const FlyoutFooterComponent = ({
   refetchFlyoutData,
 }: FlyoutFooterProps) => {
   const { euiTheme } = useEuiTheme();
+  const flyoutZIndex = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
+    [euiTheme]
+  );
 
   const alertId = detailsEcsData?.kibana?.alert ? detailsEcsData?._id : null;
   const ruleIndexRaw = useMemo(
@@ -171,7 +175,7 @@ export const FlyoutFooterComponent = ({
           data={detailsEcsData}
           onCancel={closeAddEventFilterModal}
           // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+          maskProps={flyoutZIndex} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
         />
       )}
       {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
