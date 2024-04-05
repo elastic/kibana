@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { Readable } from 'stream';
 import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';

@@ -101,8 +101,6 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     }
   };
 
-  console.log(JSON.stringify(state, null, 2));
-
   return (
     <div>
       <EuiStepsHorizontal
@@ -165,6 +163,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
               invalidLinesCount={state.invalidLinesCount}
               validLinesAsText={state.validLinesAsText}
               invalidLinesAsText={state.invalidLinesAsText}
+              fileName={state.fileName ?? ''}
               onReturn={() => {
                 dispatch({ type: 'goToStep', payload: { step: 1 } });
               }}

@@ -25,6 +25,7 @@ interface AssetCriticalityValidationStepProps {
   invalidLinesCount: number;
   validLinesAsText?: string;
   invalidLinesAsText?: string;
+  fileName: string;
   onConfirm: () => void;
   onReturn: () => void;
 }
@@ -34,6 +35,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
   invalidLinesCount,
   validLinesAsText,
   invalidLinesAsText,
+  fileName,
   onConfirm,
   onReturn,
 }) => {
@@ -42,14 +44,46 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
   return (
     <>
       <EuiSpacer size="l" />
+
+      <FormattedMessage
+        defaultMessage="{fileName} preview"
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.fileNamePreviewText"
+        values={{ fileName }}
+      />
+
+      <EuiSpacer size="m" />
+
       {validLinesCount > 0 && (
         <>
-          <EuiIcon type={'checkInCircleFilled'} color="success" />
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
-            defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset will be assigned} other {{validLinesCountBold} assets will be assigned}}"
-            values={{ validLinesCount, validLinesCountBold: <b>{validLinesCount}</b> }}
-          />
+          <EuiFlexGroup alignItems="baseline">
+            <EuiFlexItem grow>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'checkInCircleFilled'} color="success" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
+                      defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset will be assigned} other {{validLinesCountBold} assets will be assigned}}"
+                      values={{ validLinesCount, validLinesCountBold: <b>{validLinesCount}</b> }}
+                    />
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="right" onClick={onReturn} size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.chooseAnotherFileText"
+                  defaultMessage="Choose another file"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
 
           <EuiCodeBlock
             overflowHeight={400}
@@ -67,27 +101,33 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
         </>
       )}
 
-      {'file.name preview????'}
-
       {invalidLinesCount > 0 && (
         <>
-          <EuiFlexGroup alignItems="baseline" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'error'} color="danger" />
-            </EuiFlexItem>
+          <EuiFlexGroup alignItems="baseline">
             <EuiFlexItem grow>
-              <span>
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
-                  defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} invalid line won't be assigned} other {{invalidLinesCountBold} invalid lines won't be assigned}}"
-                  values={{ invalidLinesCount, invalidLinesCountBold: <b>{invalidLinesCount}</b> }}
-                />
-              </span>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'error'} color="danger" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
+                      defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} invalid line won't be assigned} other {{invalidLinesCountBold} invalid lines won't be assigned}}"
+                      values={{
+                        invalidLinesCount,
+                        invalidLinesCountBold: <b>{invalidLinesCount}</b>,
+                      }}
+                    />
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               {invalidLinesAsText && (
                 <EuiButtonEmpty
+                  size="xs"
                   flush="right"
                   onClick={() => {
                     if (invalidLinesAsText.length > 0) {
@@ -103,6 +143,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiCodeBlock
             overflowHeight={400}
             lineNumbers
