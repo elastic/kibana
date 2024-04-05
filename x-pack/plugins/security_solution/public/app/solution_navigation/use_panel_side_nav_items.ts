@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
-import type { SolutionSideNavItem, SolutionNavLink } from './types';
+import type { SolutionSideNavItem, SolutionNavLink } from '../../common/links';
 
 type GetLinkProps = (link: SolutionNavLink) => {
   href: string & Partial<SolutionSideNavItem>;

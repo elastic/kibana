@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SolutionPageName } from './types';
+import type { SolutionPageName } from '../../common/links';
 import { getNavLinkIdFromSolutionPageName, getSolutionPageNameFromNavLinkId } from './util';
 
 describe('util', () => {

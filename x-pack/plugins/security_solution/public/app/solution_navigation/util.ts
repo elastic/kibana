@@ -7,7 +7,7 @@
 
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { APP_UI_ID } from '../../../common';
-import type { SolutionPageName } from './types';
+import type { SolutionPageName } from '../../common/links';
 
 export const getNavLinkIdFromSolutionPageName = (solutionPageName: SolutionPageName): string => {
   const cleanId = solutionPageName.replace(/\/(.*)$/, ''); // remove any trailing path

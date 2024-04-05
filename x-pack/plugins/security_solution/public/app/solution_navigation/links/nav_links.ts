@@ -14,7 +14,7 @@ import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 import { settingsNavLinks } from './sections/settings_links';
 import { devToolsNavLink } from './sections/dev_tools_links';
 import { discoverNavLink } from './sections/discover_links';
-import type { SolutionNavLink } from '../types';
+import type { SolutionNavLink } from '../../../common/links';
 import { getNavLinkIdFromSolutionPageName } from '../util';
 import { investigationsNavLinks } from './sections/investigations_links';
 

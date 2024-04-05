@@ -9,7 +9,7 @@ import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navig
 import { ASSETS_PATH, CLOUD_DEFEND_PATH } from '../../../../../common/constants';
 import { SERVER_APP_ID } from '../../../../../common';
 import type { LinkItem } from '../../../../common/links/types';
-import type { SolutionNavLink } from '../../types';
+import type { SolutionNavLink } from '../../../../common/links';
 import { IconEcctlLazy, IconFleetLazy } from './lazy_icons';
 import * as i18n from './assets_translations';
 

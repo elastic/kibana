@@ -18,7 +18,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
 import { formatNavigationTree } from './navigation_tree';
-import type { SolutionNavLinks$ } from './types';
+import type { SolutionNavLinks$ } from '../../common/links';
 import { navLinks$ } from '../../common/links/nav_links';
 
 export const withNavigationProvider = <T extends object>(

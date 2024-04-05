@@ -7,7 +7,7 @@
 
 import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
 import type { LinkItem } from '../../../../common/links/types';
-import type { SolutionNavLink } from '../../types';
+import type { SolutionNavLink } from '../../../../common/links';
 import * as i18n from './settings_translations';
 
 export const createSettingsLinksFromManage = (manageLink: LinkItem): LinkItem[] => {

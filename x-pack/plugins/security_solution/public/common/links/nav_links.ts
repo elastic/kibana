@@ -15,7 +15,7 @@ import type { SecurityPageName } from '../../app/types';
 import type { AppLinkItems, NavigationLink } from './types';
 import { createSolutionNavLinks$ } from '../../app/solution_navigation/links/nav_links';
 
-type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
+export type SecurityNavLink = GenericNavigationLink<SecurityPageName>;
 
 export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[] =>
   appLinks.map<SecurityNavLink>((link) => ({
@@ -61,8 +61,14 @@ export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) =
   }
 };
 
+// includes internal security links only
+export const useSecurityInternalNavLinks = (): SecurityNavLink[] => {
+  return useObservable(internalNavLinks$, []);
+};
+
+// includes internal security links and externals links to other applications such as discover, ml, etc.
 export const useNavLinks = (): NavigationLink[] => {
-  return useObservable(navLinks$, []);
+  return useObservable(navLinks$, navLinksUpdater$.value); // use default value from updater subject to prevent re-renderings
 };
 
 export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undefined => {

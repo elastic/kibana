@@ -17,7 +17,7 @@ import {
   isTitleLinkCategory,
   isAccordionLinkCategory,
 } from '@kbn/security-solution-navigation';
-import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from './types';
+import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from '../../common/links';
 import { getNavLinkIdFromSolutionPageName, isBreadcrumbHidden } from './util';
 import { SOLUTION_NAME } from '../../common/translations';
 

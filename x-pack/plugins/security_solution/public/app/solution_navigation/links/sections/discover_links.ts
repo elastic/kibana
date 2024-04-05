@@ -6,7 +6,7 @@
  */
 
 import { ExternalPageName } from '@kbn/security-solution-navigation';
-import type { SolutionNavLink } from '../../types';
+import type { SolutionNavLink } from '../../../../common/links';
 import { DISCOVER_TITLE } from './discover_translations';
 
 export const discoverNavLink: SolutionNavLink = {

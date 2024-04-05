@@ -12,7 +12,7 @@ import {
   LinkCategoryType,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import type { SolutionPageName } from './types';
+import type { SolutionPageName } from '../../common/links';
 
 export const CATEGORIES: Array<SeparatorLinkCategory<SolutionPageName>> = [
   {

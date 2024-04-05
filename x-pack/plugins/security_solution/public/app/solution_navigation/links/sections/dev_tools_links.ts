@@ -6,7 +6,7 @@
  */
 
 import { ExternalPageName } from '@kbn/security-solution-navigation';
-import type { SolutionNavLink } from '../../types';
+import type { SolutionNavLink } from '../../../../common/links';
 import { DEV_TOOLS_TITLE } from './dev_tools_translations';
 
 export const devToolsNavLink: SolutionNavLink = {

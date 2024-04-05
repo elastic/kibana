@@ -12,13 +12,23 @@ import type {
   NavigationLink as GenericNavigationLink,
   LinkCategory as GenericLinkCategory,
   LinkCategories as GenericLinkCategories,
+  ExternalPageName,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
+import type { Observable } from 'rxjs';
+import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
-import type { SolutionPageName } from '../../app/solution_navigation/types';
+
+export type SolutionPageName = SecurityPageName | ExternalPageName;
+
+export type SolutionNavLink = GenericNavigationLink<SolutionPageName>;
+export type SolutionNavLinks$ = Observable<SolutionNavLink[]>;
+export type SolutionLinkCategory = GenericLinkCategory<SolutionPageName>;
+
+export type SolutionSideNavItem = ClassicSolutionSideNavItem<SolutionPageName>;
 
 /**
  * Permissions related parameters needed for the links to be filtered

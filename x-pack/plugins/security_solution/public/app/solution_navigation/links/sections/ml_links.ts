@@ -13,7 +13,7 @@ import {
 import { MACHINE_LEARNING_PATH } from '../../../../../common/constants';
 import type { LinkItem } from '../../../../common/links/types';
 import { SERVER_APP_ID } from '../../../../../common';
-import type { SolutionLinkCategory, SolutionNavLink } from '../../types';
+import type { SolutionLinkCategory, SolutionNavLink } from '../../../../common/links';
 import {
   IconLensLazy,
   IconMarketingLazy,
