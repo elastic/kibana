@@ -56,9 +56,13 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
 
   useEffect(() => {
     return setScreenContext?.({
-      screenDescription: source
-        ? `The configuration of Metrics is ${JSON.stringify(source.configuration)}`
-        : '',
+      data: [
+        {
+          name: 'Metrics configuration',
+          value: source,
+          description: 'The configuration of the Metrics app',
+        },
+      ],
       starterPrompts: [
         ...(!hasData
           ? [
