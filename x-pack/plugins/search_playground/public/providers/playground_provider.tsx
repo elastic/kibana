@@ -12,7 +12,7 @@ import { ChatForm, SummarizationModelName } from '../types';
 
 const queryClient = new QueryClient({});
 
-interface PlaygroundProviderProps {
+export interface PlaygroundProviderProps {
   children: React.ReactNode;
   defaultValues: {
     indices: string[];
