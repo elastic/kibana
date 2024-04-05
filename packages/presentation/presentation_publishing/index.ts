@@ -28,6 +28,11 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export {
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  type PanelPackage,
+} from './interfaces/can_add_new_panel';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
@@ -69,8 +74,12 @@ export {
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
+} from './interfaces/fetch/publishes_unified_search';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
+export {
+  type FetchContext,
+  onFetchContextChanged,
+} from './interfaces/fetch/on_fetch_context_changed';
 export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,

@@ -64,7 +64,7 @@ describe('helpers', () => {
   describe('getCombinedMessage', () => {
     it('returns correct content for a new chat with a system prompt', async () => {
       const message: Message = await getCombinedMessage({
-        currentReplacements: [],
+        currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
         selectedPromptContexts: {
@@ -86,7 +86,7 @@ User prompt text`);
 
     it('returns correct content for a new chat WITHOUT a system prompt', async () => {
       const message: Message = await getCombinedMessage({
-        currentReplacements: [],
+        currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
         selectedPromptContexts: {
@@ -107,7 +107,7 @@ User prompt text`);
 
     it('returns the correct content for an existing chat', async () => {
       const message: Message = await getCombinedMessage({
-        currentReplacements: [],
+        currentReplacements: {},
         isNewChat: false,
         promptText: 'User prompt text',
         selectedPromptContexts: {
@@ -126,7 +126,7 @@ User prompt text`);
 
     it('returns the expected role', async () => {
       const message: Message = await getCombinedMessage({
-        currentReplacements: [],
+        currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
         selectedPromptContexts: {
@@ -140,7 +140,7 @@ User prompt text`);
 
     it('returns a valid timestamp', async () => {
       const message: Message = await getCombinedMessage({
-        currentReplacements: [],
+        currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
         selectedPromptContexts: {},
@@ -163,7 +163,7 @@ User prompt text`);
 
       it('invokes `onNewReplacements` with the expected replacements', async () => {
         const message = await getCombinedMessage({
-          currentReplacements: [],
+          currentReplacements: {},
           getAnonymizedValue: mockGetAnonymizedValue,
           isNewChat: true,
           promptText: 'User prompt text',
@@ -174,19 +174,19 @@ User prompt text`);
           selectedSystemPrompt: mockSystemPrompt,
         });
 
-        expect(message.replacements).toEqual([
-          { uuid: 'oof', value: 'foo' },
-          { uuid: 'rab', value: 'bar' },
-          { uuid: 'zab', value: 'baz' },
-          { uuid: 'elzoof', value: 'foozle' },
-        ]);
+        expect(message.replacements).toEqual({
+          elzoof: 'foozle',
+          oof: 'foo',
+          rab: 'bar',
+          zab: 'baz',
+        });
       });
 
       it('returns the expected content when `isNewChat` is false', async () => {
         const isNewChat = false; // <-- not a new chat
 
         const message: Message = await getCombinedMessage({
-          currentReplacements: [],
+          currentReplacements: {},
           getAnonymizedValue: mockGetAnonymizedValue,
           isNewChat,
           promptText: 'User prompt text',

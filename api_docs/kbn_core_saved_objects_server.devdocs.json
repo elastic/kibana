@@ -4594,6 +4594,32 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.ISavedObjectsSecurityExtension.getCurrentUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentUser",
+            "description": [
+              "\nRetrieves the current user from the request context if available"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-security-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5618,7 +5644,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -5648,6 +5674,22 @@
             "label": "created_at",
             "description": [
               "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObject.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "The ID of the user who created this object."
             ],
             "signature": [
               "string | undefined"
@@ -6507,6 +6549,20 @@
             "type": "string",
             "tags": [],
             "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectDoc.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
             "description": [],
             "signature": [
               "string | undefined"
@@ -8769,6 +8825,20 @@
             "type": "string",
             "tags": [],
             "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-common.SavedObjectsRawDocSource.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
             "description": [],
             "signature": [
               "string | undefined"
