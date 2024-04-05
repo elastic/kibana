@@ -30,3 +30,8 @@ export const VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER =
 export const VALUE_LIST_ITEMS_ADD_INPUT = '[data-test-subj="value-list-item-add-input"]';
 export const VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT =
   '[data-test-subj="value-list-item-add-button-submit"]';
+export const VALUE_LIST_ITEMS_FILE_PICKER = '[data-test-subj="value-list-items-file-picker"]';
+export const VALUE_LIST_ITEMS_UPLOAD = '[data-test-subj="value-list-items-upload"]';
+export const getValueListDeleteItemButton = (name: string) =>
+  `[data-test-subj="delete-list-item-${name}"]`;
+export const getValueListUpdateItemButton = (name: string) => `[value-list-item-update-${name}"]`;

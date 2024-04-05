@@ -7,6 +7,8 @@
 
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
+import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
 import {
   createListsIndex,
   waitForValueListsModalToBeLoaded,
@@ -24,11 +26,21 @@ import {
   sortByValue,
   updateListItem,
   addListItem,
+  selectValueListsItemsFile,
+  uploadValueListsItemsFile,
+  mockFetchListItemsError,
+  mockCreateListItemError,
+  mockUpdateListItemError,
+  mockDeleteListItemError,
 } from '../../../../tasks/lists';
 import {
   VALUE_LIST_ITEMS_MODAL_INFO,
   VALUE_LIST_ITEMS_MODAL_TABLE,
   VALUE_LIST_ITEMS_MODAL_TITLE,
+  VALUE_LIST_ITEMS_UPLOAD,
+  VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
+  getValueListDeleteItemButton,
+  getValueListUpdateItemButton,
 } from '../../../../screens/lists';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
@@ -53,9 +65,6 @@ describe(
         KNOWN_VALUE_LIST_FILES.CIDRs,
       ]);
       createListsIndex();
-      visit(RULES_MANAGEMENT_URL);
-      waitForListsIndex();
-      waitForValueListsModalToBeLoaded();
     });
 
     afterEach(() => {
@@ -66,49 +75,90 @@ describe(
       ]);
     });
 
-    it('can CRUD value list items', () => {
-      importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
-      openValueListsModal();
-      openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
-      const totalItems = 12;
-      const perPage = 10;
+    describe('value list items modal with all priveleges', () => {
+      beforeEach(() => {
+        visit(RULES_MANAGEMENT_URL);
+        waitForListsIndex();
+        waitForValueListsModalToBeLoaded();
+        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
+        openValueListsModal();
+      });
 
-      // check modal title and info
-      cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
-      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
-      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
-      checkTotalItems(totalItems);
+      it('can CRUD value list items', () => {
+        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+        const totalItems = 12;
+        const perPage = 10;
 
-      // search working
-      getValueListItemsTableRow().should('have.length', perPage);
-      searchValueListItemsModal('keyword:not_exists');
-      getValueListItemsTableRow().should('have.length', 1);
-      cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('No items found');
+        // check modal title and info
+        cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
+        cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
+        cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
+        checkTotalItems(totalItems);
 
-      searchValueListItemsModal('keyword:*or*');
-      getValueListItemsTableRow().should('have.length', 4);
+        // search working
+        getValueListItemsTableRow().should('have.length', perPage);
+        searchValueListItemsModal('keyword:not_exists');
+        getValueListItemsTableRow().should('have.length', 1);
+        cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('No items found');
 
-      clearSearchValueListItemsModal('');
-      getValueListItemsTableRow().should('have.length', perPage);
+        searchValueListItemsModal('keyword:*or*');
+        getValueListItemsTableRow().should('have.length', 4);
 
-      // sort working
-      sortByValue();
-      getValueListItemsTableRow().first().contains('a');
+        clearSearchValueListItemsModal('');
+        getValueListItemsTableRow().should('have.length', perPage);
 
-      // delete item
-      deleteListItem('a');
-      checkTotalItems(totalItems - 1);
+        // sort working
+        sortByValue();
+        getValueListItemsTableRow().first().contains('a');
 
-      getValueListItemsTableRow().first().contains('are');
+        // delete item
+        deleteListItem('a');
+        checkTotalItems(totalItems - 1);
 
-      // update item
-      updateListItem('are', 'b');
-      getValueListItemsTableRow().first().contains('b');
+        getValueListItemsTableRow().first().contains('are');
 
-      // add item
-      addListItem('a new item');
-      getValueListItemsTableRow().first().contains('a new item');
-      checkTotalItems(totalItems);
+        // update item
+        updateListItem('are', 'b');
+        getValueListItemsTableRow().first().contains('b');
+
+        // add item
+        addListItem('a new item');
+        getValueListItemsTableRow().first().contains('a new item');
+        checkTotalItems(totalItems);
+
+        // upload file just append all items from the file to the list
+        selectValueListsItemsFile(KNOWN_VALUE_LIST_FILES.TEXT);
+        uploadValueListsItemsFile();
+        checkTotalItems(totalItems + totalItems);
+      });
+
+      it('error to find', () => {
+        mockFetchListItemsError();
+        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+        cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains(
+          'Failed to load list items. You can change the search query or contact your administartor'
+        );
+      });
+
+      it('errors to actions with list items elements', () => {
+        mockCreateListItemError();
+        mockUpdateListItemError();
+        mockDeleteListItemError();
+        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+        addListItem('a new item');
+        cy.get(TOASTER_BODY).contains('error to create list item');
+        closeErrorToast();
+
+        sortByValue();
+
+        deleteListItem('a');
+        cy.get(TOASTER_BODY).contains('error to delete list item');
+        closeErrorToast();
+
+        updateListItem('a', 'b');
+        cy.get(TOASTER_BODY).contains('error to update list item');
+        closeErrorToast();
+      });
     });
   }
 );

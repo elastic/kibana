@@ -89,11 +89,13 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
           display="default"
           isLoading={importState.loading}
           isInvalid={!fileIsValid}
+          data-test-subj="value-list-items-file-picker"
         />
       </EuiToolTip>
       <EuiButton
         onClick={handleImport}
         disabled={file == null || !fileIsValid || importState.loading}
+        data-test-subj="value-list-items-upload"
       >
         {UPLOAD_LIST_ITEM}
       </EuiButton>

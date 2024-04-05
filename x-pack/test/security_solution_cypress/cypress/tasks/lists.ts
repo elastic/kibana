@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import {
   VALUE_LISTS_MODAL_ACTIVATOR,
   VALUE_LIST_CLOSE_BUTTON,
@@ -19,6 +20,10 @@ import {
   VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
   VALUE_LIST_ITEMS_ADD_INPUT,
   VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT,
+  VALUE_LIST_ITEMS_FILE_PICKER,
+  VALUE_LIST_ITEMS_UPLOAD,
+  getValueListUpdateItemButton,
+  getValueListDeleteItemButton,
 } from '../screens/lists';
 import { EUI_INLINE_SAVE_BUTTON } from '../screens/common/controls';
 import { rootRequest } from './api_calls/common';
@@ -192,7 +197,7 @@ export const checkTotalItems = (totalItems: number) => {
 };
 
 export const deleteListItem = (value: string) => {
-  return cy.get(`[data-test-subj="delete-list-item-${value}"]`).click();
+  return cy.get(getValueListDeleteItemButton(value)).click();
 };
 
 export const sortByValue = () => {
@@ -200,7 +205,7 @@ export const sortByValue = () => {
 };
 
 export const updateListItem = (oldValue: string, newValue: string) => {
-  const inlineEdit = `[data-test-subj="value-list-item-update-${oldValue}"]`;
+  const inlineEdit = getValueListUpdateItemButton(oldValue);
   cy.get(inlineEdit).click();
   cy.get(inlineEdit).find('input').clear();
   cy.get(inlineEdit).find('input').type(newValue);
@@ -211,4 +216,52 @@ export const addListItem = (value: string) => {
   cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER).click();
   cy.get(VALUE_LIST_ITEMS_ADD_INPUT).type(value);
   return cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT).click();
+};
+
+export const selectValueListsItemsFile = (file: string) => {
+  return cy.get(VALUE_LIST_ITEMS_FILE_PICKER).attachFile(file).trigger('change', { force: true });
+};
+
+export const uploadValueListsItemsFile = () => {
+  return cy.get(VALUE_LIST_ITEMS_UPLOAD).click();
+};
+
+export const mockFetchListItemsError = () => {
+  cy.intercept('GET', `${LIST_ITEM_URL}/_find*`, {
+    statusCode: 400,
+    body: {
+      message: 'search_phase_execution_exception: all shards failed',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockCreateListItemError = () => {
+  cy.intercept('POST', `${LIST_ITEM_URL}`, {
+    statusCode: 400,
+    body: {
+      message: 'error to create list item',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockUpdateListItemError = () => {
+  cy.intercept('PATCH', `${LIST_ITEM_URL}`, {
+    statusCode: 400,
+    body: {
+      message: 'error to update list item',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockDeleteListItemError = () => {
+  cy.intercept('DELETE', `${LIST_ITEM_URL}*`, {
+    statusCode: 400,
+    body: {
+      message: 'error to delete list item',
+      status_code: 400,
+    },
+  });
 };
