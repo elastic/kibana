@@ -212,6 +212,7 @@ export function initializeCrossPanelActions({
       isMovementSynchronized: [isMovementSynchronized$, setIsMovementSynchronized],
       filterByMapExtent: [isFilterByMapExtent$, setIsFilterByMapExtent],
     } as StateComparators<MapSerializeState>,
+    getIsFilterByMapExtent,
     serialize: () => {
       return {
         isMovementSynchronized: isMovementSynchronized$.value,

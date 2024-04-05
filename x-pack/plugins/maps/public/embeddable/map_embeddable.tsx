@@ -24,7 +24,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
-  setMapSettings,
   setQuery,
   setEmbeddableSearchContext,
 } from '../actions';
@@ -48,7 +47,6 @@ import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
   getCharts,
   getHttp,
-  getSearchService,
 } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
 
@@ -78,14 +76,6 @@ async function getChartsPaletteServiceGetColor(): Promise<((value: string) => st
   };
 }
 
-function getIsRestore(searchSessionId?: string) {
-  if (!searchSessionId) {
-    return false;
-  }
-  const searchSessionOptions = getSearchService().session.getSearchOptions(searchSessionId);
-  return searchSessionOptions ? searchSessionOptions.isRestore : false;
-}
-
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
@@ -99,7 +89,6 @@ export class MapEmbeddable
 
   private _savedMap: SavedMap;
   private _subscriptions: Subscription[] = [];
-  private _prevIsRestore: boolean = false;
   private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
   private _isInitialized = false;
@@ -155,22 +144,6 @@ export class MapEmbeddable
 
     const store = this._savedMap.getStore();
 
-    this._dispatchSetQuery({ forceRefresh: false });
-    
-    this._subscriptions.push(
-      shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
-        return {
-          ...this.getInput(),
-          filters: this._getInputFilters(),
-          searchSessionId: this._getSearchSessionId(),
-        };
-      }).subscribe(() => {
-        this._dispatchSetQuery({
-          forceRefresh: false,
-        });
-      })
-    );
-
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
       try {
@@ -200,18 +173,6 @@ export class MapEmbeddable
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
     });
-  }
-
-  public async getExplicitInputIsEqual(
-    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
-  ): Promise<boolean> {
-    const currentExplicitInput = this.getExplicitInput();
-    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
-
-    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
-    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
-    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
-    return fastIsEqual(lastMapInput, currentMapInput);
   }
 
   public getLayerList() {
@@ -252,54 +213,6 @@ export class MapEmbeddable
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
-
-    const isRestore = getIsRestore(this._getSearchSessionId());
-    if (isRestore !== this._prevIsRestore) {
-      this._prevIsRestore = isRestore;
-      this._savedMap.getStore().dispatch(
-        setMapSettings({
-          disableInteractive: isRestore,
-          hideToolbarOverlay: isRestore,
-        })
-      );
-    }
-  }
-
-  _getInputFilters() {
-    return this.input.filters
-      ? this.input.filters.filter(
-          (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
-        )
-      : [];
-  }
-
-  _getSearchSessionId() {
-    // New search session id causes all layers from elasticsearch to refetch data.
-    // Dashboard provides a new search session id anytime filters change.
-    // Thus, filtering embeddable container by map extent causes a new search session id any time the map is moved.
-    // Disabling search session when filtering embeddable container by map extent.
-    // The use case for search sessions (restoring results because of slow responses) does not match the use case of
-    // filtering by map extent (rapid responses as users explore their map).
-    return this.input.filterByMapExtent ? undefined : this.input.searchSessionId;
-  }
-
-  _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
-    this._savedMap.getStore().dispatch<any>(
-      setQuery({
-        filters: this._getInputFilters(),
-        query: this.input.query,
-        timeFilters: this.input.timeRange,
-        timeslice: this.input.timeslice
-          ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
-          : undefined,
-        clearTimeslice: this.input.timeslice === undefined,
-        forceRefresh,
-        searchSessionId: this._getSearchSessionId(),
-        searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())
-          ? this.input.mapBuffer
-          : undefined,
-      })
-    );
   }
 
   async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
@@ -340,12 +253,6 @@ export class MapEmbeddable
 
     this._subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
-    });
-  }
-
-  reload() {
-    this._dispatchSetQuery({
-      forceRefresh: true,
     });
   }
 }

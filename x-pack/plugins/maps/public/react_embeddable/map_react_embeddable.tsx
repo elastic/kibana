@@ -26,6 +26,7 @@ import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
 import { initializeDataViews } from './initialize_data_views';
+import { initializeFetch } from './initialize_fetch';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -96,6 +97,14 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       }
     );
 
+    const unsubscribeFromFetch = initializeFetch({
+      api,
+      controlledBy,
+      getIsFilterByMapExtent: crossPanelActions.getIsFilterByMapExtent,
+      searchSessionMapBuffer: state.mapBuffer,
+      store: savedMap.getStore(),
+    });
+    
     return {
       api,
       Component: () => {
@@ -103,6 +112,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
           return () => {
             crossPanelActions.cleanup();
             reduxSync.cleanup();
+            unsubscribeFromFetch();
           };
         }, []);
 
