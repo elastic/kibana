@@ -17,6 +17,7 @@ import {
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithMissingFields,
+  isEqlSequenceQuery,
 } from './utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -317,6 +318,33 @@ describe('Alert Suppression Rules', () => {
       const ruleType = '123' as Type;
       const result = isSuppressionRuleConfiguredWithMissingFields(ruleType);
       expect(result).toBe(false);
+    });
+  });
+
+  describe('isEqlSequenceQuery', () => {
+    it('is false if query is undefined', () => {
+      const result = isEqlSequenceQuery(undefined);
+      expect(result).toBe(false);
+    });
+
+    it('is false if query is an empty string', () => {
+      const result = isEqlSequenceQuery('');
+      expect(result).toBe(false);
+    });
+
+    it('is false if query is an nonempty string', () => {
+      const result = isEqlSequenceQuery('any where true');
+      expect(result).toBe(false);
+    });
+
+    it('is true if query begins with "sequence"', () => {
+      const query = 'sequence where true';
+      expect(isEqlSequenceQuery(query)).toBe(true);
+    });
+
+    it('is true if query begins with some whitespace and then "sequence"', () => {
+      const query = '   sequence where true';
+      expect(isEqlSequenceQuery(query)).toBe(true);
     });
   });
 });
