@@ -1,6 +1,6 @@
 ---
-status: proposed
-date: 2024-03-27
+status: accepted
+date: 2024-04-05
 ---
 
 # 0001 - Saving of timeline-associated saved objects
@@ -30,15 +30,15 @@ This gives the false impression that the associated saved object has been stored
 
 ## Decision Outcome
 
-Chosen option: **TBD**
+Chosen option: **Auto-saving timeline as draft when an a note or pinned event is created**
 
 ### Confirmation
 
-_PR link will be added later_
+https://github.com/elastic/kibana/pull/178212
 
 ## Discussion of options
 
-### Auto-saving timeline when an a note or pinned event is created
+### Auto-saving timeline as draft when an a note or pinned event is created
 
 In this proposed solution we're bringing back parts of the "auto-save" behaviour. A request to save the associated saved object will precede request to create a draft timeline (given that timeline has not been saved previously). Draft timelines are ephemeral and tied to a specific user so "auto-saving" will not create version conflicts since they cannot be concurrently edited.
 This approach has been implemented in https://github.com/elastic/kibana/pull/178212 .
