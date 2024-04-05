@@ -38,12 +38,7 @@ export interface FlyoutThresholdData {
 }
 
 const getPctAboveThreshold = (observedValue?: number, threshold?: number[]): string => {
-  if (!observedValue || !threshold) return '';
-  if (threshold.length > 1) {
-    return i18n.translate('xpack.observability.alertFlyout.overview.rangeThresholdLabel', {
-      defaultMessage: ' (Range threshold)',
-    });
-  }
+  if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
     defaultMessage: ' ({pctValue}% above the threshold)',
     values: {
