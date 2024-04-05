@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { merge } from 'lodash';
+import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
@@ -78,7 +78,8 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    const { servicesOverrides = {} } = this.getConfigFromKibanaConfig();
+    const kibanaConfig = this.getConfigFromKibanaConfig();
+    const { servicesOverrides = {} } = merge(kibanaConfig, this.getConfigFromEnv(kibanaConfig));
 
     let baseConfig = {
       ...this.getBaseConfig(),
@@ -138,9 +139,18 @@ export class ApmConfiguration {
    */
   private getConfigFromEnv(configFromKibanaConfig: AgentConfigOptions): AgentConfigOptions {
     const config: AgentConfigOptions = {};
+    const servicesOverrides: Record<string, AgentConfigOptions> = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
+    }
+
+    if (process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE === 'false') {
+      merge(servicesOverrides, {
+        'kibana-frontend': {
+          active: false,
+        },
+      });
     }
 
     if (process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY === 'true') {
@@ -183,6 +193,10 @@ export class ApmConfiguration {
           return [key, val.join('=')];
         })
       );
+    }
+
+    if (!isEmpty(servicesOverrides)) {
+      merge(config, { servicesOverrides });
     }
 
     return config;

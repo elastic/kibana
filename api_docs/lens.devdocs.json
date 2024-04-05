@@ -1297,7 +1297,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -5464,7 +5464,7 @@
             "label": "changeType",
             "description": [],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"extended\" | \"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -5755,7 +5755,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"extended\" | \"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6311,7 +6311,7 @@
               "\nIf the visualization has subtypes, update the subtype in state."
             ],
             "signature": [
-              "((visualizationTypeId: string, state: T) => T) | undefined"
+              "((visualizationTypeId: string, state: T, layerId?: string | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6346,6 +6346,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.switchVisualizationType.$3",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -6360,7 +6375,7 @@
               "Description is displayed as the clickable text in the chart switcher"
             ],
             "signature": [
-              "(state: T) => { icon?: ",
+              "(state: T, layerId?: string | undefined) => { icon?: ",
               "IconType",
               " | undefined; label: string; }"
             ],
@@ -6382,6 +6397,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getDescription.$2",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -6666,7 +6696,15 @@
             "signature": [
               "((state: T, layerId: string, type: ",
               "LayerType",
-              ", indexPatternId: string, extraArg?: ExtraAppendLayerArg | undefined) => T) | undefined"
+              ", indexPatternId: string, extraArg?: ExtraAppendLayerArg | undefined, seriesType?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.SeriesType",
+                "text": "SeriesType"
+              },
+              " | undefined) => T) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6741,6 +6779,28 @@
                 "description": [],
                 "signature": [
                   "ExtraAppendLayerArg | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.appendLayer.$6",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "seriesType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.SeriesType",
+                    "text": "SeriesType"
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -7177,10 +7237,57 @@
           },
           {
             "parentPluginId": "lens",
-            "id": "def-public.Visualization.LayerHeaderComponent",
+            "id": "def-public.Visualization.isSubtypeCompatible",
             "type": "Function",
             "tags": [],
-            "label": "LayerHeaderComponent",
+            "label": "isSubtypeCompatible",
+            "description": [],
+            "signature": [
+              "((subtype1?: string | undefined, subtype2?: string | undefined) => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isSubtypeCompatible.$1",
+                "type": "string",
+                "tags": [],
+                "label": "subtype1",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.isSubtypeCompatible.$2",
+                "type": "string",
+                "tags": [],
+                "label": "subtype2",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getCustomLayerHeader",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomLayerHeader",
             "description": [
               "\nHeader rendered as layer title. This can be used for both static and dynamic content like\nfor extra configurability, such as for switch chart type"
             ],
@@ -7189,7 +7296,7 @@
               "VisualizationLayerWidgetProps",
               "<T>) => React.ReactElement<",
               "VisualizationLayerWidgetProps",
-              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
+              "<T>, string | React.JSXElementConstructor<any>> | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -7197,7 +7304,7 @@
             "children": [
               {
                 "parentPluginId": "lens",
-                "id": "def-public.Visualization.LayerHeaderComponent.$1",
+                "id": "def-public.Visualization.getCustomLayerHeader.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -7751,7 +7858,7 @@
               "\nRenders dimension trigger. Used only for noDatasource layers"
             ],
             "signature": [
-              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; }) => React.ReactElement<{ columnId: string; label: string; hideTooltip?: boolean | undefined; }, string | React.JSXElementConstructor<any>> | null) | undefined"
+              "((props: { columnId: string; label: string; }) => React.ReactElement<{ columnId: string; label: string; }, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -7789,20 +7896,6 @@
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "lens",
-                    "id": "def-public.Visualization.DimensionTriggerComponent.$1.hideTooltip",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "hideTooltip",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "x-pack/plugins/lens/public/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
                   }
                 ]
               }
@@ -7817,7 +7910,7 @@
             "label": "getAddLayerButtonComponent",
             "description": [],
             "signature": [
-              "((props: AddLayerButtonProps) => React.ReactElement<AddLayerButtonProps, string | React.JSXElementConstructor<any>> | null) | undefined"
+              "((props: AddLayerButtonProps<T>) => React.ReactElement<AddLayerButtonProps<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -7831,7 +7924,7 @@
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "AddLayerButtonProps"
+                  "AddLayerButtonProps<T>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -9485,11 +9578,11 @@
               "PointerUpdateTrigger",
               " | undefined; brushAxis?: ",
               "BrushAxis",
-              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
-              " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+              " | undefined>; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
               "LegendStrategy",
               " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined"
             ],
@@ -10537,7 +10630,7 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"full\" | \"custom\" | \"dataBounds\""
+          "\"custom\" | \"full\" | \"dataBounds\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -10939,7 +11032,9 @@
             "section": "def-public.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          " | undefined>; } & ",
+          " | undefined>; canViewUnderlyingData: () => Promise<boolean>; getViewUnderlyingDataArgs: () => ",
+          "ViewUnderlyingDataArgs",
+          "; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -10952,10 +11047,50 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
-            "text": "PublishesUnifiedSearch"
+            "section": "def-common.PublishesTimeRange",
+            "text": "PublishesTimeRange"
           },
-          " & Partial<",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -11567,11 +11702,11 @@
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+          " | undefined>; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> | Partial<Record<\"gauge\", { id: string; subtype: ",
           "GoalSubtype",
@@ -11812,7 +11947,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
+          "\"log\" | \"sqrt\" | \"time\" | \"linear\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

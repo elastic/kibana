@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178581
+  // Failing: See https://github.com/elastic/kibana/issues/178581
   describe.skip('Dashboard control group apply button', () => {
     let controlIds: string[];
 

@@ -24,10 +24,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import type { CreateChatCompletionResponseChunk } from '../../../common/utils/process_openai_stream';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
+import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
@@ -337,6 +337,11 @@ describe('Observability AI Assistant client', () => {
               title: 'New conversation',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 2,
+                prompt: 100,
+                total: 102,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -390,6 +395,11 @@ describe('Observability AI Assistant client', () => {
               title: 'An auto-generated title',
               id: expect.any(String),
               last_updated: expect.any(String),
+              token_count: {
+                completion: 8,
+                prompt: 284,
+                total: 292,
+              },
             },
             type: StreamingChatResponseEventType.ConversationCreate,
           });
@@ -403,6 +413,11 @@ describe('Observability AI Assistant client', () => {
                 id: expect.any(String),
                 last_updated: expect.any(String),
                 title: 'An auto-generated title',
+                token_count: {
+                  completion: 8,
+                  prompt: 284,
+                  total: 292,
+                },
               },
               labels: {},
               numeric_labels: {},
@@ -525,6 +540,11 @@ describe('Observability AI Assistant client', () => {
           title: 'My stored conversation',
           id: expect.any(String),
           last_updated: expect.any(String),
+          token_count: {
+            completion: 2,
+            prompt: 100,
+            total: 102,
+          },
         },
         type: StreamingChatResponseEventType.ConversationUpdate,
       });
@@ -539,6 +559,11 @@ describe('Observability AI Assistant client', () => {
             id: expect.any(String),
             last_updated: expect.any(String),
             title: 'My stored conversation',
+            token_count: {
+              completion: 2,
+              prompt: 100,
+              total: 102,
+            },
           },
           labels: {},
           numeric_labels: {},
@@ -682,7 +707,6 @@ describe('Observability AI Assistant client', () => {
             descriptionForUser: '',
             parameters: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 foo: {
                   type: 'string',
@@ -765,6 +789,7 @@ describe('Observability AI Assistant client', () => {
         expect(functionClientMock.executeFunction).toHaveBeenCalledWith({
           connectorId: 'foo',
           name: 'my-function',
+          chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
           messages: [
@@ -889,6 +914,11 @@ describe('Observability AI Assistant client', () => {
               id: expect.any(String),
               last_updated: expect.any(String),
               title: 'My predefined title',
+              token_count: {
+                completion: expect.any(Number),
+                prompt: expect.any(Number),
+                total: expect.any(Number),
+              },
             },
           });
 
@@ -1242,7 +1272,6 @@ describe('Observability AI Assistant client', () => {
             name: 'get_top_alerts',
             contexts: ['core'],
             description: '',
-            parameters: {},
           },
           respond: async () => {
             return { content: 'Call this function again' };
@@ -1277,9 +1306,9 @@ describe('Observability AI Assistant client', () => {
 
         let nextLlmCallPromise: Promise<void>;
 
-        if (body.functions?.length) {
+        if (body.tools?.length) {
           nextLlmCallPromise = waitForNextLlmCall();
-          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts', arguments: '{}' } });
         } else {
           nextLlmCallPromise = Promise.resolve();
           await llmSimulator.next({ content: 'Looks like we are done here' });
@@ -1319,9 +1348,9 @@ describe('Observability AI Assistant client', () => {
         (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
       );
 
-      expect(firstBody.functions.length).toBe(1);
+      expect(firstBody.tools.length).toBe(1);
 
-      expect(body.functions).toBeUndefined();
+      expect(body.tools).toBeUndefined();
     });
   });
 

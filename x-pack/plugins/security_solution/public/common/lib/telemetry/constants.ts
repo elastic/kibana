@@ -56,6 +56,8 @@ export enum TelemetryEventTypes {
   AnomaliesCountClicked = 'Anomalies Count Clicked',
   DataQualityIndexChecked = 'Data Quality Index Checked',
   DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
+  DetailsFlyoutOpened = 'Details Flyout Opened',
+  DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

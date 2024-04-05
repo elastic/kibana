@@ -22,6 +22,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const browser = getService('browser');
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   const driver = getService('__webdriver__');
 
@@ -67,7 +68,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConnectors();
       await deleteConversations();
 
-      proxy = await createLlmProxy();
+      proxy = await createLlmProxy(log);
 
       await ui.auth.login();
 
@@ -151,7 +152,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   (body) =>
                     (
                       JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
+                    ).tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined
                 );
 
                 const conversationInterceptor = proxy.intercept(
@@ -159,7 +160,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   (body) =>
                     (
                       JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
-                    ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
+                    ).tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
                 );
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
@@ -301,7 +302,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await deleteConversations();
 
       await ui.auth.logout();
-      await proxy.close();
+      proxy.close();
     });
   });
 }

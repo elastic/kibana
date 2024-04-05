@@ -462,8 +462,8 @@
   ],
   "infra-custom-dashboards": [
     "assetType",
-    "dashboardIdList",
-    "kuery"
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"
@@ -727,6 +727,7 @@
     "titleKeyword"
   ],
   "risk-engine-configuration": [
+    "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
     "filter",

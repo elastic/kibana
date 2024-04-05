@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { keyBy, mapValues, once, pick } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
-import { lastValueFrom, startWith, type Observable } from 'rxjs';
+import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
@@ -20,7 +20,6 @@ import {
   concatenateChatCompletionChunks,
   ConcatenatedMessage,
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import type { FunctionRegistrationParameters } from '..';
@@ -80,7 +79,6 @@ export function registerQueryFunction({
       description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           query: {
             type: 'string',
@@ -111,7 +109,6 @@ export function registerQueryFunction({
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           switch: {
             type: 'boolean',
@@ -120,7 +117,7 @@ export function registerQueryFunction({
         required: ['switch'],
       } as const,
     },
-    async ({ messages, connectorId }, signal) => {
+    async ({ messages, connectorId, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
 
       const withEsqlSystemMessage = (message?: string) => [
@@ -132,7 +129,7 @@ export function registerQueryFunction({
       ];
 
       const source$ = (
-        await client.chat('classify_esql', {
+        await chat('classify_esql', {
           connectorId,
           messages: withEsqlSystemMessage().concat({
             '@timestamp': new Date().toISOString(),
@@ -262,38 +259,36 @@ export function registerQueryFunction({
           break;
       }
 
-      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat(
-        'answer_esql_question',
-        {
-          messages: [
-            ...withEsqlSystemMessage(),
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'get_esql_info',
-                  arguments: JSON.stringify(args),
-                  trigger: MessageRole.Assistant as const,
-                },
-              },
-            },
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
+      const esqlResponse$ = await chat('answer_esql_question', {
+        messages: [
+          ...withEsqlSystemMessage(),
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
                 name: 'get_esql_info',
-                content: JSON.stringify({
-                  documentation: messagesToInclude,
-                }),
+                arguments: JSON.stringify(args),
+                trigger: MessageRole.Assistant as const,
               },
             },
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
-                content: `Answer the user's question that was previously asked using the attached documentation.
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_esql_info',
+              content: JSON.stringify({
+                documentation: messagesToInclude,
+              }),
+            },
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: `Answer the user's question that was previously asked using the attached documentation.
 
                 Format any ES|QL query as follows:
                 \`\`\`esql
@@ -347,14 +342,13 @@ export function registerQueryFunction({
                 \`\`\`
                 
                 `,
-              },
             },
-          ],
-          connectorId,
-          signal,
-          functions: functions.getActions(),
-        }
-      );
+          },
+        ],
+        connectorId,
+        signal,
+        functions: functions.getActions(),
+      });
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {
