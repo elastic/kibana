@@ -40,28 +40,34 @@ describe('form_settings', () => {
 
       expect(() =>
         apiSchema.validate({
-          test_foo: 'not valid',
+          advanced_settings: {
+            test_foo: 'not valid',
+          },
         })
       ).toThrowError(/Expected boolean, received string/);
 
       expect(() =>
         apiSchema.validate({
-          test_foo: true,
+          advanced_settings: {
+            test_foo: true,
+          },
         })
       ).not.toThrow();
     });
 
     it('generate a valid API schema for api_field with default value', () => {
       const apiSchema = schema.object(_getSettingsAPISchema(TEST_SETTINGS));
-      const res = apiSchema.validate({});
-      expect(res).toEqual({ test_foo_default_value: 'test' });
+      const res = apiSchema.validate({ advanced_settings: {} });
+      expect(res).toEqual({ advanced_settings: { test_foo_default_value: 'test' } });
     });
   });
 
   describe('_getSettingsValuesForAgentPolicy', () => {
     it('generate the proper values for agent policy (full agent policy)', () => {
       const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
-        test_foo_default_value: 'test',
+        advanced_settings: {
+          test_foo_default_value: 'test',
+        },
       } as any);
       expect(res).toEqual({ 'test.foo.default_value': 'test' });
     });
