@@ -8,7 +8,8 @@
 
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
+import * as Rx from 'rxjs';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
@@ -31,6 +32,7 @@ export const PresentationPanelTitle = ({
   panelDescription?: string;
   viewMode?: ViewMode;
 }) => {
+  const [panelTitleElmRef, setPanelTitleElmRef] = useState<HTMLElement | null>(null);
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
     const titleClassNames = classNames('embPanel__titleText', {
@@ -45,20 +47,61 @@ export const PresentationPanelTitle = ({
     return (
       <EuiLink
         color="text"
+        ref={setPanelTitleElmRef}
         className={titleClassNames}
         aria-label={getEditTitleAriaLabel(panelTitle)}
         data-test-subj={'embeddablePanelTitleLink'}
-        onClick={() =>
-          openCustomizePanelFlyout({
-            api: api as CustomizePanelActionApi,
-            focusOnTitle: true,
-          })
-        }
       >
         {panelTitle || placeholderTitle}
       </EuiLink>
     );
-  }, [hideTitle, panelTitle, viewMode, api]);
+  }, [setPanelTitleElmRef, hideTitle, panelTitle, viewMode, api]);
+
+  const onClick = useRef<Rx.Observable<{ dragged: boolean }> | null>(null);
+
+  useEffect(() => {
+    if (panelTitleElmRef) {
+      const mouseup = Rx.fromEvent<MouseEvent>(document, 'mouseup');
+      const mousemove = Rx.fromEvent<MouseEvent>(document, 'mousemove');
+      const mousedown = Rx.fromEvent<MouseEvent>(panelTitleElmRef, 'mousedown');
+
+      onClick.current = mousedown
+        .pipe(
+          Rx.mergeMap(function (md) {
+            // create reference for when mouse is down
+            const startX = md.offsetX;
+            const startY = md.offsetY;
+
+            return mousemove
+              .pipe(
+                Rx.map(function (mm) {
+                  return { dragged: startX !== mm.clientX && startY !== mm.clientY };
+                })
+              )
+              .pipe(Rx.takeUntil(mouseup))
+              .pipe(Rx.defaultIfEmpty({ dragged: false }));
+          })
+        )
+        .pipe(Rx.repeatWhen(() => mousedown));
+    }
+  }, [panelTitleElmRef]);
+
+  useEffect(() => {
+    if (panelTitleElmRef) {
+      const panelTitleClickSubscription = onClick.current?.subscribe(function onClickHandler({
+        dragged,
+      }) {
+        if (!dragged) {
+          openCustomizePanelFlyout({
+            api: api as CustomizePanelActionApi,
+            focusOnTitle: true,
+          });
+        }
+      });
+
+      return () => panelTitleClickSubscription?.unsubscribe();
+    }
+  }, [panelTitleElmRef, api]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (!panelDescription) {
