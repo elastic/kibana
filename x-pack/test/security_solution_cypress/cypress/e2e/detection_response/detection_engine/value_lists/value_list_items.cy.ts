@@ -37,10 +37,6 @@ import {
   VALUE_LIST_ITEMS_MODAL_INFO,
   VALUE_LIST_ITEMS_MODAL_TABLE,
   VALUE_LIST_ITEMS_MODAL_TITLE,
-  VALUE_LIST_ITEMS_UPLOAD,
-  VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
-  getValueListDeleteItemButton,
-  getValueListUpdateItemButton,
 } from '../../../../screens/lists';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
