@@ -34,7 +34,7 @@ export const getGroupFilters = (groups?: Group[], groupFieldName?: string): Filt
   return getGroupQueries(groups, groupFieldName).map((query) => ({ meta: {}, query }));
 };
 
-export const getGroups = (fields: string[], values: string[]): Group[] => {
+export const getGroups = (fields: string[] = [], values: string[] = []): Group[] => {
   return fields.map((_, index) => ({
     field: fields[index],
     value: values[index],
