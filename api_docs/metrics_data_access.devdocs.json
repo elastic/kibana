@@ -670,7 +670,7 @@
         "label": "awsEC2SnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
+          "(\"tx\" | \"rx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
         "deprecated": false,
@@ -730,7 +730,7 @@
         "label": "containerSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"cpu\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/container/metrics/index.ts",
         "deprecated": false,
@@ -745,7 +745,7 @@
         "label": "hostSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"logRate\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
@@ -1382,7 +1382,7 @@
         "label": "podSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
+          "(\"memory\" | \"tx\" | \"rx\" | \"cpu\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
         "deprecated": false,
@@ -1397,7 +1397,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"memory\" | \"custom\" | \"tx\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
