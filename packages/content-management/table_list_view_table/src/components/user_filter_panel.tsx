@@ -86,7 +86,7 @@ export const UserFilterPanel: FC<{}> = () => {
           >
             <FormattedMessage
               id="contentManagement.tableList.listing.userFilter.filterLabel"
-              defaultMessage={'Created  by'}
+              defaultMessage="Created  by"
             />
           </EuiFilterButton>
         }
@@ -98,14 +98,14 @@ export const UserFilterPanel: FC<{}> = () => {
           errorMessage: query.error ? (
             <FormattedMessage
               id="contentManagement.tableList.listing.userFilter.errorMessage"
-              defaultMessage={'Failed to load users'}
+              defaultMessage="Failed to load users"
             />
           ) : undefined,
           emptyMessage: (
             <p>
               <FormattedMessage
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
-                defaultMessage={'None of the dashboards have an owner'}
+                defaultMessage="None of the dashboards have an owner"
               />
               <EuiIconTip
                 aria-label="Additional information"
@@ -116,9 +116,7 @@ export const UserFilterPanel: FC<{}> = () => {
                 content={
                   <FormattedMessage
                     id="contentManagement.tableList.listing.userFilter.emptyMessageTooltip"
-                    defaultMessage={
-                      'Owner is assigned when dashboards are created, (for all dashboards created after version 8.14).'
-                    }
+                    defaultMessage="Owner is assigned when dashboards are created, (for all dashboards created after version 8.14)."
                   />
                 }
               />
