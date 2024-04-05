@@ -24,7 +24,10 @@ import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
-import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
+} from '../../../../common/endpoint/constants';
 
 const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
   fontFamily: 'inherit',
@@ -130,10 +133,18 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
+      if (action.agentType === 'sentinel_one') {
+        return false;
+      }
+
       return action.isCompleted && action.wasSuccessful;
-    }, [action.isCompleted, action.wasSuccessful]);
+    }, [action.agentType, action.isCompleted, action.wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
+      if (action.agentType === 'sentinel_one') {
+        return `/internal${BASE_ENDPOINT_ACTION_ROUTE}/sentinel_one/file/${action.agents[0]}/${action.s1FileInfo.activityId}?apiVersion=1`;
+      }
+
       return `${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
         file_id: getFileDownloadId(action, agentId),
@@ -152,7 +163,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       return null;
     }
 
-    if (isFetching) {
+    if (isFetching && action.agentType !== 'sentinel_one') {
       return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 
@@ -189,7 +200,9 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           data-test-subj={getTestId('passcodeMessage')}
           className="eui-displayInline"
         >
-          {FILE_PASSCODE_INFO_MESSAGE}
+          {action.agentType === 'sentinel_one'
+            ? '(Zip passcode (case sensitive): Elastic@123)'
+            : FILE_PASSCODE_INFO_MESSAGE}
         </EuiText>
         <EuiText size={textSize} color="warning" data-test-subj={getTestId('fileDeleteMessage')}>
           {FILE_DELETED_MESSAGE}

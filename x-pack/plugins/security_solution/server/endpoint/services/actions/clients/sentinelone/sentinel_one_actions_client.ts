@@ -410,6 +410,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           downloadUrl: activityRecord.data.downloadUrl,
           s1AgentId: activityRecord.agentId,
           activityId: activityRecord.id,
+          filename: activityRecord.data.filename,
+          passcode: 'Elastic@123',
         };
       }
     }

@@ -15,7 +15,11 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { getActionDetailsById, SentinelOneActionsClient } from '../../services';
+import {
+  getActionDetailsById,
+  NormalizedExternalConnectorClient,
+  SentinelOneActionsClient,
+} from '../../services';
 import { errorHandler } from '../error_handler';
 
 /**
@@ -75,7 +79,10 @@ export const getActionDetailsRequestHandler = (
         const s1Client = new SentinelOneActionsClient({
           esClient,
           casesClient,
-          connectorActions,
+          connectorActions: new NormalizedExternalConnectorClient(
+            connectorActions,
+            endpointContext.service.createLogger('actionDetailsRoute')
+          ),
           endpointService: endpointContext.service,
           username: user?.username || 'unknown',
         });

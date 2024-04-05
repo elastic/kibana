@@ -6,6 +6,7 @@
  */
 
 import { isPlainObject, isEmpty } from 'lodash';
+import { inspect } from 'util';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, {
@@ -143,7 +144,16 @@ export abstract class SubActionConnector<Config, Secrets> {
         timeout,
       });
 
-      this.validateResponse(responseSchema, res.data);
+      try {
+        this.validateResponse(responseSchema, res.data);
+      } catch (e) {
+        this.logger.debug(
+          `Response data that failed validation: ${typeof res.data} \n${inspect(res.data, {
+            depth: 10,
+          })}`
+        );
+        throw e;
+      }
 
       return res;
     } catch (error) {
