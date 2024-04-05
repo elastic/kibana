@@ -146,7 +146,6 @@ export class DashboardContainer
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
-  private hadContentfulRender = false;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -157,10 +156,9 @@ export class DashboardContainer
   private customBranding;
 
   public trackContentfulRender() {
-    if (!this.hadContentfulRender && this.analyticsService) {
+    if (this.analyticsService) {
       this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
     }
-    this.hadContentfulRender = true;
   }
 
   private trackPanelAddMetric:

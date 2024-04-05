@@ -1043,26 +1043,7 @@ export class Embeddable
     });
 
     trackUiCounterEvents(events, executionContext);
-
-    if (
-      this.activeData &&
-      Object.entries(this.activeData).length > 0 &&
-      canTrackContentfulRender(this.parent)
-    ) {
-      const hasData = Object.values(this.activeData).some((table) => {
-        if (
-          table.meta &&
-          table.meta.statistics &&
-          typeof table.meta.statistics.totalCount === 'number'
-        ) {
-          return table.meta.statistics.totalCount > 0;
-        }
-        return table.rows.length > 0;
-      });
-      if (hasData) {
-        this.parent?.trackContentfulRender();
-      }
-    }
+    this.trackContentfulRender();
 
     this.renderComplete.dispatchComplete();
     this.updateOutput({
@@ -1195,6 +1176,22 @@ export class Embeddable
     }
 
     this.renderUserMessages();
+  }
+
+  private trackContentfulRender() {
+    if (!this.activeData || !canTrackContentfulRender(this.parent)) {
+      return;
+    }
+
+    const hasData = Object.values(this.activeData).some((table) => {
+      const count = table.meta?.statistics?.totalCount || table.rows.length;
+
+      return count > 0;
+    });
+
+    if (hasData) {
+      this.parent.trackContentfulRender();
+    }
   }
 
   private renderUserMessages() {

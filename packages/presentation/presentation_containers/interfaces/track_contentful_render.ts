@@ -14,5 +14,5 @@ export interface TrackContentfulRender {
 }
 
 export const canTrackContentfulRender = (root: unknown): root is TrackContentfulRender => {
-  return Boolean(root && (root as TrackContentfulRender).trackContentfulRender);
+  return root !== null && typeof root === 'object' && 'trackContentfulRender' in root;
 };
