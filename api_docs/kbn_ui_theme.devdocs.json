@@ -79,11 +79,11 @@
           },
           {
             "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
+            "path": "packages/kbn-monaco/src/console/theme/shared.ts"
           },
           {
             "plugin": "@kbn/monaco",
-            "path": "packages/kbn-monaco/src/console/theme.ts"
+            "path": "packages/kbn-monaco/src/console/theme/shared.ts"
           },
           {
             "plugin": "securitySolution",
