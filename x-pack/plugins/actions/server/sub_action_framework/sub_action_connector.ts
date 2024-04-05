@@ -84,7 +84,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   }
 
   private getHeaders(headers?: AxiosRequestHeaders): Record<string, AxiosHeaderValue> {
-    return { ...headers, 'Content-Type': 'application/json' };
+    return { 'Content-Type': 'application/json', ...headers };
   }
 
   private validateResponse(responseSchema: Type<unknown>, data: unknown) {

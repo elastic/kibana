@@ -51,6 +51,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.gen-ai',
           '.bedrock',
           '.sentinelone',
+          '.crowdstrike',
         ].sort()
       );
     });

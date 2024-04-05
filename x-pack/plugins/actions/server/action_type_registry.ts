@@ -230,8 +230,10 @@ export class ActionTypeRegistry {
         .filter(([_, actionType]) =>
           featureId ? actionType.supportedFeatureIds.includes(featureId) : true
         )
-        // Temporarily don't return SentinelOne connector for Security Solution Rule Actions
-        .filter(([actionTypeId]) => (featureId ? actionTypeId !== '.sentinelone' : true))
+        // Temporarily don't return SentinelOne and Crowdstrike connector for Security Solution Rule Actions
+        .filter(([actionTypeId]) =>
+          featureId ? actionTypeId !== '.sentinelone' && actionTypeId !== '.crowdstrike' : true
+        )
         .map(([actionTypeId, actionType]) => ({
           id: actionTypeId,
           name: actionType.name,

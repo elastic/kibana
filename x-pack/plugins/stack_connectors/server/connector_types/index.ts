@@ -32,6 +32,7 @@ import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
 import { getSentinelOneConnectorType } from './sentinelone';
+import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
@@ -111,5 +112,8 @@ export function registerConnectorTypes({
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
+  }
+  if (experimentalFeatures.crowdstrikeConnectorOn) {
+    actions.registerSubActionConnectorType(getCrowdstrikeConnectorType());
   }
 }

@@ -14,3 +14,11 @@ import SentinelOneLogo from '../connector_types/sentinelone/logo';
 
 export { SENTINELONE_CONNECTOR_ID, SUB_ACTION } from '../../common/sentinelone/constants';
 export { SentinelOneLogo };
+
+import CrowdstrikeLogo from '../connector_types/crowdstrike/logo';
+
+export {
+  CROWDSTRIKE_CONNECTOR_ID,
+  SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
+} from '../../common/crowdstrike/constants';
+export { CrowdstrikeLogo };
