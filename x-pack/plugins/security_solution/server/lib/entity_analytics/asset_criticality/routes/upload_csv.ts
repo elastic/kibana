@@ -8,6 +8,7 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
+import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../types';
@@ -72,7 +73,11 @@ export const assetCriticalityCSVUploadRoute = (
           logger.debug(
             `Asset criticality CSV upload completed in ${end - start}ms ${JSON.stringify(stats)}`
           );
-          return response.ok({ body: { errors, stats } });
+
+          // type assignment here to ensure that the response body stays in sync with the API schema
+          const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
+
+          return response.ok({ body: resBody });
         } catch (error) {
           logger.error(`Error during asset criticality csv upload: ${error}`);
           return siemResponse.error({ statusCode: 500 });

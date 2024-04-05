@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Asset Criticality Create Record Schema
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /internal/asset_criticality/upload_csv:
+    post:
+      summary: Uploads a CSV file containing asset criticality data
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload.
+              required:
+                - file
+      responses:
+        '200':
+          description: CSV upload successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityCsvUploadResponse'
+        '403':
+          description: File too large
+components:
+  schemas:
+    ErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+        index:
+          type: integer
+      required:
+        - message
+        - index
+    Stats:
+      type: object
+      properties:
+        updated:
+          type: integer
+        created:
+          type: integer
+        errors:
+          type: integer
+        total:
+          type: integer
+      required:
+        - updated
+        - created
+        - errors
+        - total
+    AssetCriticalityCsvUploadResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+        stats:
+          $ref: '#/components/schemas/Stats'
+      required:
+        - errors
+        - stats
