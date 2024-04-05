@@ -9,7 +9,7 @@ export const openRemoteKibana = (url: string, path?: string) => {
   window.open(formatRemoteKibanaUrl(url, path), '_blank');
 };
 
-export const formatRemoteKibanaUrl = (url: string, path?: string) => {
+const formatRemoteKibanaUrl = (url: string, path?: string) => {
   if (url.endsWith('/') && path?.startsWith('/')) {
     return url + path.slice(1);
   } else {

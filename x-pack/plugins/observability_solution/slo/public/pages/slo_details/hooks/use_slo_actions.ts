@@ -76,7 +76,6 @@ export const useSloActions = ({
     slo.remote?.remoteName
   );
 
-  // TODO Kevin: Issue with spaceId not taken into account.
   const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
