@@ -40,6 +40,13 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
     ['data-test-subj']: dataTestSub,
     ...rest
   } = props;
+
+  const [localChoices, setLocalChoices] = React.useState(selectedOptions);
+
+  React.useEffect(() => {
+    setLocalChoices(selectedOptions);
+  }, [selectedOptions]);
+
   let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
     if (otherAttr.options) {
@@ -90,17 +97,30 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       })}
       options={styledOptions}
       isInvalid={fieldIsInvalid}
-      selectedOptions={selectedOptions}
+      selectedOptions={localChoices}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{
         panelMinWidth: calculateWidthFromCharCount(maxLabelLength),
         anchorPosition: 'downRight',
       }}
+      onBlur={() => {
+        if (localChoices?.length === 0) {
+          setLocalChoices(selectedOptions);
+        }
+      }}
       onChange={(choices) => {
         if (choices.length === 0) {
-          onDelete?.();
+          setLocalChoices([]);
           return;
+        }
+        if (choices[0] && choices[0]?.value !== selectedOptions?.[0]?.value) {
+          setLocalChoices([
+            {
+              label: choices[0].label,
+              value: choices[0].value,
+            },
+          ]);
         }
         onChoose(choices[0].value);
       }}
