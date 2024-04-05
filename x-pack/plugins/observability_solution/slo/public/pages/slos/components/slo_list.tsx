@@ -38,17 +38,13 @@ export function SloList() {
     lastRefresh: state.lastRefresh,
   });
 
-  const {
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
-  } = useKibana().services;
+  const { observabilityAIAssistant } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
 
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
   useEffect(() => {
-    if (!sloList) {
+    if (!sloList || !observabilityAIAssistant) {
       return;
     }
 
@@ -57,7 +53,7 @@ export function SloList() {
       (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
     ) as Record<typeof results[number]['summary']['status'], string>;
 
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       screenDescription: dedent(`The user is looking at a list of SLOs.
 
       ${
@@ -81,7 +77,7 @@ export function SloList() {
       }
       `),
     });
-  }, [sloList, setScreenContext]);
+  }, [sloList, observabilityAIAssistant]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">

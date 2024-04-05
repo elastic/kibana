@@ -7,7 +7,6 @@
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 
-import { createAddToNewCaseLensAction } from './add_to_new_case';
 import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import type { CasesUIActionProps } from './types';
 
@@ -28,15 +27,6 @@ const registerLensActions = ({
   history,
   storage,
 }: CasesUIActionProps) => {
-  const addToNewCaseAction = createAddToNewCaseLensAction({
-    core,
-    plugins,
-    caseContextProps,
-    history,
-    storage,
-  });
-  plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToNewCaseAction);
-
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
     core,
     plugins,
