@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { pick } from 'lodash';
-import { GetSLOResponse } from '@kbn/slo-schema';
+import { GetSLOResponse, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
@@ -18,6 +18,8 @@ import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/ai
 import { TopAlert } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { buildEsQuery } from '@kbn/observability-plugin/public';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 
@@ -27,12 +29,39 @@ interface Props {
   rule: BurnRateRule;
 }
 
+// TODO check the validity of the query & write some tests
+const getESQueryForLogRateAnalysis = (params: {
+  filter: string;
+  good: string;
+  total: string;
+  timestampField: string;
+}) => {
+  const { filter, good, total, timestampField } = params;
+  const filterKuery = kqlWithFiltersSchema.is(filter) ? filter.kqlQuery : filter;
+  const goodKuery = kqlWithFiltersSchema.is(good) ? good.kqlQuery : good;
+  const goodFilters = kqlWithFiltersSchema.is(good) ? good.filters : [];
+  const totalKuery = kqlWithFiltersSchema.is(total) ? total.kqlQuery : total;
+  const totalFilters = kqlWithFiltersSchema.is(total) ? total.filters : [];
+  const customGoodFilter = buildEsQuery({ kuery: goodKuery, filters: goodFilters });
+  const customTotalFilter = buildEsQuery({ kuery: totalKuery, filters: totalFilters });
+  const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
+  // TODO add filter query to the return result
+  // TODO add group by to the return result
+  // should look something like this
+  // const finalQuery = {
+  //   bool: { filter: [...customTotalFilter, ...filterQuery], must_not: customGoodFilter },
+  // };
+  // return finalQuery;
+  return customBadFilter;
+};
+
 export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const services = useKibana().services;
   const { dataViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
-
-  const { index, filter, good, timestampField } = slo.indicator.params;
+  const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+  const params = slo.indicator.params;
+  const { index, filter, good, total, timestampField } = params;
 
   useEffect(() => {
     const getDataView = async () => {
@@ -40,8 +69,12 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       console.log(kqlDataView, '!!kqlDataView');
       setDataView(kqlDataView);
     };
+    const getQuery = (timestampField: string) => {
+      const esSearchRequest = getESQueryForLogRateAnalysis(params) as QueryDslQueryContainer;
+    };
     getDataView();
-  }, [index, dataViews]);
+    getQuery(timestampField);
+  }, [index, dataViews, params, esSearchQuery, timestampField]);
 
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
@@ -76,7 +109,8 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         <EuiFlexItem>
           <LogRateAnalysisContent
             embeddingOrigin="observability_slo_burn_rate_alert_details"
-            dataView={dataView}
+            dataView={dataView} // TODO: fix dataview
+            esSearchQuery={esSearchQuery}
             timeRange={timeRange}
             initialAnalysisStart={initialAnalysisStart}
             appDependencies={pick(services, [

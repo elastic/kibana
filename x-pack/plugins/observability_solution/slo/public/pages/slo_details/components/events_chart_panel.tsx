@@ -208,7 +208,14 @@ export function EventsChartPanel({ slo, range }: Props) {
                     showLegendExtra={false}
                     legendPosition={Position.Left}
                     noResults={
-                      <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                      <EuiIcon
+                        type="visualizeApp"
+                        size="l"
+                        color="subdued"
+                        title={i18n.translate('xpack.slo.eventsChartPanel.euiIcon.noResultsLabel', {
+                          defaultMessage: 'no results',
+                        })}
+                      />
                     }
                     onPointerUpdate={handleCursorUpdate}
                     externalPointerEvents={{
