@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
-    await dataViews.switchTo(OUTPUT_DATA_VIEW);
+    await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
 
     let ruleId: string;
     if (type === 'name') {
@@ -401,7 +401,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await dataViews.switchTo(SOURCE_DATA_VIEW);
+      await dataViews.switchToAndValidate(SOURCE_DATA_VIEW);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       await openDiscoverAlertFlyout();
@@ -561,7 +561,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display results after data view removal on clicking prev generated link', async () => {
-      await dataViews.switchTo(OUTPUT_DATA_VIEW);
+      await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
       await deleteDataView(sourceDataViewId);
 
       await openAlertResults(RULE_NAME);
@@ -581,7 +581,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display results after rule removal on following generated link', async () => {
-      await dataViews.switchTo(OUTPUT_DATA_VIEW);
+      await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
       const [{ id: firstAlertId }] = await getAlertsByName(RULE_NAME);
       await deleteAlerts([firstAlertId]);
 

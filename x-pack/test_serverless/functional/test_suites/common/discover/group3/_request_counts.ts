@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should send 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
-          await dataViews.switchTo('long-window-logstash-*');
+          await dataViews.switchToAndValidate('long-window-logstash-*');
         });
       });
     });

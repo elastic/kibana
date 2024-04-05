@@ -79,19 +79,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'DestCountry',
       ]);
 
-      await dataViews.switchTo('Kibana Sample Data Logs (TSDB)');
+      await dataViews.switchToAndValidate('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'message', 'extension']);
 
-      await dataViews.switchTo('kibana_sample_data_flights');
+      await dataViews.switchToAndValidate('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['timestamp', 'DestCountry']);
 
-      await dataViews.switchTo('logstash-*');
+      await dataViews.switchToAndValidate('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
-      await dataViews.switchTo('Kibana Sample Data Logs (TSDB)');
+      await dataViews.switchToAndValidate('Kibana Sample Data Logs (TSDB)');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'message',
       ]);
 
-      await dataViews.switchTo('logstash-*');
+      await dataViews.switchToAndValidate('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'DestCountry',
       ]);
 
-      await dataViews.switchTo('kibana_sample_data_flights');
+      await dataViews.switchToAndValidate('kibana_sample_data_flights');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await PageObjects.discover.waitUntilSearchingHasFinished();

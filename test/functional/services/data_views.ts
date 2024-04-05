@@ -62,14 +62,14 @@ export class DataViewsService extends FtrService {
   }
 
   /**
-   * Checks if currently selected Data View has AdHoc image
+   * Checks if currently selected Data View has temporary badge
    */
   async isAdHoc() {
-    const buttonEl = await this.testSubjects.find('*dataView-switch-link');
-    const adHocImages = await buttonEl.findAllByCssSelector(
-      'img[class*="_dataview--createTrigger"]'
-    );
-    return adHocImages.length > 0;
+    const dataView = await this.testSubjects.getAttribute('*dataView-switch-link', 'title');
+    await this.testSubjects.click('*dataView-switch-link');
+    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    await this.testSubjects.click('*dataView-switch-link');
+    return hasBadge;
   }
 
   /**
@@ -92,8 +92,9 @@ export class DataViewsService extends FtrService {
     await this.testSubjects.click('*dataView-switch-link');
     await this.testSubjects.existOrFail('indexPattern-switcher');
     await this.testSubjects.setValue('indexPattern-switcher--input', name);
-    await this.find.clickByCssSelector(`[title="${name}"]`);
-    await this.waitForSwitcherToBe(name);
+    await this.find.clickByCssSelector(
+      `[data-test-subj="indexPattern-switcher"] [title="${name}"]`
+    );
   }
 
   /**
@@ -104,6 +105,14 @@ export class DataViewsService extends FtrService {
       'Data View switcher to be updated',
       async () => (await this.getSelectedName()) === name
     );
+  }
+
+  /**
+   * Switch Data View from top search bar and validate selection is applied
+   */
+  public async switchToAndValidate(name: string) {
+    await this.switchTo(name);
+    await this.waitForSwitcherToBe(name);
   }
 
   /**

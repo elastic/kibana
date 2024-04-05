@@ -394,7 +394,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await dataViews.switchTo('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -411,7 +411,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           )}NoFieldsCallout-noFieldsExist`
         );
 
-        await dataViews.switchTo('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -439,7 +439,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await dataViews.switchTo('without-timefield');
+        await dataViews.switchToAndValidate('without-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -448,7 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '6 available fields. 3 meta fields.'
         );
 
-        await dataViews.switchTo('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -462,7 +462,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           )}NoFieldsCallout-noFieldsMatch`
         );
 
-        await dataViews.switchTo('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -518,7 +518,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await dataViews.switchTo('indices-stats*');
+        await dataViews.switchToAndValidate('indices-stats*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -527,7 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '6873 available fields. 3 meta fields.'
         );
 
-        await dataViews.switchTo('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -656,7 +656,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await dataViews.switchTo('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();

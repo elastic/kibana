@@ -138,9 +138,5 @@ export function MachineLearningDashboardEmbeddablesProvider(
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
       });
     },
-
-    async selectDiscoverIndexPattern(indexPattern: string) {
-      await dataViews.switchTo(indexPattern);
-    },
   };
 }

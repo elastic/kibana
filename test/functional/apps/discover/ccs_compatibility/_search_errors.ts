@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on single shard shows warning and results', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.switchTo(defaultIndex);
+      await dataViews.switchToAndValidate(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on all shards shows error', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.switchTo(defaultIndex);
+      await dataViews.switchToAndValidate(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
