@@ -34,9 +34,9 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
       timestamp={
         createdAt &&
         i18n.translate('xpack.searchPlayground.chat.message.user.createdAt', {
-          defaultMessage: 'on {date}',
+          defaultMessage: 'at {time}',
           values: {
-            date: moment(createdAt).format('MMM DD, YYYY'),
+            time: moment(createdAt).format('HH:mm'),
           },
         })
       }
