@@ -66,8 +66,30 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async gotoVisualizationLandingPage() {
-    await this.common.navigateToApp('visualize');
+  /**
+   *  Try to speed resets a bit if the Visualize Library breadcrumb is available
+   */
+  private async clickOnVisualizeLibraryBreadcrumb() {
+    // Try to navigate to the Visualize Listing page from breadcrumb if available
+    const selector = '[data-test-subj="breadcrumb first"][title="Visualize Library"]';
+    const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
+    if (visualizeLibraryBreadcrumb) {
+      await this.find.clickByCssSelector(selector);
+      // Lens offers a last modal before leaving the page for unsaved charts
+      // so close it as quick as possible
+      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+        await this.testSubjects.click('confirmModalConfirmButton');
+        return true;
+      }
+    }
+  }
+
+  public async gotoVisualizationLandingPage(
+    { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    if (forceRefresh || !(await this.clickOnVisualizeLibraryBreadcrumb())) {
+      await this.common.navigateToApp('visualize');
+    }
   }
 
   public async selectVisualizationsTab() {
@@ -142,8 +164,15 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async navigateToNewVisualization() {
-    await this.gotoVisualizationLandingPage();
+  /**
+   * Navigation now happens without URL refresh by default
+   * so a new "forceRefresh" option has been passed in order to
+   * address those scenarios where a full refresh is required (i.e. changing default settings)
+   */
+  public async navigateToNewVisualization(
+    options: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
@@ -158,8 +187,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToLensFromAnotherVisualization() {
-    const button = await this.testSubjects.find('visualizeEditInLensButton');
-    await button.click();
+    await this.testSubjects.click('visualizeEditInLensButton');
   }
 
   public async hasNavigateToLensButton() {
