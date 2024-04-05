@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
   const retry = getService('retry');
+  const browser = getService('browser');
   const find = getService('find');
   const esql = getService('esql');
   const PageObjects = getPageObjects([
@@ -322,6 +323,74 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
+      });
+    });
+
+    describe('sorting', () => {
+      it('should sort correctly', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-* | sort @timestamp | limit 100';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains an initial value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '1,623';
+        });
+
+        await dataGrid.clickDocSortDesc('bytes', 'Sort High-Low');
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the highest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
+        await PageObjects.discover.saveSearch('testSorting');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
+        await dataGrid.clickDocSortDesc('bytes', 'Sort Low-High');
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the lowest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '0';
+        });
+
+        await browser.refresh();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same lowest value after reload', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '0';
+        });
       });
     });
   });
