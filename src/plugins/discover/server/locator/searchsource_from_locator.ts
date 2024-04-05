@@ -117,7 +117,8 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
     const savedSearch = await getSavedSearch(params.savedSearchId, services);
 
     const searchSource = savedSearch.searchSource.createCopy();
-    const index = searchSource.getField('index');
+
+    const index = await searchSource.getDataView();
 
     if (!index) {
       throw new Error(`Search Source is missing the "index" field`);

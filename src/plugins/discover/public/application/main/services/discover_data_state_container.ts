@@ -163,7 +163,7 @@ export function getDataStateContainer({
   getAppState: () => DiscoverAppState;
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
-  setDataView: (dataView: DataView) => void;
+  setDataView: (dataView: DataView) => Promise<void>;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -298,7 +298,7 @@ export function getDataStateContainer({
 
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = getAppState().query;
-    const currentDataView = getSavedSearch().searchSource.getField('index');
+    const currentDataView = await getSavedSearch().searchSource.getDataView();
 
     if (isTextBasedQuery(query)) {
       const nextDataView = await getDataViewByTextBasedQueryLang(query, currentDataView, services);

@@ -251,7 +251,7 @@ export default function AlertDetailsAppSection({
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
       try {
         const createdSearchSource = await data.search.searchSource.create(ruleSearchConfiguration);
-        setDataView(createdSearchSource.getField('index'));
+        setDataView(await createdSearchSource.getDataView());
       } catch (error) {
         setDataViewError(error);
       }

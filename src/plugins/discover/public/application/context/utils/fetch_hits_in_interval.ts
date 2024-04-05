@@ -95,7 +95,7 @@ export async function fetchHitsInInterval(
     });
 
   const { rawResponse } = await lastValueFrom(fetch$);
-  const dataView = searchSource.getField('index');
+  const dataView = searchSource.getDataViewLazy();
   const rows = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
   const interceptedWarnings: SearchResponseWarning[] = [];
   services.data.search.showWarnings(adapter, (warning) => {

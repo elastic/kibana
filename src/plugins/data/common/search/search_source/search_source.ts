@@ -72,7 +72,7 @@ import {
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -80,7 +80,12 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import {
+  AggConfigSerialized,
+  DataViewField,
+  SerializedSearchSourceFields,
+  DataViewsContract,
+} from '../..';
 
 import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
@@ -123,6 +128,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
   scriptedFieldsEnabled: boolean;
+  dataViews: DataViewsContract;
 }
 
 interface ExpressionAstOptions {
@@ -133,6 +139,8 @@ interface ExpressionAstOptions {
    */
   asDatatable?: boolean;
 }
+
+const DATA_VIEW_KEY = 'index';
 
 /** @public **/
 export class SearchSource {
@@ -237,6 +245,32 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  /**
+   * Returns dataView as DataView instead of DataViewLazy
+   * @returns dataView
+   */
+
+  async getDataView() {
+    const dataView = this.getField(DATA_VIEW_KEY);
+    return dataView ? await this.dependencies.dataViews.toDataView(dataView) : undefined;
+  }
+
+  async setDataView(dataView: DataView | undefined) {
+    const dataViewLazy = dataView
+      ? await this.dependencies.dataViews.toDataViewLazy(dataView)
+      : undefined;
+    this.setField(DATA_VIEW_KEY, dataViewLazy);
+    return this;
+  }
+
+  getDataViewLazy() {
+    return this.getField(DATA_VIEW_KEY);
+  }
+
+  setDataViewLazy(dataView: DataViewLazy | undefined) {
+    return this.setField(DATA_VIEW_KEY, dataView);
   }
 
   getActiveIndexFilter() {
@@ -690,7 +724,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: DataView) {
+  private getIndexType(index?: DataViewLazy) {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
@@ -698,13 +732,13 @@ export class SearchSource {
     typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
-    index: DataView | undefined,
+    index: DataViewLazy | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
       return bodyFields;
     }
-    const { fields } = index;
+    // const { fields } = index;
     const sourceFilters = index.getSourceFiltering();
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
@@ -747,6 +781,7 @@ export class SearchSource {
       return field;
     }
     const { fields } = index;
+    // todo
     const dateFields = fields.getByType('date');
     const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
     if (!dateField) {
@@ -765,7 +800,8 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll, pit } = searchRequest;
+    // I think this needs better typing
+    const { body, index: index  as DataViewLazy, query, filters, highlightAll, pit } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
@@ -801,6 +837,7 @@ export class SearchSource {
 
       const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
+      // todo THIS MIGHT NEED REFACTOR
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
         filter(this.getFieldName(fld))
@@ -812,6 +849,7 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
+      // todo
       const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
@@ -866,6 +904,7 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        // todo this returns all fields minus sourceFiltered fields
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
 
         const uniqueFieldNames = new Set();

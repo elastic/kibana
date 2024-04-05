@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
 import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewLazy } from '@kbn/data-views-plugin/common';
 
 // meta fields we won't merge with our result hit
 const EXCLUDED_META_FIELDS: string[] = ['_type', '_source'];
@@ -41,14 +41,17 @@ type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<s
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
+export function flattenHit(hit: Hit, indexPattern?: DataViewLazy, params?: TabifyDocsOptions) {
   const flat = {} as Record<string, any>;
 
-  function flatten(obj: Record<string, any>, keyPrefix: string = '') {
+  async function flatten(obj: Record<string, any>, keyPrefix: string = '') {
+    const fieldName = Object.keys(obj).map((k) => keyPrefix + k);
+    const fields = (await indexPattern?.getFields({ fieldName }))?.getFieldMap();
     for (const [k, val] of Object.entries(obj)) {
       const key = keyPrefix + k;
 
-      const field = indexPattern?.fields.getByName(key);
+      // todo
+      const field = fields[key];
 
       if (params?.shallow === false) {
         const isNestedField = field?.type === 'nested';
@@ -139,7 +142,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 
 export const tabifyDocs = (
   esResponse: estypes.SearchResponse<unknown>,
-  index?: DataView,
+  index?: DataViewLazy,
   params: TabifyDocsOptions = {}
 ): Datatable => {
   const columns: DatatableColumn[] = [];
@@ -148,6 +151,7 @@ export const tabifyDocs = (
     .map((hit) => {
       const flat = flattenHit(hit, index, params);
       for (const [key, value] of Object.entries(flat)) {
+        // todo
         const field = index?.fields.getByName(key);
         const fieldName = field?.name || key;
         if (!columns.find((c) => c.id === fieldName)) {

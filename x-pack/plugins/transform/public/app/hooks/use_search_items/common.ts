@@ -58,7 +58,7 @@ export function createSearchItems(
 
   if (!isDataView(dataView) && savedSearch !== null && savedSearch.id !== undefined) {
     const searchSource = savedSearch.searchSource;
-    dataView = searchSource.getField('index') as DataView;
+    dataView = searchSource.getDataViewLazy();
 
     query = searchSource.getField('query');
     const fs = searchSource.getField('filter');

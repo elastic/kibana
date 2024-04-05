@@ -42,9 +42,9 @@ export const createSearchSource = (
     // hydrating index pattern
     if (searchSourceFields.index) {
       if (typeof searchSourceFields.index === 'string') {
-        fields.index = await indexPatterns.get(searchSourceFields.index);
+        fields.index = await indexPatterns.getDataViewLazy(searchSourceFields.index);
       } else {
-        fields.index = await indexPatterns.create(searchSourceFields.index);
+        fields.index = await indexPatterns.createDataViewLazy(searchSourceFields.index);
       }
     }
 

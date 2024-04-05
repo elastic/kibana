@@ -42,7 +42,7 @@ export const useFiltersValidation = ({
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
-        const dataView = savedSearch.searchSource.getField('index');
+        const dataView = savedSearch.searchSource.getDataViewLazy();
         const areFiltersInvalid =
           dataView &&
           !dataView.isPersisted() &&

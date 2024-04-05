@@ -35,7 +35,7 @@ function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClie
   return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
 }
 
-export function getStateDefaults({
+export async function getStateDefaults({
   savedSearch,
   services,
 }: {
@@ -44,7 +44,7 @@ export function getStateDefaults({
 }) {
   const { searchSource } = savedSearch;
   const { data, uiSettings, storage } = services;
-  const dataView = searchSource.getField('index');
+  const dataView = await searchSource.getDataView();
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const isTextBasedQueryMode = isTextBasedQuery(query);

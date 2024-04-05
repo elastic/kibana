@@ -11,3 +11,4 @@ export * from './data_view';
 export * from './data_views';
 export * from './data_view_lazy';
 export { DataViewPersistableStateService } from './persistable_state';
+export { AbstractDataView } from './abstract_data_views';

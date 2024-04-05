@@ -383,7 +383,7 @@ export const getTopNavConfig = (
             vis: currentState.vis,
             linked: currentState.linked,
             indexPattern:
-              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+              visInstance.savedSearch?.searchSource?.getDataViewLazy()?.id ??
               (searchParams.indexPattern as string),
             savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
           };

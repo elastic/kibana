@@ -209,12 +209,12 @@ export interface DiscoverStateContainer {
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getDiscoverStateContainer({
+export async function getDiscoverStateContainer({
   history,
   services,
   customizationContext,
   stateStorageContainer,
-}: DiscoverStateContainerParams): DiscoverStateContainer {
+}: DiscoverStateContainerParams): Promise<DiscoverStateContainer> {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
 
@@ -254,7 +254,7 @@ export function getDiscoverStateContainer({
   /**
    * App State Container, synced with the _a part URL
    */
-  const appStateContainer = getDiscoverAppStateContainer({
+  const appStateContainer = await getDiscoverAppStateContainer({
     stateStorage,
     savedSearch: savedSearchContainer.getState(),
     services,
@@ -276,10 +276,10 @@ export function getDiscoverStateContainer({
       }
     }
   };
-  const setDataView = (dataView: DataView) => {
+  const setDataView = async (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
-    savedSearchContainer.getState().searchSource.setField('index', dataView);
+    savedSearchContainer.getState().searchSource.setDataView(dataView);
   };
 
   const dataStateContainer = getDataStateContainer({
@@ -481,11 +481,11 @@ export function getDiscoverStateContainer({
     addLog('undoSavedSearchChanges');
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
     savedSearchContainer.set(nextSavedSearch);
-    restoreStateFromSavedSearch({
+    await restoreStateFromSavedSearch({
       savedSearch: nextSavedSearch,
       timefilter: services.timefilter,
     });
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
+    const newAppState = await getDefaultAppState(nextSavedSearch, services);
 
     // a saved search can't have global (pinned) filters so we can reset global filters state
     const globalFilters = globalStateContainer.get()?.filters;
@@ -579,7 +579,7 @@ function createUrlGeneratorState({
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
-  const dataView = getSavedSearch().searchSource.getField('index');
+  const dataView = getSavedSearch().searchSource.getDataViewLazy();
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: appState.index,

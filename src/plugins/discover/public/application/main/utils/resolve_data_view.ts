@@ -111,7 +111,7 @@ export async function loadDataView({
  * Check if the given data view is valid, provide a fallback if it doesn't exist
  * And message the user in this case with toast notifications
  */
-export function resolveDataView(
+export async function resolveDataView(
   ip: DataViewData,
   savedSearch: SavedSearch | undefined,
   toastNotifications: ToastsStart,
@@ -119,7 +119,7 @@ export function resolveDataView(
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
 
-  const ownDataView = savedSearch?.searchSource.getField('index');
+  const ownDataView = await savedSearch?.searchSource.getDataView();
 
   if (ownDataView && !stateVal) {
     // the given saved search has its own data view, and no data view was specified in the URL
@@ -194,7 +194,7 @@ export const loadAndResolveDataView = async (
     dataViewSpec,
     dataViewList: savedDataViews,
   });
-  const nextDataView = resolveDataView(
+  const nextDataView = await resolveDataView(
     nextDataViewData,
     savedSearch,
     services.toastNotifications,

@@ -7,7 +7,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewLazy, DataView } from '@kbn/data-views-plugin/common';
 import { EsQuerySortValue } from './types';
 
 type FieldSortOptions = estypes.FieldSort &
@@ -17,9 +17,10 @@ type FieldSortOptions = estypes.FieldSort &
     script?: estypes.ScriptSort['script'];
   };
 
+// todo
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
-  indexPattern: DataView | string | undefined,
+  indexPattern: DataViewLazy | string | undefined,
   defaultSortOptions: FieldSortOptions | string = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];

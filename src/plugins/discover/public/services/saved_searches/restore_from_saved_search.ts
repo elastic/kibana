@@ -10,7 +10,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../utils/validate_time';
 
-export const restoreStateFromSavedSearch = ({
+export const restoreStateFromSavedSearch = async ({
   savedSearch,
   timefilter,
 }: {
@@ -21,7 +21,7 @@ export const restoreStateFromSavedSearch = ({
     return;
   }
 
-  const isTimeBased = savedSearch.searchSource.getField('index')?.isTimeBased();
+  const isTimeBased = await savedSearch.searchSource.getDataViewLazy()?.isTimeBased();
 
   if (!isTimeBased) {
     return;

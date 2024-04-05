@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
@@ -22,7 +22,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
  */
 export const getColumns = async (
   services: LocatorServicesDeps,
-  index: DataView,
+  index: AbstractDataView,
   savedSearch: SavedSearch
 ) => {
   const [hideTimeColumn, useFieldsFromSource] = await Promise.all([

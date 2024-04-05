@@ -87,7 +87,7 @@ export const loadSavedSearch = async (
   if (appState) {
     if (savedSearchId && appState.index) {
       // This is for the case appState is overwriting the loaded saved search data view
-      const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
+      const savedSearchDataViewId = nextSavedSearch.searchSource.getDataViewLazy()?.id;
       const stateDataView = await getStateDataView(params, {
         services,
         appState,
@@ -100,17 +100,17 @@ export const loadSavedSearch = async (
         stateDataView &&
         (dataViewDifferentToAppState || !savedSearchDataViewId)
       ) {
-        nextSavedSearch.searchSource.setField('index', stateDataView);
+        await nextSavedSearch.searchSource.setDataView(stateDataView);
       }
     }
-    nextSavedSearch = savedSearchContainer.update({
-      nextDataView: nextSavedSearch.searchSource.getField('index'),
+    nextSavedSearch = await savedSearchContainer.update({
+      nextDataView: (await nextSavedSearch.searchSource.getDataView())!,
       nextState: appState,
     });
   }
 
   // Update app state container with the next state derived from the next saved search
-  const nextAppState = getInitialState(undefined, nextSavedSearch, services);
+  const nextAppState = await getInitialState(undefined, nextSavedSearch, services);
   const mergedAppState = appState
     ? { ...nextAppState, ...cleanupUrlState({ ...appState }, services.uiSettings) }
     : nextAppState;
@@ -132,9 +132,9 @@ export const loadSavedSearch = async (
  * @param savedSearch
  * @param deps
  */
-function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
+async function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
   const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
-  const savedSearchDataView = savedSearch.searchSource.getField('index')!;
+  const savedSearchDataView = (await savedSearch.searchSource.getDataView())!;
 
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {

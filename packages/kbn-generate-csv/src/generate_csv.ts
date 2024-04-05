@@ -242,7 +242,8 @@ export class CsvGenerator {
       );
     }
 
-    const index = searchSource.getField('index');
+    const index = await searchSource.getDataView();
+    const indexLazy = searchSource.getDataViewLazy();
 
     if (!index) {
       throw new Error(`The search must have a reference to an index pattern!`);
@@ -287,6 +288,7 @@ export class CsvGenerator {
 
     // apply timezone from the job to all date field formatters
     try {
+      // todo
       index.fields.getByType('date').forEach(({ name }) => {
         logger.debug(`Setting timezone on ${name}`);
         const format: FieldFormatConfig = {
@@ -348,7 +350,7 @@ export class CsvGenerator {
 
         let table: Datatable | undefined;
         try {
-          table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
+          table = tabifyDocs(results, indexLazy, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           logger.error(err);
           warnings.push(i18nTexts.unknownError(err?.message ?? err));
