@@ -467,8 +467,8 @@
   ],
   "infra-custom-dashboards": [
     "assetType",
-    "dashboardIdList",
-    "kuery"
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"

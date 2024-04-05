@@ -1,0 +1,86 @@
+{
+  "id": "searchNotebooks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchNotebooks",
+      "id": "def-server.SearchNotebooksPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchNotebooksPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/search_notebooks/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchNotebooks",
+      "id": "def-server.SearchNotebooksPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchNotebooksPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/search_notebooks/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchNotebooks",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchNotebooks\""
+        ],
+        "path": "x-pack/plugins/search_notebooks/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchNotebooks",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"searchNotebooks\""
+        ],
+        "path": "x-pack/plugins/search_notebooks/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
