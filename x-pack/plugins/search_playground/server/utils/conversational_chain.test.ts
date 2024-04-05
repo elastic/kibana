@@ -10,9 +10,16 @@ import { createAssist as Assist } from './assist';
 import { ConversationalChain } from './conversational_chain';
 import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { Message } from 'ai';
 
 describe('conversational chain', () => {
-  it('should be able to create a conversational chain', async () => {
+  const createTestChain = async (
+    responses: string[],
+    chat: Message[],
+    expectedFinalAnswer: string,
+    expectedDocs: any,
+    expectedSearchRequest: any
+  ) => {
     const searchMock = jest.fn().mockImplementation(() => {
       return {
         hits: {
@@ -41,7 +48,7 @@ describe('conversational chain', () => {
     };
 
     const llm = new FakeListLLM({
-      responses: ['question rewritten to work from home', 'the final answer'],
+      responses,
     });
 
     const aiClient = Assist({
@@ -65,13 +72,7 @@ describe('conversational chain', () => {
       prompt: 'you are a QA bot',
     });
 
-    const stream = await conversationalChain.stream(aiClient, [
-      {
-        id: '1',
-        role: 'user',
-        content: 'what is the work from home policy?',
-      },
-    ]);
+    const stream = await conversationalChain.stream(aiClient, chat);
 
     const streamToValue: string[] = await new Promise((resolve) => {
       const reader = stream.getReader();
@@ -94,26 +95,122 @@ describe('conversational chain', () => {
     const textValue = streamToValue
       .filter((v) => v[0] === '0')
       .reduce((acc, v) => acc + v.replace(/0:"(.*)"\n/, '$1'), '');
-    expect(textValue).toEqual('the final answer');
+    expect(textValue).toEqual(expectedFinalAnswer);
 
     const docValue = streamToValue
       .filter((v) => v[0] === '8')
       .reduce((acc, v) => acc + v.replace(/8:(.*)\n/, '$1'), '');
-    expect(JSON.parse(docValue)).toEqual([
-      {
-        documents: [
-          { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
-          { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
-        ],
-        type: 'retrieved_docs',
-      },
-    ]);
-    expect(searchMock.mock.calls[0]).toEqual([
-      {
-        index: 'index,website',
-        query: { query: { match: { field: 'question rewritten to work from home' } } },
-        size: 3,
-      },
-    ]);
+    expect(JSON.parse(docValue)).toEqual(expectedDocs);
+    expect(searchMock.mock.calls[0]).toEqual(expectedSearchRequest);
+  };
+
+  it('should be able to create a conversational chain', async () => {
+    await createTestChain(
+      ['the final answer'],
+      [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      'the final answer',
+      [
+        {
+          documents: [
+            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
+            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      [
+        {
+          index: 'index,website',
+          query: { query: { match: { field: 'what is the work from home policy?' } } },
+          size: 3,
+        },
+      ]
+    );
+  });
+
+  it('asking with chat history should re-write the question', async () => {
+    await createTestChain(
+      ['rewrite the question', 'the final answer'],
+      [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'the final answer',
+        },
+        {
+          id: '3',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      'the final answer',
+      [
+        {
+          documents: [
+            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
+            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      [
+        {
+          index: 'index,website',
+          query: { query: { match: { field: 'rewrite the question' } } },
+          size: 3,
+        },
+      ]
+    );
+  });
+
+  fit('should cope with quotes in the query', async () => {
+    await createTestChain(
+      ['rewrite "the" question', 'the final answer'],
+      [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'the final answer',
+        },
+        {
+          id: '3',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      'the final answer',
+      [
+        {
+          documents: [
+            { metadata: { id: '1', index: 'index' }, pageContent: 'value' },
+            { metadata: { id: '1', index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      [
+        {
+          index: 'index,website',
+          query: { query: { match: { field: 'rewrite "the" question' } } },
+          size: 3,
+        },
+      ]
+    );
   });
 });
