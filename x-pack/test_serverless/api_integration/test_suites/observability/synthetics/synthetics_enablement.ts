@@ -42,8 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('SyntheticsEnablement', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/180108
-    this.tags(['failsOnMKI']);
     const svlUserManager = getService('svlUserManager');
     const svlCommonApi = getService('svlCommonApi');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
