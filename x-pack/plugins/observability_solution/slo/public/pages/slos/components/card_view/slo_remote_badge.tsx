@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { MouseEvent } from 'react';
 import { useSpace } from '../../../../hooks/use_space';
-import { createRemoteSloDetailsUrl } from '../../../../utils/slo/create_remote_slo_details_url';
+import { createRemoteSloDetailsUrl } from '../../../../utils/slo/remote_slo_urls';
 
 export function SloRemoteBadge({ slo }: { slo: SLOWithSummaryResponse }) {
   const spaceId = useSpace();

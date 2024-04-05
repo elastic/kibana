@@ -29,6 +29,6 @@ export const paths = {
     const qs = new URLSearchParams();
     if (!!instanceId) qs.append('instanceId', instanceId);
     if (!!remoteName) qs.append('remoteName', remoteName);
-    return `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
+    return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
   },
 };
