@@ -19,7 +19,7 @@ import {
   map,
   skip,
   startWith,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';

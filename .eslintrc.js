@@ -253,6 +253,11 @@ const RESTRICTED_IMPORTS = [
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
+  {
+    name: 'rxjs/operators',
+    message:
+      'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
+  },
 ];
 
 module.exports = {

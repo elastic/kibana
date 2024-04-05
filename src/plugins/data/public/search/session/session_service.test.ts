@@ -8,7 +8,7 @@
 
 import { ISessionService, SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
-import { first, take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
