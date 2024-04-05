@@ -140,9 +140,12 @@ export const reportingCsvShareProvider = ({
     };
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate('reporting.share.contextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'Export',
-      });
+      const panelTitle = i18n.translate(
+        'reporting.share.contextMenu.export.csvReportsButtonLabel',
+        {
+          defaultMessage: 'Export',
+        }
+      );
 
       const reportingUrl = new URL(window.location.origin);
 
