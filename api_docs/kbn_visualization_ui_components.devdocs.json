@@ -441,7 +441,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined; }) => JSX.Element"
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -553,7 +553,7 @@
                 "label": "bgColor",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+                  "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
