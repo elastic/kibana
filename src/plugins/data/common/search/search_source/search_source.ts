@@ -71,7 +71,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypesWithBody from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
   Filter,
@@ -87,6 +87,7 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -354,7 +355,7 @@ export class SearchSource {
    */
   fetch$<T = {}>(
     options: SearchSourceSearchOptions = {}
-  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
+  ): Observable<IKibanaSearchResponse<estypesWithBody.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -375,7 +376,7 @@ export class SearchSource {
     );
 
     return this.inspectSearch(s$, options) as Observable<
-      IKibanaSearchResponse<estypes.SearchResponse<T>>
+      IKibanaSearchResponse<estypesWithBody.SearchResponse<T>>
     >;
   }
 
@@ -385,9 +386,11 @@ export class SearchSource {
    */
   async fetch(
     options: SearchSourceSearchOptions = {}
-  ): Promise<estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>> {
+  ): Promise<
+    estypesWithBody.SearchResponse<unknown, Record<string, estypesWithBody.AggregationsAggregate>>
+  > {
     const r = await lastValueFrom(this.fetch$(options));
-    return r.rawResponse as estypes.SearchResponse<unknown>;
+    return r.rawResponse as estypesWithBody.SearchResponse<unknown>;
   }
 
   /**
@@ -466,7 +469,7 @@ export class SearchSource {
         last(undefined, null),
         tap((finalResponse) => {
           if (finalResponse) {
-            const resp = finalResponse.rawResponse as estypes.SearchResponse<unknown>;
+            const resp = finalResponse.rawResponse as estypesWithBody.SearchResponse<unknown>;
             requestResponder?.stats(getResponseInspectorStats(resp, this));
             requestResponder?.ok({ json: finalResponse });
           }
@@ -501,7 +504,7 @@ export class SearchSource {
   }
 
   private async fetchOthers(
-    response: estypes.SearchResponse<unknown>,
+    response: estypesWithBody.SearchResponse<unknown>,
     options: SearchSourceSearchOptions
   ) {
     const aggs = this.getField('aggs');
@@ -692,7 +695,8 @@ export class SearchSource {
   private mergeProps(
     root = this,
     searchRequest: SearchRequest = { body: {} }
-  ): SearchSourceFields & SearchRequest {
+    // ): SearchSourceFields & SearchRequest {
+  ): estypes.SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
