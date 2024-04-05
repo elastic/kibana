@@ -6,8 +6,6 @@
  */
 
 import {
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-  ALERT_SUPPRESSION_FIELDS,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_INPUT,
 } from '../../../../screens/create_new_rule';
@@ -16,7 +14,7 @@ import {
   selectIndicatorMatchType,
   selectNewTermsRuleType,
   selectThresholdRuleType,
-  openSuppressionFieldsTooltip,
+  openSuppressionFieldsTooltipAndCheckLicense,
 } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
 import { login } from '../../../../tasks/login';
@@ -42,13 +40,13 @@ describe(
 
       it('can not create rule with rule execution suppression on basic license for all rules with enabled suppression', () => {
         // Default query rule
-        openSuppressionFieldsTooltip();
+        openSuppressionFieldsTooltipAndCheckLicense();
 
         selectIndicatorMatchType();
-        openSuppressionFieldsTooltip();
+        openSuppressionFieldsTooltipAndCheckLicense();
 
         selectNewTermsRuleType();
-        openSuppressionFieldsTooltip();
+        openSuppressionFieldsTooltipAndCheckLicense();
 
         selectThresholdRuleType();
         cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.disabled');

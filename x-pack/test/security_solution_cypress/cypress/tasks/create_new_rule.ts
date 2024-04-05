@@ -880,10 +880,11 @@ export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm
 };
 
 /**
- * opens tooltip on disabled suppression fields and checks if it contains requirement for Platinum license
- * suppression fields are disabled when app has insufficient license
+ * Opens tooltip on disabled suppression fields and checks if it contains requirement for Platinum license.
+ *
+ * Suppression fields are disabled when app has insufficient license
  */
-export const openSuppressionFieldsTooltip = () => {
+export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
