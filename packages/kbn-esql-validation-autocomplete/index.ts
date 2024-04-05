@@ -76,3 +76,5 @@ export {
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';
+
+export { wrapAsEditorMessage } from './src/code_actions/utils';
