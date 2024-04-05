@@ -210,7 +210,7 @@ export const allowedExperimentalValues = Object.freeze({
   /*
    * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineEnabled: true,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
