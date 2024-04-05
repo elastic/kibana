@@ -92,6 +92,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: false,
 
   /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,

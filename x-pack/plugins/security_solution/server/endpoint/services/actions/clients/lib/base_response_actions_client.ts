@@ -13,6 +13,8 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ExpandedEventFieldsObject } from '../../../../../../common/types/response_actions';
+import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import { fetchActionResponses } from '../../fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
@@ -125,6 +127,12 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
   actionId: string;
 } & Pick<LogsEndpointActionResponse, 'error'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
+
+export interface ResponseActionsClientGetEventDetailsOptions {
+  index: string | string[];
+  term: Record<string, string>;
+  fields?: Array<Record<'field', string>>;
+}
 
 export type ResponseActionsClientValidateRequestResponse =
   | {
@@ -463,6 +471,42 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       });
 
     return doc;
+  }
+
+  protected async getEventDetailsById<TOutputContent>(
+    options: ResponseActionsClientGetEventDetailsOptions
+  ): Promise<TOutputContent> {
+    const search = {
+      index: options.index,
+      fields: options.fields ? options.fields : [{ field: '*' }],
+      _source: false,
+      body: {
+        query: {
+          bool: {
+            filter: [{ term: options.term }],
+          },
+        },
+      },
+    };
+    const result = await this.options.esClient
+      .search<TOutputContent>(search, {
+        ignore: [404],
+      })
+      .then((eventDetails) => {
+        return expandDottedObject(
+          eventDetails.hits.hits?.[0]?.fields as ExpandedEventFieldsObject,
+          true
+        ) as TOutputContent;
+      })
+      .catch((err) => {
+        throw new ResponseActionsClientError(
+          `Failed to fetch event document: ${err.message}`,
+          err.statusCode ?? 500,
+          err
+        );
+      });
+
+    return result;
   }
 
   protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {

@@ -153,6 +153,12 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
+interface GetTypesFilterInitialStateArguments {
+  isFlyout: boolean;
+  agentTypes?: string[];
+  types?: string[];
+}
+
 /**
  *
  * @param isSentinelOneV1Enabled
@@ -163,12 +169,18 @@ export type ActionsLogPopupFilters = Extract<
  * @description
  * sets the initial state of the types filter options
  */
-const getTypesFilterInitialState = (
-  isSentinelOneV1Enabled: boolean,
-  isFlyout: boolean,
-  agentTypes?: string[],
-  types?: string[]
-): FilterItems => {
+const useTypesFilterInitialState = ({
+  isFlyout,
+  agentTypes,
+  types,
+}: GetTypesFilterInitialStateArguments): FilterItems => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
   const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
     key,
     label,
@@ -188,7 +200,7 @@ const getTypesFilterInitialState = (
 
   // v8.13 onwards
   // for showing agent types and action types in the same filter
-  if (isSentinelOneV1Enabled) {
+  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled) {
     if (!isFlyout) {
       return [
         {
@@ -246,10 +258,6 @@ export const useActionsLogFilter = ({
   // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
   setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
-
   const {
     agentTypes = [],
     commands,
@@ -281,10 +289,15 @@ export const useActionsLogFilter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const typesFilterInitialState = useTypesFilterInitialState({
+    isFlyout,
+    agentTypes,
+    types,
+  });
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypesFilter
-      ? getTypesFilterInitialState(isSentinelOneV1Enabled, isFlyout, agentTypes, types)
+      ? typesFilterInitialState
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,

@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
+import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { getFieldValue } from './helpers';
@@ -32,6 +33,15 @@ export const HostIsolationPanel = React.memo(
     );
 
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
+    const crowdstrikeAgentId = useMemo(() => {
+      return getCrowdstrikeAgentId(details);
+      // let id = getCrowdstrikeAgentId(details);
+      // // HARDCODED agent id for testing purposes - remove this IF statement when the agent id is available in the alert
+      // if (id) {
+      //   id = 'xxxxx';
+      // }
+      // return id;
+    }, [details]);
 
     const hostName = useMemo(
       () => getFieldValue({ category: 'host', field: 'host.name' }, details),
@@ -45,14 +55,19 @@ export const HostIsolationPanel = React.memo(
 
     const { casesInfo } = useCasesFromAlerts({ alertId });
 
-    const agentType: ResponseActionAgentType = useMemo(
-      () => (sentinelOneAgentId ? 'sentinel_one' : 'endpoint'),
-      [sentinelOneAgentId]
-    );
+    const agentType: ResponseActionAgentType = useMemo(() => {
+      if (sentinelOneAgentId) {
+        return 'sentinel_one';
+      } else if (crowdstrikeAgentId) {
+        return 'crowdstrike';
+      } else {
+        return 'endpoint';
+      }
+    }, [sentinelOneAgentId, crowdstrikeAgentId]);
 
     const endpointId = useMemo(
-      () => sentinelOneAgentId ?? elasticAgentId,
-      [elasticAgentId, sentinelOneAgentId]
+      () => sentinelOneAgentId ?? crowdstrikeAgentId ?? elasticAgentId,
+      [elasticAgentId, sentinelOneAgentId, crowdstrikeAgentId]
     );
 
     return isolateAction === 'isolateHost' ? (

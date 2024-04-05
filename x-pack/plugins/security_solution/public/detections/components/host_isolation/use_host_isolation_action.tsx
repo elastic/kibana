@@ -11,6 +11,10 @@ import {
   getSentinelOneAgentId,
   isAlertFromSentinelOneEvent,
 } from '../../../common/utils/sentinelone_alert_check';
+import {
+  getCrowdstrikeAgentId,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../common/utils/crowdstrike_alert_check';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -40,6 +44,10 @@ export const useHostIsolationAction = ({
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
+
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 
   const isEndpointAlert = useMemo(
@@ -52,12 +60,18 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
+  const isCrowdstrikeAlert = useMemo(
+    () => isAlertFromCrowdstrikeEvent({ data: detailsData || [] }),
+    [detailsData]
+  );
+
   const agentId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
     [detailsData]
   );
 
   const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
+  const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
 
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
@@ -81,18 +95,24 @@ export const useHostIsolationAction = ({
 
   const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
   const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
+  // TODO TC: Add support for Crowdstrike agent status - ongoing work by Ash :+1:
 
   const isHostIsolated = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
       return sentinelOneAgentStatus?.isolated;
+    }
+    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      // return crowdstrikeAgentStatus?.isolated;
     }
 
     return isIsolated;
   }, [
     isIsolated,
     isSentinelOneAlert,
+    isCrowdstrikeAlert,
     sentinelOneAgentStatus?.isolated,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 
   const doesHostSupportIsolation = useMemo(() => {
@@ -173,6 +193,16 @@ export const useHostIsolationAction = ({
     }
 
     if (
+      crowdstrikeAgentId &&
+      isCrowdstrikeAlert &&
+      crowdstrikeManualHostActionsEnabled &&
+      hasActionsAllPrivileges &&
+      (canIsolateHost || (isHostIsolated && !canUnIsolateHost))
+    ) {
+      return menuItems;
+    }
+
+    if (
       isEndpointAlert &&
       doesHostSupportIsolation &&
       !loadingHostIsolationStatus &&
@@ -196,5 +226,8 @@ export const useHostIsolationAction = ({
     sentinelOneAgentStatus,
     sentinelOneAgentId,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeAgentId,
+    isCrowdstrikeAlert,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 };

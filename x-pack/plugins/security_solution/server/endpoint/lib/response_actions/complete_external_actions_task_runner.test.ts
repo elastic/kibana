@@ -99,6 +99,12 @@ describe('CompleteExternalTaskRunner class', () => {
           EndpointActions: expect.any(Object),
           agent: expect.any(Object),
         }),
+        { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          EndpointActions: expect.any(Object),
+          agent: expect.any(Object),
+        }),
       ],
     });
   });

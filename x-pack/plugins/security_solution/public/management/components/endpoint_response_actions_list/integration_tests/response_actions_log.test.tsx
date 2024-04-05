@@ -1425,7 +1425,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agent and action types when opened in page view', () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+      });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1438,6 +1441,7 @@ describe('Response actions history', () => {
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'Elastic Defend',
         'SentinelOne',
+        'Crowdstrike',
         'Triggered by rule',
         'Triggered manually',
       ]);
