@@ -58,7 +58,7 @@ export async function stepDeletePreviousPipelines(context: InstallContext) {
       )
     );
   } else {
-    // if none of the previous cases, return the original esRefences
+    // if none of the previous cases, return the original esReferences
     updatedESReferences = esReferences;
   }
   return { esReferences: updatedESReferences };
