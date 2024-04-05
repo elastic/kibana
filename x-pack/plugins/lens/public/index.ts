@@ -121,7 +121,6 @@ export type { ChartInfo } from './chart_info_api';
 
 export { layerTypes } from '../common/layer_types';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
-export { downloadCSVs } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
