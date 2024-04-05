@@ -54,8 +54,8 @@ export const migratePackagePolicyEnableCapsToV8140: SavedObjectModelDataBackfill
     policy.linux.advanced = {
       ...policy.linux.advanced,
       events: {
-        ...policy.linux.advanced?.events,
         enable_caps: true,
+        ...policy.linux.advanced?.events, // this comes second, so existing value is not overwritten by backfill
       },
     };
   }
