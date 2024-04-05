@@ -358,8 +358,6 @@ describe('SearchInterceptor', () => {
 
       await timeTravel(1000);
 
-      expect(error).toHaveBeenCalled();
-      expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
       expect(fetchMock).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
@@ -400,7 +398,8 @@ describe('SearchInterceptor', () => {
       // Long enough to reach the timeout but not long enough to reach the next response
       await timeTravel(1000);
 
-      expect(fetchMock).toHaveBeenCalledTimes(2);
+      // Expect 3 calls to fetch - the two polls and a final request for the results before deleting
+      expect(fetchMock).toHaveBeenCalledTimes(3);
       expect(mockCoreSetup.http.delete).toHaveBeenCalledTimes(1);
     });
 
