@@ -6,7 +6,6 @@
  */
 
 import { z } from 'zod';
-import { startCase } from 'lodash';
 import React, { useState } from 'react';
 import {
   EuiDescribedFormGroup,
@@ -15,8 +14,6 @@ import {
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
@@ -54,30 +51,13 @@ settingComponentRegistry.set(z.number()._def.typeName, (settingsConfig) => {
     setError('');
   };
 
-  const nameToStartCase = (name: string) => {
-    return startCase(name).split(' ').join('');
-  };
-
   return (
     <EuiDescribedFormGroup
       fullWidth
-      title={
-        <h4>
-          {i18n.translate(
-            `xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(settingsConfig.name)}Title`,
-            { defaultMessage: settingsConfig.title }
-          )}
-        </h4>
-      }
+      title={<h4>{settingsConfig.title}</h4>}
       description={
         <>
-          {i18n.translate(
-            `xpack.fleet.settings.agentPolicyAdvanced.${nameToStartCase(
-              settingsConfig.name
-            )}Description`,
-            { defaultMessage: settingsConfig.description }
-          )}
-          .{' '}
+          {settingsConfig.description}.{' '}
           <EuiLink href={settingsConfig.learnMoreLink} external>
             Learn more.
           </EuiLink>
