@@ -14,14 +14,14 @@ import {
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
-import type { FormSchema } from '../../../../shared_imports';
 import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
+import { createReactQueryWrapper } from '../../../../common/mock';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__/api_client';
 import { RelatedIntegrations } from './related_integrations';
 
-jest.mock('../../../fleet_integrations/api'); // must match to the import in rules/related_integrations/use_integrations.tsx
+// must match to the import in rules/related_integrations/use_integrations.tsx
+jest.mock('../../../fleet_integrations/api');
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
@@ -554,7 +554,11 @@ interface TestFormProps {
 function TestForm({ initialState, onSubmit }: TestFormProps): JSX.Element {
   const { form } = useForm({
     options: { stripEmptyFields: false },
-    schema: TEST_FROM_SCHEMA,
+    schema: {
+      relatedIntegrationsField: {
+        type: FIELD_TYPES.JSON,
+      },
+    },
     defaultValue: {
       relatedIntegrationsField: initialState,
     },
@@ -569,28 +573,6 @@ function TestForm({ initialState, onSubmit }: TestFormProps): JSX.Element {
         {'Submit'}
       </button>
     </Form>
-  );
-}
-
-const TEST_FROM_SCHEMA: FormSchema = {
-  relatedIntegrationsField: {
-    type: FIELD_TYPES.JSON,
-  },
-};
-
-function createReactQueryWrapper(): React.FC {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        // Turn retries off, otherwise we won't be able to test errors
-        retry: false,
-      },
-    },
-  });
-
-  // eslint-disable-next-line react/display-name
-  return ({ children }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 }
 

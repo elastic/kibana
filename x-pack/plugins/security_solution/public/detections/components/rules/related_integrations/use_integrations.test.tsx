@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import { useIntegrations } from './use_integrations';
 
 import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../detection_engine/fleet_integrations/api');
 jest.mock('../../../../common/lib/kibana');
@@ -26,21 +24,6 @@ describe('useInstalledIntegrations', () => {
   afterEach(async () => {
     cleanup();
   });
-
-  const createReactQueryWrapper = () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          // Turn retries off, otherwise we won't be able to test errors
-          retry: false,
-        },
-      },
-    });
-    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return wrapper;
-  };
 
   const render = ({ skip } = { skip: false }) =>
     renderHook(
