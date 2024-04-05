@@ -117,10 +117,18 @@ export const createPureDatasetsSummaryPanelStateMachine = (
             fetching: {
               invoke: {
                 src: 'loadEstimatedData',
-                onDone: {
-                  target: 'loaded',
-                  actions: ['storeEstimatedData'],
-                },
+                onDone: [
+                  {
+                    target: 'disabled',
+                    cond: {
+                      type: 'estimatedDataIsDisabled',
+                    },
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['storeEstimatedData'],
+                  },
+                ],
                 onError: [
                   {
                     target: 'retrying',
@@ -143,6 +151,9 @@ export const createPureDatasetsSummaryPanelStateMachine = (
               },
             },
             loaded: {
+              type: 'final',
+            },
+            disabled: {
               type: 'final',
             },
           },
@@ -181,6 +192,9 @@ export const createPureDatasetsSummaryPanelStateMachine = (
             return context.retries[retriesKey] < MAX_RETRIES;
           }
           return false;
+        },
+        estimatedDataIsDisabled: (context, event) => {
+          return 'estimatedDataInBytes' in event.data && event.data.estimatedDataInBytes === null;
         },
       },
     }
