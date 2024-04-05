@@ -76,13 +76,13 @@ const tabWithSuspense = <P extends {}, R = {}>(
   return Comp;
 };
 
-const QueryTab = tabWithSuspense(lazy(() => import('../tabs/query_tab_content')));
-const EqlTab = tabWithSuspense(lazy(() => import('../tabs/eql_tab_content')));
-const GraphTab = tabWithSuspense(lazy(() => import('../tabs/graph_tab_content')));
-const NotesTab = tabWithSuspense(lazy(() => import('../tabs/notes_tab_content')));
-const PinnedTab = tabWithSuspense(lazy(() => import('../tabs/pinned_tab_content')));
-const SessionTab = tabWithSuspense(lazy(() => import('../tabs/session_tab_content')));
-const EsqlTab = tabWithSuspense(lazy(() => import('../tabs/esql_tab_content')));
+const QueryTab = tabWithSuspense(lazy(() => import('./query')));
+const EqlTab = tabWithSuspense(lazy(() => import('./eql')));
+const GraphTab = tabWithSuspense(lazy(() => import('./graph')));
+const NotesTab = tabWithSuspense(lazy(() => import('./notes')));
+const PinnedTab = tabWithSuspense(lazy(() => import('./pinned')));
+const SessionTab = tabWithSuspense(lazy(() => import('./session')));
+const EsqlTab = tabWithSuspense(lazy(() => import('./esql')));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -136,7 +136,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
 
     const getAssistantTab = useCallback(() => {
       if (showTimeline) {
-        const AssistantTab = tabWithSuspense(lazy(() => import('../tabs/assistant_tab_content')));
+        const AssistantTab = tabWithSuspense(lazy(() => import('./assistant')));
         return (
           <HideShowContainer
             $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}

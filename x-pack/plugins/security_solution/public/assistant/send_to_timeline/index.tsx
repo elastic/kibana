@@ -35,7 +35,7 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql_tab_content/use_discover_state';
+import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
