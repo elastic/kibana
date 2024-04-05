@@ -190,12 +190,14 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       return [APMFlyoutMapTransactionDuration];
 
     case '.es-query':
-      const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
+      const { thresholdComparator } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
-        threshold,
+        threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: thresholdComparator,
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], threshold),
+        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
+          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
+        ]),
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
 
