@@ -25,7 +25,11 @@ import { useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
-import { ProcessorsEditorContextProvider, OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import {
+  ProcessorsEditorContextProvider,
+  OnUpdateHandlerArg,
+  OnUpdateHandler,
+} from '../pipeline_editor';
 import {
   DeprecatedPipelineBadge,
   DeprecatedPipelineCallout,

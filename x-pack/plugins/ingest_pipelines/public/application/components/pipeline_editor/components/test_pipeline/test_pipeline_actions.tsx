@@ -33,10 +33,10 @@ export const TestPipelineActions: FunctionComponent = () => {
         data-test-subj="viewOutputButton"
         onClick={() => openFlyout('documents')}
       >
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.testPipeline.outputButtonLabel"
-            defaultMessage="Test pipeline"
-          />
+        <FormattedMessage
+          id="xpack.ingestPipelines.pipelineEditor.testPipeline.outputButtonLabel"
+          defaultMessage="Test pipeline"
+        />
       </EuiButton>
 
       {openTestPipelineFlyout && (

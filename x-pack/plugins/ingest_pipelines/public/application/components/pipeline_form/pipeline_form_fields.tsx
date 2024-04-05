@@ -13,10 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
 
-import {
-  OnDoneLoadJsonHandler,
-  PipelineEditor,
-} from '../pipeline_editor';
+import { OnDoneLoadJsonHandler, PipelineEditor } from '../pipeline_editor';
 
 interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
