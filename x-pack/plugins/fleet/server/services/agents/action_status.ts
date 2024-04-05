@@ -361,8 +361,8 @@ async function getPolicyChangeActions(
             },
           },
           // This filter is for retrieving docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1).
-          // When the coordinator is removed from Fleet Server (https://github.com/elastic/fleet-server/pull/3131),
-          // this filter should be removed.
+          // Note: the coordinator will be removed from Fleet Server (https://github.com/elastic/fleet-server/pull/3131),
+          // so this filter will eventually not be needed.
           {
             term: {
               coordinator_idx: 0,
