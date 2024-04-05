@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import React from 'react';
-import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -16,15 +15,11 @@ import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
-  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
-  omitGenericEmbeddableInput,
   FilterableEmbeddable,
-  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
-  setQuery,
   setEmbeddableSearchContext,
 } from '../actions';
 import {
@@ -92,7 +87,6 @@ export class MapEmbeddable
   private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
   private _isInitialized = false;
-  private _controlledBy: string;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -108,7 +102,6 @@ export class MapEmbeddable
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
-    this._controlledBy = getControlledBy(this.id);
   }
 
   public reportsEmbeddableLoad() {
