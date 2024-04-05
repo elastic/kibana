@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
@@ -53,7 +53,8 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const title = initializeTitles(state);
+    const timeRange = initializeTimeRange(state);
     const defaultPanelTitle = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().title
     );
@@ -71,7 +72,8 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     function serializeState() {
       const { state: rawState, references } = extract({
         ...state,
-        ...serializeTitles(),
+        ...timeRange.serialize(),
+        ...title.serializeTitles(),
         ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),
       } as unknown as MapEmbeddablePersistableState);
@@ -84,14 +86,16 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     api = buildApi(
       {
         defaultPanelTitle,
-        ...titlesApi,
+        ...timeRange.api,
+        ...title.titlesApi,
         ...reduxSync.api,
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
       },
       {
-        ...titleComparators,
+        ...timeRange.comparators,
+        ...title.titleComparators,
         ...crossPanelActions.comparators,
         ...reduxSync.comparators,
       }
