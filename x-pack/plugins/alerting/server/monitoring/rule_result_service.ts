@@ -15,7 +15,7 @@ export interface RuleResultServiceResults {
 
 interface LastRunError {
   message: string;
-  userError?: boolean;
+  userError: boolean;
 }
 
 export class RuleResultService {
