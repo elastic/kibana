@@ -8,6 +8,7 @@
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import path from 'path';
 import { paths } from '../../../../common/locators/paths';
 import { useSpace } from '../../../hooks/use_space';
 import { BurnRateRuleParams } from '../../../typings';
@@ -16,7 +17,6 @@ import {
   createRemoteSloDeleteUrl,
   createRemoteSloEditUrl,
 } from '../../../utils/slo/remote_slo_urls';
-import { openRemoteKibana } from '../../../utils/slo/utils';
 
 // TODO Kevin: Refactor: can we remove the undefined check somehow?
 // TODO Kevin: Refactor remote url generation
@@ -57,13 +57,15 @@ export const useSloActions = ({
       const locator = locators.get<RulesParams>(rulesLocatorID);
       if (!locator) return undefined;
 
-      // TODO Kevin: Fix missing spaceId in URL...
+      // TODO Kevin: Extract this into remote_slo_urls maybe?
       if (slo.remote && slo.remote.kibanaUrl !== '') {
-        const basePath = http.basePath.get();
-        const url = await locator.getUrl({ params: { sloId: slo.id } });
+        const basePath = http.basePath.get(); // "/kibana/s/my-space"
+        const url = await locator.getUrl({ params: { sloId: slo.id } }); // "/kibana/s/my-space/app/rules/123"
         // since basePath is already included in the locatorUrl, we need to remove it from the start of url
-        const urlWithoutBasePath = url?.replace(basePath, '');
-        openRemoteKibana(slo.remote.kibanaUrl, urlWithoutBasePath);
+        const urlWithoutBasePath = url?.replace(basePath, ''); // "/app/rules/123"
+        const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+        const remoteUrl = new URL(path.join(spacePath, urlWithoutBasePath), slo.remote.kibanaUrl); // "kibanaUrl/s/my-space/app/rules/123"
+        window.open(remoteUrl, '_blank');
       } else {
         locator.navigate({ params: { sloId: slo.id } }, { replace: false });
       }
