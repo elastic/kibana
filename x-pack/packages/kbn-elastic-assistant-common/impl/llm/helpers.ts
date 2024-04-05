@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
+import { Message } from './types';
 
-export type ResponseBody = ExecuteConnectorResponse;
+export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
+  content: prompt,
+  role: 'user',
+});

@@ -6,12 +6,12 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, Message } from '@kbn/elastic-assistant';
+import type { Conversation } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements, LLMMessage as Message } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';

@@ -10,8 +10,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
-import { mockActionResponse } from '../../../__mocks__/action_result_data';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { mockActionResponse } from '../mock/mock_action_response';
+import { ExecuteConnectorRequestBody } from '../schemas';
 
 const connectorId = 'mock-connector-id';
 

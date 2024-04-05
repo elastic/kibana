@@ -11,8 +11,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
-import { getMessageContentAndRole } from '../helpers';
+import { ExecuteConnectorRequestBody } from '../schemas';
+import { getMessageContentAndRole } from './helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
 

@@ -17,6 +17,7 @@ import {
   PostEvaluateResponse,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
@@ -24,7 +25,6 @@ import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
 import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
-import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
 import {
   indexEvaluations,
   setupEvaluationIndex,

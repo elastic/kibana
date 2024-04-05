@@ -10,8 +10,8 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';

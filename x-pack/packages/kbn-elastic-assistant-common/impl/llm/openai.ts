@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -17,8 +18,8 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
-import { InvokeAIActionParamsSchema } from '../types';
+import { ExecuteConnectorRequestBody } from '../schemas';
+import { InvokeAIActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 

@@ -11,16 +11,17 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { ActionsClientChatOpenAI } from '../llm/openai';
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { Stream } from 'stream';
+import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common';
 
-jest.mock('../llm/actions_client_llm');
-jest.mock('../llm/openai');
+jest.mock('@kbn/elastic-assistant-common', () => ({
+  ActionsClientChatOpenAI: jest.fn(),
+  ActionsClientLlm: jest.fn(),
+}));
 
 const mockConversationChain = {
   call: jest.fn(),

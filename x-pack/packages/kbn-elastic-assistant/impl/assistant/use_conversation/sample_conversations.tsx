@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Conversation, Message } from '../../assistant_context/types';
+import type { LLMMessage as Message } from '@kbn/elastic-assistant-common';
+import { Conversation } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 

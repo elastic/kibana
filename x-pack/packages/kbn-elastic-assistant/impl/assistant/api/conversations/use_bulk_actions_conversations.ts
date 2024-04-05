@@ -11,8 +11,9 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
+  LLMMessage as Message,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, Message } from '../../../assistant_context/types';
+import { Conversation } from '../../../assistant_context/types';
 
 export interface BulkActionSummary {
   failed: number;

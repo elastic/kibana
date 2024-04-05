@@ -6,13 +6,13 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant';
+import type { LLMMessage } from '@kbn/elastic-assistant-common';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const getLangChainMessage = (
-  assistantMessage: Pick<Message, 'content' | 'role'>
+  assistantMessage: Pick<LLMMessage, 'content' | 'role'>
 ): BaseMessage => {
   switch (assistantMessage.role) {
     case 'system':
@@ -27,13 +27,8 @@ export const getLangChainMessage = (
 };
 
 export const getLangChainMessages = (
-  assistantMessages: Array<Pick<Message, 'content' | 'role'>>
+  assistantMessages: Array<Pick<LLMMessage, 'content' | 'role'>>
 ): BaseMessage[] => assistantMessages.map(getLangChainMessage);
-
-export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
-  content: prompt,
-  role: 'user',
-});
 
 export const requestHasRequiredAnonymizationParams = (
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>

@@ -5,28 +5,7 @@
  * 2.0.
  */
 
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
-
-export interface MessagePresentation {
-  delay?: number;
-  stream?: boolean;
-}
-
-export interface Message {
-  role: ConversationRole;
-  reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Replacements;
-  content?: string;
-  timestamp: string;
-  isError?: boolean;
-  presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
-}
+import { ApiConfig, LLMMessage, Replacements } from '@kbn/elastic-assistant-common';
 
 export interface ConversationTheme {
   title?: JSX.Element | string;
@@ -59,7 +38,7 @@ export interface Conversation {
   category: string;
   id: string;
   title: string;
-  messages: Message[];
+  messages: LLMMessage[];
   updatedAt?: Date;
   createdAt?: Date;
   replacements: Replacements;
