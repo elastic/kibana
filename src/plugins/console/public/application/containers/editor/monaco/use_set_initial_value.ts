@@ -41,11 +41,32 @@ const readLoadFromParam = () => {
  *
  * @param params The {@link SetInitialValueParams} to use.
  */
-export const useSetInitialValue = (params: SetInitialValueParams) => {
+export const useSetInitialValue = async (params: SetInitialValueParams) => {
   const { initialTextValue, setValue, toasts } = params;
 
-  const loadBufferFromRemote = (url: string) => {
-    // TODO: Add support for fetching from HTTP
+  const loadBufferFromRemote = async (url: string) => {
+    if (/^https?:\/\//.test(url)) {
+      // Check if this is a valid URL
+      try {
+        new URL(url);
+      } catch (e) {
+        return;
+      }
+      // Parse the URL to avoid issues with spaces and other special characters.
+      const parsedURL = new URL(url);
+      if (parsedURL.origin === 'https://www.elastic.co') {
+        const resp = await fetch(parsedURL);
+        const data = await resp.text();
+        setValue(`${initialTextValue}\n\n${data}`);
+      } else {
+        toasts.addWarning(
+          i18n.translate('console.loadFromDataUnrecognizedUrlErrorMessage', {
+            defaultMessage:
+              'Only URLs with the Elastic domain (www.elastic.co) can be loaded in Console.',
+          })
+        );
+      }
+    }
 
     // If we have a data URI instead of HTTP, LZ-decode it. This enables
     // opening requests in Console from anywhere in Kibana.
@@ -67,12 +88,12 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   };
 
   // Support for loading a console snippet from a remote source, like support docs.
-  const onHashChange = debounce(() => {
+  const onHashChange = debounce(async () => {
     const url = readLoadFromParam();
     if (!url) {
       return;
     }
-    loadBufferFromRemote(url);
+    await loadBufferFromRemote(url);
   }, 200);
 
   window.addEventListener('hashchange', onHashChange);
@@ -80,7 +101,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const loadFromParam = readLoadFromParam();
 
   if (loadFromParam) {
-    loadBufferFromRemote(loadFromParam);
+    await loadBufferFromRemote(loadFromParam);
   } else {
     setValue(initialTextValue || DEFAULT_INPUT_VALUE);
   }

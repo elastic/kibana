@@ -70,7 +70,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
+  isSemanticTextEnabled?: boolean;
+}> = ({
+  index,
+  data,
+  jsonData,
+  refetchMapping,
+  showAboutMappings,
+  isSemanticTextEnabled = false,
+}) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
@@ -481,9 +489,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                       <DocumentFields
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
+                        isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
                       />
                     ) : (
-                      <DocumentFields isAddingFields={isAddingFields} />
+                      <DocumentFields
+                        isAddingFields={isAddingFields}
+                        isSemanticTextEnabled={isSemanticTextEnabled}
+                        indexName={indexName}
+                      />
                     )}
                   </EuiPanel>
                 </EuiAccordion>

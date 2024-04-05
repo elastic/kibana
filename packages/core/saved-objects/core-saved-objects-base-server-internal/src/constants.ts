@@ -176,7 +176,7 @@ export const HASH_TO_VERSION_MAP = {
   'guided-onboarding-guide-state|a3db59c45a3fd2730816d4f53c35c7d9': '10.0.0',
   'guided-onboarding-plugin-state|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'index-pattern|83c02d842fe2a94d14dfa13f7dcd6e87': '10.0.0',
-  'infra-custom-dashboards|6eed22cbe14594bad8c076fa864930de': '10.0.0',
+  'infra-custom-dashboards|1eb3c9e1888b8daea8495769e8d3ba2d': '10.2.0',
   'infrastructure-monitoring-log-view|c50526fc6040c5355ed027d34d05b35c': '10.0.0',
   'infrastructure-ui-source|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'ingest_manager_settings|b91ffb075799c78ffd7dbd51a279c8c9': '10.1.0',
