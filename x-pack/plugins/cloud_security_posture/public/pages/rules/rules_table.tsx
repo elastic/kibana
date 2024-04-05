@@ -81,13 +81,23 @@ export const RulesTable = ({
   onSortChange,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
+  const { http, notifications } = useKibana<CoreStart>().services;
+
+  useEffect(() => {
+    if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
+      setIsAllRulesSelectedThisPage(true);
+    else setIsAllRulesSelectedThisPage(false);
+  }, [items.length, selectedRules.length]);
+
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
     sort: {
       field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
@@ -113,10 +123,6 @@ export const RulesTable = ({
     },
   });
 
-  const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
-
-  const postRequestChangeRulesStates = useChangeCspRuleState();
-
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
     selectedRulesArray: CspBenchmarkRulesWithStates[]
@@ -131,13 +137,6 @@ export const RulesTable = ({
     }
     return true;
   };
-
-  const { http, notifications } = useKibana<CoreStart>().services;
-  useEffect(() => {
-    if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
-      setIsAllRulesSelectedThisPage(true);
-    else setIsAllRulesSelectedThisPage(false);
-  }, [items.length, selectedRules.length]);
 
   const columns = useMemo(
     () =>
@@ -182,6 +181,29 @@ export const RulesTable = ({
         sorting={sorting}
       />
     </>
+  );
+};
+
+const EnableDisableRulesSwitch = ({
+  isRuleMuted: isRuleMutedProp,
+  changeCspRuleStateFn,
+}: {
+  isRuleMuted: boolean;
+  changeCspRuleStateFn: () => Promise<void>;
+}) => {
+  const [isRuleMuted, setIsRuleMuted] = useState<boolean>(isRuleMutedProp);
+  return (
+    <EuiSwitch
+      className="eui-textTruncate"
+      checked={!isRuleMuted}
+      onChange={() => {
+        setIsRuleMuted(!isRuleMuted);
+        changeCspRuleStateFn();
+      }}
+      data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
+      label=""
+      compressed={true}
+    />
   );
 };
 
@@ -331,13 +353,9 @@ const getColumns = ({
       return (
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              className="eui-textTruncate"
-              checked={!isRuleMuted}
-              onChange={changeCspRuleStateFn}
-              data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
-              label=""
-              compressed={true}
+            <EnableDisableRulesSwitch
+              isRuleMuted={isRuleMuted}
+              changeCspRuleStateFn={changeCspRuleStateFn}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
