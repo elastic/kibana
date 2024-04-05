@@ -73,7 +73,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, sloEditUrl } = useSloActions({
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -101,8 +101,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleDelete = () => {
-    setDeleteConfirmationModalOpen(true);
-    setIsPopoverOpen(false);
+    if (!!remoteDeleteUrl) {
+      window.open(remoteDeleteUrl, '_blank');
+    } else {
+      setDeleteConfirmationModalOpen(true);
+      setIsPopoverOpen(false);
+    }
   };
 
   const handleDeleteCancel = () => {
@@ -124,7 +128,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   // TODO Kevin: Should we centralize this business logic to avoid scattering the same logic everywhere?
   const isRemote = !!slo?.remote;
-  const canEditRemote = Boolean(isRemote && slo?.remote?.kibanaUrl);
+  const hasUndefinedRemoteKibanaUrl = !!slo?.remote && slo?.remote?.kibanaUrl === '';
 
   return (
     <>
@@ -154,10 +158,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
           items={[
             <EuiContextMenuItem
               key="edit"
-              disabled={!hasWriteCapabilities || !canEditRemote}
+              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
               icon="pencil"
               href={sloEditUrl}
               target={isRemote ? '_blank' : undefined}
+              toolTipContent={
+                hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+              }
               data-test-subj="sloDetailsHeaderControlPopoverEdit"
             >
               {i18n.translate('xpack.slo.sloDetails.headerControl.edit', {
@@ -178,10 +185,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="manageRules"
-              disabled={!hasWriteCapabilities}
+              disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
               icon="gear"
               onClick={handleNavigateToRules}
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
+              toolTipContent={
+                hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+              }
             >
               {i18n.translate('xpack.slo.sloDetails.headerControl.manageRules', {
                 defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
@@ -210,10 +220,13 @@ export function HeaderControl({ isLoading, slo }: Props) {
             .concat(
               <EuiContextMenuItem
                 key="clone"
-                disabled={!hasWriteCapabilities}
+                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
                 icon="copy"
                 onClick={handleClone}
                 data-test-subj="sloDetailsHeaderControlPopoverClone"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
               >
                 {i18n.translate('xpack.slo.slo.item.actions.clone', {
                   defaultMessage: 'Clone',
@@ -222,10 +235,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
               <EuiContextMenuItem
                 key="delete"
                 icon="trash"
-                disabled={!hasWriteCapabilities || isRemote}
+                disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
                 onClick={handleDelete}
                 data-test-subj="sloDetailsHeaderControlPopoverDelete"
-                toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
               >
                 {i18n.translate('xpack.slo.slo.item.actions.delete', {
                   defaultMessage: 'Delete',
@@ -266,3 +281,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
 const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.item.actions.notAvailable', {
   defaultMessage: 'This action is not available for remote SLOs',
 });
+
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.slo.item.actions.remoteKibanaUrlUndefined',
+  {
+    defaultMessage: 'This action is not available for remote SLOs with undefined kibanaUrl',
+  }
+);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
@@ -55,5 +56,18 @@ export function createRemoteSloEditUrl(slo: SLOWithSummaryResponse, spaceId: str
   const editPath = paths.sloEdit(slo.id);
   const remoteUrl = new URL(path.join(spacePath, editPath), slo.remote.kibanaUrl);
 
+  return remoteUrl.toString();
+}
+
+export function createRemoteSloCloneUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
+  if (!slo.remote || slo.remote.kibanaUrl === '') {
+    return undefined;
+  }
+
+  const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const clonePath = paths.sloCreateWithEncodedForm(
+    encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+  );
+  const remoteUrl = new URL(path.join(spacePath, clonePath), slo.remote.kibanaUrl);
   return remoteUrl.toString();
 }

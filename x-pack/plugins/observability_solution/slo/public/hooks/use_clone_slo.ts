@@ -6,31 +6,31 @@
  */
 
 import { encode } from '@kbn/rison';
-import { useCallback } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../utils/kibana_react';
+import { useCallback } from 'react';
 import { paths } from '../../common/locators/paths';
+import { useKibana } from '../utils/kibana_react';
+import { createRemoteSloCloneUrl } from '../utils/slo/remote_slo_urls';
+import { useSpace } from './use_space';
 
 export function useCloneSlo() {
   const {
     http: { basePath },
     application: { navigateToUrl },
   } = useKibana().services;
+  const spaceId = useSpace();
 
   return useCallback(
     (slo: SLOWithSummaryResponse) => {
-      const clonePath = paths.sloCreateWithEncodedForm(
-        encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-      );
-
-      // TODO Kevin: Fix missing spaceId in the initial impl
-      // TODO Kevin: There is like 3 differents way of generating the remote URL. Stick to one.
       if (slo.remote) {
-        window.open((slo.remote.kibanaUrl + clonePath).replace(/\/\//g, '/'), '_blank');
+        window.open(createRemoteSloCloneUrl(slo, spaceId), '_blank');
       } else {
+        const clonePath = paths.sloCreateWithEncodedForm(
+          encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+        );
         navigateToUrl(basePath.prepend(clonePath));
       }
     },
-    [navigateToUrl, basePath]
+    [navigateToUrl, basePath, spaceId]
   );
 }

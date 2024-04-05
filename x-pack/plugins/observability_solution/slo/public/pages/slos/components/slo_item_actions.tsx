@@ -6,25 +6,24 @@
  */
 import {
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiPopover,
-  EuiButtonIconProps,
-  useEuiShadow,
-  EuiPanel,
   EuiIcon,
+  EuiPanel,
+  EuiPopover,
+  useEuiShadow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import styled from 'styled-components';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { isEmpty } from 'lodash';
-import { BurnRateRuleParams } from '../../../typings';
-import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
-import { useKibana } from '../../../utils/kibana_react';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import React from 'react';
+import styled from 'styled-components';
 import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import { BurnRateRuleParams } from '../../../typings';
+import { useKibana } from '../../../utils/kibana_react';
+import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -73,6 +72,7 @@ export function SloItemActions({
     application: { navigateToUrl },
   } = useKibana().services;
   const { hasWriteCapabilities } = useCapabilities();
+  const navigateToClone = useCloneSlo();
 
   // TODO Kevin: Should we make useSloActions consistent? Either return an URL for all actions, or return directly the handlers.
   const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, sloDetailsUrl } = useSloActions({
@@ -90,14 +90,12 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
-  const navigateToClone = useCloneSlo();
-
   const handleClone = () => {
     navigateToClone(slo);
   };
 
   const handleDelete = () => {
-    if (slo.remote) {
+    if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
       setDeleteConfirmationModalOpen(true);
@@ -133,7 +131,10 @@ export function SloItemActions({
     />
   );
 
+  // TODO Kevin: Should we centralize this business logic to avoid scattering the same logic everywhere?
   const isRemote = !!slo.remote;
+  const hasUndefinedRemoteKibanaUrl = !!slo.remote && slo.remote.kibanaUrl === '';
+
   const showPopUpIcon = isRemote ? (
     <EuiIcon
       type="popout"
@@ -168,9 +169,12 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
             href={sloEditUrl}
             target={isRemote ? '_blank' : undefined}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
             data-test-subj="sloActionsEdit"
           >
             {i18n.translate('xpack.slo.item.actions.edit', {
@@ -193,9 +197,12 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
           >
             {i18n.translate('xpack.slo.item.actions.manageBurnRateRules', {
               defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
@@ -205,12 +212,12 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities || (isRemote && isEmpty(slo.indicator.params))}
+            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
             toolTipContent={
-              isRemote && isEmpty(slo.indicator.params) ? NOT_AVAILABLE_FOR_REMOTE : '' // TODO Kevin: params are always defined at least with fallback on dummy params
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
             }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
@@ -219,8 +226,11 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities}
+            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
             onClick={handleDelete}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
             data-test-subj="sloActionsDelete"
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
@@ -246,3 +256,10 @@ export function SloItemActions({
 const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.item.actions.notAvailable', {
   defaultMessage: 'This action is not available for remote SLOs',
 });
+
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.slo.item.actions.remoteKibanaUrlUndefined',
+  {
+    defaultMessage: 'This action is not available for remote SLOs with undefined kibanaUrl',
+  }
+);
