@@ -350,12 +350,12 @@ export class DiscoverPageObject extends FtrService {
           return await cell.getVisibleText();
         } else {
           const textContent = await cell.getAttribute('textContent');
-          return textContent.trim();
+          return textContent?.trim();
         }
       })
     );
     // Remove control columns
-    return result.slice(2).join(' ');
+    return result.filter(Boolean).slice(2).join(' ');
   }
 
   public async getDocTableIndexLegacy(index: number) {

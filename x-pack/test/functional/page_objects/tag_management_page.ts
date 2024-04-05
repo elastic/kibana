@@ -95,9 +95,10 @@ class TagModal extends FtrService {
    */
   async getFormValues(): Promise<Required<FillTagFormFields>> {
     return {
-      name: await this.testSubjects.getAttribute('createModalField-name', 'value'),
-      color: await this.testSubjects.getAttribute('~createModalField-color', 'value'),
-      description: await this.testSubjects.getAttribute('createModalField-description', 'value'),
+      name: (await this.testSubjects.getAttribute('createModalField-name', 'value')) ?? '',
+      color: (await this.testSubjects.getAttribute('~createModalField-color', 'value')) ?? '',
+      description:
+        (await this.testSubjects.getAttribute('createModalField-description', 'value')) ?? '',
     };
   }
 

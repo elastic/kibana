@@ -706,7 +706,11 @@ export class DashboardPageObject extends FtrService {
     const attributeName = 'data-shared-items-count';
     const element = await this.find.byCssSelector(`[${attributeName}]`);
     if (element) {
-      return await element.getAttribute(attributeName);
+      const attribute = await element.getAttribute(attributeName);
+
+      if (!attribute) throw new Error(`no attribute found for [${attributeName}]`);
+
+      return attribute;
     }
 
     throw new Error('no element');

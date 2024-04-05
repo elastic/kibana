@@ -1133,7 +1133,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1145,7 +1145,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
       const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1324,7 +1324,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1810,7 +1810,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return parent.getAttribute('data-test-subj');
+          return (await parent.getAttribute('data-test-subj')) ?? '';
         })
       );
     },
@@ -1875,6 +1875,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
+      if (!url) {
+        throw Error('No data-share-url attribute found');
+      }
       return url;
     },
 

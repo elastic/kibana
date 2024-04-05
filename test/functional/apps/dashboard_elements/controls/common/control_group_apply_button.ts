@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('time slider selections', () => {
-      let valueBefore: string;
+      let valueBefore: string | null;
 
       before(async () => {
         valueBefore = await dashboardControls.getTimeSliceFromTimeSlider();
