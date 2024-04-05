@@ -37,7 +37,7 @@ export const getRows = ({
       field: anonymizationField.field,
       allowed: anonymizationField.allowed ?? false,
       anonymized: anonymizationField.anonymized ?? false,
-      denied: !!anonymizationField.allowed,
+      denied: !(anonymizationField.allowed ?? false),
       rawValues: [],
     }));
   }

@@ -35,6 +35,9 @@ export interface Props {
   setAnonymizationFieldsBulkActions: React.Dispatch<
     React.SetStateAction<PerformBulkActionRequestBody>
   >;
+  setUpdatedAnonymizationData: React.Dispatch<
+    React.SetStateAction<FindAnonymizationFieldsResponse>
+  >;
   refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
@@ -43,16 +46,34 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
   anonymizationFields,
   setAnonymizationFieldsBulkActions,
   refetchAnonymizationFieldsResults,
+  setUpdatedAnonymizationData,
 }) => {
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
-      setAnonymizationFieldsBulkActions({});
-      /* updateDefaults({
-        updates,
-      }); */
-      await refetchAnonymizationFieldsResults();
+      const updatedFieldsKeys = updates.map((u) => u.field);
+      const updatedFields = updates.map((u) => ({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ...anonymizationFields.data.find((f) => f.field === u.field)!,
+        ...(u.update === 'allow' || u.update === 'defaultAllow'
+          ? { allowed: u.operation === 'add' }
+          : {}),
+        ...(u.update === 'allowReplacement' || u.update === 'defaultAllowReplacement'
+          ? { anonymized: u.operation === 'add' }
+          : {}),
+      }));
+      setAnonymizationFieldsBulkActions({
+        // Only update makes sense now, as long as we don't have an add new field design/UX
+        update: updatedFields,
+      });
+      setUpdatedAnonymizationData({
+        ...anonymizationFields,
+        data: [
+          ...anonymizationFields.data.filter((f) => !updatedFieldsKeys.includes(f.field)),
+          ...updatedFields,
+        ],
+      });
     },
-    [refetchAnonymizationFieldsResults, setAnonymizationFieldsBulkActions]
+    [anonymizationFields, setAnonymizationFieldsBulkActions, setUpdatedAnonymizationData]
   );
 
   const onReset = useCallback(() => {

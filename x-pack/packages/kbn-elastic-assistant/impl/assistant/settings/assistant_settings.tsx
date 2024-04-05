@@ -105,8 +105,10 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedSystemPromptSettings,
       saveSettings,
       conversationsSettingsBulkActions,
+      updatedAnonymizationData,
       setConversationsSettingsBulkActions,
       setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
     } = useSettingsUpdater(conversations, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
@@ -329,8 +331,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
                     defaultPageSize={5}
-                    anonymizationFields={anonymizationFields}
+                    anonymizationFields={updatedAnonymizationData}
                     setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+                    setUpdatedAnonymizationData={setUpdatedAnonymizationData}
                     refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
                   />
                 )}
