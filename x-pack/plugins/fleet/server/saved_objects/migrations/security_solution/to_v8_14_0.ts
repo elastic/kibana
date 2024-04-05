@@ -51,11 +51,13 @@ export const migratePackagePolicyEnableCapsToV8140: SavedObjectModelDataBackfill
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    const migratedPolicy = { enable_caps: true };
-
-    policy.linux.advanced = policy.linux.advanced
-      ? { ...policy.linux.advanced, ...migratedPolicy }
-      : { ...migratedPolicy };
+    policy.linux.advanced = {
+      ...policy.linux.advanced,
+      events: {
+        ...policy.linux.advanced?.events,
+        enable_caps: true,
+      },
+    };
   }
 
   return { attributes: updatedPackagePolicyDoc.attributes };
