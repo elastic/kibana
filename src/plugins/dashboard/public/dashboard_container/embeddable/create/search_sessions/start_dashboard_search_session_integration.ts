@@ -83,6 +83,7 @@ export function startDashboardSearchSessionIntegration(
 
       if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
         this.searchSessionId = updatedSearchSessionId;
+        this.searchSessionId$.next(updatedSearchSessionId);
       }
     });
 

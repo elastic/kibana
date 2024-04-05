@@ -11,6 +11,7 @@ import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeRange {
   timeRange$: PublishingSubject<TimeRange | undefined>;
+  timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
 
 export type PublishesWritableTimeRange = PublishesTimeRange & {
