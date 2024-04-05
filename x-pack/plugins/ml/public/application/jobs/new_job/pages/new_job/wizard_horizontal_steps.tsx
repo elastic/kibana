@@ -79,10 +79,6 @@ export const WizardHorizontalSteps: FC<Props> = ({
   }
 
   function createStepProps(step: WIZARD_STEPS) {
-    let testSubj: string = '';
-    if (step === WIZARD_STEPS.TIME_RANGE) testSubj = 'mlJobWizardTimeRangeStep';
-    if (step === WIZARD_STEPS.JOB_DETAILS) testSubj = 'mlJobWizardJobDetailsStep';
-
     return {
       onClick: () => jumpToStep(step),
       status: (currentStep === step
