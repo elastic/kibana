@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EsAssetReference } from '../../../../../types';
-
 import { appContextService } from '../../../..';
 
 import { installIlmForDataStream } from '../../../elasticsearch/datastream_ilm/install';
@@ -21,9 +19,7 @@ export async function stepInstallILMPolicies(context: InstallContext) {
 
   // Array that gets updated by each operation. This allows each operation to accurately update the
   // installation object with its references without requiring a refresh of the SO index on each update (faster).
-  const esReferences = installedPkg?.attributes.installed_es ?? [];
-
-  let updatedEsReferences: EsAssetReference[] = [];
+  let esReferences = installedPkg?.attributes.installed_es ?? [];
 
   // currently only the base package has an ILM policy
   // at some point ILM policies can be installed/modified
@@ -31,25 +27,19 @@ export async function stepInstallILMPolicies(context: InstallContext) {
   const isILMPoliciesDisabled =
     appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
   if (!isILMPoliciesDisabled) {
-    updatedEsReferences = await withPackageSpan('Install ILM policies', () =>
-      installILMPolicy(
-        packageInstallContext,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences || []
-      )
+    esReferences = await withPackageSpan('Install ILM policies', () =>
+      installILMPolicy(packageInstallContext, esClient, savedObjectsClient, logger, esReferences)
     );
-
-    const res = await withPackageSpan('Install Data Stream ILM policies', () =>
+    ({ esReferences } = await withPackageSpan('Install Data Stream ILM policies', () =>
       installIlmForDataStream(
         packageInstallContext,
         esClient,
         savedObjectsClient,
         logger,
-        updatedEsReferences
+        esReferences
       )
-    );
-    return { esReferences: res?.esReferences || esReferences };
+    ));
   }
+  // always return esReferences even when isILMPoliciesDisabled is false as it's the first time we are writing to it
+  return { esReferences };
 }

@@ -12,15 +12,9 @@ import { installIndexTemplatesAndPipelines } from '../../install_index_template_
 import type { InstallContext } from '../_state_machine_package_install';
 
 export async function stepInstallIndexTemplatePipelines(context: InstallContext) {
-  const {
-    esClient,
-    savedObjectsClient,
-    packageInstallContext,
-    logger,
-    installedPkg,
-    esReferences,
-  } = context;
+  const { esClient, savedObjectsClient, packageInstallContext, logger, installedPkg } = context;
   const { packageInfo } = packageInstallContext;
+  const esReferences = context.esReferences ?? [];
 
   if (packageInfo.type === 'integration') {
     logger.debug(
@@ -33,10 +27,10 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
         esClient,
         savedObjectsClient,
         logger,
-        esReferences: esReferences || [],
+        esReferences,
       });
     return {
-      esReferences: templateEsReferences || esReferences,
+      esReferences: templateEsReferences,
       indexTemplates: installedTemplates,
     };
   }
@@ -63,7 +57,7 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
           esClient,
           savedObjectsClient,
           logger,
-          esReferences: esReferences || [],
+          esReferences,
           onlyForDataStreams: dataStreams,
         });
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };

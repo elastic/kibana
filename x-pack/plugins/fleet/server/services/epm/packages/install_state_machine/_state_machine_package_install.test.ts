@@ -107,7 +107,6 @@ describe('_stateMachineInstallPackage', () => {
       esReferences: [],
     });
 
-    // use this workaround to test the error; toThrow/toThrowError doesn't match correctly
     const installationPromise = _stateMachineInstallPackage({
       savedObjectsClient: soClient,
       // @ts-ignore
