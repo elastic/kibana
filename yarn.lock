@@ -5802,6 +5802,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-notebooks@link:x-pack/plugins/search_notebooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-playground@link:x-pack/plugins/search_playground":
   version "0.0.0"
   uid ""
@@ -6207,6 +6211,10 @@
   uid ""
 
 "@kbn/shared-ux-storybook-mock@link:packages/shared-ux/storybook/mock":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-tabbed-modal@link:packages/shared-ux/modal/tabbed":
   version "0.0.0"
   uid ""
 
