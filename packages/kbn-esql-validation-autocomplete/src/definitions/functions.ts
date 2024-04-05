@@ -925,7 +925,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
   {
     name: 'mv_sort',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvAvgDoc', {
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvSortDoc', {
       defaultMessage: 'Sorts a multivalue expression in lexicographical order.',
     }),
     signatures: [
