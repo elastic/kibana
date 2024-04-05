@@ -21,7 +21,7 @@ import {
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
   SAVED_OBJECT_TYPES,
-  CASE_ORACLE_SAVED_OBJECT,
+  CASE_RULES_SAVED_OBJECT,
 } from '../../common/constants';
 import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
@@ -47,7 +47,7 @@ export const createCasesTelemetry = async ({
     return coreStart.savedObjects.createInternalRepository([
       ...SAVED_OBJECT_TYPES,
       FILE_SO_TYPE,
-      CASE_ORACLE_SAVED_OBJECT,
+      CASE_RULES_SAVED_OBJECT,
     ]);
   };
 

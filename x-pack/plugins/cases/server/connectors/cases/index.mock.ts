@@ -6,7 +6,7 @@
  */
 
 import type { Cases } from '../../../common';
-import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import type { OracleRecord, OracleRecordError } from './types';
 
@@ -136,7 +136,7 @@ export const oracleRecords = [
   },
   {
     id: groupedAlertsWithOracleKey[2].oracleKey,
-    type: CASE_ORACLE_SAVED_OBJECT,
+    type: CASE_RULES_SAVED_OBJECT,
     message: 'Not found',
     statusCode: 404,
     error: 'Not found',

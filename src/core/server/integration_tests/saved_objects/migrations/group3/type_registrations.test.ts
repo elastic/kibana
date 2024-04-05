@@ -34,7 +34,7 @@ const previouslyRegisteredTypes = [
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
-  'cases-oracle',
+  'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
   'cases-telemetry',

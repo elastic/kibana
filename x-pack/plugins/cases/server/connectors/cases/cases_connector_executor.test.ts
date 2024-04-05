@@ -9,7 +9,7 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
-  CASE_ORACLE_SAVED_OBJECT,
+  CASE_RULES_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
@@ -131,21 +131,21 @@ describe('CasesConnectorExecutor', () => {
           mockBulkGetRecords.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[0].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Not found',
               statusCode: 404,
               error: 'Not found',
             },
             {
               id: groupedAlertsWithOracleKey[1].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Not found',
               statusCode: 404,
               error: 'Not found',
             },
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Not found',
               statusCode: 404,
               error: 'Not found',
@@ -1169,14 +1169,14 @@ describe('CasesConnectorExecutor', () => {
           mockBulkGetRecords.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'getting records: mockBulkGetRecords error',
               statusCode: 409,
               error: 'Conflict',
             },
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Input not accepted',
               statusCode: 400,
               error: 'Bad request',
@@ -1196,14 +1196,14 @@ describe('CasesConnectorExecutor', () => {
           mockBulkCreateRecords.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'creating records: mockBulkCreateRecords error',
               statusCode: 400,
               error: 'Bad request',
             },
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Version mismatch',
               statusCode: 409,
               error: 'Conflict',
@@ -1225,14 +1225,14 @@ describe('CasesConnectorExecutor', () => {
           mockBulkUpdateRecord.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'timeWindow: bulkUpdateRecord error',
               statusCode: 400,
               error: 'Bad request',
             },
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Version mismatch',
               statusCode: 409,
               error: 'Conflict',
@@ -1331,14 +1331,14 @@ describe('CasesConnectorExecutor', () => {
           mockBulkUpdateRecord.mockResolvedValue([
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'creating new cases for closed cases: bulkUpdateRecord error',
               statusCode: 400,
               error: 'Bad request',
             },
             {
               id: groupedAlertsWithOracleKey[2].oracleKey,
-              type: CASE_ORACLE_SAVED_OBJECT,
+              type: CASE_RULES_SAVED_OBJECT,
               message: 'Version mismatch',
               statusCode: 409,
               error: 'Conflict',
@@ -1552,7 +1552,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([
           {
             id: groupedAlertsWithOracleKey[2].oracleKey,
-            type: CASE_ORACLE_SAVED_OBJECT,
+            type: CASE_RULES_SAVED_OBJECT,
             message: 'getting records: mockBulkGetRecords error',
             statusCode: 409,
             error: 'Conflict',
@@ -1579,7 +1579,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([
           {
             id: groupedAlertsWithOracleKey[2].oracleKey,
-            type: CASE_ORACLE_SAVED_OBJECT,
+            type: CASE_RULES_SAVED_OBJECT,
             message: 'creating records: bulkCreateRecord error',
             statusCode: 409,
             error: 'Conflict',
@@ -1610,7 +1610,7 @@ describe('CasesConnectorExecutor', () => {
       mockBulkCreateRecords.mockResolvedValueOnce([
         {
           id: groupedAlertsWithOracleKey[2].oracleKey,
-          type: CASE_ORACLE_SAVED_OBJECT,
+          type: CASE_RULES_SAVED_OBJECT,
           message: 'creating records: bulkCreateRecord error',
           statusCode: 409,
           error: 'Conflict',
@@ -1640,7 +1640,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([
           {
             id: groupedAlertsWithOracleKey[2].oracleKey,
-            type: CASE_ORACLE_SAVED_OBJECT,
+            type: CASE_RULES_SAVED_OBJECT,
             message: 'updating records: mockBulkUpdateRecord error',
             statusCode: 409,
             error: 'Conflict',
@@ -1707,7 +1707,7 @@ describe('CasesConnectorExecutor', () => {
       mockBulkUpdateRecord.mockResolvedValueOnce([
         {
           id: groupedAlertsWithOracleKey[0].oracleKey,
-          type: CASE_ORACLE_SAVED_OBJECT,
+          type: CASE_RULES_SAVED_OBJECT,
           message: 'updating records: mockBulkUpdateRecord error',
           statusCode: 409,
           error: 'Conflict',
@@ -1928,7 +1928,7 @@ describe('CasesConnectorExecutor', () => {
       mockBulkUpdateRecord.mockResolvedValueOnce([
         {
           id: groupedAlertsWithOracleKey[0].oracleKey,
-          type: CASE_ORACLE_SAVED_OBJECT,
+          type: CASE_RULES_SAVED_OBJECT,
           message: 'updating records: mockBulkUpdateRecord error',
           statusCode: 409,
           error: 'Conflict',
@@ -2468,7 +2468,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([
           {
             id: oracleRecords[0].id,
-            type: CASE_ORACLE_SAVED_OBJECT,
+            type: CASE_RULES_SAVED_OBJECT,
             message: 'Not found',
             statusCode: 404,
             error: 'Not found',
@@ -2565,7 +2565,7 @@ describe('CasesConnectorExecutor', () => {
     it('increase oracle counter but is missing', async () => {
       const nonFoundRecord = {
         id: oracleRecords[0].id,
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         message: 'Not found',
         statusCode: 404,
         error: 'Not found',

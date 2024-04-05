@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 
 interface Aggs {
@@ -19,11 +19,11 @@ export const getCasesSystemActionData = async ({
   const res = await savedObjectsClient.find<unknown, Aggs>({
     page: 1,
     perPage: 1,
-    type: CASE_ORACLE_SAVED_OBJECT,
+    type: CASE_RULES_SAVED_OBJECT,
     aggs: {
-      counterSum: { sum: { field: `${CASE_ORACLE_SAVED_OBJECT}.attributes.counter` } },
+      counterSum: { sum: { field: `${CASE_RULES_SAVED_OBJECT}.attributes.counter` } },
       totalRules: {
-        cardinality: { field: `${CASE_ORACLE_SAVED_OBJECT}.attributes.rules.id` },
+        cardinality: { field: `${CASE_RULES_SAVED_OBJECT}.attributes.rules.id` },
       },
     },
   });

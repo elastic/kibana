@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { CasesOracleService } from './cases_oracle_service';
-import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import { isEmpty, set } from 'lodash';
 
 describe('CasesOracleService', () => {
@@ -177,7 +177,7 @@ describe('CasesOracleService', () => {
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
-      type: CASE_ORACLE_SAVED_OBJECT,
+      type: CASE_RULES_SAVED_OBJECT,
       references: [],
     };
 
@@ -194,7 +194,7 @@ describe('CasesOracleService', () => {
     it('calls the savedObjectsClient.get method correctly', async () => {
       await service.getRecord('so-id');
 
-      expect(savedObjectsClient.get).toHaveBeenCalledWith('cases-oracle', 'so-id');
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('cases-rules', 'so-id');
     });
   });
 
@@ -215,12 +215,12 @@ describe('CasesOracleService', () => {
           createdAt: '2023-10-10T10:23:42.769Z',
           updatedAt: '2023-10-10T10:23:42.769Z',
         },
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         references: [],
       },
       {
         id: 'so-id-2',
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         error: {
           message: 'Not found',
           statusCode: 404,
@@ -247,8 +247,8 @@ describe('CasesOracleService', () => {
       await service.bulkGetRecords(['so-id', 'so-id-2']);
 
       expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
-        { id: 'so-id', type: 'cases-oracle' },
-        { id: 'so-id-2', type: 'cases-oracle' },
+        { id: 'so-id', type: 'cases-rules' },
+        { id: 'so-id-2', type: 'cases-rules' },
       ]);
     });
 
@@ -275,7 +275,7 @@ describe('CasesOracleService', () => {
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
-      type: CASE_ORACLE_SAVED_OBJECT,
+      type: CASE_RULES_SAVED_OBJECT,
       references: [],
     };
 
@@ -295,7 +295,7 @@ describe('CasesOracleService', () => {
       await service.createRecord(id, { cases, rules, grouping });
 
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
-        'cases-oracle',
+        'cases-rules',
         {
           cases,
           counter: 1,
@@ -340,12 +340,12 @@ describe('CasesOracleService', () => {
           createdAt: '2023-10-10T10:23:42.769Z',
           updatedAt: '2023-10-10T10:23:42.769Z',
         },
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         references: [],
       },
       {
         id: 'so-id-2',
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         error: {
           message: 'Not found',
           statusCode: 404,
@@ -388,7 +388,7 @@ describe('CasesOracleService', () => {
             updatedAt: null,
           },
           id: 'so-id',
-          type: 'cases-oracle',
+          type: 'cases-rules',
           references: [
             {
               id: 'test-rule-id',
@@ -412,7 +412,7 @@ describe('CasesOracleService', () => {
             updatedAt: null,
           },
           id: 'so-id-2',
-          type: 'cases-oracle',
+          type: 'cases-rules',
           references: [
             {
               id: 'test-rule-id',
@@ -452,7 +452,7 @@ describe('CasesOracleService', () => {
         createdAt: '2023-10-10T10:23:42.769Z',
         updatedAt: '2023-10-10T10:23:42.769Z',
       },
-      type: CASE_ORACLE_SAVED_OBJECT,
+      type: CASE_RULES_SAVED_OBJECT,
       references: [],
     };
 
@@ -481,7 +481,7 @@ describe('CasesOracleService', () => {
       await service.increaseCounter('so-id');
 
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
-        'cases-oracle',
+        'cases-rules',
         'so-id',
         {
           counter: 2,
@@ -504,12 +504,12 @@ describe('CasesOracleService', () => {
           createdAt: '2023-10-10T10:23:42.769Z',
           updatedAt: '2023-10-10T10:23:42.769Z',
         },
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         references: [],
       },
       {
         id: 'so-id-2',
-        type: CASE_ORACLE_SAVED_OBJECT,
+        type: CASE_RULES_SAVED_OBJECT,
         error: {
           message: 'Conflict',
           statusCode: 409,
@@ -549,7 +549,7 @@ describe('CasesOracleService', () => {
           },
           id: 'so-id',
           version: 'so-version-1',
-          type: 'cases-oracle',
+          type: 'cases-rules',
         },
         {
           attributes: {
@@ -558,7 +558,7 @@ describe('CasesOracleService', () => {
           },
           id: 'so-id-2',
           version: 'so-version-2',
-          type: 'cases-oracle',
+          type: 'cases-rules',
         },
       ]);
     });

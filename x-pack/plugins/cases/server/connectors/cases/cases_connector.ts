@@ -24,7 +24,7 @@ import {
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CaseConnectorRetryService } from './retry_service';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
-import { CASE_ORACLE_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -108,7 +108,7 @@ export class CasesConnector extends SubActionConnector<
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
-        [...SAVED_OBJECT_TYPES, CASE_ORACLE_SAVED_OBJECT]
+        [...SAVED_OBJECT_TYPES, CASE_RULES_SAVED_OBJECT]
       );
 
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);

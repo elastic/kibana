@@ -12,7 +12,7 @@ import type {
   SavedObjectReference,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { CASE_ORACLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import { isSODecoratedError, isSOError } from '../../common/error';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
@@ -69,7 +69,7 @@ export class CasesOracleService {
     });
 
     const oracleRecord = await this.savedObjectsClient.get<OracleRecordAttributes>(
-      CASE_ORACLE_SAVED_OBJECT,
+      CASE_RULES_SAVED_OBJECT,
       recordId
     );
 
@@ -86,7 +86,7 @@ export class CasesOracleService {
     }
 
     const oracleRecords = (await this.savedObjectsClient.bulkGet<OracleRecordAttributes>(
-      ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
+      ids.map((id) => ({ id, type: CASE_RULES_SAVED_OBJECT }))
     )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
     return this.getBulkRecordsResponse(oracleRecords);
@@ -101,7 +101,7 @@ export class CasesOracleService {
     });
 
     const oracleRecord = await this.savedObjectsClient.create<OracleRecordAttributes>(
-      CASE_ORACLE_SAVED_OBJECT,
+      CASE_RULES_SAVED_OBJECT,
       this.getCreateRecordAttributes(payload),
       { id: recordId, references: this.getCreateRecordReferences(payload) }
     );
@@ -124,7 +124,7 @@ export class CasesOracleService {
 
     const req = records.map((record) => ({
       id: record.recordId,
-      type: CASE_ORACLE_SAVED_OBJECT,
+      type: CASE_RULES_SAVED_OBJECT,
       attributes: this.getCreateRecordAttributes(record.payload),
       references: this.getCreateRecordReferences(record.payload),
     }));
@@ -148,7 +148,7 @@ export class CasesOracleService {
     );
 
     const oracleRecord = await this.savedObjectsClient.update<OracleRecordAttributes>(
-      CASE_ORACLE_SAVED_OBJECT,
+      CASE_RULES_SAVED_OBJECT,
       recordId,
       { counter: newCounter },
       { version }
@@ -176,7 +176,7 @@ export class CasesOracleService {
 
     const req = records.map((record) => ({
       id: record.recordId,
-      type: CASE_ORACLE_SAVED_OBJECT,
+      type: CASE_RULES_SAVED_OBJECT,
       version: record.version,
       attributes: { ...record.payload, updatedAt: new Date().toISOString() },
     }));

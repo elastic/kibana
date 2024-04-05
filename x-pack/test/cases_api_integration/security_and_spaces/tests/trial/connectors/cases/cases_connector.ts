@@ -31,6 +31,7 @@ import {
 } from '@kbn/cases-plugin/server/common/constants';
 import { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import { User } from '../../../../../common/lib/authentication/types';
 import {
   globalRead,
@@ -1241,7 +1242,7 @@ const getOracleRecord = async ({
 }) => {
   const res = await kibanaServer.savedObjects.get<OracleRecordAttributes>({
     id: oracleId,
-    type: 'cases-oracle',
+    type: CASE_RULES_SAVED_OBJECT,
   });
 
   return { id: res.id, version: res.version, ...res.attributes };
@@ -1249,7 +1250,7 @@ const getOracleRecord = async ({
 
 const getAllOracleRecords = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
   const res = await kibanaServer.savedObjects.find<OracleRecordAttributes>({
-    type: 'cases-oracle',
+    type: CASE_RULES_SAVED_OBJECT,
   });
 
   return {
@@ -1259,10 +1260,10 @@ const getAllOracleRecords = async ({ kibanaServer }: { kibanaServer: KbnClient }
 };
 
 const clearOracleRecords = async (es: Client, kibanaServer: KbnClient) => {
-  await kibanaServer.savedObjects.clean({ types: ['cases-oracle'] });
+  await kibanaServer.savedObjects.clean({ types: [CASE_RULES_SAVED_OBJECT] });
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    q: 'type:cases-oracle',
+    q: 'type:cases-rules',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -1298,10 +1299,10 @@ const createOracleRecord = async ({
   const creationDate = date ?? new Date().toISOString();
 
   await es.create({
-    id: `cases-oracle:${oracleId}`,
+    id: `cases-rules:${oracleId}`,
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     document: {
-      'cases-oracle': {
+      CASE_RULES_SAVED_OBJECT: {
         createdAt: creationDate,
         updatedAt: null,
         cases: [],
@@ -1313,7 +1314,7 @@ const createOracleRecord = async ({
       created_at: creationDate,
       managed: false,
       namespaces: ['default'],
-      type: 'cases-oracle',
+      type: CASE_RULES_SAVED_OBJECT,
       typeMigrationVersion: '10.1.0',
       references: [],
     },

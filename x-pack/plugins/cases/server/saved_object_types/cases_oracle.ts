@@ -8,10 +8,10 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
-import { CASE_ORACLE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_RULES_SAVED_OBJECT } from '../../common/constants';
 
-export const casesOracleSavedObjectType: SavedObjectsType = {
-  name: CASE_ORACLE_SAVED_OBJECT,
+export const casesRulesSavedObjectType: SavedObjectsType = {
+  name: CASE_RULES_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   /**

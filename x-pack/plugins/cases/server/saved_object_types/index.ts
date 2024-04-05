@@ -13,7 +13,7 @@ import { createCaseCommentSavedObjectType } from './comments';
 import { createCaseUserActionSavedObjectType } from './user_actions';
 import { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 import { casesTelemetrySavedObjectType } from './telemetry';
-import { casesOracleSavedObjectType } from './cases_oracle';
+import { casesRulesSavedObjectType } from './cases_oracle';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 interface RegisterSavedObjectsArgs {
@@ -48,5 +48,5 @@ export const registerSavedObjects = ({
   );
 
   core.savedObjects.registerType(casesTelemetrySavedObjectType);
-  core.savedObjects.registerType(casesOracleSavedObjectType);
+  core.savedObjects.registerType(casesRulesSavedObjectType);
 };
