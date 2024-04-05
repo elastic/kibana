@@ -15,6 +15,13 @@ export interface EmbeddableApiContext {
 }
 
 export {
+  getInitialValuesFromComparators,
+  runComparators,
+  type ComparatorDefinition,
+  type ComparatorFunction,
+  type StateComparators,
+} from './comparators';
+export {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
@@ -22,94 +29,95 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
-  apiPublishesPhaseEvents,
-  type PublishesPhaseEvents,
-  type PhaseEvent,
-  type PhaseEventType,
-} from './interfaces/publishes_phase_events';
+  apiCanAddNewPanel,
+  type CanAddNewPanel,
+  type PanelPackage,
+} from './interfaces/can_add_new_panel';
+export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
+export {
+  apiHasSupportedTriggers,
+  type HasSupportedTriggers,
+} from './interfaces/has_supported_triggers';
 export {
   apiHasType,
   apiIsOfType,
   type HasType,
   type HasTypeDisplayName,
 } from './interfaces/has_type';
+export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
-  useBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {
   apiPublishesDataLoading,
-  useDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export {
-  apiPublishesDataViews,
-  useDataViews,
-  type PublishesDataViews,
-} from './interfaces/publishes_data_views';
+export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
-  useDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
-  apiPublishesLocalUnifiedSearch,
-  apiPublishesPartialLocalUnifiedSearch,
-  apiPublishesWritableLocalUnifiedSearch,
-  useLocalFilters,
-  useLocalQuery,
-  useLocalTimeRange,
-  type PublishesLocalUnifiedSearch,
-  type PublishesWritableLocalUnifiedSearch,
-} from './interfaces/publishes_local_unified_search';
+  apiPublishesPhaseEvents,
+  type PhaseEvent,
+  type PhaseEventType,
+  type PublishesPhaseEvents,
+} from './interfaces/publishes_phase_events';
 export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
-  type PublishesPanelDescription,
-  type PublishesWritablePanelDescription,
-} from './interfaces/publishes_panel_description';
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/fetch/publishes_unified_search';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
 export {
-  getPanelTitle,
-  apiPublishesPanelTitle,
-  apiPublishesWritablePanelTitle,
-  useDefaultPanelTitle,
-  useHidePanelTitle,
-  usePanelTitle,
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-} from './interfaces/publishes_panel_title';
+  type FetchContext,
+  onFetchContextChanged,
+} from './interfaces/fetch/on_fetch_context_changed';
 export {
   apiPublishesSavedObjectId,
-  useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
-export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
-export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export {
-  apiHasSupportedTriggers,
-  type HasSupportedTriggers,
-} from './interfaces/has_supported_triggers';
+  apiPublishesUnsavedChanges,
+  type PublishesUnsavedChanges,
+} from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
-  useViewMode,
   type PublishesViewMode,
   type PublishesWritableViewMode,
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  type PublishesUnsavedChanges,
-  apiPublishesUnsavedChanges,
-  useUnsavedChanges,
-} from './interfaces/publishes_unsaved_changes';
+  apiPublishesPanelDescription,
+  apiPublishesWritablePanelDescription,
+  type PublishesPanelDescription,
+  type PublishesWritablePanelDescription,
+} from './interfaces/titles/publishes_panel_description';
+export {
+  apiPublishesPanelTitle,
+  apiPublishesWritablePanelTitle,
+  getPanelTitle,
+  type PublishesPanelTitle,
+  type PublishesWritablePanelTitle,
+} from './interfaces/titles/publishes_panel_title';
+export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
+export {
+  type HasLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  apiHasLegacyLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export {
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
   usePublishingSubject,
+  useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';

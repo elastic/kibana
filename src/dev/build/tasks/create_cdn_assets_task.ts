@@ -76,7 +76,10 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/core/target/public'),
       resolve(bundles, 'core')
     );
-    await copyAll(resolve(buildSource, 'node_modules/@kbn/monaco'), resolve(bundles, 'kbn-monaco'));
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
+      resolve(bundles, 'kbn-monaco')
+    );
 
     // packages/core/apps/core-apps-server-internal/src/core_app.ts
     await copyAll(

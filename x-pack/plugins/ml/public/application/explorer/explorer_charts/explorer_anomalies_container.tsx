@@ -13,10 +13,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import type { TableSeverity } from '../../components/controls/select_severity/select_severity';
 import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
-import type { TimeBuckets } from '../../util/time_buckets';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
 

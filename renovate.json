@@ -522,7 +522,7 @@
         "team:enterprise-search-frontend",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
-        "team:platform-deployment-management",
+        "team:kibana-management",
         "team:kibana-gis",
         "team:security-solution"
       ],
@@ -666,6 +666,23 @@
         "release_note:skip",
         "backport:skip",
         "ci:serverless-test-all"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchPackageNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "enabled": true
     }

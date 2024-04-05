@@ -39,7 +39,6 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -65,6 +64,12 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
+    coreSetup.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
@@ -93,7 +98,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),
     };
   }
 

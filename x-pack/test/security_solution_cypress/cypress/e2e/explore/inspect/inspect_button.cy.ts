@@ -40,8 +40,8 @@ describe.skip(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_users');
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {

@@ -6,16 +6,16 @@
  */
 import React, { useEffect } from 'react';
 import {
+  EuiCallOut,
+  EuiFieldPassword,
+  EuiFieldText,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
-  EuiHorizontalRule,
-  EuiFormRow,
-  EuiSelect,
-  EuiFieldPassword,
-  EuiFieldText,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -30,18 +30,33 @@ import {
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
 import { AzureCredentialsType } from '../../../../common/types_old';
-import { SetupFormat, useAzureCredentialsForm } from './hooks';
+import { useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
 }
 
-export const AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE = 'arm_template';
-export const AZURE_MANUAL_CREDENTIAL_TYPE = 'manual';
+export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
 
-const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
+export const AZURE_SETUP_FORMAT = {
+  ARM_TEMPLATE: 'arm_template',
+  MANUAL: 'manual',
+};
+
+export const AZURE_CREDENTIALS_TYPE = {
+  ARM_TEMPLATE: 'arm_template',
+  MANUAL: 'manual',
+  SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
+  SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
+  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
+    'service_principal_with_client_username_and_password',
+  MANAGED_IDENTITY: 'managed_identity',
+} as const;
+
+export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -76,18 +91,20 @@ const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) 
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+    id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
-    id: AZURE_MANUAL_CREDENTIAL_TYPE,
+    id: AZURE_SETUP_FORMAT.MANUAL,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 
-interface Props {
+export interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
@@ -97,7 +114,7 @@ interface Props {
   disabled: boolean;
 }
 
-const ARM_TEMPLATE_EXTERNAL_DOC_URL =
+export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
 const ArmTemplateSetup = ({
@@ -248,7 +265,7 @@ const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
-const AzureInputVarFields = ({
+export const AzureInputVarFields = ({
   fields,
   onChange,
 }: {
@@ -266,6 +283,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
           {field.type === 'text' && (
@@ -274,6 +292,7 @@ const AzureInputVarFields = ({
               fullWidth
               value={field.value || ''}
               onChange={(event) => onChange(field.id, event.target.value)}
+              data-test-subj={field.testSubj}
             />
           )}
         </>
@@ -290,7 +309,7 @@ export const AzureCredentialsForm = ({
   onChange,
   setIsValid,
   disabled,
-}: Props) => {
+}: AzureCredentialsFormProps) => {
   const {
     group,
     fields,
@@ -310,7 +329,7 @@ export const AzureCredentialsForm = ({
 
   useEffect(() => {
     if (!setupFormat) {
-      onSetupFormatChange(AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE);
+      onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
     }
   }, [setupFormat, onSetupFormatChange]);
 
@@ -363,13 +382,13 @@ export const AzureCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
+      {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && !isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !isPackageVersionValidForManualFields && (
         <TemporaryManualSetup integrationLink={integrationLink} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && isPackageVersionValidForManualFields && (
         <>
           <AzureCredentialTypeSelector
             type={azureCredentialsType}

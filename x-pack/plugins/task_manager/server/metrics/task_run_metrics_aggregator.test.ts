@@ -94,6 +94,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
     });
   });
@@ -108,6 +109,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
       by_type: {},
     });
@@ -125,6 +127,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
       by_type: {
         telemetry: {
@@ -150,6 +153,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [1], values: [10] },
         total_errors: 0,
+        delay_values: [3],
       },
     });
   });
@@ -167,6 +171,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
     });
   });
@@ -183,6 +188,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
       by_type: {
         telemetry: {
@@ -209,6 +215,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 2,
+        delay_values: [],
       },
       by_type: {
         telemetry: {
@@ -235,6 +242,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 2,
+        delay_values: [],
       },
       by_type: {
         telemetry: {
@@ -263,6 +271,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 1,
+        delay_values: [],
       },
       by_type: {
         report: {
@@ -315,6 +324,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 3,
+        delay_values: [],
       },
       by_type: {
         actions: {
@@ -417,6 +427,7 @@ describe('TaskRunMetricsAggregator', () => {
         not_timed_out: 12,
         total: 14,
         delay: { counts: [3, 0, 1], values: [10, 20, 30] },
+        delay_values: [3, 25, 6, 9],
         framework_errors: 3,
         user_errors: 0,
         total_errors: 3,
@@ -499,6 +510,7 @@ describe('TaskRunMetricsAggregator', () => {
         user_errors: 0,
         delay: { counts: [], values: [] },
         total_errors: 0,
+        delay_values: [],
       },
       by_type: {
         actions: {

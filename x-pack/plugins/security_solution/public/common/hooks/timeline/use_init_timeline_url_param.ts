@@ -8,23 +8,21 @@
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
 
-import { useDispatch } from 'react-redux';
-
 import { TimelineTabs } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
+import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineUrl } from '../../../timelines/store/model';
-import { timelineActions } from '../../../timelines/store';
 import { URL_PARAM_KEY } from '../use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
-  const dispatch = useDispatch();
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
 
   const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+
+  const queryTimelineById = useQueryTimelineById();
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
@@ -38,14 +36,12 @@ export const useInitTimelineFromUrlParam = () => {
           graphEventId: initialState.graphEventId,
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
-          updateIsLoading: (status: { id: string; isLoading: boolean }) =>
-            dispatch(timelineActions.updateIsLoading(status)),
-          updateTimeline: dispatchUpdateTimeline(dispatch),
           savedSearchId: initialState.savedSearchId,
+          unifiedComponentsInTimelineEnabled,
         });
       }
     },
-    [dispatch, isEsqlTabDisabled]
+    [isEsqlTabDisabled, queryTimelineById, unifiedComponentsInTimelineEnabled]
   );
 
   useEffect(() => {

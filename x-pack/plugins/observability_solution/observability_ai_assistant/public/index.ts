@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -32,6 +33,8 @@ export { ConnectorSelectorBase } from './components/connector_selector/connector
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
+
+export { createScreenContextAction } from './utils/create_screen_context_action';
 
 export { ChatState } from './hooks/use_chat';
 
@@ -64,6 +67,9 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';
 
+export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
+export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
+
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,
   ObservabilityAIAssistantAPIEndpoint,
@@ -71,6 +77,11 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
+export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from './hooks/use_user_preferred_language';
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+} from '../common/utils/advanced_settings';
 
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPublicSetup,

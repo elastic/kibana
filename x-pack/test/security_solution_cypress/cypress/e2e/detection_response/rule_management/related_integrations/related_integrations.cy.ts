@@ -45,6 +45,8 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
+// https://github.com/elastic/kibana/issues/179943
+
 describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
@@ -238,18 +240,15 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   });
 
   describe('related Integrations Advanced Setting is disabled', () => {
-    before(() => {
-      disableRelatedIntegrations();
-    });
-
-    after(() => {
-      enableRelatedIntegrations();
-    });
-
     describe('rules management table', () => {
       beforeEach(() => {
+        disableRelatedIntegrations();
         visitRulesManagementTable();
         disableAutoRefresh();
+      });
+
+      afterEach(() => {
+        enableRelatedIntegrations();
       });
 
       it('should not display a badge with the installed integrations', () => {

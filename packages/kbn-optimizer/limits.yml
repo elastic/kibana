@@ -1,7 +1,6 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
-  aiAssistantManagementObservability: 19279
   aiAssistantManagementSelection: 19146
   aiops: 10000
   alerting: 106936
@@ -33,7 +32,7 @@ pageLoadAssetSize:
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5176
-  dataViews: 51000
+  dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -103,9 +102,10 @@ pageLoadAssetSize:
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 115443
+  observability: 167673
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
+  observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 72039
@@ -126,6 +126,8 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchConnectors: 30000
+  searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
   securitySolution: 82780
@@ -136,6 +138,7 @@ pageLoadAssetSize:
   serverlessSearch: 72995
   sessionView: 77750
   share: 71239
+  slo: 37039
   snapshotRestore: 79032
   spaces: 57868
   stackAlerts: 58316

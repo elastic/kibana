@@ -24,6 +24,13 @@
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/i18n",
+    "@kbn/solution-nav-es",
+    "@kbn/solution-nav-oblt",
+    "@kbn/config",
+    "@kbn/solution-nav-analytics",
+    "@kbn/security-plugin",
+    "@kbn/user-profile-components",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",

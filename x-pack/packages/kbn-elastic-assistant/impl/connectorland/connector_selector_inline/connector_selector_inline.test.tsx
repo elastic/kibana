@@ -77,8 +77,8 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: [],
+      apiConfig: { connectorId: '123' },
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByText } = render(
@@ -98,8 +98,8 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: [],
+      apiConfig: { connectorId: '123' },
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -122,8 +122,8 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: [],
+      apiConfig: { connectorId: '123' },
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
@@ -143,13 +143,12 @@ describe('ConnectorSelectorInline', () => {
     expect(setApiConfig).toHaveBeenCalledWith({
       apiConfig: {
         connectorId: connectorTwo.id,
-        connectorTypeTitle: 'OpenAI',
         model: undefined,
         provider: 'OpenAI',
       },
       conversation: {
-        apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-        replacements: [],
+        apiConfig: { connectorId: '123' },
+        replacements: {},
         category: 'assistant',
         id: 'conversation_id',
         messages: [],
@@ -162,8 +161,8 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       category: 'assistant',
       messages: [],
-      apiConfig: { connectorId: '123', connectorTypeTitle: 'OpenAI' },
-      replacements: [],
+      apiConfig: { connectorId: '123' },
+      replacements: {},
       title: 'conversation_id',
     };
     const { getByTestId } = render(

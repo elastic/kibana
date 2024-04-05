@@ -17,10 +17,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useActor } from '@xstate/react';
 import { hydrateDataSourceSelection } from '@kbn/logs-explorer-plugin/common';
+import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
@@ -76,11 +77,22 @@ function alertsPopoverReducer(state: AlertsPopoverState, action: AlertsPopoverAc
   }
 }
 
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
+
+function getQuery(query?: Query | AggregateQuery): Query {
+  if (query && isOfQueryType(query)) {
+    return query;
+  }
+  return defaultQuery;
+}
+
 export const AlertsPopover = () => {
   const {
-    services: { triggersActionsUi, observability, application, http },
+    services: { triggersActionsUi, slo, application, http },
   } = useKibanaContextForPlugin();
-
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
@@ -117,7 +129,7 @@ export const AlertsPopover = () => {
           params: {
             searchConfiguration: {
               index,
-              query: logsExplorerState.query,
+              query: getQuery(logsExplorerState.query),
               filter: getDiscoverFiltersFromState(
                 index.id,
                 logsExplorerState.filters,
@@ -144,7 +156,7 @@ export const AlertsPopover = () => {
         logsExplorerState?.query && 'query' in logsExplorerState.query
           ? String(logsExplorerState.query.query)
           : undefined;
-      return observability.getCreateSLOFlyout({
+      return slo.getCreateSLOFlyout({
         initialValues: {
           indicator: {
             type: 'sli.kql.custom',
@@ -166,7 +178,7 @@ export const AlertsPopover = () => {
         onClose: closeCreateSLOFlyout,
       });
     }
-  }, [observability, pageState, state.isCreateSLOFlyoutOpen]);
+  }, [slo, pageState, state.isCreateSLOFlyoutOpen]);
 
   // Check whether the user has the necessary permissions to create an SLO
   const canCreateSLOs = !!application.capabilities[sloFeatureId]?.write;

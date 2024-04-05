@@ -10,10 +10,9 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
-
-import { usePanelTitle } from '@kbn/presentation-publishing';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
@@ -36,7 +35,7 @@ export const PresentationPanelError = ({
     [api, isEditable]
   );
 
-  const panelTitle = usePanelTitle(api);
+  const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
   const ariaLabel = useMemo(
     () => (panelTitle ? getErrorCallToAction(panelTitle) : label),
     [label, panelTitle]

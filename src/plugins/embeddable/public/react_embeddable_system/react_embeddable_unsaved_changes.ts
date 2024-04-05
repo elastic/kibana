@@ -11,24 +11,14 @@ import {
   PresentationContainer,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  getInitialValuesFromComparators,
+  PublishingSubject,
+  runComparators,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
-import { EmbeddableStateComparators } from './types';
-
-const defaultComparator = <T>(a: T, b: T) => a === b;
-
-const getInitialValuesFromComparators = <StateType extends object = object>(
-  comparators: EmbeddableStateComparators<StateType>,
-  comparatorKeys: Array<keyof StateType>
-) => {
-  const initialValues: Partial<StateType> = {};
-  for (const key of comparatorKeys) {
-    const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
-    initialValues[key] = comparatorSubject?.value;
-  }
-  return initialValues;
-};
+import { combineLatestWith, debounceTime, map } from 'rxjs';
 
 const getDefaultDiffingApi = () => {
   return {
@@ -38,31 +28,10 @@ const getDefaultDiffingApi = () => {
   };
 };
 
-const runComparators = <StateType extends object = object>(
-  comparators: EmbeddableStateComparators<StateType>,
-  comparatorKeys: Array<keyof StateType>,
-  lastSavedState: StateType | undefined,
-  latestState: Partial<StateType>
-) => {
-  if (!lastSavedState) {
-    // if the parent API provides last saved state, but it's empty for this panel, all of our latest state is unsaved.
-    return latestState;
-  }
-  const latestChanges: Partial<StateType> = {};
-  for (const key of comparatorKeys) {
-    const customComparator = comparators[key]?.[2]; // 2nd element of the tuple is the custom comparator
-    const comparator = customComparator ?? defaultComparator;
-    if (!comparator(lastSavedState?.[key], latestState[key], lastSavedState, latestState)) {
-      latestChanges[key] = latestState[key];
-    }
-  }
-  return Object.keys(latestChanges).length > 0 ? latestChanges : undefined;
-};
-
 export const startTrackingEmbeddableUnsavedChanges = <StateType extends object = object>(
   uuid: string,
   parentApi: PresentationContainer | undefined,
-  comparators: EmbeddableStateComparators<StateType>,
+  comparators: StateComparators<StateType>,
   deserializeState: (state: SerializedPanelState<object>) => StateType
 ) => {
   if (Object.keys(comparators).length === 0) return getDefaultDiffingApi();

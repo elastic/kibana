@@ -60,6 +60,10 @@ export default async () => {
         `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
 
+        // Enable strict request validation for security related ES APIs.
+        'xpack.security.authz.has_privileges.strict_request_validation.enabled=true',
+        'xpack.security.authc.api_key.strict_request_validation.enabled=true',
+
         'xpack.security.authc.realms.jwt.jwt1.allowed_audiences=elasticsearch',
         `xpack.security.authc.realms.jwt.jwt1.allowed_issuer=https://kibana.elastic.co/jwt/`,
         `xpack.security.authc.realms.jwt.jwt1.allowed_signature_algorithms=[RS256]`,

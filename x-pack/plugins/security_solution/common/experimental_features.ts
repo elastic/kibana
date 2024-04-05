@@ -74,7 +74,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
    * Enables the ability to send Response actions to SentinelOne and persist the results
@@ -83,7 +83,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.13.0
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
 
   /**
    * Enables use of SentinelOne response actions that complete asynchronously as well as support
@@ -110,6 +110,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables expandable flyout for event type documents
    */
   expandableEventFlyoutEnabled: false,
+
+  /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: false,
+  /*
 
   /**
    * Enables new Set of filters on the Alerts page.
@@ -170,14 +176,9 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables alerts suppression for indicator match rules
-   */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
-
-  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
-  sentinelOneDataInAnalyzerEnabled: false,
+  sentinelOneDataInAnalyzerEnabled: true,
 
   /**
    * Enables SentinelOne manual host manipulation actions
@@ -201,6 +202,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
@@ -214,14 +230,9 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
-   * Disables discover esql tab within timeline
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  timelineEsqlTabDisabled: false,
-
-  /**
-   * Disables date pickers and sourcerer in analyzer if needed.
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

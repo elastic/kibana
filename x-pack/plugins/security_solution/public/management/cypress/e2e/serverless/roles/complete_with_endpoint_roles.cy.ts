@@ -30,7 +30,8 @@ import {
   visitPolicyList,
 } from '../../../screens';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/179274
+describe.skip(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     tags: ['@serverless'],
@@ -151,7 +152,8 @@ describe(
         ensureFleetPermissionDeniedScreen();
       });
 
-      describe('Response Actions access', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/179281
+      describe.skip('Response Actions access', () => {
         beforeEach(() => {
           visitEndpointList();
           openConsoleFromEndpointList();

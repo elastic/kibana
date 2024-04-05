@@ -352,7 +352,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -360,7 +360,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -400,7 +400,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -408,7 +408,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -585,7 +585,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -593,7 +593,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; forwardedAs?: keyof JSX.IntrinsicElements | React.ComponentType<any> | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1882,7 +1882,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -2463,7 +2463,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3019,7 +3019,8 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicStart",
                 "text": "ObservabilityAIAssistantPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
@@ -3041,7 +3042,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -3412,7 +3413,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          "; status: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
+          "; status: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
         "deprecated": false,
@@ -3497,7 +3498,7 @@
           "label": "LogAIAssistant",
           "description": [],
           "signature": [
-            "(props: Omit<",
+            "((props: Omit<",
             {
               "pluginId": "logsShared",
               "scope": "public",
@@ -3505,7 +3506,7 @@
               "section": "def-public.LogAIAssistantProps",
               "text": "LogAIAssistantProps"
             },
-            ", \"observabilityAIAssistant\">) => JSX.Element"
+            ", \"observabilityAIAssistant\">) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
           "deprecated": false,
@@ -6001,7 +6002,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
+          "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -6341,7 +6342,7 @@
         "label": "LogViewStatus",
         "description": [],
         "signature": [
-          "{ index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }"
+          "{ index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6409,7 +6410,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

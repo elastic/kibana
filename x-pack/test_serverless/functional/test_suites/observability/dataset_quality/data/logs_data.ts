@@ -27,11 +27,13 @@ export function getLogsForDataset({
   to,
   count = 1,
   isMalformed = false,
+  namespace = defaultNamespace,
 }: {
   dataset: string;
   to: moment.MomentInput;
   count?: number;
   isMalformed?: boolean;
+  namespace?: string;
 }) {
   return timerange(moment(to).subtract(count, 'minute'), moment(to))
     .interval('1m')
@@ -48,7 +50,8 @@ export function getLogsForDataset({
             CLUSTER[index % CLUSTER.length],
             CLOUD_PROVIDERS[index % CLOUD_PROVIDERS.length],
             CLOUD_REGION[index % CLOUD_REGION.length],
-            isMalformed
+            isMalformed,
+            namespace
           ),
         ]);
     });
@@ -104,7 +107,8 @@ export function createLogRecord(
   cluster: Cluster,
   cloudProvider: string,
   cloudRegion: string,
-  isMalformed = false
+  isMalformed = false,
+  namespace: string = defaultNamespace
 ): ReturnType<typeof log.create> {
   return log
     .create()
@@ -112,7 +116,7 @@ export function createLogRecord(
     .message(msg.message)
     .logLevel(isMalformed ? MORE_THAN_1024_CHARS : msg.level)
     .service(serviceName)
-    .namespace(defaultNamespace)
+    .namespace(namespace)
     .defaults({
       'trace.id': generateShortId(),
       'agent.name': 'synth-agent',

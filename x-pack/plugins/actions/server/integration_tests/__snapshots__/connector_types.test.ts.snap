@@ -238,6 +238,22 @@ Object {
       ],
       "type": "array",
     },
+    "system": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -360,6 +376,22 @@ Object {
       ],
       "type": "array",
     },
+    "system": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "temperature": Object {
       "flags": Object {
         "default": [Function],
@@ -404,7 +436,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "anthropic.claude-v2:1",
+        "default": "anthropic.claude-3-sonnet-20240229-v1:0",
         "error": [Function],
         "presence": "optional",
       },
@@ -2889,6 +2921,49 @@ Object {
             ],
             "type": "string",
           },
+          "headers": Object {
+            "flags": Object {
+              "default": [Function],
+              "error": [Function],
+              "presence": "optional",
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "key": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "name": "entries",
+              },
+            ],
+            "type": "record",
+          },
         },
         "preferences": Object {
           "stripUnknown": Object {
@@ -2957,6 +3032,49 @@ Object {
               },
             ],
             "type": "string",
+          },
+          "headers": Object {
+            "flags": Object {
+              "default": [Function],
+              "error": [Function],
+              "presence": "optional",
+            },
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "key": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "value": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "name": "entries",
+              },
+            ],
+            "type": "record",
           },
         },
         "preferences": Object {
@@ -3777,6 +3895,75 @@ Object {
                             },
                           ],
                           "type": "array",
+                        },
+                      },
+                      Object {
+                        "schema": Object {
+                          "allow": Array [
+                            null,
+                          ],
+                          "flags": Object {
+                            "error": [Function],
+                            "only": true,
+                          },
+                          "type": "any",
+                        },
+                      },
+                    ],
+                    "type": "alternatives",
+                  },
+                  "otherFields": Object {
+                    "flags": Object {
+                      "default": null,
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "matches": Array [
+                      Object {
+                        "schema": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "key": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "rules": Array [
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                    Object {
+                                      "args": Object {
+                                        "method": [Function],
+                                      },
+                                      "name": "custom",
+                                    },
+                                  ],
+                                  "type": "string",
+                                },
+                                "value": Object {
+                                  "flags": Object {
+                                    "error": [Function],
+                                  },
+                                  "type": "any",
+                                },
+                              },
+                              "name": "entries",
+                            },
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "record",
                         },
                       },
                       Object {
