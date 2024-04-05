@@ -77,7 +77,9 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     // set values
     this.fields.replaceAll(Object.values(spec.fields || {}));
-    this.hasEcsFields = this.fields.getByName('ecs.version') !== undefined;
+    if (this.fields.getByName('ecs.version') !== undefined) {
+      this.hasEcsFields = true;
+    }
   }
 
   getScriptedFieldsForQuery() {

@@ -131,7 +131,7 @@ export abstract class AbstractDataView {
 
   private allowHidden: boolean = false;
 
-  public hasEcsFields: boolean = false;
+  public hasEcsFields?: boolean;
 
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
