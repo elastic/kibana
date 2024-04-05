@@ -39,7 +39,7 @@ import { NotePreviews } from '../../../open_timeline/note_previews';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../../side_panel';
-import { getScrollToTopSelector } from '../../tabs_content/selectors';
+import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FullWidthFlexGroup, VerticalRule } from '../shared/layout';
