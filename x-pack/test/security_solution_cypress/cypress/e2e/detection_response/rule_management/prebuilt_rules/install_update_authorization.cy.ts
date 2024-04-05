@@ -65,6 +65,7 @@ const loginPageAsWriteAuthorizedUser = (url: string) => {
   visit(url);
 };
 
+// https://github.com/elastic/kibana/issues/179965
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
