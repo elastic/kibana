@@ -149,75 +149,44 @@ export type FactoryQueryTypes =
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;
 
-export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
-  ? HostsStrategyResponse
-  : T extends HostsQueries.details
-  ? HostDetailsStrategyResponse
-  : T extends HostsQueries.overview
-  ? HostsOverviewStrategyResponse
-  : T extends typeof FirstLastSeenQuery
-  ? FirstLastSeenStrategyResponse
-  : T extends HostsQueries.uncommonProcesses
-  ? HostsUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.kpiHosts
-  ? HostsKpiHostsStrategyResponse
-  : T extends HostsKpiQueries.kpiUniqueIps
-  ? HostsKpiUniqueIpsStrategyResponse
-  : T extends UsersQueries.observedDetails
-  ? ObservedUserDetailsStrategyResponse
-  : T extends UsersQueries.managedDetails
-  ? ManagedUserDetailsStrategyResponse
-  : T extends UsersQueries.kpiTotalUsers
-  ? TotalUsersKpiStrategyResponse
-  : T extends UsersQueries.authentications
-  ? UserAuthenticationsStrategyResponse
-  : T extends UsersQueries.users
-  ? UsersStrategyResponse
-  : T extends UsersQueries.kpiAuthentications
-  ? UsersKpiAuthenticationsStrategyResponse
-  : T extends NetworkQueries.details
-  ? NetworkDetailsStrategyResponse
-  : T extends NetworkQueries.dns
-  ? NetworkDnsStrategyResponse
-  : T extends NetworkQueries.http
-  ? NetworkHttpStrategyResponse
-  : T extends NetworkQueries.overview
-  ? NetworkOverviewStrategyResponse
-  : T extends NetworkQueries.tls
-  ? NetworkTlsStrategyResponse
-  : T extends NetworkQueries.topCountries
-  ? NetworkTopCountriesStrategyResponse
-  : T extends NetworkQueries.topNFlow
-  ? NetworkTopNFlowStrategyResponse
-  : T extends NetworkQueries.users
-  ? NetworkUsersStrategyResponse
-  : T extends NetworkKpiQueries.dns
-  ? NetworkKpiDnsStrategyResponse
-  : T extends NetworkKpiQueries.networkEvents
-  ? NetworkKpiNetworkEventsStrategyResponse
-  : T extends NetworkKpiQueries.tlsHandshakes
-  ? NetworkKpiTlsHandshakesStrategyResponse
-  : T extends NetworkKpiQueries.uniqueFlows
-  ? NetworkKpiUniqueFlowsStrategyResponse
-  : T extends NetworkKpiQueries.uniquePrivateIps
-  ? NetworkKpiUniquePrivateIpsStrategyResponse
-  : T extends typeof MatrixHistogramQuery
-  ? MatrixHistogramStrategyResponse
-  : T extends CtiQueries.eventEnrichment
-  ? CtiEventEnrichmentStrategyResponse
-  : T extends CtiQueries.dataSource
-  ? CtiDataSourceStrategyResponse
-  : T extends RiskQueries.hostsRiskScore
-  ? HostsRiskScoreStrategyResponse
-  : T extends RiskQueries.usersRiskScore
-  ? UsersRiskScoreStrategyResponse
-  : T extends RiskQueries.kpiRiskScore
-  ? KpiRiskScoreStrategyResponse
-  : T extends RelatedEntitiesQueries.relatedUsers
-  ? HostsRelatedUsersStrategyResponse
-  : T extends RelatedEntitiesQueries.relatedHosts
-  ? UsersRelatedHostsStrategyResponse
-  : never;
+interface StrategyResponseTypeMap {
+  [HostsQueries.hosts]: HostsStrategyResponse;
+  [HostsQueries.details]: HostDetailsStrategyResponse;
+  [HostsQueries.overview]: HostsOverviewStrategyResponse;
+  [FirstLastSeenQuery]: FirstLastSeenStrategyResponse;
+  [HostsQueries.uncommonProcesses]: HostsUncommonProcessesStrategyResponse;
+  [HostsKpiQueries.kpiHosts]: HostsKpiHostsStrategyResponse;
+  [HostsKpiQueries.kpiUniqueIps]: HostsKpiUniqueIpsStrategyResponse;
+  [UsersQueries.observedDetails]: ObservedUserDetailsStrategyResponse;
+  [UsersQueries.managedDetails]: ManagedUserDetailsStrategyResponse;
+  [UsersQueries.kpiTotalUsers]: TotalUsersKpiStrategyResponse;
+  [UsersQueries.authentications]: UserAuthenticationsStrategyResponse;
+  [UsersQueries.users]: UsersStrategyResponse;
+  [UsersQueries.kpiAuthentications]: UsersKpiAuthenticationsStrategyResponse;
+  [NetworkQueries.details]: NetworkDetailsStrategyResponse;
+  [NetworkQueries.dns]: NetworkDnsStrategyResponse;
+  [NetworkQueries.http]: NetworkHttpStrategyResponse;
+  [NetworkQueries.overview]: NetworkOverviewStrategyResponse;
+  [NetworkQueries.tls]: NetworkTlsStrategyResponse;
+  [NetworkQueries.topCountries]: NetworkTopCountriesStrategyResponse;
+  [NetworkQueries.topNFlow]: NetworkTopNFlowStrategyResponse;
+  [NetworkQueries.users]: NetworkUsersStrategyResponse;
+  [NetworkKpiQueries.dns]: NetworkKpiDnsStrategyResponse;
+  [NetworkKpiQueries.networkEvents]: NetworkKpiNetworkEventsStrategyResponse;
+  [NetworkKpiQueries.tlsHandshakes]: NetworkKpiTlsHandshakesStrategyResponse;
+  [NetworkKpiQueries.uniqueFlows]: NetworkKpiUniqueFlowsStrategyResponse;
+  [NetworkKpiQueries.uniquePrivateIps]: NetworkKpiUniquePrivateIpsStrategyResponse;
+  [MatrixHistogramQuery]: MatrixHistogramStrategyResponse;
+  [CtiQueries.eventEnrichment]: CtiEventEnrichmentStrategyResponse;
+  [CtiQueries.dataSource]: CtiDataSourceStrategyResponse;
+  [RiskQueries.hostsRiskScore]: HostsRiskScoreStrategyResponse;
+  [RiskQueries.usersRiskScore]: UsersRiskScoreStrategyResponse;
+  [RiskQueries.kpiRiskScore]: KpiRiskScoreStrategyResponse;
+  [RelatedEntitiesQueries.relatedUsers]: HostsRelatedUsersStrategyResponse;
+  [RelatedEntitiesQueries.relatedHosts]: UsersRelatedHostsStrategyResponse;
+}
+
+export type StrategyResponseType<T extends FactoryQueryTypes> = StrategyResponseTypeMap[T];
 
 export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
   ? HostsRequestOptionsInput
