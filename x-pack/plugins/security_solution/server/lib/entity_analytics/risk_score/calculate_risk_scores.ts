@@ -207,13 +207,13 @@ const buildIdentifierTypeAggregation = ({
                 String category = doc['${EVENT_KIND}'].value;
                 double score = doc['${ALERT_RISK_SCORE}'].value;
                 double weighted_score = 0.0;
-          
+
                 fields.put('time', doc['@timestamp'].value);
                 fields.put('category', category);
                 fields.put('score', score);
                 ${buildWeightingOfScoreByCategory({ userWeights: weights, identifierType })}
                 fields.put('weighted_score', weighted_score);
-          
+
                 state.inputs.add(fields);
               `,
               combine_script: 'return state;',
@@ -291,7 +291,7 @@ export const calculateRiskScores = async ({
   range,
   runtimeMappings,
   weights,
-  alertSampleSizePerShard = 10_000,
+  alertSampleSizePerShard = 1_000,
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
