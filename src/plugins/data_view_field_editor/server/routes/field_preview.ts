@@ -19,6 +19,7 @@ const bodySchema = schema.object({
     schema.literal('date_field'),
     schema.literal('double_field'),
     schema.literal('geo_point_field'),
+    schema.literal('geo_shape_field'),
     schema.literal('ip_field'),
     schema.literal('keyword_field'),
     schema.literal('long_field'),
@@ -32,7 +33,25 @@ const geoPoint = schema.object({
   coordinates: schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }),
 });
 
-const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string(), geoPoint]);
+const geoShape = schema.object({
+  type: schema.oneOf([
+    schema.literal('Point'),
+    schema.literal('LineString'),
+    schema.literal('Polygon'),
+    schema.literal('MultiPoint'),
+    schema.literal('MultiLineString'),
+    schema.literal('MultiPolygon'),
+  ]),
+  coordinates: schema.arrayOf(schema.any()),
+});
+
+const valueSchema = schema.oneOf([
+  schema.boolean(),
+  schema.number(),
+  schema.string(),
+  geoPoint,
+  geoShape,
+]);
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
   router.versioned.post({ path, access: 'internal' }).addVersion(
@@ -70,14 +89,19 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         },
       };
 
+      console.log('body', JSON.stringify(body, null, ' '));
+
       try {
         // client types need to be update to support this request format
         // when it does, supply response types
         // @ts-expect-error
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
+        console.log('result', JSON.stringify(result, null, ' '));
 
         return res.ok({ body: { values: result } });
       } catch (error) {
+        console.log('error', JSON.stringify(error, null, ' '));
+
         // Assume invalid painless script was submitted
         // Return 200 with error object
         const handleCustomError = () => {
