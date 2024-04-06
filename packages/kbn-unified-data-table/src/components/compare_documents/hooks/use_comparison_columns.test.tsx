@@ -125,14 +125,15 @@ describe('useComparisonColumns', () => {
         column: {
           id: selectedDocs[0],
           display: expect.anything(),
-          displayAsText: selectedDocs[0],
+          displayAsText: `Pinned document: ${selectedDocs[0]}`,
         },
         includeRemoveAction: true,
       }),
       getComparisonColumn({
         column: {
           id: selectedDocs[1],
-          displayAsText: selectedDocs[1],
+          display: `Document: ${selectedDocs[1]}`,
+          displayAsText: `Comparison document: ${selectedDocs[1]}`,
           actions: {
             showMoveRight: true,
           },
@@ -143,7 +144,8 @@ describe('useComparisonColumns', () => {
       getComparisonColumn({
         column: {
           id: selectedDocs[2],
-          displayAsText: selectedDocs[2],
+          display: `Document: ${selectedDocs[2]}`,
+          displayAsText: `Comparison document: ${selectedDocs[2]}`,
           actions: {
             showMoveLeft: true,
             showMoveRight: true,
@@ -155,7 +157,8 @@ describe('useComparisonColumns', () => {
       getComparisonColumn({
         column: {
           id: selectedDocs[3],
-          displayAsText: selectedDocs[3],
+          display: `Document: ${selectedDocs[3]}`,
+          displayAsText: `Comparison document: ${selectedDocs[3]}`,
           actions: {
             showMoveLeft: true,
           },
@@ -180,7 +183,7 @@ describe('useComparisonColumns', () => {
         <EuiFlexItem
           grow={false}
         >
-          0
+          Document: 0
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
@@ -210,18 +213,18 @@ describe('useComparisonColumns', () => {
 
   it('should use result column display for plain records', () => {
     const { columns } = renderColumns({ isPlainRecord: true });
-    expect(columns[1].displayAsText).toBe('Result 1');
-    expect(columns[2].displayAsText).toBe('Result 2');
-    expect(columns[3].displayAsText).toBe('Result 3');
-    expect(columns[4].displayAsText).toBe('Result 4');
+    expect(columns[1].displayAsText).toBe(`Pinned result: 1`);
+    expect(columns[2].displayAsText).toBe(`Comparison result: 2`);
+    expect(columns[3].displayAsText).toBe(`Comparison result: 3`);
+    expect(columns[4].displayAsText).toBe(`Comparison result: 4`);
   });
 
   it('should skip columns for missing docs', () => {
     const getDocById = (id: string) => (id === selectedDocs[1] ? undefined : defaultGetDocById(id));
     const { columns } = renderColumns({ getDocById });
     expect(columns).toHaveLength(4);
-    expect(columns[1].displayAsText).toBe(selectedDocs[0]);
-    expect(columns[2].displayAsText).toBe(selectedDocs[2]);
-    expect(columns[3].displayAsText).toBe(selectedDocs[3]);
+    expect(columns[1].displayAsText).toBe(`Pinned document: ${selectedDocs[0]}`);
+    expect(columns[2].displayAsText).toBe(`Comparison document: ${selectedDocs[2]}`);
+    expect(columns[3].displayAsText).toBe(`Comparison document: ${selectedDocs[3]}`);
   });
 });

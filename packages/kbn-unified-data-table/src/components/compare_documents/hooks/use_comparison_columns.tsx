@@ -100,25 +100,54 @@ export const useComparisonColumns = ({
         });
       }
 
-      const columnDisplay = isPlainRecord
+      const resultNumber = isPlainRecord ? Number(docId || 0) + 1 : undefined;
+      const columnTitle = isPlainRecord
         ? i18n.translate('unifiedDataTable.comparisonColumnResultDisplay', {
             defaultMessage: 'Result {resultNumber}',
-            values: { resultNumber: Number(docId || 0) + 1 },
+            values: { resultNumber },
           })
-        : doc.raw._id;
+        : i18n.translate('unifiedDataTable.comparisonColumnDisplay', {
+            defaultMessage: 'Document: {documentId}',
+            values: { documentId: doc.raw._id },
+          });
+
+      const display =
+        docIndex === 0 ? (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="pinFilled" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{columnTitle}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          columnTitle
+        );
+
+      const displayAsText =
+        docIndex === 0
+          ? isPlainRecord
+            ? i18n.translate('unifiedDataTable.comparisonColumnResultPinnedTooltip', {
+                defaultMessage: 'Pinned result: {resultNumber}',
+                values: { resultNumber },
+              })
+            : i18n.translate('unifiedDataTable.comparisonColumnPinnedTooltip', {
+                defaultMessage: 'Pinned document: {documentId}',
+                values: { documentId: doc.raw._id },
+              })
+          : isPlainRecord
+          ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
+              defaultMessage: 'Comparison result: {resultNumber}',
+              values: { resultNumber },
+            })
+          : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
+              defaultMessage: 'Comparison document: {documentId}',
+              values: { documentId: doc.raw._id },
+            });
 
       currentColumns.push({
         id: docId,
-        display:
-          docIndex === 0 ? (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="pinFilled" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{columnDisplay}</EuiFlexItem>
-            </EuiFlexGroup>
-          ) : undefined,
-        displayAsText: columnDisplay,
+        display,
+        displayAsText,
         initialWidth: columnWidth,
         isSortable: false,
         isExpandable: false,
