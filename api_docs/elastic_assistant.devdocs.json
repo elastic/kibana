@@ -1552,7 +1552,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
