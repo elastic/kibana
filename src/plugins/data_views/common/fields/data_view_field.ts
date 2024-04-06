@@ -31,10 +31,6 @@ export interface ToSpecConfig {
   getFormatterForField?: DataView['getFormatterForField'];
 }
 
-export interface DataViewFieldContext {
-  ecs: boolean;
-}
-
 /**
  * Data view field class
  * @public
@@ -51,7 +47,6 @@ export class DataViewField implements DataViewFieldBase {
    * DataView constructor
    * @constructor
    * @param spec Configuration for the field
-   * @param getContext Get Context of the field
    */
   constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };

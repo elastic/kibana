@@ -282,7 +282,6 @@ describe('LogViewsClient class', () => {
           "getIndexPattern": [Function],
           "getName": [Function],
           "getOriginalSavedObjectBody": [Function],
-          "hasEcsFields": undefined,
           "id": "LOG_DATA_VIEW",
           "matchedIndices": Array [],
           "metaFields": Array [

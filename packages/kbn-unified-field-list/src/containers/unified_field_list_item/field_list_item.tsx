@@ -374,7 +374,7 @@ function UnifiedFieldListItemComponent({
           onAddFilter={onAddFilter}
           onEditField={onEditField}
           onDeleteField={onDeleteField}
-          showEcsInfo={dataView.hasEcsFields}
+          showEcsInfo={dataView.fields.getByName('ecs.version') !== undefined}
           {...customPopoverHeaderProps}
         />
       )}

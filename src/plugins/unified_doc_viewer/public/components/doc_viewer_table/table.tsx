@@ -377,7 +377,7 @@ export const DocViewerTable = ({
                     fieldMapping?.displayName ?? field,
                     searchText
                   )}
-                  showEcsInfo={dataView.hasEcsFields}
+                  showEcsInfo={dataView.fields.getByName('ecs.version') !== undefined}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -405,7 +405,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       onTogglePinned,
       searchText,
-      dataView.hasEcsFields,
+      dataView,
     ]
   );
 
