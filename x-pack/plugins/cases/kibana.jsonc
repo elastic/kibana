@@ -26,10 +26,10 @@
       "files",
       "contentManagement",
       "uiActions",
+      "taskManager",
     ],
     "optionalPlugins": [
       "home",
-      "taskManager",
       "usageCollection",
       "spaces",
       "serverless",

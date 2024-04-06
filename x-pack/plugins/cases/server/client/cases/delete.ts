@@ -37,6 +37,7 @@ export async function deleteCases(
     logger,
     authorization,
     fileService,
+    bidirectionalSyncClient,
   } = clientArgs;
 
   try {
@@ -76,6 +77,7 @@ export async function deleteCases(
     ];
 
     const fileIds = fileEntities.map((entity) => entity.id);
+
     await Promise.all([
       deleteFiles(fileIds, fileService),
       caseService.bulkDeleteCaseEntities({
@@ -88,6 +90,15 @@ export async function deleteCases(
     await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)
     );
+
+    for (const theCase of cases.saved_objects) {
+      if (theCase.attributes.connector.type === '.jira') {
+        bidirectionalSyncClient.unregisterSynching({
+          caseId: theCase.id,
+          connectorId: theCase.attributes.connector.id,
+        });
+      }
+    }
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete cases ids: ${JSON.stringify(ids)}: ${error}`,
