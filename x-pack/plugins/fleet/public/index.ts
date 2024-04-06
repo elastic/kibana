@@ -73,3 +73,11 @@ export const PackagePolicyInputVarField = lazy(() =>
     './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
   ).then((module) => ({ default: module.PackagePolicyInputVarField }))
 );
+export const PackageList = () => {
+  return import('./applications/integrations/sections/epm/components/package_list_grid');
+};
+export const AvailablePackagesHook = () => {
+  return import(
+    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
+  );
+};

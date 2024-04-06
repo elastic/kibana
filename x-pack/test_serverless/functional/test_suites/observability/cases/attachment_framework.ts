@@ -57,7 +57,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await testSubjects.click('cases-table-add-case-filter-bar');
 
         await testSubjects.existOrFail('create-case-flyout');
 

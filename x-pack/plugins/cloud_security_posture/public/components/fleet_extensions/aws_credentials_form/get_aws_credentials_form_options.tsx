@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { AwsCredentialsType } from '../../../../common/types_old';
+import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form';
 
 const AssumeRoleDescription = (
   <div>
@@ -113,19 +114,24 @@ const getAwsCredentialsTypeSelectorOptions = (
 };
 
 export const getAwsCredentialsFormManualOptions = (): AwsCredentialsTypeOptions =>
-  getAwsCredentialsTypeSelectorOptions(({ value }) => value !== 'cloud_formation');
+  getAwsCredentialsTypeSelectorOptions(
+    ({ value }) => value !== AWS_CREDENTIALS_TYPE.CLOUD_FORMATION
+  );
 
 export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
-    ({ value }) => value === 'direct_access_keys' || value === 'temporary_keys'
+    ({ value }) =>
+      value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
+      value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS
   );
 
-export const DEFAULT_AWS_CREDENTIALS_TYPE = 'cloud_formation';
-export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';
-export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = 'direct_access_keys';
+export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
+export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
+  AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
 
 export const getAwsCredentialsFormOptions = (): AwsOptions => ({
-  assume_role: {
+  [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
     label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
       defaultMessage: 'Assume role',
     }),
@@ -138,7 +144,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
       },
     },
   },
-  direct_access_keys: {
+  [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
     label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
@@ -152,7 +158,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
       },
     },
   },
-  temporary_keys: {
+  [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
     info: TemporaryKeysDescription,
     label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
@@ -171,7 +177,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
       },
     },
   },
-  shared_credentials: {
+  [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
     label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
       defaultMessage: 'Shared credentials',
     }),
@@ -189,7 +195,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
       },
     },
   },
-  cloud_formation: {
+  [AWS_CREDENTIALS_TYPE.CLOUD_FORMATION]: {
     label: 'CloudFormation',
     info: [],
     fields: {},

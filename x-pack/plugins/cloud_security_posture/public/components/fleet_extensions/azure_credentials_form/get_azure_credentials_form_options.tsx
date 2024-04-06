@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AzureCredentialsType } from '../../../../common/types_old';
 import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../../test_subjects';
+import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form';
 
 export type AzureCredentialsFields = Record<
   string,
@@ -37,9 +38,9 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
     }))
     .filter(
       ({ value }) =>
-        value !== 'arm_template' && // we remove this in order to hide it from the selectable options in the manual drop down
-        value !== 'manual' && // TODO: remove 'manual' for stack version 8.13
-        value !== 'service_principal_with_client_username_and_password' // this option is temporarily hidden
+        value !== AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE && // we remove this in order to hide it from the selectable options in the manual drop down
+        value !== AZURE_CREDENTIALS_TYPE.MANUAL && // TODO: remove 'manual' for stack version 8.13
+        value !== AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD // this option is temporarily hidden
     );
 };
 
@@ -67,7 +68,7 @@ const I18N_CLIENT_ID = i18n.translate('xpack.csp.azureIntegration.clientIdLabel'
 });
 
 export const getAzureCredentialsFormOptions = (): AzureOptions => ({
-  managed_identity: {
+  [AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY]: {
     label: i18n.translate('xpack.csp.azureIntegration.credentialType.managedIdentityLabel', {
       defaultMessage: 'Managed Identity',
     }),
@@ -81,18 +82,18 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     ),
     fields: {},
   },
-  arm_template: {
+  [AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE]: {
     label: 'ARM Template',
     info: [],
     fields: {},
   },
   // TODO: remove for stack version 8.13
-  manual: {
+  [AZURE_CREDENTIALS_TYPE.MANUAL]: {
     label: 'Manual',
     info: [],
     fields: {},
   },
-  service_principal_with_client_secret: {
+  [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
     label: i18n.translate('xpack.csp.azureIntegration.servicePrincipalWithClientSecretLabel', {
       defaultMessage: 'Service principal with Client Secret',
     }),
@@ -115,7 +116,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
     },
   },
-  service_principal_with_client_certificate: {
+  [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE]: {
     label: i18n.translate('xpack.csp.azureIntegration.servicePrincipalWithClientCertificateLabel', {
       defaultMessage: 'Service principal with Client Certificate',
     }),
@@ -144,7 +145,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
       },
     },
   },
-  service_principal_with_client_username_and_password: {
+  [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD]: {
     label: i18n.translate(
       'xpack.csp.azureIntegration.servicePrincipalWithClientUsernameAndPasswordLabel',
       { defaultMessage: 'Service principal with Client Username and Password' }

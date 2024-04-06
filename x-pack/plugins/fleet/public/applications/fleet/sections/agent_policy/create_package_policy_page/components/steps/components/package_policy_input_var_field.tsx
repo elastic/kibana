@@ -23,8 +23,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -183,6 +182,7 @@ function getInputComponent({
   if (multi) {
     return (
       <MultiTextInput
+        fieldLabel={fieldLabel}
         value={value ?? []}
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
@@ -342,16 +342,16 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
           {fieldLabel}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
+            type="iInCircle"
+            position="top"
             content={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
                 defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again."
               />
             }
-          >
-            <EuiIcon aria-label="Secret value" type="questionInCircle" color="subdued" />
-          </EuiToolTip>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
