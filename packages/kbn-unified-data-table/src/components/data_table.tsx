@@ -29,6 +29,8 @@ import {
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -65,7 +67,10 @@ import {
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
-import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
+import {
+  DataTableCompareToolbarBtn,
+  DataTableDocumentToolbarBtn,
+} from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
@@ -835,18 +840,28 @@ export const UnifiedDataTable = ({
 
     return (
       <>
-        {usedSelectedDocs.length ? (
-          <DataTableDocumentToolbarBtn
-            isPlainRecord={isPlainRecord}
-            isFilterActive={isFilterActive}
-            enableComparisonMode={enableComparisonMode}
-            rows={rows!}
-            selectedDocs={usedSelectedDocs}
-            setSelectedDocs={setSelectedDocs}
-            setIsFilterActive={setIsFilterActive}
-            setIsCompareActive={setIsCompareActive}
-          />
-        ) : null}
+        {Boolean(usedSelectedDocs.length) && (
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {enableComparisonMode && usedSelectedDocs.length > 1 && (
+              <EuiFlexItem grow={false}>
+                <DataTableCompareToolbarBtn
+                  selectedDocs={usedSelectedDocs}
+                  setIsCompareActive={setIsCompareActive}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <DataTableDocumentToolbarBtn
+                isPlainRecord={isPlainRecord}
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                selectedDocs={usedSelectedDocs}
+                setSelectedDocs={setSelectedDocs}
+                setIsFilterActive={setIsFilterActive}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         {externalAdditionalControls}
       </>
     );

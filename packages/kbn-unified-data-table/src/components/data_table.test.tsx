@@ -772,16 +772,12 @@ describe('UnifiedDataTable', () => {
     const selectDocument = (document: EsHitRecord) =>
       userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
-    const getCompareDocumentsButton = () =>
-      screen.queryByRole('button', { name: 'Compare selected documents' });
+    const getCompareDocumentsButton = () => screen.queryByRole('button', { name: /Compare/ });
 
     const goToComparisonMode = async () => {
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
-      userEvent.click(getSelectedDocumentsButton()!);
-      userEvent.click(getCompareDocumentsButton()!, undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(getCompareDocumentsButton()!);
       await screen.findByText('Comparing 2 documents');
     };
 
@@ -805,11 +801,9 @@ describe('UnifiedDataTable', () => {
       expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
       selectDocument(esHitsMock[0]);
       expect(getSelectedDocumentsButton()).toBeInTheDocument();
-      userEvent.click(getSelectedDocumentsButton()!);
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
-      userEvent.click(getSelectedDocumentsButton()!);
       selectDocument(esHitsMock[1]);
-      userEvent.click(getSelectedDocumentsButton()!);
+      expect(getSelectedDocumentsButton()).toBeInTheDocument();
       expect(getCompareDocumentsButton()).toBeInTheDocument();
     });
 
@@ -817,7 +811,6 @@ describe('UnifiedDataTable', () => {
       renderDataTable({ enableComparisonMode: false });
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
-      userEvent.click(getSelectedDocumentsButton()!);
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
     });
 

@@ -120,10 +120,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }) {
     it('should allow comparing documents', async () => {
       await dataGrid.selectRow(0);
-      await dataGrid.openSelectedRowsMenu();
       expect(await dataGrid.compareSelectedButtonExists()).to.be(false);
       await dataGrid.selectRow(1);
-      await dataGrid.openSelectedRowsMenu();
       expect(await dataGrid.compareSelectedButtonExists()).to.be(true);
       await dataGrid.clickCompareSelectedButton();
       await dataGrid.waitForComparisonModeToLoad();

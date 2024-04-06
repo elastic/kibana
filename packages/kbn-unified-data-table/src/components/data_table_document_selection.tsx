@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css, CSSObject } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -78,31 +78,38 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   );
 };
 
+const useBadgeStyles = (): CSSObject => {
+  const { euiTheme } = useEuiTheme();
+  const { isDarkMode } = useContext(UnifiedDataTableContext);
+
+  return {
+    '.euiDataGridToolbarControl__badge': {
+      backgroundColor: isDarkMode ? euiTheme.colors.success : tint(euiTheme.colors.success, 0.3),
+      color: euiTheme.colors.ink,
+    },
+  };
+};
+
 export function DataTableDocumentToolbarBtn({
   isPlainRecord,
   isFilterActive,
-  enableComparisonMode,
   rows,
   selectedDocs,
   setIsFilterActive,
-  setIsCompareActive,
   setSelectedDocs,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
-  enableComparisonMode?: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
-  setIsCompareActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-  const { isDarkMode } = useContext(UnifiedDataTableContext);
+  const badgeStyles = useBadgeStyles();
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
-    const menuItems = [
+    return [
       isFilterActive ? (
         <EuiContextMenuItem
           data-test-subj="dscGridShowAllDocuments"
@@ -148,35 +155,6 @@ export function DataTableDocumentToolbarBtn({
           )}
         </EuiContextMenuItem>
       ),
-    ];
-
-    if (enableComparisonMode && selectedDocs.length > 1) {
-      menuItems.push(
-        <EuiContextMenuItem
-          data-test-subj="unifiedDataTableCompareSelectedDocuments"
-          key="compareSelectedDocuments"
-          icon="diff"
-          onClick={() => {
-            setIsSelectionPopoverOpen(false);
-            setIsCompareActive(true);
-          }}
-        >
-          {isPlainRecord ? (
-            <FormattedMessage
-              id="unifiedDataTable.compareSelectedResults"
-              defaultMessage="Compare selected results"
-            />
-          ) : (
-            <FormattedMessage
-              id="unifiedDataTable.compareSelectedDocuments"
-              defaultMessage="Compare selected documents"
-            />
-          )}
-        </EuiContextMenuItem>
-      );
-    }
-
-    menuItems.push(
       <EuiCopy
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
@@ -215,20 +193,9 @@ export function DataTableDocumentToolbarBtn({
         }}
       >
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
-      </EuiContextMenuItem>
-    );
-
-    return menuItems;
-  }, [
-    enableComparisonMode,
-    isFilterActive,
-    isPlainRecord,
-    rows,
-    selectedDocs,
-    setIsCompareActive,
-    setIsFilterActive,
-    setSelectedDocs,
-  ]);
+      </EuiContextMenuItem>,
+    ];
+  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, setSelectedDocs]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),
@@ -248,14 +215,7 @@ export function DataTableDocumentToolbarBtn({
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={selectedDocs.length}
-          css={{
-            '.euiDataGridToolbarControl__badge': {
-              backgroundColor: isDarkMode
-                ? euiTheme.colors.success
-                : tint(euiTheme.colors.success, 0.3),
-              color: euiTheme.colors.ink,
-            },
-          }}
+          css={badgeStyles}
         >
           {isPlainRecord ? (
             <FormattedMessage
@@ -282,3 +242,30 @@ export function DataTableDocumentToolbarBtn({
     </EuiPopover>
   );
 }
+
+export const DataTableCompareToolbarBtn = ({
+  selectedDocs,
+  setIsCompareActive,
+}: {
+  selectedDocs: string[];
+  setIsCompareActive: (value: boolean) => void;
+}) => {
+  const badgeStyles = useBadgeStyles();
+
+  return (
+    <EuiDataGridToolbarControl
+      iconType="diff"
+      badgeContent={selectedDocs.length}
+      data-test-subj="unifiedDataTableCompareSelectedDocuments"
+      onClick={() => {
+        setIsCompareActive(true);
+      }}
+      css={badgeStyles}
+    >
+      <FormattedMessage
+        id="unifiedDataTable.compareSelectedRowsButtonLabel"
+        defaultMessage="Compare"
+      />
+    </EuiDataGridToolbarControl>
+  );
+};
