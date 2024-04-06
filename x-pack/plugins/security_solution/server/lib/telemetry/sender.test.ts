@@ -187,6 +187,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
@@ -384,6 +385,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
