@@ -633,7 +633,7 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
   const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
   let expiredCount = 0;
 
-  if (aggregationResponse) {
+  if (aggregationResponse && Object.keys(aggregationResponse).length > 0) {
     const { usernames, types, expired, managed } = aggregationResponse;
     (types?.buckets as estypes.AggregationsStringTermsBucket[]).forEach((type) => {
       typeFilters.add(type.key);
