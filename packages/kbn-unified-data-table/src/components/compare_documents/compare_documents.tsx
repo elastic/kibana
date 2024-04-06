@@ -74,6 +74,7 @@ const CompareDocuments = ({
   setSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
+  const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
   const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
     getStorageKey(consumer, 'DiffMode'),
     'basic'
@@ -123,12 +124,14 @@ const CompareDocuments = ({
       <ComparisonControls
         isPlainRecord={isPlainRecord}
         selectedDocs={selectedDocs}
+        showDiff={showDiff}
         diffMode={diffMode}
         showDiffDecorations={showDiffDecorations}
         showMatchingValues={showMatchingValues}
         showAllFields={showAllFields}
         forceShowAllFields={forceShowAllFields}
         setIsCompareActive={setIsCompareActive}
+        setShowDiff={setShowDiff}
         setDiffMode={setDiffMode}
         setShowDiffDecorations={setShowDiffDecorations}
         setShowMatchingValues={setShowMatchingValues}
@@ -143,9 +146,11 @@ const CompareDocuments = ({
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
+      setShowDiff,
       setShowDiffDecorations,
       setShowMatchingValues,
       showAllFields,
+      showDiff,
       showDiffDecorations,
       showMatchingValues,
     ]
@@ -172,11 +177,14 @@ const CompareDocuments = ({
     comparisonFields,
     fieldColumnId,
     selectedDocs,
-    diffMode,
+    diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById,
   });
-  const comparisonCss = useComparisonCss({ diffMode, showDiffDecorations });
+  const comparisonCss = useComparisonCss({
+    diffMode: showDiff ? diffMode : undefined,
+    showDiffDecorations,
+  });
 
   return (
     <EuiDataGrid

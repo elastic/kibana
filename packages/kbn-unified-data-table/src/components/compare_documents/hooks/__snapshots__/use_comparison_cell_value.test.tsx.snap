@@ -214,43 +214,6 @@ exports[`useComparisonCellValue should render cells with diff mode "Lines" 3`] =
 </div>
 `;
 
-exports[`useComparisonCellValue should render cells with diff mode "None" 1`] = `
-<div
-  class="unifiedDataTable__comparisonBaseDocCell"
-  data-test-subj="0_1_0"
->
-  <span
-    class="unifiedDataTable__cellValue"
-  >
-    This is a message val
-  </span>
-</div>
-`;
-
-exports[`useComparisonCellValue should render cells with diff mode "None" 2`] = `
-<div
-  data-test-subj="1_2_0"
->
-  <span
-    class="unifiedDataTable__cellValue"
-  >
-    This one is a different msg value
-  </span>
-</div>
-`;
-
-exports[`useComparisonCellValue should render cells with diff mode "None" 3`] = `
-<div
-  data-test-subj="2_3_0"
->
-  <span
-    class="unifiedDataTable__cellValue"
-  >
-    This is a message val
-  </span>
-</div>
-`;
-
 exports[`useComparisonCellValue should render cells with diff mode "Words" 1`] = `
 <div
   class="unifiedDataTable__comparisonBaseDocCell"
@@ -327,6 +290,43 @@ exports[`useComparisonCellValue should render cells with diff mode "Words" 3`] =
     >
       This is a message val
     </span>
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 1`] = `
+<div
+  class="unifiedDataTable__comparisonBaseDocCell"
+  data-test-subj="0_1_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 2`] = `
+<div
+  data-test-subj="1_2_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This one is a different msg value
+  </span>
+</div>
+`;
+
+exports[`useComparisonCellValue should render cells with no diff mode 3`] = `
+<div
+  data-test-subj="2_3_0"
+>
+  <span
+    class="unifiedDataTable__cellValue"
+  >
+    This is a message val
   </span>
 </div>
 `;

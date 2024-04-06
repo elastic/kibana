@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -22,7 +22,8 @@ const renderComparisonControls = ({
 } = {}) => {
   const selectedDocs = ['0', '1', '2'];
   const Wrapper = () => {
-    const [diffMode, setDiffMode] = useState<DocumentDiffMode>(null);
+    const [showDiff, setShowDiff] = useState(true);
+    const [diffMode, setDiffMode] = useState<DocumentDiffMode>('basic');
     const [showDiffDecorations, setShowDiffDecorations] = useState(true);
     const [showMatchingValues, setShowMatchingValues] = useState(true);
     const [showAllFields, setShowAllFields] = useState(true);
@@ -34,12 +35,14 @@ const renderComparisonControls = ({
           <ComparisonControls
             isPlainRecord={isPlainRecord}
             selectedDocs={selectedDocs}
+            showDiff={showDiff}
             diffMode={diffMode}
             showDiffDecorations={showDiffDecorations}
             showMatchingValues={showMatchingValues}
             showAllFields={showAllFields}
             forceShowAllFields={forceShowAllFields}
             setIsCompareActive={setIsCompareActive}
+            setShowDiff={setShowDiff}
             setDiffMode={setDiffMode}
             setShowDiffDecorations={setShowDiffDecorations}
             setShowMatchingValues={setShowMatchingValues}
@@ -52,14 +55,15 @@ const renderComparisonControls = ({
   render(<Wrapper />);
   const getComparisonSettingsButton = () =>
     screen.getByRole('button', { name: 'Comparison settings' });
+  const getShowDiffSwitch = () => screen.getByTestId('unifiedDataTableShowDiffSwitch');
   const getDiffModeEntry = (mode: DocumentDiffMode) =>
-    screen.getByTestId(`unifiedFieldListDiffMode-${mode ?? 'none'}`);
+    screen.getByTestId(`unifiedDataTableDiffMode-${mode}`);
   const getShowAllFieldsSwitch = () =>
-    screen.queryByTestId('unifiedFieldListDiffOptionSwitch-showAllFields');
+    screen.queryByTestId('unifiedDataTableDiffOptionSwitch-showAllFields');
   const getShowMatchingValuesSwitch = () =>
-    screen.getByTestId('unifiedFieldListDiffOptionSwitch-showMatchingValues');
+    screen.getByTestId('unifiedDataTableDiffOptionSwitch-showMatchingValues');
   const getShowDiffDecorationsSwitch = () =>
-    screen.getByTestId('unifiedFieldListDiffOptionSwitch-showDiffDecorations');
+    screen.getByTestId('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
   return {
     getComparisonCountDisplay: () =>
       screen.getByText(
@@ -67,6 +71,11 @@ const renderComparisonControls = ({
       ),
     getComparisonSettingsButton,
     clickComparisonSettingsButton: () => userEvent.click(getComparisonSettingsButton()),
+    getShowDiffSwitch,
+    clickShowDiffSwitch: () =>
+      userEvent.click(getShowDiffSwitch(), undefined, {
+        skipPointerEventsCheck: true,
+      }),
     clickDiffModeFullValueButton: () =>
       userEvent.click(screen.getByRole('button', { name: 'Full value' }), undefined, {
         skipPointerEventsCheck: true,
@@ -83,14 +92,8 @@ const renderComparisonControls = ({
       userEvent.click(screen.getByRole('button', { name: 'By line' }), undefined, {
         skipPointerEventsCheck: true,
       }),
-    clickDiffModeNoneButton: () =>
-      userEvent.click(screen.getByRole('button', { name: 'None' }), undefined, {
-        skipPointerEventsCheck: true,
-      }),
     diffModeIsSelected: (mode: DocumentDiffMode) =>
       getDiffModeEntry(mode).getAttribute('aria-current') === 'true',
-    getAdvancedDiffModeBadge: (mode: DocumentDiffMode) =>
-      within(getDiffModeEntry(mode)).queryByText('Advanced'),
     getShowAllFieldsSwitch,
     clickShowAllFieldsSwitch: () => {
       const fieldSwitch = getShowAllFieldsSwitch();
@@ -130,11 +133,19 @@ describe('ComparisonControls', () => {
     expect(result.getExitComparisonButton()).toBeInTheDocument();
   });
 
+  it('should allow toggling show diff switch', () => {
+    const result = renderComparisonControls();
+    result.clickComparisonSettingsButton();
+    expect(result.getShowDiffSwitch()).toBeChecked();
+    result.clickShowDiffSwitch();
+    expect(result.getShowDiffSwitch()).not.toBeChecked();
+    result.clickShowDiffSwitch();
+    expect(result.getShowDiffSwitch()).toBeChecked();
+  });
+
   it('should allow changing diff mode', () => {
     const result = renderComparisonControls();
     result.clickComparisonSettingsButton();
-    expect(result.diffModeIsSelected(null)).toBe(true);
-    result.clickDiffModeFullValueButton();
     expect(result.diffModeIsSelected('basic')).toBe(true);
     result.clickDiffModeByCharacterButton();
     expect(result.diffModeIsSelected('chars')).toBe(true);
@@ -142,8 +153,8 @@ describe('ComparisonControls', () => {
     expect(result.diffModeIsSelected('words')).toBe(true);
     result.clickDiffModeByLineButton();
     expect(result.diffModeIsSelected('lines')).toBe(true);
-    result.clickDiffModeNoneButton();
-    expect(result.diffModeIsSelected(null)).toBe(true);
+    result.clickDiffModeFullValueButton();
+    expect(result.diffModeIsSelected('basic')).toBe(true);
   });
 
   it('should allow toggling options', () => {
@@ -158,15 +169,6 @@ describe('ComparisonControls', () => {
     expect(result.getShowMatchingValuesSwitch()).not.toBeChecked();
     result.clickShowDiffDecorationsSwitch();
     expect(result.getShowDiffDecorationsSwitch()).not.toBeChecked();
-  });
-
-  it('should show advanced badge for advanced diff modes', () => {
-    const result = renderComparisonControls();
-    result.clickComparisonSettingsButton();
-    expect(result.getAdvancedDiffModeBadge('basic')).not.toBeInTheDocument();
-    expect(result.getAdvancedDiffModeBadge('chars')).toBeInTheDocument();
-    expect(result.getAdvancedDiffModeBadge('words')).toBeInTheDocument();
-    expect(result.getAdvancedDiffModeBadge('lines')).toBeInTheDocument();
   });
 
   it('should hide showAllFields switch when forceShowAllFields is true', () => {

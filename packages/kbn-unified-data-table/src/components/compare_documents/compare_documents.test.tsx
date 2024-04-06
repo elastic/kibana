@@ -134,6 +134,7 @@ describe('CompareDocuments', () => {
     expect(mockLocalStorage).toEqual({
       'test:dataGridComparisonDiffMode': '"basic"',
       'test:dataGridComparisonShowAllFields': 'false',
+      'test:dataGridComparisonShowDiff': 'true',
       'test:dataGridComparisonShowDiffDecorations': 'true',
       'test:dataGridComparisonShowMatchingValues': 'true',
     });

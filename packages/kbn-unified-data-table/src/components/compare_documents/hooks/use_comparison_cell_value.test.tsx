@@ -56,7 +56,7 @@ const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> =
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocs: ['0', '1', '2'],
-    diffMode: null,
+    diffMode: undefined,
     fieldFormats: fieldFormatsMock,
     getDocById,
     ...props,
@@ -172,7 +172,7 @@ describe('useComparisonCellValue', () => {
     expect(emptyCell.getCell()).toMatchSnapshot();
   });
 
-  it('should render cells with diff mode "None"', () => {
+  it('should render cells with no diff mode', () => {
     const { renderCellValue } = renderComparisonCellValue();
     const baseCell = renderComparisonCell({
       columnId: '0',

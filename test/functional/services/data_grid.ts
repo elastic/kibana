@@ -573,11 +573,14 @@ export class DataGridService extends FtrService {
     });
   }
 
-  public async selectComparisonDiffMode(diffMode: 'basic' | 'chars' | 'words' | 'lines' | null) {
+  public async toggleShowDiffSwitch() {
     await this.openComparisonSettingsMenu();
-    const menuEntry = await this.testSubjects.find(
-      `unifiedFieldListDiffMode-${diffMode ?? 'none'}`
-    );
+    await this.testSubjects.click('unifiedDataTableShowDiffSwitch');
+  }
+
+  public async selectComparisonDiffMode(diffMode: 'basic' | 'chars' | 'words' | 'lines') {
+    await this.openComparisonSettingsMenu();
+    const menuEntry = await this.testSubjects.find(`unifiedDataTableDiffMode-${diffMode}`);
     const button = await menuEntry.findByTagName('button');
     await button.click();
   }
@@ -604,22 +607,22 @@ export class DataGridService extends FtrService {
 
   public async showAllFieldsSwitchExists() {
     await this.openComparisonSettingsMenu();
-    return await this.testSubjects.exists('unifiedFieldListDiffOptionSwitch-showAllFields');
+    return await this.testSubjects.exists('unifiedDataTableDiffOptionSwitch-showAllFields');
   }
 
   public async toggleShowAllFieldsSwitch() {
     await this.openComparisonSettingsMenu();
-    await this.testSubjects.click('unifiedFieldListDiffOptionSwitch-showAllFields');
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showAllFields');
   }
 
   public async toggleShowMatchingValuesSwitch() {
     await this.openComparisonSettingsMenu();
-    await this.testSubjects.click('unifiedFieldListDiffOptionSwitch-showMatchingValues');
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showMatchingValues');
   }
 
   public async toggleShowDiffDecorationsSwitch() {
     await this.openComparisonSettingsMenu();
-    await this.testSubjects.click('unifiedFieldListDiffOptionSwitch-showDiffDecorations');
+    await this.testSubjects.click('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
   }
 
   public async exitComparisonMode() {

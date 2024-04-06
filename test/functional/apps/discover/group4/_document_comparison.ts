@@ -150,11 +150,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expectedExtensionValues,
       expectedBytesValues,
     }: {
-      diffMode: Parameters<typeof dataGrid.selectComparisonDiffMode>[0];
+      diffMode?: Parameters<typeof dataGrid.selectComparisonDiffMode>[0];
       expectedExtensionValues: string[];
       expectedBytesValues: string[];
     }) => {
-      await dataGrid.selectComparisonDiffMode(diffMode);
+      if (diffMode) {
+        await dataGrid.selectComparisonDiffMode(diffMode);
+      }
       const extensionRow = await dataGrid.getComparisonRow(extensionRowIndex);
       expect(extensionRow.fieldName).to.be('extension');
       expect(extensionRow.values).to.eql(expectedExtensionValues);
@@ -207,14 +209,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '<div class="unifiedDataTable__comparisonSegment unifiedDataTable__comparisonAddedSegment">5453</div>',
         ],
       });
+    });
+
+    it('should allow toggling show diff switch', async () => {
+      await dataGrid.toggleShowDiffSwitch();
       await testDiffMode({
-        diffMode: null,
         expectedExtensionValues: ['jpg', 'jpg'],
         expectedBytesValues: ['7,124', '5,453'],
       });
+      await dataGrid.toggleShowDiffSwitch();
     });
 
     it('should allow toggling all fields', async () => {
+      await dataGrid.selectComparisonDiffMode('basic');
       await dataGrid.toggleShowAllFieldsSwitch();
       const fieldNames = await dataGrid.getComparisonFieldNames();
       expect(fieldNames.length >= fullFieldNames.length).to.be(true);

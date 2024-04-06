@@ -7,7 +7,6 @@
  */
 
 import {
-  EuiBadge,
   EuiContextMenuItem,
   EuiContextMenuItemProps,
   EuiContextMenuPanel,
@@ -22,23 +21,25 @@ import {
   EuiSwitchProps,
   EuiText,
   EuiTitle,
-  EuiToolTip,
+  EuiTitleSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, useState } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {
   isPlainRecord?: boolean;
   selectedDocs: string[];
+  showDiff: boolean | undefined;
   diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
   showMatchingValues: boolean | undefined;
   showAllFields: boolean | undefined;
   forceShowAllFields: boolean;
   setIsCompareActive: (isCompareActive: boolean) => void;
+  setShowDiff: (showDiff: boolean) => void;
   setDiffMode: (diffMode: DocumentDiffMode) => void;
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
   setShowMatchingValues: (showMatchingValues: boolean) => void;
@@ -48,12 +49,14 @@ export interface ComparisonControlsProps {
 export const ComparisonControls = ({
   isPlainRecord,
   selectedDocs,
+  showDiff,
   diffMode,
   showDiffDecorations,
   showMatchingValues,
   showAllFields,
   forceShowAllFields,
   setIsCompareActive,
+  setShowDiff,
   setDiffMode,
   setShowDiffDecorations,
   setShowMatchingValues,
@@ -85,11 +88,13 @@ export const ComparisonControls = ({
 
       <EuiFlexItem grow={false}>
         <ComparisonSettings
+          showDiff={showDiff}
           diffMode={diffMode}
           showDiffDecorations={showDiffDecorations}
           showMatchingValues={showMatchingValues}
           showAllFields={showAllFields}
           forceShowAllFields={forceShowAllFields}
+          setShowDiff={setShowDiff}
           setDiffMode={setDiffMode}
           setShowDiffDecorations={setShowDiffDecorations}
           setShowMatchingValues={setShowMatchingValues}
@@ -117,24 +122,32 @@ export const ComparisonControls = ({
   );
 };
 
+const showDiffLabel = i18n.translate('unifiedDataTable.showDiff', {
+  defaultMessage: 'Show diff',
+});
+
 const ComparisonSettings = ({
+  showDiff,
   diffMode,
   showDiffDecorations,
   showMatchingValues,
   showAllFields,
   forceShowAllFields,
+  setShowDiff,
   setDiffMode,
   setShowDiffDecorations,
   setShowMatchingValues,
   setShowAllFields,
 }: Pick<
   ComparisonControlsProps,
+  | 'showDiff'
   | 'diffMode'
-  | 'setDiffMode'
   | 'showDiffDecorations'
   | 'showMatchingValues'
   | 'showAllFields'
   | 'forceShowAllFields'
+  | 'setShowDiff'
+  | 'setDiffMode'
   | 'setShowDiffDecorations'
   | 'setShowMatchingValues'
   | 'setShowAllFields'
@@ -175,35 +188,65 @@ const ComparisonSettings = ({
           },
         }}
       >
-        <SectionHeader>
-          <FormattedMessage id="unifiedDataTable.diffMode" defaultMessage="Diff mode" />
-        </SectionHeader>
+        <SectionHeader
+          title={showDiffLabel}
+          append={
+            <EuiSwitch
+              label={showDiffLabel}
+              showLabel={false}
+              checked={Boolean(showDiff)}
+              compressed
+              onChange={(e) => {
+                setShowDiff(e.target.checked);
+              }}
+              data-test-subj="unifiedDataTableShowDiffSwitch"
+            />
+          }
+        />
+
+        <SectionHeader
+          title={<FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Basic" />}
+          type="subsection"
+        />
 
         <DiffModeEntry entryDiffMode="basic" diffMode={diffMode} setDiffMode={setDiffMode}>
           <FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Full value" />
         </DiffModeEntry>
 
-        <DiffModeEntry entryDiffMode="chars" diffMode={diffMode} setDiffMode={setDiffMode} advanced>
+        <SectionHeader
+          title={
+            <FormattedMessage id="unifiedDataTable.diffModeAdvanced" defaultMessage="Advanced" />
+          }
+          description={
+            <FormattedMessage
+              id="unifiedDataTable.advancedDiffModesTooltip"
+              defaultMessage={
+                'Advanced modes offer enhanced diffing capabilities, but operate ' +
+                'on raw documents and therefore do not support field formatting.'
+              }
+            />
+          }
+          type="subsection"
+          noPadding
+        />
+
+        <DiffModeEntry entryDiffMode="chars" diffMode={diffMode} setDiffMode={setDiffMode}>
           <FormattedMessage id="unifiedDataTable.diffModeChars" defaultMessage="By character" />
         </DiffModeEntry>
 
-        <DiffModeEntry entryDiffMode="words" diffMode={diffMode} setDiffMode={setDiffMode} advanced>
+        <DiffModeEntry entryDiffMode="words" diffMode={diffMode} setDiffMode={setDiffMode}>
           <FormattedMessage id="unifiedDataTable.diffModeWords" defaultMessage="By word" />
         </DiffModeEntry>
 
-        <DiffModeEntry entryDiffMode="lines" diffMode={diffMode} setDiffMode={setDiffMode} advanced>
+        <DiffModeEntry entryDiffMode="lines" diffMode={diffMode} setDiffMode={setDiffMode}>
           <FormattedMessage id="unifiedDataTable.diffModeLines" defaultMessage="By line" />
-        </DiffModeEntry>
-
-        <DiffModeEntry entryDiffMode={null} diffMode={diffMode} setDiffMode={setDiffMode}>
-          <FormattedMessage id="unifiedDataTable.diffModeNone" defaultMessage="None" />
         </DiffModeEntry>
 
         <EuiHorizontalRule margin="none" />
 
-        <SectionHeader>
-          <FormattedMessage id="unifiedDataTable.diffOptions" defaultMessage="Options" />
-        </SectionHeader>
+        <SectionHeader
+          title={<FormattedMessage id="unifiedDataTable.diffOptions" defaultMessage="Options" />}
+        />
 
         {!forceShowAllFields && (
           <DiffOptionSwitch
@@ -258,12 +301,47 @@ const ComparisonSettings = ({
   );
 };
 
-const SectionHeader: FC = ({ children }) => {
+const SectionHeader = ({
+  title,
+  description,
+  type = 'section',
+  noPadding,
+  append,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  type?: 'section' | 'subsection';
+  noPadding?: boolean;
+  append?: ReactNode;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const size: EuiTitleSize = type === 'section' ? 'xxs' : 'xxxs';
+  const HeadingTag = type === 'section' ? 'h3' : 'h4';
+
   return (
-    <EuiContextMenuItem size="s" css={{ paddingBottom: 0 }}>
-      <EuiTitle size="xxs">
-        <h3>{children}</h3>
-      </EuiTitle>
+    <EuiContextMenuItem
+      size="s"
+      css={[
+        noPadding && { paddingTop: 0 },
+        { paddingBottom: 0 },
+        type === 'subsection' && { paddingLeft: `calc(${euiTheme.size.m} + ${euiTheme.size.xxs})` },
+      ]}
+    >
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size={size}>
+              <HeadingTag>{title}</HeadingTag>
+            </EuiTitle>
+          </EuiFlexItem>
+          {description && (
+            <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>
+              <EuiIconTip type="questionInCircle" position="right" content={description} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        {append && <EuiFlexItem grow={false}>{append}</EuiFlexItem>}
+      </EuiFlexGroup>
     </EuiContextMenuItem>
   );
 };
@@ -271,9 +349,8 @@ const SectionHeader: FC = ({ children }) => {
 const DiffModeEntry: FC<
   Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
     entryDiffMode: DocumentDiffMode;
-    advanced?: boolean;
   }
-> = ({ children, entryDiffMode, diffMode, advanced, setDiffMode }) => {
+> = ({ children, entryDiffMode, diffMode, setDiffMode }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -282,8 +359,12 @@ const DiffModeEntry: FC<
       icon={diffMode === entryDiffMode ? 'check' : 'empty'}
       size="s"
       aria-current={diffMode === entryDiffMode}
-      data-test-subj={`unifiedFieldListDiffMode-${entryDiffMode ?? 'none'}`}
-      css={{ paddingTop: 0, paddingBottom: 0 }}
+      data-test-subj={`unifiedDataTableDiffMode-${entryDiffMode}`}
+      css={{
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingLeft: `calc(${euiTheme.size.m} + ${euiTheme.size.xxs})`,
+      }}
     >
       <EuiFlexGroup
         gutterSize="m"
@@ -302,30 +383,8 @@ const DiffModeEntry: FC<
             {children}
           </EuiLink>
         </EuiFlexItem>
-        {advanced && (
-          <EuiFlexItem grow={false}>
-            <AdvancedModeBadge />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiContextMenuItem>
-  );
-};
-
-const AdvancedModeBadge = () => {
-  return (
-    <EuiToolTip
-      position="right"
-      content={i18n.translate('unifiedDataTable.advancedDiffModesTooltip', {
-        defaultMessage:
-          'Advanced modes offer enhanced diffing capabilities, but operate ' +
-          'on raw documents and therefore do not support field formatting.',
-      })}
-    >
-      <EuiBadge color="hollow" tabIndex={0} title="">
-        <FormattedMessage id="unifiedDataTable.advancedDiffModes" defaultMessage="Advanced" />
-      </EuiBadge>
-    </EuiToolTip>
   );
 };
 
@@ -350,11 +409,11 @@ const DiffOptionSwitch = ({
             checked={checked}
             compressed
             onChange={onChange}
-            data-test-subj={`unifiedFieldListDiffOptionSwitch-${dataTestSubj}`}
+            data-test-subj={`unifiedDataTableDiffOptionSwitch-${dataTestSubj}`}
           />
         </EuiFlexItem>
         {description && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>
             <EuiIconTip type="questionInCircle" position="right" content={description} />
           </EuiFlexItem>
         )}

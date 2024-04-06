@@ -10,7 +10,7 @@ import { diffChars, diffJson, diffLines, diffWords } from 'diff';
 import type { DocumentDiffMode } from '../types';
 
 export interface CalculateDiffProps {
-  diffMode: Exclude<DocumentDiffMode, 'basic' | null>;
+  diffMode: Exclude<DocumentDiffMode, 'basic'>;
   baseValue: unknown;
   comparisonValue: unknown;
 }
