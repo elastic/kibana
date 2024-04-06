@@ -167,6 +167,8 @@ Organize and separate your ideas by adding more pages.
 
 . On the *Page* editor panel, select the page transition from the *Transition* dropdown.
 
+Hint: If you click on the text showing the actual positon at the bottom, it shows all the pages of the current canvas. If you hover your mouse over, you have the option to clone or delete the selected page.
+
 [float]
 [[workpad-share-options]]
 == Share your workpad
