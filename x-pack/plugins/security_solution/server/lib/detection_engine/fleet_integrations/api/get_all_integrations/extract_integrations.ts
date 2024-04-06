@@ -30,7 +30,7 @@ export function extractIntegrations(
       const integrationName = policyTemplate.name;
       const integrationTitle =
         packagePolicyTemplates.length === 1 && policyTemplate.name === fleetPackage.name
-          ? fleetPackage.title
+          ? packageTitle
           : `${packageTitle} ${capitalize(policyTemplate.title)}`;
 
       const integration: Integration = {
