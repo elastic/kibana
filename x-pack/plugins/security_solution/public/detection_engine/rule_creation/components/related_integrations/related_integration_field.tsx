@@ -114,6 +114,7 @@ export function RelatedIntegrationField({
               fullWidth
               aria-label={i18n.RELATED_INTEGRATION_ARIA_LABEL}
               isInvalid={Boolean(packageErrorMessage)}
+              data-test-subj="relatedIntegrationComboBox"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -126,7 +127,7 @@ export function RelatedIntegrationField({
               value={field.value.version}
               onChange={handleVersionChange}
               isInvalid={Boolean(versionErrorMessage)}
-              data-test-subj="related-integration-version-dependency"
+              data-test-subj="relatedIntegrationVersionDependency"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -136,7 +137,7 @@ export function RelatedIntegrationField({
               isDisabled={!integrations}
               iconType="minusInCircle"
               aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
-              data-test-subj="related-integration-remove"
+              data-test-subj="relatedIntegrationRemove"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -192,7 +193,7 @@ function renderIntegrationOption(
   }
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup data-test-subj="relatedIntegrationComboBoxOption">
       <EuiFlexItem>
         <EuiTextTruncate text={value.integration_title ?? value.package_title} truncation="end" />
       </EuiFlexItem>

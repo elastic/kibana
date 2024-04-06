@@ -32,12 +32,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
-const RELATED_INTEGRATION_ROW = 'related-integration-row';
+const RELATED_INTEGRATION_ROW = 'relatedIntegrationRow';
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const COMBO_BOX_SELECTION_TEST_ID = 'euiComboBoxPill';
 const COMBO_BOX_CLEAR_BUTTON_TEST_ID = 'comboBoxClearButton';
-const VERSION_INPUT_TEST_ID = 'related-integration-version-dependency';
-const REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID = 'related-integration-remove';
+const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
+const REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID = 'relatedIntegrationRemove';
 
 describe('RelatedIntegrations form part', () => {
   beforeEach(() => {

@@ -33,7 +33,7 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
             <fieldset>
               <EuiFlexGroup direction="column" gutterSize="s">
                 {items.map((item) => (
-                  <EuiFlexItem key={item.id} data-test-subj="related-integration-row">
+                  <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
                     <RelatedIntegrationFieldRow
                       item={item}
                       relatedIntegrations={form.getFormData()[path] ?? []}
