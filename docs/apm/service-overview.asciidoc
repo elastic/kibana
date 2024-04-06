@@ -139,9 +139,6 @@ or when to remove a large dependency.
 The cold start rate chart is currently supported for <<apm-lambda-cold-start-info,AWS Lambda>>
 functions and Azure functions.
 
-[role="screenshot"]
-image::apm/images/lambda-cold-start.png[lambda cold start graph]
-
 [discrete]
 [[service-instances]]
 === Instances
