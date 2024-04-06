@@ -205,25 +205,22 @@ const ComparisonSettings = ({
         />
 
         <SectionHeader
-          title={<FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Basic" />}
+          title={<FormattedMessage id="unifiedDataTable.diffModesBasic" defaultMessage="Basic" />}
           type="subsection"
         />
 
         <DiffModeEntry entryDiffMode="basic" diffMode={diffMode} setDiffMode={setDiffMode}>
-          <FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Full value" />
+          <FormattedMessage id="unifiedDataTable.diffModeFullValue" defaultMessage="Full value" />
         </DiffModeEntry>
 
         <SectionHeader
           title={
-            <FormattedMessage id="unifiedDataTable.diffModeAdvanced" defaultMessage="Advanced" />
+            <FormattedMessage id="unifiedDataTable.diffModesAdvanced" defaultMessage="Advanced" />
           }
           description={
             <FormattedMessage
               id="unifiedDataTable.advancedDiffModesTooltip"
-              defaultMessage={
-                'Advanced modes offer enhanced diffing capabilities, but operate ' +
-                'on raw documents and therefore do not support field formatting.'
-              }
+              defaultMessage="Advanced modes offer enhanced diffing capabilities, but operate on raw documents and therefore do not support field formatting."
             />
           }
           type="subsection"
