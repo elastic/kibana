@@ -25,6 +25,8 @@ import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
 import { ImageConfig } from '../types';
 import { createValidateUrl } from '../utils/validate_url';
 import { ImageClickContext } from '../actions';
+import { inject } from './persistable_state/inject';
+import { extract } from './persistable_state/extract';
 
 export interface ImageEmbeddableFactoryDeps {
   start: () => {
@@ -110,4 +112,8 @@ export class ImageEmbeddableFactoryDefinition
 
   private getImageDownloadHref = (fileId: string) =>
     this.deps.start().files.getDownloadHref({ id: fileId, fileKind: imageEmbeddableFileKind.id });
+
+  public inject = inject;
+
+  public extract = extract;
 }

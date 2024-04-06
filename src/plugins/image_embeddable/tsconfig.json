@@ -21,7 +21,8 @@
     "@kbn/core-http-browser",
     "@kbn/shared-ux-file-image",
     "@kbn/ui-actions-plugin",
-    "@kbn/screenshot-mode-plugin"
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/content-management-utils"
   ],
   "exclude": [
     "target/**/*",
