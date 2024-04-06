@@ -38,10 +38,17 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
           const fleet = ctx.securitySolution.getInternalFleetServices();
 
           const [packages, packagePolicies] = await Promise.all([
-            fleet.packages.getPackages(),
+            fleet.packages.getPackages({ category: 'security' }),
             fleet.packagePolicy.list(fleet.internalReadonlySoClient, {}),
           ]);
-          const integrations = extractIntegrations(packages, packagePolicies.items);
+          // Elastic prebuilt rules is a special packages and should be skipped
+          const packagesWithoutPrebuiltSecurityRules = packages.filter(
+            (x) => x.name !== 'security_detection_engine'
+          );
+          const integrations = extractIntegrations(
+            packagesWithoutPrebuiltSecurityRules,
+            packagePolicies.items
+          );
 
           const body: GetAllIntegrationsResponse = {
             integrations,

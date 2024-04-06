@@ -46,6 +46,18 @@ export function extractIntegrations(
 
       result.push(integration);
     }
+
+    // some packages don't have policy templates at al, e.g. Lateral Movement Detection
+    if (packagePolicyTemplates.length === 0) {
+      result.push({
+        package_name: packageName,
+        package_title: packageTitle,
+        latest_package_version: fleetPackage.version,
+        installed_package_version: installedPackageVersion,
+        is_installed: isPackageInstalled,
+        is_enabled: enabledIntegrationsSet.has(getIntegrationId(packageName, '')),
+      });
+    }
   }
 
   return result;
