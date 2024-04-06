@@ -39,6 +39,7 @@ import {
   usePager,
 } from '@kbn/discover-utils';
 import {
+  containsEcsFields,
   fieldNameWildcardMatcher,
   getFieldSearchMatchingHighlight,
   getTextBasedColumnIconType,
@@ -377,7 +378,7 @@ export const DocViewerTable = ({
                     fieldMapping?.displayName ?? field,
                     searchText
                   )}
-                  showEcsInfo={dataView.fields.getByName('ecs.version') !== undefined}
+                  showEcsInfo={containsEcsFields(dataView.getFieldByName)}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell

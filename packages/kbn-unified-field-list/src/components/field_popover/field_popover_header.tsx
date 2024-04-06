@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldDescription } from '@kbn/field-utils';
+import { FieldDescription, getFieldDescription } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
@@ -52,7 +52,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   if (!field) {
     return null;
   }
-  const description = showEcsInfo ? field?.ecsDescription : field?.customDescription;
+  const description = getFieldDescription(field.name, field.customDescription, showEcsInfo);
 
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',

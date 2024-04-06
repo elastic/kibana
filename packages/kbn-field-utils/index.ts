@@ -17,6 +17,9 @@ export {
 export { getTextBasedColumnIconType } from './src/utils/get_text_based_column_icon_type';
 export { getFieldIconType } from './src/utils/get_field_icon_type';
 export { getFieldType } from './src/utils/get_field_type';
+export { getFieldDescription } from './src/utils/get_field_description';
+
+export { containsEcsFields } from './src/utils/contains_ecs_fields';
 export { getFieldTypeDescription } from './src/utils/get_field_type_description';
 export { getFieldTypeName, UNKNOWN_FIELD_TYPE_MESSAGE } from './src/utils/get_field_type_name';
 export {

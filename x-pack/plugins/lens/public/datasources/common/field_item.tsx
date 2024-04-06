@@ -25,6 +25,7 @@ import {
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
+import { containsEcsFields } from '@kbn/field-utils';
 import { DatasourceDataPanelProps } from '../../types';
 import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
@@ -99,7 +100,9 @@ export function InnerFieldItem(props: FieldItemProps) {
     }
     return new DataViewField(field);
   }, [field]);
-  const showEcsInfo = Boolean(indexPattern?.getFieldByName('ecs.version'));
+  const showEcsInfo = Boolean(
+    indexPattern && containsEcsFields(indexPattern.getFieldByName as DataView['getFieldByName'])
+  );
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;
   const [infoIsOpen, setOpen] = useState(false);

@@ -14,7 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { FieldDescriptionIconButton, getFieldTypeName } from '@kbn/field-utils';
+import {
+  FieldDescriptionIconButton,
+  getFieldDescription,
+  getFieldTypeName,
+} from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
@@ -41,7 +45,9 @@ export function FieldName({
   const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
-  const description = showEcsInfo ? fieldMapping?.ecsDescription : fieldMapping?.customDescription;
+  const description = fieldMapping
+    ? getFieldDescription(fieldMapping?.name, fieldMapping?.customDescription, showEcsInfo)
+    : '';
 
   return (
     <Fragment>
