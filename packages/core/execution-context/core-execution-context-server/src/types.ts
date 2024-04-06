@@ -14,4 +14,8 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 export interface IExecutionContextContainer {
   toString(): string;
   toJSON(): Readonly<KibanaExecutionContext>;
+  getCircuitBreaker(breaker: keyof Required<KibanaExecutionContext>['circuitBreakers']): number;
+  incrementCircuitBreaker(
+    breaker: keyof Required<KibanaExecutionContext>['circuitBreakers']
+  ): number;
 }
