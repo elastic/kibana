@@ -19,6 +19,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { Embeddable } from '@kbn/lens-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { getMlGlobalServices } from '../../../application/app';
 
@@ -28,6 +29,7 @@ export function createFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
+  dashboardService: DashboardStart,
   lens?: LensPublicStart
 ): Promise<void> {
   const {
@@ -53,6 +55,7 @@ export function createFlyout(
                 share,
                 data,
                 lens,
+                dashboardService,
                 mlServices: getMlGlobalServices(http),
               }}
             >
