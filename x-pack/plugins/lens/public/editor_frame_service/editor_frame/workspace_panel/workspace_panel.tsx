@@ -72,6 +72,7 @@ import {
   DatasourceStates,
   DataViewsState,
   selectExecutionContextSearch,
+  setIsWorkspaceLoading,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import {
@@ -93,6 +94,7 @@ export interface WorkspacePanelProps {
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  abortController?: AbortController;
 }
 
 interface WorkspaceState {
@@ -146,6 +148,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   lensInspector,
   getUserMessages,
   addUserMessages,
+  abortController,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -237,9 +240,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         events.push('ad_hoc_data_view');
       });
 
+      dispatchLens(setIsWorkspaceLoading(false));
+
       trackUiCounterEvents(events);
     }
-  }, [core.analytics]);
+  }, [core.analytics, dispatchLens]);
 
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
@@ -608,6 +613,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           visualizationRenderStartTime.current = performance.now();
         }}
         displayOptions={displayOptions}
+        abortController={abortController}
       />
     );
   };
@@ -704,6 +710,7 @@ export const VisualizationWrapper = ({
   onData$,
   onComponentRendered,
   displayOptions,
+  abortController,
 }: {
   expression: string | null | undefined;
   lensInspector: LensInspector;
@@ -718,11 +725,18 @@ export const VisualizationWrapper = ({
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
+  abortController?: AbortController;
 }) => {
+  const dispatchLens = useLensDispatch();
+
   useEffect(() => {
     onComponentRendered();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    dispatchLens(setIsWorkspaceLoading(true));
+  }, [dispatchLens, expression]);
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
@@ -774,6 +788,7 @@ export const VisualizationWrapper = ({
         expression={expression!}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
+        abortController={abortController}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         // @ts-expect-error upgrade typescript v4.9.5

@@ -131,6 +131,7 @@ export class EditorFrameService {
           indexPatternService,
           getUserMessages,
           addUserMessages,
+          abortController,
         }) => {
           return (
             <div className="lnsApp__frame">
@@ -146,6 +147,7 @@ export class EditorFrameService {
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                abortController={abortController}
               />
             </div>
           );

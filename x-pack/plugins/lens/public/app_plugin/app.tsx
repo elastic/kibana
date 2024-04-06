@@ -31,6 +31,7 @@ import {
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
+  selectIsWorkspaceLoading,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
@@ -111,6 +112,9 @@ export function App({
     visualization,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
+
+  const isWorkspaceLoading = useLensSelector(selectIsWorkspaceLoading);
+  const [isQueryLoading, setIsQueryLoading] = useState(false);
 
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
@@ -540,6 +544,20 @@ export function App({
     visualizationState: visualization,
   });
 
+  const [abortController, setAbortController] = useState(new AbortController());
+
+  useEffect(() => {
+    setIsQueryLoading(isWorkspaceLoading);
+    if (!isWorkspaceLoading) {
+      setAbortController(new AbortController());
+    }
+  }, [isWorkspaceLoading]);
+
+  const onCancel = () => {
+    abortController?.abort();
+    setIsQueryLoading(false);
+  };
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -577,6 +595,8 @@ export function App({
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          onCancel={onCancel}
+          isLoading={isQueryLoading}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -587,6 +607,7 @@ export function App({
             indexPatternService={indexPatternService}
             getUserMessages={getUserMessages}
             addUserMessages={addUserMessages}
+            abortController={abortController}
           />
         )}
       </div>
@@ -659,6 +680,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   addUserMessages,
   lensInspector,
   indexPatternService,
+  abortController,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
@@ -666,6 +688,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
+  abortController?: AbortController;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
@@ -675,6 +698,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
+      abortController={abortController}
     />
   );
 });

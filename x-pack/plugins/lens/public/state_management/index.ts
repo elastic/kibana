@@ -56,6 +56,7 @@ export const {
   setIsLoadLibraryVisible,
   registerLibraryAnnotationGroup,
   changeIndexPattern,
+  setIsWorkspaceLoading,
 } = lensActions;
 
 type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;

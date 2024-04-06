@@ -162,6 +162,7 @@ export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
 export const applyChanges = createAction<void>('lens/applyChanges');
 export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
+export const setIsWorkspaceLoading = createAction<boolean>('lens/setIsWorkspaceLoading');
 export const updateDatasourceState = createAction<{
   newDatasourceState: unknown;
   datasourceId: string;
@@ -318,6 +319,7 @@ export const lensActions = {
   removeDimension,
   syncLinkedDimensions,
   registerLibraryAnnotationGroup,
+  setIsWorkspaceLoading,
 };
 
 export const makeLensReducer = (storeDeps: LensStoreDeps) => {
@@ -369,6 +371,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       })
       .addCase(setChangesApplied, (state, { payload: applied }) => {
         state.changesApplied = applied;
+      })
+      .addCase(setIsWorkspaceLoading, (state, { payload: applied }) => {
+        state.workspaceIsLoading = applied;
       })
       .addCase(cloneLayer, (state, { payload: { layerId, newLayerId } }) => {
         const clonedIDsMap = new Map<string, string>();

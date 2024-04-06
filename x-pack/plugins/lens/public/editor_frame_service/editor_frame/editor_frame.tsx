@@ -50,6 +50,7 @@ export interface EditorFrameProps {
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  abortController?: AbortController;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -63,6 +64,8 @@ export function EditorFrame(props: EditorFrameProps) {
   const visualizationTypeIsKnown = Boolean(
     visualization.activeId && props.visualizationMap[visualization.activeId]
   );
+
+  const abortController = props.abortController;
 
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
@@ -139,6 +142,7 @@ export function EditorFrame(props: EditorFrameProps) {
               hasSuggestionForField={hasSuggestionForField}
               indexPatternService={props.indexPatternService}
               frame={framePublicAPI}
+              abortController={props.abortController}
             />
           </ErrorBoundary>
         }
@@ -173,6 +177,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
                 addUserMessages={props.addUserMessages}
+                abortController={abortController}
               />
             </ErrorBoundary>
           )
@@ -189,6 +194,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
                 core={props.core}
+                abortController={abortController}
                 showOnlyIcons
               />
             </ErrorBoundary>

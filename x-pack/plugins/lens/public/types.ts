@@ -116,6 +116,7 @@ export interface EditorFrameProps {
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  abortController?: AbortController;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
@@ -592,6 +593,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
   usedIndexPatterns?: string[];
+  abortController?: AbortController;
 }
 
 /** @internal **/
