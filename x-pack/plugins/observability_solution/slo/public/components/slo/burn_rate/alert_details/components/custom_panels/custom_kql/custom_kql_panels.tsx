@@ -9,6 +9,7 @@ import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { LogRateAnalysisPanel } from './log_rate_analysis_panel';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
+import { useLicense } from '../../../../../../../hooks/use_license';
 
 interface Props {
   slo: GetSLOResponse;
@@ -17,5 +18,9 @@ interface Props {
 }
 
 export function CustomKqlPanels({ slo, alert, rule }: Props) {
-  return <LogRateAnalysisPanel slo={slo} alert={alert} rule={rule} />;
+  const { hasAtLeast } = useLicense();
+  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
+  return hasLicenseForLogRateAnalysis ? (
+    <LogRateAnalysisPanel slo={slo} alert={alert} rule={rule} />
+  ) : null;
 }
