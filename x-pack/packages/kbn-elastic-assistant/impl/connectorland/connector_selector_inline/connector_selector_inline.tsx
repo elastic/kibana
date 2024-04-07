@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -30,10 +31,6 @@ interface Props {
 const inputContainerClassName = css`
   height: 32px;
 
-  .euiSuperSelect {
-    width: 400px;
-  }
-
   .euiSuperSelectControl {
     border: none;
     box-shadow: none;
@@ -48,9 +45,9 @@ const inputContainerClassName = css`
 `;
 
 const inputDisplayClassName = css`
+  margin-right: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 400px;
 `;
 
 const placeholderButtonClassName = css`
@@ -123,6 +120,45 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       [selectedConversation, setApiConfig, onConnectorSelected]
     );
 
+    if (isFlyoutMode) {
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          className={inputContainerClassName}
+          direction="row"
+          gutterSize="xs"
+          justifyContent={'flexStart'}
+          responsive={false}
+        >
+          {!isFlyoutMode && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.INLINE_CONNECTOR_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <ConnectorSelector
+              displayFancy={(displayText) => (
+                <EuiText
+                  className={inputDisplayClassName}
+                  size="s"
+                  color={euiThemeVars.euiColorPrimaryText}
+                >
+                  {displayText}
+                </EuiText>
+              )}
+              isOpen={isOpen}
+              isDisabled={localIsDisabled}
+              selectedConnectorId={selectedConnectorId}
+              setIsOpen={setIsOpen}
+              onConnectorSelectionChange={onChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -132,18 +168,16 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        {!isFlyoutMode && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.INLINE_CONNECTOR_LABEL}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.INLINE_CONNECTOR_LABEL}
+          </EuiText>
+        </EuiFlexItem>
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector
               displayFancy={(displayText) => (
-                <EuiText className={inputDisplayClassName} size="xs">
+                <EuiText css={inputDisplayClassName} size="s">
                   {displayText}
                 </EuiText>
               )}
@@ -156,22 +190,14 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           ) : (
             <span>
               <EuiButtonEmpty
-                css={
-                  isFlyoutMode &&
-                  css`
-                    padding: 0;
-                    height: auto;
-                    block-size: auto;
-                  `
-                }
                 className={placeholderButtonClassName}
-                color={isFlyoutMode ? 'primary' : 'text'}
+                color={'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"
                 isDisabled={localIsDisabled}
                 onClick={onConnectorClick}
-                size={isFlyoutMode ? 'm' : 'xs'}
+                size={'xs'}
               >
                 {selectedConnectorName}
               </EuiButtonEmpty>

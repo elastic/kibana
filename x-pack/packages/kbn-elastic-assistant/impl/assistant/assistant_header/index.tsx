@@ -34,7 +34,6 @@ interface OwnProps {
   onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
   title: string;
@@ -61,7 +60,6 @@ export const AssistantHeader: React.FC<Props> = ({
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
   title,
-  setCurrentConversation,
   conversations,
   refetchConversationsState,
 }) => {
@@ -74,13 +72,12 @@ export const AssistantHeader: React.FC<Props> = ({
   );
   const onConversationChange = useCallback(
     (updatedConversation) => {
-      setCurrentConversation(updatedConversation);
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,
       });
     },
-    [onConversationSelected, setCurrentConversation]
+    [onConversationSelected]
   );
   return (
     <>

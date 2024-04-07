@@ -39,3 +39,33 @@ export const DOCUMENTATION = i18n.translate(
     defaultMessage: 'documentation',
   }
 );
+
+export const EMPTY_SCREEN_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.emptyScreen.title',
+  {
+    defaultMessage: 'How I can help you?',
+  }
+);
+
+export const EMPTY_SCREEN_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.emptyScreen.description',
+  {
+    defaultMessage:
+      'Ask me anything from <strong>Summarize this alert</strong> to <strong>Help me build a query</strong> using the following system prompt:',
+  }
+);
+
+export const WELCOME_SCREEN_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.welcomeScreen.title',
+  {
+    defaultMessage: 'Welcome to Security AI Assistant!',
+  }
+);
+
+export const WELCOME_SCREEN_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.welcomeScreen.description',
+  {
+    defaultMessage:
+      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going!",
+  }
+);

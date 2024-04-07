@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -21,7 +23,7 @@ import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
-import { executeAction } from '../lib/executor';
+import { executeAction, StaticResponse } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -112,6 +114,8 @@ export const postActionsConnectorExecuteRoute = (
               content: c.content,
             }));
 
+            console.error('prevMessages', prevMessages);
+
             if (request.body.message) {
               const res = await dataClient?.appendConversationMessages({
                 existingConversation: conversation,
@@ -183,6 +187,58 @@ export const postActionsConnectorExecuteRoute = (
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
+
+          if (!prevMessages?.length && newMessage && conversationId) {
+            try {
+              const autoTitle = await executeAction({
+                actions,
+                request,
+                connectorId,
+                actionTypeId: connectors[0]?.actionTypeId,
+                params: {
+                  subAction: request.body.subAction,
+                  subActionParams: {
+                    model: request.body.model,
+                    messages: [
+                      {
+                        role: 'assistant',
+                        content:
+                          'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                      },
+                      newMessage,
+                    ],
+                    ...(connectors[0]?.actionTypeId === '.gen-ai'
+                      ? { n: 1, stop: null, temperature: 0.2 }
+                      : { temperature: 0, stopSequences: [] }),
+                  },
+                },
+                logger,
+              });
+              if ((autoTitle as StaticResponse).status === 'ok') {
+                try {
+                  // This regular expression captures a string enclosed in single or double quotes.
+                  // It extracts the string content without the quotes.
+                  // Example matches:
+                  // - "Hello, World!" => Captures: Hello, World!
+                  // - 'Another Example' => Captures: Another Example
+                  // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+                  const match = (autoTitle as StaticResponse).data.match(/^["']?([^"']+)["']?$/);
+                  const title = match ? match[1] : (autoTitle as StaticResponse).data;
+
+                  await dataClient?.updateConversation({
+                    conversationUpdateProps: {
+                      id: conversationId,
+                      title,
+                    },
+                  });
+                } catch (e) {
+                  /* empty */
+                }
+              }
+            } catch (e) {
+              /* empty */
+            }
+          }
 
           // if not langchain, call execute action directly and return the response:
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {

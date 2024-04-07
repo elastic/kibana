@@ -194,9 +194,26 @@ export const useConnectorSetup = ({
     [conversation, onConversationUpdate, refetchConnectors, setApiConfig]
   );
 
+  const handleClose = useCallback(() => {
+    setSelectedActionType(null);
+    setIsConnectorModalVisible(false);
+  }, []);
+
   return {
     comments,
-    prompt: (
+    prompt: isFlyoutMode ? (
+      <div data-test-subj="prompt">
+        <AddConnectorModal
+          actionTypeRegistry={actionTypeRegistry}
+          actionTypes={actionTypes}
+          onClose={handleClose}
+          onSaveConnector={onSaveConnector}
+          onSelectActionType={setSelectedActionType}
+          selectedActionType={selectedActionType}
+          actionTypeSelectorInline={true}
+        />
+      </div>
+    ) : (
       <div data-test-subj="prompt">
         {showAddConnectorButton && (
           <ConnectorButtonWrapper>
@@ -231,9 +248,9 @@ export const useConnectorSetup = ({
           <AddConnectorModal
             actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
-            onClose={() => setIsConnectorModalVisible(false)}
+            onClose={handleClose}
             onSaveConnector={onSaveConnector}
-            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+            onSelectActionType={setSelectedActionType}
             selectedActionType={selectedActionType}
           />
         )}

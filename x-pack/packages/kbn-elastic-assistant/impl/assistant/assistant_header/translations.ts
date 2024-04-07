@@ -49,13 +49,6 @@ export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
   }
 );
 
-export const RESET_CONVERSATION_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.resetConversationModal.resetConversationTitle',
-  {
-    defaultMessage: 'Reset conversation',
-  }
-);
-
 export const CANCEL_BUTTON_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.resetConversationModal.cancelButtonText',
   {

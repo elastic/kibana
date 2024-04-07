@@ -22,7 +22,7 @@ export interface Props {
   actionTypeId: string;
   logger: Logger;
 }
-interface StaticResponse {
+export interface StaticResponse {
   connector_id: string;
   data: string;
   status: string;

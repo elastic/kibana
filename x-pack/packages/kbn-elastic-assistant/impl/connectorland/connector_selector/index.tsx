@@ -170,6 +170,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           onChange={onChange}
           options={allConnectorOptions}
           valueOfSelected={selectedConnectorId ?? ''}
+          popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
         />
         {isConnectorModalVisible && (
           // Crashing management app otherwise
@@ -177,7 +178,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             <AddConnectorModal
               actionTypeRegistry={actionTypeRegistry}
               actionTypes={actionTypes}
-              onClose={() => setIsConnectorModalVisible(false)}
+              onClose={cleanupAndCloseModal}
               onSaveConnector={onSaveConnector}
               onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
               selectedActionType={selectedActionType}

@@ -6,17 +6,27 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
   isExpanded: boolean;
   setIsExpanded: (value: boolean) => void;
   children: React.ReactNode;
+  onConversationCreate?: () => Promise<void>;
 }
+
+const VerticalSeparator = styled.div`
+  :before {
+    content: '';
+    height: 100%;
+    border-left: 1px solid ${euiThemeVars.euiColorLightShade};
+  }
+`;
 
 /**
  * Navigation menu on the right panel only, with expand/collapse button and option to
@@ -24,53 +34,33 @@ export interface FlyoutNavigationProps {
  */
 
 export const FlyoutNavigation = memo<FlyoutNavigationProps>(
-  ({ isExpanded, setIsExpanded, children }) => {
-    const collapseDetails = useCallback(() => setIsExpanded(false), [setIsExpanded]);
+  ({ isExpanded, setIsExpanded, children, onConversationCreate }) => {
+    const onToggle = useCallback(() => setIsExpanded(!isExpanded), [isExpanded, setIsExpanded]);
 
-    const collapseButton = useMemo(
+    const toggleButton = useMemo(
       () => (
-        <EuiButtonEmpty
-          iconSide="left"
-          onClick={collapseDetails}
-          iconType="menuRight"
+        <EuiButtonIcon
+          onClick={onToggle}
+          iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
           size="xs"
-          aria-label={i18n.translate(
-            'xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel',
-            {
-              defaultMessage: 'Hide chats',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.elasticAssistant.flyout.right.header.collapseDetailButtonLabel"
-            defaultMessage="Hide chats"
-          />
-        </EuiButtonEmpty>
+          aria-label={
+            isExpanded
+              ? i18n.translate(
+                  'xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel',
+                  {
+                    defaultMessage: 'Hide chats',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel',
+                  {
+                    defaultMessage: 'Show chats',
+                  }
+                )
+          }
+        />
       ),
-      [collapseDetails]
-    );
-
-    const expandButton = useMemo(
-      () => (
-        <EuiButtonEmpty
-          iconSide="left"
-          onClick={() => setIsExpanded(true)}
-          iconType="menuLeft"
-          size="xs"
-          aria-label={i18n.translate(
-            'xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel',
-            {
-              defaultMessage: 'Show chats',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.elasticAssistant.flyout.right.header.expandDetailButtonLabel"
-            defaultMessage="Show chats"
-          />
-        </EuiButtonEmpty>
-      ),
-      [setIsExpanded]
+      [isExpanded, onToggle]
     );
 
     return (
@@ -89,7 +79,28 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           alignItems="center"
           gutterSize="none"
         >
-          <EuiFlexItem grow={false}>{isExpanded ? collapseButton : expandButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>{toggleButton}</EuiFlexItem>
+              {onConversationCreate && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <VerticalSeparator />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      color="primary"
+                      iconType="newChat"
+                      onClick={onConversationCreate}
+                    >
+                      {NEW_CHAT}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
           {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiPanel>

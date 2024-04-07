@@ -21,7 +21,6 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 import { isEmpty, findIndex, orderBy } from 'lodash';
 import { Conversation } from '../../../..';
-import { useConversation } from '../../use_conversation';
 import * as i18n from './translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -33,6 +32,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
+  onConversationCreate: () => void;
   refetchConversationsState: () => Promise<void>;
 }
 
@@ -78,13 +78,15 @@ export const ConversationSidePanel = React.memo<Props>(
     isDisabled = false,
     conversations,
     onConversationDeleted,
-    refetchConversationsState,
+    onConversationCreate,
   }) => {
-    const { createConversation } = useConversation();
     const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
     const conversationList = useMemo(
-      () => orderBy(Object.values(conversations), 'updatedAt', 'desc'),
+      () =>
+        orderBy(Object.values(conversations), 'updatedAt', 'desc').sort((a, b) =>
+          a.id.length > b.id.length ? -1 : 1
+        ),
       [conversations]
     );
 
@@ -100,7 +102,7 @@ export const ConversationSidePanel = React.memo<Props>(
             cTitle: previousConversation.title,
           });
         }
-        onConversationDeleted(conversation.title);
+        onConversationDeleted(conversation.id);
       },
       [currentConversation.id, onConversationDeleted, conversationList, onConversationSelected]
     );
@@ -154,36 +156,6 @@ export const ConversationSidePanel = React.memo<Props>(
       ]
     );
 
-    const onSubmit = useCallback(async () => {
-      if (conversations[i18n.NEW_CHAT]) {
-        onConversationSelected({
-          cId: conversations[i18n.NEW_CHAT].id,
-          cTitle: conversations[i18n.NEW_CHAT].title,
-        });
-        return;
-      }
-
-      const newConversation = await createConversation({
-        title: i18n.NEW_CHAT,
-        apiConfig: currentConversation.apiConfig,
-      });
-
-      await refetchConversationsState();
-
-      if (newConversation) {
-        onConversationSelected({
-          cId: newConversation.id,
-          cTitle: newConversation.title,
-        });
-      }
-    }, [
-      conversations,
-      createConversation,
-      currentConversation.apiConfig,
-      onConversationSelected,
-      refetchConversationsState,
-    ]);
-
     const handleCloseModal = useCallback(() => {
       setDeleteConversationItem(null);
     }, []);
@@ -199,8 +171,19 @@ export const ConversationSidePanel = React.memo<Props>(
 
     return (
       <>
-        <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem>
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <EuiFlexItem
+            css={css`
+              overflow: auto;
+            `}
+          >
             <EuiPanel hasShadow={false} borderRadius="none">
               <EuiListGroup
                 size="xs"
@@ -252,7 +235,7 @@ export const ConversationSidePanel = React.memo<Props>(
                 color="primary"
                 fill
                 iconType="discuss"
-                onClick={onSubmit}
+                onClick={onConversationCreate}
                 fullWidth
                 size="s"
               >

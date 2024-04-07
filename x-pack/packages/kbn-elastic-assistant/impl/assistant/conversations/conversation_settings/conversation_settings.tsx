@@ -165,22 +165,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.title]: updatedConversation,
+            [updatedConversation.id]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     defaultSystemPromptId: systemPromptId,
@@ -193,7 +193,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -236,22 +236,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [selectedConversation.title]: updatedConversation,
+            [selectedConversation.id]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     connectorId: connector?.id,
@@ -266,7 +266,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }
@@ -299,22 +299,22 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.title]: updatedConversation,
+            [updatedConversation.id]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}),
                   apiConfig: {
                     ...updatedConversation.apiConfig,
                     ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.title] ?? {}
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                       : {}
                     ).apiConfig ?? {}),
                     model,
@@ -327,7 +327,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
+                [updatedConversation.id]: updatedConversation,
               },
             });
           }

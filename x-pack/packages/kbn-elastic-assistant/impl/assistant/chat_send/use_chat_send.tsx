@@ -18,7 +18,7 @@ import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: Prompt[];
-  currentConversation: Conversation;
+  currentConversation: Conversation | undefined;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
@@ -28,7 +28,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
 
 export interface UseChatSend {
@@ -74,7 +74,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      if (!currentConversation.apiConfig) {
+      if (!currentConversation?.apiConfig) {
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
@@ -157,7 +157,7 @@ export const useChatSend = ({
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    if (!currentConversation.apiConfig) {
+    if (!currentConversation?.apiConfig) {
       toasts?.addError(
         new Error('The conversation needs a connector configured in order to send a message.'),
         {
@@ -207,9 +207,11 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    const updatedConversation = await clearConversation(currentConversation);
-    if (updatedConversation) {
-      setCurrentConversation(updatedConversation);
+    if (currentConversation) {
+      const updatedConversation = await clearConversation(currentConversation);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
     }
     setEditingSystemPromptId(defaultSystemPromptId);
   }, [

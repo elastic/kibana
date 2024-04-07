@@ -77,7 +77,7 @@ export interface AssistantProviderProps {
     regenerateMessage,
     showAnonymizedValues,
   }: {
-    currentConversation: Conversation;
+    currentConversation: Conversation | undefined;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: (conversationId: string) => void;
@@ -90,6 +90,12 @@ export interface AssistantProviderProps {
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
   toasts?: IToasts;
+}
+
+export interface UserAvatar {
+  color: string;
+  imageUrl?: string;
+  initials: string;
 }
 
 export interface UseAssistantContext {
@@ -119,12 +125,14 @@ export interface UseAssistantContext {
     showAnonymizedValues,
     refetchCurrentConversation,
     isFetchingResponse,
+    currentUserAvatar,
   }: {
-    currentConversation: Conversation;
+    currentConversation: Conversation | undefined;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
+    currentUserAvatar?: UserAvatar;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;

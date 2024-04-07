@@ -103,11 +103,11 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
               {...(isFlyoutMode
                 ? {
                     css: css`
-                      background: #fff;
+                      background: ${euiThemeVars.euiPageBackgroundColor};
                       border-radius: ${euiThemeVars.euiBorderRadius};
-                      color: ${euiThemeVars.euiColorPrimary};
 
                       > div:first-child {
+                        color: ${euiThemeVars.euiColorPrimary};
                         padding: ${euiThemeVars.euiFormControlPadding};
                       }
                     `,

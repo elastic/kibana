@@ -23,9 +23,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 interface Props {
   message: Message;
+  isFlyoutMode: boolean;
 }
 
-const CommentActionsComponent: React.FC<Props> = ({ message }) => {
+const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => {
   const toasts = useToasts();
   const basePath = useBasePath();
   const { cases } = useKibana().services;
@@ -65,7 +66,9 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   });
 
   const onAddToExistingCase = useCallback(() => {
-    showAssistantOverlay({ showOverlay: false });
+    if (!isFlyoutMode) {
+      showAssistantOverlay({ showOverlay: false });
+    }
 
     selectCaseModal.open({
       getAttachments: () => [
@@ -76,7 +79,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         },
       ],
     });
-  }, [content, selectCaseModal, showAssistantOverlay]);
+  }, [content, isFlyoutMode, selectCaseModal, showAssistantOverlay]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running

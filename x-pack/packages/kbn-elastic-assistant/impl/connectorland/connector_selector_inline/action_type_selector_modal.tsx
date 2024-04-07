@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +26,7 @@ interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
   onSelect: (actionType: ActionType) => void;
+  actionTypeSelectorInline: boolean;
 }
 const itemClassName = css`
   .euiKeyPadMenuItem__label {
@@ -34,21 +35,12 @@ const itemClassName = css`
   }
 `;
 
-export const ActionTypeSelectorModal = ({
-  actionTypes,
-  actionTypeRegistry,
-  onClose,
-  onSelect,
-}: Props) =>
-  actionTypes && actionTypes.length > 0 ? (
-    <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody>
+export const ActionTypeSelectorModal = React.memo(
+  ({ actionTypes, actionTypeRegistry, onClose, onSelect, actionTypeSelectorInline }: Props) => {
+    const content = useMemo(
+      () => (
         <EuiFlexGroup>
-          {actionTypes.map((actionType: ActionType) => {
+          {actionTypes?.map((actionType: ActionType) => {
             const fullAction = actionTypeRegistry.get(actionType.id);
             return (
               <EuiFlexItem data-test-subj="action-option" key={actionType.id} grow={false}>
@@ -66,6 +58,24 @@ export const ActionTypeSelectorModal = ({
             );
           })}
         </EuiFlexGroup>
-      </EuiModalBody>
-    </EuiModal>
-  ) : null;
+      ),
+      [actionTypeRegistry, actionTypes, onSelect]
+    );
+
+    if (actionTypes?.length === 0) return null;
+
+    if (actionTypeSelectorInline) return <>{content}</>;
+
+    return (
+      <EuiModal onClose={onClose} data-test-subj="action-type-selector-modal">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{i18n.INLINE_CONNECTOR_PLACEHOLDER}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>{content}</EuiModalBody>
+      </EuiModal>
+    );
+  }
+);
+
+ActionTypeSelectorModal.displayName = 'ActionTypeSelectorModal';

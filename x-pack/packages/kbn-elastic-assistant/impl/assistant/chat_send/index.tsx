@@ -54,7 +54,7 @@ export const ChatSend: React.FC<Props> = ({
   return (
     <EuiFlexGroup
       gutterSize="none"
-      alignItems={isFlyoutMode ? 'center' : 'flexStart'}
+      alignItems={isFlyoutMode ? 'flexEnd' : 'flexStart'}
       css={css`
         position: relative;
       `}
@@ -80,6 +80,7 @@ export const ChatSend: React.FC<Props> = ({
                 right: 0;
                 position: absolute;
                 margin-right: ${euiThemeVars.euiSizeS};
+                margin-bottom: ${euiThemeVars.euiSizeS};
               `
             : css`
                 left: -34px;

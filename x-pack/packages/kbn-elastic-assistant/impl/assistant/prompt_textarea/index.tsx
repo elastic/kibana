@@ -49,7 +49,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
     return (
       <EuiTextArea
         css={css`
-          padding-right: 42px !important;
+          padding-right: 64px !important;
           min-height: ${!isFlyoutMode ? '125px' : '56px'};
           max-height: ${!isFlyoutMode ? 'auto' : '350px'};
         `}
@@ -59,7 +59,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         data-test-subj={'prompt-textarea'}
         fullWidth
         autoFocus
-        resize="vertical"
+        resize="none"
         disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
         value={value}

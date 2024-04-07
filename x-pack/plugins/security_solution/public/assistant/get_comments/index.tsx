@@ -13,9 +13,19 @@ import React from 'react';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import styled from '@emotion/styled';
+import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
+
+// Matches EuiAvatar L
+const SpinnerWrapper = styled.div`
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+`;
 
 export interface ContentMessage extends Message {
   content: string;
@@ -48,13 +58,19 @@ export const getComments = ({
   refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
+  isFlyoutMode,
+  currentUserAvatar,
 }: {
   currentConversation: Conversation;
   isFetchingResponse: boolean;
   refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
+  isFlyoutMode: boolean;
+  currentUserAvatar?: UserAvatar;
 }): EuiCommentProps[] => {
+  if (!currentConversation) return [];
+
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
@@ -64,7 +80,11 @@ export const getComments = ({
     ? [
         {
           username: i18n.ASSISTANT,
-          timelineAvatar: <EuiLoadingSpinner size="xl" />,
+          timelineAvatar: (
+            <SpinnerWrapper>
+              <EuiLoadingSpinner size="xl" />
+            </SpinnerWrapper>
+          ),
           timestamp: '...',
           children: (
             <StreamComment
@@ -90,7 +110,14 @@ export const getComments = ({
 
       const messageProps = {
         timelineAvatar: isUser ? (
-          <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
+          <EuiAvatar
+            name="user"
+            size="l"
+            color={currentUserAvatar?.color ?? 'subdued'}
+            {...(currentUserAvatar?.imageUrl
+              ? { imageUrl: currentUserAvatar.imageUrl as string }
+              : { initials: currentUserAvatar?.initials })}
+          />
         ) : (
           <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),
@@ -137,7 +164,7 @@ export const getComments = ({
 
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
+        actions: <CommentActions message={transformedMessage} isFlyoutMode={isFlyoutMode} />,
         children: (
           <StreamComment
             connectorId={connectorId}

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiModal, EuiFlyout } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
-import { Assistant } from '..';
+import {
+  ShowAssistantOverlayProps,
+  useAssistantContext,
+  UserAvatar,
+} from '../../assistant_context';
+import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -30,8 +34,11 @@ const StyledEuiModal = styled(EuiModal)`
  */
 export interface Props {
   isFlyoutMode: boolean;
+  currentUserAvatar?: UserAvatar;
 }
-export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
+
+export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAvatar }) => {
+  const { euiTheme } = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
@@ -39,6 +46,8 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay, getLastConversationTitle } =
     useAssistantContext();
+
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -102,14 +111,31 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
     cleanupAndCloseModal();
   }, [cleanupAndCloseModal]);
 
+  const toggleChatHistory = useCallback(() => {
+    setChatHistoryVisible((prev) => {
+      if (flyoutRef?.current) {
+        const currentValue = parseInt(flyoutRef.current.style.inlineSize.split('px')[0], 10);
+        flyoutRef.current.style.inlineSize = `${
+          prev
+            ? currentValue - CONVERSATION_SIDE_PANEL_WIDTH
+            : currentValue + CONVERSATION_SIDE_PANEL_WIDTH
+        }px`;
+      }
+
+      return !prev;
+    });
+  }, []);
+
+  const flyoutRef = useRef<HTMLDivElement>();
+
   if (!isModalVisible) return null;
 
   if (isFlyoutMode) {
     return (
-      <EuiFlyout
+      <EuiFlyoutResizable
+        ref={flyoutRef}
         css={css`
-          inline-size: auto !important;
-
+          max-inline-size: calc(100% - 20px);
           > div {
             height: 100%;
           }
@@ -118,14 +144,20 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
         data-test-subj="ai-assistant-flyout"
         paddingSize="none"
         hideCloseButton
+        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+        maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+        // type="push"
       >
         <Assistant
           conversationTitle={conversationTitle}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           isFlyoutMode={isFlyoutMode}
+          chatHistoryVisible={chatHistoryVisible}
+          setChatHistoryVisible={toggleChatHistory}
+          currentUserAvatar={currentUserAvatar}
         />
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     );
   }
 
@@ -133,7 +165,13 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant conversationTitle={conversationTitle} promptContextId={promptContextId} />
+          <Assistant
+            conversationTitle={conversationTitle}
+            promptContextId={promptContextId}
+            chatHistoryVisible={chatHistoryVisible}
+            setChatHistoryVisible={toggleChatHistory}
+            currentUserAvatar={currentUserAvatar}
+          />
         </StyledEuiModal>
       )}
     </>

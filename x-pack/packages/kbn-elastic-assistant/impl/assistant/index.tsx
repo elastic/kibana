@@ -30,13 +30,14 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
+  EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { isEmpty } from 'lodash';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
+import { find } from 'lodash';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -48,7 +49,7 @@ import {
   mergeBaseWithPersistedConversations,
 } from './helpers';
 
-import { useAssistantContext } from '../assistant_context';
+import { useAssistantContext, UserAvatar } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -60,9 +61,13 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
+import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
 import { SystemPrompt } from './prompt_editor/system_prompt';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeaderFlyout } from './assistant_header/assistant_header_flyout';
+import * as i18n from './translations';
+
+export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
 const CommentContainer = styled('span')`
   display: flex;
@@ -80,6 +85,8 @@ import {
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
+import { getGenAiConfig } from '../connectorland/helpers';
+import { AssistantAnimatedIcon } from './assistant_animated_icon';
 
 export interface Props {
   conversationTitle?: string;
@@ -90,6 +97,9 @@ export interface Props {
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   isFlyoutMode?: boolean;
+  chatHistoryVisible: boolean;
+  setChatHistoryVisible: Dispatch<SetStateAction<boolean>>;
+  currentUserAvatar?: UserAvatar;
 }
 
 /**
@@ -105,6 +115,9 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationTitle,
   onCloseFlyout,
   isFlyoutMode = false,
+  chatHistoryVisible,
+  setChatHistoryVisible,
+  currentUserAvatar,
 }) => {
   const {
     assistantTelemetry,
@@ -123,13 +136,18 @@ const AssistantComponent: React.FC<Props> = ({
     baseConversations,
   } = useAssistantContext();
 
-  const { getDefaultConversation, getConversation, deleteConversation, setApiConfig } =
-    useConversation();
+  const {
+    getDefaultConversation,
+    getConversation,
+    deleteConversation,
+    setApiConfig,
+    createConversation,
+  } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
-  const [conversations, setConversations] = useState<Record<string, Conversation>>({});
+
   const selectedPromptContextsCount = useMemo(
     () => Object.keys(selectedPromptContexts).length,
     [selectedPromptContexts]
@@ -141,26 +159,11 @@ const AssistantComponent: React.FC<Props> = ({
     [baseConversations]
   );
   const {
-    data: conversationsData,
+    data: conversations,
     isLoading,
-    isError,
-    refetch,
+    refetch: refetchResults,
     isSuccess: conversationsLoaded,
   } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
-
-  useEffect(() => {
-    if (!isLoading && !isError) {
-      setConversations(conversationsData ?? {});
-    }
-  }, [conversationsData, isError, isLoading]);
-
-  const refetchResults = useCallback(async () => {
-    const updatedConv = await refetch();
-    if (!updatedConv.isLoading) {
-      setConversations(updatedConv.data ?? {});
-      return updatedConv.data;
-    }
-  }, [refetch]);
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
@@ -168,13 +171,11 @@ const AssistantComponent: React.FC<Props> = ({
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-  const [currentConversation, setCurrentConversation] = useState<Conversation>(
-    getDefaultConversation({
-      cTitle: isAssistantEnabled
-        ? getLastConversationTitle(conversationTitle)
-        : WELCOME_CONVERSATION_TITLE,
-    })
+  const [currentConversationId, setCurrentConversationId] = useState<string>(
+    isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
   );
+
+  const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
 
   useEffect(() => {
     if (setConversationTitle && currentConversation?.title) {
@@ -187,43 +188,48 @@ const AssistantComponent: React.FC<Props> = ({
       if (cId === '' || (cTitle && !conversations[cTitle])) {
         return;
       }
-      const updatedConversation = await getConversation(
-        cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id
-      );
 
-      if (updatedConversation) {
-        setCurrentConversation(updatedConversation);
+      const conversationId = cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
+
+      if (conversationId) {
+        const updatedConversation = await getConversation(conversationId);
+
+        return updatedConversation;
       }
-      return updatedConversation;
     },
     [conversations, currentConversation?.id, getConversation]
   );
 
   useEffect(() => {
     if (conversationsLoaded && Object.keys(conversations).length > 0) {
-      const conversation =
-        conversations[currentConversation?.title ?? getLastConversationTitle(conversationTitle)];
-      // Set the last conversation as current conversation or use persisted or non-persisted Welcom conversation
-      setCurrentConversation(
-        conversation ??
+      setCurrentConversation((prev) => {
+        const nextConversation =
+          conversations[currentConversationId] ??
+          find(conversations, ['title', currentConversationId]);
+        if (prev?.id === nextConversation?.id) return prev;
+
+        return (
+          conversations[nextConversation?.id] ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
-      );
+        );
+      });
     }
   }, [
     conversationTitle,
     conversations,
-    currentConversation?.title,
     getDefaultConversation,
     getLastConversationTitle,
     conversationsLoaded,
+    currentConversation?.id,
+    currentConversationId,
   ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
     // if any conversation has a connector id, we're not in welcome set up
     return Object.keys(conversations).some(
-      (conversation) => conversations[conversation].apiConfig?.connectorId != null
+      (conversation) => conversations[conversation]?.apiConfig?.connectorId != null
     )
       ? false
       : (connectors?.length ?? 0) === 0;
@@ -233,7 +239,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () => getBlockBotConversation(currentConversation, isAssistantEnabled),
+    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
     [currentConversation, isAssistantEnabled]
   );
 
@@ -253,7 +259,7 @@ const AssistantComponent: React.FC<Props> = ({
   }, [
     areConnectorsFetched,
     connectors?.length,
-    conversationsData,
+    conversations,
     currentConversation?.excludeFromLastConversationStorage,
     currentConversation?.title,
     isLoading,
@@ -269,25 +275,29 @@ const AssistantComponent: React.FC<Props> = ({
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
   const [_, setCodeBlockControlsVisible] = useState(false);
   useLayoutEffect(() => {
-    // need in order for code block controls to be added to the DOM
-    setTimeout(() => {
-      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
-    }, 0);
+    if (currentConversation) {
+      // need in order for code block controls to be added to the DOM
+      setTimeout(() => {
+        setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
+      }, 0);
+    }
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched && !currentConversation?.apiConfig?.connectorId) {
-      return (
-        connectors?.some(
-          (connector) => connector.id === currentConversation.apiConfig?.connectorId
-        ) ?? false
+    if (!isLoading && areConnectorsFetched) {
+      if (!currentConversation?.apiConfig?.connectorId) {
+        return true;
+      }
+
+      return !connectors?.some(
+        (connector) => connector.id === currentConversation.apiConfig?.connectorId
       );
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation.apiConfig?.connectorId, isLoading]);
+  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -340,28 +350,26 @@ const AssistantComponent: React.FC<Props> = ({
 
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
+      const updatedConv = await refetchResults();
+
       if (cId === '') {
-        const updatedConv = await refetchResults();
-        if (updatedConv) {
-          setCurrentConversation(updatedConv[cTitle]);
-          setEditingSystemPromptId(
-            getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
-          );
-        }
+        setCurrentConversationId(cTitle);
+        setEditingSystemPromptId(
+          getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv?.data?.[cTitle] })
+            ?.id
+        );
       } else {
-        const refetchedConversation = await refetchCurrentConversation({ cId, cTitle });
+        const refetchedConversation = await refetchCurrentConversation({ cId });
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
         if (refetchedConversation) {
-          setConversations({
-            ...conversations,
-            [refetchedConversation.title]: refetchedConversation,
-          });
+          setCurrentConversation(refetchedConversation);
         }
+        setCurrentConversationId(cId);
       }
     },
-    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
@@ -369,10 +377,9 @@ const AssistantComponent: React.FC<Props> = ({
     conversation: blockBotConversation,
     onConversationUpdate: handleOnConversationSelected,
     onSetupComplete: () => {
-      setConversations({
-        ...conversations,
-        [currentConversation?.title]: clearPresentationData(currentConversation),
-      });
+      if (currentConversation) {
+        setCurrentConversation(clearPresentationData(currentConversation));
+      }
     },
   });
 
@@ -439,7 +446,7 @@ const AssistantComponent: React.FC<Props> = ({
       }
     }
   }, [
-    currentConversation.messages,
+    currentConversation?.messages,
     promptContexts,
     promptContextId,
     conversationTitle,
@@ -508,6 +515,7 @@ const AssistantComponent: React.FC<Props> = ({
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
+            currentUserAvatar,
           })}
           {...(!isFlyoutMode
             ? {
@@ -528,12 +536,12 @@ const AssistantComponent: React.FC<Props> = ({
               })}
         />
 
-        {currentConversation.messages.length !== 0 && selectedPromptContextsCount > 0 && (
+        {currentConversation?.messages.length !== 0 && selectedPromptContextsCount > 0 && (
           <EuiSpacer size={'m'} />
         )}
 
         {!isFlyoutMode &&
-          (currentConversation.messages.length === 0 || selectedPromptContextsCount > 0) && (
+          (currentConversation?.messages.length === 0 || selectedPromptContextsCount > 0) && (
             <ModalPromptEditorWrapper>
               <PromptEditor
                 conversation={currentConversation}
@@ -553,26 +561,27 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      refetchCurrentConversation,
-      currentConversation,
-      editingSystemPromptId,
       getComments,
-      handleOnSystemPromptSelectionChange,
+      currentConversation,
+      showAnonymizedValues,
+      refetchCurrentConversation,
       handleRegenerateResponse,
-      isFlyoutMode,
       isLoadingChatSend,
+      currentUserAvatar,
+      isFlyoutMode,
+      selectedPromptContextsCount,
+      editingSystemPromptId,
       isNewConversation,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
+      handleOnSystemPromptSelectionChange,
       selectedPromptContexts,
-      selectedPromptContextsCount,
-      showAnonymizedValues,
     ]
   );
 
   const comments = useMemo(() => {
-    if (isDisabled) {
+    if (isDisabled && !isFlyoutMode) {
       return (
         <EuiCommentList
           comments={connectorComments}
@@ -584,47 +593,42 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return chatbotComments;
-  }, [isDisabled, chatbotComments, connectorComments]);
+  }, [isDisabled, isFlyoutMode, chatbotComments, connectorComments]);
 
   const trackPrompt = useCallback(
     (promptTitle: string) => {
-      assistantTelemetry?.reportAssistantQuickPrompt({
-        conversationId: currentConversation?.title,
-        promptTitle,
-      });
+      if (currentConversation?.title) {
+        assistantTelemetry?.reportAssistantQuickPrompt({
+          conversationId: currentConversation?.title,
+          promptTitle,
+        });
+      }
     },
     [assistantTelemetry, currentConversation?.title]
   );
 
-  const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
-
   const refetchConversationsState = useCallback(async () => {
-    const refetchedConversations = await refetchResults();
-
-    if (refetchedConversations) {
-      const conversation = Object.values(refetchedConversations).find(
-        (c) =>
-          (!isEmpty(currentConversation?.id) && c.id === currentConversation?.id) ||
-          c.title === currentConversation?.title
-      );
-
-      if (conversation) {
-        setCurrentConversation(conversation);
-      }
-    }
-  }, [currentConversation?.id, currentConversation?.title, refetchResults]);
+    await refetchResults();
+  }, [refetchResults]);
 
   useEffect(() => {
     if (
       showMissingConnectorCallout &&
       areConnectorsFetched &&
       defaultConnector &&
-      !currentConversation.excludeFromLastConversationStorage &&
+      !currentConversation?.excludeFromLastConversationStorage &&
+      currentConversation?.id.length &&
       setApiConfig
     ) {
+      const apiConfig = getGenAiConfig(defaultConnector);
       setApiConfig({
         conversation: currentConversation,
-        apiConfig: { connectorId: defaultConnector.id },
+        apiConfig: {
+          ...currentConversation.apiConfig,
+          connectorId: defaultConnector.id,
+          provider: apiConfig?.apiProvider,
+          model: apiConfig?.defaultModel,
+        },
       }).then(() => refetchConversationsState());
     }
   }, [
@@ -636,6 +640,39 @@ const AssistantComponent: React.FC<Props> = ({
     areConnectorsFetched,
   ]);
 
+  const handleCreateConversation = useCallback(async () => {
+    const newChatExists = find(conversations, ['title', NEW_CHAT]);
+    if (newChatExists && !newChatExists.messages.length) {
+      handleOnConversationSelected({
+        cId: newChatExists.id,
+        cTitle: newChatExists.title,
+      });
+      return;
+    }
+
+    const newConversation = await createConversation({
+      title: NEW_CHAT,
+      apiConfig: currentConversation?.apiConfig,
+    });
+
+    await refetchConversationsState();
+
+    if (newConversation) {
+      handleOnConversationSelected({
+        cId: newConversation.id,
+        cTitle: newConversation.title,
+      });
+    }
+  }, [
+    conversations,
+    createConversation,
+    currentConversation?.apiConfig,
+    handleOnConversationSelected,
+    refetchConversationsState,
+  ]);
+
+  if (!currentConversation) return <></>;
+
   if (isFlyoutMode) {
     return (
       <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
@@ -643,7 +680,7 @@ const AssistantComponent: React.FC<Props> = ({
           <EuiFlexItem
             grow={false}
             css={css`
-              inline-size: 220px;
+              inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
               border-right: 1px solid ${euiThemeVars.euiColorLightShade};
             `}
           >
@@ -652,13 +689,14 @@ const AssistantComponent: React.FC<Props> = ({
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
+              onConversationCreate={handleCreateConversation}
               refetchConversationsState={refetchConversationsState}
             />
           </EuiFlexItem>
         )}
         <EuiFlexItem
           css={css`
-            inline-size: 50vw;
+            overflow: hidden;
           `}
         >
           <CommentContainer>
@@ -679,7 +717,6 @@ const AssistantComponent: React.FC<Props> = ({
                     docLinks={docLinks}
                     isDisabled={isDisabled}
                     isSettingsModalVisible={isSettingsModalVisible}
-                    setCurrentConversation={setCurrentConversation}
                     onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     showAnonymizedValues={showAnonymizedValues}
@@ -690,6 +727,7 @@ const AssistantComponent: React.FC<Props> = ({
                     onConversationSelected={handleOnConversationSelected}
                     conversations={conversations}
                     refetchConversationsState={refetchConversationsState}
+                    onConversationCreate={handleCreateConversation}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -700,6 +738,18 @@ const AssistantComponent: React.FC<Props> = ({
                     min-height: 100px;
                     flex: 1;
                   `}
+                  banner={
+                    !isDisabled &&
+                    showMissingConnectorCallout &&
+                    areConnectorsFetched && (
+                      <ConnectorMissingCallout
+                        isConnectorConfigured={connectors?.length > 0}
+                        isSettingsModalVisible={isSettingsModalVisible}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        isFlyoutMode={isFlyoutMode}
+                      />
+                    )
+                  }
                 >
                   <EuiPanel
                     hasShadow={false}
@@ -711,6 +761,79 @@ const AssistantComponent: React.FC<Props> = ({
                     {comments}
 
                     <EuiPanel hasShadow={false}>
+                      {isWelcomeSetup ? (
+                        <EuiFlexGroup justifyContent="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiPanel
+                              hasShadow={false}
+                              css={css`
+                                max-width: 400px;
+                                text-align: center;
+                              `}
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                justifyContent="center"
+                                direction="column"
+                              >
+                                <EuiFlexItem grow={false}>
+                                  <AssistantAnimatedIcon />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiText>
+                                    <h3>{i18n.WELCOME_SCREEN_TITLE}</h3>
+                                  </EuiText>
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiText color="subdued">
+                                    <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
+                                  </EuiText>
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false} data-test-subj="connector-prompt">
+                                  {connectorPrompt}
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiPanel>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ) : (
+                        currentConversation?.messages.length === 0 && (
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiPanel
+                                hasShadow={false}
+                                css={css`
+                                  max-width: 380px;
+                                `}
+                              >
+                                <EuiFlexGroup justifyContent="center" direction="column">
+                                  <EuiFlexItem grow={false}>
+                                    <AssistantAnimatedIcon />
+                                  </EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    <EuiText>
+                                      <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
+                                      <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
+                                    </EuiText>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    <SystemPrompt
+                                      conversation={currentConversation}
+                                      editingSystemPromptId={editingSystemPromptId}
+                                      onSystemPromptSelectionChange={
+                                        handleOnSystemPromptSelectionChange
+                                      }
+                                      isSettingsModalVisible={isSettingsModalVisible}
+                                      setIsSettingsModalVisible={setIsSettingsModalVisible}
+                                      isFlyoutMode
+                                    />
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
+                              </EuiPanel>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        )
+                      )}
                       <BlockBotCallToAction
                         connectorPrompt={connectorPrompt}
                         http={http}
@@ -718,21 +841,6 @@ const AssistantComponent: React.FC<Props> = ({
                         isWelcomeSetup={isWelcomeSetup}
                       />
                     </EuiPanel>
-
-                    {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
-                      <>
-                        <EuiSpacer />
-                        <EuiFlexGroup justifyContent="spaceAround">
-                          <EuiFlexItem grow={false}>
-                            <ConnectorMissingCallout
-                              isConnectorConfigured={connectors?.length > 0}
-                              isSettingsModalVisible={isSettingsModalVisible}
-                              setIsSettingsModalVisible={setIsSettingsModalVisible}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </>
-                    )}
                   </EuiPanel>
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
@@ -767,7 +875,6 @@ const AssistantComponent: React.FC<Props> = ({
                       hasShadow={false}
                       hasBorder
                       css={
-                        currentConversation?.messages.length === 0 ||
                         selectedPromptContextsCount > 0
                           ? css`
                               background: ${euiThemeVars.euiColorLightestShade};
@@ -779,19 +886,6 @@ const AssistantComponent: React.FC<Props> = ({
                       }
                     >
                       <EuiFlexGroup direction="column" gutterSize="s">
-                        {currentConversation?.messages.length === 0 && (
-                          <EuiFlexItem grow={false}>
-                            <SystemPrompt
-                              conversation={currentConversation}
-                              editingSystemPromptId={editingSystemPromptId}
-                              onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-                              isSettingsModalVisible={isSettingsModalVisible}
-                              setIsSettingsModalVisible={setIsSettingsModalVisible}
-                              isFlyoutMode
-                            />
-                          </EuiFlexItem>
-                        )}
-
                         {Object.keys(selectedPromptContexts).length ? (
                           <EuiFlexItem grow={false}>
                             <SelectedPromptContexts
@@ -860,7 +954,6 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
-            setCurrentConversation={setCurrentConversation}
             defaultConnector={defaultConnector}
             docLinks={docLinks}
             isDisabled={isDisabled}
@@ -907,6 +1000,7 @@ const AssistantComponent: React.FC<Props> = ({
                       isConnectorConfigured={connectors?.length > 0}
                       isSettingsModalVisible={isSettingsModalVisible}
                       setIsSettingsModalVisible={setIsSettingsModalVisible}
+                      isFlyoutMode={isFlyoutMode}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

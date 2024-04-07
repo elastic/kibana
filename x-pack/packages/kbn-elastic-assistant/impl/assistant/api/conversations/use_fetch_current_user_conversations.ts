@@ -53,16 +53,19 @@ export const useFetchCurrentUserConversations = ({
     ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ];
 
-  return useQuery([cachingKeys, query], async () => {
-    const res = await http.fetch<FetchConversationsResponse>(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-      {
+  return useQuery(
+    [cachingKeys, query],
+    async () =>
+      http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         query,
         signal,
-      }
-    );
-    return onFetch(res);
-  });
+      }),
+    {
+      select: (data) => onFetch(data),
+      keepPreviousData: true,
+      initialData: { page: 1, perPage: 100, total: 0, data: [] },
+    }
+  );
 };

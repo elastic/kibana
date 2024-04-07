@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -112,19 +112,17 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      () => {
-        return conversationSettings[defaultSelectedConversation.title];
-      }
+    const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(
+      defaultSelectedConversation.id
     );
     const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
-      setSelectedConversation(conversation);
+      setSelectedConversationId(conversation?.id);
     }, []);
-    useEffect(() => {
-      if (selectedConversation != null) {
-        setSelectedConversation(conversationSettings[selectedConversation.title]);
-      }
-    }, [conversationSettings, selectedConversation]);
+
+    const selectedConversation = useMemo(
+      () => (selectedConversationId ? conversationSettings[selectedConversationId] : undefined),
+      [conversationSettings, selectedConversationId]
+    );
 
     // Quick Prompt Selection State
     const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
@@ -153,7 +151,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.title] == null;
+        conversationSettings[defaultSelectedConversation.id] == null;
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
@@ -170,7 +168,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       await onSave(saveResult);
     }, [
       conversationSettings,
-      defaultSelectedConversation.title,
+      defaultSelectedConversation.id,
       onConversationSelected,
       onSave,
       saveSettings,

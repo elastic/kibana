@@ -7,10 +7,7 @@
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import { useAssistantContext } from '../assistant_context';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
@@ -86,13 +83,7 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
   if (isFlyoutMode) {
     return (
       <EditorContainer data-test-subj="dataAnonymizationEditor">
-        <EuiPanel
-          hasShadow={false}
-          paddingSize="m"
-          css={css`
-            padding-top: 0;
-          `}
-        >
+        <EuiPanel hasShadow={false} paddingSize="m">
           {typeof selectedPromptContext.rawData === 'string' ? (
             <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
           ) : (

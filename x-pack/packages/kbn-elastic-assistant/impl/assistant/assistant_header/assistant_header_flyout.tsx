@@ -36,7 +36,6 @@ interface OwnProps {
   isSettingsModalVisible: boolean;
   onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   showAnonymizedValues: boolean;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
@@ -45,6 +44,7 @@ interface OwnProps {
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  onConversationCreate: () => Promise<void>;
 }
 
 type Props = OwnProps;
@@ -61,7 +61,6 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   isSettingsModalVisible,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  setCurrentConversation,
   showAnonymizedValues,
   onChatCleared,
   chatHistoryVisible,
@@ -70,6 +69,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   onConversationSelected,
   conversations,
   refetchConversationsState,
+  onConversationCreate,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -101,13 +101,12 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 
   const onConversationChange = useCallback(
     (updatedConversation) => {
-      setCurrentConversation(updatedConversation);
       onConversationSelected({
         cId: updatedConversation.id,
         cTitle: updatedConversation.title,
       });
     },
-    [onConversationSelected, setCurrentConversation]
+    [onConversationSelected]
   );
 
   const panels = useMemo(
@@ -132,11 +131,16 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   const handleReset = useCallback(() => {
     onChatCleared();
     closeDestroyModal();
-  }, [onChatCleared, closeDestroyModal]);
+    closePopover();
+  }, [onChatCleared, closeDestroyModal, closePopover]);
 
   return (
     <>
-      <FlyoutNavigation isExpanded={chatHistoryVisible} setIsExpanded={setChatHistoryVisible}>
+      <FlyoutNavigation
+        isExpanded={chatHistoryVisible}
+        setIsExpanded={setChatHistoryVisible}
+        onConversationCreate={onConversationCreate}
+      >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <AssistantSettingsButton
@@ -245,7 +249,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
       </EuiPanel>
       {isResetConversationModalVisible && (
         <EuiConfirmModal
-          title={i18n.RESET_CONVERSATION_TITLE}
+          title={i18n.RESET_CONVERSATION}
           onCancel={closeDestroyModal}
           onConfirm={handleReset}
           cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
