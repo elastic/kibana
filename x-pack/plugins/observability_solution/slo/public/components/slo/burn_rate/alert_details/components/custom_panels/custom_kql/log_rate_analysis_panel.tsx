@@ -52,6 +52,8 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     | undefined
   >();
   const params = slo.indicator.params as KQLCustomIndicator['params'];
+  const groupBy = slo.groupBy;
+  const groupings = slo.groupings;
   const { index } = params;
   const { data: dataViews = [] } = useFetchDataViews();
 
@@ -69,13 +71,17 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     };
 
     const getQuery = () => {
-      const esSearchRequest = getESQueryForLogRateAnalysis(params) as QueryDslQueryContainer;
+      const esSearchRequest = getESQueryForLogRateAnalysis(
+        params,
+        groupBy,
+        groupings
+      ) as QueryDslQueryContainer;
       if (esSearchRequest) {
         setEsSearchQuery(esSearchRequest);
       }
     };
     getDataView();
-  }, [index, dataViews, params, dataViewsService]);
+  }, [index, dataViews, params, dataViewsService, groupBy, groupings]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.

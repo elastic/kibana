@@ -351,6 +351,7 @@ type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
+type GroupingsSchema = t.TypeOf<typeof groupingsSchema>;
 
 export {
   createSLOParamsSchema,
@@ -429,4 +430,5 @@ export type {
   GroupSummary,
   KqlWithFiltersSchema,
   QuerySchema,
+  GroupingsSchema,
 };

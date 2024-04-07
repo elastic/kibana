@@ -170,9 +170,28 @@ describe('buildEsQuery', () => {
         total: 'http.response.status_code: *',
       },
     },
+    {
+      title:
+        'rule with good query (as KQL), with optional filter (as KQL), total filter (as KQL) and group by two fields',
+      params: {
+        good: 'http.response.status_code < 500',
+        filter: 'host.name: admin-console.prod.001',
+        total: 'http.response.status_code: *',
+      },
+      groupBy: ['not_nested_1', 'not_nested_2'],
+      groupings: {
+        not_nested_1: 'authentication',
+        not_nested_2: 'blast-mail.co',
+      },
+    },
   ];
 
-  test.each(testData)('should generate correct es query for $title', ({ params }) => {
-    expect(getESQueryForLogRateAnalysis(params as KQLCustomIndicator['params'])).toMatchSnapshot();
-  });
+  test.each(testData)(
+    'should generate correct es query for $title',
+    ({ params, groupBy, groupings }) => {
+      expect(
+        getESQueryForLogRateAnalysis(params as KQLCustomIndicator['params'], groupBy, groupings)
+      ).toMatchSnapshot();
+    }
+  );
 });
