@@ -110,10 +110,14 @@ components:
       type: object
       required:
         - connectorId
+        - actionTypeId
       properties:
         connectorId:
           type: string
           description: connector Id
+        actionTypeId:
+          type: string
+          description: action type Id
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId
