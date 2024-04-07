@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { Dependency } from '../../../../../common/typings';
+import { Dependency } from '../../../../../common/types';
 import { KibanaSavedObjectsSLORepository } from '../../../../services';
 import { BurnRateRuleParams } from '../types';
 import { SLO } from '../../../../domain/models';

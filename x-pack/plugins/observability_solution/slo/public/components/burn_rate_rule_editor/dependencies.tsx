@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { useFetchSLOsWithBurnRateRules } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { Dependency } from '../../../common/typings';
+import { Dependency } from '../../../common/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
