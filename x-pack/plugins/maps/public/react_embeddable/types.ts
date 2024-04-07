@@ -7,10 +7,12 @@
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasLibraryTransforms,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
@@ -46,8 +48,10 @@ export interface MapSerializeState extends SerializedTitles {
 }
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
+  HasInspectorAdapters &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesUnifiedSearch &
   HasLibraryTransforms<MapSerializeState> & {
     setLayerList: (layerList: LayerDescriptor[]) => void;
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;

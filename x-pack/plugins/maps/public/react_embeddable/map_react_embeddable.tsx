@@ -60,9 +60,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       savedMap.getAttributes().title
     );
     const reduxSync = initializeReduxSync({
-      syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
+      savedMap,
       state,
-      store: savedMap.getStore(),
+      syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
       uuid,
     });
     const actionHandlers = initializeActionHandlers(getApi);

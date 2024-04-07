@@ -23,6 +23,7 @@ import {
   isMapLoading,
 } from '../selectors/map_selectors';
 import {
+  setEmbeddableSearchContext,
   setExecutionContext,
   setGotoWithCenter,
   setHiddenLayers,
@@ -33,7 +34,9 @@ import {
 } from '../actions';
 import type { MapSerializeState } from './types';
 import { getCharts, getExecutionContextService } from '../kibana_services';
-import { setChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
+import { getInspectorAdapters, setChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
+import { SavedMap } from '../routes';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -49,16 +52,18 @@ function getHiddenLayerIds(state: MapStoreState) {
 }
 
 export function initializeReduxSync({
-  syncColors$,
+  savedMap,
   state,
-  store,
+  syncColors$,
   uuid,
 }: {
-  syncColors$?: PublishingSubject<boolean | undefined>;
-  store: MapStore;
+  savedMap: SavedMap,
   state: MapSerializeState;
+  syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
 }) {
+  const store = savedMap.getStore();
+
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
   const hiddenLayers$ = new BehaviorSubject<string[]>(
@@ -114,6 +119,29 @@ export function initializeReduxSync({
   );
   store.dispatch(setExecutionContext(getExecutionContext(uuid, state.savedObjectId)));
 
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const query$ = new BehaviorSubject<AggregateQuery | Query | undefined>(undefined);
+  const mapStateJSON = savedMap.getAttributes().mapStateJSON;
+  if (mapStateJSON) {
+    try {
+      const mapState = JSON.parse(mapStateJSON);
+      if (mapState.filters) {
+        filters$.next(mapState.filters);
+      }
+      if (mapState.query) {
+        query$.next(mapState.query);
+      }
+      store.dispatch(
+        setEmbeddableSearchContext({
+          filters: mapState.filters,
+          query: mapState.query,
+        })
+      );
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+  }
+
   let syncColorsSubscription: Subscription | undefined;
   let syncColorsSymbol: symbol | undefined;
   if (syncColors$) {
@@ -136,6 +164,10 @@ export function initializeReduxSync({
     },
     api: {
       dataLoading: dataLoading$,
+      filters$,
+      getInspectorAdapters: () => {
+        return getInspectorAdapters(store.getState());
+      },
       onRenderComplete$: dataLoading$.pipe(
         filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
         debounceTime(RENDER_TIMEOUT),
@@ -145,6 +177,7 @@ export function initializeReduxSync({
           return;
         })
       ),
+      query$
     },
     comparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check

@@ -27,7 +27,6 @@ export function initializeDataViews(store: MapStore) {
     if (currentDataViewsFetchToken !== dataViewsFetchToken) {
       return;
     }
-    console.log('dataViews', dataViews);
     dataViews$.next(dataViews);
   }
 
@@ -44,7 +43,6 @@ export function initializeDataViews(store: MapStore) {
     updateLayerById: (layerDescriptor: LayerDescriptor) => {
       store.dispatch<any>(updateLayerDescriptor(layerDescriptor));
       updateDataViews();
-      syncLayerTokens[layerDescriptor.id] = Symbol();
       (async () => {
         const currentSyncLayerToken = Symbol();
         syncLayerTokens[layerDescriptor.id] = currentSyncLayerToken;

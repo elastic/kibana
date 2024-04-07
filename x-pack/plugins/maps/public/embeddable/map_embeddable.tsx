@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
-import { Query } from '@kbn/es-query';
 import {
   Embeddable,
   IContainer,
@@ -16,13 +13,11 @@ import {
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { setEmbeddableSearchContext } from '../actions';
 import {
-  getInspectorAdapters,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
-import { getEmbeddableSearchContext, getLayerList } from '../selectors/map_selectors';
+import { getLayerList } from '../selectors/map_selectors';
 import { APP_ID, getEditPath, getFullPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getHttp } from '../kibana_services';
@@ -44,8 +39,6 @@ export class MapEmbeddable
   deferEmbeddableLoad = true;
 
   private _savedMap: SavedMap;
-  private _domNode?: HTMLElement;
-  private _isInitialized = false;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -73,7 +66,6 @@ export class MapEmbeddable
       this.onFatalError(e);
       return;
     }
-    this._initializeStore();
     try {
       await this._initializeOutput();
     } catch (e) {
@@ -83,30 +75,6 @@ export class MapEmbeddable
 
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();
-
-    this._isInitialized = true;
-    if (this._domNode) {
-      this.render(this._domNode);
-    }
-  }
-
-  private _initializeStore() {
-    const store = this._savedMap.getStore();
-
-    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
-    if (mapStateJSON) {
-      try {
-        const mapState = JSON.parse(mapStateJSON);
-        store.dispatch(
-          setEmbeddableSearchContext({
-            filters: mapState.filters ? mapState.filters : [],
-            query: mapState.query,
-          })
-        );
-      } catch (e) {
-        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-      }
-    }
   }
 
   private async _initializeOutput() {
@@ -128,20 +96,6 @@ export class MapEmbeddable
     return getLayerList(this._savedMap.getStore().getState());
   }
 
-  public getFilters() {
-    const embeddableSearchContext = getEmbeddableSearchContext(
-      this._savedMap.getStore().getState()
-    );
-    return embeddableSearchContext ? embeddableSearchContext.filters : [];
-  }
-
-  public getQuery(): Query | undefined {
-    const embeddableSearchContext = getEmbeddableSearchContext(
-      this._savedMap.getStore().getState()
-    );
-    return embeddableSearchContext?.query;
-  }
-
   public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
@@ -153,21 +107,4 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
-
-  getInspectorAdapters() {
-    return getInspectorAdapters(this._savedMap.getStore().getState());
-  }
-
-  /**
-   *
-   * @param {HTMLElement} domNode
-   * @param {ContainerState} containerState
-   */
-  render(domNode: HTMLElement) {
-    this._domNode = domNode;
-    if (!this._isInitialized) {
-      return;
-    }
-    render(<div>Use react embeddable</div>, this._domNode);
-  }
 }
