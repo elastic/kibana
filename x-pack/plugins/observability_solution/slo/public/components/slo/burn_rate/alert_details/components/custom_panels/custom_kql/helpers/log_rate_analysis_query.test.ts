@@ -6,6 +6,7 @@
  */
 
 import { getESQueryForLogRateAnalysis } from './log_rate_analysis_query';
+import { KQLCustomIndicator } from '@kbn/slo-schema';
 
 describe('buildEsQuery', () => {
   // const index = 'mockedIndex';
@@ -172,6 +173,6 @@ describe('buildEsQuery', () => {
   ];
 
   test.each(testData)('should generate correct es query for $title', ({ params }) => {
-    expect(getESQueryForLogRateAnalysis(params)).toMatchSnapshot();
+    expect(getESQueryForLogRateAnalysis(params as KQLCustomIndicator['params'])).toMatchSnapshot();
   });
 });

@@ -7,8 +7,9 @@
 import { kqlWithFiltersSchema } from '@kbn/slo-schema';
 import { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
+import { KQLCustomIndicator } from '@kbn/slo-schema';
 
-export const getESQueryForLogRateAnalysis = (params) => {
+export const getESQueryForLogRateAnalysis = (params: KQLCustomIndicator['params']) => {
   const { filter, good, total } = params;
 
   const filterKuery = kqlWithFiltersSchema.is(filter) ? filter.kqlQuery : filter;
@@ -29,6 +30,5 @@ export const getESQueryForLogRateAnalysis = (params) => {
   const finalQuery = {
     bool: { filter: [customTotalFilter, customFilters], must_not: customGoodFilter },
   };
-  console.log(finalQuery, '!!finalQuery');
   return finalQuery;
 };

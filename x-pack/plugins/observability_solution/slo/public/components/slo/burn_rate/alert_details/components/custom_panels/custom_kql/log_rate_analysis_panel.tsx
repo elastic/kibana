@@ -5,24 +5,23 @@
  * 2.0.
  */
 import { pick, orderBy } from 'lodash';
-import { GetSLOResponse, kqlWithFiltersSchema } from '@kbn/slo-schema';
+import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisType,
-} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
+import { type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { colorTransformer, Color } from '@kbn/observability-shared-plugin/common';
+import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
+
 interface Props {
   slo: GetSLOResponse;
   alert: BurnRateAlert;
@@ -46,7 +45,7 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
     | undefined
   >();
-  const params = slo.indicator.params;
+  const params = slo.indicator.params as KQLCustomIndicator['params'];
   const { index } = params;
   const { data: dataViews = [] } = useFetchDataViews();
 
@@ -62,9 +61,9 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         getQuery();
       }
     };
+
     const getQuery = () => {
       const esSearchRequest = getESQueryForLogRateAnalysis(params) as QueryDslQueryContainer;
-      console.log(esSearchRequest, '!!esSearchRequest');
       if (esSearchRequest) {
         setEsSearchQuery(esSearchRequest);
       }
@@ -85,7 +84,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         )
       : moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
-  console.log(lookbackDuration, '!!lookbackDuration');
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
@@ -150,6 +148,8 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         : undefined
     );
   };
+
+  if (!dataView || !esSearchQuery) return null;
 
   return (
     <EuiPanel hasBorder={true} data-test-subj="logRateAnalysisBurnRateAlertDetails">
