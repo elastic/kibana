@@ -348,7 +348,6 @@ export class CasesConnectorExecutor {
         bulkCreateReq.push({
           recordId: error.id,
           payload: {
-            cases: [],
             rules: [{ id: params.rule.id }],
             grouping: record?.grouping ?? {},
           },

@@ -21,13 +21,6 @@ export const casesRulesSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      cases: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-        },
-      },
       counter: {
         type: 'unsigned_long',
       },
@@ -59,7 +52,6 @@ export const casesRulesSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          cases: schema.arrayOf(schema.object({ id: schema.string() })),
           counter: schema.number(),
           createdAt: schema.string(),
           grouping: schema.recordOf(schema.string(), schema.any()),

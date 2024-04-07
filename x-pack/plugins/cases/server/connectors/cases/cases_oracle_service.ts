@@ -12,7 +12,7 @@ import type {
   SavedObjectReference,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { CASE_RULES_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import { isSODecoratedError, isSOError } from '../../common/error';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
@@ -194,7 +194,6 @@ export class CasesOracleService {
     id: oracleRecord.id,
     version: oracleRecord.version ?? '',
     counter: oracleRecord.attributes.counter,
-    cases: oracleRecord.attributes.cases,
     grouping: oracleRecord.attributes.grouping,
     rules: oracleRecord.attributes.rules,
     createdAt: oracleRecord.attributes.createdAt,
@@ -231,10 +230,9 @@ export class CasesOracleService {
     };
   }
 
-  private getCreateRecordAttributes({ cases, rules, grouping }: OracleRecordCreateRequest) {
+  private getCreateRecordAttributes({ rules, grouping }: OracleRecordCreateRequest) {
     return {
       counter: INITIAL_ORACLE_RECORD_COUNTER,
-      cases,
       rules,
       grouping,
       createdAt: new Date().toISOString(),
@@ -243,7 +241,6 @@ export class CasesOracleService {
   }
 
   private getCreateRecordReferences({
-    cases,
     rules,
     grouping,
   }: OracleRecordCreateRequest): SavedObjectReference[] {
@@ -254,14 +251,6 @@ export class CasesOracleService {
         id: rule.id,
         type: RULE_SAVED_OBJECT_TYPE,
         name: `associated-${RULE_SAVED_OBJECT_TYPE}`,
-      });
-    }
-
-    for (const theCase of cases) {
-      references.push({
-        id: theCase.id,
-        type: CASE_SAVED_OBJECT,
-        name: `associated-${CASE_SAVED_OBJECT}`,
       });
     }
 

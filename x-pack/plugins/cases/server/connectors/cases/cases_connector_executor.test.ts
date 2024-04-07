@@ -200,7 +200,6 @@ describe('CasesConnectorExecutor', () => {
             {
               recordId: groupedAlertsWithOracleKey[0].oracleKey,
               payload: {
-                cases: [],
                 grouping: groupedAlertsWithOracleKey[0].grouping,
                 rules: [
                   {
@@ -212,7 +211,6 @@ describe('CasesConnectorExecutor', () => {
             {
               recordId: groupedAlertsWithOracleKey[1].oracleKey,
               payload: {
-                cases: [],
                 grouping: groupedAlertsWithOracleKey[1].grouping,
                 rules: [
                   {
@@ -224,7 +222,6 @@ describe('CasesConnectorExecutor', () => {
             {
               recordId: groupedAlertsWithOracleKey[2].oracleKey,
               payload: {
-                cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
                 rules: [
                   {
@@ -378,7 +375,6 @@ describe('CasesConnectorExecutor', () => {
             {
               recordId: groupedAlertsWithOracleKey[2].oracleKey,
               payload: {
-                cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
                 rules: [
                   {
@@ -418,7 +414,6 @@ describe('CasesConnectorExecutor', () => {
             {
               recordId: groupedAlertsWithOracleKey[2].oracleKey,
               payload: {
-                cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
                 rules: [
                   {
@@ -2604,7 +2599,6 @@ describe('CasesConnectorExecutor', () => {
       expect(mockBulkCreateRecords).toHaveBeenCalledWith([
         {
           payload: {
-            cases: [],
             grouping: {
               foo: 'bar',
             },

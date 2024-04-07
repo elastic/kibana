@@ -43,7 +43,6 @@ export type CaseIdPayload = OracleKey & { counter: number };
 export interface OracleRecord {
   id: string;
   counter: number;
-  cases: Array<{ id: string }>;
   grouping: Record<string, unknown>;
   rules: Array<{ id: string }>;
   createdAt: string;
@@ -61,7 +60,6 @@ export interface OracleRecordError {
 }
 
 export interface OracleRecordCreateRequest {
-  cases: Array<{ id: string }>;
   rules: Array<{ id: string }>;
   grouping: Record<string, unknown>;
 }

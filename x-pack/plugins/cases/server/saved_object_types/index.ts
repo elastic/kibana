@@ -13,7 +13,7 @@ import { createCaseCommentSavedObjectType } from './comments';
 import { createCaseUserActionSavedObjectType } from './user_actions';
 import { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 import { casesTelemetrySavedObjectType } from './telemetry';
-import { casesRulesSavedObjectType } from './cases_oracle';
+import { casesRulesSavedObjectType } from './cases_rules';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 interface RegisterSavedObjectsArgs {

@@ -162,7 +162,6 @@ describe('CasesOracleService', () => {
   });
 
   describe('getRecord', () => {
-    const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
     const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
@@ -171,7 +170,6 @@ describe('CasesOracleService', () => {
       version: 'so-version',
       attributes: {
         counter: 1,
-        cases,
         rules,
         grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
@@ -199,7 +197,6 @@ describe('CasesOracleService', () => {
   });
 
   describe('bulkGetRecord', () => {
-    const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
     const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
@@ -209,7 +206,6 @@ describe('CasesOracleService', () => {
         version: 'so-version',
         attributes: {
           counter: 1,
-          cases,
           rules,
           grouping,
           createdAt: '2023-10-10T10:23:42.769Z',
@@ -260,7 +256,6 @@ describe('CasesOracleService', () => {
   });
 
   describe('createRecord', () => {
-    const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
     const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
@@ -269,7 +264,6 @@ describe('CasesOracleService', () => {
       version: 'so-version',
       attributes: {
         counter: 1,
-        cases,
         rules,
         grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
@@ -284,7 +278,7 @@ describe('CasesOracleService', () => {
     });
 
     it('creates a record correctly', async () => {
-      const record = await service.createRecord('so-id', { cases, rules, grouping });
+      const record = await service.createRecord('so-id', { rules, grouping });
 
       expect(record).toEqual({ ...oracleSO.attributes, id: 'so-id', version: 'so-version' });
     });
@@ -292,12 +286,11 @@ describe('CasesOracleService', () => {
     it('calls the savedObjectsClient.create method correctly', async () => {
       const id = 'so-id';
 
-      await service.createRecord(id, { cases, rules, grouping });
+      await service.createRecord(id, { rules, grouping });
 
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'cases-rules',
         {
-          cases,
           counter: 1,
           createdAt: expect.anything(),
           rules,
@@ -312,11 +305,6 @@ describe('CasesOracleService', () => {
               name: 'associated-alert',
               type: 'alert',
             },
-            {
-              id: 'test-case-id',
-              name: 'associated-cases',
-              type: 'cases',
-            },
           ],
         }
       );
@@ -324,7 +312,6 @@ describe('CasesOracleService', () => {
   });
 
   describe('bulkCreateRecord', () => {
-    const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
     const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
@@ -334,7 +321,6 @@ describe('CasesOracleService', () => {
         version: 'so-version',
         attributes: {
           counter: 1,
-          cases,
           rules,
           grouping,
           createdAt: '2023-10-10T10:23:42.769Z',
@@ -361,8 +347,8 @@ describe('CasesOracleService', () => {
 
     it('formats the response correctly', async () => {
       const res = await service.bulkCreateRecord([
-        { recordId: 'so-id', payload: { cases, rules, grouping } },
-        { recordId: 'so-id-2', payload: { cases, rules, grouping } },
+        { recordId: 'so-id', payload: { rules, grouping } },
+        { recordId: 'so-id-2', payload: { rules, grouping } },
       ]);
 
       expect(res).toEqual([
@@ -373,14 +359,13 @@ describe('CasesOracleService', () => {
 
     it('calls the bulkCreate correctly', async () => {
       await service.bulkCreateRecord([
-        { recordId: 'so-id', payload: { cases, rules, grouping } },
-        { recordId: 'so-id-2', payload: { cases, rules, grouping } },
+        { recordId: 'so-id', payload: { rules, grouping } },
+        { recordId: 'so-id-2', payload: { rules, grouping } },
       ]);
 
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: {
-            cases,
             rules,
             grouping,
             counter: 1,
@@ -395,16 +380,10 @@ describe('CasesOracleService', () => {
               name: 'associated-alert',
               type: 'alert',
             },
-            {
-              id: 'test-case-id',
-              name: 'associated-cases',
-              type: 'cases',
-            },
           ],
         },
         {
           attributes: {
-            cases,
             rules,
             grouping,
             counter: 1,
@@ -419,11 +398,6 @@ describe('CasesOracleService', () => {
               name: 'associated-alert',
               type: 'alert',
             },
-            {
-              id: 'test-case-id',
-              name: 'associated-cases',
-              type: 'cases',
-            },
           ],
         },
       ]);
@@ -437,7 +411,6 @@ describe('CasesOracleService', () => {
   });
 
   describe('increaseCounter', () => {
-    const cases = [{ id: 'test-case-id' }];
     const rules = [{ id: 'test-rule-id' }];
     const grouping = { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' };
 
@@ -446,7 +419,6 @@ describe('CasesOracleService', () => {
       version: 'so-version',
       attributes: {
         counter: 1,
-        cases,
         rules,
         grouping,
         createdAt: '2023-10-10T10:23:42.769Z',
@@ -498,7 +470,6 @@ describe('CasesOracleService', () => {
         version: 'so-version',
         attributes: {
           counter: 1,
-          cases: [],
           rules: [],
           grouping: {},
           createdAt: '2023-10-10T10:23:42.769Z',
