@@ -9,11 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { createConversationRoute } from './create_route';
-import {
-  getBasicEmptySearchResponse,
-  getEmptyFindResult,
-  getFindConversationsResultWithSingleHit,
-} from '../../__mocks__/response';
+import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
 import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
 import {
   getCreateConversationSchemaMock,
