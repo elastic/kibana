@@ -7,3 +7,7 @@
 
 @import 'app';
 @import 'components/index';
+
+.ace_editor.ace_autocomplete {
+    resize: horizontal;
+}
