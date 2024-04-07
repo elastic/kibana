@@ -209,11 +209,6 @@ Object {
           "field": "slo.id",
         },
       },
-      "slo.instanceId": Object {
-        "terms": Object {
-          "field": "slo.instanceId",
-        },
-      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
@@ -259,12 +254,6 @@ Object {
       "slo.id": Object {
         "script": Object {
           "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.instanceId": Object {
-        "script": Object {
-          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -374,11 +363,6 @@ Object {
           "field": "slo.id",
         },
       },
-      "slo.instanceId": Object {
-        "terms": Object {
-          "field": "slo.instanceId",
-        },
-      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
@@ -424,12 +408,6 @@ Object {
       "slo.id": Object {
         "script": Object {
           "source": "emit('irrelevant')",
-        },
-        "type": "keyword",
-      },
-      "slo.instanceId": Object {
-        "script": Object {
-          "source": "emit('*')",
         },
         "type": "keyword",
       },

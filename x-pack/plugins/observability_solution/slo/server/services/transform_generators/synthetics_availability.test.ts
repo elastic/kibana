@@ -130,12 +130,6 @@ describe('Synthetics Availability Transform Generator', () => {
             },
             type: 'keyword',
           },
-          'slo.instanceId': {
-            script: {
-              source: "emit('*')",
-            },
-            type: 'keyword',
-          },
           'slo.revision': {
             script: {
               source: 'emit(1)',

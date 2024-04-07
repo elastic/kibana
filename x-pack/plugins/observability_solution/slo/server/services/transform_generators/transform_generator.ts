@@ -61,7 +61,7 @@ export abstract class TransformGenerator {
               },
             };
           }, {})
-        : { };
+        : {};
 
     return {
       'slo.id': { terms: { field: 'slo.id' } },

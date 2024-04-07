@@ -25,12 +25,6 @@ describe('Transform Generator', () => {
         },
         type: 'keyword',
       },
-      'slo.instanceId': {
-        script: {
-          source: "emit('*')",
-        },
-        type: 'keyword',
-      },
       'slo.revision': {
         script: {
           source: 'emit(1)',
@@ -51,11 +45,6 @@ describe('Transform Generator', () => {
       'slo.id': {
         terms: {
           field: 'slo.id',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
         },
       },
       'slo.revision': {
