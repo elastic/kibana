@@ -177,6 +177,6 @@ export const sloInstanceIdActionVariableDescription = i18n.translate(
 export const suppressedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.suppressedActionDescription',
   {
-    defaultMessage: 'The action group that was suppressed.',
+    defaultMessage: 'The suppressed action group.',
   }
 );
