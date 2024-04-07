@@ -87,7 +87,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
   // Note: There's a bug with URL params being rewritten, so must specify 'query' to filter on transaction id
   // See: https://github.com/elastic/kibana/issues/171368
   const apmTraceLink =
-    message.traceData != null
+    message.traceData != null && Object.keys(message.traceData).length > 0
       ? `${basePath}/app/apm/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
       : undefined;
 

@@ -128,6 +128,7 @@ const AssistantComponent: React.FC<Props> = ({
     docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationTitle,
     getLastConversationTitle,
@@ -158,12 +159,18 @@ const AssistantComponent: React.FC<Props> = ({
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
+  const [isStreaming, setIsStreaming] = useState(false);
+
   const {
     data: conversations,
     isLoading,
     refetch: refetchResults,
     isSuccess: conversationsLoaded,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    refetchOnWindowFocus: !isStreaming,
+  });
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
@@ -486,6 +493,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
@@ -510,11 +518,14 @@ const AssistantComponent: React.FC<Props> = ({
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
+            setIsStreaming,
             currentUserAvatar,
           })}
           {...(!isFlyoutMode
@@ -561,16 +572,19 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      getComments,
-      currentConversation,
-      showAnonymizedValues,
+      abortStream,
       refetchCurrentConversation,
+      currentConversation,
+      editingSystemPromptId,
+      getComments,
+      showAnonymizedValues,
       handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       isLoadingChatSend,
       currentUserAvatar,
       isFlyoutMode,
       selectedPromptContextsCount,
-      editingSystemPromptId,
       isNewConversation,
       isSettingsModalVisible,
       promptContexts,
@@ -626,6 +640,7 @@ const AssistantComponent: React.FC<Props> = ({
         apiConfig: {
           ...currentConversation.apiConfig,
           connectorId: defaultConnector.id,
+          actionTypeId: defaultConnector.actionTypeId,
           provider: apiConfig?.apiProvider,
           model: apiConfig?.defaultModel,
         },

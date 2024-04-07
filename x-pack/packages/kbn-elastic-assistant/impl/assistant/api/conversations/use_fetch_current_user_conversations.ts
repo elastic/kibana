@@ -24,6 +24,7 @@ export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
   onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
   signal?: AbortSignal | undefined;
+  refetchOnWindowFocus?: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
+  refetchOnWindowFocus = true,
 }: UseFetchCurrentUserConversationsParams) => {
   const query = {
     page: 1,
@@ -66,6 +68,7 @@ export const useFetchCurrentUserConversations = ({
       select: (data) => onFetch(data),
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      refetchOnWindowFocus,
     }
   );
 };
