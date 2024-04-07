@@ -64,7 +64,7 @@ interface Props {
   ) => void;
   isFlyoutMode: boolean;
   onSave: (success: boolean) => Promise<void>;
-  selectedConversation: Conversation;
+  selectedConversation: Conversation | undefined;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
 }
@@ -115,7 +115,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
     const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(
-      defaultSelectedConversation.id
+      defaultSelectedConversation?.id
     );
     const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
       setSelectedConversationId(conversation?.id);
@@ -153,7 +153,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.id] == null;
+        defaultSelectedConversation?.id &&
+        conversationSettings[defaultSelectedConversation?.id] == null;
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
@@ -170,7 +171,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       await onSave(saveResult);
     }, [
       conversationSettings,
-      defaultSelectedConversation.id,
+      defaultSelectedConversation?.id,
       onConversationSelected,
       onSave,
       saveSettings,

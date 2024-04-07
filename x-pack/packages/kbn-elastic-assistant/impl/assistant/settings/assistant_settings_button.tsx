@@ -17,7 +17,7 @@ import { useAssistantContext } from '../../assistant_context';
 interface Props {
   defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation;
+  selectedConversation: Conversation | undefined;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;

@@ -29,6 +29,7 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={false}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
+              isFlyoutMode={false}
             />
           </TestProviders>
         );
@@ -43,6 +44,7 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
+              isFlyoutMode={false}
             />
           </TestProviders>
         );
@@ -66,6 +68,7 @@ describe('connectorMissingCallout', () => {
               isConnectorConfigured={true}
               isSettingsModalVisible={false}
               setIsSettingsModalVisible={jest.fn()}
+              isFlyoutMode={false}
             />
           </TestProviders>
         );

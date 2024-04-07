@@ -155,13 +155,13 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
-        conversationId: testProps.currentConversation.title,
+        conversationId: testProps.currentConversation?.title,
         role: 'user',
         isEnabledKnowledgeBase: false,
         isEnabledRAGAlerts: false,
       });
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
-        conversationId: testProps.currentConversation.title,
+        conversationId: testProps.currentConversation?.title,
         role: 'assistant',
         isEnabledKnowledgeBase: false,
         isEnabledRAGAlerts: false,

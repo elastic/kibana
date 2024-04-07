@@ -14,7 +14,7 @@ import type { IHttpFetchError } from '@kbn/core/public';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 
-import { UseQueryResult } from '@tanstack/react-query';
+import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 
 import { useLocalStorage } from 'react-use';
@@ -40,7 +40,7 @@ jest.mock('./use_conversation');
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
     <TestProviders>
-      <Assistant {...extraProps} />
+      <Assistant chatHistoryVisible={false} setChatHistoryVisible={jest.fn()} {...extraProps} />
     </TestProviders>
   );
 
@@ -104,7 +104,7 @@ describe('Assistant', () => {
           },
         },
       }),
-    } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+    } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
   });
 
   let persistToLocalStorage: jest.Mock;
@@ -155,7 +155,7 @@ describe('Assistant', () => {
           isLoading: false,
           data: rest,
         }),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
       const chatSendSpy = jest.spyOn(all, 'useChatSend');
       const setConversationTitle = jest.fn();
 
@@ -237,7 +237,7 @@ describe('Assistant', () => {
         },
         isLoading: false,
         refetch: jest.fn(),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
 
       const { getByLabelText } = renderAssistant();
 
@@ -307,7 +307,7 @@ describe('Assistant', () => {
             },
           },
         }),
-      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
       renderAssistant();
 
       const previousConversationButton = screen.getByLabelText('Previous conversation');

@@ -25,6 +25,7 @@ import type { Conversation } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 /**
  * Renders a header title, a tooltip button, and a popover with
@@ -32,7 +33,7 @@ import { useConversation } from '../use_conversation';
  */
 export const AssistantTitle: React.FC<{
   isDisabled?: boolean;
-  title: string;
+  title?: string;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
   isFlyoutMode: boolean;
@@ -122,7 +123,7 @@ export const AssistantTitle: React.FC<{
           <EuiInlineEditTitle
             heading="h2"
             inputAriaLabel="Edit text inline"
-            value={newTitle}
+            value={newTitle ?? NEW_CHAT}
             size="xs"
             isInvalid={!!newTitleError}
             isReadOnly={selectedConversation?.isDefault}

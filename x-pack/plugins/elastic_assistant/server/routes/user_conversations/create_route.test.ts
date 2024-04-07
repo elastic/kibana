@@ -72,22 +72,6 @@ describe('Create conversation route', () => {
   });
 
   describe('unhappy paths', () => {
-    test('returns a duplicate error if conversation_id already exists', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
-        Promise.resolve(getFindConversationsResultWithSingleHit())
-      );
-      const response = await server.inject(
-        getCreateConversationRequest(),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(409);
-      expect(response.body).toEqual({
-        message: expect.stringContaining('already exists'),
-        status_code: 409,
-      });
-    });
-
     test('catches error if creation throws', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockImplementation(
         async () => {

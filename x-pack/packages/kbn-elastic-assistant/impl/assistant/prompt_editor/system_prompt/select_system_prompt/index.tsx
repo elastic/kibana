@@ -26,6 +26,7 @@ import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
 import { TEST_IDS } from '../../../constants';
+import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
 
 export interface Props {
   allSystemPrompts: Prompt[];
@@ -189,7 +190,15 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               options={[...options, addNewSystemPrompt]}
               placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
               valueOfSelected={valueOfSelected}
-              prepend={isFlyoutMode ? 'Select prompt' : undefined}
+              prepend={
+                isFlyoutMode && !isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined
+              }
+              css={
+                isFlyoutMode &&
+                css`
+                  padding-right: 56px !important;
+                `
+              }
             />
           </EuiFormRow>
         )}

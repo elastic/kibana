@@ -14,6 +14,7 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useMeasure } from 'react-use';
 
 import { css } from '@emotion/react';
 import { QuickPrompt } from '../../..';
@@ -23,7 +24,6 @@ import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
-const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,6 +38,8 @@ interface QuickPromptsProps {
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
   ({ setInput, setIsSettingsModalVisible, trackPrompt, isFlyoutMode }) => {
+    const [quickPromptsContainerRef, { width }] = useMeasure();
+
     const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
       useAssistantContext();
 
@@ -92,6 +94,14 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
       setSelectedSettingsTab(QUICK_PROMPTS_TAB);
     }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
+    const quickPrompts = useMemo(() => {
+      const visibleCount = Math.floor(width / 120);
+      const visibleItems = contextFilteredQuickPrompts.slice(0, visibleCount);
+      const overflowItems = contextFilteredQuickPrompts.slice(visibleCount);
+
+      return { visible: visibleItems, overflow: overflowItems };
+    }, [contextFilteredQuickPrompts, width]);
+
     return (
       <EuiFlexGroup
         gutterSize="s"
@@ -105,13 +115,17 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
         }
       >
         <EuiFlexItem
-          grow={false}
           css={css`
             overflow: hidden;
           `}
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
-            {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
+          <EuiFlexGroup
+            ref={quickPromptsContainerRef}
+            gutterSize="s"
+            alignItems="center"
+            wrap={false}
+          >
+            {quickPrompts.visible.map((badge, index) => (
               <EuiFlexItem
                 grow={false}
                 key={index}
@@ -128,7 +142,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                 </EuiBadge>
               </EuiFlexItem>
             ))}
-            {contextFilteredQuickPrompts.length > COUNT_BEFORE_OVERFLOW && (
+            {quickPrompts.overflow.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
@@ -152,19 +166,17 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
                   anchorPosition="rightUp"
                 >
                   <EuiFlexGroup direction="column" gutterSize="s">
-                    {contextFilteredQuickPrompts
-                      .slice(COUNT_BEFORE_OVERFLOW)
-                      .map((badge, index) => (
-                        <EuiFlexItem key={index} grow={false}>
-                          <EuiBadge
-                            color={badge.color}
-                            onClick={() => onClickOverflowQuickPrompt(badge)}
-                            onClickAriaLabel={badge.title}
-                          >
-                            {badge.title}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
+                    {quickPrompts.overflow.map((badge, index) => (
+                      <EuiFlexItem key={index} grow={false}>
+                        <EuiBadge
+                          color={badge.color}
+                          onClick={() => onClickOverflowQuickPrompt(badge)}
+                          onClickAriaLabel={badge.title}
+                        >
+                          {badge.title}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
                   </EuiFlexGroup>
                 </EuiPopover>
               </EuiFlexItem>

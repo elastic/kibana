@@ -73,6 +73,9 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
+          // Get the actions plugin start contract from the request context for the agents
+          const actionsClient = await assistantContext.actions.getActionsClientWithRequest(request);
+
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return response.unauthorized({
@@ -87,7 +90,7 @@ export const postActionsConnectorExecuteRoute = (
           };
 
           let onLlmResponse;
-          let prevMessages;
+          let prevMessages: Array<Pick<Message, 'content' | 'role'>> = [];
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -112,12 +115,11 @@ export const postActionsConnectorExecuteRoute = (
             }
 
             // messages are anonymized by dataClient
-            prevMessages = conversation?.messages?.map((c) => ({
-              role: c.role,
-              content: c.content,
-            }));
-
-            console.error('prevMessages', prevMessages);
+            prevMessages =
+              conversation?.messages?.map((c) => ({
+                role: c.role,
+                content: c.content,
+              })) ?? [];
 
             if (request.body.message) {
               const res = await dataClient?.appendConversationMessages({
@@ -183,6 +185,10 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
+          const connectors = await actionsClient.getBulk({
+            ids: [connectorId],
+            throwIfSystemAction: false,
+          });
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;

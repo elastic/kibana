@@ -25,7 +25,7 @@ import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
 
 interface OwnProps {
-  currentConversation: Conversation;
+  currentConversation?: Conversation;
   defaultConnector?: AIConnector;
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
@@ -65,10 +65,10 @@ export const AssistantHeader: React.FC<Props> = ({
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
-      currentConversation.replacements != null &&
-      Object.keys(currentConversation.replacements).length > 0 &&
+      currentConversation?.replacements != null &&
+      Object.keys(currentConversation?.replacements).length > 0 &&
       showAnonymizedValues,
-    [currentConversation.replacements, showAnonymizedValues]
+    [currentConversation?.replacements, showAnonymizedValues]
   );
   const onConversationChange = useCallback(
     (updatedConversation) => {
@@ -108,7 +108,7 @@ export const AssistantHeader: React.FC<Props> = ({
         >
           <ConversationSelector
             defaultConnector={defaultConnector}
-            selectedConversationTitle={currentConversation.title}
+            selectedConversationTitle={currentConversation?.title}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}
@@ -129,7 +129,7 @@ export const AssistantHeader: React.FC<Props> = ({
                     data-test-subj="showAnonymizedValues"
                     checked={showAnonymizedValuesChecked}
                     compressed={true}
-                    disabled={isEmpty(currentConversation.replacements)}
+                    disabled={isEmpty(currentConversation?.replacements)}
                     label={i18n.SHOW_ANONYMIZED}
                     onChange={onToggleShowAnonymizedValues}
                   />

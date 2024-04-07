@@ -29,7 +29,7 @@ import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
 
 interface OwnProps {
-  selectedConversation: Conversation;
+  selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
@@ -73,10 +73,10 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
-      selectedConversation.replacements != null &&
-      Object.keys(selectedConversation.replacements).length > 0 &&
+      selectedConversation?.replacements != null &&
+      Object.keys(selectedConversation?.replacements).length > 0 &&
       showAnonymizedValues,
-    [selectedConversation.replacements, showAnonymizedValues]
+    [selectedConversation?.replacements, showAnonymizedValues]
   );
 
   const selectedConnectorId = useMemo(
@@ -185,7 +185,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           >
             <AssistantTitle
               docLinks={docLinks}
-              title={selectedConversation.title}
+              title={selectedConversation?.title}
               selectedConversation={selectedConversation}
               onChange={onConversationChange}
               isFlyoutMode={true}
@@ -222,7 +222,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
                     }
                     iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
                     onClick={onToggleShowAnonymizedValues}
-                    isDisabled={isEmpty(selectedConversation.replacements)}
+                    isDisabled={isEmpty(selectedConversation?.replacements)}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

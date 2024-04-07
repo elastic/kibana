@@ -26,7 +26,7 @@ import * as i18n from './translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
-  currentConversation: Conversation;
+  currentConversation?: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -46,9 +46,11 @@ const getCurrentConversationIndex = (
 
 const getPreviousConversation = (
   conversationList: Conversation[],
-  currentConversation: Conversation
+  currentConversation?: Conversation
 ) => {
-  const conversationIndex = getCurrentConversationIndex(conversationList, currentConversation);
+  const conversationIndex = currentConversation
+    ? getCurrentConversationIndex(conversationList, currentConversation)
+    : 0;
 
   return !conversationIndex
     ? conversationList[conversationList.length - 1]
@@ -57,9 +59,11 @@ const getPreviousConversation = (
 
 const getNextConversation = (
   conversationList: Conversation[],
-  currentConversation: Conversation
+  currentConversation?: Conversation
 ) => {
-  const conversationIndex = getCurrentConversationIndex(conversationList, currentConversation);
+  const conversationIndex = currentConversation
+    ? getCurrentConversationIndex(conversationList, currentConversation)
+    : 0;
 
   return conversationIndex >= conversationList.length - 1
     ? conversationList[0]
@@ -95,7 +99,7 @@ export const ConversationSidePanel = React.memo<Props>(
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
       (conversation: Conversation) => {
-        if (currentConversation.id === conversation.id) {
+        if (currentConversation?.id === conversation.id) {
           const previousConversation = getNextConversation(conversationList, conversation);
           onConversationSelected({
             cId: previousConversation.id,
@@ -104,7 +108,7 @@ export const ConversationSidePanel = React.memo<Props>(
         }
         onConversationDeleted(conversation.id);
       },
-      [currentConversation.id, onConversationDeleted, conversationList, onConversationSelected]
+      [currentConversation?.id, onConversationDeleted, conversationList, onConversationSelected]
     );
 
     const onArrowUpClick = useCallback(() => {
@@ -200,8 +204,8 @@ export const ConversationSidePanel = React.memo<Props>(
                     label={conversation.title}
                     isActive={
                       !isEmpty(conversation.id)
-                        ? conversation.id === currentConversation.id
-                        : conversation.title === currentConversation.title
+                        ? conversation.id === currentConversation?.id
+                        : conversation.title === currentConversation?.title
                     }
                     extraAction={{
                       color: 'danger',

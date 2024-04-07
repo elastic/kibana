@@ -686,7 +686,99 @@ const AssistantComponent: React.FC<Props> = ({
     refetchConversationsState,
   ]);
 
-  if (!currentConversation) return <></>;
+  const flyoutBodyContent = useMemo(() => {
+    if (isWelcomeSetup) {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              css={css`
+                max-width: 400px;
+                text-align: center;
+              `}
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+                <EuiFlexItem grow={false}>
+                  <AssistantAnimatedIcon />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <h3>{i18n.WELCOME_SCREEN_TITLE}</h3>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} data-test-subj="connector-prompt">
+                  {connectorPrompt}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (currentConversation?.messages.length === 0) {
+      return (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              css={css`
+                max-width: 400px;
+                text-align: center;
+              `}
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+                <EuiFlexItem grow={false}>
+                  <AssistantAnimatedIcon />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
+                    <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SystemPrompt
+                    conversation={currentConversation}
+                    editingSystemPromptId={editingSystemPromptId}
+                    onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    isFlyoutMode
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
+      <EuiPanel
+        hasShadow={false}
+        panelRef={(element) => {
+          commentsContainerRef.current = (element?.parentElement as HTMLDivElement) || null;
+        }}
+      >
+        {comments}
+      </EuiPanel>
+    );
+  }, [
+    comments,
+    connectorPrompt,
+    currentConversation,
+    editingSystemPromptId,
+    handleOnSystemPromptSelectionChange,
+    isSettingsModalVisible,
+    isWelcomeSetup,
+  ]);
 
   if (isFlyoutMode) {
     return (
@@ -752,6 +844,21 @@ const AssistantComponent: React.FC<Props> = ({
                   css={css`
                     min-height: 100px;
                     flex: 1;
+
+                    > div {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: stretch;
+
+                      > .euiFlyoutBody__banner {
+                        overflow-x: unset;
+                      }
+
+                      > .euiFlyoutBody__overflowContent {
+                        display: flex;
+                        flex: 1;
+                      }
+                    }
                   `}
                   banner={
                     !isDisabled &&
@@ -766,107 +873,33 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  <EuiPanel
-                    hasShadow={false}
-                    panelRef={(element) => {
-                      commentsContainerRef.current =
-                        (element?.parentElement as HTMLDivElement) || null;
-                    }}
-                  >
-                    {comments}
-
-                    <EuiPanel hasShadow={false}>
-                      {isWelcomeSetup ? (
-                        <EuiFlexGroup justifyContent="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiPanel
-                              hasShadow={false}
-                              css={css`
-                                max-width: 400px;
-                                text-align: center;
-                              `}
-                            >
-                              <EuiFlexGroup
-                                alignItems="center"
-                                justifyContent="center"
-                                direction="column"
-                              >
-                                <EuiFlexItem grow={false}>
-                                  <AssistantAnimatedIcon />
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  <EuiText>
-                                    <h3>{i18n.WELCOME_SCREEN_TITLE}</h3>
-                                  </EuiText>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  <EuiText color="subdued">
-                                    <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
-                                  </EuiText>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false} data-test-subj="connector-prompt">
-                                  {connectorPrompt}
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiPanel>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      ) : (
-                        currentConversation?.messages.length === 0 && (
-                          <EuiFlexGroup>
-                            <EuiFlexItem>
-                              <EuiPanel
-                                hasShadow={false}
-                                css={css`
-                                  max-width: 380px;
-                                `}
-                              >
-                                <EuiFlexGroup justifyContent="center" direction="column">
-                                  <EuiFlexItem grow={false}>
-                                    <AssistantAnimatedIcon />
-                                  </EuiFlexItem>
-                                  <EuiFlexItem grow={false}>
-                                    <EuiText>
-                                      <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
-                                      <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
-                                    </EuiText>
-                                  </EuiFlexItem>
-                                  <EuiFlexItem grow={false}>
-                                    <SystemPrompt
-                                      conversation={currentConversation}
-                                      editingSystemPromptId={editingSystemPromptId}
-                                      onSystemPromptSelectionChange={
-                                        handleOnSystemPromptSelectionChange
-                                      }
-                                      isSettingsModalVisible={isSettingsModalVisible}
-                                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                                      isFlyoutMode
-                                    />
-                                  </EuiFlexItem>
-                                </EuiFlexGroup>
-                              </EuiPanel>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        )
-                      )}
+                  {flyoutBodyContent}
+                  {/* {!isAssistantEnabled && (
                       <BlockBotCallToAction
                         connectorPrompt={connectorPrompt}
                         http={http}
                         isAssistantEnabled={isAssistantEnabled}
                         isWelcomeSetup={isWelcomeSetup}
                       />
-                    </EuiPanel>
-                  </EuiPanel>
+                    )} */}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
                     background: none;
                     border-top: 1px solid ${euiThemeVars.euiColorLightShade};
-                    overflow: auto;
+                    overflow: hidden;
                     max-height: 60%;
+                    display: flex;
+                    flex-direction: column;
                   `}
                 >
-                  <EuiPanel paddingSize="m" hasShadow={false}>
+                  <EuiPanel
+                    paddingSize="m"
+                    hasShadow={false}
+                    css={css`
+                      overflow: auto;
+                    `}
+                  >
                     {!isDisabled &&
                       Object.keys(promptContexts).length !== selectedPromptContextsCount && (
                         <EuiFlexGroup>

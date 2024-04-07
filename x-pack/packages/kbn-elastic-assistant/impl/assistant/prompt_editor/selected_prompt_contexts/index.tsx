@@ -86,7 +86,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
             ) : null}
             <EuiAccordion
               buttonContent={promptContexts[id]?.description}
-              forceState={accordionState}
+              {...(!isFlyoutMode && { forceState: accordionState })}
               extraAction={
                 <EuiToolTip content={i18n.REMOVE_CONTEXT}>
                   <EuiButtonIcon
@@ -98,7 +98,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 </EuiToolTip>
               }
               id={id}
-              onToggle={onToggle}
+              {...(!isFlyoutMode && { onToggle })}
               paddingSize="s"
               {...(isFlyoutMode
                 ? {
@@ -118,14 +118,23 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                   }
                 : {})}
             >
-              <EditorContainer $accordionState={accordionState}>
+              {isFlyoutMode ? (
                 <DataAnonymizationEditor
                   currentReplacements={currentReplacements}
                   selectedPromptContext={selectedPromptContexts[id]}
                   setSelectedPromptContexts={setSelectedPromptContexts}
                   isFlyoutMode={isFlyoutMode}
                 />
-              </EditorContainer>
+              ) : (
+                <EditorContainer $accordionState={accordionState}>
+                  <DataAnonymizationEditor
+                    currentReplacements={currentReplacements}
+                    selectedPromptContext={selectedPromptContexts[id]}
+                    setSelectedPromptContexts={setSelectedPromptContexts}
+                    isFlyoutMode={isFlyoutMode}
+                  />
+                </EditorContainer>
+              )}
             </EuiAccordion>
           </EuiFlexItem>
         ))}
