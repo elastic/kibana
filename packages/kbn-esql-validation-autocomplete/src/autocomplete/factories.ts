@@ -58,7 +58,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   return {
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
-    ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-validation-autocomplete.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
     documentation: {
