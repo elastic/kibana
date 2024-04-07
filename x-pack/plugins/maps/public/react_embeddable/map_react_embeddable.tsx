@@ -12,6 +12,7 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
 import { extract, type MapEmbeddablePersistableState } from '../../common/embeddable';
@@ -42,7 +43,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ) as unknown as MapSerializeState)
       : {};
   },
-  buildEmbeddable: async (state, buildApi, uuid) => {
+  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
     const savedMap = new SavedMap({
       mapEmbeddableInput: state as unknown as MapEmbeddableInput,
     });
@@ -58,7 +59,12 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     const defaultPanelTitle = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().title
     );
-    const reduxSync = initializeReduxSync(savedMap.getStore(), state, uuid);
+    const reduxSync = initializeReduxSync({
+      syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
+      state,
+      store: savedMap.getStore(),
+      uuid,
+    });
     const actionHandlers = initializeActionHandlers(getApi);
     const crossPanelActions = initializeCrossPanelActions({
       controlledBy,
@@ -108,7 +114,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       searchSessionMapBuffer: state.mapBuffer,
       store: savedMap.getStore(),
     });
-    
+
     return {
       api,
       Component: () => {

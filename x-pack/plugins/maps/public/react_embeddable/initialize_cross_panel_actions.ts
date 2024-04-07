@@ -187,12 +187,14 @@ export function initializeCrossPanelActions({
   }
 
   // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
-  savedMap.getStore().dispatch(setOnMapMove((lat: number, lon: number, zoom: number) => {
-    if (getIsMovementSynchronized()) {
-      mapEmbeddablesSingleton.setLocation(uuid, lat, lon, zoom);
-    }
-  }))
-  
+  savedMap.getStore().dispatch(
+    setOnMapMove((lat: number, lon: number, zoom: number) => {
+      if (getIsMovementSynchronized()) {
+        mapEmbeddablesSingleton.setLocation(uuid, lat, lon, zoom);
+      }
+    })
+  );
+
   const unsubscribeFromStore = savedMap.getStore().subscribe(() => {
     if (!getMapReady(savedMap.getStore().getState())) {
       return;

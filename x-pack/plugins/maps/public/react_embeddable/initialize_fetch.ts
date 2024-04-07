@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FetchContext, onFetchContextChanged } from "@kbn/presentation-publishing";
-import { getSearchService } from "../kibana_services";
-import { MapStore } from "../reducers/store";
-import { MapApi } from "./types";
+import { FetchContext, onFetchContextChanged } from '@kbn/presentation-publishing';
+import { Query } from '@kbn/es-query';
+import { MapExtent } from '../../common/descriptor_types';
+import { getSearchService } from '../kibana_services';
+import { MapStore } from '../reducers/store';
+import { MapApi } from './types';
 import { setMapSettings, setQuery } from '../actions';
-import { Query } from "@kbn/es-query";
-import { MapExtent } from "@kbn/maps-plugin/common/descriptor_types";
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -29,7 +29,7 @@ export function initializeFetch({
   store,
 }: {
   api: MapApi;
-  controlledBy: string
+  controlledBy: string;
   getIsFilterByMapExtent: () => boolean;
   searchSessionMapBuffer?: MapExtent;
   store: MapStore;
@@ -44,9 +44,7 @@ export function initializeFetch({
       // Disabling search session when filtering embeddable container by map extent.
       // The use case for search sessions (restoring results because of slow responses) does not match the use case of
       // filtering by map extent (rapid responses as users explore their map).
-      const searchSessionId = getIsFilterByMapExtent()
-        ? undefined
-        : fetchContext.searchSessionId;
+      const searchSessionId = getIsFilterByMapExtent() ? undefined : fetchContext.searchSessionId;
       const isRestore = getIsRestore(searchSessionId);
 
       // Map can not be interacted with when viewing session restore.
@@ -76,11 +74,9 @@ export function initializeFetch({
           clearTimeslice: fetchContext.timeslice === undefined,
           forceRefresh: fetchContext.isReload,
           searchSessionId,
-          searchSessionMapBuffer: isRestore
-            ? searchSessionMapBuffer
-            : undefined,
+          searchSessionMapBuffer: isRestore ? searchSessionMapBuffer : undefined,
         })
-      )
+      );
     },
     fetchOnSetup: true,
   });

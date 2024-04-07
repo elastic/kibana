@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { PaletteRegistry } from '@kbn/coloring';
 import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import { MapStore, MapStoreState } from '../reducers/store';
@@ -30,8 +32,8 @@ import {
   setReadOnly,
 } from '../actions';
 import type { MapSerializeState } from './types';
-import { getExecutionContextService } from '../kibana_services';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { getCharts, getExecutionContextService } from '../kibana_services';
+import { setChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -46,7 +48,17 @@ function getHiddenLayerIds(state: MapStoreState) {
     .map((layer) => layer.id);
 }
 
-export function initializeReduxSync(store: MapStore, state: MapSerializeState, uuid: string) {
+export function initializeReduxSync({
+  syncColors$,
+  state,
+  store,
+  uuid,
+}: {
+  syncColors$?: PublishingSubject<boolean | undefined>;
+  store: MapStore;
+  state: MapSerializeState;
+  uuid: string;
+}) {
   // initializing comparitor publishing subjects to state instead of store state values
   // because store is not settled until map is rendered and mapReady is true
   const hiddenLayers$ = new BehaviorSubject<string[]>(
@@ -102,8 +114,26 @@ export function initializeReduxSync(store: MapStore, state: MapSerializeState, u
   );
   store.dispatch(setExecutionContext(getExecutionContext(uuid, state.savedObjectId)));
 
+  let syncColorsSubscription: Subscription | undefined;
+  let syncColorsSymbol: symbol | undefined;
+  if (syncColors$) {
+    syncColorsSubscription = syncColors$.subscribe(async (syncColors: boolean | undefined) => {
+      const currentSyncColorsSymbol = Symbol();
+      syncColorsSymbol = currentSyncColorsSymbol;
+      const chartsPaletteServiceGetColor = syncColors
+        ? await getChartsPaletteServiceGetColor()
+        : null;
+      if (syncColorsSymbol === currentSyncColorsSymbol) {
+        store.dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
+      }
+    });
+  }
+
   return {
-    cleanup: unsubscribeFromStore,
+    cleanup: () => {
+      if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
+      unsubscribeFromStore();
+    },
     api: {
       dataLoading: dataLoading$,
       onRenderComplete$: dataLoading$.pipe(
@@ -173,4 +203,22 @@ function getExecutionContext(uuid: string, savedObjectId: string | undefined) {
         child: mapContext,
       }
     : mapContext;
+}
+
+async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
+  const chartsService = getCharts();
+  const paletteRegistry: PaletteRegistry | null = chartsService
+    ? await chartsService.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
 }

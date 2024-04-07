@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Subscription } from 'rxjs';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { render } from 'react-dom';
 import { Query } from '@kbn/es-query';
 import {
   Embeddable,
@@ -19,30 +16,16 @@ import {
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import {
-  setEmbeddableSearchContext,
-} from '../actions';
+import { setEmbeddableSearchContext } from '../actions';
 import {
   getInspectorAdapters,
-  setChartsPaletteServiceGetColor,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
-import {
-  getEmbeddableSearchContext,
-  getLayerList,
-} from '../selectors/map_selectors';
-import {
-  APP_ID,
-  getEditPath,
-  getFullPath,
-  MAP_SAVED_OBJECT_TYPE,
-} from '../../common/constants';
+import { getEmbeddableSearchContext, getLayerList } from '../selectors/map_selectors';
+import { APP_ID, getEditPath, getFullPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import {
-  getCharts,
-  getHttp,
-} from '../kibana_services';
+import { getHttp } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
 
 import {
@@ -53,28 +36,6 @@ import {
   MapEmbeddableOutput,
 } from './types';
 
-async function getChartsPaletteServiceGetColor(): Promise<((value: string) => string) | null> {
-  const chartsService = getCharts();
-  const paletteRegistry: PaletteRegistry | null = chartsService
-    ? await chartsService.palettes.getPalettes()
-    : null;
-  if (!paletteRegistry) {
-    return null;
-  }
-
-  const paletteDefinition = paletteRegistry.get('default');
-  const chartConfiguration = { syncColors: true };
-  return (value: string) => {
-    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
-    const color = paletteDefinition.getCategoricalColor(series, chartConfiguration);
-    return color ? color : '#3d3d3d';
-  };
-}
-
-export function getControlledBy(id: string) {
-  return `mapEmbeddablePanel${id}`;
-}
-
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
@@ -83,8 +44,6 @@ export class MapEmbeddable
   deferEmbeddableLoad = true;
 
   private _savedMap: SavedMap;
-  private _subscriptions: Subscription[] = [];
-  private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
   private _isInitialized = false;
 
@@ -101,7 +60,6 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
   }
 
   public reportsEmbeddableLoad() {
@@ -133,8 +91,6 @@ export class MapEmbeddable
   }
 
   private _initializeStore() {
-    this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
-
     const store = this._savedMap.getStore();
 
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
@@ -202,25 +158,6 @@ export class MapEmbeddable
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
-  onUpdate() {
-    if (this.input.syncColors !== this._prevSyncColors) {
-      this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
-    }
-  }
-
-  async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
-    this._prevSyncColors = syncColors;
-    const chartsPaletteServiceGetColor = syncColors
-      ? await getChartsPaletteServiceGetColor()
-      : null;
-    if (syncColors !== this._prevSyncColors) {
-      return;
-    }
-    this._savedMap
-      .getStore()
-      .dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
-  }
-
   /**
    *
    * @param {HTMLElement} domNode
@@ -231,21 +168,6 @@ export class MapEmbeddable
     if (!this._isInitialized) {
       return;
     }
-    render(
-      <div>Use react embeddable</div>,
-      this._domNode
-    );
-  }
-
-  destroy() {
-    super.destroy();
-
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
-    }
-
-    this._subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
+    render(<div>Use react embeddable</div>, this._domNode);
   }
 }

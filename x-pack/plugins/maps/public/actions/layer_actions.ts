@@ -19,7 +19,6 @@ import {
   getLayerListRaw,
   getMapColors,
   getMapReady,
-  getMapSettings,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -44,12 +43,7 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import {
-  autoFitToBounds,
-  clearDataRequests,
-  syncDataForLayerId,
-  updateStyleMeta,
-} from './data_request_actions';
+import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import {
   Attribution,
   JoinDescriptor,

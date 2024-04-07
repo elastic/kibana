@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
+import { LayerDescriptor } from '../../common';
 import { replaceLayerList, updateLayerDescriptor } from '../actions';
 import { MapStore } from '../reducers/store';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
@@ -16,7 +16,7 @@ import { autoFitToBounds, syncDataForLayerId } from '../actions/data_request_act
 
 export function initializeDataViews(store: MapStore) {
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
-  let dataViewsFetchToken: Symbol | undefined;
+  let dataViewsFetchToken: symbol | undefined;
 
   async function updateDataViews() {
     const queryableDataViewIds = getQueryableUniqueIndexPatternIds(store.getState());
@@ -30,10 +30,10 @@ export function initializeDataViews(store: MapStore) {
     console.log('dataViews', dataViews);
     dataViews$.next(dataViews);
   }
-  
+
   updateDataViews();
 
-  const syncLayerTokens: Record<string, Symbol> = {};
+  const syncLayerTokens: Record<string, symbol> = {};
 
   return {
     dataViews: dataViews$,
@@ -58,5 +58,5 @@ export function initializeDataViews(store: MapStore) {
         }
       })();
     },
-  }
+  };
 }
