@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       runComparisonTests({
         comparisonDisplay: 'Comparing 2 documents',
-        tableHeaders: ['Field', 'AU_x3_g4GFA8no6QjkYX', 'AU_x3-TcGFA8no6Qjipx'],
+        tableHeaders: ['Field', 'Document: AU_x3_g4GFA8no6QjkYX', 'Document: AU_x3-TcGFA8no6Qjipx'],
         fullFieldNames: [
           '@timestamp',
           '_id',
