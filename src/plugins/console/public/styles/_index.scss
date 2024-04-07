@@ -9,13 +9,13 @@
 @import 'components/index';
 
 .ace_editor.ace_autocomplete {
-    resize: horizontal;
+  resize: horizontal;
 
-    .ace_scroller {
-        right: 10px !important;
-    }
+  .ace_scroller {
+    right: 10px !important;
+  }
 
-    .ace_scrollbar.ace_scrollbar-v {
-        bottom: 10px !important;
-    }
+  .ace_scrollbar.ace_scrollbar-v {
+    bottom: 10px !important;
+  }
 }
