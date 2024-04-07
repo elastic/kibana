@@ -48,12 +48,12 @@ interface DependencyTableRow {
 }
 
 export function Dependencies({ currentRuleId, dependencies, onChange }: DependenciesProps) {
-  const { isLoading, data } = useFetchSLOsWithBurnRateRules({});
+  const { isLoading, data: allRules } = useFetchSLOsWithBurnRateRules({});
 
   const dependencyRuleIds = dependencies.map((dep) => dep.ruleId);
-  const rules = currentRuleId
-    ? data?.filter((rule) => rule.id !== currentRuleId && !dependencyRuleIds.includes(rule.id))
-    : data;
+  const availableRules = currentRuleId
+    ? allRules?.filter((rule) => rule.id !== currentRuleId && !dependencyRuleIds.includes(rule.id))
+    : allRules;
 
   const handleAddDependency = (dependency: Dependency) => {
     onChange([...dependencies, dependency]);
@@ -68,7 +68,7 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
   };
 
   const rows = dependencies.map((dependency, index) => {
-    const rule = data?.find(({ id }) => id === dependency.ruleId);
+    const rule = allRules?.find(({ id }) => id === dependency.ruleId);
     return {
       index,
       name: rule?.name,
@@ -105,12 +105,17 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
             const handleSubmit = (dep: Dependency) => {
               handleChange(row.index, dep);
             };
+            const selectedRule = allRules?.find(({ id }) => id === row.dependency.ruleId);
             return (
               <DependencyEditor
                 isLoading={isLoading}
                 onSubmit={handleSubmit}
                 dependency={row.dependency}
-                rules={rules}
+                rules={
+                  availableRules && selectedRule
+                    ? [...availableRules, selectedRule]
+                    : availableRules
+                }
               />
             );
           },
@@ -157,7 +162,11 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
       <EuiSpacer size="s" />
       <EuiBasicTable columns={columns} items={rows} />
       <EuiSpacer size="s" />
-      <DependencyEditor rules={rules} isLoading={isLoading} onSubmit={handleAddDependency} />
+      <DependencyEditor
+        rules={availableRules}
+        isLoading={isLoading}
+        onSubmit={handleAddDependency}
+      />
       <EuiSpacer size="m" />
     </>
   );
