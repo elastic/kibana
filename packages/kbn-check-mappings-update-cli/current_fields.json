@@ -196,8 +196,6 @@
     "owner"
   ],
   "cases-rules": [
-    "cases",
-    "cases.id",
     "counter",
     "createdAt",
     "rules",

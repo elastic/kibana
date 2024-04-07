@@ -672,13 +672,6 @@
   "cases-rules": {
     "dynamic": false,
     "properties": {
-      "cases": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
       "counter": {
         "type": "unsigned_long"
       },

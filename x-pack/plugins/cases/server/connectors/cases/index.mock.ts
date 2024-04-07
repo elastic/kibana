@@ -13,7 +13,6 @@ import type { OracleRecord, OracleRecordError } from './types';
 export const oracleRecord: OracleRecord = {
   id: 'so-id',
   version: 'so-version',
-  cases: [{ id: 'test-case-id' }],
   rules: [{ id: 'test-rule-id' }],
   grouping: { 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' },
   counter: 1,
