@@ -28,6 +28,7 @@ import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_
 import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -51,6 +52,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
 
     let api: MapApi | undefined;
     const getApi = () => api;
+    let renderTooltipContent: RenderToolTipContent | undefined;
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
@@ -98,6 +100,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
+        setRenderTooltipContent: (nextValue: RenderToolTipContent) => {
+          renderTooltipContent = nextValue;
+        },
       },
       {
         ...timeRange.comparators,
@@ -147,6 +152,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
               addFilters={state.hideFilterActions ? null : actionHandlers.addFilters}
               getFilterActions={actionHandlers.getFilterActions}
               getActionContext={actionHandlers.getActionContext}
+              renderTooltipContent={renderTooltipContent}
               title="title"
               description="description"
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}

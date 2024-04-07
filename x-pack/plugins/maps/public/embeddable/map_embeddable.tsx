@@ -13,13 +13,7 @@ import {
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import {
-  setEventHandlers,
-  EventHandlers,
-} from '../reducers/non_serializable_instances';
-import { getLayerList } from '../selectors/map_selectors';
 import { APP_ID, getEditPath, getFullPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getHttp } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
 
@@ -92,19 +86,7 @@ export class MapEmbeddable
     });
   }
 
-  public getLayerList() {
-    return getLayerList(this._savedMap.getStore().getState());
-  }
-
   public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
-
-  setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
-    this._renderTooltipContent = renderTooltipContent;
-  };
-
-  setEventHandlers = (eventHandlers: EventHandlers) => {
-    this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
-  };
 }

@@ -23,6 +23,9 @@ import {
   MapExtent,
   MapSettings,
 } from '../../common/descriptor_types';
+import { ILayer } from '../classes/layers/layer';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
+import { EventHandlers } from '../reducers/non_serializable_instances';
 
 export interface MapSerializeState extends SerializedTitles {
   // by-valye
@@ -53,7 +56,10 @@ export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
   PublishesDataViews &
   PublishesUnifiedSearch &
   HasLibraryTransforms<MapSerializeState> & {
+    getLayerList: () => ILayer[];
+    setEventHandlers: (eventHandlers: EventHandlers) => void;
     setLayerList: (layerList: LayerDescriptor[]) => void;
+    setRenderTooltipContent: (renderTooltipContent: RenderToolTipContent) => void;
     updateLayerById: (layerDescriptor: LayerDescriptor) => void;
     onRenderComplete$: Observable<void>;
   };

@@ -10,11 +10,13 @@ import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { PaletteRegistry } from '@kbn/coloring';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
-import { MapStore, MapStoreState } from '../reducers/store';
+import { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
+  getLayerList,
   getLayerListRaw,
   getMapBuffer,
   getMapCenter,
@@ -34,9 +36,13 @@ import {
 } from '../actions';
 import type { MapSerializeState } from './types';
 import { getCharts, getExecutionContextService } from '../kibana_services';
-import { getInspectorAdapters, setChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
+import {
+  EventHandlers,
+  getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
+  setEventHandlers,
+} from '../reducers/non_serializable_instances';
 import { SavedMap } from '../routes';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -57,7 +63,7 @@ export function initializeReduxSync({
   syncColors$,
   uuid,
 }: {
-  savedMap: SavedMap,
+  savedMap: SavedMap;
   state: MapSerializeState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
@@ -168,6 +174,9 @@ export function initializeReduxSync({
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());
       },
+      getLayerList: () => {
+        return getLayerList(store.getState());
+      },
       onRenderComplete$: dataLoading$.pipe(
         filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
         debounceTime(RENDER_TIMEOUT),
@@ -177,7 +186,10 @@ export function initializeReduxSync({
           return;
         })
       ),
-      query$
+      query$,
+      setEventHandlers: (eventHandlers: EventHandlers) => {
+        store.dispatch(setEventHandlers(eventHandlers));
+      },
     },
     comparators: {
       // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
