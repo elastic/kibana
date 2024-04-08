@@ -17,7 +17,7 @@ import {
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
-import { usePreviousPrompts } from '../../hooks/use_previous_prompts';
+import { useLastUsedPrompts } from '../../hooks/use_last_used_prompts';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -50,7 +50,7 @@ export function PromptEditor({
 
   const [hasFocus, setHasFocus] = useState(false);
 
-  const { previousPrompts, addPrompt } = usePreviousPrompts();
+  const { previousPrompts, addLastUsed: addPrompt } = useLastUsedPrompts();
 
   const initialInnerMessage = initialRole
     ? {

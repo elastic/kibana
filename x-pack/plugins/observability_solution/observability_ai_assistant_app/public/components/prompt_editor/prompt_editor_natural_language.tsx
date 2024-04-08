@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiInputPopover, EuiSelectable, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,12 @@ const inputPopoverClassName = css`
 const textAreaClassName = css`
   max-height: 200px;
   width: 100%;
+`;
+
+const selectableClassName = css`
+  .euiSelectableListItem__icon {
+    display: none;
+  }
 `;
 
 export function PromptEditorNaturalLanguage({
@@ -64,11 +70,15 @@ export function PromptEditorNaturalLanguage({
     }
   }, [onChangeHeight]);
 
-  const handleSelectOption = (
-    _: any,
-    __: any,
-    selectedOption: { label: string; checked: 'off' }
-  ) => {
+  const handleKeydown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // only trigger select when no prompt is available
+    if (!prompt && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault();
+      setSelectablePopoverOpen(true);
+    }
+  };
+
+  const handleSelectOption = (_: any, __: any, selectedOption: { label: string }) => {
     onChange({
       role: MessageRole.User,
       content: selectedOption.label,
@@ -121,12 +131,7 @@ export function PromptEditorNaturalLanguage({
           value={prompt || ''}
           onChange={handleChange}
           onFocus={onFocus}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-              e.preventDefault();
-              setSelectablePopoverOpen(true);
-            }
-          }}
+          onKeyDown={handleKeydown}
           onBlur={onBlur}
         />
       }
@@ -138,8 +143,10 @@ export function PromptEditorNaturalLanguage({
           'xpack.observabilityAiAssistant.promptEditorNaturalLanguage.euiSelectable.selectAnOptionLabel',
           { defaultMessage: 'Select an option' }
         )}
+        className={selectableClassName}
+        options={previousPrompts.map((label) => ({ label }))}
         searchable
-        options={previousPrompts.map((label) => ({ label, checked: 'off' }))}
+        singleSelection
         onChange={handleSelectOption}
       >
         {(list, search) => (

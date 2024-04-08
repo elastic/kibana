@@ -6,23 +6,22 @@
  */
 
 import { uniq } from 'lodash';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from './use_kibana';
 
 const AI_ASSISTANT_LAST_USED_PROMPT_STORAGE = 'ai-assistant-last-used-prompts';
 
-export function usePreviousPrompts() {
-  const [previousPrompts = [], setPreviousPrompts] = useLocalStorage(
-    AI_ASSISTANT_LAST_USED_PROMPT_STORAGE,
-    [] as string[]
-  );
+export function useLastUsedPrompts() {
+  const { storage } = useKibana().services;
+
+  const previousPrompts = (storage.get(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE) as string[]) ?? [];
 
   return {
     previousPrompts,
-    addPrompt: (prompt: string) => {
+    addLastUsed: (prompt: string) => {
       if (previousPrompts[0] !== prompt) {
         // Keep track of the last 5 prompts
         const newPrompts = uniq([prompt].concat(previousPrompts.filter((_, index) => index < 4)));
-        setPreviousPrompts(newPrompts);
+        storage.set(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE, newPrompts);
       }
     },
   };
