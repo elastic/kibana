@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,11 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
 > = ({ errors, index, messageVariables, editAction, actionParams, service }) => {
   const { connectors, loading, selectConnector, selectedConnector } =
     useGenAIConnectorsWithoutContext(service);
+
+  useEffect(() => {
+    editAction('connector', selectedConnector, index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
