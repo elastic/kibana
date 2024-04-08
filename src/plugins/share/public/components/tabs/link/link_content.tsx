@@ -150,8 +150,9 @@ export const LinkContent = ({
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
       setShortUrlCache(shortUrl as string);
       setUrl(shortUrl as string);
+      setDashboardLink(shortUrl as string);
     },
-    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache]
+    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache, setDashboardLink]
   );
 
   const setUrlHelper = useCallback(() => {
