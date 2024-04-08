@@ -11,7 +11,7 @@ import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { updatePromptContexts } from './helpers';
@@ -25,7 +25,7 @@ import { DEFAULT_ASSISTANT_TITLE } from '../assistant/translations';
 import { CodeBlockDetails } from '../assistant/use_conversation/helpers';
 import { PromptContextTemplate } from '../assistant/prompt_context/types';
 import { QuickPrompt } from '../assistant/quick_prompts/types';
-import type { KnowledgeBaseConfig, Prompt } from '../assistant/types';
+import { KnowledgeBaseConfig, Prompt, TraceOptions } from '../assistant/types';
 import { BASE_SYSTEM_PROMPTS } from '../content/prompts/system';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -35,6 +35,7 @@ import {
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
+  TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
@@ -150,8 +151,14 @@ export interface UseAssistantContext {
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
+  setTraceOptions: (traceOptions: {
+    apmUrl: string;
+    langSmithProject: string;
+    langSmithApiKey: string;
+  }) => void;
   title: string;
   toasts: IToasts | undefined;
+  traceOptions: TraceOptions;
   unRegisterPromptContext: UnRegisterPromptContext;
 }
 
@@ -182,6 +189,20 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
 }) => {
+  /**
+   * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
+   */
+  const defaultTraceOptions: TraceOptions = {
+    apmUrl: `${http.basePath.serverBasePath}/app/apm`,
+    langSmithProject: '',
+    langSmithApiKey: '',
+  };
+  const [sessionStorageTraceOptions = defaultTraceOptions, setSessionStorageTraceOptions] =
+    useSessionStorage<TraceOptions>(
+      `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
+      defaultTraceOptions
+    );
+
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
    */
@@ -313,9 +334,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
+      setTraceOptions: setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
       toasts,
+      traceOptions: sessionStorageTraceOptions,
       unRegisterPromptContext,
       getLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
@@ -353,9 +376,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setDefaultAllow,
       setDefaultAllowReplacement,
       setLocalStorageKnowledgeBase,
+      setSessionStorageTraceOptions,
       showAssistantOverlay,
       title,
       toasts,
+      sessionStorageTraceOptions,
       unRegisterPromptContext,
       getLastConversationId,
       setLocalStorageLastConversationId,

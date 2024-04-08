@@ -22,3 +22,9 @@ export interface KnowledgeBaseConfig {
   isEnabledKnowledgeBase: boolean;
   latestAlerts: number;
 }
+
+export interface TraceOptions {
+  apmUrl: string;
+  langSmithProject: string;
+  langSmithApiKey: string;
+}
