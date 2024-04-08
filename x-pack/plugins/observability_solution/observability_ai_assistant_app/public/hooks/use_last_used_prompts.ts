@@ -18,11 +18,10 @@ export function useLastUsedPrompts() {
   return {
     previousPrompts,
     addLastUsed: (prompt: string) => {
-      if (previousPrompts[0] !== prompt) {
-        // Keep track of the last 5 prompts
-        const newPrompts = uniq([prompt].concat(previousPrompts.filter((_, index) => index < 4)));
-        storage.set(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE, newPrompts);
-      }
+      storage.set(
+        AI_ASSISTANT_LAST_USED_PROMPT_STORAGE,
+        uniq([prompt, ...previousPrompts]).slice(0, 5)
+      );
     },
   };
 }

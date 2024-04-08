@@ -84,8 +84,8 @@ export function AlertActions({
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
-    const alertLink = observabilityAlert.link as unknown as string;
-    if (!observabilityAlert.hasBasePath) {
+    const alertLink = observabilityAlert.link;
+    if (!observabilityAlert.hasBasePath && prepend) {
       setViewInAppUrl(prepend(alertLink ?? ''));
     } else {
       setViewInAppUrl(alertLink);
