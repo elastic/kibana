@@ -86,13 +86,20 @@ export function fetchAll(
       });
     }
 
+    const shouldFetchTextBased = useTextBased && !!query;
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
-    // histogram will send `loading` for totalHits$
+
+    if (shouldFetchTextBased) {
+      sendLoadingMsg(dataSubjects.totalHits$, {
+        recordRawType,
+        result: dataSubjects.totalHits$.getValue().result,
+      });
+    }
 
     // Start fetching all required requests
-    const shouldFetchTextBased = useTextBased && !!query;
     const response = shouldFetchTextBased
       ? fetchTextBased(
           query,
