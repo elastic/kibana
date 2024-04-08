@@ -9,10 +9,13 @@ import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import {
+  apiHasParentApi,
+  apiPublishesTimeRange,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -20,7 +23,8 @@ import {
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -107,26 +111,17 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const refresh$ = new BehaviorSubject<void>(undefined);
 
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const { appliedTimeRange$, serializeTimeRange, timeRangeComparators, timeRangeApi } =
-        initializeTimeRange(state, parentApi);
+      const {
+        api: timeRangeApi,
+        comparators: timeRangeComparators,
+        serialize: serializeTimeRange,
+      } = initializeTimeRange(state);
 
       const { swimLaneControlsApi, serializeSwimLaneState, swimLaneComparators } =
         initializeSwimLaneControls(state, titlesApi);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
-
-      const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
-        swimLaneControlsApi,
-        chartWidth$.asObservable(),
-        dataLoading,
-        blockingError,
-        appliedTimeRange$,
-        query$,
-        filters$,
-        refresh$,
-        anomalySwimLaneServices
-      );
 
       const api = buildApi(
         {
@@ -162,6 +157,42 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...titleComparators,
           ...swimLaneComparators,
         }
+      );
+
+      const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
+        api.timeRange$,
+        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+          ? api.parentApi.timeRange$
+          : of(null),
+        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+          ? api.parentApi.timeslice$
+          : of(null),
+      ]).pipe(
+        // @ts-ignore
+        map(([timeRange, parentTimeRange, parentTimeslice]) => {
+          if (timeRange) {
+            return timeRange;
+          }
+          if (parentTimeRange) {
+            return parentTimeRange;
+          }
+          if (parentTimeslice) {
+            return parentTimeRange;
+          }
+          return undefined;
+        })
+      ) as Observable<TimeRange | undefined>;
+
+      const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
+        swimLaneControlsApi,
+        chartWidth$.asObservable(),
+        dataLoading,
+        blockingError,
+        appliedTimeRange$,
+        query$,
+        filters$,
+        refresh$,
+        anomalySwimLaneServices
       );
 
       const onRenderComplete = () => {};

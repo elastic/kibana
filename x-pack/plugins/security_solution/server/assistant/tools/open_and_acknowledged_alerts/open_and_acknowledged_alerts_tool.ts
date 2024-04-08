@@ -8,7 +8,7 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';

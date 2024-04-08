@@ -22,6 +22,8 @@ import type {
   HasType,
   PublishesDataViews,
   PublishesUnifiedSearch,
+  PublishesWritablePanelTitle,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -49,6 +51,8 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesDataViews,
     PublishesUnifiedSearch {}
+
+export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
@@ -132,7 +136,7 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   functionDescription?: string;
   panelTitle: string;
   selectedDetectorIndex: number;
-  selectedEntities: MlEntityField[];
+  selectedEntities?: MlEntity;
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
   query: Query;
@@ -142,6 +146,19 @@ export interface SingleMetricViewerEmbeddableCustomInput {
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
   SingleMetricViewerEmbeddableCustomInput;
+
+export interface SingleMetricViewerComponentApi {
+  functionDescription?: PublishingSubject<string>;
+  jobIds: PublishingSubject<JobId[]>;
+  selectedDetectorIndex: PublishingSubject<number>;
+  selectedEntities?: PublishingSubject<MlEntity>;
+
+  updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
+}
+
+export type SingleMetricViewerEmbeddableApi = MlEmbeddableBaseApi &
+  PublishesWritablePanelTitle &
+  SingleMetricViewerComponentApi;
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;

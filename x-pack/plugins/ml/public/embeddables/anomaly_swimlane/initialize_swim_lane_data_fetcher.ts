@@ -6,7 +6,7 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import type { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
@@ -41,7 +41,7 @@ export const initializeSwimLaneDataFetcher = (
   chartWidth$: Observable<number | undefined>,
   dataLoading: BehaviorSubject<boolean | undefined>,
   blockingError: BehaviorSubject<Error | undefined>,
-  appliedTimeRange$: PublishingSubject<TimeRange | undefined>,
+  appliedTimeRange$: Observable<TimeRange | undefined>,
   query$: PublishesUnifiedSearch['query$'],
   filters$: PublishesUnifiedSearch['filters$'],
   refresh$: Observable<void>,
