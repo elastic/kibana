@@ -30,6 +30,7 @@ export interface QueryMatch {
   value: string | number | boolean | Array<string | number | boolean>;
   displayValue?: string | number | boolean;
   operator: QueryOperator;
+  params?: Record<string, unknown>;
 }
 
 export interface DataProvider {
@@ -63,6 +64,8 @@ export interface DataProvider {
    * Returns a DataProviderType
    */
   type?: DataProviderType.default | DataProviderType.template;
+
+  params?: Record<string, unknown>;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

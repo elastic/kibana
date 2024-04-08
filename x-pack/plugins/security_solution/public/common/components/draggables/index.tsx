@@ -32,6 +32,7 @@ export interface DefaultDraggableType {
   tooltipContent?: React.ReactNode;
   tooltipPosition?: ToolTipPositions;
   truncate?: boolean;
+  params?: Record<string, unknown>;
 }
 
 /**
@@ -113,6 +114,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     tooltipPosition,
     queryValue,
     truncate,
+    params,
   }) => {
     const dataProviderProp: DataProvider = useMemo(
       () => ({
@@ -126,9 +128,10 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
           field,
           value: queryValue ? queryValue : value ?? '',
           operator: IS_OPERATOR,
+          params,
         },
       }),
-      [field, id, name, queryValue, value]
+      [field, id, name, queryValue, params, value]
     );
 
     const renderCallback = useCallback(

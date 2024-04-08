@@ -25,7 +25,10 @@ import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
+import {
+  getEmptyString,
+  getOrEmptyTagFromValue,
+} from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { Port } from '../../../../../explore/network/components/port';
@@ -314,6 +317,8 @@ const FormattedFieldValueComponent: React.FC<{
       value,
     });
   } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
+    const isEmptyString = typeof value === 'string' && value === '';
+
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
@@ -335,11 +340,14 @@ const FormattedFieldValueComponent: React.FC<{
         </EuiToolTip>
       </TruncatableText>
     ) : (
-      <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
+      <span data-test-subj={`formatted-field-${fieldName}`}>
+        {isEmptyString ? getEmptyString() : value}
+      </span>
     );
   } else {
     // This should not be reached for the unified data table
     const contentValue = getOrEmptyTagFromValue(value);
+
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
     return (
       <DefaultDraggable
@@ -354,6 +362,7 @@ const FormattedFieldValueComponent: React.FC<{
             ? null
             : fieldName
         }
+        params={{ originalValue: value }}
       >
         {content}
       </DefaultDraggable>

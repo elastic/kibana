@@ -32,6 +32,7 @@ export interface QueryMatch {
   value: PrimitiveOrArrayOfPrimitives;
   displayValue?: string | number | boolean;
   operator: QueryOperator;
+  params?: Record<string, unknown>;
 }
 
 export interface DataProvider {

@@ -7,6 +7,7 @@
  */
 
 import type { Filter, PhraseFilter, ScriptedPhraseFilter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import {
   getPhraseFilterValue,
@@ -17,6 +18,10 @@ import {
 } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
+const isEmptyString = (value: string | number | boolean | undefined) => {
+  return typeof value === 'string' && value === '';
+};
+
 const getScriptedPhraseValue = (filter: PhraseFilter) =>
   get(filter, ['query', 'script', 'script', 'params', 'value']);
 
@@ -26,6 +31,13 @@ export function getPhraseDisplayValue(
   fieldType?: string
 ): string {
   const value = filter.meta.value ?? filter.meta.params?.query;
+
+  if (isEmptyString(value)) {
+    return i18n.translate('data.filter.filterBar.emptyString', {
+      defaultMessage: 'Empty string',
+    });
+  }
+
   const updatedValue = fieldType === 'number' && !value ? 0 : value;
   if (formatter?.convert) {
     return formatter.convert(updatedValue);

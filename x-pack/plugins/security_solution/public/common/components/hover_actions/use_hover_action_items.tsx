@@ -184,6 +184,7 @@ export const useHoverActionItems = ({
               showTooltip: enableOverflowButton ? false : true,
               value: values,
               dataViewId,
+              dataProvider,
             })}
           </div>
         ) : null,
@@ -199,6 +200,7 @@ export const useHoverActionItems = ({
               showTooltip: enableOverflowButton ? false : true,
               value: values,
               dataViewId,
+              dataProvider,
             })}
           </div>
         ) : null,

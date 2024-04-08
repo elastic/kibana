@@ -23,6 +23,8 @@ export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
 export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
 
+export const isEmptyString = (value: unknown) => typeof value === 'string' && value === '';
+
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {
     return getEmptyTagValue();

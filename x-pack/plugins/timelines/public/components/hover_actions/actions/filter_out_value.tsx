@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { isEmptyString } from '../../../../common/utils/is_empty_string';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
@@ -34,11 +35,21 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     showTooltip = false,
     value,
     dataViewId,
+    dataProvider,
   }) => {
+    const provider = Array.isArray(dataProvider) ? dataProvider[0] : dataProvider;
+    const originalValue = provider?.queryMatch?.params?.originalValue;
+
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal == null || currentVal?.length === 0
-          ? createFilter(field, null, false, dataViewId)
+          ? // NOTE: it is important to distinguish empty strings for filtering purposes
+            createFilter(
+              field,
+              isEmptyString(originalValue) ? '' : null,
+              isEmptyString(originalValue),
+              dataViewId
+            )
           : createFilter(field, currentVal, true, dataViewId);
       const filters = Array.isArray(value)
         ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
@@ -55,7 +66,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
       if (onClick != null) {
         onClick();
       }
-    }, [field, filterManager, onClick, onFilterAdded, value, dataViewId]);
+    }, [value, filterManager, onClick, field, originalValue, dataViewId, onFilterAdded]);
 
     useEffect(() => {
       if (!ownFocus) {
