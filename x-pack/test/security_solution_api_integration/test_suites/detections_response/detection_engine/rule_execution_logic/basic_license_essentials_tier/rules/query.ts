@@ -76,10 +76,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
-        useCreate: true,
-        docsOnly: true,
-      });
+      // await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
+      //   useCreate: true,
+      //   docsOnly: true,
+      // });
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -87,12 +87,13 @@ export default ({ getService }: FtrProviderContext) => {
       await esDeleteAllIndices('.preview.alerts*');
       await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0');
+      // await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0');
     });
 
     // First test creates a real rule - most remaining tests use preview API
@@ -105,6 +106,72 @@ export default ({ getService }: FtrProviderContext) => {
       const alerts = await getOpenAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBeGreaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).toEqual(ID);
+    });
+
+    describe('alerts on alerts', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
+          useCreate: true,
+          docsOnly: true,
+        });
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+        );
+      });
+
+      it('should query and get back expected alert structure when it is a alert on a alert', async () => {
+        const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
+          rule_id: 'alert-on-alert',
+          query: `_id:${alertId}`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toEqual(1);
+
+        const alert = previewAlerts[0]._source;
+
+        if (!alert) {
+          return expect(true).toEqual(true);
+        }
+        const alertAncestorIndex = isServerless
+          ? /\.ds-\.alerts-security\.alerts-default-\d\d\d\d\.\d\d\.\d\d-000001/
+          : /\.internal\.alerts-security\.alerts-default-000001/;
+        expect(alert[ALERT_ANCESTORS][0]).toEqual({
+          id: 'vT9cwocBh3b8EMpD8lsi',
+          type: 'event',
+          index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
+          depth: 0,
+        });
+        expect(alert[ALERT_ANCESTORS][1]).toEqual(
+          expect.objectContaining({
+            rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
+            id: alertId,
+            type: 'signal',
+            depth: 1,
+          })
+        );
+        expect(alert[ALERT_ANCESTORS][1].index).toMatch(alertAncestorIndex);
+        expect(alert[ALERT_WORKFLOW_STATUS]).toEqual('open');
+        expect(alert[ALERT_DEPTH]).toEqual(2);
+
+        expect(alert[ALERT_ORIGINAL_TIME]).toEqual('2023-04-27T11:03:57.906Z');
+        expect(alert[`${ALERT_ORIGINAL_EVENT}.agent_id_status`]).toEqual('auth_metadata_missing');
+        expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
+        expect(alert[`${ALERT_ORIGINAL_EVENT}.dataset`]).toEqual('endpoint');
+        expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
+      });
     });
 
     it('generates max alerts warning when circuit breaker is hit', async () => {
@@ -176,52 +243,6 @@ export default ({ getService }: FtrProviderContext) => {
           module: 'system',
         }),
       });
-    });
-
-    it('should query and get back expected alert structure when it is a alert on a alert', async () => {
-      const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
-      const rule: QueryRuleCreateProps = {
-        ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
-        rule_id: 'alert-on-alert',
-        query: `_id:${alertId}`,
-      };
-
-      const { previewId } = await previewRule({ supertest, rule });
-      const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-      expect(previewAlerts.length).toEqual(1);
-
-      const alert = previewAlerts[0]._source;
-
-      if (!alert) {
-        return expect(true).toEqual(true);
-      }
-      const alertAncestorIndex = isServerless
-        ? /\.ds-\.alerts-security\.alerts-default-\d\d\d\d\.\d\d\.\d\d-000001/
-        : /\.internal\.alerts-security\.alerts-default-000001/;
-      expect(alert[ALERT_ANCESTORS][0]).toEqual({
-        id: 'vT9cwocBh3b8EMpD8lsi',
-        type: 'event',
-        index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
-        depth: 0,
-      });
-      expect(alert[ALERT_ANCESTORS][1]).toEqual(
-        expect.objectContaining({
-          rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
-          id: alertId,
-          type: 'signal',
-          depth: 1,
-        })
-      );
-      expect(alert[ALERT_ANCESTORS][1].index).toMatch(alertAncestorIndex);
-      expect(alert[ALERT_WORKFLOW_STATUS]).toEqual('open');
-      expect(alert[ALERT_DEPTH]).toEqual(2);
-
-      expect(alert[ALERT_ORIGINAL_TIME]).toEqual('2023-04-27T11:03:57.906Z');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.agent_id_status`]).toEqual('auth_metadata_missing');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.dataset`]).toEqual('endpoint');
-      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).toEqual('2023-04-27T10:58:03Z');
     });
 
     it('should not have risk score fields without risk indices', async () => {

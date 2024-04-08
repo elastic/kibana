@@ -46,6 +46,8 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Saved query type rules', () => {
     before(async () => {
       await esArchiver.load(path);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     after(async () => {

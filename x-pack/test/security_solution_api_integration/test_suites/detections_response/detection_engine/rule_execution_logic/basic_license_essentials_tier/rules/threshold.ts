@@ -25,7 +25,11 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { createRule } from '../../../../../../../common/utils/security_solution';
+import {
+  createRule,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../../../common/utils/security_solution';
 import {
   getOpenAlerts,
   getPreviewAlerts,
@@ -46,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('@ess @serverless Threshold type rules', () => {
     before(async () => {
@@ -54,6 +59,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(path);
+    });
+
+    afterEach(async () => {
+      await esDeleteAllIndices('.preview.alerts*');
+      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
     });
 
     // First test creates a real rule - remaining tests use preview API

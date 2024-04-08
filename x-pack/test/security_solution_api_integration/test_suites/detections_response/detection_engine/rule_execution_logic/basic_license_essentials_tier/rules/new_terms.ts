@@ -51,6 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   /**
    * indexes 2 sets of documents:
    * - documents in historical window
@@ -89,6 +91,11 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
+    });
+
+    afterEach(async () => {
+      await esDeleteAllIndices('.preview.alerts*');
+      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
