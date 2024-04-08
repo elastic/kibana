@@ -371,6 +371,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return text === '483';
         });
 
+        await browser.refresh();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value after reload', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
         await dataGrid.clickDocSortDesc('bytes', 'Sort Low-High');
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
