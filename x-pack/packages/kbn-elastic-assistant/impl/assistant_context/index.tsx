@@ -182,14 +182,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Session storage for traceOptions, including APM Server URL and LangSmith Project/API Key
    */
-  const [sessionStorageTraceOptions, setSessionStorageTraceOptions] = useSessionStorage(
-    `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
-    {
-      apmUrl: `${http.basePath.serverBasePath}/app/apm`,
-      langSmithProject: '',
-      langSmithApiKey: '',
-    }
-  );
+  const defaultTraceOptions: TraceOptions = {
+    apmUrl: `${http.basePath.serverBasePath}/app/apm`,
+    langSmithProject: '',
+    langSmithApiKey: '',
+  };
+  const [sessionStorageTraceOptions = defaultTraceOptions, setSessionStorageTraceOptions] =
+    useSessionStorage<TraceOptions>(
+      `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
+      defaultTraceOptions
+    );
 
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
