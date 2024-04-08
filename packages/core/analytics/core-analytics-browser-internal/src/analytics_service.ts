@@ -13,7 +13,9 @@ import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { trackRenderMutations } from './track_render_mutations';
 import { trackClicks } from './track_clicks';
+
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
 import { trackViewportSize } from './track_viewport_size';
@@ -44,6 +46,7 @@ export class AnalyticsService {
     this.registerSessionIdContext();
     this.registerBrowserInfoAnalyticsContext();
     this.subscriptionsHandler.add(trackClicks(this.analyticsClient, core.env.mode.dev));
+    this.subscriptionsHandler.add(trackRenderMutations(this.analyticsClient, core.env.mode.dev));
     this.subscriptionsHandler.add(trackViewportSize(this.analyticsClient));
 
     // Register a flush method in the browser so CI can explicitly call it before closing the browser.

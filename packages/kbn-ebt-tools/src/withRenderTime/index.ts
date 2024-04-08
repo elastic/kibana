@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './src/withRenderTime';
-export * from './src/performance_metric_events';
+export { withRenderTime } from './withRenderTime';
+export type { WithRenderTimeProps } from './types';
