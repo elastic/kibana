@@ -9,8 +9,9 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
-import { SummarizationPanelForStartChat } from './summarization_panel/summarization_panel_for_start_chat';
+import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 import { ChatFormFields } from '../types';
 
 const maxWidthPage = 640;
@@ -21,6 +22,7 @@ interface StartNewChatProps {
 
 export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { euiTheme } = useEuiTheme();
+  const { data: connectors } = useLoadConnectors();
   const { watch } = useFormContext();
 
   return (
@@ -51,7 +53,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <SummarizationPanelForStartChat />
+          <SetUpConnectorPanelForStartChat />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -63,7 +65,9 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             fill
             iconType="arrowRight"
             iconSide="right"
-            disabled={!watch(ChatFormFields.openAIKey) || !watch(ChatFormFields.indices, []).length}
+            disabled={
+              !watch(ChatFormFields.indices, []).length || !Object.keys(connectors || {}).length
+            }
             onClick={onStartClick}
           >
             <FormattedMessage

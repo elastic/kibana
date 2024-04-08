@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
-
-export type ResponseBody = ExecuteConnectorResponse;
+export { ActionsClientChatOpenAI } from './openai';
+export { ActionsClientLlm } from './actions_client_llm';

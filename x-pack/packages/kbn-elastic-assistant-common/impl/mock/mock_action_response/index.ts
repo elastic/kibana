@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
-
-export type ResponseBody = ExecuteConnectorResponse;
+export const mockActionResponse = {
+  message: 'Yes, your name is Andrew. How can I assist you further, Andrew?',
+  usage: { prompt_tokens: 4, completion_tokens: 10, total_tokens: 14 },
+};
