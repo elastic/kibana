@@ -13,7 +13,7 @@ import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historica
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
-import { SloListItem } from '../slo_list_item';
+import { SloListItem } from './slo_list_item';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type

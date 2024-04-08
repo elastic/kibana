@@ -9,16 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { EditBurnRateRuleFlyout } from './common/edit_burn_rate_rule_flyout';
-import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { useSloFormattedSummary } from '../hooks/use_slo_summary';
-import { BurnRateRuleFlyout } from './common/burn_rate_rule_flyout';
-import { useSloListActions } from '../hooks/use_slo_list_actions';
-import { SloItemActions } from './slo_item_actions';
-import { SloBadges } from './badges/slo_badges';
-import { SloSummary } from './slo_summary';
-import { BurnRateRuleParams } from '../../../typings';
-import { SLOGroupings } from './common/slo_groupings';
+import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
+import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
+import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
+import { useSloListActions } from '../../hooks/use_slo_list_actions';
+import { SloItemActions } from '../slo_item_actions';
+import { SloBadges } from '../badges/slo_badges';
+import { SloSummary } from '../slo_summary';
+import { BurnRateRuleParams } from '../../../../typings';
+import { SLOGroupings } from '../common/slo_groupings';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse; // TODO Kevin: wrong type
@@ -61,16 +61,12 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    {slo.summary ? (
-                      <>
-                        <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                          {slo.name}
-                        </a>
-                        <SLOGroupings slo={slo} />
-                      </>
-                    ) : (
-                      <span>{slo.name}</span>
-                    )}
+                    <>
+                      <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                        {slo.name}
+                      </a>
+                      <SLOGroupings slo={slo} />
+                    </>
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges
@@ -84,13 +80,11 @@ export function SloListItem({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              {slo.summary ? (
-                <SloSummary
-                  slo={slo}
-                  historicalSummary={historicalSummary}
-                  historicalSummaryLoading={historicalSummaryLoading}
-                />
-              ) : null}
+              <SloSummary
+                slo={slo}
+                historicalSummary={historicalSummary}
+                historicalSummaryLoading={historicalSummaryLoading}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -12,8 +12,8 @@ import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public'
 import {
   HEALTHY_ROLLING_SLO,
   historicalSummaryData,
-} from '../../../data/slo/historical_summary_data';
-import { buildSlo } from '../../../data/slo/slo';
+} from '../../../../data/slo/historical_summary_data';
+import { buildSlo } from '../../../../data/slo/slo';
 import { SloListItem as Component, SloListItemProps } from './slo_list_item';
 
 export default {
