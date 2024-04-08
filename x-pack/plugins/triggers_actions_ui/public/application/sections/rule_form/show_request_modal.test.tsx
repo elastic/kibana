@@ -122,7 +122,7 @@ describe('rules_settings_modal', () => {
     };
     const result = render(<ShowRequestModalWithProviders {...modalProps} />);
     expect(result.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
-    expect(result.getByTestId('modalSubheadingTitle').textContent).toBe(
+    expect(result.getByTestId('modalSubtitle').textContent).toBe(
       'This elasticsearch request will create this rule.'
     );
     expect(result.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`
@@ -187,7 +187,7 @@ describe('rules_settings_modal', () => {
     };
     const result = render(<ShowRequestModalWithProviders {...modalProps} />);
     expect(result.getByTestId('modalHeaderTitle').textContent).toBe('Edit alerting rule request');
-    expect(result.getByTestId('modalSubheadingTitle').textContent).toBe(
+    expect(result.getByTestId('modalSubtitle').textContent).toBe(
       'This elasticsearch request will edit this rule.'
     );
     expect(result.getByTestId('modalRequestCodeBlock').textContent).toMatchInlineSnapshot(`

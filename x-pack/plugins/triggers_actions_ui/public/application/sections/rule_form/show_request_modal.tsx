@@ -18,7 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import * as i18n from '../translations';
 import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { rewriteBodyRequest as rewriteCreateBodyRequest } from '../../lib/rule_api/create';
@@ -34,39 +34,9 @@ const stringify = (rule: RuleUpdates, edit: boolean): string => {
       : rewriteCreateBodyRequest(rule);
     return JSON.stringify(request, null, 2);
   } catch {
-    return i18n.translate(
-      'xpack.triggersActionsUI.sections.showRequestModal.somethingWentWrongDescription',
-      {
-        defaultMessage: 'Sorry about that, something went wrong.',
-      }
-    );
+    return i18n.SHOW_REQUEST_MODAL_ERROR;
   }
 };
-
-const EDIT = i18n.translate(
-  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleEdit',
-  {
-    defaultMessage: 'edit',
-  }
-);
-const CREATE = i18n.translate(
-  'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitleCreate',
-  {
-    defaultMessage: 'create',
-  }
-);
-const HEADER_EDIT = i18n.translate(
-  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleEdit',
-  {
-    defaultMessage: 'Edit',
-  }
-);
-const HEADER_CREATE = i18n.translate(
-  'xpack.triggersActionsUI.sections.showRequestModal.headerTitleCreate',
-  {
-    defaultMessage: 'Create',
-  }
-);
 
 export interface ShowRequestModalProps {
   onClose: () => void;
@@ -89,23 +59,14 @@ export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle id="showRequestModal" data-test-subj="modalHeaderTitle">
-              {i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.headerTitle', {
-                defaultMessage: '{requestType} alerting rule request',
-                values: { requestType: edit ? HEADER_EDIT : HEADER_CREATE },
-              })}
+              {i18n.SHOW_REQUEST_MODAL_TITLE(edit)}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText data-test-subj="modalSubheadingTitle">
+            <EuiText data-test-subj="modalSubtitle">
               <p>
                 <EuiTextColor color="subdued">
-                  {i18n.translate(
-                    'xpack.triggersActionsUI.sections.showRequestModal.subheadingTitle',
-                    {
-                      defaultMessage: 'This elasticsearch request will {requestType} this rule.',
-                      values: { requestType: edit ? EDIT : CREATE },
-                    }
-                  )}
+                  {i18n.SHOW_REQUEST_MODAL_SUBTITLE(edit)}
                 </EuiTextColor>
               </p>
             </EuiText>
