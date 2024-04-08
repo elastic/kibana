@@ -18,9 +18,7 @@ import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 import {
-  isKeyEqual,
   isKeyEqualAsync,
-  shouldRefreshDiffingFunctions,
   unsavedChangesDiffingFunctions,
 } from './dashboard_diffing_functions';
 
@@ -59,23 +57,6 @@ export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInpu
   'timeslice',
   'viewMode',
   'id',
-];
-
-/**
- * input keys that will cause a new session to be created.
- */
-const sessionChangeKeys: Array<keyof Omit<DashboardContainerInput, 'panels'>> = [
-  'query',
-  'filters',
-  'timeRange',
-  'timeslice',
-  'timeRestore',
-  'lastReloadRequestTime',
-
-  // also refetch when chart settings change
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
 ];
 
 /**
@@ -226,34 +207,6 @@ export async function getDashboardUnsavedChanges(
     return changes;
   }, {} as Partial<DashboardContainerInput>);
   return inputChanges;
-}
-
-export function getShouldRefresh(
-  this: DashboardContainer,
-  lastInput: DashboardContainerInput,
-  input: DashboardContainerInput
-): boolean {
-  for (const key of sessionChangeKeys) {
-    if (input[key] === undefined && lastInput[key] === undefined) {
-      continue;
-    }
-    if (
-      !isKeyEqual(
-        key,
-        {
-          container: this,
-          currentValue: input[key],
-          currentInput: input,
-          lastValue: lastInput[key],
-          lastInput,
-        },
-        shouldRefreshDiffingFunctions
-      )
-    ) {
-      return true;
-    }
-  }
-  return false;
 }
 
 function backupUnsavedChanges(

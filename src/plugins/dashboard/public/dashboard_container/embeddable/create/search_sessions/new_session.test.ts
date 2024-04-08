@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
+import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
+import { newSession$ } from './new_session';
+
+describe('newSession$', () => {
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const query$ = new BehaviorSubject(undefined);
+  const reload$ = new Subject();
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+  const api = {
+    filters$,
+    query$,
+    reload$,
+    timeRange$,
+  };
+
+  describe('filter$', () => {
+    const existsFilter = buildExistsFilter(
+      {
+        name: 'myFieldName',
+      } as DataViewFieldBase,
+      {
+        id: 'myDataViewId',
+      } as DataViewBase
+    );
+    
+    test('should fire on filter change', async () => {
+      filters$.next([existsFilter]);
+
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      filters$.next([toggleFilterNegated(existsFilter)]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(true);
+      subscription.unsubscribe();
+    });
+
+    test('should not fire on disabled filter change', async () => {
+      const disabledFilter = disableFilter(existsFilter);
+      filters$.next([disabledFilter]);
+      
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      filters$.next([toggleFilterNegated(disabledFilter)]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(false);
+      subscription.unsubscribe();
+    });
+
+    test('should not fire on unpinned filter changing to pinned', async () => {
+      filters$.next([existsFilter]);
+      
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      filters$.next([pinFilter(existsFilter)]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(false);
+      subscription.unsubscribe();
+    });
+
+    test('should not fire on pinned filter changing to unpinned', async () => {
+      filters$.next([pinFilter(existsFilter)]);
+      
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      filters$.next([existsFilter]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(false);
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('reload$', () => {
+    test('should fire on reload', async () => {
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      reload$.next(undefined);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(true);
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('timeRange$', () => {
+    test('should fire on timeRange change', async () => {
+      timeRange$.next({ from: 'now-15m', to: 'now' });
+
+      let fired = false;
+      const subscription = newSession$(api).pipe(
+        // ignore emit on subscribe
+        skip(1),
+      ).subscribe(() => {
+        fired = true;
+      });
+
+      timeRange$.next({ from: 'now-30m', to: 'now' });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(fired).toBe(true);
+      subscription.unsubscribe();
+    });
+  });
+});

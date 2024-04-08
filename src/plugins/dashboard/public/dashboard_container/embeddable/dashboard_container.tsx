@@ -142,6 +142,7 @@ export class DashboardContainer
   public searchSessionId?: string;
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
+  public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
@@ -265,6 +266,10 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
+    this.timeRestore$ = embeddableInputToSubject<
+      boolean | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'timeRestore');
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput
