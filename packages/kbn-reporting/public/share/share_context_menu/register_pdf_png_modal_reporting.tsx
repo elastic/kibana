@@ -506,7 +506,7 @@ export const reportingExportModalProvider = ({
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       theme,
-      renderLayoutOptionSwitch: true,
+      renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
     });
 
