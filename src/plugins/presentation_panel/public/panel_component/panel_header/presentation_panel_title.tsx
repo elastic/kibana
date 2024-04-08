@@ -34,8 +34,9 @@ import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_ac
 const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
 const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
 
-const usePresentationPanelTitleClickHandler = (titleElmRef?: HTMLElement) => {
+export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement | null) => {
   const onClick = useRef<Observable<{ dragged: boolean }> | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   const mouseup = createDocumentMouseUpListener();
   const mousemove = createDocumentMouseMoveListener();
@@ -68,10 +69,12 @@ const usePresentationPanelTitleClickHandler = (titleElmRef?: HTMLElement) => {
         keydown.pipe(takeWhile((kd) => kd.key === 'Enter')).pipe(map(() => ({ dragged: false }))),
         mousedragExclusiveClick$
       );
+
+      setInitialized(true);
     }
   }, [mousemove, mouseup, titleElmRef]);
 
-  return titleElmRef ? onClick.current : null;
+  return initialized ? onClick.current : null;
 };
 
 export const PresentationPanelTitle = ({
