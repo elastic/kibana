@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'discover',
