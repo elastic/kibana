@@ -115,6 +115,16 @@ export const conversationRt: t.Type<Conversation> = t.intersection([
   }),
 ]);
 
+export const functionRt = t.intersection([
+  t.type({
+    name: t.string,
+    description: t.string,
+  }),
+  t.partial({
+    parameters: t.any,
+  }),
+]);
+
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
   description: t.string,
   data: t.array(
@@ -124,15 +134,5 @@ export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextReques
       value: t.any,
     })
   ),
-  actions: t.array(
-    t.intersection([
-      t.type({
-        name: t.string,
-        description: t.string,
-      }),
-      t.partial({
-        parameters: t.record(t.string, t.any),
-      }),
-    ])
-  ),
+  actions: t.array(functionRt),
 });

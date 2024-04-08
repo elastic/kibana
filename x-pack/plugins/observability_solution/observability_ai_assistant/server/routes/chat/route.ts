@@ -11,14 +11,13 @@ import { Readable } from 'stream';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { screenContextRt, messageRt } from '../runtime_types';
+import { screenContextRt, messageRt, functionRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
-const chatCompleteRt = t.type({
+const chatCompleteBaseRt = t.type({
   body: t.intersection([
     t.type({
       messages: t.array(messageRt),
-      screenContexts: t.array(screenContextRt),
       connectorId: t.string,
       persist: toBooleanRt,
     }),
@@ -29,6 +28,24 @@ const chatCompleteRt = t.type({
     }),
   ]),
 });
+
+const chatCompleteInternalRt = t.intersection([
+  chatCompleteBaseRt,
+  t.type({
+    body: t.type({
+      screenContexts: t.array(screenContextRt),
+    }),
+  }),
+]);
+
+const chatCompletePublicRt = t.intersection([
+  chatCompleteBaseRt,
+  t.type({
+    body: t.partial({
+      actions: t.array(functionRt),
+    }),
+  }),
+]);
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -41,17 +58,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         name: t.string,
         messages: t.array(messageRt),
         connectorId: t.string,
-        functions: t.array(
-          t.intersection([
-            t.type({
-              name: t.string,
-              description: t.string,
-            }),
-            t.partial({
-              parameters: t.any,
-            }),
-          ])
-        ),
+        functions: t.array(functionRt),
       }),
       t.partial({
         functionCall: t.string,
@@ -98,7 +105,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
 async function chatComplete(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
-    params: t.TypeOf<typeof chatCompleteRt>;
+    params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
 ) {
   const { request, params, service } = resources;
@@ -156,7 +163,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: chatCompleteRt,
+  params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
     return observableIntoStream(await chatComplete(resources));
   },
@@ -167,9 +174,26 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: chatCompleteRt,
+  params: chatCompletePublicRt,
   handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await chatComplete(resources));
+    const {
+      body: { actions, ...restOfBody },
+    } = resources.params;
+    return observableIntoStream(
+      await chatComplete({
+        ...resources,
+        params: {
+          body: {
+            ...restOfBody,
+            screenContexts: [
+              {
+                actions,
+              },
+            ],
+          },
+        },
+      })
+    );
   },
 });
 
