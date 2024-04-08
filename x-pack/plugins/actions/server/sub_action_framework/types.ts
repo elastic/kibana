@@ -82,9 +82,7 @@ export interface SubActionConnectorType<Config, Secrets> {
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
-  getKibanaPrivileges?: (args?: {
-    params?: { subAction: string; subActionParams: Record<string, unknown> };
-  }) => string[];
+  getKibanaPrivileges?: () => string[];
 }
 
 export interface ExecutorParams extends ActionTypeParams {

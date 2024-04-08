@@ -166,7 +166,7 @@ export interface ActionType<
    * It only works with system actions and only when executing an action.
    * For all other scenarios they will be ignored
    */
-  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
+  getKibanaPrivileges?: () => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;

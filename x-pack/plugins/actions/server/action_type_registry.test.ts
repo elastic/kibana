@@ -799,8 +799,8 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
+      registry.getSystemActionKibanaPrivileges('test.system-action');
+      expect(getKibanaPrivileges).toHaveBeenCalled();
     });
   });
 });

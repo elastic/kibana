@@ -666,15 +666,14 @@ export class ActionsClient {
     return await this.context.unsecuredSavedObjectsClient.delete('action', id);
   }
 
-  private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {
+  private getSystemActionKibanaPrivileges(connectorId: string) {
     const inMemoryConnector = this.context.inMemoryConnectors.find(
       (connector) => connector.id === connectorId
     );
 
     const additionalPrivileges = inMemoryConnector?.isSystemAction
       ? this.context.actionTypeRegistry.getSystemActionKibanaPrivileges(
-          inMemoryConnector.actionTypeId,
-          params
+          inMemoryConnector.actionTypeId
         )
       : [];
 
@@ -695,7 +694,7 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId);
       let actionTypeId: string | undefined;
 
       try {

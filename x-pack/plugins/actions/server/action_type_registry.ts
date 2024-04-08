@@ -108,17 +108,14 @@ export class ActionTypeRegistry {
   /**
    * Returns the kibana privileges of a system action type
    */
-  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
-    actionTypeId: string,
-    params?: Params
-  ): string[] {
+  public getSystemActionKibanaPrivileges(actionTypeId: string): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
     if (!actionType?.isSystemActionType) {
       return [];
     }
 
-    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
+    return actionType?.getKibanaPrivileges?.() ?? [];
   }
 
   /**

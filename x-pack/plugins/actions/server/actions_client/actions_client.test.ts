@@ -2935,7 +2935,7 @@ describe('execute()', () => {
         additionalPrivileges: ['test/create'],
       });
 
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
+      expect(getKibanaPrivileges).toHaveBeenCalled();
     });
   });
 

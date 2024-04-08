@@ -688,10 +688,7 @@ const ensureAuthorizedToExecute = async ({
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
     if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
-        actionTypeId,
-        params
-      );
+      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(actionTypeId);
 
       await authorization.ensureAuthorized({
         operation: 'execute',

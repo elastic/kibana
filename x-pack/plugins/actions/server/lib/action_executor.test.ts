@@ -1294,9 +1294,7 @@ describe('System actions', () => {
       actionId: 'system-connector-.cases',
     });
 
-    expect(connectorTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
-      foo: 'bar',
-    });
+    expect(connectorTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases');
 
     expect(authorizationMock.ensureAuthorized).toBeCalledWith({
       actionTypeId: '.cases',
