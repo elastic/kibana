@@ -253,13 +253,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
             <EuiText size="s">
-              {slo.summary ? (
-                <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                  {slo.name}
-                </a>
-              ) : (
-                <span>{slo.name}</span>
-              )}
+              <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                {slo.name}
+              </a>
             </EuiText>
           </EuiToolTip>
         );
@@ -292,7 +288,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       name: 'SLI value',
       truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
-        !slo.summary || slo.summary.status === 'NO_DATA'
+        slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
           : numeral(slo.summary.sliValue).format(percentFormat),
     },
@@ -300,9 +296,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       field: 'historicalSli',
       name: 'Historical SLI',
       render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed =
-          (slo.summary && slo.summary.status === 'VIOLATED') ||
-          (slo.summary && slo.summary.status === 'DEGRADING');
+        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
         const historicalSliData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
@@ -328,7 +322,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       name: 'Budget remaining',
       truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
-        !slo.summary || slo.summary.status === 'NO_DATA'
+        slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
           : numeral(slo.summary.errorBudget.remaining).format(percentFormat),
     },
@@ -336,9 +330,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       field: 'historicalErrorBudgetRemaining',
       name: 'Historical budget remaining',
       render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed =
-          (slo.summary && slo.summary.status === 'VIOLATED') ||
-          (slo.summary && slo.summary.status === 'DEGRADING');
+        const isSloFailed = ['VIOLATED', 'DEGRADING'].includes(slo.summary.status);
         const errorBudgetBurnDownData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
@@ -377,7 +369,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
 
   return (
     <>
-      <EuiBasicTable<SLOWithSummaryResponse> // TODO Kevin: wrong type
+      <EuiBasicTable<SLOWithSummaryResponse>
         items={sloList}
         columns={columns}
         loading={loading}
