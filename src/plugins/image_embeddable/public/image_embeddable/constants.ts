@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-import './image_embeddable.scss';
+export const IMAGE_EMBEDDABLE_TYPE = 'image';
+export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
