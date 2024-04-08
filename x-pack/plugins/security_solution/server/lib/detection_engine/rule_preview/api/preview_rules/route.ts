@@ -286,6 +286,7 @@ export const previewRulesRoute = async (
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),
+                startedAtOverridden: true,
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,

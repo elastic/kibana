@@ -59,4 +59,17 @@ export interface AdHocRunSO extends Record<string, unknown> {
   schedule: AdHocRunSchedule[];
 }
 
-export type AdHocRun = Omit<AdHocRunSO, 'rule'> & { id: string; rule: AdHocRunRule };
+export interface AdHocRun {
+  apiKeyId: string;
+  apiKeyToUse: string;
+  createdAt: string;
+  duration: string;
+  enabled: boolean;
+  end?: string;
+  id: string;
+  rule: AdHocRunRule;
+  spaceId: string;
+  start: string;
+  status: AdHocRunStatus;
+  schedule: AdHocRunSchedule[];
+}

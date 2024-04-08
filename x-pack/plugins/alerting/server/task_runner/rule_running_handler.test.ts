@@ -7,7 +7,7 @@
 import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 
 import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
-import { RunningHandler } from './running_handler';
+import { RuleRunningHandler } from './rule_running_handler';
 
 jest.mock('../saved_objects/partially_update_rule', () => ({
   partiallyUpdateRule: jest.fn(),
@@ -30,7 +30,7 @@ describe('isRunning handler', () => {
 
   test('Should resolve if nothing got started', async () => {
     (partiallyUpdateRule as jest.Mock).mockImplementation(() => Promise.resolve('resolve'));
-    const runHandler = new RunningHandler(soClient, logger, ruleTypeId);
+    const runHandler = new RuleRunningHandler(soClient, logger, ruleTypeId);
     const resp = await runHandler.waitFor();
     expect(partiallyUpdateRule).toHaveBeenCalledTimes(0);
     expect(logger.error).toHaveBeenCalledTimes(0);
@@ -39,7 +39,7 @@ describe('isRunning handler', () => {
 
   test('Should return the promise from partiallyUpdateRule when the update isRunning has been a success', async () => {
     (partiallyUpdateRule as jest.Mock).mockImplementation(() => Promise.resolve('resolve'));
-    const runHandler = new RunningHandler(soClient, logger, ruleTypeId);
+    const runHandler = new RuleRunningHandler(soClient, logger, ruleTypeId);
     runHandler.start('9876543210');
     jest.runAllTimers();
     const resp = await runHandler.waitFor();
@@ -65,7 +65,7 @@ describe('isRunning handler', () => {
 
   test('Should reject when the update isRunning has been a failure', async () => {
     (partiallyUpdateRule as jest.Mock).mockImplementation(() => Promise.reject(new Error('error')));
-    const runHandler = new RunningHandler(soClient, logger, ruleTypeId);
+    const runHandler = new RuleRunningHandler(soClient, logger, ruleTypeId);
     runHandler.start('9876543210');
     jest.runAllTimers();
 
