@@ -33,7 +33,6 @@ describe('When showing Endpoint Agent Status', () => {
     capabilities = [...ENDPOINT_CAPABILITIES],
     found = true,
     isolated = true,
-    isPendingUninstall,
     lastSeen = new Date().toISOString(),
     pendingActions = {},
     status = HostStatus.HEALTHY,
