@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { TransformListRow } from '../../../../common';
@@ -83,7 +84,9 @@ export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) =>
   }
 
   const statsSection: SectionConfig = {
-    title: 'Basic Stats',
+    title: i18n.translate('xpack.transform.transformList.transformDetails.statsTitle', {
+      defaultMessage: 'Stats',
+    }),
     items: Object.entries(displayStats).map((s) => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
@@ -91,6 +94,10 @@ export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) =>
   };
 
   return (
-    <ExpandedRowColumnView sections={[statsSection]} dataTestSubj={'transformStatsTabContent'} />
+    <ExpandedRowColumnView
+      sections={[statsSection]}
+      showErrorCallout={isError}
+      dataTestSubj={'transformStatsTabContent'}
+    />
   );
 };

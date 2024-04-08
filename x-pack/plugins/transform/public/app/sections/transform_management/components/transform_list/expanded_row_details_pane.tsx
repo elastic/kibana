@@ -190,13 +190,17 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
   }
 
   const state: SectionConfig = {
-    title: 'State',
+    title: i18n.translate('xpack.transform.transformList.transformDetails.stateTitle', {
+      defaultMessage: 'State',
+    }),
     items: stateItems,
     position: 'right',
   };
 
   const general: SectionConfig = {
-    title: 'General',
+    title: i18n.translate('xpack.transform.transformList.transformDetails.generalTitle', {
+      defaultMessage: 'General',
+    }),
     items: configItems,
     position: 'left',
   };
@@ -222,7 +226,9 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
   });
 
   const checkpointing: SectionConfig = {
-    title: 'Checkpointing',
+    title: i18n.translate('xpack.transform.transformList.transformDetails.checkpointTitle', {
+      defaultMessage: 'Checkpointing',
+    }),
     items: checkpointingItems,
     position: 'right',
   };
@@ -238,6 +244,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
   return (
     <ExpandedRowColumnView
       sections={[general, state, checkpointing, ...(alertingRules.items ? [alertingRules] : [])]}
+      showErrorCallout={isError}
       dataTestSubj={'transformDetailsTabContent'}
     />
   );

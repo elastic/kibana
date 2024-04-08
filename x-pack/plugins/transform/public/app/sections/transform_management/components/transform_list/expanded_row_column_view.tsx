@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import {
+  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +17,8 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface SectionItem {
   title: string | JSX.Element;
@@ -49,15 +52,30 @@ export const Section: FC<SectionProps> = ({ section }) => {
 
 interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
+  showErrorCallout: boolean;
   dataTestSubj?: string;
 }
 
 export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
   sections,
+  showErrorCallout,
   dataTestSubj,
 }) => {
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
+      {showErrorCallout && (
+        <>
+          <EuiSpacer size={'s'} />
+          <EuiCallOut color="warning" iconType="warning" size="m">
+            <p>
+              <FormattedMessage
+                id="xpack.transform.list.extendedStatsError"
+                defaultMessage="An error occured fetching the extended stats for this transform, showing the basic stats as a fallback."
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections
