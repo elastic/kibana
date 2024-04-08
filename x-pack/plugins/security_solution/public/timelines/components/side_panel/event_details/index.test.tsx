@@ -18,9 +18,9 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
+  ASSISTANT_FEATURE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_PREVIEW_INDEX,
-  ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
@@ -56,19 +56,6 @@ jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('testSpace'),
 }));
-
-jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
-  () => {
-    return {
-      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-        loading: false,
-        isIsolated: false,
-        agentStatus: 'healthy',
-      }),
-    };
-  }
-);
 
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
   return {

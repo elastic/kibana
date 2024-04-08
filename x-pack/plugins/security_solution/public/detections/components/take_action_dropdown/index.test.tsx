@@ -86,16 +86,6 @@ jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
   };
 });
 
-jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
-  return {
-    useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-      loading: false,
-      isIsolated: false,
-      agentStatus: 'healthy',
-    }),
-  };
-});
-
 jest.mock('../../../common/components/user_privileges');
 
 describe('take action dropdown', () => {
