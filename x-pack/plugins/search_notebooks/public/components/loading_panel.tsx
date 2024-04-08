@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import { EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginStart {}
+export const LoadingPanel = () => (
+  <EuiPanel color="subdued">
+    <EuiLoadingSpinner />
+  </EuiPanel>
+);

@@ -18,6 +18,7 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
+    "@kbn/ipynb",
     "@kbn/logging",
   ]
 }

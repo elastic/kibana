@@ -6,14 +6,16 @@
   "plugin": {
     "id": "searchNotebooks",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "xpack",
       "search",
       "notebooks"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "console"
+    ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginStart {}
+import { SearchNotebooksPlugin } from './plugin';
+
+export function plugin() {
+  return new SearchNotebooksPlugin();
+}
+
+export type { SearchNotebooksPluginSetup, SearchNotebooksPluginStart } from './types';
