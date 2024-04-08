@@ -180,7 +180,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
 }) => {
   /**
-   * Session storage for traceOptions, including APM Server URL and LangSmith Project/API Key
+   * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
    */
   const defaultTraceOptions: TraceOptions = {
     apmUrl: `${http.basePath.serverBasePath}/app/apm`,
