@@ -181,6 +181,7 @@ Array [
       "errorBudgetRemaining": 1,
       "goodEvents": 0,
       "isTempDoc": true,
+      "kibanaUrl": "http://myhost.com/mock-server-basepath",
       "service": Object {
         "environment": "irrelevant",
         "name": "irrelevant",
