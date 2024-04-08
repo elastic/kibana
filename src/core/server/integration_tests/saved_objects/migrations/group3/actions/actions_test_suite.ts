@@ -1348,9 +1348,7 @@ export const runActionTestSuite = ({
       );
     });
 
-    // consistently breaking in CI:
-    // https://github.com/elastic/kibana/issues/167288
-    it.skip('returns a left es_response_too_large error when a read batch exceeds the maxResponseSize', async () => {
+    it('returns a left es_response_too_large error when a read batch exceeds the maxResponseSize', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;
 
@@ -1362,9 +1360,11 @@ export const runActionTestSuite = ({
         searchAfter: undefined,
         maxResponseSizeBytes: 500, // set a small size to force the error
       });
-      const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
+      const rightResponse = await readWithPitTask();
 
-      await expect(Either.isRight(rightResponse)).toBe(true);
+      if (Either.isLeft(rightResponse)) {
+        fail(`Expected a successful response but got ${JSON.stringify(rightResponse.left)}`);
+      }
 
       readWithPitTask = readWithPit({
         client,
