@@ -167,5 +167,6 @@
     "@kbn/typed-react-router-config",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/infra-forge",
+    "@kbn/apm-data-view",
   ]
 }

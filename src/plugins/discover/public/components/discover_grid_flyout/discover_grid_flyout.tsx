@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -98,6 +99,10 @@ export function DiscoverGridFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
+      const nodeName = get(ev, 'target.nodeName', null);
+      if (typeof nodeName === 'string' && nodeName.toLowerCase() === 'input') {
+        return;
+      }
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();
