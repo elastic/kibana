@@ -19,16 +19,16 @@ import {
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
-import { asDuration, asPercent } from '../../../../../common';
-import { createFormatter } from '../../../../../common/custom_threshold_rule/formatters';
-import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { METRIC_FORMATTERS } from '../../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../pages/alert_details/alert_details';
+import { asDuration, asPercent } from '../../../../common';
+import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
+import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
+import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../pages/alert_details/alert_details';
 import {
   BaseMetricExpressionParams,
   CustomMetricExpressionParams,
-} from '../../../../../common/custom_threshold_rule/types';
-import { TopAlert } from '../../../../typings/alerts';
+} from '../../../../common/custom_threshold_rule/types';
+import { TopAlert } from '../../../typings/alerts';
 import { isFieldsSameType } from './is_fields_same_type';
 export interface FlyoutThresholdData {
   observedValue: string;

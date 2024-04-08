@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TopAlert } from '../../../../typings/alerts';
+import { TopAlert } from '../../../typings/alerts';
 import { mapRuleParamsWithFlyout } from './map_rules_params_with_flyout';
 
 describe('Map rules params with flyout', () => {

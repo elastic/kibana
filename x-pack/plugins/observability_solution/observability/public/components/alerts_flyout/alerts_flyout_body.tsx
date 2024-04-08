@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TopAlert } from '../../typings/alerts';
-import { Overview } from './alert_flyout_overview/alerts_flyout_overview';
+import { AlertOverview } from '../alert_overview/alert_overview';
 
 interface FlyoutProps {
   rawAlert: AlertsTableFlyoutBaseProps['alert'];
@@ -28,7 +28,7 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
       name: i18n.translate('xpack.observability.alertFlyout.overview', {
         defaultMessage: 'Overview',
       }),
-      content: <Overview alert={alert} pageId={pageId} />,
+      content: <AlertOverview alert={alert} pageId={pageId} />,
     };
   }, [alert, pageId]);
 

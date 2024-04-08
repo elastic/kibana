@@ -42,7 +42,7 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { Overview } from '../../components/alerts_flyout/alert_flyout_overview/alerts_flyout_overview';
+import { AlertOverview } from '../../components/alert_overview/alert_overview';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -176,7 +176,7 @@ export function AlertDetails() {
         )}
       </>
     ) : (
-      <Overview alert={alertDetail.formatted} />
+      <AlertOverview alert={alertDetail.formatted} />
     )
   ) : (
     <></>

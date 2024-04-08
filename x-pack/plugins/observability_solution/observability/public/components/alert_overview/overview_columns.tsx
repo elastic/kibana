@@ -13,9 +13,9 @@ import { AlertStatus } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
-import type { Group } from '../../../../common/custom_threshold_rule/types';
-import { NavigateToCaseView } from '../../../hooks/use_case_view_navigation';
-import { Groups } from '../../custom_threshold/components/alert_details_app_section/groups';
+import type { Group } from '../../../common/custom_threshold_rule/types';
+import { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
+import { Groups } from '../custom_threshold/components/alert_details_app_section/groups';
 import { formatCase } from './helpers/format_cases';
 import { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
 
