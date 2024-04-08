@@ -8,15 +8,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { IntlProvider } from '..';
+import { IntlProvider } from 'react-intl';
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export const I18nProvider: React.FC = ({ children }) => {
+export const I18nProvider = ({
+  children,
+}: {
+  children: IntlProvider['props']['children'] | React.ReactElement;
+}) => {
   const { messages, formats, locale, defaultLocale, defaultFormats } = i18n.getTranslation();
 
   const isInitialized = i18n.getIsInitialized();

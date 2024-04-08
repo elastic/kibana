@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IntlShape, WrappedComponentProps } from '.';
+import type { IntlShape, WrappedComponentProps } from 'react-intl';
 import {
   FormattedDate,
   FormattedTime,
@@ -14,7 +14,7 @@ import {
   FormattedPlural,
   FormattedMessage,
   FormattedRelativeTime,
-} from '.';
+} from 'react-intl';
 
 export type { IntlShape, WrappedComponentProps };
 export {
@@ -26,5 +26,7 @@ export {
   FormattedRelativeTime,
 };
 
+export { FormattedRelative } from './src/compatiblity_layer';
+export type { FormattedRelativeProps } from './src/compatiblity_layer';
 export { I18nProvider } from './src/provider';
 export { injectI18n, useI18n } from './src/inject';
