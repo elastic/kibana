@@ -25,6 +25,7 @@ import { LensEmbeddable } from '../../../../common/components/visualization_acti
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -121,6 +122,18 @@ const mockUseIsExperimentalFeatureEnabled = jest.fn((feature: keyof Experimental
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
   useAlertHistogramCount: jest.fn().mockReturnValue(999),
+}));
+
+jest.mock('../../../../common/components/visualization_actions/use_visualization_response', () => ({
+  useVisualizationResponse: jest.fn().mockReturnValue({
+    responses: [
+      {
+        hits: { total: 0 },
+        aggregations: { myAgg: { buckets: [{ key: 'A' }, { key: 'B' }, { key: 'C' }] } },
+      },
+    ],
+    loading: false,
+  }),
 }));
 
 const defaultProps = {
@@ -849,6 +862,38 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
+      });
+    });
+
+    it('should render correct subtitle with alert count', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      });
+    });
+
+    it('should render correct subtitle with empty string', async () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        responses: [
+          {
+            hits: { total: 0 },
+            aggregations: { myAgg: { buckets: [] } },
+          },
+        ],
+        loading: false,
+      });
+
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
       });
     });
   });
