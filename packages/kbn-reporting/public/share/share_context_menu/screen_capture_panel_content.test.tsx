@@ -30,10 +30,30 @@ const getJobParamsDefault = () => ({
 
 const theme = themeServiceMock.createSetupContract();
 
-xtest('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
+test('ScreenCapturePanelContent renders the default view properly', () => {
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+        theme={theme}
+      />
+    </IntlProvider>
+  );
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
+  expect(component.text()).not.toMatch('Full page layout');
+  expect(component.text()).not.toMatch('Optimize for printing');
+});
+
+test('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="canvas"
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
@@ -52,6 +72,7 @@ test('ScreenCapturePanelContent allows POST URL to be copied when objectId is pr
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        layoutOption="canvas"
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
@@ -71,6 +92,7 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
   const component = mount(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
+        layoutOption="canvas"
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
@@ -83,6 +105,25 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
   );
   expect(component.text()).not.toMatch('Copy POST URL');
   expect(component.text()).toMatch('Unsaved work');
+});
+
+test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
+  const component = mount(
+    <IntlProvider locale="en">
+      <ScreenCapturePanelContent
+        layoutOption="print"
+        reportType="Analytical App"
+        requiresSavedState={false}
+        apiClient={apiClient}
+        uiSettings={uiSettings}
+        toasts={coreSetup.notifications.toasts}
+        getJobParams={getJobParamsDefault}
+        theme={theme}
+      />
+    </IntlProvider>
+  );
+  expect(component.find('EuiForm').render()).toMatchSnapshot();
+  expect(component.text()).toMatch('Optimize for printing');
 });
 
 test('ScreenCapturePanelContent decorated job params are visible in the POST URL', () => {
