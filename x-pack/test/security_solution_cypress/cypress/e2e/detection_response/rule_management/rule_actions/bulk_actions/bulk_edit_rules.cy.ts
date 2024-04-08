@@ -183,7 +183,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
     });
 
     // github.com/elastic/kibana/issues/179954
-    it('Only prebuilt rules selected', { tags: ['@brokenInServerlessQA'] }, () => {
+    it('Only prebuilt rules selected', { tags: ['@skipInServerless'] }, () => {
       createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
@@ -204,7 +204,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
     // https://github.com/elastic/kibana/issues/179955
     it(
       'Prebuilt and custom rules selected: user proceeds with custom rules editing',
-      { tags: ['@brokenInServerlessQA'] },
+      { tags: ['@skipInServerless'] },
       () => {
         getRulesManagementTableRows().then((existedRulesRows) => {
           createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
@@ -235,7 +235,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@serverless'] }, () => 
     // https://github.com/elastic/kibana/issues/179956
     it(
       'Prebuilt and custom rules selected: user cancels action',
-      { tags: ['@brokenInServerlessQA'] },
+      { tags: ['@skipInServerless'] },
       () => {
         createAndInstallMockedPrebuiltRules(PREBUILT_RULES);
 
