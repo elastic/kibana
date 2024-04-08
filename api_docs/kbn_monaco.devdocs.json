@@ -1068,6 +1068,36 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.CONSOLE_OUTPUT_LANG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONSOLE_OUTPUT_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"consoleOutput\""
+        ],
+        "path": "packages/kbn-monaco/src/console/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.CONSOLE_OUTPUT_THEME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONSOLE_OUTPUT_THEME_ID",
+        "description": [],
+        "signature": [
+          "\"consoleOutputTheme\""
+        ],
+        "path": "packages/kbn-monaco/src/console/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.CONSOLE_THEME_ID",
         "type": "string",
         "tags": [],
