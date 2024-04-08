@@ -37,7 +37,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/management-settings-ids",
     "@kbn/navigation-plugin",
-    "@kbn/react-field",
     "@kbn/router-utils",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
