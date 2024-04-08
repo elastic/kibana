@@ -34,7 +34,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/cases-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/elastic-assistant-common"
   ],
   "exclude": [
     "target/**/*",
