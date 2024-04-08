@@ -100,8 +100,12 @@ export function InnerFieldItem(props: FieldItemProps) {
     }
     return new DataViewField(field);
   }, [field]);
-  const useEcsInfo = Boolean(
-    indexPattern && containsEcsFields(indexPattern.getFieldByName as DataView['getFieldByName'])
+  const useEcsInfo = useMemo(
+    () =>
+      Boolean(
+        indexPattern && containsEcsFields(indexPattern.getFieldByName as DataView['getFieldByName'])
+      ),
+    [indexPattern]
   );
   const services = useKibana<LensAppServices>().services;
   const filterManager = services?.data?.query?.filterManager;

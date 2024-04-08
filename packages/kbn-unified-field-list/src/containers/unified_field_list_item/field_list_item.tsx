@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { containsEcsFields } from '@kbn/field-utils';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -255,6 +256,10 @@ function UnifiedFieldListItemComponent({
   );
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
+  const useEcsInfo = useMemo(
+    () => containsEcsFields(dataView.getFieldByName.bind(dataView)),
+    [dataView]
+  );
 
   const customPopoverHeaderProps: Partial<FieldPopoverHeaderProps> = useMemo(() => {
     const dataTestSubjPrefix =
@@ -374,7 +379,7 @@ function UnifiedFieldListItemComponent({
           onAddFilter={onAddFilter}
           onEditField={onEditField}
           onDeleteField={onDeleteField}
-          useEcsInfo={dataView.fields.getByName('ecs.version') !== undefined}
+          useEcsInfo={useEcsInfo}
           {...customPopoverHeaderProps}
         />
       )}
