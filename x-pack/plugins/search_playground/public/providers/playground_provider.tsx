@@ -12,12 +12,20 @@ import { ChatForm } from '../types';
 
 const queryClient = new QueryClient({});
 
-export const PlaygroundProvider: React.FC = ({ children }) => {
+export interface PlaygroundProviderProps {
+  defaultValues?: Partial<ChatForm>;
+}
+
+export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
+  children,
+  defaultValues,
+}) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
       doc_size: 5,
       source_fields: [],
+      indices: defaultValues?.indices || [],
     },
   });
 
