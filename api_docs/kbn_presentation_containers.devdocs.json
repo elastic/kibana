@@ -387,57 +387,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.useExpandedPanelId",
-        "type": "Function",
-        "tags": [],
-        "label": "useExpandedPanelId",
-        "description": [
-          "\nGets this API's expanded panel state as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "(api: Partial<",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.CanExpandPanels",
-            "text": "CanExpandPanels"
-          },
-          "> | undefined) => string | undefined"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.useExpandedPanelId.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.CanExpandPanels",
-                "text": "CanExpandPanels"
-              },
-              "> | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -747,45 +696,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.PanelPackage",
-        "type": "Interface",
-        "tags": [],
-        "label": "PanelPackage",
-        "description": [],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PanelPackage.panelType",
-            "type": "string",
-            "tags": [],
-            "label": "panelType",
-            "description": [],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PanelPackage.initialState",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "initialState",
-            "description": [],
-            "signature": [
-              "object | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-common.PublishesLastSavedState",
         "type": "Interface",
         "tags": [],
@@ -1046,19 +956,19 @@
             "section": "def-common.PublishesLastSavedState",
             "text": "PublishesLastSavedState"
           },
-          " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+          " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PanelPackage",
-            "text": "PanelPackage"
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAddNewPanel",
+            "text": "CanAddNewPanel"
           },
-          ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },

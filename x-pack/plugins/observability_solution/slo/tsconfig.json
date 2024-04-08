@@ -84,6 +84,7 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/presentation-publishing"
   ]
 }

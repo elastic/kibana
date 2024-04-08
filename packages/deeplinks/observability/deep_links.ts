@@ -15,6 +15,9 @@ import {
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
   SLO_APP_ID,
+  AI_ASSISTANT_APP_ID,
+  OBLT_UX_APP_ID,
+  OBLT_PROFILING_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -24,7 +27,10 @@ type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
 type SyntheticsApp = typeof SYNTHETICS_APP_ID;
 type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
-type SLO_APP = typeof SLO_APP_ID;
+type SloApp = typeof SLO_APP_ID;
+type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
+type ObltUxApp = typeof OBLT_UX_APP_ID;
+type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -34,7 +40,10 @@ export type AppId =
   | ApmApp
   | MetricsApp
   | SyntheticsApp
-  | SLO_APP;
+  | SloApp
+  | AiAssistantApp
+  | ObltUxApp
+  | ObltProfilingApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -63,7 +72,7 @@ export type ApmLinkId =
 
 export type SyntheticsLinkId = 'certificates' | 'overview';
 
-export type SLOLinkId = 'slo';
+export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type LinkId =
   | LogsLinkId
@@ -71,7 +80,7 @@ export type LinkId =
   | MetricsLinkId
   | ApmLinkId
   | SyntheticsLinkId
-  | SLOLinkId;
+  | ProfilingLinkId;
 
 export type DeepLinkId =
   | AppId
@@ -79,4 +88,5 @@ export type DeepLinkId =
   | `${ObservabilityOverviewApp}:${ObservabilityOverviewLinkId}`
   | `${MetricsApp}:${MetricsLinkId}`
   | `${ApmApp}:${ApmLinkId}`
-  | `${SyntheticsApp}:${SyntheticsLinkId}`;
+  | `${SyntheticsApp}:${SyntheticsLinkId}`
+  | `${ObltProfilingApp}:${ProfilingLinkId}`;
