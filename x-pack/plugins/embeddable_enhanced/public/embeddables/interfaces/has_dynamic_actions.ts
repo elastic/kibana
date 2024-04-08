@@ -15,8 +15,8 @@ export type HasDynamicActions = Partial<{
   dynamicActionsState$: PublishingSubject<DynamicActionsSerializedState['enhancements']>;
 }>;
 
-export const apiHasDynamicActions = (api: unknown): api is HasDynamicActions => {
-  const apiMaybeHasDynamicActions = api as HasDynamicActions;
+export const apiHasDynamicActions = (api: unknown): api is Required<HasDynamicActions> => {
+  const apiMaybeHasDynamicActions = api as Required<HasDynamicActions>;
   return Boolean(
     apiMaybeHasDynamicActions &&
       apiMaybeHasDynamicActions.enhancements &&
