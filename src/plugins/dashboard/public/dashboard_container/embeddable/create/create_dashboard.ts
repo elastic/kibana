@@ -18,7 +18,7 @@ import {
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
@@ -460,7 +460,7 @@ export const initializeDashboard = async ({
       startWith(dashboardContainer.getInput()),
       map((input) => input.filters),
       distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? []);
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
       })
     );
 
