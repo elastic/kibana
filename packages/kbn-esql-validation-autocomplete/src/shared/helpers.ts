@@ -17,6 +17,7 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
+import { ESQLStringLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -71,6 +72,9 @@ export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
   return isSingleItem(arg) && arg.type === 'literal';
 }
+
+export const isESQLStringLiteral = (literal: ESQLLiteral): literal is ESQLStringLiteral =>
+  literal.literalType === 'string';
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
   return isSingleItem(arg) && arg.type === 'timeInterval';
@@ -178,6 +182,8 @@ export function getAllFunctions(options?: {
 export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
+
+export const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 function buildCommandLookup() {
   if (!commandLookups) {

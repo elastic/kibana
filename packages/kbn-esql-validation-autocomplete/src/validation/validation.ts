@@ -19,7 +19,6 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { isESQLStringLiteral, unwrapStringLiteralQuotes } from '@kbn/esql-ast/src/types';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -38,6 +37,7 @@ import {
   isArrayType,
   isColumnItem,
   isEqualType,
+  isESQLStringLiteral,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
@@ -53,6 +53,7 @@ import {
   isSettingItem,
   isAssignment,
   isVariable,
+  unwrapStringLiteralQuotes,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
