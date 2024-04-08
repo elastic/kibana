@@ -6,7 +6,7 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';

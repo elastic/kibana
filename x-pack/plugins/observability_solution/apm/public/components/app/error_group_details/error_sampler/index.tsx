@@ -43,11 +43,7 @@ export function ErrorSampler({
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
 
-  const {
-    observabilityAIAssistant: {
-      service: { setScreenContext },
-    },
-  } = useApmPluginContext();
+  const { observabilityAIAssistant } = useApmPluginContext();
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
 
@@ -90,10 +86,10 @@ export function ErrorSampler({
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
 
   useEffect(() => {
-    if (!errorData) {
+    if (!errorData || !observabilityAIAssistant) {
       return;
     }
-    return setScreenContext({
+    return observabilityAIAssistant.service.setScreenContext({
       data: [
         {
           name: 'error_sample',
@@ -102,7 +98,7 @@ export function ErrorSampler({
         },
       ],
     });
-  }, [setScreenContext, errorData]);
+  }, [observabilityAIAssistant, errorData]);
 
   if (loadingErrorSamplesData || !errorData) {
     return (

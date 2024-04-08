@@ -80,7 +80,6 @@ export function registerQueryFunction({
         'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           query: {
             type: 'string',

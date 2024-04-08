@@ -51,7 +51,7 @@ const mockData = {
     category: 'assistant',
     messages: [],
     apiConfig: { connectorId: '123' },
-    replacements: [],
+    replacements: {},
   },
   'electric sheep': {
     id: 'electric sheep id',
@@ -59,7 +59,7 @@ const mockData = {
     title: 'electric sheep',
     messages: [],
     apiConfig: { connectorId: '123' },
-    replacements: [],
+    replacements: {},
   },
 };
 const mockDeleteConvo = jest.fn();
@@ -140,7 +140,7 @@ describe('Assistant', () => {
             id: 'Welcome Id',
             messages: [],
             title: 'Welcome',
-            replacements: [],
+            replacements: {},
           },
         })
       );
@@ -170,7 +170,7 @@ describe('Assistant', () => {
         expect.objectContaining({
           currentConversation: {
             apiConfig: { connectorId: '123' },
-            replacements: [],
+            replacements: {},
             category: 'assistant',
             id: 'Welcome Id',
             messages: [],

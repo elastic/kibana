@@ -108,14 +108,11 @@ export async function getRelevantFieldNames({
               description: 'The fields you consider relevant to the conversation',
               parameters: {
                 type: 'object',
-                additionalProperties: false,
                 properties: {
                   fields: {
                     type: 'array',
-                    additionalProperties: false,
                     items: {
                       type: 'string',
-                      additionalProperties: false,
                     },
                   },
                 },
