@@ -51,7 +51,7 @@ import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
-import { ModelsTableToConfigMapping } from '.';
+import { ModelsTableToConfigMapping } from './config_mapping';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';

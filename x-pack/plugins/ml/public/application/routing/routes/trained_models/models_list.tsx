@@ -21,7 +21,7 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
 
 const ModelsList = dynamic(async () => ({
-  default: (await import('../../../model_management')).ModelsList,
+  default: (await import('../../../model_management/models_list')).ModelsList,
 }));
 
 export const modelsListRouteFactory = (
