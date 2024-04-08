@@ -17,7 +17,9 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../shared_imports';
-import { getClonePath } from '../../../services/navigation';
+import { getClonePath, getListPath } from '../../../services/navigation';
+import { useRedirectToPathOrRedirectPath } from '../../../hooks';
+import { PipelineDeleteModal } from '../delete_pipelines_modal';
 
 interface Props {
   pipelineName: string;
@@ -28,6 +30,8 @@ export const EditActionsContextButton = ({ pipelineName }: Props) => {
     services: { history },
   } = useKibana();
   const [isPopoverOpen, setPopover] = useState<boolean>(false);
+  const [pipelineToDelete, setPipelineToDelete] = useState<string | undefined>();
+  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'contextMenuPopover',
@@ -66,7 +70,10 @@ export const EditActionsContextButton = ({ pipelineName }: Props) => {
             </EuiTextColor>
           ),
           icon: <EuiIcon type="trash" size="m" color="danger" />,
-          onClick: closePopover,
+          onClick: () => {
+            closePopover();
+            setPipelineToDelete(pipelineName);
+          },
         },
       ],
     },
@@ -83,16 +90,31 @@ export const EditActionsContextButton = ({ pipelineName }: Props) => {
   );
 
   return (
-    <EuiPopover
-      id={contextMenuPopoverId}
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-    >
-      <div style={{ maxWidth: '200px' }}>
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </div>
-    </EuiPopover>
+    <>
+      <EuiPopover
+        id={contextMenuPopoverId}
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+      >
+        <div style={{ maxWidth: '200px' }}>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </div>
+      </EuiPopover>
+
+      {pipelineToDelete ? (
+        <PipelineDeleteModal
+          callback={(deleteResponse) => {
+            if (deleteResponse?.hasDeletedPipelines) {
+              redirectToPathOrRedirectPath(getListPath());
+            }
+
+            setPipelineToDelete(undefined);
+          }}
+          pipelinesToDelete={[pipelineToDelete]}
+        />
+      ) : null}
+    </>
   );
 };

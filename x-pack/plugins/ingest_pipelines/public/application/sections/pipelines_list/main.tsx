@@ -22,7 +22,7 @@ import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
-import { PipelineDeleteModal } from './delete_modal';
+import { PipelineDeleteModal } from '../../components/pipeline_form/delete_pipelines_modal';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 const getPipelineNameFromLocation = (location: Location) => {
