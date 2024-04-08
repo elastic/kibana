@@ -28,10 +28,6 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/observability/README.md[aiAssistantManagementObservability]
-|The aiAssistantManagementObservability plugin manages the Ai Assistant for Observability management section.
-
-
 |{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
@@ -692,6 +688,14 @@ Elastic.
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
+|This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability management section.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
 |This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
@@ -749,6 +753,18 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
+|This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]
+|This plugin contains endpoints and components for rendering search python notebooks in the persistent dev console.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_playground/README.md[searchPlayground]
+|The Search Playground is a tool for developers to experiment with their own data using LLMs.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
@@ -788,6 +804,10 @@ It leverages universal configuration and other APIs in the serverless plugin to 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/slo/README.md[slo]
+|A Kibana plugin
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]

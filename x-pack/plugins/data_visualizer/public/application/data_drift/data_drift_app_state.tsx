@@ -77,6 +77,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -89,7 +90,6 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
   const datePickerDeps = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),

@@ -1,0 +1,239 @@
+openapi: 3.0.0
+info:
+  title: Bulk Actions API endpoint
+  version: '2023-10-31'
+paths:
+  /api/elastic_assistant/anonymization_fields/_bulk_action:
+    post:
+      operationId: PerformBulkAction
+      x-codegen-enabled: true
+      summary: Applies a bulk action to multiple anonymization fields
+      description: The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
+      tags:
+        - Bulk API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delete:
+                  $ref: '#/components/schemas/BulkActionBase'
+                create:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
+                update:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkCrudActionResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    BulkActionSkipReason:
+      type: string
+      enum:
+        - ANONYMIZATION_FIELD_NOT_MODIFIED
+
+    BulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        skip_reason:
+          $ref: '#/components/schemas/BulkActionSkipReason'
+      required:
+        - id
+        - skip_reason
+
+    AnonymizationFieldDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+
+    NormalizedAnonymizationFieldError:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+        err_code:
+          type: string
+        anonymization_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
+      required:
+        - message
+        - status_code
+        - anonymization_fields
+
+    AnonymizationFieldResponse:
+      type: object
+      required:
+        - id
+        - field
+      properties:
+        id:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
+        'timestamp':
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        field:
+          type: string
+        defaultAllow:
+          type: boolean
+        defaultAllowReplacement:
+          type: boolean
+        updatedAt:
+          type: string
+        updatedBy:
+          type: string
+        createdAt:
+          type: string
+        createdBy:
+          type: string
+        users:
+          type: array
+          items:
+            $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/User'
+        namespace:
+          type: string
+          description: Kibana space
+
+    BulkCrudActionResults:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
+        deleted:
+          type: array
+          items:
+            type: string
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkActionSkipResult'
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+
+    BulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+        skipped:
+          type: integer
+        succeeded:
+          type: integer
+        total:
+          type: integer
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+
+    BulkCrudActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status_code:
+          type: integer
+        message:
+          type: string
+        anonymization_fields_count:
+          type: integer
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/BulkCrudActionResults'
+            summary:
+              $ref: '#/components/schemas/BulkCrudActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
+          required:
+            - results
+            - summary
+      required:
+        - attributes
+
+
+    BulkActionBase:
+      x-inline: true
+      type: object
+      properties:
+        query:
+          type: string
+          description: Query to filter anonymization fields
+        ids:
+          type: array
+          description: Array of anonymization fields IDs
+          minItems: 1
+          items:
+            type: string
+
+    AnonymizationFieldCreateProps:
+      type: object
+      required:
+        - field
+      properties:
+        field:
+          type: string
+        defaultAllow:
+          type: boolean
+        defaultAllowReplacement:
+          type: boolean
+
+    AnonymizationFieldUpdateProps:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        defaultAllow:
+          type: boolean
+        defaultAllowReplacement:
+          type: boolean
+    

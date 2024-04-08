@@ -8,11 +8,11 @@
 import { SearchConnectorsSoParams } from './types';
 
 export const searchConnectorsSo = async ({
-  scopedClusterClient,
+  esClient,
   kibanaIndices,
   aggs,
 }: SearchConnectorsSoParams) => {
-  return scopedClusterClient.asInternalUser.search({
+  return esClient.search({
     index: kibanaIndices,
     ignore_unavailable: true,
     body: {

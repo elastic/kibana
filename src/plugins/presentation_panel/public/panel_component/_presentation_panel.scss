@@ -147,15 +147,7 @@
 // EDITING MODE
 
 .embPanel--editing {
-  outline-style: dashed !important;
-  outline-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  outline-width: $euiBorderWidthThin;
-
-  &:hover,
-  &:focus {
-    @include euiSlightShadowHover;
-  }
 
   .embPanel--dragHandle {
     transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;

@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
         log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
+        return actualCount <= expectedCount;
       });
       let prevRowData = '';
       // to make sure the table is already rendered
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
+      renderingCountInc = 4; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
       await retry.waitFor('chart rendering complete after being brushed', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc * 2;

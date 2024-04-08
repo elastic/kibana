@@ -8,15 +8,15 @@
 import { chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
-import { FunctionVisibility, MessageRole } from '../../common/types';
+import { FunctionVisibility } from '../../common/functions/types';
+import { MessageRole } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 export function registerGetDatasetInfoFunction({
-  client,
   resources,
-  registerFunction,
+  functions,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'get_dataset_info',
       contexts: ['core'],
@@ -30,7 +30,6 @@ export function registerGetDatasetInfoFunction({
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           index: {
             type: 'string',
@@ -41,7 +40,7 @@ export function registerGetDatasetInfoFunction({
         required: ['index'],
       } as const,
     },
-    async ({ arguments: { index }, messages, connectorId }, signal) => {
+    async ({ arguments: { index }, messages, connectorId, chat }, signal) => {
       const coreContext = await resources.context.core;
 
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -99,7 +98,6 @@ export function registerGetDatasetInfoFunction({
           return (field.esTypes ?? [field.type]).map((type) => {
             return {
               name: field.name,
-              description: field.customLabel || '',
               type,
             };
           });
@@ -115,7 +113,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
           const chunkResponse$ = (
-            await client.chat('get_relevent_dataset_names', {
+            await chat('get_relevent_dataset_names', {
               connectorId,
               signal,
               messages: [
@@ -147,14 +145,11 @@ export function registerGetDatasetInfoFunction({
                   description: 'The fields you consider relevant to the conversation',
                   parameters: {
                     type: 'object',
-                    additionalProperties: false,
                     properties: {
                       fields: {
                         type: 'array',
-                        additionalProperties: false,
                         items: {
                           type: 'string',
-                          additionalProperties: false,
                         },
                       },
                     },

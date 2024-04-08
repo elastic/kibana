@@ -5,25 +5,28 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
+import { embeddableInputToSubject, embeddableOutputToSubject } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { IContainer } from '@kbn/embeddable-plugin/public';
-import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { MlDependencies } from '../../application/app';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
+import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneEmbeddableUserInput,
   AnomalySwimlaneServices,
 } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
-import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { MlDependencies } from '../../application/app';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { AnomalyDetectionEmbeddable } from '../common/anomaly_detection_embeddable';
+import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 
 export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
@@ -41,12 +44,62 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
+  // API
+  public readonly jobIds: BehaviorSubject<JobId[] | undefined>;
+  public readonly viewBy: BehaviorSubject<string | undefined>;
+  public readonly swimlaneType: BehaviorSubject<SwimlaneType | undefined>;
+  public readonly perPage: BehaviorSubject<number | undefined>;
+  public readonly fromPage: BehaviorSubject<number | undefined>;
+  public readonly interval: BehaviorSubject<number | undefined>;
+
+  private apiSubscriptions = new Subscription();
+
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
     public services: [CoreStart, MlDependencies, AnomalySwimlaneServices],
     parent?: IContainer
   ) {
     super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
+
+    this.jobIds = embeddableInputToSubject<JobId[], AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'jobIds'
+    );
+
+    this.viewBy = embeddableInputToSubject<string, AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'viewBy'
+    );
+
+    this.swimlaneType = embeddableInputToSubject<SwimlaneType, AnomalySwimlaneEmbeddableInput>(
+      this.apiSubscriptions,
+      this,
+      'swimlaneType'
+    );
+
+    this.perPage = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'perPage'
+    );
+
+    this.fromPage = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'fromPage'
+    );
+
+    this.interval = embeddableOutputToSubject<number, AnomalySwimlaneEmbeddableOutput>(
+      this.apiSubscriptions,
+      this,
+      'interval'
+    );
+  }
+
+  public updateUserInput(update: AnomalySwimlaneEmbeddableUserInput) {
+    this.updateInput(update);
   }
 
   public reportsEmbeddableLoad() {
@@ -104,6 +157,7 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
   }
 
   public destroy() {
+    this.apiSubscriptions.unsubscribe();
     super.destroy();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);

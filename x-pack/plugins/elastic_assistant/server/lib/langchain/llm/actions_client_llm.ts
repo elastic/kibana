@@ -8,11 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { LLM } from 'langchain/llms/base';
+import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { getMessageContentAndRole } from '../helpers';
-import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
@@ -21,7 +21,7 @@ interface ActionsClientLlmParams {
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceId?: string;
 }
 
@@ -29,8 +29,7 @@ export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, RequestBody>;
-  #actionResultData: string;
+  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
@@ -53,11 +52,6 @@ export class ActionsClientLlm extends LLM {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
-    this.#actionResultData = '';
-  }
-
-  getActionResultData(): string {
-    return this.#actionResultData;
   }
 
   _llmType() {
@@ -83,10 +77,14 @@ export class ActionsClientLlm extends LLM {
     const requestBody = {
       actionId: this.#connectorId,
       params: {
-        ...this.#request.body.params, // the original request body params
+        // hard code to non-streaming subaction as this class only supports non-streaming
+        subAction: 'invokeAI',
         subActionParams: {
-          ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+          model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
+          ...(this.llmType === 'openai'
+            ? { n: 1, stop: null, temperature: 0.2 }
+            : { temperature: 0, stopSequences: [] }),
         },
       },
     };
@@ -109,7 +107,6 @@ export class ActionsClientLlm extends LLM {
         `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
       );
     }
-    this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
 
     return content; // per the contact of _call, return a string
   }

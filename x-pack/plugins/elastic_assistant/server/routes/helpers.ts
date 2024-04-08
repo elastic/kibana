@@ -7,6 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
+import { Message, TraceData } from '@kbn/elastic-assistant-common';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -49,4 +50,32 @@ export const getPluginNameFromRequest = ({
     );
   }
   return defaultPluginName;
+};
+
+export const getMessageFromRawResponse = ({
+  rawContent,
+  isError,
+  traceData,
+}: {
+  rawContent?: string;
+  traceData?: TraceData;
+  isError?: boolean;
+}): Message => {
+  const dateTimeString = new Date().toISOString();
+  if (rawContent) {
+    return {
+      role: 'assistant',
+      content: rawContent,
+      timestamp: dateTimeString,
+      isError,
+      traceData,
+    };
+  } else {
+    return {
+      role: 'assistant',
+      content: 'Error: Response from LLM API is empty or undefined.',
+      timestamp: dateTimeString,
+      isError: true,
+    };
+  }
 };

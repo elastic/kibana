@@ -11,6 +11,7 @@ import { EuiRangeTick } from '@elastic/eui';
 
 import { ControlOutput } from '../types';
 import { TimeSliderControlEmbeddableInput } from '../../common/time_slider/types';
+import { TimeSlice } from '../../common/types';
 
 export * from '../../common/time_slider/types';
 
@@ -22,7 +23,7 @@ export interface TimeSliderSubjectState {
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeBounds: [number, number];
-  value?: [number, number];
+  value?: TimeSlice;
 }
 
 // public only - redux embeddable state type

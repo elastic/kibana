@@ -29,7 +29,6 @@ export interface DefinedSections {
 }
 
 export interface ManagementStart {
-  setIsSidebarEnabled: (enabled: boolean) => void;
   setupCardsNavigation: ({
     enabled,
     hideLinksTo,

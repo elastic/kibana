@@ -51,7 +51,6 @@ import { GroupByOptions } from '../../../../detections/pages/detection_engine/ru
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -68,6 +67,19 @@ const EuiBadgeWrap = styled(EuiBadge)`
 const Query = styled.div`
   white-space: pre-wrap;
 `;
+
+export const getQueryLabel = (ruleType: Type | undefined): string => {
+  switch (ruleType) {
+    case 'eql':
+      return i18n.EQL_QUERY_LABEL;
+    case 'saved_query':
+      return i18n.SAVED_QUERY_LABEL;
+    case 'esql':
+      return i18n.ESQL_QUERY_LABEL;
+    default:
+      return i18n.QUERY_LABEL;
+  }
+};
 
 export const buildQueryBarDescription = ({
   field,
@@ -464,7 +476,7 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
       return [
         {
           title: label,
-          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
+          description: i18n.ESQL_TYPE_DESCRIPTION,
         },
       ];
     }

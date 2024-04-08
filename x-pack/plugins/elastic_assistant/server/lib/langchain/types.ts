@@ -5,17 +5,39 @@
  * 2.0.
  */
 
-import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/post_actions_connector_execute';
+import {
+  ChatCompletionContentPart,
+  ChatCompletionCreateParamsNonStreaming,
+} from 'openai/resources/chat/completions';
+import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
 
-export type RequestBody = PostActionsConnectorExecuteBodyInputs;
+export type ResponseBody = ExecuteConnectorResponse;
 
-export interface ResponseBody {
-  data: string;
-  connector_id: string;
-  replacements?: Record<string, string>;
-  status: string;
-  trace_data?: {
-    transaction_id: string;
-    trace_id: string;
-  };
+export interface InvokeAIActionParamsSchema {
+  messages: Array<{
+    role: string;
+    content: string | ChatCompletionContentPart[];
+    name?: string;
+    function_call?: {
+      arguments: string;
+      name: string;
+    };
+    tool_calls?: Array<{
+      id: string;
+
+      function: {
+        arguments: string;
+        name: string;
+      };
+
+      type: string;
+    }>;
+    tool_call_id?: string;
+  }>;
+  model?: ChatCompletionCreateParamsNonStreaming['model'];
+  n?: ChatCompletionCreateParamsNonStreaming['n'];
+  stop?: ChatCompletionCreateParamsNonStreaming['stop'];
+  temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
+  functions?: ChatCompletionCreateParamsNonStreaming['functions'];
+  signal?: AbortSignal;
 }

@@ -7,10 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  type Message,
-  MessageRole,
-  type ObservabilityAIAssistantPluginStart,
+import type {
+  Message,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
@@ -20,53 +19,47 @@ export interface LogAIAssistantDocument {
 }
 
 export interface LogAIAssistantProps {
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   doc: LogAIAssistantDocument | undefined;
 }
 
 export const LogAIAssistant = ({
   doc,
-  observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  observabilityAIAssistant: {
+    ObservabilityAIAssistantContextualInsight,
+    getContextualInsightMessages,
+  },
 }: LogAIAssistantProps) => {
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;
     }
 
-    const now = new Date().toISOString();
-
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I'm looking at a log entry. Can you explain me what the log message means? Where it could be coming from, whether it is expected and whether it is an issue. Here's the context, serialized: ${JSON.stringify(
-            { logEntry: { fields: doc.fields } }
-          )} `,
+    return getContextualInsightMessages({
+      message:
+        'Can you explain what this log message means? Where it could be coming from, whether it is expected and whether it is an issue.',
+      instructions: JSON.stringify({
+        logEntry: {
+          fields: doc.fields,
         },
-      },
-    ];
-  }, [doc]);
+      }),
+    });
+  }, [doc, getContextualInsightMessages]);
 
   const similarLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;
     }
 
-    const now = new Date().toISOString();
-
     const message = doc.fields.find((field) => field.field === 'message')?.value[0];
 
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.User,
-          content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
-        },
-      },
-    ];
-  }, [doc]);
+    return getContextualInsightMessages({
+      message: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the message field?`,
+      instructions: JSON.stringify({
+        message,
+      }),
+    });
+  }, [getContextualInsightMessages, doc]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

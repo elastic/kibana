@@ -82,7 +82,10 @@ describe('useLoadConnectors', () => {
       const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors(defaultProps));
       await waitForNextUpdate();
 
-      await expect(result.current).resolves.toStrictEqual(loadConnectorsResult);
+      await expect(result.current).resolves.toStrictEqual(
+        // @ts-ignore ts does not like config, but we define it in the mock data
+        loadConnectorsResult.map((c) => ({ ...c, apiProvider: c.config.apiProvider }))
+      );
     });
   });
   it('should display error toast when api throws error', async () => {

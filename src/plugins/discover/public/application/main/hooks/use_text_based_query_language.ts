@@ -9,7 +9,6 @@ import { isEqual } from 'lodash';
 import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { switchMap } from 'rxjs';
 import { useSavedSearchInitial } from '../services/discover_state_provider';
 import type { DiscoverStateContainer } from '../services/discover_state';
@@ -87,7 +86,7 @@ export function useTextBasedQueryLanguage({
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
             }
-            const dataViewObj = stateContainer.internalState.getState().dataView!;
+            const dataViewObj = stateContainer.internalState.getState().dataView;
 
             if (hasResults) {
               // check if state needs to contain column transformation due to a different columns in the resultset
@@ -110,8 +109,10 @@ export function useTextBasedQueryLanguage({
             const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
             const queryChanged = query[language] !== prev.current.query;
             // no need to reset index to state if it hasn't changed
-            const addDataViewToState = Boolean(dataViewObj?.id !== index);
-            if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
+            const addDataViewToState = index !== undefined;
+            const changeViewMode =
+              viewMode !== getValidViewMode({ viewMode, isTextBasedQueryMode: true });
+            if (!queryChanged || (!addDataViewToState && !addColumnsToState && !changeViewMode)) {
               sendComplete();
               return;
             }
@@ -120,14 +121,16 @@ export function useTextBasedQueryLanguage({
               prev.current.query = query[language];
               prev.current.columns = nextColumns;
             }
-            const nextState = {
-              ...(addDataViewToState && { index: dataViewObj.id }),
-              ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
-              ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
-                viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
-              }),
-            };
-            await stateContainer.appState.replaceUrlState(nextState);
+            // just change URL state if necessary
+            if (addDataViewToState || addColumnsToState || changeViewMode) {
+              const nextState = {
+                ...(addDataViewToState && { index: undefined }),
+                ...(addColumnsToState && { columns: nextColumns }),
+                ...(changeViewMode && { viewMode: undefined }),
+              };
+              await stateContainer.appState.replaceUrlState(nextState);
+            }
+
             sendComplete();
           } else {
             // cleanup for a "regular" query

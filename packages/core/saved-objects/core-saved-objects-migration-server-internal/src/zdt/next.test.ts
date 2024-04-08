@@ -16,6 +16,7 @@ import { nextActionMap, type ActionMap } from './next';
 import {
   createContextMock,
   type MockedMigratorContext,
+  createPostInitState,
   createPostDocInitState,
 } from './test_helpers';
 import type {
@@ -23,6 +24,7 @@ import type {
   UpdateMappingModelVersionState,
   UpdateDocumentModelVersionsState,
   UpdateIndexMappingsState,
+  CreateTargetIndexState,
 } from './state';
 
 describe('actions', () => {
@@ -69,6 +71,33 @@ describe('actions', () => {
         client: context.elasticsearchClient,
         index: state.currentIndex,
         meta: someMeta,
+      });
+    });
+  });
+
+  describe('CREATE_TARGET_INDEX', () => {
+    it('calls createIndex with the correct parameters', () => {
+      const state: CreateTargetIndexState = {
+        ...createPostInitState(),
+        controlState: 'CREATE_TARGET_INDEX',
+        currentIndex: '.kibana_1',
+        indexMappings: {
+          properties: { foo: { type: 'keyword' } },
+        },
+        creationAliases: ['.kibana', '.kibana_foo'],
+      };
+
+      const action = actionMap.CREATE_TARGET_INDEX;
+
+      action(state);
+
+      expect(ActionMocks.createIndex).toHaveBeenCalledTimes(1);
+      expect(ActionMocks.createIndex).toHaveBeenCalledWith({
+        client: context.elasticsearchClient,
+        indexName: state.currentIndex,
+        aliases: state.creationAliases,
+        mappings: state.indexMappings,
+        esCapabilities: context.esCapabilities,
       });
     });
   });
@@ -150,64 +179,33 @@ describe('actions', () => {
   });
 
   describe('UPDATE_INDEX_MAPPINGS', () => {
-    describe('when only SO types have been updated', () => {
-      it('calls updateAndPickupMappings with the correct parameters', () => {
-        const state: UpdateIndexMappingsState = {
-          ...createPostDocInitState(),
-          controlState: 'UPDATE_INDEX_MAPPINGS',
-          additiveMappingChanges: {
+    it('calls updateAndPickupMappings with the correct parameters', () => {
+      const state: UpdateIndexMappingsState = {
+        ...createPostDocInitState(),
+        controlState: 'UPDATE_INDEX_MAPPINGS',
+        additiveMappingChanges: {
+          someToken: {},
+        },
+      };
+      const action = actionMap.UPDATE_INDEX_MAPPINGS;
+
+      action(state);
+
+      expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
+      expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
+        client: context.elasticsearchClient,
+        index: state.currentIndex,
+        mappings: {
+          properties: {
             someToken: {},
           },
-        };
-        const action = actionMap.UPDATE_INDEX_MAPPINGS;
-
-        action(state);
-
-        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
-        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
-          client: context.elasticsearchClient,
-          index: state.currentIndex,
-          mappings: {
-            properties: {
-              someToken: {},
-            },
+        },
+        batchSize: context.batchSize,
+        query: {
+          bool: {
+            should: [{ term: { type: 'someToken' } }],
           },
-          batchSize: context.batchSize,
-          query: {
-            bool: {
-              should: [{ term: { type: 'someToken' } }],
-            },
-          },
-        });
-      });
-    });
-
-    describe('when core properties have been updated', () => {
-      it('calls updateAndPickupMappings with the correct parameters', () => {
-        const state: UpdateIndexMappingsState = {
-          ...createPostDocInitState(),
-          controlState: 'UPDATE_INDEX_MAPPINGS',
-          additiveMappingChanges: {
-            managed: {}, // this is a root field
-            someToken: {},
-          },
-        };
-        const action = actionMap.UPDATE_INDEX_MAPPINGS;
-
-        action(state);
-
-        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledTimes(1);
-        expect(ActionMocks.updateAndPickupMappings).toHaveBeenCalledWith({
-          client: context.elasticsearchClient,
-          index: state.currentIndex,
-          mappings: {
-            properties: {
-              managed: {},
-              someToken: {},
-            },
-          },
-          batchSize: context.batchSize,
-        });
+        },
       });
     });
   });

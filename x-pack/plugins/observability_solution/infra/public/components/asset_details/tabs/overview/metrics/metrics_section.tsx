@@ -10,7 +10,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
 import {
   MetricsSectionTitle,
   KubernetesMetricsSectionTitle,
@@ -18,6 +17,11 @@ import {
 import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
 import { CollapsibleSection } from '../section/collapsible_section';
+import {
+  useHostFlyoutViewMetricsCharts,
+  useHostPageViewMetricsCharts,
+  useKubernetesSectionMetricsCharts,
+} from '../../../hooks/use_metrics_charts';
 
 interface Props {
   assetName: string;
@@ -42,34 +46,10 @@ export const MetricsSectionCompact = ({
   dateRange,
 }: Props) => {
   const model = findInventoryModel('host');
-
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
-
-    return [
-      cpu.xy.cpuUsage,
-      memory.xy.memoryUsage,
-      cpu.xy.normalizedLoad1m,
-      logs.xy.logRate,
-      disk.xy.diskSpaceUsageAvailable,
-      disk.xy.diskUsageByMountPoint,
-      disk.xy.diskThroughputReadWrite,
-      disk.xy.diskIOReadWrite,
-      network.xy.rxTx,
-    ].map((chart) => {
-      const dataViewId = chart.id === 'logRate' ? logsDataView?.id : metricsDataView?.id;
-      return {
-        ...chart,
-        ...(dataViewId
-          ? {
-              dataset: {
-                index: dataViewId,
-              },
-            }
-          : {}),
-      };
-    });
-  }, [metricsDataView?.id, logsDataView?.id]);
+  const charts = useHostFlyoutViewMetricsCharts({
+    metricsDataViewId: metricsDataView?.id,
+    logsDataViewId: logsDataView?.id,
+  });
 
   return (
     <Section title={MetricsSectionTitle} collapsible>
@@ -86,37 +66,10 @@ export const MetricsSectionCompact = ({
 
 const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
   const model = findInventoryModel('host');
-
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network, logs } = await model.metrics.getCharts();
-
-    return [
-      cpu.xy.cpuUsage,
-      cpu.xy.cpuUsageBreakdown,
-      memory.xy.memoryUsage,
-      memory.xy.memoryUsageBreakdown,
-      cpu.xy.normalizedLoad1m,
-      cpu.xy.loadBreakdown,
-      logs.xy.logRate,
-      disk.xy.diskSpaceUsageAvailable,
-      disk.xy.diskUsageByMountPoint,
-      disk.xy.diskThroughputReadWrite,
-      disk.xy.diskIOReadWrite,
-      network.xy.rxTx,
-    ].map((chart) => {
-      const dataViewId = chart.id === 'logRate' ? logsDataView?.id : metricsDataView?.id;
-      return {
-        ...chart,
-        ...(dataViewId
-          ? {
-              dataset: {
-                index: dataViewId,
-              },
-            }
-          : {}),
-      };
-    });
-  }, [metricsDataView?.id, logsDataView?.id]);
+  const charts = useHostPageViewMetricsCharts({
+    metricsDataViewId: metricsDataView?.id,
+    logsDataViewId: logsDataView?.id,
+  });
 
   return (
     <Section title={MetricsSectionTitle} collapsible>
@@ -137,28 +90,7 @@ const KubenetesMetricsSection = ({
   dateRange,
 }: Omit<Props, 'logsDataView'>) => {
   const model = findInventoryModel('host');
-
-  const { value: charts = [] } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts();
-
-    return [
-      kibernetesNode.xy.nodeCpuCapacity,
-      kibernetesNode.xy.nodeMemoryCapacity,
-      kibernetesNode.xy.nodeDiskCapacity,
-      kibernetesNode.xy.nodePodCapacity,
-    ].map((chart) => {
-      return {
-        ...chart,
-        ...(metricsDataView?.id
-          ? {
-              dataset: {
-                index: metricsDataView.id,
-              },
-            }
-          : {}),
-      };
-    });
-  }, [metricsDataView?.id]);
+  const charts = useKubernetesSectionMetricsCharts({ metricsDataViewId: metricsDataView?.id });
 
   return (
     <Section dependsOn={['kubernetes.node']} title={KubernetesMetricsSectionTitle} collapsible>

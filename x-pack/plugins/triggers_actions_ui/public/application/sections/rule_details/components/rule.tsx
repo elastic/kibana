@@ -8,7 +8,7 @@
 import React, { lazy, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { AlertStatusValues, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
 import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
 import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
@@ -104,7 +104,7 @@ export function RuleComponent({
             alertsTableConfigurationRegistry as AlertTableConfigRegistry
           }
           featureIds={
-            (rule.consumer === ALERTS_FEATURE_ID
+            (rule.consumer === ALERTING_FEATURE_ID
               ? [ruleType.producer]
               : [rule.consumer]) as AlertConsumers[]
           }

@@ -15,7 +15,9 @@ import {
   PostEvaluateBody,
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -27,10 +29,13 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
-import { RequestBody } from '../../lib/langchain/types';
+import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
+
+/**
+ * To support additional Agent Executors from the UI, add them to this map
+ * and reference your specific AgentExecutor function
+ */
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
 
 const DEFAULT_SIZE = 20;
@@ -43,6 +48,7 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: EVALUATE,
+
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -123,9 +129,7 @@ export const postEvaluateRoute = (
           });
 
           // Fetch any tools registered by the request's originating plugin
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(
-            'securitySolution'
-          );
+          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
 
           // Get a scoped esClient for passing to the agents for retrieval, and
           // writing results to the output index
@@ -136,22 +140,20 @@ export const postEvaluateRoute = (
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
-          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+          const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
             ...request,
             body: {
               alertsIndexPattern: '',
               allow: [],
               allowReplacement: [],
-              params: {
-                subAction: 'invokeAI',
-                subActionParams: {
-                  messages: [],
-                },
-              },
+              subAction: 'invokeAI',
+              // The actionTypeId is irrelevant when used with the invokeAI subaction
+              actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
+              conversationId: '',
             },
           };
 
@@ -162,21 +164,21 @@ export const postEvaluateRoute = (
           connectorIds.forEach((connectorId) => {
             agentNames.forEach((agentName) => {
               logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-              const llmType = getLlmType(connectorId, connectors);
               const connectorName =
                 getConnectorName(connectorId, connectors) ?? '[unknown connector]';
               const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
               agents.push({
-                agentEvaluator: (langChainMessages, exampleId) =>
-                  AGENT_EXECUTOR_MAP[agentName]({
+                agentEvaluator: async (langChainMessages, exampleId) => {
+                  const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actions,
                     isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
                     esClient,
                     elserId,
+                    isStream: false,
                     langChainMessages,
-                    llmType,
+                    llmType: 'openai',
                     logger,
                     request: skeletonRequest,
                     kbResource: ESQL_RESOURCE,
@@ -193,7 +195,10 @@ export const postEvaluateRoute = (
                       ],
                       tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                     },
-                  }),
+                    replacements: {},
+                  });
+                  return evalResult.body;
+                },
                 metadata: {
                   connectorName,
                   runName: detailedRunName,
