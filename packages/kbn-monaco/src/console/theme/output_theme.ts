@@ -7,28 +7,27 @@
  */
 
 import { monaco } from '../../monaco_imports';
-import { buildConsoleSharedTheme } from './shared';
+import { buildConsoleBasicTheme } from './basic_theme';
+import { buildConsoleSharedJsonRules } from './shared_json_rules';
 
-const sharedTheme = buildConsoleSharedTheme();
+const basicTheme = buildConsoleBasicTheme();
 
 export const buildConsoleOutputJsonTheme = (): monaco.editor.IStandaloneThemeData => {
+  const sharedJsonRules = buildConsoleSharedJsonRules();
   return {
-    ...sharedTheme,
+    ...basicTheme,
+    rules: sharedJsonRules,
   };
 };
 
 export const buildConsoleOutputYamlTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
-    ...sharedTheme,
-    rules: [],
-    colors: sharedTheme.colors,
+    ...basicTheme,
   };
 };
 
 export const buildConsoleOutputTextTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
-    ...sharedTheme,
-    rules: [],
-    colors: sharedTheme.colors,
+    ...basicTheme,
   };
 };

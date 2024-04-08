@@ -62,4 +62,4 @@ export const getThemeForLanguage = (language: string) => {
       return undefined;
     }
   }
-}
+};

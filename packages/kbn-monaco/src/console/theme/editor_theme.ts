@@ -11,7 +11,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { themeRuleGroupBuilderFactory } from '../../common/theme';
 import { monaco } from '../../monaco_imports';
-import { buildConsoleSharedTheme } from './shared';
+import { buildConsoleBasicTheme } from './basic_theme';
+import { buildConsoleSharedJsonRules } from './shared_json_rules';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
@@ -19,11 +20,12 @@ const background = euiThemeVars.euiColorLightestShade;
 const methodTextColor = '#DD0A73';
 const urlTextColor = '#00A69B';
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
-  const sharedTheme = buildConsoleSharedTheme();
+  const basicTheme = buildConsoleBasicTheme();
+  const sharedJsonRules = buildConsoleSharedJsonRules();
   return {
-    ...sharedTheme,
+    ...basicTheme,
     rules: [
-      ...sharedTheme.rules,
+      ...sharedJsonRules,
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
     ],
