@@ -50,7 +50,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-utility",
     "@kbn/data-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
