@@ -480,13 +480,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        returnType: 'version',
+        returnType: 'string',
         examples: [`from index | EVAL version = to_version(stringField)`],
-      },
-      {
-        params: [{ name: 'field', type: 'version' }],
-        returnType: 'version',
-        examples: [`from index | EVAL version = to_version(versionField)`],
       },
     ],
   },
