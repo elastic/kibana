@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { getRouterLinkProps } from '@kbn/router-utils';
 import React, { useCallback, useState } from 'react';
 import { EuiPageTemplate, EuiIcon, EuiFieldText, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+
 import { useRuleNameGuard } from '../hooks';
 
 export interface RuleFormPageHeaderProps {
@@ -83,11 +85,7 @@ export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
                 ),
                 color: 'primary',
                 'aria-current': false,
-                href: referrerHref,
-                onClick: (e) => {
-                  e.preventDefault();
-                  onClickReturn();
-                },
+                ...getRouterLinkProps({ href: referrerHref, onClick: onClickReturn }),
               },
             ]
           : []

@@ -17,12 +17,8 @@ import {
   setIntervalNumber,
   setIntervalUnit,
 } from './slice';
-import {
-  useConfigContext,
-  useRuleFormDispatch,
-  useRuleFormSelector,
-  useValidationContext,
-} from '../../hooks';
+import { useConfig, useValidation } from '../../contexts';
+import { useRuleFormDispatch, useRuleFormSelector } from '../../hooks';
 import { RuleFormConfig } from '../../types';
 
 const getHelpTextForInterval = (
@@ -69,9 +65,9 @@ export const RuleScheduleField: React.FC = () => {
   const ruleIntervalUnit = useSelectIntervalUnit();
   const currentInterval = useRuleFormSelector((state) => state.ruleDefinition.schedule.interval);
   const dispatch = useRuleFormDispatch();
-  const { minimumScheduleInterval } = useConfigContext();
+  const { minimumScheduleInterval } = useConfig();
 
-  const intervalError = useValidationContext().ruleDefinition.errors.schedule.interval;
+  const intervalError = useValidation().ruleDefinition.errors.schedule.interval;
   const hasIntervalError = useMemo(() => intervalError.length > 0, [intervalError]);
   const displayedIntervalError = useMemo(
     () =>

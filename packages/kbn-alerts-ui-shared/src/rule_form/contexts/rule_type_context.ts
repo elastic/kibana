@@ -7,13 +7,9 @@
  */
 
 import { createContext, useContext } from 'react';
-import { RuleFormConfig } from '../types';
+import { RuleTypeModel } from '../types';
 
-export const DEFAULT_CONFIG: RuleFormConfig = {
-  isUsingSecurity: false,
-};
+const RuleTypeContext = createContext<RuleTypeModel>({} as RuleTypeModel);
 
-const ConfigContext = createContext<RuleFormConfig>(DEFAULT_CONFIG);
-
-export const ConfigProvider = ConfigContext.Provider;
-export const useConfigContext = () => useContext(ConfigContext);
+export const RuleTypeProvider = RuleTypeContext.Provider;
+export const useRuleType = () => useContext(RuleTypeContext);

@@ -111,7 +111,13 @@ import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
+/**
+ * @deprecated V1 Rule Form, remove when V2 is enabled without feature flag
+ */
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
+/**
+ * @deprecated V1 Rule Form, remove when V2 is enabled without feature flag
+ */
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
@@ -1021,6 +1027,9 @@ export const RulesList = ({
             filteredRuleTypes={filteredRuleTypes}
           />
         )}
+        {/**
+         * V1 Rule Form, remove when V2 is enabled without feature flag
+         */}
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd
@@ -1038,6 +1047,9 @@ export const RulesList = ({
             />
           </Suspense>
         )}
+        {/**
+         * V1 Rule Form, remove when V2 is enabled without feature flag
+         */}
         {editFlyoutVisible && currentRuleToEdit && (
           <Suspense fallback={<div />}>
             <RuleEdit

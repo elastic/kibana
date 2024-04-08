@@ -31,7 +31,8 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { useRuleFormSelector, useRuleFormDispatch, useValidationContext } from '../../hooks';
+import { useValidation } from '../../contexts';
+import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
 import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../../types';
 import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice';
 import { RuleScheduleField } from './rule_schedule_field';
@@ -61,7 +62,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
 }) => {
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
-  const ruleParamsErrors = useValidationContext().ruleDefinition.errors.params;
+  const ruleParamsErrors = useValidation().ruleDefinition.errors.params;
   const dispatch = useRuleFormDispatch();
 
   const { euiTheme } = useEuiTheme();

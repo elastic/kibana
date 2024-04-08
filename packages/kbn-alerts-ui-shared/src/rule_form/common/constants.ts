@@ -28,3 +28,6 @@ export enum ValidationStatus {
   INCOMPLETE,
   INVALID,
 }
+
+export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;

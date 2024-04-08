@@ -7,25 +7,29 @@
  */
 
 import React, { useMemo } from 'react';
-import { Provider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux';
 import { RuleFormPage } from './rule_form_page';
 import { useStore } from '../store';
 import type { RuleFormPageProps } from './rule_form_page';
 import {
   ConfigProvider,
   ValidationProvider,
-  useAuthorizedConsumers,
+  KibanaServicesProvider,
+  RuleFormKibanaServices,
   DEFAULT_CONFIG,
-} from '../hooks';
+} from '../contexts';
+import { useAuthorizedConsumers } from '../hooks';
 import { RuleFormAppContext, RuleFormConfig } from '../types';
 
-interface RuleFormPageComponentProps extends RuleFormPageProps {
+interface RuleFormPageComponentProps extends RuleFormPageProps, RuleFormKibanaServices {
   config?: RuleFormConfig;
   appContext: RuleFormAppContext;
 }
 
 export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
   ruleTypeModel,
+  http,
+  toasts,
   config = DEFAULT_CONFIG,
   appContext: { consumer, validConsumers, canShowConsumerSelection },
   ...rest
@@ -43,17 +47,19 @@ export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
   const store = useStore(initialState, authorizedConsumers);
 
   return (
-    <Provider store={store}>
-      <ConfigProvider value={config}>
-        <ValidationProvider ruleTypeModel={ruleTypeModel}>
-          <RuleFormPage
-            ruleTypeModel={ruleTypeModel}
-            canShowConsumerSelection={canShowConsumerSelection}
-            authorizedConsumers={authorizedConsumers}
-            {...rest}
-          />
-        </ValidationProvider>
-      </ConfigProvider>
-    </Provider>
+    <ReduxProvider store={store}>
+      <KibanaServicesProvider value={{ http, toasts }}>
+        <ConfigProvider value={config}>
+          <ValidationProvider ruleTypeModel={ruleTypeModel}>
+            <RuleFormPage
+              ruleTypeModel={ruleTypeModel}
+              canShowConsumerSelection={canShowConsumerSelection}
+              authorizedConsumers={authorizedConsumers}
+              {...rest}
+            />
+          </ValidationProvider>
+        </ConfigProvider>
+      </KibanaServicesProvider>
+    </ReduxProvider>
   );
 };

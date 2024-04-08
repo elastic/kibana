@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './use_rule_form_selector';
-export * from './use_rule_form_dispatch';
-export * from './use_rule_name_guard';
-export * from './use_authorized_consumers';
+import { createContext, useContext } from 'react';
+import { RuleFormConfig } from '../types';
+
+export const DEFAULT_CONFIG: RuleFormConfig = {
+  isUsingSecurity: false,
+};
+
+const ConfigContext = createContext<RuleFormConfig>(DEFAULT_CONFIG);
+
+export const ConfigProvider = ConfigContext.Provider;
+export const useConfig = () => useContext(ConfigContext);

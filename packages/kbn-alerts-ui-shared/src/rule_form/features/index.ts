@@ -8,3 +8,4 @@
 
 export * from './rule_details';
 export * from './rule_definition';
+export * from './save_rule_button';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { ValidationStatus } from '../common/constants';
 import {
   RuleDefinitionValidation,
@@ -15,7 +15,7 @@ import {
   useValidateRuleDetails,
 } from '../features';
 import { RuleFormStateValidation, RuleTypeModel } from '../types';
-import { useConfigContext } from './config_context';
+import { useConfig } from './config_context';
 
 const ValidationContext = createContext<RuleFormStateValidation>({
   ruleDefinition: {
@@ -25,7 +25,7 @@ const ValidationContext = createContext<RuleFormStateValidation>({
       schedule: { interval: [] },
       alertDelay: [],
     },
-    status: ValidationStatus.COMPLETE,
+    status: ValidationStatus.INCOMPLETE,
   },
   ruleDetails: {
     errors: {
@@ -34,12 +34,13 @@ const ValidationContext = createContext<RuleFormStateValidation>({
     },
     status: ValidationStatus.COMPLETE,
   },
+  isOverallValid: false,
 });
 
 export const ValidationProvider: React.FC<{
   ruleTypeModel: RuleTypeModel;
 }> = ({ ruleTypeModel, children }) => {
-  const config = useConfigContext();
+  const config = useConfig();
   const ruleDefinitionValidation: RuleDefinitionValidation = useValidateRuleDefinition({
     config,
     ruleTypeModel,
@@ -49,9 +50,16 @@ export const ValidationProvider: React.FC<{
   const validationStatus = {
     ruleDefinition: ruleDefinitionValidation,
     ruleDetails: ruleDetailsValidation,
+    isOverallValid: useMemo(
+      () =>
+        [ruleDefinitionValidation, ruleDetailsValidation].every(
+          ({ status }) => status === ValidationStatus.COMPLETE
+        ),
+      [ruleDefinitionValidation, ruleDetailsValidation]
+    ),
   };
   return (
     <ValidationContext.Provider value={validationStatus}>{children}</ValidationContext.Provider>
   );
 };
-export const useValidationContext = () => useContext(ValidationContext);
+export const useValidation = () => useContext(ValidationContext);

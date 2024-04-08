@@ -6,22 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import React, { useMemo } from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { EuiPageTemplate, EuiSteps } from '@elastic/eui';
+import { EuiPageTemplate, EuiSteps, EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
 import { RuleFormPageHeader } from './header';
-import { RuleDetails, RuleDefinition } from '../features';
+import { RuleDetails, RuleDefinition, SaveRuleButton } from '../features';
 import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../types';
-import { useValidationContext } from '../hooks/validation_context';
+import { useValidation, RuleTypeProvider } from '../contexts';
 import { ValidationStatus } from '../common/constants';
 
 export interface RuleFormPageProps {
   ruleTypeModel: RuleTypeModel;
   expressionPlugins: RuleTypeParamsExpressionPlugins;
   onClickReturn: () => void;
+  onSaveRule: (ruleId: string) => void;
   referrerHref?: string;
   docLinks: DocLinksStart;
   canShowConsumerSelection?: boolean;
@@ -41,6 +44,7 @@ const validationStatusToStepStatus: (
 
 export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   onClickReturn,
+  onSaveRule,
   referrerHref,
   ruleTypeModel,
   expressionPlugins,
@@ -50,7 +54,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
-  const validation = useValidationContext();
+  const validation = useValidation();
   const stepStatuses = useMemo(
     () => ({
       ruleDefinition: validationStatusToStepStatus(validation.ruleDefinition.status),
@@ -60,7 +64,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   );
 
   return (
-    <>
+    <RuleTypeProvider value={ruleTypeModel}>
       <RuleFormPageHeader
         ruleName={ruleName}
         onChangeName={(name) => dispatch(setRuleName(name))}
@@ -101,6 +105,24 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
           ]}
         />
       </EuiPageTemplate.Section>
-    </>
+      <EuiPageTemplate.Section>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {referrerHref && (
+              <EuiButtonEmpty
+                {...getRouterLinkProps({ href: referrerHref, onClick: onClickReturn })}
+              >
+                {i18n.translate('alertsUIShared.ruleForm.cancelButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SaveRuleButton isEdit={false} onSuccessfulSave={onSaveRule} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
+    </RuleTypeProvider>
   );
 };

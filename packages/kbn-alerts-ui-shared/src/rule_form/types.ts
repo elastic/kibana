@@ -10,7 +10,6 @@ import type { ComponentType } from 'react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ValidationStatus } from './common/constants';
-import type { RuleFormRootState } from './store';
 import { RuleDefinitionValidation, RuleDetailsValidation } from './features';
 
 type RuleTypeParams = Record<string, unknown>;
@@ -105,4 +104,5 @@ export interface IErrorObject {
 export interface RuleFormStateValidation {
   ruleDefinition: RuleDefinitionValidation;
   ruleDetails: RuleDetailsValidation;
+  isOverallValid: boolean;
 }

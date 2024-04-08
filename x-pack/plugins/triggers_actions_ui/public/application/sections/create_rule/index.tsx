@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingLogo, EuiEmptyPrompt } from '@elastic/eui';
 import { RuleFormPage } from '@kbn/alerts-ui-shared';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { RuleCreationValidConsumer, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../common';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
@@ -33,8 +33,17 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
 }) => {
   const { referrer, consumer, validConsumers } = (location.state ?? {}) as CreateRuleLocationState;
 
-  const { setBreadcrumbs, ruleTypeRegistry, docLinks, charts, data, dataViews, unifiedSearch } =
-    useKibana().services;
+  const {
+    http,
+    notifications: { toasts },
+    setBreadcrumbs,
+    ruleTypeRegistry,
+    docLinks,
+    charts,
+    data,
+    dataViews,
+    unifiedSearch,
+  } = useKibana().services;
   const {
     ruleTypesState,
     authorizedRuleTypes,
@@ -54,6 +63,13 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   const onClickReturn = useCallback(() => {
     history.push(referrer);
   }, [referrer, history]);
+
+  const onSaveRule = useCallback(
+    (ruleId: string) => {
+      history.push(getRuleDetailsRoute(ruleId));
+    },
+    [history]
+  );
 
   useEffect(() => {
     setBreadcrumbs([
@@ -134,6 +150,8 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
 
   return (
     <RuleFormPage
+      http={http}
+      toasts={toasts}
       ruleTypeModel={{
         name: ruleTypeFromServer.name,
         authorizedConsumers: ruleTypeFromServer.authorizedConsumers,
@@ -146,9 +164,10 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
         unifiedSearch,
       }}
       docLinks={docLinks}
-      onClickReturn={onClickReturn}
       referrerHref={referrer}
       appContext={{ consumer, validConsumers, canShowConsumerSelection: true }}
+      onClickReturn={onClickReturn}
+      onSaveRule={onSaveRule}
     />
   );
 };
