@@ -21,11 +21,8 @@ paths:
                 properties:
                   assistantModelEvaluation:
                     type: boolean
-                  assistantStreamingEnabled:
-                    type: boolean
                 required:
                   - assistantModelEvaluation
-                  - assistantStreamingEnabled
         '400':
           description: Generic Error
           content:
