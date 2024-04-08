@@ -938,6 +938,8 @@
             "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
+          " & ",
+          "PublishesSettings",
           ">,",
           {
             "pluginId": "@kbn/presentation-containers",
@@ -951,67 +953,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.addNewPanel",
-            "type": "Function",
-            "tags": [],
-            "label": "addNewPanel",
-            "description": [],
-            "signature": [
-              "<ApiType extends unknown = unknown>(panel: ",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
-                "text": "PanelPackage"
-              },
-              ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.addNewPanel.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "panel",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
-                    "text": "PanelPackage"
-                  }
-                ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.addNewPanel.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "displaySuccessMessage",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
           {
             "parentPluginId": "@kbn/presentation-containers",
             "id": "def-common.PresentationContainer.removePanel",
