@@ -30,45 +30,96 @@ describe('helpers', () => {
 
   describe('isAllowed', () => {
     it('returns true when the field is present in the allowSet', () => {
-      const allowSet = new Set(['fieldName1', 'fieldName2', 'fieldName3']);
+      const anonymizationFields = {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { id: 'fieldName1', field: 'fieldName1', allowed: true, anonymized: false },
+          { id: 'fieldName2', field: 'fieldName2', allowed: false, anonymized: false },
+          { id: 'fieldName3', field: 'fieldName3', allowed: false, anonymized: false },
+        ],
+      };
 
-      expect(isAllowed({ allowSet, field: 'fieldName1' })).toBe(true);
+      expect(
+        isAllowed({ anonymizationFields: anonymizationFields.data, field: 'fieldName1' })
+      ).toBe(true);
     });
 
     it('returns false when the field is NOT present in the allowSet', () => {
-      const allowSet = new Set(['fieldName1', 'fieldName2', 'fieldName3']);
+      const anonymizationFields = {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { id: 'fieldName1', field: 'fieldName1', allowed: true, anonymized: false },
+          { id: 'fieldName2', field: 'fieldName2', allowed: false, anonymized: false },
+          { id: 'fieldName3', field: 'fieldName3', allowed: false, anonymized: false },
+        ],
+      };
 
-      expect(isAllowed({ allowSet, field: 'nonexistentField' })).toBe(false);
+      expect(
+        isAllowed({ anonymizationFields: anonymizationFields.data, field: 'nonexistentField' })
+      ).toBe(false);
     });
   });
 
   describe('isDenied', () => {
     it('returns true when the field is NOT in the allowSet', () => {
-      const allowSet = new Set(['field1', 'field2']);
+      const anonymizationFields = {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { id: 'field1', field: 'field1', allowed: true, anonymized: false },
+          { id: 'field2', field: 'field2', allowed: false, anonymized: false },
+        ],
+      };
       const field = 'field3';
 
-      expect(isDenied({ allowSet, field })).toBe(true);
+      expect(isDenied({ anonymizationFields: anonymizationFields.data, field })).toBe(true);
     });
 
     it('returns false when the field is in the allowSet', () => {
-      const allowSet = new Set(['field1', 'field2']);
+      const anonymizationFields = {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { id: 'field1', field: 'field1', allowed: true, anonymized: false },
+          { id: 'field2', field: 'field2', allowed: false, anonymized: false },
+        ],
+      };
       const field = 'field1';
 
-      expect(isDenied({ allowSet, field })).toBe(false);
+      expect(isDenied({ anonymizationFields: anonymizationFields.data, field })).toBe(false);
     });
 
     it('returns true for an empty allowSet', () => {
-      const allowSet = new Set<string>();
+      const anonymizationFields = {
+        total: 0,
+        page: 1,
+        perPage: 100,
+        data: [],
+      };
       const field = 'field1';
 
-      expect(isDenied({ allowSet, field })).toBe(true);
+      expect(isDenied({ anonymizationFields: anonymizationFields.data, field })).toBe(true);
     });
 
     it('returns false when the field is an empty string and allowSet contains the empty string', () => {
-      const allowSet = new Set(['', 'field1']);
+      const anonymizationFields = {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { id: 'field1', field: 'field1', allowed: true, anonymized: false },
+          { id: '', field: '', allowed: false, anonymized: false },
+        ],
+      };
       const field = '';
 
-      expect(isDenied({ allowSet, field })).toBe(false);
+      expect(isDenied({ anonymizationFields: anonymizationFields.data, field })).toBe(false);
     });
   });
 
@@ -78,20 +129,20 @@ describe('helpers', () => {
     it('returns true when the field is in the allowReplacementSet', () => {
       const field = 'user.name';
 
-      expect(isAnonymized({ allowReplacementSet, field })).toBe(true);
+      expect(isAnonymized({ anonymizationFields: anonymizationFields.data, field })).toBe(true);
     });
 
     it('returns false when the field is NOT in the allowReplacementSet', () => {
       const field = 'foozle';
 
-      expect(isAnonymized({ allowReplacementSet, field })).toBe(false);
+      expect(isAnonymized({ anonymizationFields: anonymizationFields.data, field })).toBe(false);
     });
 
     it('returns false when allowReplacementSet is empty', () => {
       const emptySet = new Set<string>();
       const field = 'user.name';
 
-      expect(isAnonymized({ allowReplacementSet: emptySet, field })).toBe(false);
+      expect(isAnonymized({ anonymizationFields: anonymizationFields.data, field })).toBe(false);
     });
   });
 });
