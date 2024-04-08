@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  reactEmbeddableRegistryHasKey,
-} from '@kbn/embeddable-plugin/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  isFilterPinned,
-} from '@kbn/es-query';
+import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
+import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../../embeddable/dashboard_container';

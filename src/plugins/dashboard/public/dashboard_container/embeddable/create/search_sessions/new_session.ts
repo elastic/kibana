@@ -6,31 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { Filter, TimeRange, onlyDisabledFiltersChanged } from "@kbn/es-query";
-import { combineLatest, distinctUntilChanged, merge, Observable, tap } from "rxjs";
+import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { combineLatest, distinctUntilChanged, merge, Observable } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
-import { areTimesEqual } from "../../../state/diffing/dashboard_diffing_utils";
-import { apiPublishesSettings } from "@kbn/presentation-containers/interfaces/publishes_settings";
-import { apiPublishesUnifiedSearch } from "@kbn/presentation-publishing";
-import { apiPublishesReload } from "@kbn/presentation-publishing/interfaces/fetch/publishes_reload";
+import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
+import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
 
 export function newSession$(api: unknown) {
-  const observables: Observable<unknown>[] = [];
-  
+  const observables: Array<Observable<unknown>> = [];
+
   if (apiPublishesUnifiedSearch(api)) {
-    observables.push(api.filters$.pipe(
-      // TODO move onlyDisabledFiltersChanged to appliedFilters$ interface
-      distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
-        return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
-      })
-    ));
+    observables.push(
+      api.filters$.pipe(
+        // TODO move onlyDisabledFiltersChanged to appliedFilters$ interface
+        distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
+          return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
+        })
+      )
+    );
     observables.push(api.query$);
-    observables.push(api.timeRange$.pipe(
-      distinctUntilChanged((previous: TimeRange | undefined, current: TimeRange | undefined) => {
-        return areTimesEqual(current?.from, previous?.from) &&
-          areTimesEqual(current?.to, previous?.to);
-      })
-    ));
+    observables.push(
+      api.timeRange$.pipe(
+        distinctUntilChanged((previous: TimeRange | undefined, current: TimeRange | undefined) => {
+          return (
+            areTimesEqual(current?.from, previous?.from) && areTimesEqual(current?.to, previous?.to)
+          );
+        })
+      )
+    );
     if (api.timeRestore$) {
       observables.push(api.timeRestore$);
     }
@@ -52,9 +57,6 @@ export function newSession$(api: unknown) {
   }
 
   return apiPublishesReload(api)
-    ? merge(
-        api.reload$,
-        combineLatest(observables)
-      )
+    ? merge(api.reload$, combineLatest(observables))
     : combineLatest(observables);
 }

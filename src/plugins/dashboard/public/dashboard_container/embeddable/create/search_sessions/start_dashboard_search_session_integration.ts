@@ -57,7 +57,6 @@ export function startDashboardSearchSessionIntegration(
     const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
 
     const updatedSearchSessionId: string | undefined = (() => {
-      
       let searchSessionIdFromURL = getSearchSessionIdFromURL();
       if (searchSessionIdFromURL) {
         if (session.isRestore() && session.isCurrentSession(searchSessionIdFromURL)) {

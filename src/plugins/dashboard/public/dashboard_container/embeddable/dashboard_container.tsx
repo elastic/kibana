@@ -266,10 +266,11 @@ export class DashboardContainer
         'syncTooltips'
       ),
     };
-    this.timeRestore$ = embeddableInputToSubject<
-      boolean | undefined,
-      DashboardContainerInput
-    >(this.publishingSubscription, this, 'timeRestore');
+    this.timeRestore$ = embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+      this.publishingSubscription,
+      this,
+      'timeRestore'
+    );
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput

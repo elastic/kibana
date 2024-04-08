@@ -32,17 +32,19 @@ describe('newSession$', () => {
         id: 'myDataViewId',
       } as DataViewBase
     );
-    
+
     test('should fire on filter change', async () => {
       filters$.next([existsFilter]);
 
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       filters$.next([toggleFilterNegated(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -53,14 +55,16 @@ describe('newSession$', () => {
     test('should not fire on disabled filter change', async () => {
       const disabledFilter = disableFilter(existsFilter);
       filters$.next([disabledFilter]);
-      
+
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       filters$.next([toggleFilterNegated(disabledFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -70,14 +74,16 @@ describe('newSession$', () => {
 
     test('should not fire on unpinned filter changing to pinned', async () => {
       filters$.next([existsFilter]);
-      
+
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       filters$.next([pinFilter(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -87,14 +93,16 @@ describe('newSession$', () => {
 
     test('should not fire on pinned filter changing to unpinned', async () => {
       filters$.next([pinFilter(existsFilter)]);
-      
+
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       filters$.next([existsFilter]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -106,12 +114,14 @@ describe('newSession$', () => {
   describe('reload$', () => {
     test('should fire on reload', async () => {
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       reload$.next(undefined);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -125,12 +135,14 @@ describe('newSession$', () => {
       timeRange$.next({ from: 'now-15m', to: 'now' });
 
       let fired = false;
-      const subscription = newSession$(api).pipe(
-        // ignore emit on subscribe
-        skip(1),
-      ).subscribe(() => {
-        fired = true;
-      });
+      const subscription = newSession$(api)
+        .pipe(
+          // ignore emit on subscribe
+          skip(1)
+        )
+        .subscribe(() => {
+          fired = true;
+        });
 
       timeRange$.next({ from: 'now-30m', to: 'now' });
       await new Promise((resolve) => setTimeout(resolve, 0));

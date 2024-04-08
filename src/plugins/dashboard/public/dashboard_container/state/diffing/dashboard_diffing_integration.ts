@@ -17,10 +17,7 @@ import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
-import {
-  isKeyEqualAsync,
-  unsavedChangesDiffingFunctions,
-} from './dashboard_diffing_functions';
+import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_diffing_functions';
 
 /**
  * An array of reducers which cannot cause unsaved changes. Unsaved changes only compares the explicit input
