@@ -67,6 +67,7 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
   name,
   to: {
     datatable: (context: EsRawResponse) => {
+      const time = Date.now();
       const rows = convertResult(context.body);
       const columns = rows.length
         ? Object.keys(rows[0]).map((key) => ({
@@ -79,7 +80,7 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
             },
           }))
         : [];
-
+      console.log('tabify:' + (Date.now() - time));
       return {
         type: 'datatable',
         meta: {

@@ -291,6 +291,7 @@ export class Execution<
       getExecutionContext: () => execution.params.executionContext,
     };
 
+    const stime = window.performance.now();
     this.result = this.input$.pipe(
       switchMap((input) =>
         this.invokeChain<Output>(this.state.get().ast.chain, input).pipe(
@@ -312,6 +313,7 @@ export class Execution<
       }),
       tap({
         next: (result) => {
+          console.log('startExecution: ' + (window.performance.now() - stime));
           this.context.inspectorAdapters.expression?.logAST(this.state.get().ast);
           this.state.transitions.setResult(result);
         },
@@ -382,6 +384,8 @@ export class Execution<
         });
       }
 
+      const stime = window.performance.now();
+
       if (fn.disabled) {
         throw createError({
           name: 'fn is disabled',
@@ -441,6 +445,7 @@ export class Execution<
           );
         }),
         finalize(() => {
+          console.log(`invoke_chain_${fnName}: ` + (window.performance.now() - stime));
           if (this.execution.params.debug) {
             Object.assign(head.debug ?? {}, { duration: now() - timeStart });
           }
@@ -454,6 +459,8 @@ export class Execution<
     input: unknown,
     args: Record<string, unknown>
   ): Observable<UnwrapReturnType<Fn['fn']>> {
+    const stime = window.performance.now();
+
     return of(input).pipe(
       map((currentInput) => this.cast(currentInput, fn.inputTypes)),
       switchMap((normalizedInput) => of(fn.fn(normalizedInput, args, this.context))),
@@ -486,6 +493,8 @@ export class Execution<
             throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
           }
         }
+
+        console.log(`invoke_fn_${fn.name}: ` + (window.performance.now() - stime));
 
         return output;
       })

@@ -44,6 +44,7 @@ export function getFunctionDefinition({
       return defer(async () => {
         const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
+        const stime = window.performance.now();
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
@@ -58,27 +59,32 @@ export function getFunctionDefinition({
 
         const { handleEsaggsRequest } = await import('../../../common/search/expressions');
 
-        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
+        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest, stime };
       }).pipe(
-        switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
-          const { disableWarningToasts } = getSearchContext();
+        switchMap(
+          ({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest, stime }) => {
+            const { disableWarningToasts } = getSearchContext();
 
-          return handleEsaggsRequest({
-            abortSignal,
-            aggs: aggConfigs,
-            filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
-            indexPattern,
-            inspectorAdapters,
-            query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),
-            searchSessionId: getSearchSessionId(),
-            searchSourceService: searchSource,
-            timeFields: args.timeFields,
-            timeRange: get(input, 'timeRange', undefined),
-            disableWarningToasts: (disableWarningToasts || false) as boolean,
-            getNow,
-            executionContext: getExecutionContext(),
-          });
-        })
+            const response = handleEsaggsRequest({
+              abortSignal,
+              aggs: aggConfigs,
+              filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
+              indexPattern,
+              inspectorAdapters,
+              query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),
+              searchSessionId: getSearchSessionId(),
+              searchSourceService: searchSource,
+              timeFields: args.timeFields,
+              timeRange: get(input, 'timeRange', undefined),
+              disableWarningToasts: (disableWarningToasts || false) as boolean,
+              getNow,
+              executionContext: getExecutionContext(),
+            });
+
+            console.log(`esaggs: ` + (window.performance.now() - stime));
+            return response;
+          }
+        )
       );
     },
   });

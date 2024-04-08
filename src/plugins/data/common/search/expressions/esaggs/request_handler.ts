@@ -54,6 +54,8 @@ export const handleRequest = ({
   title,
   description,
 }: RequestHandlerParams) => {
+  const time = Date.now();
+
   return defer(async () => {
     const forceNow = getNow?.();
     const searchSource = await searchSourceService.create();
@@ -130,6 +132,7 @@ export const handleRequest = ({
         })
         .pipe(
           map(({ rawResponse: response }) => {
+            console.log('_esaggs: ' + (Date.now() - time));
             const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
             const tabifyParams = {
               metricsAtAllLevels: aggs.hierarchical,
@@ -139,7 +142,9 @@ export const handleRequest = ({
                 : undefined,
             };
 
-            return tabifyAggResponse(aggs, response, tabifyParams);
+            const t = tabifyAggResponse(aggs, response, tabifyParams);
+            console.log('_esaggs_t: ' + (Date.now() - time));
+            return t;
           })
         )
     )

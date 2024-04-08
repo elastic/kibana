@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { range } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -484,7 +484,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should create a valid XY chart with references', async () => {
+    it.only('should create a valid XY chart with references', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
