@@ -32,7 +32,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AssetCriticalityCsvUploadResponse'
-        '403':
+        '413':
           description: File too large
 components:
   schemas:
