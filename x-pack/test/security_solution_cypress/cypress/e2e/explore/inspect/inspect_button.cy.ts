@@ -27,7 +27,7 @@ const DATA_VIEW = 'auditbeat-*';
 // FLAKY: https://github.com/elastic/kibana/issues/178367
 describe.skip(
   'Inspect Explore pages',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
