@@ -79,7 +79,7 @@ Elastic Security::
 For the Elastic Security 8.13.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * Fixes having to wait ten minutes after agent upgrade if agent cleared watching state ({kibana-pull}179917[#179917]).
-* Fixes using the latest compatible version in K8's manifest instead of latest available version ({kibana-pull}179662[#179662]).
+Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
 * Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
 Machine Learning::
 * Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
