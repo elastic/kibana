@@ -16,12 +16,12 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { PLAYGROUND_PATH } from '../../../../routes';
 
-export interface SearchEnginesPlaygroundProps {
+export interface SearchPlaygroundPopoverProps {
   indexName: string;
   ingestionMethod: string;
 }
 
-export const SearchEnginesPlayground: React.FC<SearchEnginesPlaygroundProps> = ({
+export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = ({
   indexName,
   ingestionMethod,
 }) => {

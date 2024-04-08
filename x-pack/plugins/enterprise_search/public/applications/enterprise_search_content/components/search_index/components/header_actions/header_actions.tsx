@@ -13,7 +13,7 @@ import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/typ
 import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../../utils/indices';
 import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
 
-import { SearchEnginesPlayground } from './search_engines_playground';
+import { SearchPlaygroundPopover } from './search_playground_popover';
 import { SyncsContextMenu } from './syncs_context_menu';
 
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
@@ -26,7 +26,7 @@ export const getHeaderActions = (
     ...(isCrawlerIndex(indexData) && indexData.connector ? [<CrawlerStatusIndicator />] : []),
     ...(isConnectorIndex(indexData) || connector ? [<SyncsContextMenu />] : []),
     ...(indexData
-      ? [<SearchEnginesPlayground indexName={indexData?.name} ingestionMethod={ingestionMethod} />]
+      ? [<SearchPlaygroundPopover indexName={indexData?.name} ingestionMethod={ingestionMethod} />]
       : []),
   ];
 };
