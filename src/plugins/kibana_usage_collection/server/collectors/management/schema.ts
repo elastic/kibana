@@ -655,4 +655,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'aiAssistant:preferredAIAssistantType': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };
