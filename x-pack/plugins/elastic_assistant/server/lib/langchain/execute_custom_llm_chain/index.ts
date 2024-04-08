@@ -60,6 +60,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    model: request.body.model,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure

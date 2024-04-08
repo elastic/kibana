@@ -217,6 +217,7 @@ export const postEvaluateRoute = (
                   connectorId: evalModel,
                   request: skeletonRequest,
                   logger,
+                  model: skeletonRequest.body.model,
                 });
 
           const { evaluationResults, evaluationSummary } = await performEvaluation({

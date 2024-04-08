@@ -11,7 +11,6 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 
-import { ExecuteConnectorRequestBody } from '../schemas';
 import { getMessageContentAndRole } from './helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
@@ -21,7 +20,8 @@ interface ActionsClientLlmParams {
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  request: KibanaRequest;
+  model?: string;
   traceId?: string;
 }
 
@@ -29,12 +29,14 @@ export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  #request: KibanaRequest;
   #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
   protected llmType: string;
+
+  model?: string;
 
   constructor({
     actions,
@@ -42,6 +44,7 @@ export class ActionsClientLlm extends LLM {
     traceId = uuidv4(),
     llmType,
     logger,
+    model,
     request,
   }: ActionsClientLlmParams) {
     super({});
@@ -52,6 +55,7 @@ export class ActionsClientLlm extends LLM {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.model = model;
   }
 
   _llmType() {
@@ -80,7 +84,7 @@ export class ActionsClientLlm extends LLM {
         // hard code to non-streaming subaction as this class only supports non-streaming
         subAction: 'invokeAI',
         subActionParams: {
-          model: this.#request.body.model,
+          model: this.model,
           messages: [assistantMessage], // the assistant message
           ...(this.llmType === 'openai'
             ? { n: 1, stop: null, temperature: 0.2 }
