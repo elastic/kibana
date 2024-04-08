@@ -24,7 +24,14 @@ interface Props {
    * The inclusive set of card names to display.
    */
   featuredCards?: string[];
+  /**
+   * Cards that do not correspond to an integration, but
+   * have some custom behavior.
+   */
   generatedCards?: IntegrationCardItem[];
+  /**
+   * Override the default `observability` option.
+   */
   selectedCategory?: string;
   showSearchBar?: boolean;
 }
