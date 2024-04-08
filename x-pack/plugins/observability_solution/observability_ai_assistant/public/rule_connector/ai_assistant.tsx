@@ -6,7 +6,6 @@
  */
 
 import React, { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
@@ -15,6 +14,12 @@ import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
 import { AssistantAvatar } from '../components/assistant_avatar';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import {
+  CONNECTOR_DESC,
+  CONNECTOR_REQUIRED,
+  CONNECTOR_TITLE,
+  MESSAGE_REQUIRED,
+} from './translations';
 
 export function getConnectorType(
   service: ObservabilityAIAssistantService
@@ -25,22 +30,24 @@ export function getConnectorType(
     iconClass: () => <AssistantAvatar />,
     isSystemActionType: true,
     isExperimental: true,
-    selectMessage: i18n.translate(
-      'xpack.observabilityAiAssistant.alertConnector.selectMessageText',
-      {
-        defaultMessage: 'Send messages to Observability AI Assistant.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.observabilityAiAssistant.alertConnector.connectorTypeTitle',
-      {
-        defaultMessage: 'ObsAIAssistant',
-      }
-    ),
+    selectMessage: CONNECTOR_DESC,
+    actionTypeTitle: CONNECTOR_TITLE,
     validateParams: async (
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
-      return { errors: { message: [] } };
+      const validationResult = {
+        errors: { connector: new Array<string>(), message: new Array<string>() },
+      };
+
+      if (!actionParams.connector) {
+        validationResult.errors.connector.push(CONNECTOR_REQUIRED);
+      }
+
+      if (!actionParams.message) {
+        validationResult.errors.message.push(MESSAGE_REQUIRED);
+      }
+
+      return validationResult;
     },
     actionParamsFields: lazy(() =>
       import('./ai_assistant_params').then(({ default: ActionParamsFields }) => ({

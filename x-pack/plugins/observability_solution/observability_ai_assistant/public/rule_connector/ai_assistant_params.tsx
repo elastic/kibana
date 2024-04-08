@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
 import { useGenAIConnectorsWithoutContext } from '../hooks/use_genai_connectors';
@@ -37,6 +37,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           fullWidth
           data-test-subj="observabilityAiAssistantAlertConnectorSelect"
           isLoading={loading}
+          isInvalid={errors.connector.length > 0}
           options={connectors?.map((connector) => {
             return { value: connector.id, text: connector.name };
           })}
@@ -47,6 +48,8 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           value={selectedConnector}
         />
       </EuiFormRow>
+
+      <EuiSpacer size="m" />
 
       <EuiFlexItem grow={false}>
         <TextAreaWithMessageVariables
@@ -61,7 +64,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
               defaultMessage: 'Message',
             }
           )}
-          errors={(errors.text ?? []) as string[]}
+          errors={errors.message as string[]}
         />
       </EuiFlexItem>
     </>
