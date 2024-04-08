@@ -10,7 +10,7 @@ import { z } from 'zod';
 
 import type { SettingsConfig } from './types';
 
-const zodStringWithDurationValidation = z.string().refine((val) => val.match(/^\d+[s|m|h|d]$/), {
+const zodStringWithDurationValidation = z.string().refine((val) => val.match(/^(\d+[s|m|h|d])?$/), {
   message: i18n.translate(
     'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
     {
