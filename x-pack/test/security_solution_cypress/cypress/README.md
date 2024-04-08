@@ -362,6 +362,8 @@ Store the email and password of the account you used to login in the QA Environm
 
 In order to execute Cypress using a project wih an overridden image, you need to first make sure that the image is created (if you need to debug a failing test of the periodic pipeline, the image is already created you just need to check the commit that was used).
 
+In order to check for the existance of an image check: https://container-library.elastic.co/r/kibana-ci, if the image with the commit you want to use does not exist **DON'T USE THE COMMIT FLAG SINCE YOU MAY CAUSE A MAJOR ISSUE IN CONTROL PLANE**.
+
 You need to have everything setup as mentioned above in `Setup required`. Once the setup is ready you just need to execute Cypress with the following option:
 
 ```
