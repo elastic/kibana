@@ -197,7 +197,7 @@ export function ConfigureLogsContent() {
             }
           )}
           helpText={i18n.translate(
-            'xpack.observability_onboarding.configureLogs.logFile.helper',
+            'xpack.observability_onboarding.configureLogs.logFile.helperText',
             {
               defaultMessage: 'You can use a file path or pattern.',
             }
