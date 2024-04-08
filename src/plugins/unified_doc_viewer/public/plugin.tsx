@@ -74,7 +74,6 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      enabled: true,
       component: (props) => {
         const { uiSettings } = getUnifiedDocViewerServices();
         const LazyDocView = uiSettings.get(DOC_TABLE_LEGACY)
@@ -91,7 +90,6 @@ export class UnifiedDocViewerPublicPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      enabled: true,
       component: ({ hit, dataView, textBasedHits }) => {
         return (
           <LazySourceViewer
