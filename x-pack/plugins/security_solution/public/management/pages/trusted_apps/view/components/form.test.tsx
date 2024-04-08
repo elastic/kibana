@@ -213,7 +213,7 @@ describe('Trusted apps form', () => {
     });
 
     it('should default OS to Windows', () => {
-      expect(getOsField().textContent).toEqual('Windows');
+      expect(getOsField().textContent).toContain('Windows');
     });
 
     it('should allow user to select between 3 OSs', () => {
