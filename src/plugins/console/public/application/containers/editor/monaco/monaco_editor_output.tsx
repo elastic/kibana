@@ -13,7 +13,7 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
@@ -82,9 +82,10 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         value={value}
         fullWidth={true}
         options={{
+          readOnly: true,
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
-          theme: mode === CONSOLE_OUTPUT_LANG_ID ? CONSOLE_OUTPUT_THEME_ID : undefined,
+          theme: CONSOLE_THEME_ID,
         }}
       />
     </div>

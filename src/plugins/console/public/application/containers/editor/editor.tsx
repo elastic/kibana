@@ -73,7 +73,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
         >
           {loading ? (
             <EditorContentSpinner />
-          ) : isMonacoEnabled ? (
+          ) : !isMonacoEnabled ? (
             <MonacoEditor initialTextValue={currentTextObject.text} />
           ) : (
             <EditorUI

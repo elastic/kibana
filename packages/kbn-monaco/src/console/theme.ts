@@ -9,8 +9,8 @@
 import { makeHighContrastColor } from '@elastic/eui';
 import { darkMode, euiThemeVars } from '@kbn/ui-theme';
 
-import { themeRuleGroupBuilderFactory } from '../../common/theme';
-import { monaco } from '../../monaco_imports';
+import { themeRuleGroupBuilderFactory } from '../common/theme';
+import { monaco } from '../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
@@ -20,7 +20,9 @@ const commentTextColor = '#4C886B';
 const variableTextColor = '#0079A5';
 const booleanTextColor = '#585CF6';
 const numericTextColor = variableTextColor;
-export const buildConsoleSharedTheme = (): monaco.editor.IStandaloneThemeData => {
+const methodTextColor = '#DD0A73';
+const urlTextColor = '#00A69B';
+export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
   return {
     base: darkMode ? 'vs-dark' : 'vs',
     inherit: true,
@@ -36,6 +38,8 @@ export const buildConsoleSharedTheme = (): monaco.editor.IStandaloneThemeData =>
         makeHighContrastColor(booleanTextColor)(background)
       ),
       ...buildRuleGroup(['constant.numeric'], makeHighContrastColor(numericTextColor)(background)),
+      ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
+      ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
     ],
     colors: {
       'editor.background': background,
