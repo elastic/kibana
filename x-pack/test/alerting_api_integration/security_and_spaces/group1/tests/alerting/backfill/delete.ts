@@ -6,12 +6,19 @@
  */
 
 import expect from '@kbn/expect';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
-import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import {
+  getTestRuleData,
+  getUrlPrefix,
+  ObjectRemover,
+  TaskManagerDoc,
+} from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteBackfillTests({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -92,6 +99,26 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             .set('kbn-xsrf', 'foo')
             .expect(200);
 
+          // ensure task exists
+          const taskRecord1 = await getScheduledTask(backfillId1);
+          expect(taskRecord1._source!.type).to.eql('task');
+          expect(taskRecord1._source!.task.taskType).to.eql('ad_hoc_run-backfill');
+          expect(taskRecord1._source!.task.timeoutOverride).to.eql('10s');
+          expect(taskRecord1._source!.task.enabled).to.eql(true);
+          expect(JSON.parse(taskRecord1._source!.task.params)).to.eql({
+            adHocRunParamsId: backfillId1,
+            spaceId: apiOptions.spaceId,
+          });
+          const taskRecord2 = await getScheduledTask(backfillId2);
+          expect(taskRecord2._source!.type).to.eql('task');
+          expect(taskRecord2._source!.task.taskType).to.eql('ad_hoc_run-backfill');
+          expect(taskRecord2._source!.task.timeoutOverride).to.eql('10s');
+          expect(taskRecord2._source!.task.enabled).to.eql(true);
+          expect(JSON.parse(taskRecord2._source!.task.params)).to.eql({
+            adHocRunParamsId: backfillId2,
+            spaceId: apiOptions.spaceId,
+          });
+
           // delete them
           const deleteResponse1 = await supertestWithoutAuth
             .delete(
@@ -156,8 +183,20 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
                 .set('kbn-xsrf', 'foo')
                 .expect(404);
 
-              // TODO - add check that scheduled task no longer exists
-              // after merging with task runner branch
+              try {
+                await getScheduledTask(backfillId1);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.meta.statusCode).to.eql(404);
+              }
+
+              try {
+                await getScheduledTask(backfillId2);
+                throw new Error('Should have removed scheduled task');
+              } catch (e) {
+                expect(e.meta.statusCode).to.eql(404);
+              }
+
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -270,6 +309,13 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        async function getScheduledTask(id: string): Promise<GetResponse<TaskManagerDoc>> {
+          return await es.get<TaskManagerDoc>({
+            id: `task:${id}`,
+            index: '.kibana_task_manager',
+          });
+        }
       });
     }
   });

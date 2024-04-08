@@ -37,6 +37,7 @@ const rawAdHocRunParamsRuleSchema = schema.object({
   updatedBy: schema.nullable(schema.string()),
   updatedAt: schema.string(),
   createdAt: schema.string(),
+  revision: schema.number(),
 });
 
 export const rawAdHocRunParamsSchema = schema.object({
