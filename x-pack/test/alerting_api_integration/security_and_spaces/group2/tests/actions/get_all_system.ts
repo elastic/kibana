@@ -127,6 +127,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  id: 'system-connector-.observability-ai-assistant',
+                  name: 'System action: .observability-ai-assistant',
+                  connector_type_id: '.observability-ai-assistant',
+                  is_preconfigured: false,
+                  is_deprecated: false,
+                  referenced_by_count: 0,
+                  is_system_action: true,
+                },
+                {
                   connector_type_id: 'test.system-action',
                   id: 'system-connector-test.system-action',
                   is_deprecated: false,
@@ -179,15 +188,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',
                   referenced_by_count: 0,
-                },
-                {
-                  id: 'system-connector-.observability-ai-assistant',
-                  name: 'System action: .observability-ai-assistant',
-                  connector_type_id: '.observability-ai-assistant',
-                  is_preconfigured: false,
-                  is_deprecated: false,
-                  referenced_by_count: 0,
-                  is_system_action: true,
                 },
               ]);
               break;
