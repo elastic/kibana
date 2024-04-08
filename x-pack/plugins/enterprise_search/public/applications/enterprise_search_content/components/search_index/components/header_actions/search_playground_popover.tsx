@@ -11,7 +11,6 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 import { PLAYGROUND_PATH } from '../../../../routes';
@@ -25,8 +24,7 @@ export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = (
   indexName,
   ingestionMethod,
 }) => {
-  const playgroundUrl =
-    ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + PLAYGROUND_PATH + `?defaultIndexName=${indexName}`;
+  const playgroundUrl = PLAYGROUND_PATH + `?defaultIndexName=${indexName}`;
 
   return (
     <EuiButton
@@ -34,7 +32,7 @@ export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = (
       iconType="eye"
       onClick={() => {
         KibanaLogic.values.navigateToUrl(playgroundUrl, {
-          shouldNotCreateHref: true,
+          shouldNotCreateHref: false,
         });
       }}
     >
