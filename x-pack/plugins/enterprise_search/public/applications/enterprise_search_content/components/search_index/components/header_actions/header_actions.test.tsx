@@ -17,23 +17,23 @@ import { SyncsContextMenu } from './syncs_context_menu';
 
 describe('Header Actions', () => {
   it('renders api index', () => {
-    expect(getHeaderActions(apiIndex, true)).toEqual([
+    expect(getHeaderActions(apiIndex)).toEqual([
       <SearchEnginesPlayground indexName="api" ingestionMethod="api" />,
     ]);
-    expect(getHeaderActions(apiIndex, false)).toEqual([]);
+    expect(getHeaderActions(apiIndex)).toEqual([]);
   });
   it('renders connector index', () => {
-    expect(getHeaderActions(connectorIndex, true)).toEqual([
+    expect(getHeaderActions(connectorIndex)).toEqual([
       <SyncsContextMenu />,
       <SearchEnginesPlayground indexName="connector" ingestionMethod="connector" />,
     ]);
-    expect(getHeaderActions(connectorIndex, false)).toEqual([<SyncsContextMenu />]);
+    expect(getHeaderActions(connectorIndex)).toEqual([<SyncsContextMenu />]);
   });
   it('renders crawler index', () => {
-    expect(getHeaderActions(crawlerIndex, true)).toEqual([
+    expect(getHeaderActions(crawlerIndex)).toEqual([
       <CrawlerStatusIndicator />,
       <SearchEnginesPlayground indexName="crawler" ingestionMethod="crawler" />,
     ]);
-    expect(getHeaderActions(crawlerIndex, false)).toEqual([<CrawlerStatusIndicator />]);
+    expect(getHeaderActions(crawlerIndex)).toEqual([<CrawlerStatusIndicator />]);
   });
 });

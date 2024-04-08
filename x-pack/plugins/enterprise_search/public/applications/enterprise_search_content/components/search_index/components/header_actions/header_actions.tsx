@@ -19,14 +19,13 @@ import { SyncsContextMenu } from './syncs_context_menu';
 // Used to populate rightSideItems of an EuiPageTemplate, which is rendered right-to-left
 export const getHeaderActions = (
   indexData: ElasticsearchIndexWithIngestion | undefined,
-  hasAppSearchAccess: boolean,
   connector?: Connector
 ) => {
   const ingestionMethod = getIngestionMethod(indexData);
   return [
     ...(isCrawlerIndex(indexData) && indexData.connector ? [<CrawlerStatusIndicator />] : []),
     ...(isConnectorIndex(indexData) || connector ? [<SyncsContextMenu />] : []),
-    ...(hasAppSearchAccess && indexData
+    ...(indexData
       ? [<SearchEnginesPlayground indexName={indexData?.name} ingestionMethod={ingestionMethod} />]
       : []),
   ];
