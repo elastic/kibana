@@ -27,5 +27,6 @@
     "@kbn/navigation-plugin",
     "@kbn/management-cards-navigation",
     "@kbn/management-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }
