@@ -1082,6 +1082,20 @@ async function getFunctionArgsSuggestions(
     return [];
   });
 
+  const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
+    const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
+    return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
+  }, [] as string[]);
+
+  if (literalOptions.length) {
+    return literalOptions.map((literalOption) => ({
+      label: literalOption,
+      text: `"${literalOption}"`,
+      detail: literalOption,
+      kind: 'Constant',
+    }));
+  }
+
   const arg = node.args[argIndex];
 
   // the first signature is used as reference
