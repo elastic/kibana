@@ -33,8 +33,13 @@ import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts'
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
+import { useSpace } from '../../../../hooks/use_space';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import {
+  createRemoteSloDeleteUrl,
+  createRemoteSloEditUrl,
+} from '../../../../utils/slo/remote_slo_urls';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SLOGroupings } from '../common/slo_groupings';
@@ -59,6 +64,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
+  const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const sloIdsAndInstanceIds = sloList.map(
@@ -67,10 +73,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
 
   const { hasWriteCapabilities } = useCapabilities();
   const filteredRuleTypes = useGetFilteredRuleTypes();
-
   const queryClient = useQueryClient();
   const { mutate: deleteSlo } = useDeleteSlo();
-
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
@@ -99,6 +103,10 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     });
 
   const navigateToClone = useCloneSlo();
+
+  const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
+  const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
+    !!slo.remote && slo.remote.kibanaUrl !== '';
 
   // TODO Kevin: MISSING REMOTE ACTIONS HANDLING
   // With some refactoring, we should be able to
@@ -137,9 +145,14 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Edit',
       }),
       'data-test-subj': 'sloActionsEdit',
-      enabled: (_) => hasWriteCapabilities,
+      enabled: (slo) => (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
+        const remoteEditUrl = createRemoteSloEditUrl(slo, spaceId);
+        if (!!remoteEditUrl) {
+          window.open(remoteEditUrl, '_blank');
+        } else {
+          navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
+        }
       },
     },
     {
@@ -152,7 +165,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Create new alert rule',
       }),
       'data-test-subj': 'sloActionsCreateRule',
-      enabled: (_) => hasWriteCapabilities,
+      enabled: (slo: SLOWithSummaryResponse) => hasWriteCapabilities && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         setSloToAddRule(slo);
       },
@@ -167,7 +180,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Manage rules',
       }),
       'data-test-subj': 'sloActionsManageRules',
-      enabled: (_) => hasWriteCapabilities,
+      enabled: (slo: SLOWithSummaryResponse) => hasWriteCapabilities && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         const locator = locators.get<RulesParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
@@ -183,7 +196,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Clone',
       }),
       'data-test-subj': 'sloActionsClone',
-      enabled: (_) => hasWriteCapabilities,
+      enabled: (slo: SLOWithSummaryResponse) =>
+        (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         navigateToClone(slo);
       },
@@ -198,8 +212,16 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Delete',
       }),
       'data-test-subj': 'sloActionsDelete',
-      enabled: (_) => hasWriteCapabilities,
-      onClick: (slo: SLOWithSummaryResponse) => setSloToDelete(slo),
+      enabled: (slo: SLOWithSummaryResponse) =>
+        (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
+        if (!!remoteDeleteUrl) {
+          window.open(remoteDeleteUrl, '_blank');
+        } else {
+          setSloToDelete(slo);
+        }
+      },
     },
   ];
 
