@@ -296,7 +296,7 @@ export const reportingExportModalProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    const generateReportPDF = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
+    const generateReportPDF = () => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
@@ -343,8 +343,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toastsReport.addError(error, {
-            title: intlReport!.formatMessage({
+          toasts.addError(error, {
+            title: intl.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
