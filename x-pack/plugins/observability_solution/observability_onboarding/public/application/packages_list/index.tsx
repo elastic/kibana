@@ -45,6 +45,11 @@ const Loading = () => (
 
 const QUICKSTART_FLOWS = ['kubernetes'];
 
+const toCustomCard = (card: IntegrationCardItem) => ({
+  ...card,
+  isQuickstart: QUICKSTART_FLOWS.includes(card.name),
+});
+
 const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
@@ -63,14 +68,13 @@ const PackageListGridWrapper = ({
   if (featuredCards || generatedCards) {
     featuredCards?.forEach((name) => {
       const card = filteredCards.find((c) => c.name === name);
-      if (card)
-        list.push({ ...card, isQuickstart: QUICKSTART_FLOWS.includes(name) });
+      if (card) list.push(toCustomCard(card));
     });
     generatedCards?.forEach((c) => list.push(c));
   } else {
-    list = filteredCards.filter((card) =>
-      card.categories.includes(selectedCategory)
-    );
+    list = filteredCards
+      .filter((card) => card.categories.includes(selectedCategory))
+      .map(toCustomCard);
   }
   const showPackageList =
     (showSearchBar && !initialHidden) || showSearchBar === false;
