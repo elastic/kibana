@@ -243,7 +243,7 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         <EuiFlexItem>
           <LogRateAnalysisContent
             embeddingOrigin="observability_slo_burn_rate_alert_details"
-            dataView={dataView} // TODO: fix dataview
+            dataView={dataView}
             esSearchQuery={esSearchQuery}
             timeRange={timeRange}
             initialAnalysisStart={initialAnalysisStart}

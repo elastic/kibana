@@ -249,10 +249,8 @@ export default function AlertDetailsAppSection({
   useEffect(() => {
     const initDataView = async () => {
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
-      console.log(ruleSearchConfiguration, '!!ruleSearchConfiguration');
       try {
         const createdSearchSource = await data.search.searchSource.create(ruleSearchConfiguration);
-        console.log(createdSearchSource, '!!createdSearchSource');
         setDataView(createdSearchSource.getField('index'));
       } catch (error) {
         setDataViewError(error);

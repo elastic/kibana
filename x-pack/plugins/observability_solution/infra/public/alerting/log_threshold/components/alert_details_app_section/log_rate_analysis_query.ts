@@ -42,5 +42,6 @@ export const getESQueryForLogRateAnalysis = (
       ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
     },
   };
+
   return query;
 };

@@ -9,8 +9,6 @@ import { getESQueryForLogRateAnalysis } from './log_rate_analysis_query';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 
 describe('buildEsQuery', () => {
-  // const index = 'mockedIndex';
-
   const testData = [
     {
       title: 'rule with good query (as KQL), no optional filter and no total',
