@@ -18,7 +18,7 @@ import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: Prompt[];
-  currentConversation: Conversation | undefined;
+  currentConversation?: Conversation;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;

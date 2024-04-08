@@ -141,7 +141,11 @@ export const AssistantHeader: React.FC<Props> = ({
                   defaultConnector={defaultConnector}
                   isDisabled={isDisabled}
                   isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversation={currentConversation}
+                  selectedConversationId={
+                    !isEmpty(currentConversation?.id)
+                      ? currentConversation?.id
+                      : currentConversation?.title
+                  }
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}

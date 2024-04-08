@@ -65,7 +65,7 @@ export const getComments = ({
   setIsStreaming,
 }: {
   abortStream: () => void;
-  currentConversation: Conversation;
+  currentConversation?: Conversation;
   isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: () => void;

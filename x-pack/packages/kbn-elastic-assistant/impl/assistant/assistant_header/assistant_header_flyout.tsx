@@ -147,7 +147,11 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               defaultConnector={defaultConnector}
               isDisabled={isDisabled}
               isSettingsModalVisible={isSettingsModalVisible}
-              selectedConversation={selectedConversation}
+              selectedConversationId={
+                !isEmpty(selectedConversation?.id)
+                  ? selectedConversation?.id
+                  : selectedConversation?.title
+              }
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
               conversations={conversations}

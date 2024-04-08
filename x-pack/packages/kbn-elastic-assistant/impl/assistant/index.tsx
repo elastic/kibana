@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// remove after isFlyoutMode is gone
-/* eslint-disable complexity */
-
 import React, {
   Dispatch,
   SetStateAction,
@@ -37,7 +34,7 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { find } from 'lodash';
+import { find, isEmpty } from 'lodash';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -130,8 +127,8 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
-    setLastConversationTitle,
-    getLastConversationTitle,
+    setLastConversationId,
+    getLastConversationId,
     title,
     allSystemPrompts,
     baseConversations,
@@ -178,9 +175,7 @@ const AssistantComponent: React.FC<Props> = ({
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-  const [currentConversationId, setCurrentConversationId] = useState<string>(
-    isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
-  );
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
 
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
 
@@ -211,12 +206,21 @@ const AssistantComponent: React.FC<Props> = ({
     if (conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
         const nextConversation =
-          conversations[currentConversationId] ??
-          find(conversations, ['title', currentConversationId]);
-        if (prev?.id === nextConversation?.id) return prev;
+          (currentConversationId && conversations[currentConversationId]) ||
+          find(conversations, [
+            'title',
+            isAssistantEnabled
+              ? getLastConversationId(conversationTitle)
+              : WELCOME_CONVERSATION_TITLE,
+          ]);
+
+        if (nextConversation?.id !== '' && prev?.id === nextConversation?.id) return prev;
 
         return (
-          conversations[nextConversation?.id] ??
+          (nextConversation &&
+            conversations[
+              nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
+            ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
         );
@@ -226,10 +230,11 @@ const AssistantComponent: React.FC<Props> = ({
     conversationTitle,
     conversations,
     getDefaultConversation,
-    getLastConversationTitle,
+    getLastConversationId,
     conversationsLoaded,
     currentConversation?.id,
     currentConversationId,
+    isAssistantEnabled,
   ]);
 
   // Welcome setup state
@@ -257,20 +262,21 @@ const AssistantComponent: React.FC<Props> = ({
   // Clear it if there is no connectors
   useEffect(() => {
     if (areConnectorsFetched && !connectors?.length) {
-      return setLastConversationTitle(WELCOME_CONVERSATION_TITLE);
+      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
     }
 
     if (!currentConversation?.excludeFromLastConversationStorage) {
-      setLastConversationTitle(currentConversation?.title);
+      setLastConversationId(
+        !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title
+      );
     }
   }, [
     areConnectorsFetched,
     connectors?.length,
     conversations,
-    currentConversation?.excludeFromLastConversationStorage,
-    currentConversation?.title,
+    currentConversation,
     isLoading,
-    setLastConversationTitle,
+    setLastConversationId,
   ]);
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
@@ -365,6 +371,7 @@ const AssistantComponent: React.FC<Props> = ({
           getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv?.data?.[cTitle] })
             ?.id
         );
+        setCurrentConversationId(cTitle);
       } else {
         const refetchedConversation = await refetchCurrentConversation({ cId });
         setEditingSystemPromptId(
@@ -527,6 +534,7 @@ const AssistantComponent: React.FC<Props> = ({
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
+            isFlyoutMode,
           })}
           {...(!isFlyoutMode
             ? {
@@ -630,9 +638,7 @@ const AssistantComponent: React.FC<Props> = ({
       showMissingConnectorCallout &&
       areConnectorsFetched &&
       defaultConnector &&
-      !currentConversation?.excludeFromLastConversationStorage &&
-      currentConversation?.id.length &&
-      setApiConfig
+      currentConversation
     ) {
       const apiConfig = getGenAiConfig(defaultConnector);
       setApiConfig({
@@ -857,6 +863,7 @@ const AssistantComponent: React.FC<Props> = ({
                       > .euiFlyoutBody__overflowContent {
                         display: flex;
                         flex: 1;
+                        overflow: auto;
                       }
                     }
                   `}
@@ -874,14 +881,12 @@ const AssistantComponent: React.FC<Props> = ({
                   }
                 >
                   {flyoutBodyContent}
-                  {/* {!isAssistantEnabled && (
-                      <BlockBotCallToAction
-                        connectorPrompt={connectorPrompt}
-                        http={http}
-                        isAssistantEnabled={isAssistantEnabled}
-                        isWelcomeSetup={isWelcomeSetup}
-                      />
-                    )} */}
+                  {/* <BlockBotCallToAction
+                    connectorPrompt={connectorPrompt}
+                    http={http}
+                    isAssistantEnabled={isAssistantEnabled}
+                    isWelcomeSetup={isWelcomeSetup}
+                  /> */}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
@@ -919,50 +924,35 @@ const AssistantComponent: React.FC<Props> = ({
                         </EuiFlexGroup>
                       )}
 
-                    <EuiPanel
-                      hasShadow={false}
-                      hasBorder
-                      css={
-                        selectedPromptContextsCount > 0
-                          ? css`
-                              background: ${euiThemeVars.euiColorLightestShade};
-                            `
-                          : css`
-                              padding: 0;
-                              border: 0;
-                            `
-                      }
-                    >
-                      <EuiFlexGroup direction="column" gutterSize="s">
-                        {Object.keys(selectedPromptContexts).length ? (
-                          <EuiFlexItem grow={false}>
-                            <SelectedPromptContexts
-                              isNewConversation={isNewConversation}
-                              promptContexts={promptContexts}
-                              selectedPromptContexts={selectedPromptContexts}
-                              setSelectedPromptContexts={setSelectedPromptContexts}
-                              currentReplacements={currentConversation?.replacements}
-                              isFlyoutMode={isFlyoutMode}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {Object.keys(selectedPromptContexts).length ? (
                         <EuiFlexItem grow={false}>
-                          <ChatSend
-                            isDisabled={isSendingDisabled}
-                            shouldRefocusPrompt={shouldRefocusPrompt}
-                            userPrompt={userPrompt}
-                            handleButtonSendMessage={handleButtonSendMessage}
-                            handleOnChatCleared={handleOnChatCleared}
-                            handlePromptChange={handlePromptChange}
-                            handleSendMessage={handleSendMessage}
-                            handleRegenerateResponse={handleRegenerateResponse}
-                            isLoading={isLoadingChatSend}
+                          <SelectedPromptContexts
+                            isNewConversation={isNewConversation}
+                            promptContexts={promptContexts}
+                            selectedPromptContexts={selectedPromptContexts}
+                            setSelectedPromptContexts={setSelectedPromptContexts}
+                            currentReplacements={currentConversation?.replacements}
                             isFlyoutMode={isFlyoutMode}
                           />
                         </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
+                      ) : null}
+
+                      <EuiFlexItem grow={false}>
+                        <ChatSend
+                          isDisabled={isSendingDisabled}
+                          shouldRefocusPrompt={shouldRefocusPrompt}
+                          userPrompt={userPrompt}
+                          handleButtonSendMessage={handleButtonSendMessage}
+                          handleOnChatCleared={handleOnChatCleared}
+                          handlePromptChange={handlePromptChange}
+                          handleSendMessage={handleSendMessage}
+                          handleRegenerateResponse={handleRegenerateResponse}
+                          isLoading={isLoadingChatSend}
+                          isFlyoutMode={isFlyoutMode}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiPanel>
 
                   {!isDisabled && (

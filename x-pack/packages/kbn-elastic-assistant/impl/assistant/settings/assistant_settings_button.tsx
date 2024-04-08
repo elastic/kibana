@@ -17,7 +17,7 @@ import { useAssistantContext } from '../../assistant_context';
 interface Props {
   defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
-  selectedConversation: Conversation | undefined;
+  selectedConversationId?: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
@@ -35,7 +35,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversation,
+    selectedConversationId,
     isFlyoutMode,
     onConversationSelected,
     conversations,
@@ -88,7 +88,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
         {isSettingsModalVisible && (
           <AssistantSettings
             defaultConnector={defaultConnector}
-            selectedConversation={selectedConversation}
+            selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}

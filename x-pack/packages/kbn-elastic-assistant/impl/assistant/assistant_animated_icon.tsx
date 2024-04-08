@@ -43,12 +43,12 @@ const Animation = styled.div`
     top: 0;
     left: 0;
     z-index: 0;
-    background: ${euiThemeVars.euiColorPrimary};
+    border: 1px solid ${euiThemeVars.euiColorPrimary};
     border-radius: inherit;
-    animation: pulsing 2.5s linear infinite;
+    animation: 4s cubic-bezier(0.42, 0, 0.37, 1) 0.5s infinite normal none running pulsing;
   }
   &:after {
-    animation: pulsing1 2.5s linear infinite;
+    animation: 4s cubic-bezier(0.42, 0, 0.37, 1) 0.5s infinite normal none running pulsing1;
   }
 
   @keyframes pulsing {
@@ -77,7 +77,11 @@ const Animation = styled.div`
       opacity: 1;
       transform: scaleY(1) scaleX(1);
     }
-    20% {
+    15% {
+      opacity: 1;
+      transform: scaleY(1) scaleX(1);
+    }
+    40% {
       opacity: 0.5;
     }
     70% {

@@ -156,7 +156,7 @@ const getPluginDependencies = () => {
 
 export function MessageText({ loading, content, index }: Props) {
   const containerClassName = css`
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   `;
 
   const { parsingPluginList, processingPluginList } = getPluginDependencies();

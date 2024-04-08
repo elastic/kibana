@@ -44,7 +44,7 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationTitle } =
+  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
@@ -57,7 +57,7 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
         promptContextId: pid,
         conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationTitle = getLastConversationTitle(cTitle);
+        const newConversationTitle = getLastConversationId(cTitle);
         if (so)
           assistantTelemetry?.reportAssistantInvoked({
             conversationId: newConversationTitle,
@@ -68,7 +68,7 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
         setPromptContextId(pid);
         setConversationTitle(newConversationTitle);
       },
-    [assistantTelemetry, getLastConversationTitle]
+    [assistantTelemetry, getLastConversationId]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -78,15 +78,15 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationTitle(getLastConversationTitle());
+      setConversationTitle(getLastConversationId());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getLastConversationTitle(),
+        conversationId: getLastConversationId(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversationTitle, assistantTelemetry]);
+  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
