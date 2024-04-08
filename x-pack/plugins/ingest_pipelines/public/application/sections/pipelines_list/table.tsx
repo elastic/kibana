@@ -29,7 +29,6 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/pipeline_elements';
 
 export interface Props {
   pipelines: Pipeline[];

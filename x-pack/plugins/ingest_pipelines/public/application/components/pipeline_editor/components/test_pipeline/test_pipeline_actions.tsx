@@ -20,6 +20,8 @@ export const TestPipelineActions: FunctionComponent = () => {
 
   const [openTestPipelineFlyout, setOpenTestPipelineFlyout] = useState(false);
   const [activeFlyoutTab, setActiveFlyoutTab] = useState<TestPipelineFlyoutTab>('documents');
+  const hasProcessors =
+    processors?.state?.processors?.length > 0 || processors?.state?.onFailure?.length > 0;
 
   const openFlyout = (activeTab: TestPipelineFlyoutTab) => {
     setOpenTestPipelineFlyout(true);
@@ -32,6 +34,7 @@ export const TestPipelineActions: FunctionComponent = () => {
         iconType="play"
         data-test-subj="viewOutputButton"
         onClick={() => openFlyout('documents')}
+        disabled={!hasProcessors}
       >
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.testPipeline.outputButtonLabel"
