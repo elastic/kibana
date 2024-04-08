@@ -82,12 +82,36 @@ export class BackfillClient {
     unsecuredSavedObjectsClient,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
-    const soToCreateOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
+
+    /**
+     * soToCreateIndexOrErrorMap contains a map of the original request index to the
+     * AdHocRunSO to create index in the adHocSOsToCreate array or any errors
+     * encountered while processing the request
+     *
+     * For example, if the original request has 5 entries, 2 of which result in errors,
+     * the map will look like:
+     *
+     * params: [request1, request2, request3, request4, request5]
+     * adHocSOsToCreate: [AdHocRunSO1, AdHocRunSO3, AdHocRunSO4]
+     * soToCreateIndexOrErrorMap: {
+     *   0: 0,
+     *   1: error1,
+     *   2: 1,
+     *   3: 2,
+     *   4: error2
+     * }
+     *
+     * This allows us to return a response in the same order the requests were received
+     */
+
+    const soToCreateIndexOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
 
     params.forEach((param: ScheduleBackfillParam, ndx: number) => {
+      // For this schedule request, look up the rule or return error
       const { rule, error } = getRuleOrError(param.ruleId, rules, ruleTypeRegistry);
       if (rule) {
-        soToCreateOrErrorMap.set(ndx, adHocSOsToCreate.length);
+        // keep track of index of this request in the adHocSOsToCreate array
+        soToCreateIndexOrErrorMap.set(ndx, adHocSOsToCreate.length);
         const reference: SavedObjectReference = {
           id: rule.id,
           name: `rule`,
@@ -99,7 +123,9 @@ export class BackfillClient {
           references: [reference],
         });
       } else if (error) {
-        soToCreateOrErrorMap.set(ndx, error);
+        // keep track of the error encountered for this request by index so
+        // we can return it in order
+        soToCreateIndexOrErrorMap.set(ndx, error);
         this.logger.warn(
           `No rule found for ruleId ${param.ruleId} - not scheduling backfill for ${JSON.stringify(
             param
@@ -108,10 +134,14 @@ export class BackfillClient {
       }
     });
 
+    // Every request encountered an error, so short-circuit the logic here
     if (!adHocSOsToCreate.length) {
-      return params.map((_, ndx: number) => soToCreateOrErrorMap.get(ndx) as ScheduleBackfillError);
+      return params.map(
+        (_, ndx: number) => soToCreateIndexOrErrorMap.get(ndx) as ScheduleBackfillError
+      );
     }
 
+    // Bulk create the saved object
     const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
       adHocSOsToCreate
     );
@@ -120,18 +150,39 @@ export class BackfillClient {
       transformAdHocRunToBackfillResult
     );
 
-    const createSOResult = Array.from(soToCreateOrErrorMap.keys()).map((ndx: number) => {
-      const indexOrError = soToCreateOrErrorMap.get(ndx);
+    /**
+     * Use soToCreateIndexOrErrorMap to build the result array that returns
+     * the bulkQueue result in the same order of the request
+     *
+     * For example, if we have 3 entries in the bulkCreateResponse
+     *
+     * bulkCreateResult: [AdHocRunSO1, AdHocRunSO3, AdHocRunSO4]
+     * soToCreateIndexOrErrorMap: {
+     *   0: 0,
+     *   1: error1,
+     *   2: 1,
+     *   3: 2,
+     *   4: error2
+     * }
+     *
+     * The following result would be returned
+     * result: [AdHocRunSO1, error1, AdHocRunSO3, AdHocRunSO4, error2]
+     */
+    const createSOResult = Array.from(soToCreateIndexOrErrorMap.keys()).map((ndx: number) => {
+      const indexOrError = soToCreateIndexOrErrorMap.get(ndx);
+
       if (isNumber(indexOrError)) {
+        // This number is the index of the response from the savedObjects bulkCreate function
         return transformedResponse[indexOrError];
       } else {
+        // Return the error we encountered
         return indexOrError as ScheduleBackfillError;
       }
     });
 
     // Build array of tasks to schedule
     const adHocTasksToSchedule: TaskInstance[] = [];
-    createSOResult.forEach((result: ScheduleBackfillResult, ndx: number) => {
+    createSOResult.forEach((result: ScheduleBackfillResult) => {
       if (!(result as ScheduleBackfillError).error) {
         const createdSO = result as Backfill;
 
