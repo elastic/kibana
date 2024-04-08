@@ -9,15 +9,16 @@ import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
-import {
-  throwIfResponseIsNotValid,
-  getErrorMessage,
-} from '@kbn/actions-plugin/server/lib/axios_utils';
+import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   CreateCommentParams,
   CreateIncidentData,
   CreateIncidentParams,
   ExternalServiceIncidentResponse,
+  ExternalServiceParams,
+  GetCommonFieldsResponse,
+  GetIncidentTypesResponse,
+  GetSeverityResponse,
   Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,
@@ -114,13 +115,16 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
   }
 
   private getAuthHeaders() {
-    // return { api_key_id: this.secrets.apiKeyId, api_key_secret: this.secrets.apiKeySecret };
-    return { username: this.secrets.apiKeyId, password: this.secrets.apiKeySecret };
+    const token = Buffer.from(
+      this.secrets.apiKeyId + ':' + this.secrets.apiKeySecret,
+      'utf8'
+    ).toString('base64');
+
+    return { Authorization: `Basic ${token}` };
   }
 
   private getOrgUrl() {
     const { apiUrl: url, orgId } = this.config;
-    // const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
 
     return `${url}/rest/orgs/${orgId}`;
   }
@@ -177,11 +181,6 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         }),
       });
 
-      throwIfResponseIsNotValid({
-        res,
-        requiredAttributesToBeInTheResponse: ['id', 'create_date'],
-      });
-
       return {
         title: `${res.data.id}`,
         id: `${res.data.id}`,
@@ -200,7 +199,7 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> {
     try {
-      const latestIncident = await this.getIncident(incidentId);
+      const latestIncident = await this.getIncident({ externalId: incidentId });
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
@@ -210,22 +209,18 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         method: 'PATCH',
         url: `${this.urls.incident}/${incidentId}`,
         data,
-        // headers: this.getAuthHeaders(),
+        headers: this.getAuthHeaders(),
         responseSchema: schema.object({
           success: schema.boolean(),
           message: schema.string(),
         }),
       });
 
-      throwIfResponseIsNotValid({
-        res,
-      });
-
       if (!res.data.success) {
         throw new Error(res.data.message);
       }
 
-      const updatedIncident = await this.getIncident(incidentId);
+      const updatedIncident = await this.getIncident({ externalId: incidentId });
 
       return {
         title: `${updatedIncident.id}`,
@@ -252,10 +247,6 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         }),
       });
 
-      throwIfResponseIsNotValid({
-        res,
-      });
-
       return {
         commentId: comment.commentId,
         externalCommentId: res.data.id,
@@ -268,12 +259,8 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     }
   }
 
-  public async getIncidentTypes() {
+  public async getIncidentTypes(): Promise<GetIncidentTypesResponse> {
     try {
-      console.log('resilient_new_connector_getIncidentTypes', {
-        url: this.urls.incidentTypes,
-        headers: this.getAuthHeaders(),
-      });
       const res = await this.request({
         method: 'GET',
         url: this.urls.incidentTypes,
@@ -281,11 +268,12 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         responseSchema: GetIncidentTypesResponseSchema,
       });
 
-      throwIfResponseIsNotValid({
-        res,
-      });
+      const incidentTypes = res.data?.values ?? [];
 
-      return res.data ?? [];
+      return incidentTypes.map((type: { value: number; label: string }) => ({
+        id: type.value.toString(),
+        name: type.label,
+      }));
     } catch (error) {
       throw new Error(
         getErrorMessage(i18n.NAME, `Unable to get incident types. Error: ${error.message}.`)
@@ -293,7 +281,7 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     }
   }
 
-  public async getSeverity() {
+  public async getSeverity(): Promise<GetSeverityResponse> {
     try {
       const res = await this.request({
         method: 'GET',
@@ -302,11 +290,11 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         responseSchema: GetSeverityResponseSchema,
       });
 
-      throwIfResponseIsNotValid({
-        res,
-      });
-
-      return res.data ?? [];
+      const severities = res.data?.values ?? [];
+      return severities.map((type: { value: number; label: string }) => ({
+        id: type.value.toString(),
+        name: type.label,
+      }));
     } catch (error) {
       throw new Error(
         getErrorMessage(i18n.NAME, `Unable to get severity. Error: ${error.message}.`)
@@ -314,7 +302,7 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     }
   }
 
-  public async getFields() {
+  public async getFields(): Promise<GetCommonFieldsResponse> {
     try {
       const res = await this.request({
         method: 'GET',
@@ -323,21 +311,27 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         responseSchema: GetCommonFieldsResponseSchema,
       });
 
-      throwIfResponseIsNotValid({
-        res,
+      const fields = res.data.map((field) => {
+        return {
+          name: field.name,
+          input_type: field.input_type,
+          read_only: field.read_only,
+          required: field.required,
+          text: field.text,
+        };
       });
 
-      return res.data ?? [];
+      return fields;
     } catch (error) {
       throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
     }
   }
 
-  public async getIncident(id: string) {
+  public async getIncident(params: { externalId: string }): Promise<ExternalServiceParams> {
     try {
       const res = await this.request({
         method: 'GET',
-        url: `${this.urls.incident}/${id}`,
+        url: `${this.urls.incident}/${params.externalId}`,
         params: {
           text_content_output_format: 'objects_convert',
         },
@@ -345,14 +339,13 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         responseSchema: GetIncidentResponseSchema,
       });
 
-      throwIfResponseIsNotValid({
-        res,
-      });
-
       return { ...res.data, description: res.data?.description?.content ?? '' };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get incident with id ${params.externalId}. Error: ${error.message}.`
+        )
       );
     }
   }

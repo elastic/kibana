@@ -22,9 +22,6 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
   ExternalServiceCommentResponseSchema,
   ExternalServiceIncidentResponseSchema,
-  GetCommonFieldsResponseSchema,
-  GetIncidentTypesResponseSchema,
-  GetSeverityResponseSchema,
 } from './schema';
 
 export interface ExternalServiceCredentials {
@@ -42,9 +39,13 @@ export interface ExternalServiceFields {
   input_type: string;
   name: string;
   read_only: boolean;
-  required?: string;
+  required: string | null;
   text: string;
 }
+
+export type GetCommonFieldsResponse = ExternalServiceFields[];
+export type GetIncidentTypesResponse = Array<{ id: string; name: string }>;
+export type GetSeverityResponse = Array<{ id: string; name: string }>;
 
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
@@ -190,6 +191,3 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
 >;
 export type ExternalServiceIncidentResponse = TypeOf<typeof ExternalServiceIncidentResponseSchema>;
 export type ExternalServiceCommentResponse = TypeOf<typeof ExternalServiceCommentResponseSchema>;
-export type GetIncidentTypesResponse = TypeOf<typeof GetIncidentTypesResponseSchema>;
-export type GetSeverityResponse = TypeOf<typeof GetSeverityResponseSchema>;
-export type GetCommonFieldsResponse = TypeOf<typeof GetCommonFieldsResponseSchema>;

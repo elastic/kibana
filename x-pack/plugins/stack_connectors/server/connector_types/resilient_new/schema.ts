@@ -80,24 +80,28 @@ export const ExecutorParamsSchema = schema.oneOf([
   }),
 ]);
 
-export const GetIncidentTypesResponseSchema = schema.arrayOf(
+const ArrayOfValuesSchema = schema.arrayOf(
   schema.object(
     {
-      id: schema.string(),
-      name: schema.string(),
+      value: schema.number(),
+      label: schema.string(),
     },
-    { unknowns: 'ignore' }
+    { unknowns: 'allow' }
   )
 );
 
-export const GetSeverityResponseSchema = schema.arrayOf(
-  schema.object(
-    {
-      id: schema.string(),
-      name: schema.string(),
-    },
-    { unknowns: 'ignore' }
-  )
+export const GetIncidentTypesResponseSchema = schema.object(
+  {
+    values: ArrayOfValuesSchema,
+  },
+  { unknowns: 'allow' }
+);
+
+export const GetSeverityResponseSchema = schema.object(
+  {
+    values: ArrayOfValuesSchema,
+  },
+  { unknowns: 'allow' }
 );
 
 export const ExternalServiceFieldsSchema = schema.object(
@@ -108,18 +112,21 @@ export const ExternalServiceFieldsSchema = schema.object(
     required: schema.nullable(schema.string()),
     text: schema.string(),
   },
-  { unknowns: 'ignore' }
+  { unknowns: 'allow' }
 );
 
 export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
 export const GetIncidentResponseSchema = schema.object(
   {
-    id: schema.string(),
+    id: schema.number(),
     name: schema.string(),
-    description: schema.object({
-      content: schema.string(),
-    }),
-    inc_last_modified_date: schema.string(),
+    description: schema.object(
+      {
+        content: schema.string(),
+      },
+      { unknowns: 'allow' }
+    ),
+    inc_last_modified_date: schema.number(),
   },
   { unknowns: 'allow' }
 );

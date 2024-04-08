@@ -9,7 +9,7 @@ import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-
 
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
-import { getConnectorType as getResilientConnectorType } from './resilient';
+import { getResilientConnectorType } from './resilient_new';
 import { getServiceNowITSMConnectorType } from './servicenow_itsm';
 import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getServiceNowITOMConnectorType } from './servicenow_itom';
@@ -99,7 +99,6 @@ export function registerConnectorTypes({
   actions.registerType(getServiceNowSIRConnectorType());
   actions.registerType(getServiceNowITOMConnectorType());
   actions.registerType(getJiraConnectorType());
-  actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
 
@@ -108,6 +107,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
+  actions.registerSubActionConnectorType(getResilientConnectorType());
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
