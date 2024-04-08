@@ -25,6 +25,10 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type {
+  PluginSetupContract as AlertingPluginSetup,
+  PluginStartContract as AlertingPluginStart,
+} from '@kbn/alerting-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantServerSetup {
@@ -50,6 +54,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
+  alerting: AlertingPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -62,4 +67,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   cloud?: CloudStart;
   serverless?: ServerlessPluginStart;
+  alerting: AlertingPluginStart;
 }

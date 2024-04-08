@@ -38,7 +38,7 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import { getObsAIAssistantConnectorType } from './rule_connector';
+import { getObsAIAssistantConnectorType, getObsAIAssistantConnectorAdapter } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -193,6 +193,7 @@ export class ObservabilityAIAssistantPlugin
     };
 
     plugins.actions.registerType(getObsAIAssistantConnectorType(initResources));
+    plugins.alerting.registerConnectorAdapter(getObsAIAssistantConnectorAdapter());
 
     registerServerRoutes({
       core,

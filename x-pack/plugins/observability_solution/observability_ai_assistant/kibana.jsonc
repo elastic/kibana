@@ -15,7 +15,8 @@
       "taskManager",
       "dataViews",
       "triggersActionsUi",
-      "ruleRegistry"
+      "ruleRegistry",
+      "alerting"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud", "serverless"],

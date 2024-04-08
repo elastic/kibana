@@ -16,6 +16,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
+import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -157,3 +158,16 @@ async function executor(
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
+
+export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
+  ActionParamsType,
+  ActionParamsType
+> => {
+  return {
+    connectorTypeId: '.observability-ai-assistant',
+    ruleActionParamsSchema: ParamsSchema,
+    buildActionParams: ({ params }) => {
+      return { connector: params.connector, message: params.message };
+    },
+  };
+};
