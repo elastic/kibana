@@ -20,20 +20,17 @@ describe('Header Actions', () => {
     expect(getHeaderActions(apiIndex)).toEqual([
       <SearchPlaygroundPopover indexName="api" ingestionMethod="api" />,
     ]);
-    expect(getHeaderActions(apiIndex)).toEqual([]);
   });
   it('renders connector index', () => {
     expect(getHeaderActions(connectorIndex)).toEqual([
       <SyncsContextMenu />,
       <SearchPlaygroundPopover indexName="connector" ingestionMethod="connector" />,
     ]);
-    expect(getHeaderActions(connectorIndex)).toEqual([<SyncsContextMenu />]);
   });
   it('renders crawler index', () => {
     expect(getHeaderActions(crawlerIndex)).toEqual([
       <CrawlerStatusIndicator />,
       <SearchPlaygroundPopover indexName="crawler" ingestionMethod="crawler" />,
     ]);
-    expect(getHeaderActions(crawlerIndex)).toEqual([<CrawlerStatusIndicator />]);
   });
 });
