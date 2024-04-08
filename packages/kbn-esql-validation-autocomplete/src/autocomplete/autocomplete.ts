@@ -1088,12 +1088,7 @@ async function getFunctionArgsSuggestions(
   }, [] as string[]);
 
   if (literalOptions.length) {
-    return literalOptions.map((literalOption) => ({
-      label: literalOption,
-      text: `"${literalOption}"`,
-      detail: literalOption,
-      kind: 'Constant',
-    }));
+    return buildConstantsDefinitions(literalOptions);
   }
 
   const arg = node.args[argIndex];
