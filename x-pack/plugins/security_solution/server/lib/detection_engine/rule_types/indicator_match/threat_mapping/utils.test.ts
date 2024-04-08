@@ -20,6 +20,7 @@ import {
   encodeThreatMatchNamedQuery,
   getMatchedFields,
   getSignalValueMap,
+  getMaxClauseCountErrorValue,
 } from './utils';
 
 describe('utils', () => {
@@ -945,6 +946,55 @@ describe('utils', () => {
           'threat.indicator.url.full',
         ],
       });
+    });
+  });
+
+  describe('getMaxClauseCountErrorValue', () => {
+    test('should return Number.NEGATIVE_INFINITY when no max clause count error encountered', () => {
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: true,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [],
+          warningMessages: [],
+        },
+      ];
+
+      const noMaxClauseCountErrorFound = getMaxClauseCountErrorValue(searchesPerformed, 2);
+      expect(noMaxClauseCountErrorFound).toEqual(Number.NEGATIVE_INFINITY);
+    });
+
+    test('should return parsed max clause count when max clause count error encountered', () => {
+      const threatEntries = 2;
+      const searchesPerformed: SearchAfterAndBulkCreateReturnType[] = [
+        {
+          success: false,
+          warning: false,
+          searchAfterTimes: ['10', '20', '30'],
+          bulkCreateTimes: ['5', '15', '25'],
+          enrichmentTimes: ['1', '2', '3'],
+          lastLookBackDate: undefined,
+          createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
+          errors: [
+            'ResponseError: search_phase_execution_exception \
+          Root causes:\
+            query_shard_exception: failed to create query: maxClauseCount is set to 4096',
+          ],
+          warningMessages: [],
+        },
+      ];
+
+      const maxClauseCountErrorValueFound = getMaxClauseCountErrorValue(searchesPerformed, 2);
+
+      const newPageSize = (4096 - 1) / (threatEntries + 1); // 1365
+      expect(maxClauseCountErrorValueFound).toEqual(newPageSize);
     });
   });
 

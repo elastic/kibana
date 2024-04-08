@@ -6,7 +6,6 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { isEmpty } from 'lodash';
 
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -25,6 +24,7 @@ import {
   buildExecutionIntervalValidator,
   combineConcurrentResults,
   getMatchedFields,
+  getMaxClauseCountErrorValue,
 } from './utils';
 import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
 
@@ -33,8 +33,6 @@ import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
-
-export const MAX_CLAUSE_DEFAULT_VALUE = Number.NEGATIVE_INFINITY;
 
 export const createThreatSignals = async ({
   alertId,
@@ -187,40 +185,19 @@ export const createThreatSignals = async ({
       // Did our searches fail with an error containing the maxClauseCount
       // error message?
 
-      // TODO - delete this comment
-      // FOR PR TESTING PURPOSES ONLY
-      // uncomment this line..
-      // const maxClauseCountValue = MAX_CLAUSE_DEFAULT_VALUE;
+      const maxClauseCountValue = getMaxClauseCountErrorValue(
+        searchesPerformed,
+        threatFieldsLength
+      );
 
-      // and comment out the below reduce function to force the
-      // max clause count error to re-appear.
-      const maxClauseCountValue = searchesPerformed.reduce<number>((acc, search) => {
-        const failureMessage: string | undefined = search.errors.find((err) =>
-          err.includes('failed to create query: maxClauseCount is set to')
-        );
-
-        const regex = /[0-9]+/g;
-        const foundMaxClauseCountValue = failureMessage?.match(regex)?.[0];
-
-        if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
-          const tempVal = parseInt(foundMaxClauseCountValue, 10);
-          // minus 1 since it needs to be one less than the max
-          // provided by elasticsearch error message.
-          const val = (tempVal - 1) / (threatFieldsLength + 1);
-          ruleExecutionLogger.warn(
-            `maxClauseCount error received from elasticsearch, setting IM rule page size to ${val}`
-          );
-          return val;
-        } else {
-          return acc;
-        }
-      }, MAX_CLAUSE_DEFAULT_VALUE);
-
-      if (maxClauseCountValue > MAX_CLAUSE_DEFAULT_VALUE) {
+      if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
         // parse the error message to acquire the number of maximum possible clauses
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
         // threat filters.
         chunkPage = maxClauseCountValue;
+        ruleExecutionLogger.warn(
+          `maxClauseCount error received from elasticsearch, setting IM rule page size to ${maxClauseCountValue}`
+        );
 
         // only store results + errors that are not related to maxClauseCount
         // since the maxClauseCount error is not relevant since we will be re-running
@@ -275,7 +252,7 @@ export const createThreatSignals = async ({
         break;
       }
       ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
-      if (maxClauseCountValue > MAX_CLAUSE_DEFAULT_VALUE) {
+      if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
         ruleExecutionLogger.debug(`Re-running search since we hit max clause count error`);
 
         // re-run search with smaller max clause count;

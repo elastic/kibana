@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../../types';
 import { parseInterval } from '../../utils/utils';
 import { ThreatMatchQueryType } from './types';
@@ -239,3 +239,26 @@ export const getSignalValueMap = ({
     });
     return acc;
   }, {});
+
+export const getMaxClauseCountErrorValue = (
+  searchesPerformed: SearchAfterAndBulkCreateReturnType[],
+  threatEntriesCount: number
+) =>
+  searchesPerformed.reduce<number>((acc, search) => {
+    const failureMessage: string | undefined = search.errors.find((err) =>
+      err.includes('failed to create query: maxClauseCount is set to')
+    );
+
+    const regex = /[0-9]+/g;
+    const foundMaxClauseCountValue = failureMessage?.match(regex)?.[0];
+
+    if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+      const tempVal = parseInt(foundMaxClauseCountValue, 10);
+      // minus 1 since the max clause count value is exclusive
+      const val = (tempVal - 1) / (threatEntriesCount + 1);
+
+      return val;
+    } else {
+      return acc;
+    }
+  }, Number.NEGATIVE_INFINITY);
