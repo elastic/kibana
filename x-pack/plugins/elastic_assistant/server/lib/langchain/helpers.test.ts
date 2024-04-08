@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
@@ -119,7 +119,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -133,7 +133,7 @@ describe('helpers', () => {
         body: {
           // allow is undefined
           allowReplacement: ['b', 'c'],
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -147,7 +147,7 @@ describe('helpers', () => {
         body: {
           allow: [], // <-- empty
           allowReplacement: ['b', 'c'],
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -161,7 +161,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 9876, 'c'], // <-- non-string value
           allowReplacement: ['b', 'c'],
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -175,7 +175,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: [],
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -189,7 +189,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 12345], // <-- non-string value
-          replacements: [{ uuid: 'key', value: 'value' }],
+          replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -203,7 +203,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: [],
+          replacements: {},
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
@@ -217,7 +217,7 @@ describe('helpers', () => {
         body: {
           allow: ['a', 'b', 'c'],
           allowReplacement: ['b', 'c'],
-          replacements: [{ uuid: 'key', value: 76543 }], // <-- non-string value
+          replacements: { key: 76543 }, // <-- non-string value
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 

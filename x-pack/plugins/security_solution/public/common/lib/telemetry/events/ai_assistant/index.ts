@@ -99,5 +99,12 @@ export const assistantSettingToggledEvent: TelemetryEvent = {
         optional: true,
       },
     },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
+        optional: true,
+      },
+    },
   },
 };

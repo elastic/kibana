@@ -12,6 +12,7 @@ export const QUICK_PROMPT_LOCAL_STORAGE_KEY = 'quickPrompts';
 export const SYSTEM_PROMPT_LOCAL_STORAGE_KEY = 'systemPrompts';
 export const LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY = 'lastConversationTitle';
 export const KNOWLEDGE_BASE_LOCAL_STORAGE_KEY = 'knowledgeBase';
+export const STREAMING_LOCAL_STORAGE_KEY = 'streaming';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
 export const DEFAULT_LATEST_ALERTS = 20;
