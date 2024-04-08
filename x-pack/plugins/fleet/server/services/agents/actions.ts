@@ -491,10 +491,6 @@ export const getAgentsByActionsIds = async (
     agentIds.push(...assignedAgentIds);
   }
 
-  if (agentIds.length === 0) {
-    throw new AgentActionNotFoundError(`No agent action found for ids ${actionsIds}`);
-  }
-
   return agentIds;
 };
 
