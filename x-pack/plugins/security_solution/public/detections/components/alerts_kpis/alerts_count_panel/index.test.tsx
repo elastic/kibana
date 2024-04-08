@@ -211,67 +211,57 @@ describe('AlertsCountPanel', () => {
       });
     });
   });
-});
 
-describe('Visualization', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(
-      getMockUseIsExperimentalFeatureEnabled({
-        alertsPageChartsEnabled: false,
-      })
-    );
-  });
-
-  it('should render embeddable', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
+  describe('Visualization', () => {
+    it('should render embeddable', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
+      });
     });
-  });
 
-  it('should render with provided height', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
-        218
-      );
+    it('should render with provided height', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(
+          218
+        );
+      });
     });
-  });
 
-  it('should render with extra actions', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
-      ).toEqual('resetGroupByFields');
+    it('should render with extra actions', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+        ).toEqual('resetGroupByFields');
+      });
     });
-  });
 
-  it('should render with extra options', async () => {
-    await act(async () => {
-      mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions
-          .breakdownField
-      ).toEqual(defaultProps.stackByField1);
+    it('should render with extra options', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsCountPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions
+            .breakdownField
+        ).toEqual(defaultProps.stackByField1);
+      });
     });
   });
 });

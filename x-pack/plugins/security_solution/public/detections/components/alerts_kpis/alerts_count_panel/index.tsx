@@ -7,7 +7,6 @@
 
 import type { EuiComboBox } from '@elastic/eui';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import React, { memo, useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -35,12 +34,10 @@ interface AlertsCountPanelProps {
   filters?: Filter[];
   inspectTitle: string;
   panelHeight?: number;
-  runtimeMappings?: MappingRuntimeFields;
   setStackByField0: (stackBy: string) => void;
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   setStackByField1: (stackBy: string | undefined) => void;
   setStackByField1ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  signalIndexName: string | null;
   stackByField0: string;
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
