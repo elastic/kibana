@@ -165,7 +165,8 @@ export class ObservabilityAIAssistantPlugin
     const initResources = async (
       request: KibanaRequest
     ): Promise<ObservabilityAIAssistantRouteHandlerResources> => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const license = await firstValueFrom(pluginsStart.licensing.license$);
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
       return {
         request,
@@ -189,6 +190,7 @@ export class ObservabilityAIAssistantPlugin
               client: savedObjectsClient,
             },
           },
+          licensing: { license },
         } as unknown as ObservabilityAIAssistantRequestHandlerContext,
         logger: this.logger.get('connector'),
         plugins: routeHandlerPlugins,
