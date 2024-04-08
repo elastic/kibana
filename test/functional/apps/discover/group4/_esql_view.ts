@@ -22,9 +22,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
   const esql = getService('esql');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
     'discover',
+    'dashboard',
     'header',
     'timePicker',
     'unifiedFieldList',
@@ -328,6 +330,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('sorting', () => {
       it('should sort correctly', async () => {
+        const savedSearchName = 'testSorting';
+
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -360,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return text === '483';
         });
 
-        await PageObjects.discover.saveSearch('testSorting');
+        await PageObjects.discover.saveSearch(savedSearchName);
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -382,6 +386,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return text === '483';
         });
 
+        await PageObjects.discover.clickNewSearchButton();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await PageObjects.discover.loadSavedSearch(savedSearchName);
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same highest value after reopening',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 2);
+            const text = await cell.getVisibleText();
+            return text === '483';
+          }
+        );
+
         await dataGrid.clickDocSortDesc('bytes', 'Sort Low-High');
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -402,6 +425,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const text = await cell.getVisibleText();
           return text === '0';
         });
+
+        await PageObjects.discover.saveSearch(savedSearchName);
+
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.addSavedSearch(savedSearchName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same lowest value as dashboard panel',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 2);
+            const text = await cell.getVisibleText();
+            return text === '0';
+          }
+        );
       });
     });
   });
