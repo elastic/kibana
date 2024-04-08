@@ -17,11 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-  tint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css, CSSObject } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -78,18 +77,6 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   );
 };
 
-const useBadgeStyles = (): CSSObject => {
-  const { euiTheme } = useEuiTheme();
-  const { isDarkMode } = useContext(UnifiedDataTableContext);
-
-  return {
-    '.euiDataGridToolbarControl__badge': {
-      backgroundColor: isDarkMode ? euiTheme.colors.success : tint(euiTheme.colors.success, 0.3),
-      color: euiTheme.colors.ink,
-    },
-  };
-};
-
 export function DataTableDocumentToolbarBtn({
   isPlainRecord,
   isFilterActive,
@@ -105,7 +92,6 @@ export function DataTableDocumentToolbarBtn({
   setIsFilterActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
 }) {
-  const badgeStyles = useBadgeStyles();
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
   const getMenuItems = useCallback(() => {
@@ -215,7 +201,6 @@ export function DataTableDocumentToolbarBtn({
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={selectedDocs.length}
-          css={badgeStyles}
         >
           {isPlainRecord ? (
             <FormattedMessage
@@ -250,8 +235,6 @@ export const DataTableCompareToolbarBtn = ({
   selectedDocs: string[];
   setIsCompareActive: (value: boolean) => void;
 }) => {
-  const badgeStyles = useBadgeStyles();
-
   return (
     <EuiDataGridToolbarControl
       iconType="diff"
@@ -260,7 +243,6 @@ export const DataTableCompareToolbarBtn = ({
       onClick={() => {
         setIsCompareActive(true);
       }}
-      css={badgeStyles}
     >
       <FormattedMessage
         id="unifiedDataTable.compareSelectedRowsButtonLabel"
