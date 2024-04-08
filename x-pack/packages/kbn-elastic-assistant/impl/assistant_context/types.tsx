@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import { ApiConfig, LLMMessage, Replacements } from '@kbn/elastic-assistant-common';
+import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+
+export interface MessagePresentation {
+  delay?: number;
+  stream?: boolean;
+}
+
+// The ClientMessage is different from the Message in that it content
+// can be undefined and reader is the correct type which is unavailable in Zod
+export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+  content?: string;
+  presentation?: MessagePresentation;
+}
 
 export interface ConversationTheme {
   title?: JSX.Element | string;
@@ -38,7 +51,7 @@ export interface Conversation {
   category: string;
   id: string;
   title: string;
-  messages: LLMMessage[];
+  messages: ClientMessage[];
   updatedAt?: Date;
   createdAt?: Date;
   replacements: Replacements;

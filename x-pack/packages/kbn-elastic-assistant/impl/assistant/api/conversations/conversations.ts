@@ -12,9 +12,8 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
   Replacements,
-  LLMMessage as Message,
 } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -150,7 +149,7 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
   apiConfig?: ApiConfig;
   replacements?: Replacements;
   excludeFromLastConversationStorage?: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message } from './types';
+import { Message } from '../schemas';
 import { getMessageContentAndRole } from './helpers';
 
 describe('helpers', () => {
