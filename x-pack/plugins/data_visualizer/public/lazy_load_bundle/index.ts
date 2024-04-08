@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import type { ResultLinks } from '../../common/app';
 import type {
   DataDriftSpec,
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
 } from '../application';
-import { getCoreStart } from '../kibana_services';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
@@ -20,7 +18,6 @@ interface LazyLoadedModules {
   FileDataVisualizer: FileDataVisualizerSpec;
   IndexDataVisualizer: IndexDataVisualizerSpec;
   DataDrift: DataDriftSpec;
-  getHttp: () => HttpSetup;
   resultsLinks: ResultLinks;
 }
 
@@ -32,8 +29,7 @@ export async function lazyLoadModules(resultsLinks: ResultLinks): Promise<LazyLo
   loadModulesPromise = new Promise(async (resolve, reject) => {
     try {
       const lazyImports = await import('./lazy');
-      // remove getHttp !!!!!!!!!!!!!!!!!!!!!!!!!!!
-      resolve({ ...lazyImports, resultsLinks, getHttp: () => getCoreStart().http });
+      resolve({ ...lazyImports, resultsLinks });
     } catch (error) {
       reject(error);
     }

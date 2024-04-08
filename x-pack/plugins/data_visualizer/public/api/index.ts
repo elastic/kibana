@@ -13,13 +13,15 @@ import type {
   IndexDataVisualizerSpec,
 } from '../application';
 
-export interface SpecWithLinks {
+export interface SpecWithLinks<T> {
   resultLinks: ResultLinks;
-  component: FileDataVisualizerSpec;
+  component: T;
 }
 
 export function getComponents(resultLinks: ResultLinks) {
-  async function getFileDataVisualizerComponent(): Promise<() => SpecWithLinks> {
+  async function getFileDataVisualizerComponent(): Promise<
+    () => SpecWithLinks<FileDataVisualizerSpec>
+  > {
     const modules = await lazyLoadModules(resultLinks);
     return () => ({ component: modules.FileDataVisualizer, resultLinks });
   }
