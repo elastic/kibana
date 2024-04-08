@@ -45,7 +45,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
-  sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type
+  sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
 }
