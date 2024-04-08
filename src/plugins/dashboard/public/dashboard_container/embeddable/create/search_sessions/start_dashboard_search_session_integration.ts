@@ -54,7 +54,6 @@ export function startDashboardSearchSessionIntegration(
     .subscribe(() => this.forceRefresh());
 
   newSession$(this).subscribe(() => {
-    console.log('newSession$ fired');
     const currentSearchSessionId = this.getState().explicitInput.searchSessionId;
 
     const updatedSearchSessionId: string | undefined = (() => {
@@ -72,7 +71,6 @@ export function startDashboardSearchSessionIntegration(
     })();
 
     if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-      console.log('updatedSearchSessionId', updatedSearchSessionId);
       this.searchSessionId = updatedSearchSessionId;
       this.searchSessionId$.next(updatedSearchSessionId);
     }
