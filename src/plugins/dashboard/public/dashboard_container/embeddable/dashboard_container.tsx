@@ -11,6 +11,7 @@ import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
+  type PublishingSubject,
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
@@ -136,6 +137,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+  public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -245,6 +247,24 @@ export class DashboardContainer
       })
     );
     this.startAuditingReactEmbeddableChildren();
+
+    this.settings = {
+      syncColors$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncColors'
+      ),
+      syncCursor$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncCursor'
+      ),
+      syncTooltips$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncTooltips'
+      ),
+    };
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput

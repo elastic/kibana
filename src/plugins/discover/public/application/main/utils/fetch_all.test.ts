@@ -77,6 +77,7 @@ describe('test fetchAll', () => {
         adHocDataViews: [],
         expandedDoc: undefined,
         customFilters: [],
+        overriddenVisContextAfterInvalidation: undefined,
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -275,6 +276,7 @@ describe('test fetchAll', () => {
         adHocDataViews: [],
         expandedDoc: undefined,
         customFilters: [],
+        overriddenVisContextAfterInvalidation: undefined,
       }),
     };
     fetchAll(subjects, false, deps);
@@ -401,6 +403,7 @@ describe('test fetchAll', () => {
           adHocDataViews: [],
           expandedDoc: undefined,
           customFilters: [],
+          overriddenVisContextAfterInvalidation: undefined,
         }),
       };
       fetchAll(subjects, false, deps);
