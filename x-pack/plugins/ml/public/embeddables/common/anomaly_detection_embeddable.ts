@@ -15,8 +15,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, firstValueFrom, forkJoin, from } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, forkJoin, from, map, switchMap } from 'rxjs';
 import { type AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import type { JobId } from '../../shared';
 import type { AnomalySwimLaneEmbeddableApi } from '../anomaly_swimlane/types';
