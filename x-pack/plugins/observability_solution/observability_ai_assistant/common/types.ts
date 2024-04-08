@@ -50,7 +50,7 @@ export interface TokenCount {
 
 export interface Conversation {
   '@timestamp': string;
-  user: {
+  user?: {
     id?: string;
     name: string;
   };

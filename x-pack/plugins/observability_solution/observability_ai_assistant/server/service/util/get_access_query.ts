@@ -8,7 +8,7 @@ export function getAccessQuery({
   user,
   namespace,
 }: {
-  user: { name: string; id?: string };
+  user?: { name: string; id?: string };
   namespace?: string;
 }) {
   return [
@@ -20,7 +20,7 @@ export function getAccessQuery({
               should: [
                 {
                   term: {
-                    'user.name': user.name,
+                    'user.name': user?.name,
                   },
                 },
                 {

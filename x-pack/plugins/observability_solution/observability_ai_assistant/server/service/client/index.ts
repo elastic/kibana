@@ -76,7 +76,7 @@ export class ObservabilityAIAssistantClient {
       };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
-      user: {
+      user?: {
         id?: string;
         name: string;
       };

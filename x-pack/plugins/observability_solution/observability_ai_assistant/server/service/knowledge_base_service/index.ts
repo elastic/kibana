@@ -302,7 +302,7 @@ export class KnowledgeBaseService {
     queries: string[];
     categories?: string[];
     namespace: string;
-    user: { name: string };
+    user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
     const query = {
@@ -429,7 +429,7 @@ export class KnowledgeBaseService {
   }: {
     queries: string[];
     categories?: string[];
-    user: { name: string };
+    user?: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
   }): Promise<{
