@@ -114,7 +114,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
-      await testSubjects.existOrFail('unifiedHistogramSuggestionSelector');
 
       await PageObjects.discover.saveSearch('esql');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -123,7 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
-      await testSubjects.missingOrFail('unifiedHistogramSuggestionSelector'); // histogram also updated
       expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
   });

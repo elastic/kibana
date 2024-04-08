@@ -11,12 +11,14 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
-import type {
-  UnifiedHistogramServices,
+import {
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramVisContext,
+  UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  UnifiedHistogramSuggestionType,
+  UnifiedHistogramVisContext,
 } from '../types';
 
 export function ChartConfigPanel({
@@ -43,13 +45,14 @@ export function ChartConfigPanel({
   onSuggestionContextChange: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
-  const updateSuggestion = useCallback(
-    (datasourceState, visualizationState) => {
+
+  const updatePanelState = useCallback(
+    (datasourceState, visualizationState, visualizationId) => {
       const updatedSuggestion: Suggestion = {
         ...currentSuggestionContext?.suggestion,
+        visualizationId: visualizationId ?? currentSuggestionContext?.suggestion?.visualizationId,
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       };
@@ -57,11 +60,30 @@ export function ChartConfigPanel({
         ...currentSuggestionContext,
         suggestion: updatedSuggestion,
       });
+      console.log('updatePanelState', datasourceState, visualizationState, updatedSuggestion);
     },
     [currentSuggestionContext, onSuggestionContextChange]
   );
+  const updateSuggestion = useCallback(
+    (attributes) => {
+      const updatedSuggestion = deriveLensSuggestionFromLensAttributes({
+        externalVisContext: {
+          ...visContext,
+          attributes,
+        },
+        queryParams: null, // skip query matching
+      });
+      onSuggestionContextChange({
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
+        suggestion: updatedSuggestion,
+      });
+      console.log('updateSuggestion', attributes, updatedSuggestion);
+    },
+    [onSuggestionContextChange, visContext]
+  );
 
   const currentSuggestion = currentSuggestionContext.suggestion;
+  const currentSuggestionType = currentSuggestionContext.type;
 
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;
@@ -74,7 +96,8 @@ export function ChartConfigPanel({
       const panel = (
         <Component
           attributes={visContext.attributes}
-          updatePanelState={updateSuggestion}
+          updateSuggestion={updateSuggestion}
+          updatePanelState={updatePanelState}
           lensAdapters={lensAdapters}
           output$={lensEmbeddableOutput$}
           displayFlyoutHeader
@@ -83,27 +106,24 @@ export function ChartConfigPanel({
           }}
           wrapInFlyout
           datasourceId="textBased"
-          hidesSuggestions
+          hidesSuggestions={currentSuggestionType !== UnifiedHistogramSuggestionType.lensSuggestion}
         />
       );
       setEditLensConfigPanel(panel);
-      previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
     }
-    const suggestionHasChanged =
-      currentSuggestion?.visualizationId !== previousSuggestion?.current?.visualizationId;
-    // rerender the component if the data has changed or the suggestion
-    // as I can have different suggestions for the same data
-    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
+    // rerender the component if the data has changed
+    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
     visContext.attributes,
     services.lens,
     updateSuggestion,
+    updatePanelState,
     isPlainRecord,
     currentSuggestion,
     query,
@@ -111,6 +131,7 @@ export function ChartConfigPanel({
     setIsFlyoutVisible,
     lensAdapters,
     lensEmbeddableOutput$,
+    currentSuggestionType,
   ]);
 
   return isPlainRecord ? editLensConfigPanel : null;

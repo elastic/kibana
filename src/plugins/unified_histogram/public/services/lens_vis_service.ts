@@ -19,8 +19,8 @@ import type {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { Filter, getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
@@ -33,7 +33,11 @@ import {
   UnifiedHistogramSuggestionType,
   UnifiedHistogramVisContext,
 } from '../types';
-import { isSuggestionShapeAndVisContextCompatible } from '../utils/external_vis_context';
+import {
+  isSuggestionShapeAndVisContextCompatible,
+  deriveLensSuggestionFromLensAttributes,
+  type QueryParams,
+} from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
@@ -56,16 +60,6 @@ interface LensVisServiceState {
   allSuggestions: Suggestion[] | undefined;
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   visContext: UnifiedHistogramVisContext | undefined;
-}
-
-export interface QueryParams {
-  dataView: DataView;
-  query?: Query | AggregateQuery;
-  filters: Filter[] | undefined;
-  isPlainRecord?: boolean;
-  columns?: DatatableColumn[];
-  columnsMap?: Record<string, DatatableColumn>;
-  timeRange?: TimeRange;
 }
 
 interface Services {
@@ -265,7 +259,7 @@ export class LensVisService {
       }
     }
 
-    if (externalVisContext) {
+    if (externalVisContext && queryParams.isPlainRecord) {
       // externalVisContext can be based on an unfamiliar suggestion, but it was saved somehow, so try to restore it too
       const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext,
@@ -653,66 +647,6 @@ export class LensVisService {
       visContext,
     };
   };
-}
-
-function deriveLensSuggestionFromLensAttributes({
-  externalVisContext,
-  queryParams,
-}: {
-  externalVisContext: UnifiedHistogramVisContext | undefined;
-  queryParams: QueryParams;
-}): Suggestion | undefined {
-  if (!externalVisContext || !queryParams.isPlainRecord) {
-    return undefined;
-  }
-
-  try {
-    if (externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
-      // should be based on same query
-      if (!isEqual(externalVisContext.attributes?.state?.query, queryParams.query)) {
-        return undefined;
-      }
-
-      // it should be one of 'formBased'/'textBased' and have value
-      const datasourceId: 'formBased' | 'textBased' | undefined = [
-        'formBased' as const,
-        'textBased' as const,
-      ].find((key) => Boolean(externalVisContext.attributes.state.datasourceStates[key]));
-
-      if (!datasourceId) {
-        return undefined;
-      }
-
-      const datasourceState = externalVisContext.attributes.state.datasourceStates[datasourceId];
-
-      // should be based on same columns
-      if (
-        !datasourceState?.layers ||
-        Object.values(datasourceState?.layers).some(
-          (layer) =>
-            isEqual(layer.query, queryParams.query) &&
-            layer.columns?.some(
-              // unknown column
-              (c: { fieldName: string }) => !queryParams.columnsMap?.[c.fieldName]
-            )
-        )
-      ) {
-        return undefined;
-      }
-
-      return {
-        title: externalVisContext.attributes.title,
-        visualizationId: externalVisContext.attributes.visualizationType,
-        visualizationState: externalVisContext.attributes.state.visualization,
-        datasourceState,
-        datasourceId,
-      } as Suggestion;
-    }
-  } catch {
-    return undefined;
-  }
-
-  return undefined;
 }
 
 function areSuggestionAndVisContextAndQueryParamsStillCompatible({
