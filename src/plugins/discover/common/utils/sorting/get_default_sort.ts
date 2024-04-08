@@ -12,16 +12,21 @@ import { isSortable } from './get_sort';
 
 /**
  * use in case the user didn't manually sort.
- * the default sort is returned depending of the data view
+ * the default sort is returned depending on the data view or non for text based queries
  */
 export function getDefaultSort(
   dataView: DataView | undefined,
   defaultSortOrder: string = 'desc',
-  hidingTimeColumn: boolean = false
+  hidingTimeColumn: boolean = false,
+  isTextBased: boolean
 ): SortOrder[] {
+  if (isTextBased) {
+    return [];
+  }
+
   if (
     dataView?.timeFieldName &&
-    isSortable(dataView.timeFieldName, dataView) &&
+    isSortable(dataView.timeFieldName, dataView, isTextBased) &&
     !hidingTimeColumn
   ) {
     return [[dataView.timeFieldName, defaultSortOrder]];

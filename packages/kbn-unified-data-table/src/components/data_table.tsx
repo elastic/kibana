@@ -910,10 +910,8 @@ export const UnifiedDataTable = ({
   ]);
 
   const inMemory = useMemo(() => {
-    return isPlainRecord && columns.length
-      ? ({ level: 'sorting' } as EuiDataGridInMemory)
-      : undefined;
-  }, [columns.length, isPlainRecord]);
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
 
   const toolbarVisibility = useMemo(
     () =>

@@ -389,8 +389,12 @@ export class SavedSearchEmbeddable
     }
   };
 
-  private getSort(sort: SortPair[] | undefined, dataView?: DataView) {
-    return getSortForEmbeddable(sort, dataView, this.services.uiSettings);
+  private getSort(
+    sort: SortPair[] | undefined,
+    dataView: DataView | undefined,
+    isTextBased: boolean
+  ) {
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isTextBased);
   }
 
   private initializeSearchEmbeddableProps() {
@@ -417,7 +421,7 @@ export class SavedSearchEmbeddable
       filters: savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
-      sort: this.getSort(savedSearch.sort, dataView),
+      sort: this.getSort(savedSearch.sort, dataView, this.isTextBasedSearch(savedSearch)),
       rows: [],
       searchDescription: savedSearch.description,
       description: savedSearch.description,
@@ -573,7 +577,11 @@ export class SavedSearchEmbeddable
     );
 
     searchProps.columns = columnState.columns || [];
-    searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
+    searchProps.sort = this.getSort(
+      this.input.sort || savedSearch.sort,
+      searchProps?.dataView,
+      this.isTextBasedSearch(savedSearch)
+    );
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
     searchProps.rowHeightState = this.input.rowHeight ?? savedSearch.rowHeight;

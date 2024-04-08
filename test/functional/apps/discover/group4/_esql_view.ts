@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
-        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
+        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
@@ -354,6 +354,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return text === '1,623';
         });
 
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields'
+        );
+
         await dataGrid.clickDocSortDesc('bytes', 'Sort High-Low');
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -363,6 +367,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const text = await cell.getVisibleText();
           return text === '483';
         });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
 
         await PageObjects.discover.saveSearch(savedSearchName);
 
@@ -415,6 +423,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return text === '0';
         });
 
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
+
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
+
+        await retry.waitFor('first cell contains the lowest value for extension', async () => {
+          const cell = await dataGrid.getCellElement(0, 3);
+          const text = await cell.getVisibleText();
+          return text === 'css';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n2'
+        );
+
         await browser.refresh();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -425,6 +454,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const text = await cell.getVisibleText();
           return text === '0';
         });
+
+        await retry.waitFor(
+          'first cell contains the same lowest value for extension after reload',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 3);
+            const text = await cell.getVisibleText();
+            return text === 'css';
+          }
+        );
 
         await PageObjects.discover.saveSearch(savedSearchName);
 
@@ -442,6 +480,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const text = await cell.getVisibleText();
             return text === '0';
           }
+        );
+
+        await retry.waitFor(
+          'first cell contains the lowest value for extension as dashboard panel',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 3);
+            const text = await cell.getVisibleText();
+            return text === 'css';
+          }
+        );
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n2'
         );
       });
     });

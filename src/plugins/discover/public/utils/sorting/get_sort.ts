@@ -16,9 +16,10 @@ import { getDefaultSort, getSortArray, SortInput } from '../../../common/utils/s
  * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid
  */
 export function getSortForEmbeddable(
-  sort?: SortInput,
-  dataView?: DataView,
-  uiSettings?: IUiSettingsClient
+  sort: SortInput | undefined,
+  dataView: DataView | undefined,
+  uiSettings: IUiSettingsClient | undefined,
+  isTextBased: boolean
 ): SortOrder[] {
   if (!sort || !sort.length || !dataView) {
     if (!uiSettings) {
@@ -26,7 +27,7 @@ export function getSortForEmbeddable(
     }
     const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
     const hidingTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isTextBased);
   }
-  return getSortArray(sort, dataView);
+  return getSortArray(sort, dataView, isTextBased);
 }

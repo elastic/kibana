@@ -48,20 +48,20 @@ export function getStateDefaults({
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const isTextBasedQueryMode = isTextBasedQuery(query);
-  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
+  const sort = getSortArray(savedSearch.sort ?? [], dataView!, isTextBasedQueryMode);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
 
   const defaultState: DiscoverAppState = {
     query,
-    sort:
-      !isTextBasedQueryMode && !sort.length
-        ? getDefaultSort(
-            dataView,
-            uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-            uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
-          )
-        : sort,
+    sort: !sort.length
+      ? getDefaultSort(
+          dataView,
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+          isTextBasedQueryMode
+        )
+      : sort,
     columns,
     index: isTextBasedQueryMode ? undefined : dataView?.id,
     interval: 'auto',
