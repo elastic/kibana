@@ -1310,14 +1310,10 @@ describe('migration actions', () => {
         searchAfter: undefined,
         maxResponseSizeBytes: 500, // set a small size to force the error
       });
-      const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
-      if (Either.isRight(rightResponse)) {
-        await expect(Either.isRight(rightResponse)).toBe(true);
-      } else {
-        console.log(
-          'got a left: ',
-          (rightResponse as Either.Left<EsResponseTooLargeError>).left.type
-        );
+      const rightResponse = await readWithPitTask();
+
+      if (Either.isLeft(rightResponse)) {
+        fail(`Expected a successful response but got ${JSON.stringify(rightResponse.left)}`);
       }
 
       readWithPitTask = readWithPit({
