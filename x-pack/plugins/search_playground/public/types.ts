@@ -17,6 +17,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
 import React from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
@@ -39,6 +40,7 @@ export interface AppServicesContext {
   http: HttpStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+  cloud?: CloudSetup;
 }
 
 export enum ChatFormFields {
@@ -60,7 +62,7 @@ export interface ChatForm {
   [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
   [ChatFormFields.summarizationModel]: string;
-  [ChatFormFields.elasticsearchQuery]: QueryDslQueryContainer;
+  [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
 }
