@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { useOperator } from '../use_observable';
 import { flattenDataSearchResponseDescriptor } from './flatten_data_search_response';
