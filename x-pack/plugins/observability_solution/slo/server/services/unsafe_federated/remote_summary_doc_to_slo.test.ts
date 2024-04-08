@@ -85,12 +85,12 @@ describe('FromRemoteSummaryDocToSlo', () => {
           slo: {
             indicator: {
               type: 'sli.kql.custom',
-              params: JSON.stringify({
+              params: {
                 index: 'irrelvant',
                 good: 'irrelevant',
                 total: 'irrelevant',
                 timestampField: 'irrelevant',
-              }), // added in 8.14
+              }, // added in 8.14
             },
             timeWindow: {
               duration: '7d',
@@ -122,6 +122,7 @@ describe('FromRemoteSummaryDocToSlo', () => {
           status: 'NO_DATA',
           isTempDoc: true,
           spaceId: 'irrelevant',
+          kibanaUrl: 'http://kibana.com/base-path', // added in 8.14
         },
         loggerMock
       );

@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { Indicator, sloDefinitionSchema } from '@kbn/slo-schema';
+import { Indicator, indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { isLeft } from 'fp-ts/lib/Either';
 import { SLODefinition } from '../../domain/models';
@@ -21,10 +21,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     id: summaryDoc.slo.id,
     name: summaryDoc.slo.name,
     description: summaryDoc.slo.description,
-    indicator: {
-      type: summaryDoc.slo.indicator.type,
-      params: getIndicatorParams(logger, summaryDoc),
-    },
+    indicator: getIndicator(summaryDoc, logger),
     timeWindow: summaryDoc.slo.timeWindow,
     budgetingMethod: summaryDoc.slo.budgetingMethod,
     objective: {
@@ -36,8 +33,8 @@ export function fromRemoteSummaryDocumentToSloDefinition(
     revision: summaryDoc.slo.revision,
     enabled: true,
     tags: summaryDoc.slo.tags,
-    createdAt: summaryDoc.slo.createdAt ?? '2024-01-01T00:00:00.000Z',
-    updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z',
+    createdAt: summaryDoc.slo.createdAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
+    updatedAt: summaryDoc.slo.updatedAt ?? '2024-01-01T00:00:00.000Z', // fallback prior 8.14
     groupBy: summaryDoc.slo.groupBy,
     version: 1,
   });
@@ -53,97 +50,122 @@ export function fromRemoteSummaryDocumentToSloDefinition(
   return res.right;
 }
 
-function getIndicatorParams(logger: Logger, summaryDoc: EsSummaryDocument): Indicator['params'] {
-  const stringifiedParams = summaryDoc.slo.indicator.params;
-  if (typeof stringifiedParams === 'string') {
-    try {
-      return JSON.parse(stringifiedParams);
-    } catch (e) {
-      logger.error(
-        `Invalid remote stored summary SLO with id [${summaryDoc.slo.id}]. Error parsing indicator params. Falling back on dummy indicator params.`
-      );
-      logger.error(e);
-    }
+/**
+ * Temporary documents priors to 8.14 don't have indicator.params, therefore we need to fallback to a dummy
+ */
+function getIndicator(summaryDoc: EsSummaryDocument, logger: Logger): Indicator {
+  const res = indicatorSchema.decode(summaryDoc.slo.indicator);
+
+  if (isLeft(res)) {
+    const errors = formatErrors(res.left);
+    logger.error(
+      `Invalid remote stored summary SLO with id [${summaryDoc.slo.id}] - Fallback on dummy indicator`
+    );
+    logger.error(errors.join('|'));
+
+    return getDummyIndicator(summaryDoc);
   }
 
-  return getDummyIndicatorParams(summaryDoc);
+  return res.right;
 }
 
-function getDummyIndicatorParams(summaryDoc: EsSummaryDocument): Indicator['params'] {
-  let params: Indicator['params'] | undefined;
-  switch (summaryDoc.slo.indicator.type) {
+function getDummyIndicator(summaryDoc: EsSummaryDocument): Indicator {
+  const indicatorType = summaryDoc.slo.indicator.type;
+  let indicator: Indicator;
+  switch (indicatorType) {
     case 'sli.kql.custom':
-      params = {
-        index: '',
-        good: '',
-        total: '',
-        timestampField: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          index: '',
+          good: '',
+          total: '',
+          timestampField: '',
+        },
       };
       break;
     case 'sli.apm.transactionDuration':
-      params = {
-        environment: '',
-        service: '',
-        transactionType: '',
-        transactionName: '',
-        threshold: 0,
-        index: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          environment: '',
+          service: '',
+          transactionType: '',
+          transactionName: '',
+          threshold: 0,
+          index: '',
+        },
       };
       break;
     case 'sli.apm.transactionErrorRate':
-      params = {
-        environment: '',
-        service: '',
-        transactionType: '',
-        transactionName: '',
-        index: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          environment: '',
+          service: '',
+          transactionType: '',
+          transactionName: '',
+          index: '',
+        },
       };
       break;
     case 'sli.metric.custom':
-      params = {
-        index: '',
-        good: '',
-        total: '',
-        timestampField: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          index: '',
+          good: { metrics: [{ name: '', aggregation: 'sum', field: '' }], equation: '' },
+          total: { metrics: [{ name: '', aggregation: 'sum', field: '' }], equation: '' },
+          timestampField: '',
+        },
       };
       break;
     case 'sli.metric.timeslice':
-      params = {
-        index: '',
-        metric: {
-          metrics: [],
-          equation: '',
-          threshold: 0,
-          comparator: 'GT',
+      indicator = {
+        type: indicatorType,
+        params: {
+          index: '',
+          metric: {
+            metrics: [],
+            equation: '',
+            threshold: 0,
+            comparator: 'GT',
+          },
+          timestampField: '',
         },
-        timestampField: '',
       };
       break;
     case 'sli.histogram.custom':
-      params = {
-        index: '',
-        timestampField: '',
-        good: '',
-        total: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          index: '',
+          timestampField: '',
+          good: { field: '', aggregation: 'value_count' },
+          total: { field: '', aggregation: 'value_count' },
+        },
       };
       break;
     case 'sli.synthetics.availability':
-      params = {
-        projects: [],
-        tags: [],
-        monitorIds: [
-          {
-            value: '*',
-            label: 'All',
-          },
-        ],
-        index: 'synthetics-*',
-        filter: '',
+      indicator = {
+        type: indicatorType,
+        params: {
+          projects: [],
+          tags: [],
+          monitorIds: [
+            {
+              value: '*',
+              label: 'All',
+            },
+          ],
+          index: 'synthetics-*',
+          filter: '',
+        },
       };
       break;
     default:
-      assertNever(summaryDoc.slo.indicator.type);
+      assertNever(indicatorType);
   }
 
-  return params;
+  return indicator;
 }

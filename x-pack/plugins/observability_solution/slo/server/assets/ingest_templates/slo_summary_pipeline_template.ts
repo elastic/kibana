@@ -169,7 +169,7 @@ export const getSLOSummaryPipelineTemplate = (
       // >= 8.14:
       {
         set: {
-          description: 'Store the stringified indicator params',
+          description: 'Store the indicator params',
           field: 'slo.indicator.params',
           value: slo.indicator.params,
           ignore_failure: true,

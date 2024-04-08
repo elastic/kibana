@@ -6,15 +6,9 @@
  */
 
 import { IBasePath } from '@kbn/core-http-server';
-import {
-  ALL_VALUE,
-  BudgetingMethod,
-  IndicatorType,
-  Objective,
-  timeWindowSchema,
-} from '@kbn/slo-schema';
+import { ALL_VALUE, BudgetingMethod, Objective, timeWindowSchema } from '@kbn/slo-schema';
 import * as t from 'io-ts';
-import { SLODefinition, Status } from '../../../domain/models';
+import { Indicator, IndicatorTypes, SLODefinition, Status } from '../../../domain/models';
 
 export interface EsSummaryDocument {
   service: {
@@ -26,10 +20,8 @@ export interface EsSummaryDocument {
     type: string | null;
   };
   slo: {
-    indicator: {
-      type: IndicatorType;
-      params?: string; // >= 8.14: We store the stringified params on the temp summary document as well as the real summary document (from the ingest pipeline)
-    };
+    // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
+    indicator: { type: IndicatorTypes } | Indicator;
     timeWindow: t.OutputOf<typeof timeWindowSchema>;
     groupBy: string | string[];
     groupings: Record<string, unknown>;
@@ -55,7 +47,7 @@ export interface EsSummaryDocument {
   status: Status;
   isTempDoc: boolean;
   spaceId: string;
-  kibanaUrl?: string;
+  kibanaUrl?: string; // >= 8.14
 }
 
 export function createTempSummaryDocument(
@@ -65,7 +57,7 @@ export function createTempSummaryDocument(
 ): EsSummaryDocument {
   const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
 
-  return {
+  const doc = {
     service: {
       environment: apmParams?.environment ?? null,
       name: apmParams?.service ?? null,
@@ -75,10 +67,8 @@ export function createTempSummaryDocument(
       type: apmParams?.transactionType ?? null,
     },
     slo: {
-      indicator: {
-        type: slo.indicator.type,
-        params: JSON.stringify(slo.indicator.params), // added in 8.14
-      },
+      // 8.14 adds indicator.params through transform summary pipeline, i.e. indicator.params might be undefined
+      indicator: slo.indicator,
       timeWindow: {
         duration: slo.timeWindow.duration.format(),
         type: slo.timeWindow.type,
@@ -97,8 +87,8 @@ export function createTempSummaryDocument(
         timesliceWindow: slo.objective.timesliceWindow?.format() ?? undefined,
       },
       tags: slo.tags,
-      createdAt: slo.createdAt.toISOString(), // added in 8.14
-      updatedAt: slo.updatedAt.toISOString(), // added in 8.14
+      createdAt: slo.createdAt.toISOString(), // added in 8.14, i.e. might be undefined
+      updatedAt: slo.updatedAt.toISOString(), // added in 8.14, i.e. might be undefined
     },
     goodEvents: 0,
     totalEvents: 0,
@@ -108,9 +98,11 @@ export function createTempSummaryDocument(
     errorBudgetInitial: 1 - slo.objective.target,
     sliValue: -1,
     statusCode: 0,
-    status: 'NO_DATA',
+    status: 'NO_DATA' as const,
     isTempDoc: true,
     spaceId,
-    kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14
+    kibanaUrl: basePath.publicBaseUrl ?? '', // added in 8.14, i.e. might be undefined
   };
+
+  return doc;
 }
