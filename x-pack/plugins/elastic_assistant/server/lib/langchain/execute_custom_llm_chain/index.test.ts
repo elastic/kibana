@@ -16,9 +16,9 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common';
+import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 
-jest.mock('@kbn/elastic-assistant-common', () => ({
+jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientLlm: jest.fn(),
 }));
@@ -58,7 +58,7 @@ jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
 const mockConnectorId = 'mock-connector-id';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaRequest<
+const mockRequest: KibanaRequest<unknown, unknown, any, any> = { body: {} } as KibanaRequest<
   unknown,
   unknown,
   any, // eslint-disable-line @typescript-eslint/no-explicit-any
