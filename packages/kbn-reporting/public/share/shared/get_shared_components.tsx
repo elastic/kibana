@@ -42,7 +42,7 @@ export interface ApplicationProps {
 
 export interface ReportingPublicComponents {
   /** Needed for Canvas PDF reports */
-  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | undefined;
+  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | null;
   ReportingPanelPNGV2(props: ApplicationProps): JSX.Element | undefined;
   ReportingModalPDF(props: ApplicationProps): JSX.Element | undefined;
   ReportingModalPNG(props: ApplicationProps): JSX.Element | undefined;
@@ -74,6 +74,8 @@ export function getSharedComponents(
             getJobParams={getJobParams}
           />
         );
+      } else {
+        return null;
       }
     },
     ReportingPanelPNGV2(props: ApplicationProps) {
