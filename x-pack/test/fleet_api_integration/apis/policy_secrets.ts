@@ -83,6 +83,20 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         // index doesn't exist
       }
+
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-enrollment-api-keys',
+          refresh: true,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesn't exist
+      }
     };
 
     const cleanupSecrets = async () => {
