@@ -49,7 +49,7 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
           })}
           iconType="check"
           color="success"
-          data-test-subj="connectorsAdded"
+          data-test-subj="addedConnectorCallout"
         />
       )}
       {!Object.keys(connectors).length && (

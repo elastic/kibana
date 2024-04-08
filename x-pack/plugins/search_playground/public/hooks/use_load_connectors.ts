@@ -12,18 +12,46 @@ import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
+import {
+  OPENAI_CONNECTOR_ID,
+  OpenAiProviderType,
+} from '@kbn/stack-connectors-plugin/public/common';
+import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from './use_kibana';
 import { LLMs } from '../types';
 
 const QUERY_KEY = ['search-playground, load-connectors'];
 
+type OpenAIConnector = UserConfiguredActionConnector<
+  { apiProvider: OpenAiProviderType },
+  Record<string, unknown>
+>;
+
 const mapLLMToActionParam: Record<
   LLMs,
-  { actionId: string; transform: (connector: ActionConnector) => PlaygroundConnector }
+  {
+    actionId: string;
+    actionProvider?: string;
+    match: (connector: ActionConnector) => boolean;
+    transform: (connector: ActionConnector) => PlaygroundConnector;
+  }
 > = {
+  [LLMs.openai_azure]: {
+    actionId: OPENAI_CONNECTOR_ID,
+    actionProvider: OpenAiProviderType.AzureAi,
+    match: (connector) =>
+      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.AzureAi,
+    transform: (connector) => ({
+      ...connector,
+      title: i18n.translate('xpack.searchPlayground.openAIAzureConnectorTitle', {
+        defaultMessage: 'OpenAI Azure',
+      }),
+    }),
+  },
   [LLMs.openai]: {
     actionId: OPENAI_CONNECTOR_ID,
+    match: (connector) =>
+      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.OpenAi,
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {
@@ -49,9 +77,12 @@ export const useLoadConnectors = (): UseQueryResult<
       const queryResult = await loadConnectors({ http });
 
       return Object.entries(mapLLMToActionParam).reduce<Partial<Record<LLMs, PlaygroundConnector>>>(
-        (result, [llm, { actionId, transform }]) => {
+        (result, [llm, { actionId, match, transform }]) => {
           const targetConnector = queryResult.find(
-            (connector) => !connector.isMissingSecrets && connector.actionTypeId === actionId
+            (connector) =>
+              !connector.isMissingSecrets &&
+              connector.actionTypeId === actionId &&
+              (match?.(connector) ?? true)
           );
 
           return targetConnector ? { ...result, [llm]: transform(targetConnector) } : result;

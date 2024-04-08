@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ChatOpenAI } from '@langchain/openai';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { RawAction } from '@kbn/actions-plugin/server/types';
+import { v4 as uuidv4 } from 'uuid';
+import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/llm';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
@@ -78,7 +78,7 @@ export function defineRoutes({
             prompt: schema.string(),
             citations: schema.boolean(),
             elasticsearch_query: schema.string(),
-            summarization_model: schema.string(),
+            summarization_model: schema.maybe(schema.string()),
             doc_size: schema.number(),
             source_fields: schema.string(),
           }),
@@ -87,74 +87,78 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [_, { encryptedSavedObjects }] = await getStartServices();
+      const [, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
-      const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['action'],
-      });
-
-      const aiClient = Assist({
-        es_client: client.asCurrentUser,
-      } as AssistClientOptionsWithClient);
-
-      const { messages, data } = await request.body;
-
-      const decryptedApiKey =
-        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-          'action',
-          data.connector_id
-        );
-
-      const model = new ChatOpenAI({
-        modelName: data.summarization_model,
-        openAIApiKey: decryptedApiKey.attributes.secrets.apiKey as string,
-      });
-
-      let sourceFields = {};
-
       try {
-        sourceFields = JSON.parse(data.source_fields);
+        const aiClient = Assist({
+          es_client: client.asCurrentUser,
+        } as AssistClientOptionsWithClient);
+        const { messages, data } = await request.body;
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+        const model = new ActionsClientChatOpenAI({
+          actions,
+          logger: log,
+          request,
+          connectorId: data.connector_id,
+          model: data.summarization_model,
+          traceId: uuidv4(),
+          signal: abortSignal,
+          // prevents the agent from retrying on failure
+          // failure could be due to bad connector, we should deliver that result to the client asap
+          maxRetries: 0,
+        });
+
+        let sourceFields = {};
+
+        try {
+          sourceFields = JSON.parse(data.source_fields);
+        } catch (e) {
+          log.error('Failed to parse the source fields', e);
+          throw Error(e);
+        }
+
+        const chain = ConversationalChain({
+          model,
+          rag: {
+            index: data.indices,
+            retriever: createRetriever(data.elasticsearch_query),
+            content_field: sourceFields,
+            size: Number(data.doc_size),
+          },
+          prompt: Prompt(data.prompt, {
+            citations: data.citations,
+            context: true,
+            type: 'openai',
+          }),
+        });
+
+        const stream = await chain.stream(aiClient, messages);
+
+        const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
+        const reader = (stream as ReadableStream).getReader();
+        const textDecoder = new TextDecoder();
+
+        async function pushStreamUpdate() {
+          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+            if (done) {
+              end();
+              return;
+            }
+            push(textDecoder.decode(value));
+            pushStreamUpdate();
+          });
+        }
+
+        pushStreamUpdate();
+
+        return response.ok(responseWithHeaders);
       } catch (e) {
-        log.error('Failed to parse the source fields', e);
+        log.error('Failed to create the chat stream', e);
+
         throw Error(e);
       }
-
-      const chain = ConversationalChain({
-        model,
-        rag: {
-          index: data.indices,
-          retriever: createRetriever(data.elasticsearch_query),
-          content_field: sourceFields,
-          size: Number(data.doc_size),
-        },
-        prompt: Prompt(data.prompt, {
-          citations: data.citations,
-          context: true,
-          type: 'openai',
-        }),
-      });
-
-      const stream = await chain.stream(aiClient, messages);
-
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
-
-      const reader = (stream as ReadableStream).getReader();
-      const textDecoder = new TextDecoder();
-
-      async function pushStreamUpdate() {
-        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          if (done) {
-            end();
-            return;
-          }
-          push(textDecoder.decode(value));
-          pushStreamUpdate();
-        });
-      }
-
-      pushStreamUpdate();
-
-      return response.ok(responseWithHeaders);
     })
   );
 

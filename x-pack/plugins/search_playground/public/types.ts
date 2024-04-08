@@ -56,7 +56,6 @@ export enum ChatFormFields {
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
-  connectorId = 'connector_id',
 }
 
 export interface ChatForm {
@@ -64,11 +63,10 @@ export interface ChatForm {
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
   [ChatFormFields.indices]: string[];
-  [ChatFormFields.summarizationModel]: string;
+  [ChatFormFields.summarizationModel]: LLMModel;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
-  [ChatFormFields.connectorId]: string;
 }
 
 export enum MessageRole {
@@ -107,11 +105,11 @@ export interface AIMessage extends Message {
 }
 
 export enum SummarizationModelName {
-  gpt3_5 = 'gpt-3.5-turbo',
+  gpt3_5_turbo = 'gpt-3.5-turbo',
   gpt3_5_turbo_1106 = 'gpt-3.5-turbo-1106',
   gpt3_5_turbo_16k = 'gpt-3.5-turbo-16k',
   gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
-  gpt3_5_turbo = 'gpt-3.5-turbo-instruct',
+  gpt3_5_turbo_instruct = 'gpt-3.5-turbo-instruct',
 }
 
 export interface ElasticsearchIndex {
@@ -198,6 +196,7 @@ export interface UseChatHelpers {
 
 export interface LLMModel {
   name: string;
+  value?: string;
   icon: ComponentType;
   disabled: boolean;
   connectorId?: string;

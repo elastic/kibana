@@ -28,6 +28,7 @@ export enum APIRoutes {
 
 export enum LLMs {
   openai = 'openai',
+  openai_azure = 'openai_azure',
 }
 
 export interface ChatRequestData {
@@ -36,7 +37,7 @@ export interface ChatRequestData {
   indices: string;
   citations: boolean;
   elasticsearch_query: string;
-  summarization_model: string;
+  summarization_model?: string;
   source_fields: string;
   doc_size: number;
 }

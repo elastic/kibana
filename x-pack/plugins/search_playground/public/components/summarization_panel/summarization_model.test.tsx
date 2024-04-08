@@ -34,7 +34,7 @@ describe('SummarizationModel', () => {
       { name: 'Model2', disabled: true, icon: MockIcon, connectorId: 'connector2' },
     ];
     const { getByTestId } = render(
-      <SummarizationModel selectedModel="Model1" models={models} onSelect={jest.fn()} />
+      <SummarizationModel selectedModel={models[1]} models={models} onSelect={jest.fn()} />
     );
 
     expect(getByTestId('summarizationModelSelect')).toBeInTheDocument();

@@ -25,8 +25,8 @@ import type { LLMModel } from '../../types';
 import { useManagementLink } from '../../hooks/use_management_link';
 
 interface SummarizationModelProps {
-  selectedModel: string;
-  onSelect: (model: string, connectorId: string) => void;
+  selectedModel: LLMModel;
+  onSelect: (model: LLMModel) => void;
   models: LLMModel[];
 }
 
@@ -39,8 +39,8 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   const onChange = (modelName: string) => {
     const model = models.find(({ name }) => name === modelName);
 
-    if (model && model.connectorId) {
-      onSelect(modelName, model.connectorId);
+    if (model) {
+      onSelect(model);
     }
   };
 
@@ -81,7 +81,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
           <EuiLink target="_blank" href={managementLink} data-test-subj="manageConnectorsLink">
             <FormattedMessage
               id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectors"
-              defaultMessage="Manage Gen AI connectors"
+              defaultMessage="Manage GenAI connectors"
             />
           </EuiLink>
         </EuiText>
@@ -90,7 +90,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       <EuiSuperSelect
         data-test-subj="summarizationModelSelect"
         options={modelsOption}
-        valueOfSelected={selectedModel}
+        valueOfSelected={selectedModel.name}
         onChange={onChange}
       />
     </EuiFormRow>

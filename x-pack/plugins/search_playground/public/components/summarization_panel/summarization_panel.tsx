@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Controller, useController, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 
 import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
@@ -18,27 +18,18 @@ export const SummarizationPanel: React.FC = () => {
   const { control } = useFormContext<ChatForm>();
   const models = useLLMsModels();
   const defaultModel = models.find((model) => !model.disabled);
-  const {
-    field: { onChange: handleChangeConnectorId },
-  } = useController({
-    name: ChatFormFields.connectorId,
-    defaultValue: defaultModel?.connectorId,
-  });
 
   return (
     <>
       <Controller
         name={ChatFormFields.summarizationModel}
-        defaultValue={defaultModel?.name}
+        defaultValue={defaultModel}
         rules={{ required: true }}
         control={control}
         render={({ field }) => (
           <SummarizationModel
             selectedModel={field.value}
-            onSelect={(model, connectorId) => {
-              field.onChange(model);
-              handleChangeConnectorId(connectorId);
-            }}
+            onSelect={(model) => field.onChange(model)}
             models={models}
           />
         )}

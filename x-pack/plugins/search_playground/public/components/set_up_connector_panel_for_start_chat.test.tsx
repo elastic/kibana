@@ -46,14 +46,6 @@ describe('SetUpConnectorPanelForStartChat', () => {
     jest.resetAllMocks();
   });
 
-  it('renders the loading spinner when data is loading', () => {
-    (useLoadConnectors as jest.Mock).mockReturnValueOnce({
-      isLoading: true,
-    });
-    const { getByTestId } = render(<SetUpConnectorPanelForStartChat />);
-    expect(getByTestId('loadingSpinner')).toBeInTheDocument();
-  });
-
   it('renders the empty state when there are no connectors', () => {
     (useLoadConnectors as jest.Mock).mockReturnValueOnce({
       data: {},
@@ -62,11 +54,6 @@ describe('SetUpConnectorPanelForStartChat', () => {
     });
     const { getByTestId } = render(<SetUpConnectorPanelForStartChat />);
     expect(getByTestId('setupGenAIConnectorButton')).toBeInTheDocument();
-  });
-
-  it('displays connectors when present', () => {
-    const { getByTestId } = render(<SetUpConnectorPanelForStartChat />);
-    expect(getByTestId('connectorsAdded')).toBeInTheDocument();
   });
 
   it('show the flyout when the button is clicked', async () => {

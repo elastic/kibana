@@ -35,12 +35,12 @@ import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 
 const buildFormData = (formData: ChatForm): ChatRequestData => ({
-  connector_id: formData[ChatFormFields.connectorId],
+  connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
   prompt: formData[ChatFormFields.prompt],
   indices: formData[ChatFormFields.indices].join(),
   citations: formData[ChatFormFields.citations],
   elasticsearch_query: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-  summarization_model: formData[ChatFormFields.summarizationModel],
+  summarization_model: formData[ChatFormFields.summarizationModel].value,
   source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
   doc_size: formData[ChatFormFields.docSize],
 });

@@ -9,6 +9,7 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;
 const mockedUseKibana = useKibana as jest.Mock;
@@ -47,7 +48,25 @@ describe('useLoadConnectors', () => {
   });
 
   it('successfully loads and transforms connectors', async () => {
-    const connectors = [{ id: '1', actionTypeId: '.gen-ai', isMissingSecrets: false }];
+    const connectors = [
+      {
+        id: '1',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: { apiProvider: OpenAiProviderType.OpenAi },
+      },
+      {
+        id: '2',
+        actionTypeId: 'slack',
+        isMissingSecrets: false,
+      },
+      {
+        id: '3',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: { apiProvider: OpenAiProviderType.AzureAi },
+      },
+    ];
     mockedLoadConnectors.mockResolvedValue(connectors);
 
     await act(async () => {
@@ -57,9 +76,21 @@ describe('useLoadConnectors', () => {
       await expect(result.current).resolves.toStrictEqual({
         openai: {
           actionTypeId: '.gen-ai',
+          config: {
+            apiProvider: 'OpenAI',
+          },
           id: '1',
           isMissingSecrets: false,
           title: 'OpenAI',
+        },
+        openai_azure: {
+          actionTypeId: '.gen-ai',
+          config: {
+            apiProvider: 'Azure OpenAI',
+          },
+          id: '3',
+          isMissingSecrets: false,
+          title: 'OpenAI Azure',
         },
       });
     });

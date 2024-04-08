@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -13,7 +13,7 @@ export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {}
 
 export interface SearchPlaygroundPluginStartDependencies {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStartContract;
 }
 
 export * from '../common/types';
