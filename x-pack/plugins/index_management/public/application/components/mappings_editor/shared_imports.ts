@@ -43,6 +43,7 @@ export {
   ComboBoxField,
   ToggleField,
   JsonEditorField,
+  MultiSelectField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';

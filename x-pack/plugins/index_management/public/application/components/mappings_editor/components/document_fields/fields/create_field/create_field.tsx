@@ -32,7 +32,7 @@ import {
 } from '../../../../shared_imports';
 import { MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
-import { InferenceIdSelects } from '../../field_parameters/inference_id_selects';
+import { InferenceIdSelects } from '../../field_parameters/select_inference_id';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';

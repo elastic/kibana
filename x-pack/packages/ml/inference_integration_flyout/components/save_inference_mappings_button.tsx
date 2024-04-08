@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useState, useEffect } from 'react';
-import { isFieldEmpty } from '../lib/shared_values';
-import { ModelConfig } from '../types';
-import { saveMappingOnClick } from './inference_flyout_wrapper';
+import React from 'react';
+import type { ModelConfig } from '../types';
+import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 
-interface SaveInferenceEndpointProps extends saveMappingOnClick {
+interface SaveInferenceEndpointProps extends SaveMappingOnClick {
   inferenceId: string;
   taskType: InferenceTaskType;
   modelConfig: ModelConfig;
@@ -35,7 +34,7 @@ export const SaveInferenceEndpoint: React.FC<SaveInferenceEndpointProps> = ({
       onClick={() => onSaveInferenceEndpoint(inferenceId, taskType, modelConfig)}
       type="submit"
     >
-      {i18n.translate('xpack.ml.inferenceFlyoutWrapper.addInferenceEndpoint.saveInference', {
+      {i18n.translate('xpack.ml.addInferenceEndpoint.saveInference', {
         defaultMessage: 'Save Inference Endpoint',
       })}
     </EuiButton>

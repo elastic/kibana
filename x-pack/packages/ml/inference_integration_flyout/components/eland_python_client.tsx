@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSteps,
-  EuiTitle,
   EuiText,
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -28,7 +27,7 @@ export const ElandPythonClient: React.FC<{
       <EuiSteps
         steps={[
           {
-            title: i18n.translate('xpack.ml.trainedModels.addModelFlyout.thirdParty.step1Title', {
+            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step1Title', {
               defaultMessage: 'Install the Eland Python Client',
             }),
             children: (
@@ -36,7 +35,7 @@ export const ElandPythonClient: React.FC<{
                 <p>
                   <EuiText size={'s'} color={'subdued'}>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.pipInstallLabel"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.pipInstallLabel"
                       defaultMessage="Eland can be installed with {pipLink} from {pypiLink}:"
                       values={{
                         pipLink: (
@@ -70,7 +69,7 @@ export const ElandPythonClient: React.FC<{
                 <p>
                   <EuiText size={'s'} color={'subdued'}>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.condaInstallLabel"
                       defaultMessage="or it can also be installed with {condaLink} from {condaForgeLink}:"
                       values={{
                         condaLink: (
@@ -92,7 +91,7 @@ export const ElandPythonClient: React.FC<{
                     isCopyable
                     language="shell"
                     fontSize={'m'}
-                    data-test-subj={'mlElandCondaInstallCodeBlock'}
+                    data-test-subj="mlElandCondaInstallCodeBlock"
                   >
                     $ conda install -c conda-forge eland
                   </EuiCodeBlock>
@@ -101,7 +100,7 @@ export const ElandPythonClient: React.FC<{
             ),
           },
           {
-            title: i18n.translate('xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Title', {
+            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step2Title', {
               defaultMessage: 'Importing your third-party model',
             }),
             children: (
@@ -109,7 +108,7 @@ export const ElandPythonClient: React.FC<{
                 <p>
                   <EuiText size={'s'} color={'subdued'}>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Body"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step2Body"
                       defaultMessage="Follow the instructions on importing compatible third-party models"
                     />
                   </EuiText>
@@ -118,7 +117,7 @@ export const ElandPythonClient: React.FC<{
                 <p>
                   <b>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2ExampleTitle"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step2ExampleTitle"
                       defaultMessage="Example import"
                     />
                   </b>
@@ -141,7 +140,7 @@ export const ElandPythonClient: React.FC<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty href={nlpImportModel} target={'_blank'} iconType={'help'}>
                       <FormattedMessage
-                        id="xpack.ml.trainedModels.addModelFlyout.thirdParty.importModelButtonLabel"
+                        id="xpack.ml.addInferenceEndpoint.elandPythonClient.importModelButtonLabel"
                         defaultMessage="Import models with Eland"
                       />
                     </EuiButtonEmpty>
@@ -149,7 +148,7 @@ export const ElandPythonClient: React.FC<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty href={supportedNlpModels} target={'_blank'} iconType={'help'}>
                       <FormattedMessage
-                        id="xpack.ml.trainedModels.addModelFlyout.thirdParty.compatibleModelsButtonLabel"
+                        id="xpack.ml.addInferenceEndpoint.elandPythonClient.compatibleModelsButtonLabel"
                         defaultMessage="Compatible NLP models"
                       />
                     </EuiButtonEmpty>
@@ -159,7 +158,7 @@ export const ElandPythonClient: React.FC<{
             ),
           },
           {
-            title: i18n.translate('xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Title', {
+            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step4Title', {
               defaultMessage: 'Deploy your model',
             }),
             children: (
@@ -167,16 +166,16 @@ export const ElandPythonClient: React.FC<{
                 <EuiText size={'s'} color={'subdued'}>
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Body"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step4Body"
                       defaultMessage="Click “Start deployment” in the table row containing your new model to deploy and use it."
                     />
                   </p>
                 </EuiText>
-                <EuiSpacer size={'m'} />
-                <EuiText size={'s'} color={'subdued'}>
+                <EuiSpacer size="m" />
+                <EuiText size="s" color={'subdued'}>
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Body"
+                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step3Body"
                       defaultMessage="Note: The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
                     />
                   </p>

@@ -29,8 +29,6 @@ import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { InferenceFlyoutWrapper, ModelConfig } from '@kbn/inference_integration_flyout';
-import { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -49,7 +47,7 @@ import { useMappingsStateListener } from '../../../../components/mappings_editor
 import { documentationService } from '../../../../services';
 import { DocumentFields } from '../../../../components/mappings_editor/components';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
-import { updateIndexMappings, createInferenceEndpoint } from '../../../../services/api';
+import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import {
   NormalizedField,
@@ -84,24 +82,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const {
     services: { extensionsService },
     core: { getUrlForApp },
-    docLinks,
   } = useAppContext();
 
   const state = useMappingsState();
   const dispatch = useDispatch();
-  const [showTESTFlout, setShowTESTFlout] = useState(false);
-
-  const onSaveInferenceCallback = useCallback(
-    async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
-      // console.log(inferenceId, taskType, modelConfig);
-      const { error } = await createInferenceEndpoint(inferenceId, taskType, modelConfig);
-      if (!error) {
-        setShowTESTFlout(!showTESTFlout);
-      }
-    },
-    [showTESTFlout]
-  );
-  // const { isLoading, data, error, resendRequest } = createInferenceEndpoint(index?.name || '');
   const indexName = index.name;
 
   const pendingFieldListId = useGeneratedHtmlId({
@@ -465,19 +449,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButton onClick={() => setShowTESTFlout(!showTESTFlout)}>Show flyout </EuiButton>
-            {showTESTFlout && (
-              <InferenceFlyoutWrapper
-                elserv2documentationUrl={docLinks.links.ml.nlpElser}
-                e5documentationUrl={docLinks.links.ml.nlpE5}
-                onSaveInferenceEndpoint={onSaveInferenceCallback}
-                onFlyoutClose={setShowTESTFlout}
-                isInferenceFlyoutVisible={showTESTFlout}
-              />
-            )}
-          </EuiFlexItem>
-
           {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false}>

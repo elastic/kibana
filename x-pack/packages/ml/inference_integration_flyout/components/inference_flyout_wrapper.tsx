@@ -19,11 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ModelConfig, Tab, TabType } from '../types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ModelConfig, Tab } from '../types';
+import { TabType } from '../types';
 import { ElandPythonClient } from './eland_python_client';
 import { ConnectToApi } from './connect_to_api';
 import { ElasticsearchModels } from './elasticsearch_models';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { flyoutHeaderDescriptions } from '../lib/shared_values';
 const tabs: Tab[] = [
   {
@@ -70,7 +71,7 @@ const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = ({
     </EuiTabs>
   );
 };
-export interface saveMappingOnClick {
+export interface SaveMappingOnClick {
   onSaveInferenceEndpoint: (
     inferenceId: string,
     taskType: InferenceTaskType,
@@ -83,9 +84,10 @@ export interface DocumentationProps {
   supportedNlpModels?: string;
   nlpImportModel?: string;
 }
-export interface InferenceFlyoutProps extends saveMappingOnClick, DocumentationProps {
+export interface InferenceFlyoutProps extends SaveMappingOnClick, DocumentationProps {
   onFlyoutClose: (value: boolean) => void;
   isInferenceFlyoutVisible: boolean;
+  errorCallout: JSX.Element;
 }
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   onSaveInferenceEndpoint,
@@ -95,6 +97,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   elserv2documentationUrl = '',
   supportedNlpModels = '',
   nlpImportModel = '',
+  errorCallout = <></>,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.elasticsearch_models);
   const tabToInferenceContentMap: Record<TabType, React.ReactNode> = {
@@ -119,6 +122,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   const tabContent = tabToInferenceContentMap[activeTab];
   const content: React.ReactNode = (
     <>
+      {errorCallout}
       <InferenceEndpointFlyoutTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <EuiSpacer size="l" />
@@ -135,7 +139,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.ml.inferenceFlyoutWrapper.addInferenceEndpoint.header.title"
+              id="xpack.ml.addInferenceEndpoint.header.title"
               defaultMessage="Add inference endpoint"
             />
           </h2>
@@ -144,7 +148,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
       <EuiFlyoutBody data-test-subj="inference_endpoint_content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={() => onFlyoutClose(!isInferenceFlyoutVisible)}>
-          {i18n.translate('xpack.ml.inferenceFlyoutWrapper.addInferenceEndpoint.footer.cancel', {
+          {i18n.translate('xpack.ml.addInferenceEndpoint.footer.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>

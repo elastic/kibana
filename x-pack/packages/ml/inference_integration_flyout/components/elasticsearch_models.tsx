@@ -16,20 +16,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
-import {
-  ElasticsearchModelDefaultOptions,
-  ElasticsearchModelDescriptions,
-  ElasticsearchService,
-  ModelConfig,
-  Service,
-} from '../types';
-import { DocumentationProps, saveMappingOnClick } from './inference_flyout_wrapper';
+import type { ElasticsearchModelDescriptions, ElasticsearchService, ModelConfig } from '../types';
+import { ElasticsearchModelDefaultOptions, Service } from '../types';
+import type { DocumentationProps, SaveMappingOnClick } from './inference_flyout_wrapper';
 import { elasticsearchModelsOptions, setModalConfigResponse } from '../lib/shared_values';
 import { ServiceOptions } from './service_options';
 import { InferenceFlyout } from './flyout_layout';
 interface ElasticsearchModelsProps
   extends Omit<DocumentationProps, 'supportedNlpModels' | 'nlpImportModel'>,
-    saveMappingOnClick {
+    SaveMappingOnClick {
   description: string;
 }
 export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
@@ -43,11 +38,9 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   const [numberOfThreads, setNumberOfThreads] = useState<number>(1);
 
   const serviceType: Service = useMemo(() => {
-    const serviceType =
-      selectedModelType === ElasticsearchModelDefaultOptions.elser
-        ? Service.elser
-        : Service.elasticsearch;
-    return serviceType;
+    return selectedModelType === ElasticsearchModelDefaultOptions.elser
+      ? Service.elser
+      : Service.elasticsearch;
   }, [selectedModelType]);
 
   const modelConfig: ModelConfig = useMemo(() => {
@@ -115,7 +108,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
         <EuiTitle size="xs">
           <h6>
             <FormattedMessage
-              id="xpack.ml.inferenceFlyoutWrapper.elasticsearchModels.modelDescription"
+              id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelTitle"
               defaultMessage="{title}"
               values={{
                 title: elasticSearchModelTypesDescriptions[selectedModelType].title,
@@ -128,7 +121,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
       <EuiFlexItem>
         <EuiText color="subdued">
           <FormattedMessage
-            id="xpack.ml.inferenceFlyoutWrapper.elasticsearchModels.modelDescription"
+            id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDescription"
             defaultMessage="{description}"
             values={{
               description: elasticSearchModelTypesDescriptions[selectedModelType].description,
@@ -145,7 +138,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
             target={'_blank'}
           >
             <FormattedMessage
-              id="xpack.ml.inferenceFlyoutWrapper.elasticsearchModels.modelDocumentation"
+              id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDocumentation"
               defaultMessage="View documentation"
             />
           </EuiLink>

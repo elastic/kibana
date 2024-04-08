@@ -9,6 +9,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
 import {
   IndicesStatsResponse,
+  InferenceGetModelResponse,
   InferenceModelConfig,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -443,19 +444,5 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'put',
     body: JSON.stringify({ ...newFields }),
-  });
-}
-export function createInferenceEndpoint(
-  modelId: string,
-  taskType: InferenceTaskType,
-  modelConfig: ModelConfig
-) {
-  // console.log('modelConfig', modelConfig);
-  return sendRequest({
-    path: `${API_BASE_PATH}/inference/${encodeURIComponent(taskType)}/${encodeURIComponent(
-      modelId
-    )}`,
-    method: 'put',
-    body: JSON.stringify({ ...modelConfig }),
   });
 }

@@ -6,16 +6,17 @@
  */
 import { EuiSuperSelect } from '@elastic/eui';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { connectToApiOptions, isFieldEmpty, setModalConfigResponse } from '../lib/shared_values';
-import { ModelConfig, Service } from '../types';
+import type { ModelConfig } from '../types';
+import { Service } from '../types';
 import { InferenceFlyout } from './flyout_layout';
-import { saveMappingOnClick } from './inference_flyout_wrapper';
+import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { CohereForm } from './service_forms/cohere_form';
 import { HuggingFaceForm } from './service_forms/huggingFace_form';
 import { OpenaiForm } from './service_forms/openAi_form';
 
-interface Props extends saveMappingOnClick {
+interface Props extends SaveMappingOnClick {
   description: string;
 }
 export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndpoint }) => {
@@ -77,7 +78,6 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
       return setModalConfigResponse(Service.cohere, {
         api_key: cohereApiKey,
         model_id: cohereModelId,
-        // check for embedding type
       });
     } else {
       return setModalConfigResponse(Service.openai, {
@@ -87,7 +87,17 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
         url: openaiEndpointlUrl,
       });
     }
-  }, [huggingFaceApiKey, huggingFaceModelUrl]);
+  }, [
+    selectedModelType,
+    huggingFaceApiKey,
+    huggingFaceModelUrl,
+    cohereApiKey,
+    cohereModelId,
+    openaiApiKey,
+    openaiModelId,
+    openaiOrganizationId,
+    openaiEndpointlUrl,
+  ]);
 
   const renderForm = () => {
     if (selectedModelType === Service.huggingFace)

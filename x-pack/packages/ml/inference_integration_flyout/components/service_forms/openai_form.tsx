@@ -41,7 +41,7 @@ export const OpenaiForm: React.FC<OpenaiFormProps> = ({
         hasChildLabel={false}
       >
         <EuiFieldText
-          data-test-subj={'openaiOrganizationId'}
+          data-test-subj="openaiOrganizationId"
           value={organizationId}
           onChange={(e) => setOrganizationId(e.target.value)}
         />
