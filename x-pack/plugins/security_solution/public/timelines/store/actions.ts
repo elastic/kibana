@@ -37,9 +37,11 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timel
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent = actionCreator<{
+  id: string;
+  noteId: string;
+  eventId: string;
+}>('ADD_NOTE_TO_EVENT');
 
 export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
   'DELETE_NOTE_FROM_EVENT'
@@ -289,6 +291,22 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
+export const updateRowHeight = actionCreator<{
+  id: string;
+  rowHeight: number;
+}>('UPDATE_ROW_HEIGHT');
+
+export const updateSampleSize = actionCreator<{
+  id: string;
+  sampleSize: number;
+}>('UPDATE_SAMPLE_SIZE');
 
 export const setConfirmingNoteId = actionCreator<{
   id: string;

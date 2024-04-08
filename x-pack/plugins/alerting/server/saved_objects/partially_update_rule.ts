@@ -59,12 +59,7 @@ export async function partiallyUpdateRule(
   );
 
   try {
-    await savedObjectsClient.update<RuleAttributes>(
-      RULE_SAVED_OBJECT_TYPE,
-      id,
-      attributeUpdates,
-      updateOptions
-    );
+    await savedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;
