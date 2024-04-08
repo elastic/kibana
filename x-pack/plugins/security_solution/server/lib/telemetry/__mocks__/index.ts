@@ -18,7 +18,7 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { type UsageCounters } from '@kbn/usage-collection-plugin/common/types';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
-import { stubEndpointMetricsResponse } from './metrics';
+import { stubEndpointMetricsAbstractResponse, stubEndpointMetricsByIdResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
 import type { ESClusterInfo, ESLicense } from '../types';
 import { stubFleetAgentResponse } from './fleet_agent_response';
@@ -122,7 +122,8 @@ export const createMockTelemetryReceiver = (
     getAlertsIndex: jest.fn().mockReturnValue('alerts-*'),
     fetchDiagnosticAlertsBatch: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
     getExperimentalFeatures: jest.fn().mockReturnValue(undefined),
-    fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
+    fetchEndpointMetricsAbstract: jest.fn().mockReturnValue(stubEndpointMetricsAbstractResponse),
+    fetchEndpointMetricsById: jest.fn().mockReturnValue(stubEndpointMetricsByIdResponse),
     fetchEndpointPolicyResponses: jest.fn(),
     fetchPrebuiltRuleAlertsBatch: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
     fetchDetectionRulesPackageVersion: jest.fn(),

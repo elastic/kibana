@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { catchError, filter, map } from 'rxjs/operators';
+import { catchError, filter, tap } from 'rxjs';
 import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
@@ -67,9 +67,8 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
             endTracking(abortSignal.aborted ? 'aborted' : 'error');
             throw error;
           }),
-          map((response) => {
+          tap(() => {
             endTracking('success');
-            return response;
           })
         );
     },

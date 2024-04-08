@@ -49,14 +49,13 @@ import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_des
 import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 import { useAlertSuppression } from '../../logic/use_alert_suppression';
 import {
-  useFiltersStyles,
-  useQueryStyles,
+  filtersStyles,
+  queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 
@@ -86,7 +85,7 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
     dataViewId,
   });
 
-  const styles = useFiltersStyles();
+  const styles = filtersStyles;
 
   return (
     <EuiFlexGroup
@@ -107,7 +106,7 @@ interface QueryProps {
 }
 
 const Query = ({ query, 'data-test-subj': dataTestSubj = 'query' }: QueryProps) => {
-  const styles = useQueryStyles();
+  const styles = queryStyles;
   return (
     <div data-test-subj={dataTestSubj} className={styles.content}>
       {query}
@@ -231,7 +230,7 @@ const getRuleTypeDescription = (ruleType: Type) => {
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
     case 'esql':
-      return <TechnicalPreviewBadge label={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
+      return descriptionStepI18n.ESQL_TYPE_DESCRIPTION;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
@@ -270,7 +269,7 @@ const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
             <EuiFlexItem grow={false}>
               <EuiText
                 data-test-subj="requiredFieldsPropertyValueItem"
-                className={styles.fieldTypeText}
+                className={styles.fieldNameText}
                 grow={false}
                 size="xs"
               >

@@ -44,7 +44,7 @@ export const updateFields = async ({
   fields,
 }: UpdateFieldsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDataViewLazy(id);
 
   const fieldNames = Object.keys(fields);
 
@@ -182,7 +182,7 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string) => {
           });
 
           const body: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: dataView.toSpec(),
+            [serviceKey]: await dataView.toSpec({ fieldParams: { fieldName: ['*'] } }),
           };
 
           return res.ok({
