@@ -37,6 +37,7 @@ export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'in
 export type InstallSource = 'registry' | 'upload' | 'bundled' | 'custom';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type InstallResultStatus = 'installed' | 'already_installed';
 
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AgentAssetType = typeof agentAssetTypes;
@@ -548,6 +549,36 @@ export interface InstallFailedAttempt {
   };
 }
 
+export enum INSTALL_STATES {
+  CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
+  INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  INSTALL_ML_MODEL = 'install_ml_model',
+  INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
+  REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
+  UPDATE_CURRENT_WRITE_INDICES = 'update_current_write_indices',
+  INSTALL_TRANSFORMS = 'install_transforms',
+  DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
+  SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
+  UPDATE_SO = 'update_so',
+}
+type StatesKeys = keyof typeof INSTALL_STATES;
+export type StateNames = typeof INSTALL_STATES[StatesKeys];
+
+export interface LatestExecutedState<T> {
+  name: T;
+  started_at: string;
+  error?: string;
+}
+
+export type InstallLatestExecutedState = LatestExecutedState<StateNames>;
+
+export interface StateContext<T> {
+  [key: string]: any;
+  latestExecutedState?: LatestExecutedState<T>;
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -568,6 +599,7 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_executed_state?: InstallLatestExecutedState;
 }
 
 export interface PackageUsageStats {
