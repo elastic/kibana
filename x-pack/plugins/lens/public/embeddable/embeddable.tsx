@@ -761,7 +761,6 @@ export class Embeddable
     visualizationState: unknown,
     visualizationType?: string
   ) {
-    console.log('updateVisualization');
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -811,7 +810,6 @@ export class Embeddable
   }
 
   async updateSuggestion(attrs: LensSavedObjectAttributes) {
-    console.log('attrs', attrs);
     const viz = this.savedVis;
     const newViz = {
       ...viz,

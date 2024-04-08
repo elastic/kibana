@@ -60,7 +60,7 @@ export function ChartConfigPanel({
         ...currentSuggestionContext,
         suggestion: updatedSuggestion,
       });
-      console.log('updatePanelState', datasourceState, visualizationState, updatedSuggestion);
+      // console.log('updatePanelState', datasourceState, visualizationState, updatedSuggestion);
     },
     [currentSuggestionContext, onSuggestionContextChange]
   );
@@ -77,7 +77,7 @@ export function ChartConfigPanel({
         type: UnifiedHistogramSuggestionType.lensSuggestion,
         suggestion: updatedSuggestion,
       });
-      console.log('updateSuggestion', attributes, updatedSuggestion);
+      // console.log('updateSuggestion', attributes, updatedSuggestion);
     },
     [onSuggestionContextChange, visContext]
   );
