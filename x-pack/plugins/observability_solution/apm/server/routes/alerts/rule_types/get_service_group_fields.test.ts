@@ -7,9 +7,9 @@
 
 import {
   getApmAlertSourceFields,
-  getServiceGroupFieldsAgg,
+  getApmAlertSourceFieldsAgg,
   flattenSourceDoc,
-} from './get_service_group_fields';
+} from './get_apm_alert_source_fields';
 
 const mockSourceObj = {
   service: {
@@ -67,7 +67,7 @@ describe('getSourceFields', () => {
 
 describe('getSourceFieldsAgg', () => {
   it('should create a agg for specific source fields', () => {
-    const agg = getServiceGroupFieldsAgg();
+    const agg = getApmAlertSourceFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
         "source_fields": Object {
@@ -91,7 +91,7 @@ describe('getSourceFieldsAgg', () => {
   });
 
   it('should accept options for top_hits options', () => {
-    const agg = getServiceGroupFieldsAgg({
+    const agg = getApmAlertSourceFieldsAgg({
       sort: [{ 'transaction.duration.us': { order: 'desc' } }],
     });
     expect(agg).toMatchInlineSnapshot(`
