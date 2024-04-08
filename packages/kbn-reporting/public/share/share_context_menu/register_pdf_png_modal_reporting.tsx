@@ -486,7 +486,8 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      showRadios: objectType === 'dashboard' || objectType === 'lens',
+      showRadios:
+        objectType === 'dashboard' || objectType === 'lens' || objectType === 'visualization',
       generateReportForPrinting: generateReportPDFForPrinting,
       generateReport: generateReportPDF,
       reportType: 'printablePdfV2',
@@ -519,7 +520,8 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      showRadios: objectType === 'dashboard' || objectType === 'lens',
+      showRadios:
+        objectType === 'dashboard' || objectType === 'lens' || objectType === 'visualization',
       generateReport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,

@@ -249,7 +249,7 @@ const ExportContentUi = ({
   }, [isDirty, generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
-    if ((showRadios && getRadioOptions() !== undefined) || objectType === 'visualization') {
+    if (showRadios && getRadioOptions() !== undefined) {
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
