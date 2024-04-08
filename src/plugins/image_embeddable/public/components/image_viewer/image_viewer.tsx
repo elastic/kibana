@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { css, SerializedStyles } from '@emotion/react';
-import { FileImage } from '@kbn/shared-ux-file-image';
 import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiImage,
-  useEuiTheme,
-  useResizeObserver,
-  useIsWithinBreakpoints,
   EuiImageProps,
+  useIsWithinBreakpoints,
+  useResizeObserver,
 } from '@elastic/eui';
+import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ImageConfig } from '../types';
-import notFound from './not_found/not_found_light.png';
-import notFound2x from './not_found/not_found_light@2x.png';
-import { validateImageConfig } from '../utils/validate_image_config';
+import { FileImage } from '@kbn/shared-ux-file-image';
+
+import { ImageConfig } from '../../types';
+import { validateImageConfig } from '../../utils/validate_image_config';
+import notFound from './assets/not_found_light.png';
+import notFound2x from './assets/not_found_light@2x.png';
 import { useImageViewerContext } from './image_viewer_context';
 
 export interface ImageViewerProps {
@@ -50,7 +51,6 @@ export function ImageViewer({
   containerCSS,
   isScreenshotMode,
 }: ImageViewerProps) {
-  const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 
   const isImageConfigValid = validateImageConfig(imageConfig, { validateUrl });
@@ -73,8 +73,6 @@ export function ImageViewer({
           position: relative;
           width: 100%;
           height: 100%;
-          border-radius: ${euiTheme.border.radius.medium};
-
           .visually-hidden {
             visibility: hidden;
           }

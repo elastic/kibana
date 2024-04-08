@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './image_embeddable';
-export * from './image_embeddable_factory';
+export { openImageEditor } from './open_image_editor';
