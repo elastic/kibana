@@ -6,20 +6,47 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { partition } from 'lodash/fp';
-import { parseAssetCriticalityCsvRow } from '../../../../common/entity_analytics/asset_criticality';
-import { MAX_FILE_SIZE, SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from './constants';
+import {
+  CRITICALITY_CSV_MAX_SIZE_BYTES,
+  CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE,
+  parseAssetCriticalityCsvRow,
+} from '../../../../common/entity_analytics/asset_criticality';
+import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from './constants';
+
+export interface RowValidationErrors {
+  error: string;
+  index: number;
+}
 
 export const validateParsedContent = (
   data: string[][]
-): { valid: string[][]; invalid: string[][]; error?: string } => {
+): { valid: string[][]; invalid: string[][]; errors: RowValidationErrors[] } => {
   if (data.length === 0) {
-    return { valid: [], invalid: [], error: 'The file is empty' };
+    return { valid: [], invalid: [], errors: [] };
   }
 
-  const [valid, invalid] = partition((row) => parseAssetCriticalityCsvRow(row).valid, data);
+  let errorIndex = 1;
+  const { valid, invalid, errors } = data.reduce<{
+    valid: string[][];
+    invalid: string[][];
+    errors: RowValidationErrors[];
+  }>(
+    (acc, row) => {
+      const parsedRow = parseAssetCriticalityCsvRow(row);
+      if (parsedRow.valid) {
+        acc.valid.push(row);
+      } else {
+        acc.invalid.push(row);
+        acc.errors.push({ error: parsedRow.error, index: errorIndex });
+        errorIndex++;
+      }
 
-  return { valid, invalid };
+      return acc;
+    },
+    { valid: [], invalid: [], errors: [] }
+  );
+
+  return { valid, invalid, errors };
 };
 
 export const validateFile = (
@@ -51,7 +78,7 @@ export const validateFile = (
     };
   }
 
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size > CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE) {
     return {
       valid: false,
       errorMessage: i18n.translate(
@@ -60,7 +87,7 @@ export const validateFile = (
           defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
           values: {
             fileSize: formatBytes(file.size),
-            maxFileSize: formatBytes(MAX_FILE_SIZE),
+            maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
           },
         }
       ),

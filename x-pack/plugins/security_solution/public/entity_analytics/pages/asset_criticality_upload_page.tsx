@@ -28,7 +28,7 @@ export const AssetCriticalityUploadPage = () => {
         pageTitle={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.title"
-            defaultMessage="Asset classification"
+            defaultMessage="Asset criticality"
           />
         }
       />
@@ -88,7 +88,7 @@ export const AssetCriticalityUploadPage = () => {
             <EuiLink>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.documentationLink"
-                defaultMessage="Asset classification documentation"
+                defaultMessage="Asset criticality documentation"
               />
             </EuiLink>
             <EuiText size="xs" color={'danger'}>

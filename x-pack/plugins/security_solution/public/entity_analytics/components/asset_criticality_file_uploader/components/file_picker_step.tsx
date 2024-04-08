@@ -18,13 +18,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useFormatBytes } from '../../../../common/components/formatted_bytes';
 import {
-  MAX_FILE_SIZE,
-  SUPPORTED_FILE_EXTENSIONS,
-  SUPPORTED_FILE_TYPES,
-  VALID_CRITICALITY_LEVELS,
-} from '../constants';
+  CRITICALITY_CSV_MAX_SIZE_BYTES,
+  ValidCriticalityLevels,
+} from '../../../../../common/entity_analytics/asset_criticality';
+import { useFormatBytes } from '../../../../common/components/formatted_bytes';
+import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from '../constants';
 
 interface AssetCriticalityFilePickerStepProps {
   onFileChange: (fileList: FileList | null) => void;
@@ -32,7 +31,7 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const sampleCSVContent = `identifier,criticality,type\nuser-001,low_impact,user\nuser-002,medium_impact,user\nhost-001,extreme_impact,host`;
+const sampleCSVContent = `type,identifier,criticality\nuser,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
 const listStyle = css`
   list-style-type: disc;
@@ -81,7 +80,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
                 'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit'
               }
               values={{
-                maxFileSize: formatBytes(MAX_FILE_SIZE),
+                maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
               }}
             />
           </li>
@@ -121,7 +120,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
               defaultMessage="Criticality label: Use any of these labels: {labels}"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
               values={{
-                labels: <b>{VALID_CRITICALITY_LEVELS.join(', ')}</b>,
+                labels: <b>{ValidCriticalityLevels.join(', ')}</b>,
               }}
             />
           </li>

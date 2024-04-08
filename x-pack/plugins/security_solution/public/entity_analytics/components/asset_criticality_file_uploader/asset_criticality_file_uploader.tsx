@@ -26,15 +26,6 @@ import { getStepStatus } from './helpers';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 
-// TODO
-// Should we support headers?
-// result step UI
-// Add the info icon with the error message
-
-// WHAT DO I NEED FROM DESIGN?
-// 3. serverless navigation
-// 5. Rename steps
-
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, { isLoading: false, step: 1 });
   const formatBytes = useFormatBytes();
@@ -43,8 +34,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
   const onFileChange = (fileList: FileList | null) => {
     if (fileList?.length === 0) {
       dispatch({
-        type: 'goToStep',
-        payload: { step: 1 },
+        type: 'resetState',
       });
     }
 
@@ -71,12 +61,12 @@ export const AssetCriticalityFileUploader: React.FC = () => {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete(parsedFile, returnedFile) {
-          const { invalid, valid, error } = validateParsedContent(parsedFile.data);
-
-          if (error) {
-            dispatch({ type: 'fileError', payload: { message: error, file } });
+          if (parsedFile.data.length === 0) {
+            dispatch({ type: 'fileError', payload: { message: 'The file is empty', file } }); // TODO i18n
             return;
           }
+
+          const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
 
           const validLinesAsText = Papa.unparse(valid);
           const invalidLinesAsText = Papa.unparse(invalid);
@@ -87,6 +77,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
               fileName: returnedFile?.name ?? '',
               validLinesAsText,
               invalidLinesAsText,
+              invalidLinesErrors: errors,
               validLinesCount: valid.length,
               invalidLinesCount: invalid.length,
             },
@@ -115,7 +106,9 @@ export const AssetCriticalityFileUploader: React.FC = () => {
             ),
             status: getStepStatus(1, state.step),
             onClick: () => {
-              dispatch({ type: 'goToStep', payload: { step: 1 } });
+              if (state.step === 2) {
+                dispatch({ type: 'resetState' }); // User can only go back to the first step from the second step
+              }
             },
           },
           {
@@ -126,9 +119,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
               }
             ),
             status: getStepStatus(2, state.step),
-            onClick: () => {
-              dispatch({ type: 'goToStep', payload: { step: 2 } });
-            },
+            onClick: () => {}, // This prevents the user from going back to the previous step
           },
           {
             title: i18n.translate(
@@ -163,9 +154,10 @@ export const AssetCriticalityFileUploader: React.FC = () => {
               invalidLinesCount={state.invalidLinesCount}
               validLinesAsText={state.validLinesAsText}
               invalidLinesAsText={state.invalidLinesAsText}
+              invalidLinesErrors={state.invalidLinesErrors ?? []}
               fileName={state.fileName ?? ''}
               onReturn={() => {
-                dispatch({ type: 'goToStep', payload: { step: 1 } });
+                dispatch({ type: 'resetState' });
               }}
               onConfirm={async () => {
                 if (state.validLinesAsText) {
@@ -173,22 +165,36 @@ export const AssetCriticalityFileUploader: React.FC = () => {
                     type: 'uploadingFile',
                   });
 
-                  const result = await uploadAssetCriticalityFile(
-                    state.validLinesAsText,
-                    state.fileName
-                  );
+                  try {
+                    const result = await uploadAssetCriticalityFile(
+                      state.validLinesAsText,
+                      state.fileName
+                    );
 
-                  dispatch({
-                    type: 'fileUploaded',
-                    payload: result,
-                  });
+                    dispatch({
+                      type: 'fileUploaded',
+                      payload: { response: result },
+                    });
+                  } catch (e) {
+                    dispatch({
+                      type: 'fileUploaded',
+                      payload: { errorMessage: e.message },
+                    });
+                  }
                 }
               }}
             />
           )}
 
-        {state.step === 3 && state.fileUploadResponse && (
-          <AssetCriticalityResultStep result={state.fileUploadResponse} />
+        {state.step === 3 && (
+          <AssetCriticalityResultStep
+            result={state.fileUploadResponse}
+            errorMessage={state.fileUploadError}
+            validLinesAsText={state.validLinesAsText ?? ''}
+            onReturn={() => {
+              dispatch({ type: 'resetState' });
+            }}
+          />
         )}
       </div>
     </div>
