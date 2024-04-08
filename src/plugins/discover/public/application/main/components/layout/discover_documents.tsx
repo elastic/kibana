@@ -422,7 +422,7 @@ function DiscoverDocumentsComponent({
                   onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
-                  isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
+                  isSortEnabled={true}
                   isPlainRecord={isTextBasedQuery}
                   rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                   onUpdateRowsPerPage={onUpdateRowsPerPage}
