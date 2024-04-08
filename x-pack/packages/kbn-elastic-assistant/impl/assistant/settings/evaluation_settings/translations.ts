@@ -193,6 +193,13 @@ export const EVALUATOR_OUTPUT_INDEX_DESCRIPTION = i18n.translate(
   }
 );
 
+export const SHOW_TRACE_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.evaluationSettings.showTraceOptionsLabel',
+  {
+    defaultMessage: 'Show Trace Options (for internal use only)',
+  }
+);
+
 export const APM_URL_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.evaluationSettings.apmUrlLabel',
   {
