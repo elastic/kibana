@@ -36,6 +36,7 @@ const mockConvo = {
   messages: [message, anotherMessage],
   apiConfig: {
     connectorId: '123',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
   },
 };
@@ -63,13 +64,8 @@ describe('useConversation', () => {
       createConversation.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
-        id: mockConvo.id,
-        messages: mockConvo.messages,
+        ...mockConvo,
         replacements: {},
-        apiConfig: {
-          connectorId: '123',
-          defaultSystemPromptId: 'default-system-prompt',
-        },
         title: mockConvo.title,
         category: 'assistant',
       });
