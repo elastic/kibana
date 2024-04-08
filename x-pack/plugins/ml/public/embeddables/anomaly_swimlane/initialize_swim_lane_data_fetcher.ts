@@ -32,12 +32,12 @@ import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { processFilters } from '../common/process_filters';
 import type { AnomalySwimlaneServices } from '../types';
-import type { AnomalySwimLaneComponentApi } from './types';
+import type { AnomalySwimLaneEmbeddableApi } from './types';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 export const initializeSwimLaneDataFetcher = (
-  swimLaneApi: AnomalySwimLaneComponentApi,
+  swimLaneApi: AnomalySwimLaneEmbeddableApi,
   chartWidth$: Observable<number | undefined>,
   dataLoading: BehaviorSubject<boolean | undefined>,
   blockingError: BehaviorSubject<Error | undefined>,
@@ -151,7 +151,7 @@ export const initializeSwimLaneDataFetcher = (
       })
     )
     .subscribe((data) => {
-      // api.setInterval(data?.interval);
+      swimLaneApi.setInterval(data?.interval);
 
       dataLoading.next(false);
       blockingError.next(undefined);

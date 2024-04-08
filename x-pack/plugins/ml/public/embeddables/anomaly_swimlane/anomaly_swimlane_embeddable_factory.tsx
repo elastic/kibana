@@ -184,7 +184,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       ) as Observable<TimeRange | undefined>;
 
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
-        swimLaneControlsApi,
+        api,
         chartWidth$.asObservable(),
         dataLoading,
         blockingError,
