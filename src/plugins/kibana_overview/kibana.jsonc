@@ -20,9 +20,6 @@
     "requiredBundles": [
       "kibanaReact",
       "newsfeed"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

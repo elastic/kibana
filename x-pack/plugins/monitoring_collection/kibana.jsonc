@@ -8,9 +8,6 @@
     "browser": false,
     "configPath": [
       "monitoring_collection"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

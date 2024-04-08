@@ -11,9 +11,6 @@
       "actions",
       "data",
       "ml"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

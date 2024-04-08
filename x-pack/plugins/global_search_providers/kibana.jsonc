@@ -12,9 +12,6 @@
     ],
     "requiredPlugins": [
       "globalSearch"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

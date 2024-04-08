@@ -29,9 +29,6 @@
       "kibanaUtils",
       "kibanaReact",
       "savedObjects"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

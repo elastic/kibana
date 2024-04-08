@@ -9,10 +9,6 @@
     "configPath": [
       "x-pack",
       "translations"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

@@ -23,9 +23,6 @@
       "kibanaUtils",
       "kibanaReact",
       "visDefaultEditor"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

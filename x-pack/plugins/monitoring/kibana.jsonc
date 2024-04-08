@@ -30,10 +30,6 @@
       "dashboard",
       "fleet"
     ],
-    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
+    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
   }
 }

@@ -10,9 +10,6 @@
     "browser": true,
     "configPath": [
       "interactiveSetup"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

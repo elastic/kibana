@@ -9,9 +9,6 @@
     "configPath": ["xpack", "apm_data_access"],
     "requiredPlugins": ["data"],
     "optionalPlugins": [],
-    "requiredBundles": [],
-    "nodeRoles": [
-      "ui"
-    ]
+    "requiredBundles": []
   }
 }

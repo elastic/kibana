@@ -9,9 +9,6 @@
     "configPath": [
       "xpack",
       "licenseApiGuard"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

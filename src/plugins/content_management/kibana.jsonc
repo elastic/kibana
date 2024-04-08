@@ -6,9 +6,6 @@
   "plugin": {
     "id": "contentManagement",
     "server": true,
-    "browser": true,
-    "nodeRoles": [
-      "ui"
-    ]
+    "browser": true
   }
 }

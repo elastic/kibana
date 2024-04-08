@@ -14,10 +14,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

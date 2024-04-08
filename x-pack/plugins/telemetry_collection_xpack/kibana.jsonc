@@ -8,10 +8,6 @@
     "browser": false,
     "requiredPlugins": [
       "telemetryCollectionManager"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

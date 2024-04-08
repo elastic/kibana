@@ -8,9 +8,6 @@
     "browser": true,
     "optionalPlugins": [
       "savedObjects"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

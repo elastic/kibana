@@ -36,10 +36,6 @@
       "exploratoryView",
       "observability",
       "maps"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

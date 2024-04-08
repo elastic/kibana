@@ -20,9 +20,6 @@
     "optionalPlugins": [
       "security",
       "cloudExperiments"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

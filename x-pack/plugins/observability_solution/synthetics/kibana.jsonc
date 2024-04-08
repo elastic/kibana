@@ -52,10 +52,6 @@
       "spaces",
       "indexLifecycleManagement",
       "unifiedDocViewer"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

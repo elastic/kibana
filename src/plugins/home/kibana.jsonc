@@ -14,9 +14,6 @@
       "cloud",
       "guidedOnboarding",
       "cloudExperiments"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

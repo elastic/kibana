@@ -9,9 +9,5 @@
     "browser": true,
     "requiredBundles": ["kibanaUtils"],
     "requiredPlugins": ["data", "fieldFormats"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
   }
 }

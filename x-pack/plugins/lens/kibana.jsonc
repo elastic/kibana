@@ -60,10 +60,6 @@
     ],
     "extraPublicDirs": [
       "common/constants"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

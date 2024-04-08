@@ -23,9 +23,6 @@
       "kibanaUtils",
       "data",
       "lens"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

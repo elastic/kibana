@@ -8,10 +8,6 @@
     "browser": true,
     "extraPublicDirs": [
       "common"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

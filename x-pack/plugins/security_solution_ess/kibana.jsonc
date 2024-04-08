@@ -15,10 +15,6 @@
     "optionalPlugins": [
       "cloudExperiments",
     ],
-    "requiredBundles": [ "kibanaReact"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
+    "requiredBundles": [ "kibanaReact"]
   }
 }

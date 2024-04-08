@@ -18,9 +18,6 @@
       "visualizations"
     ],
     "optionalPlugins": ["triggersActionsUi", "usageCollection"],
-    "requiredBundles": ["savedObjects"],
-    "nodeRoles": [
-      "ui"
-    ]
+    "requiredBundles": ["savedObjects"]
   }
 }

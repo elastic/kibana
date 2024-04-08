@@ -18,10 +18,6 @@
       "uiActions"
     ],
     "extraPublicDirs": ["common"],
-    "requiredBundles": ["kibanaUtils"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
+    "requiredBundles": ["kibanaUtils"]
   }
 }

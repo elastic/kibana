@@ -14,9 +14,6 @@
       "inspector",
       "expressions",
       "visualizations"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

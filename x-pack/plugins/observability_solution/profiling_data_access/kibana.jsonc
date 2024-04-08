@@ -11,9 +11,6 @@
       "data", 
     ],
     "optionalPlugins": ["cloud",  "fleet"],
-    "requiredBundles": [],
-    "nodeRoles": [
-      "ui"
-    ]
+    "requiredBundles": []
   }
 }

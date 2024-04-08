@@ -17,10 +17,6 @@
       "share"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact"],
-    "extraPublicDirs": ["common"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

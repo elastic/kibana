@@ -6,10 +6,6 @@
     "id": "savedObjectsFinder",
     "server": true,
     "browser": true,
-    "requiredBundles": ["savedObjectsManagement"],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
-    ]
+    "requiredBundles": ["savedObjectsManagement"]
   }
 }

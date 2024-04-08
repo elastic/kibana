@@ -13,10 +13,6 @@
     "optionalPlugins": [
       "spaces",
       "serverless"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

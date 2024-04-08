@@ -15,9 +15,6 @@
       "kibanaReact",
       "kibanaUtils",
       "esUiShared"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

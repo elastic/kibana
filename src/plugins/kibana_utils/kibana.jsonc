@@ -10,10 +10,6 @@
       "common",
       "demos/state_containers/todomvc",
       "common/state_containers"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

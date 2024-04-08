@@ -10,9 +10,6 @@
     "requiredPlugins": ["data", "contentManagement", "embeddable", "expressions"],
     "optionalPlugins": ["spaces", "savedObjectsTaggingOss"],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"],
-    "nodeRoles": [
-      "ui"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

@@ -7,9 +7,6 @@
     "server": false,
     "browser": true,
     "requiredPlugins": ["unifiedSearch"],
-    "requiredBundles": [],
-    "nodeRoles": [
-      "ui"
-    ]
+    "requiredBundles": []
   }
 }

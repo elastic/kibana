@@ -36,10 +36,6 @@
     ],
     "requiredBundles": [
       "kibanaReact"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

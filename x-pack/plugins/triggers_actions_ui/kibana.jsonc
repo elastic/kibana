@@ -44,10 +44,6 @@
     "extraPublicDirs": [
       "public/common",
       "public/common/constants"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

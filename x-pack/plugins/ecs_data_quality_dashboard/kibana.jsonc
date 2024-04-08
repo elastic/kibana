@@ -12,9 +12,6 @@
     ],
     "optionalPlugins": [
       "spaces",
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

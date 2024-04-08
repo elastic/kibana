@@ -14,9 +14,6 @@
       "usageCollection"
     ],
     "requiredBundles": [
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

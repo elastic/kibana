@@ -22,9 +22,6 @@
     ],
     "extraPublicDirs": [
       "common/constants"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

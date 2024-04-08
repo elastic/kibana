@@ -42,10 +42,6 @@
       "presentationUtil",
       "presentationPanel",
       "savedObjects"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

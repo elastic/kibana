@@ -9,8 +9,5 @@
     "browser": true,
     "optionalPlugins": ["cloud", "features"],
     "requiredBundles": ["kibanaReact"],
-    "nodeRoles": [
-      "ui"
-    ]
   }
 }

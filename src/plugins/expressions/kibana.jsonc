@@ -14,9 +14,6 @@
     "extraPublicDirs": [
       "common",
       "common/fonts"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

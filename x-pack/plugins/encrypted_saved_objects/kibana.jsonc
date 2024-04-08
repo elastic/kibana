@@ -13,10 +13,6 @@
     ],
     "optionalPlugins": [
       "security"
-    ],
-    "nodeRoles": [
-      "background_tasks",
-      "ui"
     ]
   }
 }

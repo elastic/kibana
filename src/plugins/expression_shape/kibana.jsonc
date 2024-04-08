@@ -16,9 +16,6 @@
     ],
     "extraPublicDirs": [
       "common"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

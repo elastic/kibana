@@ -17,9 +17,6 @@
     ],
     "requiredBundles": [
       "kibanaReact", "embeddable"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

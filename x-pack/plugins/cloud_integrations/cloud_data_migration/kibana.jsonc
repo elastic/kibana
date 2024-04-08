@@ -20,9 +20,6 @@
     ],
     "requiredBundles": [
       "kibanaReact"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

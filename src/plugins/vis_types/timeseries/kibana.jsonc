@@ -26,9 +26,6 @@
       "kibanaUtils",
       "kibanaReact",
       "fieldFormats"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

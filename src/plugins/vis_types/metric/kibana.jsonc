@@ -17,9 +17,6 @@
     "requiredBundles": [
       "visDefaultEditor",
       "kibanaUtils"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

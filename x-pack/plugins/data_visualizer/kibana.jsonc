@@ -38,9 +38,6 @@
       "uiActions",
       "lens",
       "textBasedLanguages",
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }

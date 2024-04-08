@@ -8,9 +8,6 @@
     "browser": true,
     "requiredPlugins": ["management"],
     "optionalPlugins": ["home", "serverless"],
-    "requiredBundles": ["kibanaReact"],
-    "nodeRoles": [
-      "ui"
-    ]
+    "requiredBundles": ["kibanaReact"]
   }
 }

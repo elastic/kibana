@@ -10,9 +10,6 @@
     "requiredPlugins": [
       "licensing",
       "licenseApiGuard"
-    ],
-    "nodeRoles": [
-      "ui"
     ]
   }
 }
