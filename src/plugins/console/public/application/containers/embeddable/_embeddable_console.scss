@@ -64,15 +64,23 @@
   width: 100%;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   overflow-y: hidden; // Ensures the movement of buttons in :focus don't cause scrollbars
   overflow-x: auto;
+  padding-right: $euiSizeS;
 
   &--button {
-    justify-content: flex-start;
+    flex-grow: 1;
+    width: 100%;
+
+    .euiButtonEmpty__content {
+      justify-content: flex-start;
+    }
   }
 
   &--altViewButton-container {
-    padding: $euiSizeS;
+    margin-left: auto;
+    // padding: $euiSizeS;
   }
 }
 

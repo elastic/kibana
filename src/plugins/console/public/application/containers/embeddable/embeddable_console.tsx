@@ -10,9 +10,7 @@ import React, { useReducer, useEffect } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiButtonEmpty,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
@@ -128,40 +126,32 @@ export const EmbeddableConsole = ({
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <EuiFlexGroup className="embeddableConsole__controls" gutterSize="none">
-              <EuiFlexItem>
-                <EuiButton
-                  color="text"
-                  iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                  onClick={toggleConsole}
-                  fullWidth
-                  contentProps={{
-                    className: 'embeddableConsole__controls--button',
-                  }}
-                  data-test-subj="consoleEmbeddedControlBar"
-                  data-telemetry-id="console-embedded-controlbar-button"
-                >
-                  {i18n.translate('console.embeddableConsole.title', {
-                    defaultMessage: 'Console',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
+            <div className="embeddableConsole__controls">
+              <EuiButtonEmpty
+                color="text"
+                iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                onClick={toggleConsole}
+                className="embeddableConsole__controls--button"
+                data-test-subj="consoleEmbeddedControlBar"
+                data-telemetry-id="console-embedded-controlbar-button"
+              >
+                {i18n.translate('console.embeddableConsole.title', {
+                  defaultMessage: 'Console',
+                })}
+              </EuiButtonEmpty>
               {alternateView && (
-                <EuiFlexItem
-                  grow={false}
-                  className="embeddableConsole__controls--altViewButton-container"
-                >
+                <div className="embeddableConsole__controls--altViewButton-container">
                   <alternateView.ActivationButton
                     activeView={showAlternateView}
                     onClick={clickAlternateViewActivateButton}
                   />
-                </EuiFlexItem>
+                </div>
               )}
-            </EuiFlexGroup>
+            </div>
           </EuiThemeProvider>
           {showConsole ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
           {showAlternateView ? (
-            <div>
+            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
               <EuiWindowEvent event="keydown" handler={onKeyDown} />
               <alternateView.ViewContent />
             </div>
