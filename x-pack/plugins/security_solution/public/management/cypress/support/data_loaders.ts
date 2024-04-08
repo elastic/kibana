@@ -11,6 +11,14 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type {
+  DeletedIndexedCrowdstrikeRuleAlerts,
+  IndexedCrowdstrikeRuleAlerts,
+} from '../../../../common/endpoint/data_loaders/index_crowdstrike_rule_alerts';
+import {
+  deleteIndexedCrowdstrikeRuleAlerts,
+  indexCrowdstrikeRuleAlerts,
+} from '../../../../common/endpoint/data_loaders/index_crowdstrike_rule_alerts';
 import {
   getHostVmClient,
   createVm,
@@ -240,6 +248,23 @@ export const dataLoaders = (
     ): Promise<DeletedIndexedEndpointRuleAlerts> => {
       const { esClient, log } = await stackServicesPromise;
       return deleteIndexedEndpointRuleAlerts(esClient, data, log);
+    },
+
+    indexCrowdstrikeRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
+      const { esClient } = await stackServicesPromise;
+      return (
+        await indexCrowdstrikeRuleAlerts({
+          ...options,
+          esClient,
+        })
+      ).alerts;
+    },
+
+    deleteIndexedCrowdstrikeRuleAlerts: async (
+      data: IndexedCrowdstrikeRuleAlerts['alerts']
+    ): Promise<DeletedIndexedCrowdstrikeRuleAlerts> => {
+      const { esClient } = await stackServicesPromise;
+      return deleteIndexedCrowdstrikeRuleAlerts(esClient, data);
     },
 
     indexEndpointPolicyResponse: async (
