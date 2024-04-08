@@ -30,6 +30,7 @@ import {
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
+import { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
@@ -219,6 +220,7 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    modelVersions: adHocRunParamsModelVersions,
   });
 
   // Encrypted attributes
