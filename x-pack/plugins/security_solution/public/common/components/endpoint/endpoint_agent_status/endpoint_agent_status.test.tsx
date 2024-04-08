@@ -9,7 +9,7 @@ import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
 import type { EndpointAgentStatusProps } from './endpoint_agent_status';
 import { EndpointAgentStatus } from './endpoint_agent_status';
-import { HostStatus, type AgentStatuses } from '../../../../../common/endpoint/types';
+import { type AgentStatuses, HostStatus } from '../../../../../common/endpoint/types';
 import React from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useAgentStatus } from '../../../hooks/use_agent_status';
@@ -165,29 +165,39 @@ describe('When showing Endpoint Agent Status', () => {
       expect(getByTestId('test').textContent).toEqual('HealthyIsolating');
     });
 
-    it('should display status and isolating and have tooltip with other pending actions', async () => {
-      useAgentStatusMock.mockReturnValue({
-        data: {
-          [testAgentId]: getAgentStatusMock({
-            pendingActions: {
-              isolate: 1,
-              'kill-process': 1,
-            },
-          }),
-        },
-      });
+    it.each([
+      ['isolate', 'Isolating'],
+      ['release', 'Releasing'],
+    ])(
+      'should display status and %s and have tooltip with other pending actions',
+      async (action, expectedLabel) => {
+        useAgentStatusMock.mockReturnValue({
+          data: {
+            [testAgentId]: getAgentStatusMock({
+              pendingActions: {
+                [action === 'release' ? 'unisolate' : action]: 1,
+                'kill-process': 1,
+              },
+            }),
+          },
+        });
 
-      const { getByTestId } = render();
-      expect(getByTestId('test').textContent).toEqual('HealthyIsolating');
+        const { getByTestId } = render();
+        expect(getByTestId('test').textContent).toEqual(`Healthy${expectedLabel}`);
 
-      triggerTooltip();
-      await waitFor(() => {
-        expect(
-          within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
-            .textContent
-        ).toEqual('Pending actions:isolate1kill-process1');
-      });
-    });
+        triggerTooltip();
+        await waitFor(() => {
+          expect(
+            within(renderResult.baseElement).getByTestId('test-actionStatuses-tooltipContent')
+              .textContent
+          ).toEqual(
+            action === 'isolate'
+              ? `Pending actions:${action}1kill-process1`
+              : `Pending actions:kill-process1${action}1`
+          );
+        });
+      }
+    );
 
     it('should display status and releasing', async () => {
       useAgentStatusMock.mockReturnValue({

@@ -90,15 +90,4 @@ describe('EndpointOverview Component', () => {
     render();
     expect(findData.at(3).text()).toEqual('HealthyIsolated');
   });
-
-  // FIXME: un-skip once pending isolation status are supported again
-  test.skip.each([
-    ['isolate', 'Isolating'],
-    ['unisolate', 'Releasing'],
-  ])('it shows pending %s status', (action, expectedLabel) => {
-    set(endpointData.hostInfo ?? {}, 'metadata.Endpoint.state.isolation', true);
-    endpointData.pendingActions![action] = 1;
-    render();
-    expect(findData.at(3).text()).toEqual(`Healthy${expectedLabel}`);
-  });
 });
