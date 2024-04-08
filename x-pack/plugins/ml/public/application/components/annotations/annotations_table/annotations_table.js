@@ -278,7 +278,6 @@ class AnnotationsTableUI extends Component {
       entityCondition[annotation.by_field_name] = annotation.by_field_value;
     }
     mlTimeSeriesExplorer.entities = entityCondition;
-    // appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
     const singleMetricViewerLink = await mlLocator.getUrl(

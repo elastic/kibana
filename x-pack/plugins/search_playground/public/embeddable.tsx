@@ -7,7 +7,7 @@
 
 import React, { ComponentType, lazy, LazyExoticComponent, Suspense } from 'react';
 import type { App } from './components/app';
-import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
+import { PlaygroundProviderProps } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
 
 const lazyRender =
@@ -33,9 +33,7 @@ export const PlaygroundToolbar = lazyRender<React.ComponentProps<typeof Toolbar>
   }))
 );
 
-export const PlaygroundProvider = lazyRender<
-  React.ComponentProps<typeof PlaygroundProviderComponent>
->(
+export const PlaygroundProvider = lazyRender<PlaygroundProviderProps>(
   lazy(async () => ({
     default: (await import('./providers/playground_provider')).PlaygroundProvider,
   }))
