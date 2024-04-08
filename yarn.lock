@@ -5000,6 +5000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ipynb@link:packages/kbn-ipynb":
+  version "0.0.0"
+  uid ""
+
 "@kbn/jest-serializers@link:packages/kbn-jest-serializers":
   version "0.0.0"
   uid ""
