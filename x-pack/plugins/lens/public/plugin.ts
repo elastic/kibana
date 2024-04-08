@@ -403,6 +403,7 @@ export class LensPlugin {
               uiSettings: core.uiSettings,
               formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
               atLeastGold,
+              isNewVersion: share.isNewVersion,
             })
           );
         });

@@ -14,6 +14,7 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
+import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 
 declare global {
   interface Window {
@@ -97,12 +98,14 @@ interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
   atLeastGold: boolean;
+  isNewVersion: boolean;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
+  isNewVersion,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
@@ -123,41 +126,76 @@ export const downloadCsvShareProvider = ({
       }
     );
 
-    return atLeastGold
-      ? [
-          {
-            shareMenuItem: {
-              name: panelTitle,
-              icon: 'document',
-              disabled: !csvEnabled,
-              sortOrder: 1,
+    return isNewVersion
+      ? atLeastGold
+        ? [
+            {
+              shareMenuItem: {
+                name: panelTitle,
+                icon: 'document',
+                disabled: !csvEnabled,
+                sortOrder: 1,
+              },
+              downloadCSVLens: async () => {
+                await downloadCSVs({
+                  title,
+                  formatFactory: formatFactoryFn(),
+                  activeData,
+                  uiSettings,
+                  columnsSorting,
+                });
+                onClose?.();
+              },
+              label: 'CSV' as const,
+              reportType: 'csv',
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.share.helpText"
+                  defaultMessage="Export a PDF, PNG, or CSV of this visualization."
+                />
+              ),
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
+              ),
+              renderLayoutOptionSwitch: false,
+              getJobParams: undefined,
+              showRadios: true,
             },
-            downloadCSVLens: async () => {
-              await downloadCSVs({
-                title,
-                formatFactory: formatFactoryFn(),
-                activeData,
-                uiSettings,
-                columnsSorting,
-              });
-              onClose?.();
+          ]
+        : [
+            {
+              shareMenuItem: {
+                name: panelTitle,
+                icon: 'document',
+                disabled: !csvEnabled,
+                sortOrder: 1,
+              },
+              showRadios: false,
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.application.csvPanelContent.generationDescription"
+                  defaultMessage="Download the data displayed in the visualization."
+                />
+              ),
+              isDisabled: !csvEnabled,
+              warnings: getWarnings(activeData),
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+              ),
+              downloadCSVLens: async () => {
+                await downloadCSVs({
+                  title,
+                  formatFactory: formatFactoryFn(),
+                  activeData,
+                  uiSettings,
+                  columnsSorting,
+                });
+                onClose?.();
+              },
+              label: 'CSV' as const,
+              reportType: 'csv',
             },
-            label: 'CSV' as const,
-            reportType: 'csv',
-            helpText: (
-              <FormattedMessage
-                id="xpack.lens.share.helpText"
-                defaultMessage="Export a PDF, PNG, or CSV of this visualization."
-              />
-            ),
-            generateReportButton: (
-              <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
-            ),
-            renderLayoutOptionSwitch: false,
-            getJobParams: undefined,
-            showRadios: true,
-          },
-        ]
+          ]
       : [
           {
             shareMenuItem: {
@@ -166,30 +204,26 @@ export const downloadCsvShareProvider = ({
               disabled: !csvEnabled,
               sortOrder: 1,
             },
-            showRadios: false,
-            helpText: (
-              <FormattedMessage
-                id="xpack.lens.application.csvPanelContent.generationDescription"
-                defaultMessage="Download the data displayed in the visualization."
-              />
-            ),
-            isDisabled: !csvEnabled,
-            warnings: getWarnings(activeData),
-            generateReportButton: (
-              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
-            ),
-            downloadCSVLens: async () => {
-              await downloadCSVs({
-                title,
-                formatFactory: formatFactoryFn(),
-                activeData,
-                uiSettings,
-                columnsSorting,
-              });
-              onClose?.();
+            panel: {
+              id: 'csvDownloadPanel',
+              title: panelTitle,
+              content: (
+                <DownloadPanelContent
+                  isDisabled={!csvEnabled}
+                  warnings={getWarnings(activeData)}
+                  onClick={async () => {
+                    await downloadCSVs({
+                      title,
+                      formatFactory: formatFactoryFn(),
+                      activeData,
+                      uiSettings,
+                      columnsSorting,
+                    });
+                    onClose?.();
+                  }}
+                />
+              ),
             },
-            label: 'CSV' as const,
-            reportType: 'csv',
           },
         ];
   };
