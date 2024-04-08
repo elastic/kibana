@@ -61,7 +61,7 @@ export interface BulkCreateSuppressedAlertsParams
  * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
  * they will be created as regular alerts
  */
-export const bulkCreateSuppressedAlertsInMemoryForNewTerms = async ({
+export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   eventsAndTerms,
   wrapHits,
   wrapSuppressedHits,

@@ -23,7 +23,7 @@ interface SuppressionTerm {
 }
 
 /**
- * returns list of populated suppression fields:
+ * returns an object containing the standard suppression fields (ALERT_INSTANCE_ID, ALERT_SUPPRESSION_TERMS, etc), with corresponding values populated from the `fields` parameter.
  */
 export const getSuppressionAlertFields = ({
   primaryTimestamp,
@@ -58,7 +58,7 @@ export const getSuppressionAlertFields = ({
 };
 
 /**
- * retrieves suppression values from source fields based on alert suppression configuration
+ * returns an array of {@link SuppressionTerm}s by retrieving the appropriate field values based on the provided alertSuppression configuration
  */
 export const getSuppressionTerms = ({
   alertSuppression,

@@ -21,6 +21,7 @@ export const partitionMissingFieldsEvents = <
 >(
   events: T[],
   suppressedBy: string[] = [],
+  // path to fields property within event object. At this point, it can be in root of event object or within event key
   fieldsPath: ['event'] | [] = []
 ): T[][] => {
   return partition(events, (event) => {

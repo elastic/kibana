@@ -17,7 +17,7 @@ import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
-import { bulkCreateSuppressedAlertsInMemoryForNewTerms } from './bulk_create_suppressed_alerts_in_memory';
+import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 import type { EventsAndTerms } from './types';
 import type {
   RecentTermsAggResult,
@@ -262,7 +262,7 @@ export const createNewTermsAlertType = (
             const eventAndTermsChunk = eventAndTermsChunks[i];
 
             if (isAlertSuppressionActive) {
-              bulkCreateResult = await bulkCreateSuppressedAlertsInMemoryForNewTerms({
+              bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
                 eventsAndTerms: eventAndTermsChunk,
                 toReturn: result,
                 wrapHits,
