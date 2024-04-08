@@ -25,7 +25,8 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/field-utils",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/custom-icons"
   ],
   "exclude": [
     "target/**/*",

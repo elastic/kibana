@@ -74,6 +74,25 @@ describe('DocViewerRegistry', () => {
     });
   });
 
+  describe('#enableById & #disableById', () => {
+    test('should enable/disable a doc view given the passed id', () => {
+      const registry = new DocViewsRegistry([fnDocView, componentDocView]);
+
+      const docViews = registry.getAll();
+
+      expect(docViews[0]).toHaveProperty('enabled', true);
+      expect(docViews[1]).toHaveProperty('enabled', true);
+
+      registry.disableById('function-doc-view');
+
+      expect(registry.getAll()[0]).toHaveProperty('enabled', false);
+
+      registry.enableById('function-doc-view');
+
+      expect(registry.getAll()[0]).toHaveProperty('enabled', true);
+    });
+  });
+
   describe('#clone', () => {
     test('should return a new DocViewRegistry instance starting from the current one', () => {
       const registry = new DocViewsRegistry([fnDocView, componentDocView]);
