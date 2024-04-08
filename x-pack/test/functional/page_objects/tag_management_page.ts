@@ -350,10 +350,9 @@ export class TagManagementPageObject extends FtrService {
         firstRow
       );
       await actionButton.click();
-      await this.testSubjects.click(`tagsTableAction-${action}`);
-    } else {
-      await this.testSubjects.click(`tagsTableAction-${action}`);
     }
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**
