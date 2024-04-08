@@ -43,6 +43,7 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
   isEditing?: boolean;
+  updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
 }
 const AgentPolicyFormContext = React.createContext<
   | {
@@ -63,6 +64,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   updateSysMonitoring,
   validation,
   isEditing = false,
+  updateAdvancedSettingsHasErrors,
 }) => {
   const authz = useAuthz();
   const disabled = !authz.fleet.allAgents;
@@ -151,7 +153,10 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                     </h3>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <ConfiguredSettings configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS} />
+                  <ConfiguredSettings
+                    configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
+                    updateAdvancedSettingsHasErrors={updateAdvancedSettingsHasErrors}
+                  />
                 </>
               ) : null}
             </StyledEuiAccordion>
@@ -178,7 +183,10 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <ConfiguredSettings configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS} />
+                <ConfiguredSettings
+                  configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
+                  updateAdvancedSettingsHasErrors={updateAdvancedSettingsHasErrors}
+                />
               </>
             ) : null}
             <EuiSpacer size="xl" />

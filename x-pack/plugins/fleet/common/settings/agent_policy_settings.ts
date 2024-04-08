@@ -10,6 +10,15 @@ import { z } from 'zod';
 
 import type { SettingsConfig } from './types';
 
+const zodStringWithDurationValidation = z.string().refine((val) => val.match(/^\d+[s|m|h|d]$/), {
+  message: i18n.translate(
+    'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
+    {
+      defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d',
+    }
+  ),
+});
+
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.limits.go_max_procs',
@@ -42,7 +51,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_download_timeout',
     },
-    schema: z.string().default('120s'),
+    schema: zodStringWithDurationValidation.default('120s'),
   },
   {
     name: 'agent.download.target_directory',
@@ -84,6 +93,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     ),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
-    schema: z.string().default('30s'),
+    schema: zodStringWithDurationValidation.default('30s'),
   },
 ];

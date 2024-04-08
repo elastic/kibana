@@ -78,6 +78,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
     const validation = agentPolicyFormValidation(agentPolicy);
+    const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
       setAgentPolicy({
@@ -170,6 +171,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
           validation={validation}
           isEditing={true}
+          updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
         />
 
         {hasChanges ? (
@@ -203,7 +205,11 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                     {showDevtoolsRequest ? (
                       <EuiFlexItem grow={false}>
                         <DevtoolsRequestFlyoutButton
-                          isDisabled={isLoading || Object.keys(validation).length > 0}
+                          isDisabled={
+                            isLoading ||
+                            Object.keys(validation).length > 0 ||
+                            hasAdvancedSettingsErrors
+                          }
                           btnProps={{
                             color: 'text',
                           }}
@@ -222,7 +228,10 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
+                          !hasFleetAllPrivileges ||
+                          isLoading ||
+                          Object.keys(validation).length > 0 ||
+                          hasAdvancedSettingsErrors
                         }
                         iconType="save"
                         color="primary"

@@ -92,7 +92,10 @@ const SettingsFieldWrapper: React.FC<{
 
     if (!validationResults.success) {
       setError(validationResults.error.issues[0].message);
-      return;
+      settingsConfig.updateAdvancedSettingsHasErrors?.(true);
+    } else {
+      setError('');
+      settingsConfig.updateAdvancedSettingsHasErrors?.(false);
     }
 
     const newAdvancedSettings = {
@@ -101,8 +104,6 @@ const SettingsFieldWrapper: React.FC<{
     };
 
     agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
-
-    setError('');
   };
 
   const fieldValue =
@@ -131,15 +132,20 @@ const SettingsFieldWrapper: React.FC<{
 
 export function ConfiguredSettings({
   configuredSettings,
+  updateAdvancedSettingsHasErrors,
 }: {
   configuredSettings: SettingsConfig[];
+  updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
 }) {
   return (
     <>
       {configuredSettings.map((configuredSetting) => {
+        configuredSetting.updateAdvancedSettingsHasErrors = updateAdvancedSettingsHasErrors;
         const Component = settingComponentRegistry.get(
           configuredSetting.schema instanceof z.ZodDefault
-            ? configuredSetting.schema._def.innerType._def.typeName
+            ? configuredSetting.schema._def.innerType._def.typeName === 'ZodEffects'
+              ? configuredSetting.schema._def.innerType._def.schema._def.typeName
+              : configuredSetting.schema._def.innerType._def.typeName
             : configuredSetting.schema._def.typeName
         );
 
