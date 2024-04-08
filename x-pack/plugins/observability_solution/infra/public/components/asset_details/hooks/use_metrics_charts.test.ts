@@ -29,7 +29,6 @@ describe('useHostFlyoutViewMetricsCharts', () => {
       'memoryUsage',
       'normalizedLoad1m',
       'logRate',
-      'diskSpaceUsageAvailable',
       'diskUsageByMountPoint',
       'diskThroughputReadWrite',
       'diskIOReadWrite',
@@ -70,7 +69,6 @@ describe('useHostPageViewMetricsCharts', () => {
       'normalizedLoad1m',
       'loadBreakdown',
       'logRate',
-      'diskSpaceUsageAvailable',
       'diskUsageByMountPoint',
       'diskThroughputReadWrite',
       'diskIOReadWrite',
@@ -119,6 +117,18 @@ describe('useKubernetesSectionMetricsCharts', () => {
 });
 
 describe('useHostKpiCharts', () => {
+  it('should return the subtitle "Max" in case of disk usage chart', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useHostKpiCharts({ dataViewId: metricsDataViewId })
+    );
+    await waitForNextUpdate();
+
+    const diskUsageChart = result.current.find(({ id }) => id === 'diskUsage');
+
+    expect(diskUsageChart).toHaveProperty('subtitle', 'Max');
+    expect(diskUsageChart).toHaveProperty('decimals', 1);
+  });
+
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useHostKpiCharts({ dataViewId: metricsDataViewId })
@@ -131,7 +141,8 @@ describe('useHostKpiCharts', () => {
 
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
-      expect(chart).toHaveProperty('subtitle', 'Average');
+      // diskUsage should have subtitle 'Max'
+      expect(chart).toHaveProperty('subtitle', index === 3 ? 'Max' : 'Average');
       expect(chart).toHaveProperty('decimals', 1);
     });
   });
@@ -139,7 +150,7 @@ describe('useHostKpiCharts', () => {
   it('should return an array of charts with correct options', async () => {
     const options = {
       seriesColor: 'blue',
-      subtitle: 'Custom Subtitle',
+      getSubtitle: () => 'Custom Subtitle',
     };
 
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -151,7 +162,7 @@ describe('useHostKpiCharts', () => {
 
     result.current.forEach((chart) => {
       expect(chart).toHaveProperty('seriesColor', options.seriesColor);
-      expect(chart).toHaveProperty('subtitle', options.subtitle);
+      expect(chart).toHaveProperty('subtitle', 'Custom Subtitle');
     });
   });
 });

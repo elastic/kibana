@@ -33,8 +33,20 @@ export const KpiCharts = () => {
         }),
       ];
 
-  const subtitle =
-    searchCriteria.limit < (hostCountData?.count.value ?? 0)
+  const getSubtitle = (formulaValue: string) => {
+    if (formulaValue.startsWith('max(')) {
+      return searchCriteria.limit < (hostCountData?.count.value ?? 0)
+        ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
+            defaultMessage: 'Max (of {limit} hosts)',
+            values: {
+              limit: searchCriteria.limit,
+            },
+          })
+        : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+            defaultMessage: 'Max',
+          });
+    }
+    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {
@@ -44,6 +56,7 @@ export const KpiCharts = () => {
       : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
           defaultMessage: 'Average',
         });
+  };
 
   // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
@@ -53,7 +66,7 @@ export const KpiCharts = () => {
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     searchSessionId,
-    subtitle,
+    getSubtitle,
   });
 
   return (
@@ -63,7 +76,7 @@ export const KpiCharts = () => {
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      options={{ subtitle: afterLoadedState.subtitle }}
+      options={{ getSubtitle: afterLoadedState.getSubtitle }}
       loading={loading}
     />
   );

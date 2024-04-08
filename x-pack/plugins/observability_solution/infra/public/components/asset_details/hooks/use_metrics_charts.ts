@@ -26,7 +26,6 @@ export const useHostFlyoutViewMetricsCharts = ({
       memory.xy.memoryUsage,
       cpu.xy.normalizedLoad1m,
       logs.xy.logRate,
-      disk.xy.diskSpaceUsageAvailable,
       disk.xy.diskUsageByMountPoint,
       disk.xy.diskThroughputReadWrite,
       disk.xy.diskIOReadWrite,
@@ -67,7 +66,6 @@ export const useHostPageViewMetricsCharts = ({
       cpu.xy.normalizedLoad1m,
       cpu.xy.loadBreakdown,
       logs.xy.logRate,
-      disk.xy.diskSpaceUsageAvailable,
       disk.xy.diskUsageByMountPoint,
       disk.xy.diskThroughputReadWrite,
       disk.xy.diskIOReadWrite,
@@ -118,12 +116,19 @@ export const useKubernetesSectionMetricsCharts = ({
   return charts;
 };
 
+const getSubtitleFromChartValue = (value: string) =>
+  value.startsWith('max(')
+    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
+    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+        defaultMessage: 'Average',
+      });
+
 export const useHostKpiCharts = ({
   dataViewId,
   options,
 }: {
   dataViewId?: string;
-  options?: { seriesColor: string; subtitle?: string };
+  options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
 }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
@@ -138,18 +143,16 @@ export const useHostKpiCharts = ({
       ...chart,
       seriesColor: options?.seriesColor,
       decimals: 1,
-      subtitle:
-        options?.subtitle ??
-        i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-          defaultMessage: 'Average',
-        }),
+      subtitle: options?.getSubtitle
+        ? options?.getSubtitle(chart.value)
+        : getSubtitleFromChartValue(chart.value),
       ...(dataViewId && {
         dataset: {
           index: dataViewId,
         },
       }),
     }));
-  }, [dataViewId, options?.seriesColor, options?.subtitle]);
+  }, [dataViewId, options?.seriesColor, options?.getSubtitle]);
 
   return charts;
 };
