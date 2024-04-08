@@ -19,11 +19,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { TransformListRow } from '../../../../common';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
-
 import { useGetTransformStats } from '../../../../hooks';
 
-import type { SectionConfig } from './expanded_row_details_pane';
-import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
+import type { SectionConfig } from './expanded_row_column_view';
+import { ExpandedRowColumnView } from './expanded_row_column_view';
 
 const NoStatsFallbackTabContent = ({
   transformsStatsLoading,
@@ -69,35 +68,29 @@ interface ExpandedRowStatsPaneProps {
 }
 
 export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) => {
-  const { data: fullStats } = useGetTransformStats(item.id, false, true);
-  const fullStatsSection: SectionConfig = {
-    title: 'Full Stats',
-    items: fullStats
-      ? Object.entries(fullStats.transforms[0].stats).map((s) => {
-          return { title: s[0].toString(), description: getItemDescription(s[1]) };
-        })
-      : [],
-    position: 'right',
-  };
-  console.log('fullStatsSection', fullStats);
+  const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
 
-  const basicStatsSection: SectionConfig = {
+  if (!isTransformListRowWithStats(item) && fullStats === undefined) {
+    return <NoStatsFallbackTabContent transformsStatsLoading={isLoading} />;
+  }
+
+  let displayStats = {};
+
+  if (fullStats !== undefined && !isLoading && !isError) {
+    displayStats = fullStats.transforms[0].stats;
+  } else if (isTransformListRowWithStats(item)) {
+    displayStats = item.stats?.stats;
+  }
+
+  const statsSection: SectionConfig = {
     title: 'Basic Stats',
-    items: isTransformListRowWithStats(item)
-      ? Object.entries(item.stats.stats).map((s) => {
-          return { title: s[0].toString(), description: getItemDescription(s[1]) };
-        })
-      : [],
+    items: Object.entries(displayStats).map((s) => {
+      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+    }),
     position: 'left',
   };
-  console.log('basicStatsSection', basicStatsSection);
 
-  return isTransformListRowWithStats(item) ? (
-    <ExpandedRowDetailsPane
-      sections={[basicStatsSection, fullStatsSection]}
-      dataTestSubj={'transformStatsTabContent'}
-    />
-  ) : (
-    <NoStatsFallbackTabContent transformsStatsLoading={false} />
+  return (
+    <ExpandedRowColumnView sections={[statsSection]} dataTestSubj={'transformStatsTabContent'} />
   );
 };
