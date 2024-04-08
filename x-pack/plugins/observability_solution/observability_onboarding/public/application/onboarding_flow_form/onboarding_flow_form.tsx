@@ -14,11 +14,11 @@ import {
   EuiText,
   EuiPanel,
   EuiSpacer,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
   EuiIcon,
-  EuiFlexGrid,
   EuiAvatar,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -38,39 +38,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.collectAndAnalyzeMyLabel',
         { defaultMessage: 'Collect and analyze my logs' }
       ),
-      description: (
-        <ul>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.detectPatternsAndOutliersLabel',
-              {
-                defaultMessage:
-                  'Detect patterns and outliers with log categorization and anomaly detection.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.troubleshootInRealTimeLabel',
-              { defaultMessage: 'Troubleshoot in real time with live tail.' }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.getInsightsFromStructuredLabel',
-              {
-                defaultMessage:
-                  'Get insights from structured and unstructured logs in minutes.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.deployAndManageLogsLabel',
-              { defaultMessage: 'Deploy and manage logs at petabyte scale.' }
-            )}
-          </li>
-        </ul>
+      description: i18n.translate(
+        'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
+        {
+          defaultMessage:
+            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+        }
       ),
     },
     {
@@ -79,45 +52,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyApplicationPerformanceLabel',
         { defaultMessage: 'Monitor my application performance' }
       ),
-      description: (
-        <ul>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.captureAndAnalyzeDistributedLabel',
-              {
-                defaultMessage:
-                  'Capture and analyze distributed transactions, traces, and profiling data for your applications.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.identifyPerformanceBottlenecksWithLabel',
-              {
-                defaultMessage:
-                  'Identify performance bottlenecks with automated and curated visual representation of all dependencies.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.drillIntoAnomaliesTransactionLabel',
-              {
-                defaultMessage:
-                  'Drill into anomalies, transaction details, errors and metrics for deeper analysis.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.useMachineLearningToLabel',
-              {
-                defaultMessage:
-                  'Use machine learning to automatically detect anomalies.',
-              }
-            )}
-          </li>
-        </ul>
+      description: i18n.translate(
+        'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
+        {
+          defaultMessage:
+            'Collect distributed traces and catch application performance problems.',
+        }
       ),
     },
     {
@@ -126,49 +66,18 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyInfrastructureLabel',
         { defaultMessage: 'Monitor my infrastructure' }
       ),
-      description: (
-        <ul>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.builtOnPowerfulElasticsearchLabel',
-              {
-                defaultMessage:
-                  'Built on powerful Elasticsearch, stream in and scale infrastructure metrics from your systems, cloud, network, and other infrastructure sources',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.getLogicalAndPhysicalLabel',
-              {
-                defaultMessage:
-                  'Get logical and physical views of your infrastructure topology.',
-              }
-            )}
-          </li>
-          <li>
-            {i18n.translate(
-              'xpack.observability_onboarding.onboardingFlowForm.li.breakDownApplicationAndLabel',
-              {
-                defaultMessage:
-                  'Break down application and infrastructure silos for faster root cause detection',
-              }
-            )}
-          </li>
-        </ul>
+      description: i18n.translate(
+        'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
+        {
+          defaultMessage:
+            'Stream infrastructure metrics and accelerate root cause detection by breaking down silos.',
+        }
       ),
     },
   ];
 
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingUseCase' });
   const [selectedId, setSelectedId] = useState<string>();
-  const [hoveredId, setHoveredId] = useState<string>();
-
-  const visibleOption = hoveredId
-    ? options.find((option) => option.id === hoveredId)
-    : selectedId
-    ? options.find((option) => option.id === selectedId)
-    : undefined;
 
   const { euiTheme } = useEuiTheme();
 
@@ -185,35 +94,30 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}>
-        <EuiFlexItem css={{ fontWeight: 'bold' }}>
-          {options.map((option, index) => (
-            <div
-              key={option.id}
-              onMouseEnter={() => setHoveredId(option.id)}
-              onMouseLeave={() => setHoveredId(undefined)}
-            >
-              {/* Using EuiSpacer instead of EuiFlexGroup to ensure spacing is part of hit area for mouse hover effect */}
-              {index > 0 && <EuiSpacer size="m" />}
-              <EuiCheckableCard
-                id={`${radioGroupId}_${option.id}`}
-                name={radioGroupId}
-                label={option.label}
-                checked={selectedId === option.id}
-                onChange={() => setSelectedId(option.id)}
-              />
-            </div>
-          ))}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {visibleOption && (
-            <EuiPanel color="subdued">
-              <EuiText size="s" color="subdued">
-                {visibleOption.description}
-              </EuiText>
-            </EuiPanel>
-          )}
-        </EuiFlexItem>
+      <EuiFlexGroup
+        css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}
+        gutterSize="m"
+        direction="column"
+      >
+        {options.map((option, index) => (
+          <EuiFlexItem key={option.id}>
+            <EuiCheckableCard
+              id={`${radioGroupId}_${option.id}`}
+              name={radioGroupId}
+              label={
+                <>
+                  <EuiText css={{ fontWeight: 'bold' }}>{option.label}</EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiText color="subdued" size="s">
+                    {option.description}
+                  </EuiText>
+                </>
+              }
+              checked={selectedId === option.id}
+              onChange={() => setSelectedId(option.id)}
+            />
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
 
       {selectedId && (

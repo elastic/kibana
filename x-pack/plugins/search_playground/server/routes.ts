@@ -17,6 +17,17 @@ import { Prompt } from '../common/prompt';
 import { errorHandler } from './utils/error_handler';
 import { APIRoutes } from './types';
 
+export function createRetriever(esQuery: string) {
+  return (question: string) => {
+    try {
+      const query = JSON.parse(esQuery.replace(/{query}/g, question.replace(/"/g, '\\"')));
+      return query.query;
+    } catch (e) {
+      throw Error(e);
+    }
+  };
+}
+
 export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) {
   router.post(
     {
@@ -76,15 +87,7 @@ export function defineRoutes({ log, router }: { log: Logger; router: IRouter }) 
         model,
         rag: {
           index: data.indices,
-          retriever: (question: string) => {
-            try {
-              const query = JSON.parse(data.elasticsearchQuery.replace(/{query}/g, question));
-              return query.query;
-            } catch (e) {
-              log.error('Failed to parse the Elasticsearch query', e);
-              throw Error(e);
-            }
-          },
+          retriever: createRetriever(data.elasticsearchQuery),
           content_field: sourceFields,
           size: Number(data.docSize),
         },
