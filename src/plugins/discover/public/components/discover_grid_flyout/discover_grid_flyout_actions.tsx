@@ -24,6 +24,7 @@ import {
   EuiToolTip,
   useEuiTheme,
   useResizeObserver,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { FlyoutActionItem } from '../../customizations';
 
@@ -37,8 +38,8 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
   const { euiTheme } = useEuiTheme();
   const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
   const dimensions = useResizeObserver(ref);
-  const isMobileScreen = dimensions?.width ? dimensions.width < euiTheme.breakpoint.xs : false;
-  const isLargeScreen = dimensions?.width ? dimensions.width > euiTheme.breakpoint.m : false;
+  const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
+  const isLargeScreen = dimensions?.width ? dimensions.width > euiTheme.base * 30 : false;
   return (
     <EuiFlexGroup ref={setRef}>
       <EuiFlexItem>
