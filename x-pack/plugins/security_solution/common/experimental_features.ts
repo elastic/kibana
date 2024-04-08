@@ -120,7 +120,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
-  assistantModelEvaluation: false,
+  assistantModelEvaluation: true,
 
   /**
    * Enables the new user details flyout displayed on the Alerts table.
