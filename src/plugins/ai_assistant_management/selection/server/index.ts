@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './configure_image';
+import { PluginInitializerContext } from '@kbn/core/server';
+
+export { config } from './config';
+
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { AIAssistantManagementSelectionPlugin } = await import('./plugin');
+  return new AIAssistantManagementSelectionPlugin(initContext);
+};

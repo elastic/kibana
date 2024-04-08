@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-import './image_embeddable.scss';
+export enum AIAssistantType {
+  Observability = 'observability',
+  Default = 'default',
+  Never = 'never',
+}
