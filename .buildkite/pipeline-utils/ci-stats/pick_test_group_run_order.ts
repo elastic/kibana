@@ -19,6 +19,25 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
+// TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
+/** This function bridges the agent targeting between gobld and kibana-buildkite agent targeting */
+const getAgentRule = (queueName: string = 'n2-4-spot') => {
+  if (process.env?.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld') {
+    const [kind, cores, spot] = queueName.split('-');
+    return {
+      provider: 'gcp',
+      image: 'family/kibana-ubuntu-2004',
+      imageProject: 'elastic-images-qa',
+      machineType: `${kind}-standard-${cores}`,
+      preemptible: spot === 'spot',
+    };
+  } else {
+    return {
+      queue: queueName,
+    };
+  }
+};
+
 const getRequiredEnv = (name: string) => {
   const value = process.env[name];
   if (typeof value !== 'string' || !value) {
@@ -418,9 +437,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              queue: 'n2-4-spot',
-            },
+            agents: getAgentRule('n2-4-spot'),
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -438,9 +455,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: {
-              queue: 'n2-4-spot',
-            },
+            agents: getAgentRule('n2-4-spot'),
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -474,9 +489,7 @@ export async function pickTestGroupRunOrder() {
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                   timeout_in_minutes: 90,
-                  agents: {
-                    queue,
-                  },
+                  agents: getAgentRule(queue),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
                     ...FTR_EXTRA_ARGS,
