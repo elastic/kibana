@@ -24,6 +24,7 @@ import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
+const COUNT_BEFORE_OVERFLOW = 5;
 interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -95,12 +96,12 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
     const quickPrompts = useMemo(() => {
-      const visibleCount = Math.floor(width / 120);
+      const visibleCount = isFlyoutMode ? Math.floor(width / 120) : COUNT_BEFORE_OVERFLOW;
       const visibleItems = contextFilteredQuickPrompts.slice(0, visibleCount);
       const overflowItems = contextFilteredQuickPrompts.slice(visibleCount);
 
       return { visible: visibleItems, overflow: overflowItems };
-    }, [contextFilteredQuickPrompts, width]);
+    }, [contextFilteredQuickPrompts, isFlyoutMode, width]);
 
     return (
       <EuiFlexGroup

@@ -39,8 +39,8 @@ interface OwnProps {
   showAnonymizedValues: boolean;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
-  chatHistoryVisible: boolean;
-  setChatHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  chatHistoryVisible?: boolean;
+  setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
@@ -137,7 +137,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   return (
     <>
       <FlyoutNavigation
-        isExpanded={chatHistoryVisible}
+        isExpanded={!!chatHistoryVisible}
         setIsExpanded={setChatHistoryVisible}
         onConversationCreate={onConversationCreate}
       >

@@ -81,6 +81,7 @@ export interface AssistantProviderProps {
     showAnonymizedValues: boolean;
     setIsStreaming: (isStreaming: boolean) => void;
     currentUserAvatar?: UserAvatar;
+    isFlyoutMode?: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;

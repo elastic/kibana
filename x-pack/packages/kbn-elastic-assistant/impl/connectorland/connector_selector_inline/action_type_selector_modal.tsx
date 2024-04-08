@@ -62,7 +62,7 @@ export const ActionTypeSelectorModal = React.memo(
       [actionTypeRegistry, actionTypes, onSelect]
     );
 
-    if (actionTypes?.length === 0) return null;
+    if (!actionTypes?.length) return null;
 
     if (actionTypeSelectorInline) return <>{content}</>;
 

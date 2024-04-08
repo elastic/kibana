@@ -97,8 +97,8 @@ export interface Props {
   setConversationTitle?: Dispatch<SetStateAction<string>>;
   onCloseFlyout?: () => void;
   isFlyoutMode?: boolean;
-  chatHistoryVisible: boolean;
-  setChatHistoryVisible: Dispatch<SetStateAction<boolean>>;
+  chatHistoryVisible?: boolean;
+  setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
   currentUserAvatar?: UserAvatar;
 }
 

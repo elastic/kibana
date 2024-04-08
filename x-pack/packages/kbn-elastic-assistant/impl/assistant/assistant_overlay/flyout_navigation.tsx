@@ -15,7 +15,7 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
   isExpanded: boolean;
-  setIsExpanded: (value: boolean) => void;
+  setIsExpanded?: (value: boolean) => void;
   children: React.ReactNode;
   onConversationCreate?: () => Promise<void>;
 }
@@ -35,7 +35,10 @@ const VerticalSeparator = styled.div`
 
 export const FlyoutNavigation = memo<FlyoutNavigationProps>(
   ({ isExpanded, setIsExpanded, children, onConversationCreate }) => {
-    const onToggle = useCallback(() => setIsExpanded(!isExpanded), [isExpanded, setIsExpanded]);
+    const onToggle = useCallback(
+      () => setIsExpanded && setIsExpanded(!isExpanded),
+      [isExpanded, setIsExpanded]
+    );
 
     const toggleButton = useMemo(
       () => (
@@ -81,7 +84,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>{toggleButton}</EuiFlexItem>
+              {setIsExpanded && <EuiFlexItem grow={false}>{toggleButton}</EuiFlexItem>}
               {onConversationCreate && (
                 <>
                   <EuiFlexItem grow={false}>

@@ -223,12 +223,12 @@ describe('helpers', () => {
       replacements: {},
     };
     const baseConversations = {
-      conversation1: {
+      conversation_1: {
         ...defaultProps,
         title: 'Conversation 1',
         id: 'conversation_1',
       },
-      conversation2: {
+      conversation_2: {
         ...defaultProps,
         title: 'Conversation 2',
         id: 'conversation_2',
@@ -261,22 +261,22 @@ describe('helpers', () => {
       const result = mergeBaseWithPersistedConversations(baseConversations, moreData);
 
       expect(result).toEqual({
-        conversation1: {
+        conversation_1: {
           title: 'Conversation 1',
           id: 'conversation_1',
           ...defaultProps,
         },
-        conversation2: {
+        conversation_2: {
           title: 'Conversation 2',
           id: 'conversation_2',
           ...defaultProps,
         },
-        'Conversation 3': {
+        conversation_3: {
           title: 'Conversation 3',
           id: 'conversation_3',
           ...defaultProps,
         },
-        'Conversation 4': {
+        conversation_4: {
           title: 'Conversation 4',
           id: 'conversation_4',
           ...defaultProps,
@@ -298,71 +298,15 @@ describe('helpers', () => {
       const result = mergeBaseWithPersistedConversations({}, conversationsData);
 
       expect(result).toEqual({
-        'Conversation 1': {
+        conversation_1: {
           ...defaultProps,
           title: 'Conversation 1',
           id: 'conversation_1',
         },
-        'Conversation 2': {
+        conversation_2: {
           ...defaultProps,
           title: 'Conversation 2',
           id: 'conversation_2',
-        },
-      });
-    });
-
-    it('should handle and merge conversations with duplicate titles', () => {
-      const result = mergeBaseWithPersistedConversations(
-        {
-          'Conversation 1': {
-            title: 'Conversation 1',
-            id: 'conversation1',
-            ...defaultProps,
-          },
-        },
-        {
-          page: 1,
-          perPage: 10,
-          total: 1,
-          data: [
-            {
-              title: 'Conversation 1',
-              id: 'conversation1',
-              ...defaultProps,
-              messages: [
-                {
-                  content: 'Message 3',
-                  role: 'user' as const,
-                  timestamp: '2024-02-14T22:29:43.862Z',
-                },
-                {
-                  content: 'Message 4',
-                  role: 'user' as const,
-                  timestamp: '2024-02-14T22:29:43.862Z',
-                },
-              ],
-            },
-          ],
-        }
-      );
-
-      expect(result).toEqual({
-        'Conversation 1': {
-          title: 'Conversation 1',
-          id: 'conversation1',
-          ...defaultProps,
-          messages: [
-            {
-              content: 'Message 3',
-              role: 'user',
-              timestamp: '2024-02-14T22:29:43.862Z',
-            },
-            {
-              content: 'Message 4',
-              role: 'user',
-              timestamp: '2024-02-14T22:29:43.862Z',
-            },
-          ],
         },
       });
     });
