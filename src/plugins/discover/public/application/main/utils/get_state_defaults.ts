@@ -54,13 +54,14 @@ export function getStateDefaults({
 
   const defaultState: DiscoverAppState = {
     query,
-    sort: !sort.length
-      ? getDefaultSort(
-          dataView,
-          uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
-        )
-      : sort,
+    sort:
+      !isTextBasedQueryMode && !sort.length
+        ? getDefaultSort(
+            dataView,
+            uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+            uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+          )
+        : sort,
     columns,
     index: isTextBasedQueryMode ? undefined : dataView?.id,
     interval: 'auto',
