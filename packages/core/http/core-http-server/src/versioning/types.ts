@@ -228,7 +228,7 @@ export interface AddVersionOpts<P, Q, B> {
    * Validation for this version of a route
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B>;
+  validate: false | FullValidationConfig<P, Q, B> | (() => FullValidationConfig<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**
