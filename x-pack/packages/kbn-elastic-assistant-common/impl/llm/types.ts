@@ -9,30 +9,6 @@ import {
   ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { Replacements, ExecuteConnectorResponse } from '../schemas';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
-
-export interface MessagePresentation {
-  delay?: number;
-  stream?: boolean;
-}
-
-export interface Message {
-  role: ConversationRole;
-  reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Replacements;
-  content?: string;
-  timestamp: string;
-  isError?: boolean;
-  presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
-}
-
-export type ResponseBody = ExecuteConnectorResponse;
 
 export interface InvokeAIActionParamsSchema {
   messages: Array<{

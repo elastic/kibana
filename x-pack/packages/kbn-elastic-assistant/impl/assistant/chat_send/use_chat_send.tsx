@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
-import type { LLMMessage as Message } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
+import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
@@ -127,7 +127,7 @@ export const useChatSend = ({
         isEnabledRAGAlerts,
       });
 
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
 
       setCurrentConversation({
         ...currentConversation,
@@ -185,7 +185,7 @@ export const useChatSend = ({
       replacements: {},
     });
 
-    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
     setCurrentConversation({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
