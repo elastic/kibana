@@ -67,12 +67,13 @@ export class ImageEmbeddablePlugin
 
     untilPluginStartServicesReady().then(() => {
       registerCreateImageAction();
-      registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-        const { getImageEmbeddableFactory } = await import(
-          './image_embeddable/get_image_embeddable_factory'
-        );
-        return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
-      });
+    });
+    registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+      const [_, { getImageEmbeddableFactory }] = await Promise.all([
+        untilPluginStartServicesReady(),
+        import('./image_embeddable/get_image_embeddable_factory'),
+      ]);
+      return getImageEmbeddableFactory({ embeddableEnhanced: plugins.embeddableEnhanced });
     });
 
     return {};
