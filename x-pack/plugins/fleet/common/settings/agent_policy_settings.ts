@@ -20,7 +20,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously',
     }),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
+      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#limit-cpu-usage',
     api_field: {
       name: 'agent_limits_go_max_procs',
     },
@@ -38,11 +38,11 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       }
     ),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
+      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#configure-agent-download-timeout',
     api_field: {
       name: 'agent_download_timeout',
     },
-    schema: z.number().int().min(0).default(0),
+    schema: z.string().default('120s'),
   },
   {
     name: 'agent.download.target_directory',
@@ -62,7 +62,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       }
     ),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
     schema: z.string(),
   },
   {
@@ -83,7 +83,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       }
     ),
     learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: z.string().default('30s'),
   },
 ];
