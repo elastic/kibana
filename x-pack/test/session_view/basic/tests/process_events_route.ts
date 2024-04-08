@@ -232,5 +232,63 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         expect(response.body.events.length).to.be.greaterThan(0);
       });
     });
+
+    describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with Auditbeat Events`, () => {
+      const MOCK_INDEX_AUDITBEAT = '.ds-auditbeat-8.14.0-2024.03.26-000001';
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+        );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+        );
+      });
+
+      it(`${PROCESS_EVENTS_ROUTE} returns a page of Auditbeat process events`, async () => {
+        const MOCK_SESSION_ENTITY_ID_AUDITBEAT =
+          'NDAyNjUzMTgzNl9fOTIxYjkxYzktZjJlMS00MjZhLThmZWYtYjgwYTNlMWY3MDQxX18yMjA2X18xNzEyMTA2MjIx';
+        const MOCK_SESSION_START_TIME_AUDITBEAT = '2024-04-03T01:03:41.970Z';
+
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX_AUDITBEAT,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID_AUDITBEAT,
+          sessionStartTime: MOCK_SESSION_START_TIME_AUDITBEAT,
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.total).to.be.greaterThan(0);
+        expect(response.body.events.length).to.be.greaterThan(0);
+      });
+
+      it(`${PROCESS_EVENTS_ROUTE} returns a page of Auditbeat process events (w alerts)`, async () => {
+        const MOCK_SESSION_ENTITY_ID_AUDITBEAT_ALERT =
+          'NDAyNjUzMTgzNl9fOTIxYjkxYzktZjJlMS00MjZhLThmZWYtYjgwYTNlMWY3MDQxX18xNTA5X18xNzEyMTAxNzk4';
+        const MOCK_SESSION_START_TIME_AUDITBEAT_ALERT = '2024-04-02T23:49:58.700Z';
+
+        const response = await getTestRoute().query({
+          index: MOCK_INDEX_AUDITBEAT,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID_AUDITBEAT_ALERT,
+          sessionStartTime: MOCK_SESSION_START_TIME_AUDITBEAT_ALERT,
+          pageSize: MOCK_PAGE_SIZE, // overriding to test pagination, as we only have 419 records of mock data
+        });
+        expect(response.status).to.be(200);
+
+        const alerts = response.body.events.filter(
+          (event: any) => event._source.event.kind === 'signal'
+        );
+
+        expect(alerts.length).to.above(0);
+      });
+    });
   });
 }
