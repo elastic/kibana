@@ -8,7 +8,7 @@
 
 import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
-import { BehaviorSubject, skip, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { newSession$ } from './new_session';
 
 describe('newSession$', () => {
@@ -25,10 +25,9 @@ describe('newSession$', () => {
 
   test('should not fire on subscribe', async () => {
     let count = 0;
-    const subscription = newSession$(api)
-      .subscribe(() => {
-        count++;
-      });
+    const subscription = newSession$(api).subscribe(() => {
+      count++;
+    });
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(count).toBe(0);
     subscription.unsubscribe();
@@ -48,10 +47,9 @@ describe('newSession$', () => {
       filters$.next([existsFilter]);
 
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++;
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       filters$.next([toggleFilterNegated(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -64,10 +62,9 @@ describe('newSession$', () => {
       filters$.next([disabledFilter]);
 
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++;
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       filters$.next([toggleFilterNegated(disabledFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -79,10 +76,9 @@ describe('newSession$', () => {
       filters$.next([existsFilter]);
 
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++;
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       filters$.next([pinFilter(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -94,10 +90,9 @@ describe('newSession$', () => {
       filters$.next([pinFilter(existsFilter)]);
 
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       filters$.next([existsFilter]);
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -109,10 +104,9 @@ describe('newSession$', () => {
   describe('reload$', () => {
     test('should fire on reload', async () => {
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++;
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       reload$.next();
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -126,10 +120,9 @@ describe('newSession$', () => {
       timeRange$.next({ from: 'now-15m', to: 'now' });
 
       let count = 0;
-      const subscription = newSession$(api)
-        .subscribe(() => {
-          count++;
-        });
+      const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
 
       timeRange$.next({ from: 'now-30m', to: 'now' });
       await new Promise((resolve) => setTimeout(resolve, 0));
