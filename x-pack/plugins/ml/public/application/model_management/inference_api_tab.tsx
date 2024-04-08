@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferenceAPIConfigResponse } from '../../../common/types/trained_models';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export interface InferenceAPITabProps {
   inferenceApis: InferenceAPIConfigResponse[];
