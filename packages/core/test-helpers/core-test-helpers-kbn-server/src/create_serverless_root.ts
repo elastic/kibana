@@ -77,6 +77,9 @@ function createServerlessES() {
   });
   const es = new Cluster({ log });
   const esPort = esTestConfig.getPort();
+  const esServerlessImageParams = parseEsServerlessImageOverride(
+    esTestConfig.getESServerlessImage()
+  );
   return {
     es,
     start: async () => {
@@ -88,7 +91,7 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
-        image: esTestConfig.getESServerlessImage(),
+        ...esServerlessImageParams,
         // security is enabled by default, if needed kibana requires serviceAccountToken
         esArgs: ['xpack.security.enabled=false'],
       });
@@ -155,4 +158,21 @@ function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
     ...cliArgs,
     serverless: true,
   });
+}
+
+function parseEsServerlessImageOverride(dockerImageOrTag: string | undefined): {
+  image?: string;
+  tag?: string;
+} {
+  if (!dockerImageOrTag) {
+    return {};
+  } else if (dockerImageOrTag.includes(':')) {
+    return {
+      image: dockerImageOrTag,
+    };
+  } else {
+    return {
+      tag: dockerImageOrTag,
+    };
+  }
 }
