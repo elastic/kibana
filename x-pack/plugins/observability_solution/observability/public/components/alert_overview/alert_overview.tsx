@@ -7,7 +7,6 @@
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
-  EuiPanel,
   EuiTitle,
   EuiSpacer,
   EuiText,
@@ -48,19 +47,17 @@ import { getSources } from './helpers/get_sources';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 
 export const AlertOverview = memo(({ alert, pageId }: { alert: TopAlert; pageId?: string }) => {
+  const {
+    http: {
+      basePath: { prepend },
+    },
+  } = useKibana().services;
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-
-  const {
-    http: {
-      basePath: { prepend },
-    },
-  } = useKibana().services;
-
   const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
   const linkToRule =
     pageId !== RULE_DETAILS_PAGE_ID && ruleId
@@ -183,7 +180,7 @@ export const AlertOverview = memo(({ alert, pageId }: { alert: TopAlert; pageId?
   ]);
 
   return (
-    <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
+    <>
       <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.observability.alertsFlyout.reasonTitle', {
@@ -211,6 +208,6 @@ export const AlertOverview = memo(({ alert, pageId }: { alert: TopAlert; pageId?
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiInMemoryTable width={'80%'} columns={overviewColumns} itemId="key" items={items} />
-    </EuiPanel>
+    </>
   );
 });

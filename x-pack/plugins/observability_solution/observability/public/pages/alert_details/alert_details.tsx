@@ -176,14 +176,28 @@ export function AlertDetails() {
         )}
       </>
     ) : (
-      <AlertOverview alert={alertDetail.formatted} />
+      <EuiPanel
+        hasShadow={false}
+        data-test-subj="overviewTabPanel"
+        css={css`
+          padding: ${euiTheme.size.l} 0 0 0;
+        `}
+      >
+        <AlertOverview alert={alertDetail.formatted} />
+      </EuiPanel>
     )
   ) : (
     <></>
   );
 
   const metadataTab = alertDetail?.raw && (
-    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">
+    <EuiPanel
+      hasShadow={false}
+      data-test-subj="metadataTabPanel"
+      css={css`
+        padding: ${euiTheme.size.l} 0 0 0;
+      `}
+    >
       <AlertFieldsTable alert={alertDetail.raw} />
     </EuiPanel>
   );

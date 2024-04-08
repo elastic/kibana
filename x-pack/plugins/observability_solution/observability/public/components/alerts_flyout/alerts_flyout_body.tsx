@@ -28,7 +28,11 @@ export function AlertsFlyoutBody({ alert, rawAlert, id: pageId }: FlyoutProps) {
       name: i18n.translate('xpack.observability.alertFlyout.overview', {
         defaultMessage: 'Overview',
       }),
-      content: <AlertOverview alert={alert} pageId={pageId} />,
+      content: (
+        <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
+          <AlertOverview alert={alert} pageId={pageId} />
+        </EuiPanel>
+      ),
     };
   }, [alert, pageId]);
 
