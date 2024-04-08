@@ -12,6 +12,7 @@
     ],
     "optionalPlugins": [
       "usageCollection"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }
