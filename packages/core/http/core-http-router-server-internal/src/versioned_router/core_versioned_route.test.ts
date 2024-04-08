@@ -9,18 +9,14 @@
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
-import type {
-  IRouter,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteConfig,
-} from '@kbn/core-http-server';
+import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { CoreKibanaRequest } from '../request';
 import { Method } from './types';
+import { Router } from '../router';
 
 const createRequest = (
   {
@@ -44,7 +40,7 @@ const createRequest = (
   );
 
 describe('Versioned route', () => {
-  let router: IRouter;
+  let router: Router;
   let responseFactory: jest.Mocked<KibanaResponseFactory>;
   const handlerFn: RequestHandler = async (ctx, req, res) => res.ok({ body: { foo: 1 } });
   beforeEach(() => {
@@ -165,7 +161,8 @@ describe('Versioned route', () => {
 
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining(expectedRouteConfig),
-      expect.any(Function)
+      expect.any(Function),
+      { isVersioned: true }
     );
   });
 
