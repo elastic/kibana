@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { getTranslation, getLocale, translate, init, load, handleIntlError } from './src/core';
+import {
+  getTranslation,
+  getLocale,
+  translate,
+  init,
+  load,
+  handleIntlError,
+  getIsInitialized,
+} from './src/core';
 
 import {
   registerTranslationFile,
@@ -24,6 +32,7 @@ const i18n = {
   init,
   load,
   handleIntlError,
+  getIsInitialized,
 };
 
 const i18nLoader = {

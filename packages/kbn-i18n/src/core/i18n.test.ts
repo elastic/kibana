@@ -680,11 +680,11 @@ describe('I18n engine', () => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
     });
 
-    test('fails if server returns >= 300 status code', async () => {
-      mockFetch.mockResolvedValue({ status: 301 });
+    test('fails if server returns >= 400 status code', async () => {
+      mockFetch.mockResolvedValue({ status: 400 });
 
       await expect(i18n.load('some-url')).rejects.toMatchInlineSnapshot(
-        `[Error: Translations request failed with status code: 301]`
+        `[Error: Translations request failed with status code: 400]`
       );
 
       mockFetch.mockResolvedValue({ status: 404 });

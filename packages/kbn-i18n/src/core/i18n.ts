@@ -28,7 +28,7 @@ const defaultLocale = EN_LOCALE;
  * locale.
  */
 let intl: IntlShape<string>;
-
+let isInitialized = false;
 /**
  * ideally here we would be using a `throw new Error()` if i18n.translate is called before init();
  * to make sure i18n is initialized before any message is attempting to be translated.
@@ -45,6 +45,9 @@ intl = createIntl({
   onError: () => void 0,
 });
 
+export const getIsInitialized = () => {
+  return isInitialized;
+};
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
  * @param locale
@@ -168,6 +171,7 @@ export function init(newTranslation?: TranslationInput) {
   }
 
   activateTranslation(newTranslation);
+  isInitialized = true;
 }
 
 /**
@@ -181,20 +185,16 @@ export async function load(translationsUrl: string) {
     credentials: 'same-origin',
   });
 
-  if (response.status >= 300) {
+  if (response.status >= 400) {
     throw new Error(`Translations request failed with status code: ${response.status}`);
   }
 
   const newTranslation = await response.json();
-
-  if (!newTranslation || !Object.keys(newTranslation.messages).length) {
-    return;
-  }
-
-  if (!newTranslation.locale || typeof newTranslation.locale !== 'string') {
+  if (!newTranslation || !newTranslation.locale || typeof newTranslation.locale !== 'string') {
     return;
   }
 
   await polyfillLocale(normalizeLocale(newTranslation.locale));
   activateTranslation(newTranslation);
+  isInitialized = true;
 }

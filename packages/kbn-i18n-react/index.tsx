@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { IntlShape, WrappedComponentProps } from '.';
-
-export {
+import type { IntlShape, WrappedComponentProps } from '.';
+import {
   FormattedDate,
   FormattedTime,
   FormattedNumber,
@@ -17,7 +16,15 @@ export {
   FormattedRelativeTime,
 } from '.';
 
-export { injecti18n } from './src/compatiblity_layer';
+export type { IntlShape, WrappedComponentProps };
+export {
+  FormattedDate,
+  FormattedTime,
+  FormattedNumber,
+  FormattedPlural,
+  FormattedMessage,
+  FormattedRelativeTime,
+};
 
 export { I18nProvider } from './src/provider';
-export { injectI18n } from './src/inject';
+export { injectI18n, useI18n } from './src/inject';

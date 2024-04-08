@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { IntlProvider } from '..';
 
 /**
@@ -16,7 +17,12 @@ import { IntlProvider } from '..';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 export const I18nProvider: React.FC = ({ children }) => {
-  const { messages, formats, locale, defaultLocale } = i18n.getTranslation();
+  const { messages, formats, locale, defaultLocale, defaultFormats } = i18n.getTranslation();
+
+  const isInitialized = i18n.getIsInitialized();
+  if (!isInitialized) {
+    throw new Error('kbn-i18n must be initialized before using <I18nProvider />');
+  }
 
   return (
     <IntlProvider
@@ -24,6 +30,7 @@ export const I18nProvider: React.FC = ({ children }) => {
       messages={messages}
       formats={formats}
       defaultLocale={defaultLocale}
+      defaultFormats={defaultFormats}
       onError={i18n.handleIntlError}
     >
       {children}

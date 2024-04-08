@@ -10,8 +10,42 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { injectI18n } from './inject';
 import { I18nProvider } from './provider';
+import { i18n } from '@kbn/i18n';
 
 describe('I18nProvider', () => {
+  test('throws if i18n is not initialized', () => {
+    const ChildrenMock = () => null;
+
+    expect(() =>
+      shallow(
+        <I18nProvider>
+          <ChildrenMock />
+        </I18nProvider>
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"kbn-i18n must be initialized before using <I18nProvider />"`
+    );
+  });
+
+  test('intialized provider properly when i18n.init is called', () => {
+    const childrenMock = () => <div />;
+    const WithIntl = injectI18n(childrenMock);
+    i18n.init({
+      locale: 'en-US',
+      messages: {
+        'my.id': 'mock message',
+      },
+    });
+
+    const wrapper = mount(
+      <I18nProvider>
+        <WithIntl />
+      </I18nProvider>
+    );
+
+    expect(wrapper.find(childrenMock).prop('intl')).toMatchSnapshot();
+  });
+
   test('renders children', () => {
     const ChildrenMock = () => null;
 

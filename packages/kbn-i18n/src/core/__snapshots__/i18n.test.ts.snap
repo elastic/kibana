@@ -17,7 +17,7 @@ SyntaxError: INVALID_ARGUMENT_TYPE
     at /Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/utils.js:115:20
     at variadic (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/fast-memoize/index.js:37:28)
     at formatMessage (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/message.js:72:39)
-    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:141:17)
+    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:150:17)
     at translate (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:604:14)
     at _toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:569:7)
     at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:469:10)
@@ -71,7 +71,7 @@ Error: The intl string context variable \\"numPhotos\\" was not provided to the 
     at IntlMessageFormat.formatToParts (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:120:51)
     at IntlMessageFormat.format (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:98:31)
     at formatMessage (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/message.js:73:34)
-    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:141:17)
+    at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:150:17)
     at translate (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:432:14)
     at _toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:569:7)
     at Object.toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:469:10)
