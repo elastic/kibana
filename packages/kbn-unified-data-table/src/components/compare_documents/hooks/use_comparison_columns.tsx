@@ -106,10 +106,7 @@ export const useComparisonColumns = ({
             defaultMessage: 'Result {resultNumber}',
             values: { resultNumber },
           })
-        : i18n.translate('unifiedDataTable.comparisonColumnDisplay', {
-            defaultMessage: 'Document: {documentId}',
-            values: { documentId: doc.raw._id },
-          });
+        : doc.raw._id;
 
       const display =
         docIndex === 0 ? (

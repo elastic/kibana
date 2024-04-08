@@ -817,7 +817,7 @@ describe('UnifiedDataTable', () => {
     it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {
       renderDataTable({ enableComparisonMode: true });
       await goToComparisonMode();
-      expect(getColumnHeaders()).toEqual(['Field', 'Document: 1', 'Document: 2']);
+      expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
       expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
     });
 

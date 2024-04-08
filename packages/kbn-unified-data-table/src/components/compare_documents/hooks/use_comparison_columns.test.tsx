@@ -132,7 +132,7 @@ describe('useComparisonColumns', () => {
       getComparisonColumn({
         column: {
           id: selectedDocs[1],
-          display: `Document: ${selectedDocs[1]}`,
+          display: selectedDocs[1],
           displayAsText: `Comparison document: ${selectedDocs[1]}`,
           actions: {
             showMoveRight: true,
@@ -144,7 +144,7 @@ describe('useComparisonColumns', () => {
       getComparisonColumn({
         column: {
           id: selectedDocs[2],
-          display: `Document: ${selectedDocs[2]}`,
+          display: selectedDocs[2],
           displayAsText: `Comparison document: ${selectedDocs[2]}`,
           actions: {
             showMoveLeft: true,
@@ -157,7 +157,7 @@ describe('useComparisonColumns', () => {
       getComparisonColumn({
         column: {
           id: selectedDocs[3],
-          display: `Document: ${selectedDocs[3]}`,
+          display: selectedDocs[3],
           displayAsText: `Comparison document: ${selectedDocs[3]}`,
           actions: {
             showMoveLeft: true,
@@ -183,7 +183,7 @@ describe('useComparisonColumns', () => {
         <EuiFlexItem
           grow={false}
         >
-          Document: 0
+          0
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
