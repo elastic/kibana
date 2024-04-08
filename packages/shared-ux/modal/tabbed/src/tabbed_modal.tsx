@@ -8,11 +8,11 @@
 
 import React, {
   useMemo,
+  useCallback,
   Fragment,
   type ComponentProps,
   type FC,
   type ReactElement,
-  useCallback,
   useState,
 } from 'react';
 import {
@@ -125,7 +125,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           })}
         </Fragment>
       </EuiModalBody>
-      {modalActionBtn && (
+      {modalActionBtn?.id !== undefined && selectedTabState && (
         <EuiModalFooter>
           <EuiToolTip content={afterMessage} onMouseOut={() => setIsTextVisible(false)}>
             <EuiButton
@@ -137,7 +137,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
               data-share-url={state.url}
               onClick={() => {
                 // @ts-ignore state will not be null because of the modalActionBtn check
-                modalActionBtn!.handler!({ state: selectedTabId });
+                modalActionBtn.handler({ state: selectedTabState });
                 setIsTextVisible(true);
               }}
             >
