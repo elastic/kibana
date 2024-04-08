@@ -26,14 +26,7 @@ export const reportingCsvShareProvider = ({
   i18n: i18nStart,
   theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    sharingData,
-    onClose,
-    intl,
-    toasts,
-  }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData, onClose, intl, toasts }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -117,7 +110,7 @@ export const reportingCsvShareProvider = ({
                   ),
                 }}
               />,
-              { theme, i18n }
+              { theme, i18n: i18nStart }
             ),
             'data-test-subj': 'queueReportSuccess',
           });

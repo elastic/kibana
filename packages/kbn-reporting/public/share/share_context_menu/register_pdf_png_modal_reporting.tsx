@@ -241,6 +241,7 @@ export const reportingExportModalProvider = ({
     shareableUrl,
     shareableUrlForSavedObject,
     intl,
+    toasts,
     ...shareOpts
   }: ShareContext) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
@@ -310,8 +311,8 @@ export const reportingExportModalProvider = ({
       return apiClient
         .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
-          toastsReport.addSuccess({
-            title: intlReport?.formatMessage(
+          toasts.addSuccess({
+            title: intl.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -372,8 +373,8 @@ export const reportingExportModalProvider = ({
       return apiClient
         .createReportingJob('printablePdfV2', decoratedJobParams)
         .then(() => {
-          toastsReport.addSuccess({
-            title: intlReport?.formatMessage(
+          toasts.addSuccess({
+            title: intl.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -431,8 +432,8 @@ export const reportingExportModalProvider = ({
       return apiClient
         .createReportingJob('pngV2', decoratedJobParams)
         .then(() => {
-          toastsReport.addSuccess({
-            title: intlReport?.formatMessage(
+          toasts.addSuccess({
+            title: intl.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -463,8 +464,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toastsReport.addError(error, {
-            title: intlReport!.formatMessage({
+          toasts.addError(error, {
+            title: intl.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
