@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { getLensAttributes } from './get_lens_attributes';
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../../__mocks__/suggestions';
+import {
+  dataViewWithTimefieldMock,
+  dataViewWithAtTimefieldMock,
+} from '../__mocks__/data_view_with_timefield';
+import { currentSuggestionMock } from '../__mocks__/suggestions';
+import { getLensVisMock } from '../__mocks__/lens_vis';
 
-describe('getLensAttributes', () => {
+describe('LensVisService attributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
   const filters: Filter[] = [
     {
@@ -41,29 +44,25 @@ describe('getLensAttributes', () => {
     },
   ];
   const query: Query | AggregateQuery = { language: 'kuery', query: 'extension : css' };
+  const queryEsql: Query | AggregateQuery = { esql: 'from logstash-* | limit 10' };
   const timeInterval = 'auto';
 
-  it('should return correct attributes', () => {
+  it('should return correct attributes', async () => {
     const breakdownField: DataViewField | undefined = undefined;
-    expect(
-      getLensAttributes({
-        title: 'test',
-        filters,
-        query,
-        dataView,
-        timeInterval,
-        breakdownField,
-        suggestion: undefined,
-      })
-    ).toMatchInlineSnapshot(`
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+      isPlainRecord: false,
+    });
+
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
             Object {
               "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
@@ -187,7 +186,7 @@ describe('getLensAttributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -196,33 +195,28 @@ describe('getLensAttributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
 
-  it('should return correct attributes with breakdown field', () => {
+  it('should return correct attributes with breakdown field', async () => {
     const breakdownField: DataViewField | undefined = dataView.fields.find(
       (f) => f.name === 'extension'
     );
-    expect(
-      getLensAttributes({
-        title: 'test',
-        filters,
-        query,
-        dataView,
-        timeInterval,
-        breakdownField,
-        suggestion: undefined,
-      })
-    ).toMatchInlineSnapshot(`
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+      isPlainRecord: false,
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
             Object {
               "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
@@ -364,7 +358,7 @@ describe('getLensAttributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -373,33 +367,28 @@ describe('getLensAttributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
 
-  it('should return correct attributes with unsupported breakdown field', () => {
+  it('should return correct attributes with unsupported breakdown field', async () => {
     const breakdownField: DataViewField | undefined = dataView.fields.find(
       (f) => f.name === 'scripted'
     );
-    expect(
-      getLensAttributes({
-        title: 'test',
-        filters,
-        query,
-        dataView,
-        timeInterval,
-        breakdownField,
-        suggestion: undefined,
-      })
-    ).toMatchInlineSnapshot(`
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField,
+      columns: [],
+      isPlainRecord: false,
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
             Object {
               "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
@@ -523,7 +512,7 @@ describe('getLensAttributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -532,33 +521,28 @@ describe('getLensAttributes', () => {
           "timeField": "timestamp",
           "timeInterval": "auto",
         },
+        "suggestionType": "histogramForDataView",
       }
     `);
   });
 
-  it('should return correct attributes for text based languages', () => {
-    expect(
-      getLensAttributes({
-        title: 'test',
-        filters,
-        query,
-        dataView,
-        timeInterval,
-        breakdownField: undefined,
-        suggestion: currentSuggestionMock,
-      })
-    ).toMatchInlineSnapshot(`
+  it('should return correct attributes for text based languages', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+    });
+    expect(lensVis.visContext).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
           "references": Array [
             Object {
               "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-layer-unifiedHistogram",
+              "name": "textBasedLanguages-datasource-layer-suggestion",
               "type": "index-pattern",
             },
           ],
@@ -695,8 +679,7 @@ describe('getLensAttributes', () => {
               },
             ],
             "query": Object {
-              "language": "kuery",
-              "query": "extension : css",
+              "esql": "from logstash-* | limit 10",
             },
             "visualization": Object {
               "gridConfig": Object {
@@ -719,34 +702,35 @@ describe('getLensAttributes', () => {
               "xAccessor": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
             },
           },
-          "title": "test",
+          "title": "Heat map",
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
           "breakdownField": undefined,
           "dataViewId": "index-pattern-with-timefield-id",
           "timeField": "timestamp",
-          "timeInterval": "auto",
+          "timeInterval": undefined,
         },
+        "suggestionType": "lensSuggestion",
       }
     `);
   });
 
-  it('should return correct attributes for text based languages with adhoc dataview', () => {
+  it('should return correct attributes for text based languages with adhoc dataview', async () => {
     const adHocDataview = {
       ...dataView,
       isPersisted: () => false,
     } as DataView;
-    const lensAttrs = getLensAttributes({
-      title: 'test',
+    const lensVis = await getLensVisMock({
       filters,
-      query,
+      query: queryEsql,
       dataView: adHocDataview,
       timeInterval,
       breakdownField: undefined,
-      suggestion: currentSuggestionMock,
+      columns: [],
+      isPlainRecord: true,
     });
-    expect(lensAttrs.attributes).toEqual({
+    expect(lensVis.visContext?.attributes).toEqual({
       state: expect.objectContaining({
         adHocDataViews: {
           'index-pattern-with-timefield-id': {},
@@ -755,31 +739,43 @@ describe('getLensAttributes', () => {
       references: [
         {
           id: 'index-pattern-with-timefield-id',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: 'index-pattern-with-timefield-id',
-          name: 'indexpattern-datasource-layer-unifiedHistogram',
+          name: 'textBasedLanguages-datasource-layer-suggestion',
           type: 'index-pattern',
         },
       ],
-      title: 'test',
+      title: 'Heat map',
       visualizationType: 'lnsHeatmap',
     });
   });
 
-  it('should return suggestion title if no title is given', () => {
-    expect(
-      getLensAttributes({
-        title: undefined,
-        filters,
-        query,
-        dataView,
-        timeInterval,
-        breakdownField: undefined,
-        suggestion: currentSuggestionMock,
-      }).attributes.title
-    ).toBe(currentSuggestionMock.title);
+  it('should return suggestion title', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+    });
+    expect(lensVis.visContext?.attributes.title).toBe(currentSuggestionMock.title);
+  });
+
+  it('should use the correct histogram query when no suggestion passed', async () => {
+    const histogramQuery = {
+      esql: 'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 10 minute`',
+    };
+    const lensVis = await getLensVisMock({
+      filters,
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: true,
+      allSuggestions: [], // none available
+      hasHistogramSuggestionForESQL: true,
+    });
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 });
