@@ -15,29 +15,36 @@ import { useShareTabsContext } from '../../context';
 
 const EMBED_TAB_ACTIONS = {
   SET_EMBED_URL: 'SET_EMBED_URL',
+  SET_IS_NOT_SAVED: 'SET_IS_NOT_SAVED',
 };
 
-type IEmbedTab = IModalTabDeclaration<{ url: string }>;
+type IEmbedTab = IModalTabDeclaration<{ url: string; isNotSaved: boolean }>;
 
-const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '' }, action) => {
+const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '', isNotSaved: false }, action) => {
   switch (action.type) {
     case EMBED_TAB_ACTIONS.SET_EMBED_URL:
       return {
         ...state,
         url: action.payload,
       };
+    case EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED:
+      return {
+        ...state,
+        isNotSaved: action.payload,
+      };
     default:
       return state;
   }
 };
 
-const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ dispatch }) => {
+const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch }) => {
   const {
     embedUrlParamExtensions,
     shareableUrlForSavedObject,
     shareableUrl,
     isEmbedded,
     objectType,
+    isDirty,
   } = useShareTabsContext()!;
 
   const onChange = useCallback(
@@ -50,6 +57,13 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ dispatch }) => {
     [dispatch]
   );
 
+  const setIsNotSaved = useCallback(() => {
+    dispatch({
+      type: EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED,
+      payload: objectType === 'dashboard' ? isDirty : false,
+    });
+  }, [dispatch, objectType, isDirty]);
+
   return (
     <EmbedContent
       {...{
@@ -58,6 +72,9 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ dispatch }) => {
         shareableUrl,
         isEmbedded,
         objectType,
+        isDirty,
+        isNotSaved: state?.isNotSaved,
+        setIsNotSaved,
       }}
       onChange={onChange}
     />
@@ -84,5 +101,6 @@ export const embedTab: IEmbedTab = {
     handler: ({ state }) => {
       copyToClipboard(state.url);
     },
+    style: ({ state }) => state.isNotSaved,
   },
 };

@@ -66,9 +66,6 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
 const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
   // EuiCopy equivalent
   const [, setIsTextVisible] = useState<boolean>(false);
-  const afterMessage = (
-    <FormattedMessage id="sharedUXPackages.afterMessageClick" defaultMessage="Copied" />
-  );
 
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
@@ -83,6 +80,14 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
+  const afterMessage = selectedTabState.isNotSaved ? (
+    <FormattedMessage
+      id="sharedUXPackages.afterMessageSave"
+      defaultMessage="There are unsaved changes."
+    />
+  ) : (
+    <FormattedMessage id="sharedUXPackages.afterMessageClick" defaultMessage="Copied" />
+  );
   const onSelectedTabChanged = useCallback(
     (id: string) => {
       dispatch({ type: 'META_selectedTabId', payload: id });

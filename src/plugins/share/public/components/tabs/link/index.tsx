@@ -68,7 +68,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
   const setIsNotSaved = useCallback(() => {
     dispatch({
       type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
-      payload: objectType === 'lens' ? isDirty : false,
+      payload: objectType === 'lens' || objectType === 'dashboard' ? isDirty : false,
     });
   }, [dispatch, objectType, isDirty]);
 
