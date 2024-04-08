@@ -6800,39 +6800,15 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          "> | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; parentApi: (Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          "> & ",
+          "> | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; parentApi: (",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PublishesLastSavedState",
-            "text": "PublishesLastSavedState"
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
           },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.CanAddNewPanel",
-            "text": "CanAddNewPanel"
-          },
-          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PanelPackage",
-            "text": "PanelPackage"
-          },
-          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
+          " & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -9653,7 +9629,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14001,7 +13977,7 @@
             "label": "yLeftScale",
             "description": [],
             "signature": [
-              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14015,7 +13991,7 @@
             "label": "yRightScale",
             "description": [],
             "signature": [
-              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+              "\"log\" | \"sqrt\" | \"time\" | \"linear\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
