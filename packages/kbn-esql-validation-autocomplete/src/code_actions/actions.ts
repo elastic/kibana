@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError } from '@kbn/esql-ast';
+import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -26,6 +26,7 @@ import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import type { CodeAction, Callbacks, CodeActionOptions } from './types';
 import { getAstContext } from '../shared/context';
+import { wrapAsEditorMessage } from './utils';
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
@@ -380,7 +381,7 @@ function inferCodeFromError(
 
 export async function getActions(
   innerText: string,
-  markers: EditorError[],
+  markers: Array<ESQLMessage | EditorError>,
   astProvider: AstProviderFn,
   options: CodeActionOptions = {},
   resourceRetriever?: ESQLCallbacks
@@ -389,6 +390,7 @@ export async function getActions(
   if (markers.length === 0) {
     return actions;
   }
+  const editorMarkers = wrapAsEditorMessage('error', markers);
   const { ast } = await astProvider(innerText);
 
   const queryForFields = buildQueryForFieldsFromSource(innerText, ast);
@@ -408,7 +410,7 @@ export async function getActions(
   // Markers are sent only on hover and are limited to the hovered area
   // so unless there are multiple error/markers for the same area, there's just one
   // in some cases, like syntax + semantic errors (i.e. unquoted fields eval field-1 ), there might be more than one
-  for (const error of markers) {
+  for (const error of editorMarkers) {
     const code = error.code ?? inferCodeFromError(error, ast, innerText);
     switch (code) {
       case 'unknownColumn': {

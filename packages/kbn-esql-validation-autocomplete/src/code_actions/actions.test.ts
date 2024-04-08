@@ -9,7 +9,6 @@
 import { getActions } from './actions';
 import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
-import { wrapAsEditorMessage } from './testing_utils';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { CodeActionOptions } from './types';
 
@@ -92,10 +91,9 @@ function testQuickFixesFn(
       );
       const { equalityCheck, ...fnOptions } = options || {};
 
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       const actions = await getActions(
         statement,
-        monacoErrors,
+        errors,
         getAstAndSyntaxErrors,
         fnOptions,
         callbackMocks
@@ -347,8 +345,7 @@ describe('quick fixes logic', () => {
         it('return no result without callbacks and relaxed option', async () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors);
-          const monacoErrors = wrapAsEditorMessage('error', errors);
-          const edits = await getActions(statement, monacoErrors, getAstAndSyntaxErrors);
+          const edits = await getActions(statement, errors, getAstAndSyntaxErrors);
           expect(edits.length).toBe(0);
         });
 
@@ -359,17 +356,10 @@ describe('quick fixes logic', () => {
             ...callbackMocks,
             getFieldsFor: undefined,
           });
-          const monacoErrors = wrapAsEditorMessage('error', errors);
-          const edits = await getActions(
-            statement,
-            monacoErrors,
-            getAstAndSyntaxErrors,
-            undefined,
-            {
-              ...callbackMocks,
-              getFieldsFor: undefined,
-            }
-          );
+          const edits = await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
+            ...callbackMocks,
+            getFieldsFor: undefined,
+          });
           expect(edits.length).toBe(0);
         });
       });
@@ -377,8 +367,7 @@ describe('quick fixes logic', () => {
         it('return a result without callbacks and relaxed option', async () => {
           const statement = `FROM index | DROP any#Char$Field`;
           const { errors } = await validateQuery(statement, getAstAndSyntaxErrors);
-          const monacoErrors = wrapAsEditorMessage('error', errors);
-          const actions = await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+          const actions = await getActions(statement, errors, getAstAndSyntaxErrors, {
             relaxOnMissingCallbacks: true,
           });
           const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
@@ -392,10 +381,9 @@ describe('quick fixes logic', () => {
             ...callbackMocks,
             getFieldsFor: undefined,
           });
-          const monacoErrors = wrapAsEditorMessage('error', errors);
           const actions = await getActions(
             statement,
-            monacoErrors,
+            errors,
             getAstAndSyntaxErrors,
             {
               relaxOnMissingCallbacks: true,
@@ -419,9 +407,8 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, undefined, {
+        await getActions(statement, errors, getAstAndSyntaxErrors, undefined, {
           getFieldsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
@@ -441,11 +428,10 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
         await getActions(
           statement,
-          monacoErrors,
+          errors,
           getAstAndSyntaxErrors,
           { relaxOnMissingCallbacks: true },
           {
@@ -469,9 +455,8 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors);
+        await getActions(statement, errors, getAstAndSyntaxErrors);
       } catch {
         fail('Should not throw');
       }
@@ -486,9 +471,8 @@ describe('quick fixes logic', () => {
         undefined,
         callbackMocks
       );
-      const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+        await getActions(statement, errors, getAstAndSyntaxErrors, {
           relaxOnMissingCallbacks: true,
         });
       } catch {
