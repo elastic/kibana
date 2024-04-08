@@ -45,5 +45,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
+    "@kbn/search-connectors-plugin",
   ]
 }

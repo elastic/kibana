@@ -28,7 +28,6 @@
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
     "@kbn/core-analytics-server",
@@ -44,6 +43,8 @@
     "@kbn/config-schema",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/ml-response-stream",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",

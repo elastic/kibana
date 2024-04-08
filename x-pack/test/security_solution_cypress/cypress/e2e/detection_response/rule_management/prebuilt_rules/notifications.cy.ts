@@ -54,9 +54,10 @@ describe(
         cy.get(RULES_UPDATES_TAB).should('not.exist');
       });
 
+      // https://github.com/elastic/kibana/issues/179967
       it(
         'should NOT display install or update notifications when latest rules are installed',
-        { tags: ['@brokenInServerlessQA'] },
+        { tags: ['@skipInServerless'] },
         () => {
           visitRulesManagementTable();
           createAndInstallMockedPrebuiltRules([RULE_1]);
@@ -70,73 +71,66 @@ describe(
       );
     });
 
-    describe('Notifications', () => {
+    // https://github.com/elastic/kibana/issues/179968
+    describe('Notifications', { tags: ['@skipInServerless'] }, () => {
       beforeEach(() => {
         installPrebuiltRuleAssets([RULE_1]);
       });
 
-      describe(
-        'Rules installation notification when no rules have been installed',
-        { tags: ['@brokenInServerlessQA'] },
-        () => {
-          beforeEach(() => {
-            visitRulesManagementTable();
-          });
+      describe('Rules installation notification when no rules have been installed', () => {
+        beforeEach(() => {
+          visitRulesManagementTable();
+        });
 
-          it('should notify user about prebuilt rules available for installation', () => {
+        it('should notify user about prebuilt rules available for installation', () => {
+          cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
+          cy.get(RULES_UPDATES_TAB).should('not.exist');
+        });
+      });
+
+      describe('Rule installation notification when at least one rule already installed', () => {
+        beforeEach(() => {
+          installAllPrebuiltRulesRequest().then(() => {
+            /* Create new rule assets with a different rule_id as the one that was */
+            /* installed before in order to trigger the installation notification */
+            const RULE_2 = createRuleAssetSavedObject({
+              name: 'Test rule 2',
+              rule_id: 'rule_2',
+            });
+            const RULE_3 = createRuleAssetSavedObject({
+              name: 'Test rule 3',
+              rule_id: 'rule_3',
+            });
+
+            visitRulesManagementTable();
+            installPrebuiltRuleAssets([RULE_2, RULE_3]);
+          });
+        });
+
+        it('should notify user about prebuilt rules available for installation', () => {
+          const numberOfAvailableRules = 2;
+          cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
+          cy.get(ADD_ELASTIC_RULES_BTN).should(
+            'have.text',
+            `Add Elastic rules${numberOfAvailableRules}`
+          );
+          cy.get(RULES_UPDATES_TAB).should('not.exist');
+        });
+
+        it('should notify user a rule is again available for installation if it is deleted', () => {
+          /* Install available rules, assert that the notification is gone */
+          /* then delete one rule and assert that the notification is back */
+          installAllPrebuiltRulesRequest().then(() => {
+            cy.reload();
+            deleteFirstRule();
             cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
             cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
-            cy.get(RULES_UPDATES_TAB).should('not.exist');
           });
-        }
-      );
+        });
+      });
 
-      describe(
-        'Rule installation notification when at least one rule already installed',
-        { tags: ['@brokenInServerlessQA'] },
-        () => {
-          beforeEach(() => {
-            installAllPrebuiltRulesRequest().then(() => {
-              /* Create new rule assets with a different rule_id as the one that was */
-              /* installed before in order to trigger the installation notification */
-              const RULE_2 = createRuleAssetSavedObject({
-                name: 'Test rule 2',
-                rule_id: 'rule_2',
-              });
-              const RULE_3 = createRuleAssetSavedObject({
-                name: 'Test rule 3',
-                rule_id: 'rule_3',
-              });
-
-              visitRulesManagementTable();
-              installPrebuiltRuleAssets([RULE_2, RULE_3]);
-            });
-          });
-
-          it('should notify user about prebuilt rules available for installation', () => {
-            const numberOfAvailableRules = 2;
-            cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
-            cy.get(ADD_ELASTIC_RULES_BTN).should(
-              'have.text',
-              `Add Elastic rules${numberOfAvailableRules}`
-            );
-            cy.get(RULES_UPDATES_TAB).should('not.exist');
-          });
-
-          it('should notify user a rule is again available for installation if it is deleted', () => {
-            /* Install available rules, assert that the notification is gone */
-            /* then delete one rule and assert that the notification is back */
-            installAllPrebuiltRulesRequest().then(() => {
-              cy.reload();
-              deleteFirstRule();
-              cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
-              cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
-            });
-          });
-        }
-      );
-
-      describe('Rule update notification', { tags: ['@brokenInServerlessQA'] }, () => {
+      describe('Rule update notification', () => {
         beforeEach(() => {
           installAllPrebuiltRulesRequest().then(() => {
             /* Create new rule asset with the same rule_id as the one that was installed  */
@@ -160,39 +154,35 @@ describe(
         });
       });
 
-      describe(
-        'Rule installation available and rule update available notifications',
-        { tags: ['@brokenInServerlessQA'] },
-        () => {
-          beforeEach(() => {
-            installAllPrebuiltRulesRequest().then(() => {
-              /* Create new rule assets with a different rule_id as the one that was */
-              /* installed before in order to trigger the installation notification */
-              const RULE_2 = createRuleAssetSavedObject({
-                name: 'Test rule 2',
-                rule_id: 'rule_2',
-              });
-              /* Create new rule asset with the same rule_id as the one that was installed  */
-              /* but with a higher version, in order to trigger the update notification     */
-              const UPDATED_RULE = createRuleAssetSavedObject({
-                name: 'Test rule 1.1 (updated)',
-                rule_id: 'rule_1',
-                version: 2,
-              });
-              installPrebuiltRuleAssets([RULE_2, UPDATED_RULE]);
-              visitRulesManagementTable();
+      describe('Rule installation available and rule update available notifications', () => {
+        beforeEach(() => {
+          installAllPrebuiltRulesRequest().then(() => {
+            /* Create new rule assets with a different rule_id as the one that was */
+            /* installed before in order to trigger the installation notification */
+            const RULE_2 = createRuleAssetSavedObject({
+              name: 'Test rule 2',
+              rule_id: 'rule_2',
             });
+            /* Create new rule asset with the same rule_id as the one that was installed  */
+            /* but with a higher version, in order to trigger the update notification     */
+            const UPDATED_RULE = createRuleAssetSavedObject({
+              name: 'Test rule 1.1 (updated)',
+              rule_id: 'rule_1',
+              version: 2,
+            });
+            installPrebuiltRuleAssets([RULE_2, UPDATED_RULE]);
+            visitRulesManagementTable();
           });
+        });
 
-          it('should notify user about prebuilt rules available for installation and for upgrade', () => {
-            // 1 rule available for installation
-            cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
-            // 1 rule available for update
-            cy.get(RULES_UPDATES_TAB).should('be.visible');
-            cy.get(RULES_UPDATES_TAB).should('have.text', `Rule Updates${1}`);
-          });
-        }
-      );
+        it('should notify user about prebuilt rules available for installation and for upgrade', () => {
+          // 1 rule available for installation
+          cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', `Add Elastic rules${1}`);
+          // 1 rule available for update
+          cy.get(RULES_UPDATES_TAB).should('be.visible');
+          cy.get(RULES_UPDATES_TAB).should('have.text', `Rule Updates${1}`);
+        });
+      });
     });
   }
 );
