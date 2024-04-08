@@ -58,6 +58,7 @@
       "observability",
       "maps",
       "observabilityAIAssistant"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }
