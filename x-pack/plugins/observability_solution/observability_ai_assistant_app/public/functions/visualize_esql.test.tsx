@@ -29,6 +29,7 @@ describe('VisualizeESQL', () => {
           title: 'foo',
           id: 'foo',
           toSpec: jest.fn(),
+          toMinimalSpec: jest.fn(),
           isPersisted: jest.fn().mockReturnValue(false),
         })
       ),
