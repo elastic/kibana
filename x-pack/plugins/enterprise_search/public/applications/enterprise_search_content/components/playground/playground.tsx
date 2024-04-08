@@ -18,8 +18,8 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const index: string | null = searchParams.has('defaultIndexName')
-    ? searchParams.get('defaultIndexName')
+  const index: string | null = searchParams.has('default-index')
+    ? searchParams.get('default-index')
     : null;
   const { searchPlayground } = useValues(KibanaLogic);
 
