@@ -49,7 +49,7 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
       <EuiFlexItem grow={false}>
         <EuiBadge
           color={color ?? euiLightVars.euiColorDisabled}
-          onClick={(evt) => {
+          onClick={(_) => {
             if (isSloPage) {
               onStateChange({
                 kqlQuery: `slo.indicator.type: ${slo.indicator.type}`,
@@ -68,31 +68,32 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
         </EuiBadge>
       </EuiFlexItem>
       {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
-        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) && (
-        <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
-              defaultMessage: 'View {service} details',
-              values: { service: slo.indicator.params.service },
-            })}
-          >
-            <EuiBadge
-              color={color ?? euiLightVars.euiColorDisabled}
-              onClick={handleNavigateToApm}
-              onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
-                e.stopPropagation(); // stops propagation of metric onElementClick
-              }}
-              onClickAriaLabel={i18n.translate('xpack.slo.indicatorTypeBadge.exploreInApm', {
+        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) &&
+        slo.indicator.params.service !== '' && (
+          <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.slo.sloIndicatorTypeBadge.exploreInApm', {
                 defaultMessage: 'View {service} details',
                 values: { service: slo.indicator.params.service },
               })}
             >
-              {slo.indicator.params.service}
-            </EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+              <EuiBadge
+                color={color ?? euiLightVars.euiColorDisabled}
+                onClick={handleNavigateToApm}
+                onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+                  e.stopPropagation(); // stops propagation of metric onElementClick
+                }}
+                onClickAriaLabel={i18n.translate('xpack.slo.indicatorTypeBadge.exploreInApm', {
+                  defaultMessage: 'View {service} details',
+                  values: { service: slo.indicator.params.service },
+                })}
+              >
+                {slo.indicator.params.service}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
     </>
   );
 }
