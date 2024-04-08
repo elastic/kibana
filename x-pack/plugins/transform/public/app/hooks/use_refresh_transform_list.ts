@@ -15,6 +15,7 @@ export const useRefreshTransformList = () => {
   return () => {
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_NODES]);
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS]);
+    queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_STATS]);
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORMS_STATS]);
     queryClient.invalidateQueries([TRANSFORM_REACT_QUERY_KEYS.GET_TRANSFORM_AUDIT_MESSAGES]);
   };

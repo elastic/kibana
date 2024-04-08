@@ -9,22 +9,12 @@ import React, { useMemo, type FC } from 'react';
 import moment from 'moment-timezone';
 import { css } from '@emotion/react';
 
-import {
-  EuiButtonEmpty,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiCallOut,
-  EuiFlexItem,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
 
@@ -40,56 +30,17 @@ import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
 import { ExpandedRowHealthPane } from './expanded_row_health_pane';
+import { ExpandedRowStatsPane } from './expanded_row_stats_pane';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
-
-function getItemDescription(value: any) {
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return value.toString();
-}
 
 type Item = SectionItem;
 
 interface Props {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
-  transformsStatsLoading: boolean;
 }
 
-const NoStatsFallbackTabContent = ({
-  transformsStatsLoading,
-}: {
-  transformsStatsLoading: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const content = transformsStatsLoading ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <EuiFlexItem grow={true}>
-      <EuiCallOut
-        size="s"
-        color="warning"
-        iconType="iInCircle"
-        title={
-          <FormattedMessage
-            id="xpack.transform.transformList.noStatsAvailable"
-            defaultMessage="No stats available for this transform."
-          />
-        }
-      />
-    </EuiFlexItem>
-  );
-  return (
-    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxxxl }}>
-      {content}
-    </EuiFlexGroup>
-  );
-};
-
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const { showNodeInfo } = useEnabledFeatures();
 
   const stateItems: Item[] = [];
@@ -275,16 +226,6 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     position: 'right',
   };
 
-  const stats: SectionConfig = {
-    title: 'Stats',
-    items: isTransformListRowWithStats(item)
-      ? Object.entries(item.stats.stats).map((s) => {
-          return { title: s[0].toString(), description: getItemDescription(s[1]) };
-        })
-      : [],
-    position: 'left',
-  };
-
   const tabId = stringHash(item.id);
 
   const tabs = [
@@ -318,11 +259,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Stats',
         }
       ),
-      content: isTransformListRowWithStats(item) ? (
-        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
-      ) : (
-        <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />
-      ),
+      content: <ExpandedRowStatsPane item={item} />,
     },
     {
       id: `transform-json-tab-${tabId}`,

@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import type { TransformStats } from '../types/transform_stats';
 
@@ -15,6 +16,11 @@ export const getTransformsStatsRequestSchema = getTransformsRequestSchema;
 
 export type GetTransformsStatsRequestSchema = TypeOf<typeof getTransformsStatsRequestSchema>;
 
+export const getTransformStatsQuerySchema = schema.object({
+  basic: schema.boolean(),
+});
+
+export type GetTransformStatsQuerySchema = TypeOf<typeof getTransformStatsQuerySchema>;
 export interface GetTransformsStatsResponseSchema {
   node_failures?: object;
   count: number;

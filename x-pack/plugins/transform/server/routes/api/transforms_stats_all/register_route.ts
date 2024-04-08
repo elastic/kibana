@@ -7,6 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import {
+  getTransformStatsQuerySchema,
+  type GetTransformStatsQuerySchema,
+} from '../../../../common/api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -26,13 +30,23 @@ export function registerRoute({ router, license }: RouteDependencies) {
       path: addInternalBasePath('transforms/_stats'),
       access: 'internal',
     })
-    .addVersion(
+    .addVersion<
+      estypes.TransformGetTransformStatsResponse,
+      GetTransformStatsQuerySchema,
+      undefined
+    >(
       {
         version: '1',
-        validate: false,
+        validate: {
+          request: {
+            query: getTransformStatsQuerySchema,
+          },
+        },
       },
-      license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
-        routeHandler
-      )
+      license.guardApiRoute<
+        estypes.TransformGetTransformStatsResponse,
+        GetTransformStatsQuerySchema,
+        undefined
+      >(routeHandler)
     );
 }
