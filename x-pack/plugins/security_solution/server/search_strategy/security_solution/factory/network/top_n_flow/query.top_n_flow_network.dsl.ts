@@ -8,6 +8,7 @@
 import type {
   AggregationsAggregationContainer,
   AggregationsTopHitsAggregation,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import type {
@@ -25,36 +26,19 @@ export const buildTopNFlowQuery = ({
   flowTarget,
   sort,
   pagination,
-  timerange: { from, to },
+  timerange,
   ip,
 }: NetworkTopNFlowRequestOptions): ISearchRequestParams => {
   const querySize = pagination?.querySize ?? 10;
-
-  const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
+  const query = getQuery({ filterQuery, flowTarget, timerange, ip });
 
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
+      query,
       aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
-      query: {
-        bool: ip
-          ? {
-              filter,
-              should: [
-                {
-                  term: {
-                    [`${getOppositeField(flowTarget)}.ip`]: ip,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter,
-            },
-      },
       _source: false,
       fields: [
         {
@@ -73,40 +57,39 @@ export const buildTopNFlowCountQuery = ({
   defaultIndex,
   filterQuery,
   flowTarget,
-  timerange: { from, to },
+  timerange,
   ip,
 }: NetworkTopNFlowCountRequestOptions): ISearchRequestParams => {
-  const filter = [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)];
+  const query = getQuery({ filterQuery, flowTarget, timerange, ip });
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: getCountAgg(flowTarget),
-      query: {
-        bool: ip
-          ? {
-              filter,
-              should: [
-                {
-                  term: {
-                    [`${getOppositeField(flowTarget)}.ip`]: ip,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter,
-            },
-      },
-      _source: false,
-    },
+    body: { query, aggregations: getCountAgg(flowTarget), _source: false, fields: [] },
     size: 0,
     track_total_hits: false,
   };
   return dslQuery;
 };
+
+// creates the dsl bool query with the filters
+const getQuery = ({
+  filterQuery,
+  flowTarget,
+  timerange: { from, to },
+  ip,
+}: Pick<
+  NetworkTopNFlowRequestOptions,
+  'filterQuery' | 'flowTarget' | 'timerange' | 'ip'
+>): QueryDslQueryContainer => ({
+  bool: {
+    filter: [...createQueryFilterClauses(filterQuery), getTimeRangeFilter(from, to)],
+    ...(ip && {
+      should: [{ term: { [`${getOppositeField(flowTarget)}.ip`]: ip } }],
+      minimum_should_match: 1,
+    }),
+  },
+});
 
 const getTimeRangeFilter = (from: string, to: string) => ({
   range: {
