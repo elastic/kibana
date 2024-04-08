@@ -43,6 +43,7 @@ import {
 } from '../../../common/functions/types';
 import {
   MessageRole,
+  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -149,6 +150,7 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    instructions?: UserInstruction[];
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -157,6 +159,7 @@ export class ObservabilityAIAssistantClient {
         const conversationId = params.conversationId || '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
+        const requestInstructions = params.instructions || [];
 
         const tokenCountResult = {
           prompt: 0,
@@ -511,12 +514,21 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
-          if (!signal.aborted) {
-            this.dependencies.logger.error(error);
-          }
-          subscriber.error(error);
-        });
+        this.resolveInstructions(requestInstructions)
+          .then((instructions) => {
+            return next(
+              this.extendSystemMessage(messages, [
+                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
+                instructions,
+              ])
+            );
+          })
+          .catch((error) => {
+            if (!signal.aborted) {
+              this.dependencies.logger.error(error);
+            }
+            subscriber.error(error);
+          });
 
         const titlePromise =
           !conversationId && !title && persist
@@ -911,14 +923,45 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
+  private resolveInstructions = async (requestInstructions: UserInstruction[]) => {
+    const knowledgeBaseInstructions =
+      await this.dependencies.knowledgeBaseService.getInstructions();
+
+    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
+      return '';
+    }
+
+    const knowledgeBaseInstructionsById = knowledgeBaseInstructions.reduce(
+      (acc, next) => ({
+        ...acc,
+        [next.doc_id]: next.text,
+      }),
+      {}
+    );
+
+    const instructionsById = requestInstructions.reduce(
+      (acc, next) => ({
+        ...acc,
+        [next.doc_id]: next.text,
+      }),
+      knowledgeBaseInstructionsById
+    );
+
+    const instructions = Object.values(instructionsById).join('\n\n');
+
+    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
+
+    return `${instructionsPrompt}${instructions}`;
+  };
+
+  private extendSystemMessage = (messages: Message[], extensions: string[]) => {
     const [systemMessage, ...rest] = messages;
 
     const extendedSystemMessage: Message = {
       ...systemMessage,
       message: {
         ...systemMessage.message,
-        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
+        content: `${systemMessage.message.content}\n\n${extensions.join('\n\n').trim()}`,
       },
     };
 

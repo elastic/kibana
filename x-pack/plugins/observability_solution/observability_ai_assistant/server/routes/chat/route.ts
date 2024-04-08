@@ -96,6 +96,12 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
         conversationId: t.string,
         title: t.string,
         responseLanguage: t.string,
+        instructions: t.array(
+          t.type({
+            doc_id: t.string,
+            text: t.string,
+          })
+        ),
       }),
     ]),
   }),
@@ -120,6 +126,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
         persist,
         screenContexts,
         responseLanguage,
+        instructions,
       },
     } = params;
 
@@ -145,6 +152,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       functionClient,
       responseLanguage,
+      instructions,
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
