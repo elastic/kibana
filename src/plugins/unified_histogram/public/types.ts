@@ -9,7 +9,12 @@
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensEmbeddableOutput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  LensEmbeddableOutput,
+  LensPublicStart,
+  TypedLensByValueInput,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -111,10 +116,6 @@ export interface UnifiedHistogramChartContext {
    * Controls the time interval of the chart
    */
   timeInterval?: string;
-  /**
-   * The chart title -- sets the title property on the Lens chart input
-   */
-  title?: string;
 }
 
 /**
@@ -143,3 +144,39 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  * Unified histogram input observable
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
+
+export enum UnifiedHistogramExternalVisContextStatus {
+  unknown = 'unknown',
+  applied = 'applied',
+  automaticallyCreated = 'automaticallyCreated',
+  automaticallyOverridden = 'automaticallyOverridden',
+  manuallyCustomized = 'manuallyCustomized',
+}
+
+export enum UnifiedHistogramSuggestionType {
+  unsupported = 'unsupported',
+  lensSuggestion = 'lensSuggestion',
+  histogramForESQL = 'histogramForESQL',
+  histogramForDataView = 'histogramForDataView',
+}
+
+export interface UnifiedHistogramSuggestionContext {
+  suggestion: Suggestion | undefined;
+  type: UnifiedHistogramSuggestionType;
+}
+
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+/**
+ * Unified Histogram type for recreating a stored Lens vis
+ */
+export interface UnifiedHistogramVisContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+  suggestionType: UnifiedHistogramSuggestionType;
+}
