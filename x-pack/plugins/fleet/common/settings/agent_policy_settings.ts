@@ -10,14 +10,16 @@ import { z } from 'zod';
 
 import type { SettingsConfig } from './types';
 
-const zodStringWithDurationValidation = z.string().refine((val) => val.match(/^(\d+[s|m|h|d])?$/), {
-  message: i18n.translate(
-    'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
-    {
-      defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d',
-    }
-  ),
-});
+export const zodStringWithDurationValidation = z
+  .string()
+  .refine((val) => val.match(/^(\d+[s|m|h|d])?$/), {
+    message: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage',
+      {
+        defaultMessage: 'Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d',
+      }
+    ),
+  });
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
