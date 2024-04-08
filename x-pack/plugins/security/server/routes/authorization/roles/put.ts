@@ -94,7 +94,6 @@ export function definePutRolesRoutes({
 
         await esClient.asCurrentUser.security.putRole({
           name: request.params.name,
-          // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
           body,
         });
 

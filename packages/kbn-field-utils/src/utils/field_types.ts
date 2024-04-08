@@ -37,6 +37,7 @@ export enum KNOWN_FIELD_TYPES {
   POINT = 'point',
   SHAPE = 'shape',
   SPARSE_VECTOR = 'sparse_vector',
+  SEMANTIC_TEXT = 'semantic_text',
   STRING = 'string',
   TEXT = 'text',
   VERSION = 'version',

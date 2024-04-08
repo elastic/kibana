@@ -34,7 +34,8 @@ export default function (providerContext: FtrProviderContext) {
       .expect(201);
   }
 
-  describe('fleet_final_pipeline', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/180071
+  describe.skip('fleet_final_pipeline', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
