@@ -124,7 +124,15 @@ describe('helpers', () => {
   });
 
   describe('isAnonymized', () => {
-    const allowReplacementSet = new Set(['user.name', 'host.name']);
+    const anonymizationFields = {
+      total: 2,
+      page: 1,
+      perPage: 100,
+      data: [
+        { id: 'user.name', field: 'user.name', allowed: false, anonymized: true },
+        { id: 'host.name', field: 'host.name', allowed: false, anonymized: true },
+      ],
+    };
 
     it('returns true when the field is in the allowReplacementSet', () => {
       const field = 'user.name';
@@ -139,10 +147,17 @@ describe('helpers', () => {
     });
 
     it('returns false when allowReplacementSet is empty', () => {
-      const emptySet = new Set<string>();
+      const anonymizationFieldsEmpty = {
+        total: 0,
+        page: 1,
+        perPage: 100,
+        data: [],
+      };
       const field = 'user.name';
 
-      expect(isAnonymized({ anonymizationFields: anonymizationFields.data, field })).toBe(false);
+      expect(isAnonymized({ anonymizationFields: anonymizationFieldsEmpty.data, field })).toBe(
+        false
+      );
     });
   });
 });
