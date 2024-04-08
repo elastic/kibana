@@ -35,6 +35,7 @@ import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
 import type { SloEmbeddableInput } from './types';
+import { groupByOptions } from './slo_group_filters';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
@@ -60,13 +61,25 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   ) {
     super(initialInput, {}, parent);
     this.reloadSubject = new Subject<boolean>();
-
-    this.setTitle(
-      this.input.title ||
-        i18n.translate('xpack.slo.sloEmbeddable.displayTitle', {
-          defaultMessage: 'SLO Overview',
-        })
-    );
+    if (initialInput.overviewMode === 'single') {
+      this.setTitle(
+        this.input.title ||
+          i18n.translate('xpack.slo.sloEmbeddable.displayTitle', {
+            defaultMessage: 'SLO Overview',
+          })
+      );
+    } else {
+      const groupByText = groupByOptions.find(
+        (option) => option.value === initialInput.groupFilters?.groupBy
+      )?.text;
+      this.setTitle(
+        this.input.title ||
+          i18n.translate('xpack.slo.sloEmbeddable.groupBy.displayTitle', {
+            defaultMessage: 'SLO Overview group by {groupByText}',
+            values: { groupByText },
+          })
+      );
+    }
   }
 
   setTitle(title: string) {

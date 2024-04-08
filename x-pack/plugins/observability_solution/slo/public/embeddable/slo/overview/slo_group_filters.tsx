@@ -8,27 +8,28 @@ import React, { useState } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
+
 interface Option {
   value: string;
   text: string;
 }
 
-const groupByOptions: Option[] = [
+export const groupByOptions: Option[] = [
   {
     text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.tags', {
-      defaultMessage: 'by Tag',
+      defaultMessage: 'Tags',
     }),
     value: 'slo.tags',
   },
   {
     text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.status', {
-      defaultMessage: 'by Status',
+      defaultMessage: 'Status',
     }),
     value: 'status',
   },
   {
     text: i18n.translate('xpack.slo.sloGroupConfiguration.groupBy.sliType', {
-      defaultMessage: 'by SLI type',
+      defaultMessage: 'SLI type',
     }),
     value: 'slo.indicator.type',
   },
@@ -46,7 +47,7 @@ export function SloGroupFilters({ onSelected }: Props) {
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.slo.sloGroupConfiguration.groupTypeLabel', {
-          defaultMessage: 'Group type',
+          defaultMessage: 'Group by',
         })}
       >
         <EuiSelect
