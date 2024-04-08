@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(13);
     });
   });
 
@@ -555,6 +555,21 @@ describe('description_step', () => {
         );
 
         expect(result[0].title).toEqual('Investigation guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
