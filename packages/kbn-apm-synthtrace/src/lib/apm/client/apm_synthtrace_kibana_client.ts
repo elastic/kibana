@@ -90,7 +90,7 @@ export class ApmSynthtraceKibanaClient {
 
     if (!responseJson.items) {
       throw new Error(
-        `No installed asests received for APM package version ${packageVersion}, received HTTP ${response.status} for url ${url}`
+        `No installed assets received for APM package version ${packageVersion}, received HTTP ${response.status} for url ${url}`
       );
     }
 
