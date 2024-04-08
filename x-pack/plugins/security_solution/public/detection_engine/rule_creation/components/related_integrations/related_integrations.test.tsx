@@ -17,7 +17,7 @@ import {
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
 import { createReactQueryWrapper } from '../../../../common/mock';
-import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__/api_client';
+import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 import { RelatedIntegrations } from './related_integrations';
 
 // must match to the import in rules/related_integrations/use_integrations.tsx
