@@ -43,12 +43,14 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
   isEditing?: boolean;
+  // form error state is passed up to the form
   updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
 }
 const AgentPolicyFormContext = React.createContext<
   | {
       agentPolicy: Partial<NewAgentPolicy | AgentPolicy> & { [key: string]: any };
       updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
+      updateAdvancedSettingsHasErrors: (hasErrors: boolean) => void;
     }
   | undefined
 >(undefined);
@@ -93,7 +95,9 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <AgentPolicyFormContext.Provider value={{ agentPolicy, updateAgentPolicy }}>
+    <AgentPolicyFormContext.Provider
+      value={{ agentPolicy, updateAgentPolicy, updateAdvancedSettingsHasErrors }}
+    >
       <EuiForm>
         {!isEditing ? (
           <AgentPolicyGeneralFields
@@ -153,10 +157,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                     </h3>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <ConfiguredSettings
-                    configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                    updateAdvancedSettingsHasErrors={updateAdvancedSettingsHasErrors}
-                  />
+                  <ConfiguredSettings configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS} />
                 </>
               ) : null}
             </StyledEuiAccordion>
@@ -183,10 +184,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <ConfiguredSettings
-                  configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                  updateAdvancedSettingsHasErrors={updateAdvancedSettingsHasErrors}
-                />
+                <ConfiguredSettings configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS} />
               </>
             ) : null}
             <EuiSpacer size="xl" />

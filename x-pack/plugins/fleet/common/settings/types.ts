@@ -18,6 +18,4 @@ export interface SettingsConfig {
   api_field: {
     name: string;
   };
-  // form error state is passed up to the form
-  updateAdvancedSettingsHasErrors?: (hasErrors: boolean) => void;
 }
