@@ -7,7 +7,7 @@
  */
 
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
-import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 export const DEFAULT_CONTROLS: Array<
   Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
@@ -25,8 +25,8 @@ export const DEFAULT_CONTROLS: Array<
     fieldName: ALERT_RULE_NAME,
   },
   {
-    title: 'Started at',
-    fieldName: ALERT_START,
+    title: 'Grouping name',
+    fieldName: 'error.grouping_name',
   },
   {
     title: 'Duration',

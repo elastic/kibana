@@ -13,7 +13,6 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -77,10 +76,9 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
           isEmptyState
           emptyState={
             <div className="emptyState">
-              <FormattedMessage
-                id="xpack.enterpriseSearch..div.nothingHereYetLabel"
-                defaultMessage="Nothing here yet!"
-              />
+              {i18n.translate('xpack.enterpriseSearch..div.nothingHereYetLabel', {
+                defaultMessage: 'Nothing here yet!',
+              })}
             </div>
           }
         >

@@ -135,7 +135,6 @@ export const ControlEditor = ({
         embeddable?.getInput().dataViewId ??
         getRelevantDataViewId?.() ??
         (await getDefaultId());
-
       if (initialId) {
         setSelectedDataViewId(initialId);
         startingInput.current = { ...startingInput.current, dataViewId: initialId };
@@ -280,11 +279,11 @@ export const ControlEditor = ({
                 <DataViewPicker
                   dataViews={dataViewListItems}
                   selectedDataViewId={selectedDataViewId}
-                  onChangeDataViewId={(_dataViewId) => {
-                    setLastUsedDataViewId?.(_dataViewId);
-                    if (_dataViewId === selectedDataViewId) return;
+                  onChangeDataViewId={(newDataViewId) => {
+                    setLastUsedDataViewId?.(newDataViewId);
+                    if (newDataViewId === selectedDataViewId) return;
                     setSelectedField(undefined);
-                    setSelectedDataViewId(_dataViewId);
+                    setSelectedDataViewId(newDataViewId);
                   }}
                   trigger={{
                     label:

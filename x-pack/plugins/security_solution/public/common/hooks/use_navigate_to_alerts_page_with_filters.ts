@@ -7,9 +7,9 @@
 
 import { encode } from '@kbn/rison';
 
+import type { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { SecurityPageName } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
-import type { FilterItemObj } from '../components/filter_group/types';
 import { useNavigation } from '../lib/kibana';
 import { URL_PARAM_KEY } from './use_url_state';
 

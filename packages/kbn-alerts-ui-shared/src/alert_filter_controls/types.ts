@@ -50,10 +50,6 @@ export interface FilterGroupProps
    * (takes precedence over the localStorage configuration)
    */
   controlsUrlState?: FilterItemObj[];
-  /**
-   * Setter for controlsUrlState
-   */
-  setControlsUrlState?: (controls: FilterItemObj[]) => void;
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   maxControls?: number;
   ControlGroupRenderer: typeof ControlGroupRenderer;

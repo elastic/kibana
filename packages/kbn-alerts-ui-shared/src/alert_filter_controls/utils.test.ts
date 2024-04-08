@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
 import {
   getFilterItemObjListFromControlInput,
   mergeControls,
@@ -98,7 +98,7 @@ describe('utils', () => {
         newInputData as ControlGroupInput
       );
 
-      let panelObj = newInputData.panels['1'].explicitInput;
+      let panelObj = newInputData.panels['1'].explicitInput as OptionsListEmbeddableInput;
       expect(filterItemObjList[0]).toMatchObject({
         fieldName: panelObj.fieldName,
         selectedOptions: panelObj.selectedOptions,

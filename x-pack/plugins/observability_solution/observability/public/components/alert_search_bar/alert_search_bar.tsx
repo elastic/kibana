@@ -98,7 +98,9 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
+          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
           filters: [...filters, ...(controlFilters ?? [])],
+          config: getEsQueryConfig(uiSettings),
         })
       );
     } catch (error) {
@@ -107,7 +109,19 @@ export function ObservabilityAlertSearchBar({
       });
       onKueryChange(DEFAULT_QUERY_STRING);
     }
-  }, [controlFilters, filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
+  }, [
+    controlFilters,
+    defaultSearchQueries,
+    filters,
+    kuery,
+    onEsQueryChange,
+    onKueryChange,
+    rangeFrom,
+    rangeTo,
+    status,
+    toasts,
+    uiSettings,
+  ]);
 
   const onSearchBarParamsChange = useCallback<
     (query: {

@@ -51,7 +51,6 @@ import { GroupByOptions } from '../../../../detections/pages/detection_engine/ru
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -477,7 +476,7 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
       return [
         {
           title: label,
-          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
+          description: i18n.ESQL_TYPE_DESCRIPTION,
         },
       ];
     }

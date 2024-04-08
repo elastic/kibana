@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { encode } from '@kbn/rison';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 
+import { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
