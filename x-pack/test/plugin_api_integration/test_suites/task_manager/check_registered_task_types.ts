@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.index',
         'actions:.jira',
         'actions:.opsgenie',
+        'actions:.observability-ai-assistant',
         'actions:.pagerduty',
         'actions:.resilient',
         `actions:.sentinelone`,
