@@ -12,7 +12,13 @@ import { get } from 'lodash';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
-import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import {
+  checkAAD,
+  getTestRuleData,
+  getUrlPrefix,
+  ObjectRemover,
+  TaskManagerDoc,
+} from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,6 +47,14 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         id: `ad_hoc_run_params:${id}`,
       });
       return result._source;
+    }
+
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
+        id: `task:${id}`,
+        index: '.kibana_task_manager',
+      });
+      return scheduledTask._source!;
     }
 
     function getRule(overwrites = {}) {
@@ -362,6 +376,26 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO1.references).to.eql([{ id: ruleId1, name: 'rule', type: 'alert' }]);
               expect(adHocRunSO2.references).to.eql([{ id: ruleId2, name: 'rule', type: 'alert' }]);
 
+              // check that the task was scheduled correctly
+              const taskRecord1 = await getScheduledTask(result[0].id);
+              expect(taskRecord1.type).to.eql('task');
+              expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord1.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord1.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord1.task.params)).to.eql({
+                adHocRunParamsId: result[0].id,
+                spaceId: space.id,
+              });
+              const taskRecord2 = await getScheduledTask(result[1].id);
+              expect(taskRecord2.type).to.eql('task');
+              expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord2.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord2.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                adHocRunParamsId: result[1].id,
+                spaceId: space.id,
+              });
+
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -616,6 +650,35 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO1.references).to.eql([{ id: ruleId, name: 'rule', type: 'alert' }]);
               expect(adHocRunSO2.references).to.eql([{ id: ruleId, name: 'rule', type: 'alert' }]);
               expect(adHocRunSO3.references).to.eql([{ id: ruleId, name: 'rule', type: 'alert' }]);
+
+              // check that the task was scheduled correctly
+              const taskRecord1 = await getScheduledTask(result[0].id);
+              expect(taskRecord1.type).to.eql('task');
+              expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord1.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord1.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord1.task.params)).to.eql({
+                adHocRunParamsId: result[0].id,
+                spaceId: space.id,
+              });
+              const taskRecord2 = await getScheduledTask(result[1].id);
+              expect(taskRecord2.type).to.eql('task');
+              expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord2.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord2.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                adHocRunParamsId: result[1].id,
+                spaceId: space.id,
+              });
+              const taskRecord3 = await getScheduledTask(result[2].id);
+              expect(taskRecord3.type).to.eql('task');
+              expect(taskRecord3.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord3.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord3.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord3.task.params)).to.eql({
+                adHocRunParamsId: result[2].id,
+                spaceId: space.id,
+              });
 
               // Ensure AAD isn't broken
               await checkAAD({
@@ -1056,6 +1119,35 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               expect(adHocRunSO1.references).to.eql([{ id: ruleId1, name: 'rule', type: 'alert' }]);
               expect(adHocRunSO2.references).to.eql([{ id: ruleId2, name: 'rule', type: 'alert' }]);
               expect(adHocRunSO3.references).to.eql([{ id: ruleId1, name: 'rule', type: 'alert' }]);
+
+              // check that the task was scheduled correctly
+              const taskRecord1 = await getScheduledTask(result[0].id);
+              expect(taskRecord1.type).to.eql('task');
+              expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord1.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord1.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord1.task.params)).to.eql({
+                adHocRunParamsId: result[0].id,
+                spaceId: space.id,
+              });
+              const taskRecord2 = await getScheduledTask(result[1].id);
+              expect(taskRecord2.type).to.eql('task');
+              expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord2.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord2.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord2.task.params)).to.eql({
+                adHocRunParamsId: result[1].id,
+                spaceId: space.id,
+              });
+              const taskRecord3 = await getScheduledTask(result[5].id);
+              expect(taskRecord3.type).to.eql('task');
+              expect(taskRecord3.task.taskType).to.eql('ad_hoc_run-backfill');
+              expect(taskRecord3.task.timeoutOverride).to.eql('10s');
+              expect(taskRecord3.task.enabled).to.eql(true);
+              expect(JSON.parse(taskRecord3.task.params)).to.eql({
+                adHocRunParamsId: result[5].id,
+                spaceId: space.id,
+              });
 
               // Ensure AAD isn't broken
               await checkAAD({

@@ -86,6 +86,24 @@ export type RuleAttributesNotPartiallyUpdatable =
   | 'meta'
   | 'alertDelay';
 
+export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
+export const AdHocRunAttributesIncludedInAAD = [
+  'enabled',
+  'start',
+  'duration',
+  'createdAt',
+  'rule',
+  'spaceId',
+];
+export type AdHocRunAttributesNotPartiallyUpdatable =
+  | 'enabled'
+  | 'start'
+  | 'duration'
+  | 'createdAt'
+  | 'rule'
+  | 'spaceId'
+  | 'apiKeyToUse';
+
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -220,14 +238,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['apiKeyToUse']),
-    attributesToIncludeInAAD: new Set([
-      'enabled',
-      'start',
-      'duration',
-      'createdAt',
-      'spaceId',
-      'rule',
-    ]),
+    attributesToEncrypt: new Set(AdHocRunAttributesToEncrypt),
+    attributesToIncludeInAAD: new Set(AdHocRunAttributesIncludedInAAD),
   });
 }

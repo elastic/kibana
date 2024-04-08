@@ -14,5 +14,6 @@ export default function backfillTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./task_runner'));
   });
 }

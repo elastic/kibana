@@ -25,6 +25,7 @@ import {
   VERSION,
   ALERT_TIME_RANGE,
   ALERT_END,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -58,6 +59,55 @@ describe('buildUpdatedRecoveredAlert', () => {
     ).toEqual({
       ...alertRule,
       [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [EVENT_ACTION]: 'close',
+      [EVENT_KIND]: 'signal',
+      [ALERT_ACTION_GROUP]: 'recovered',
+      [ALERT_DURATION]: '36000000',
+      [ALERT_START]: '2023-03-27T12:27:28.159Z',
+      [ALERT_END]: '2023-03-30T12:27:28.159Z',
+      [ALERT_TIME_RANGE]: { gte: '2023-03-27T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
+      [ALERT_FLAPPING]: true,
+      [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
+      [ALERT_INSTANCE_ID]: 'alert-A',
+      [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-x'],
+      [ALERT_STATUS]: 'recovered',
+      [ALERT_START]: '2023-03-28T12:27:28.159Z',
+      [ALERT_UUID]: 'abcdefg',
+      [ALERT_WORKFLOW_STATUS]: 'open',
+      [SPACE_IDS]: ['default'],
+      [VERSION]: '8.8.1',
+      [TAGS]: ['rule-', '-tags'],
+    });
+  });
+
+  test('should update with runTimestamp if specified', () => {
+    const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+    legacyAlert.scheduleActions('default');
+    legacyAlert.setFlappingHistory([false, false, true, true]);
+    legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+
+    expect(
+      buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedRecoveredAlert,
+        runTimestamp: '2030-12-15T02:44:13.124Z',
+        legacyRawAlert: {
+          meta: {
+            flapping: true,
+            flappingHistory: [false, false, true, true],
+            maintenanceWindowIds: ['maint-1', 'maint-321'],
+          },
+          state: {
+            start: '3023-03-27T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual({
+      ...alertRule,
+      [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
       [EVENT_ACTION]: 'close',
       [EVENT_KIND]: 'signal',
       [ALERT_ACTION_GROUP]: 'recovered',
@@ -129,6 +179,7 @@ describe('buildUpdatedRecoveredAlert', () => {
         version: '8.8.1',
       },
       [TIMESTAMP]: '2023-03-29T12:27:28.159Z',
+      [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-29T12:27:28.159Z',
       [ALERT_FLAPPING]: true,
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
       [ALERT_STATUS]: 'recovered',

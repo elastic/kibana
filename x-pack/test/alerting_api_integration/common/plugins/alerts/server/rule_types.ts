@@ -705,6 +705,7 @@ function getPatternFiringAutoRecoverFalseRuleType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
+    ruleTaskTimeout: '10s',
     autoRecoverAlerts: false,
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
@@ -745,7 +746,14 @@ function getPatternFiringAutoRecoverFalseRuleType() {
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+          if (scheduleByPattern === 'error') {
+            throw new Error('rule executor error');
+          } else if (scheduleByPattern === 'timeout') {
+            // delay longer than the timeout
+            await new Promise((r) => setTimeout(r, 12000));
+          } else {
+            services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
+          }
         }
       }
 

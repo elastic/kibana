@@ -6,6 +6,7 @@
  */
 
 export const adHocRunStatus = {
+  COMPLETE: 'complete',
   PENDING: 'pending',
   RUNNING: 'running',
   ERROR: 'error',

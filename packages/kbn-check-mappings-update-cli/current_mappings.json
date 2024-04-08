@@ -1027,6 +1027,10 @@
         "index": false,
         "type": "boolean"
       },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
+      },
       "latest_install_failed_attempts": {
         "enabled": false,
         "type": "object"

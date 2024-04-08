@@ -157,6 +157,7 @@ describe('legacyRules_notification_rule_type', () => {
       state: {},
       spaceId: '',
       startedAt: new Date('2019-12-14T16:40:33.400Z'),
+      startedAtOverridden: false,
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
       rule: {
         id: '1111',

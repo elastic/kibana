@@ -18,8 +18,14 @@ import { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../application/backfill/transforms';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskRunnerFactory } from '../task_runner';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 const logger = loggingSystemMock.create().get();
+const taskManagerSetup = taskManagerMock.createSetup();
+const taskManagerStart = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const auditLogger = auditLoggerMock.create();
@@ -31,6 +37,27 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
     ...overwrites,
   };
 }
+
+const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  id: 'myType',
+  name: 'Test',
+  actionGroups: [
+    { id: 'default', name: 'Default' },
+    { id: 'custom', name: 'Not the Default' },
+  ],
+  defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  recoveryActionGroup: RecoveredActionGroup,
+  executor: jest.fn(),
+  category: 'test',
+  producer: 'alerts',
+  validate: {
+    params: { validate: (params) => params },
+  },
+  validLegacyConsumers: [],
+  autoRecoverAlerts: false,
+};
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
 function getMockRule(overwrites: Record<string, unknown> = {}): RuleDomain {
@@ -154,35 +181,31 @@ describe('BackfillClient', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ruleTypeRegistry.get.mockReturnValue({
-      id: 'myType',
-      name: 'Test',
-      actionGroups: [
-        { id: 'default', name: 'Default' },
-        { id: 'custom', name: 'Not the Default' },
-      ],
-      defaultActionGroupId: 'default',
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      recoveryActionGroup: RecoveredActionGroup,
-      async executor() {
-        return { state: {} };
-      },
-      category: 'test',
-      producer: 'alerts',
-      validate: {
-        params: { validate: (params) => params },
-      },
-      validLegacyConsumers: [],
-      autoRecoverAlerts: false,
+    ruleTypeRegistry.get.mockReturnValue(mockRuleType);
+    backfillClient = new BackfillClient({
+      logger,
+      taskManagerSetup,
+      taskManagerStartPromise: Promise.resolve(taskManagerStart),
+      taskRunnerFactory: new TaskRunnerFactory(),
     });
-    backfillClient = new BackfillClient({ logger });
   });
 
   afterAll(() => jest.useRealTimers());
 
+  describe('constructor', () => {
+    test('should register backfill task type', async () => {
+      expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
+        'ad_hoc_run-backfill': {
+          title: 'Alerting Backfill Rule Run',
+          priority: TaskPriority.Low,
+          createTaskRunner: expect.any(Function),
+        },
+      });
+    });
+  });
+
   describe('bulkQueue()', () => {
-    test('should successfully create backfill saved objects', async () => {
+    test('should successfully create backfill saved objects and queue backfill tasks', async () => {
       const mockData = [
         getMockData(),
         getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
@@ -190,6 +213,7 @@ describe('BackfillClient', () => {
       const rule1 = getMockRule();
       const rule2 = getMockRule({ id: '2' });
       const mockRules = [rule1, rule2];
+      ruleTypeRegistry.get.mockReturnValue({ ...mockRuleType, ruleTaskTimeout: '1d' });
 
       const mockAttributes1 = getMockAdHocRunAttributes({
         overwrites: {
@@ -273,6 +297,22 @@ describe('BackfillClient', () => {
         kibana: { saved_object: { id: 'def', type: 'ad_hoc_run_params' } },
         message: 'User has created ad hoc run for ad_hoc_run_params [id=def]',
       });
+      expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'abc',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          timeoutOverride: '1d',
+          params: { adHocRunParamsId: 'abc', spaceId: 'default' },
+        },
+        {
+          id: 'def',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          timeoutOverride: '1d',
+          params: { adHocRunParamsId: 'def', spaceId: 'default' },
+        },
+      ]);
       expect(result).toEqual(bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult));
     });
 
@@ -363,6 +403,20 @@ describe('BackfillClient', () => {
         kibana: { saved_object: { id: 'def', type: 'ad_hoc_run_params' } },
         message: 'User has created ad hoc run for ad_hoc_run_params [id=def]',
       });
+      expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'abc',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'abc', spaceId: 'default' },
+        },
+        {
+          id: 'def',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'def', spaceId: 'default' },
+        },
+      ]);
       expect(result).toEqual(bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult));
     });
 
@@ -424,6 +478,14 @@ describe('BackfillClient', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `No rule found for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}`
       );
+      expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'abc',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'abc', spaceId: 'default' },
+        },
+      ]);
       expect(result).toEqual([
         ...bulkCreateResult.saved_objects.map(transformAdHocRunToBackfillResult),
         {
@@ -559,6 +621,33 @@ describe('BackfillClient', () => {
         message: 'User has created ad hoc run for ad_hoc_run_params [id=jkl]',
       });
 
+      expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'abc',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'abc', spaceId: 'default' },
+        },
+        {
+          id: 'def',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'def', spaceId: 'default' },
+        },
+        {
+          id: 'ghi',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'ghi', spaceId: 'default' },
+        },
+        {
+          id: 'jkl',
+          taskType: 'ad_hoc_run-backfill',
+          state: {},
+          params: { adHocRunParamsId: 'jkl', spaceId: 'default' },
+        },
+      ]);
+
       expect(result).toEqual([
         {
           error: {
@@ -630,6 +719,7 @@ describe('BackfillClient', () => {
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
+      expect(taskManagerStart.bulkSchedule).not.toHaveBeenCalled();
       expect(result).toEqual([
         {
           error: {
@@ -665,6 +755,101 @@ describe('BackfillClient', () => {
           error: {
             error: 'Not Found',
             message: 'Saved object [alert/5] not found',
+          },
+        },
+      ]);
+    });
+
+    test('should skip calling bulkSchedule if no SOs were successfully created', async () => {
+      ruleTypeRegistry.get.mockReturnValueOnce({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'custom', name: 'Not the Default' },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        validate: {
+          params: { validate: (params) => params },
+        },
+        validLegacyConsumers: [],
+        autoRecoverAlerts: true,
+      });
+      const mockData = [
+        getMockData(), // this should return error due to unsupported rule type
+        getMockData({ ruleId: '2', end: '2023-11-16T10:00:00.000Z' }), // this should return rule not found error
+        getMockData({ ruleId: '4' }), // this should return error from saved objects client bulk create
+        getMockData({ ruleId: '6' }), // this should return error due to disabled rule
+        getMockData({ ruleId: '7' }), // this should return error due to null api key
+      ];
+      const rule1 = getMockRule();
+      const rule4 = getMockRule({ id: '4' });
+      const rule6 = getMockRule({ id: '6', enabled: false });
+      const rule7 = getMockRule({ id: '7', apiKey: null });
+      const mockRules = [rule1, rule4, rule6, rule7];
+
+      const bulkCreateResult = {
+        saved_objects: [
+          {
+            type: 'ad_hoc_rule_run_params',
+            error: {
+              error: 'my error',
+              message: 'Unable to create',
+            },
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
+        bulkCreateResult as SavedObjectsBulkResponse<AdHocRunSO>
+      );
+      const result = await backfillClient.bulkQueue({
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+      });
+
+      expect(taskManagerStart.bulkSchedule).not.toHaveBeenCalled();
+
+      expect(result).toEqual([
+        {
+          error: {
+            error: 'Bad Request',
+            message: 'Rule type "myType" for rule 1 is not supported',
+          },
+        },
+        {
+          error: {
+            error: 'Not Found',
+            message: 'Saved object [alert/2] not found',
+          },
+        },
+        {
+          error: {
+            error: 'my error',
+            message: 'Unable to create',
+          },
+        },
+        {
+          error: {
+            error: 'Bad Request',
+            message: 'Rule 6 is disabled',
+          },
+        },
+        {
+          error: {
+            error: 'Bad Request',
+            message: 'Rule 7 has no API key',
           },
         },
       ]);
