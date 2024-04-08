@@ -1056,6 +1056,7 @@ describe('autocomplete', () => {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {
               const canHaveMoreArgs =
+                i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
