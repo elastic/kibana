@@ -30,6 +30,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -114,6 +119,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -203,6 +213,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -236,6 +251,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "system": Object {
@@ -244,6 +264,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -260,6 +285,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
   },
@@ -341,6 +371,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -374,6 +409,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "system": Object {
@@ -382,6 +422,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -398,6 +443,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
   },
@@ -839,6 +889,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -1504,6 +1559,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1520,6 +1580,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1536,6 +1601,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1572,6 +1642,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1588,6 +1663,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1604,6 +1684,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2584,6 +2669,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2600,6 +2690,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
     "stop": Object {
@@ -2673,6 +2768,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "temperature": Object {
@@ -2681,6 +2781,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
   },
@@ -2762,6 +2867,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2778,6 +2888,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
     "stop": Object {
@@ -2851,6 +2966,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "temperature": Object {
@@ -2859,6 +2979,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "number",
     },
   },
@@ -2927,6 +3052,14 @@ Object {
               "error": [Function],
               "presence": "optional",
             },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+              Object {
+                "x-oas-optional": true,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -3039,6 +3172,14 @@ Object {
               "error": [Function],
               "presence": "optional",
             },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+              Object {
+                "x-oas-optional": true,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -3292,6 +3433,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-get-additional-properties": [Function],
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -3924,6 +4070,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-get-additional-properties": [Function],
+                            },
+                          ],
                           "rules": Array [
                             Object {
                               "args": Object {
@@ -4348,6 +4499,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 50,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -4363,6 +4519,11 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -4381,6 +4542,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4397,6 +4563,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 15000,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4419,6 +4593,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-get-additional-properties": [Function],
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4462,6 +4644,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 512,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4482,6 +4672,14 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-max-length": 130,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4516,6 +4714,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 25000,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4598,6 +4804,11 @@ Object {
             },
             "type": "any",
           },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "type": "alternatives",
@@ -4840,6 +5051,11 @@ Object {
           "type": "alternatives",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4856,6 +5072,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 100,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -4884,6 +5108,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 50,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -4899,6 +5128,11 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -4917,6 +5151,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 100,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5122,6 +5364,11 @@ Object {
           "type": "alternatives",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5172,6 +5419,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 25000,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5194,6 +5449,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 100,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5216,6 +5479,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 100,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5469,6 +5740,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5485,6 +5761,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5501,6 +5782,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-get-additional-properties": [Function],
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5536,6 +5825,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 255,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5596,6 +5893,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "group": Object {
@@ -5604,6 +5906,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5667,6 +5974,11 @@ Object {
           "type": "object",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "severity": Object {
@@ -5725,6 +6037,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "source": Object {
@@ -5733,6 +6050,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5749,6 +6071,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-max-length": 1024,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -5771,6 +6101,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -7329,6 +7664,11 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "type": "array",
@@ -13038,6 +13378,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "appsVulnerabilityStatuses": Object {
@@ -18743,6 +19088,11 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "type": "array",
@@ -24452,6 +24802,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "appsVulnerabilityStatuses": Object {
@@ -29451,6 +29806,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "computerName": Object {
@@ -29459,6 +29819,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -29484,6 +29849,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29500,6 +29870,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29516,6 +29891,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29532,6 +29912,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29555,6 +29940,11 @@ Object {
                 "error": [Function],
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -29571,6 +29961,11 @@ Object {
                 "error": [Function],
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -29582,6 +29977,11 @@ Object {
               "type": "string",
             },
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "preferences": Object {
             "stripUnknown": Object {
               "objects": false,
@@ -29595,6 +29995,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "type": "boolean",
         },
         "scriptId": Object {
@@ -29617,6 +30022,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29633,6 +30043,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "type": "number",
         },
         "singularityxdrKeyword": Object {
@@ -29641,6 +30056,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29657,6 +30077,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -29673,6 +30098,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {
@@ -33612,6 +34042,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -33668,6 +34103,11 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
+              "metas": Array [
+                Object {
+                  "x-oas-min-length": 1,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -33688,6 +34128,11 @@ Object {
               "flags": Object {
                 "error": [Function],
               },
+              "metas": Array [
+                Object {
+                  "x-oas-min-length": 1,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -33711,6 +34156,11 @@ Object {
             },
           },
           "type": "object",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -33747,6 +34197,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -33814,6 +34269,11 @@ Object {
                   "error": [Function],
                   "presence": "optional",
                 },
+                "metas": Array [
+                  Object {
+                    "x-oas-optional": true,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -33893,6 +34353,11 @@ Object {
                     "type": "string",
                   },
                 ],
+                "metas": Array [
+                  Object {
+                    "x-oas-optional": true,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -33926,6 +34391,11 @@ Object {
                     "type": "string",
                   },
                 ],
+                "metas": Array [
+                  Object {
+                    "x-oas-optional": true,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -33940,6 +34410,11 @@ Object {
                 "flags": Object {
                   "error": [Function],
                 },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -34025,6 +34500,11 @@ Object {
                     "type": "string",
                   },
                 ],
+                "metas": Array [
+                  Object {
+                    "x-oas-optional": true,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -34056,6 +34536,11 @@ Object {
                       },
                     ],
                     "type": "string",
+                  },
+                ],
+                "metas": Array [
+                  Object {
+                    "x-oas-optional": true,
                   },
                 ],
                 "rules": Array [
@@ -35414,6 +35899,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -35552,6 +36042,11 @@ Object {
           "type": "number",
         },
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "preferences": Object {
         "stripUnknown": Object {
           "objects": false,
@@ -35565,6 +36060,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -35671,6 +36171,11 @@ Object {
           "type": "number",
         },
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "preferences": Object {
         "stripUnknown": Object {
           "objects": false,
@@ -35684,6 +36189,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -35993,6 +36503,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "ca": Object {
@@ -36001,6 +36516,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36043,6 +36563,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "hasAuth": Object {
@@ -36065,6 +36590,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-get-additional-properties": [Function],
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -36208,6 +36738,11 @@ Object {
             },
             "type": "any",
           },
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "type": "alternatives",
@@ -36456,6 +36991,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36692,6 +37232,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36708,6 +37253,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36724,6 +37274,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36754,6 +37309,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36770,6 +37330,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -36786,6 +37351,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
