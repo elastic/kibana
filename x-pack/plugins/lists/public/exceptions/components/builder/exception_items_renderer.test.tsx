@@ -16,6 +16,7 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';
+import { MockedShowValueListModal } from '../__mock__/ShowValueListModal.mock';
 
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
@@ -54,6 +55,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -102,6 +104,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -148,6 +151,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -185,6 +189,7 @@ describe('ExceptionBuilderComponent', () => {
           listType="detection"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -216,6 +221,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -252,6 +258,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -311,6 +318,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -379,6 +387,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -427,6 +436,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -463,6 +473,7 @@ describe('ExceptionBuilderComponent', () => {
           listNamespaceType="single"
           ruleName="Test rule"
           onChange={jest.fn()}
+          showValueListModal={MockedShowValueListModal}
         />
       </EuiThemeProvider>
     );
@@ -502,6 +513,7 @@ describe('ExceptionBuilderComponent', () => {
             listNamespaceType="single"
             ruleName="Test rule"
             onChange={jest.fn()}
+            showValueListModal={MockedShowValueListModal}
           />
         </EuiThemeProvider>
       );

@@ -28,6 +28,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
 
+import { MockedShowValueListModal } from '../__mock__/ShowValueListModal.mock';
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
@@ -35,8 +36,6 @@ import * as i18n from './translations';
 
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
-
-const MockedShowValueListModal = (): React.ReactNode => <></>;
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
