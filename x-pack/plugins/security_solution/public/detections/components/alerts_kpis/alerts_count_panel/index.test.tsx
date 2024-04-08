@@ -213,7 +213,7 @@ describe('AlertsCountPanel', () => {
   });
 });
 
-describe('renders', () => {
+describe('Visualization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
@@ -224,7 +224,7 @@ describe('renders', () => {
     );
   });
 
-  it('Visualization embeddable', async () => {
+  it('should render embeddable', async () => {
     await act(async () => {
       const wrapper = mount(
         <TestProviders>
@@ -235,7 +235,7 @@ describe('renders', () => {
     });
   });
 
-  it('Visualization embeddable with provided height', async () => {
+  it('should render with provided height', async () => {
     await act(async () => {
       mount(
         <TestProviders>
@@ -248,7 +248,7 @@ describe('renders', () => {
     });
   });
 
-  it('Visualization embeddable with extra actions', async () => {
+  it('should render with extra actions', async () => {
     await act(async () => {
       mount(
         <TestProviders>
@@ -261,7 +261,7 @@ describe('renders', () => {
     });
   });
 
-  it('Visualization embeddable with extra options', async () => {
+  it('should render with extra options', async () => {
     await act(async () => {
       mount(
         <TestProviders>

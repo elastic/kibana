@@ -18,6 +18,8 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
 jest.mock('./alerts_local_storage');
 jest.mock('../../../../common/containers/sourcerer');
@@ -259,6 +261,78 @@ describe('ChartPanels', () => {
           expect(afterReset).toHaveValue(defaultValue); // back to the default
         });
       });
+
+      describe.each([['trend'], ['table']])(`when 'alertViewSelection' is '%s'`, (view) => {
+        test(`it has resets the 'Group by' field as an extra action`, async () => {
+          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+            ...defaultAlertSettings,
+            alertViewSelection: view,
+          });
+
+          const mockResetGroupByFieldsAction = [
+            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+          ];
+
+          const testProps = {
+            ...defaultProps,
+            extraActions: mockResetGroupByFieldsAction,
+          };
+
+          render(
+            <TestProviders>
+              <ChartPanels {...testProps} />
+            </TestProviders>
+          );
+
+          await waitFor(() => {
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+            ).toEqual(1);
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+            ).toEqual('resetGroupByField');
+          });
+        });
+      });
+
+      describe.each([
+        ['trend', 'kibana.alert.rule.name'],
+        ['table', 'kibana.alert.rule.name'],
+      ])(`when 'alertViewSelection' is '%s'`, (view, defaultGroupBy) => {
+        test(`it has resets the 'Group by' field as an extra action, with default value ${defaultGroupBy}`, async () => {
+          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+            ...defaultAlertSettings,
+            alertViewSelection: view,
+          });
+
+          const mockResetGroupByFieldsAction = [
+            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+          ];
+
+          const testProps = {
+            ...defaultProps,
+            extraActions: mockResetGroupByFieldsAction,
+          };
+
+          render(
+            <TestProviders>
+              <ChartPanels {...testProps} />
+            </TestProviders>
+          );
+
+          await waitFor(() => {
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+            ).toEqual(1);
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+            ).toEqual('resetGroupByField');
+            expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].stackByField).toEqual(
+              defaultGroupBy
+            );
+          });
+        });
+      });
     });
 
     describe('Group by top', () => {
@@ -292,6 +366,27 @@ describe('ChartPanels', () => {
         await waitFor(() => {
           const afterReset = screen.getAllByTestId('comboBoxSearchInput')[1];
           expect(afterReset).toHaveValue(defaultValue); // back to the default
+        });
+      });
+
+      test(`it renders the 'Group by top' field to the default value, when 'alertViewSelection' is 'table'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'table',
+        });
+
+        const defaultValue = 'host.name';
+
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(
+            (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.breakdownField
+          ).toEqual(defaultValue);
         });
       });
     });

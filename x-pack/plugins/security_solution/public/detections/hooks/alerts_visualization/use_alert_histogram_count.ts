@@ -19,17 +19,17 @@ export const useAlertHistogramCount = ({
   visualizationId: string;
 }): string => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
+  const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
 
   const visualizationAlerts = useMemo(() => {
     const visualizationAlertsCount =
-      visualizationResponse != null ? visualizationResponse[0].hits.total : 0;
+      visualizationResponses != null ? visualizationResponses[0].hits.total : 0;
     return SHOWING_ALERTS(
       numeral(visualizationAlertsCount).format(defaultNumberFormat),
       visualizationAlertsCount,
       ''
     );
-  }, [defaultNumberFormat, visualizationResponse]);
+  }, [defaultNumberFormat, visualizationResponses]);
 
   return visualizationAlerts;
 };

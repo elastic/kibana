@@ -67,7 +67,6 @@ interface AlertsHistogramPanelProps {
   panelHeight?: number;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
   showGroupByPlaceholder?: boolean;
-  showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showStackBy?: boolean;
   showTotalAlertsCount?: boolean;
@@ -99,7 +98,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     panelHeight = PANEL_HEIGHT,
     setComboboxInputRef,
     showGroupByPlaceholder = false,
-    showLegend = true,
     showLinkToAlerts = false,
     showStackBy = true,
     showTotalAlertsCount = false,

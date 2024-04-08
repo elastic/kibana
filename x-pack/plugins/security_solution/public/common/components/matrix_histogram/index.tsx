@@ -117,26 +117,28 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [title, selectedStackByOption]
   );
   const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
+  const visualizationTotalCount: number | null = useMemo(() => {
+    if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse)) {
+      return 0;
+    }
+    return visualizationResponse[0].hits.total;
+  }, [visualizationResponse]);
+
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
     }
 
     if (typeof subtitle === 'function') {
-      if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse)) {
-        return subtitle(0);
-      }
-      const visualizationCount = visualizationResponse[0].hits.total;
-      return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
+      return visualizationTotalCount >= 0 ? subtitle(visualizationTotalCount) : null;
     }
 
     return subtitle;
-  }, [isInitialLoading, subtitle, visualizationResponse]);
+  }, [isInitialLoading, subtitle, visualizationTotalCount]);
 
   const hideHistogram = useMemo(
-    () =>
-      (visualizationResponse?.[0].hits.total ?? 0) <= 0 && hideHistogramIfEmpty ? true : false,
-    [hideHistogramIfEmpty, visualizationResponse]
+    () => ((visualizationTotalCount ?? 0) <= 0 && hideHistogramIfEmpty ? true : false),
+    [hideHistogramIfEmpty, visualizationTotalCount]
   );
 
   useEffect(() => {
@@ -184,9 +186,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             toggleStatus={toggleStatus}
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             subtitle={subtitleWithCounts}
-            inspectMultiple
             showInspectButton={false}
-            isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
