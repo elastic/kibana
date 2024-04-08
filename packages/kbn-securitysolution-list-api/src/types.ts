@@ -21,7 +21,7 @@ interface HttpStart {
 
 export interface ApiParams {
   http: HttpStart;
-  signal?: AbortSignal;
+  signal: AbortSignal;
 }
 export type ApiPayload<T extends ApiParams> = Omit<T, 'http' | 'signal'>;
 

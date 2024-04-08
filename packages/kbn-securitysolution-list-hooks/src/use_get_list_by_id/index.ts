@@ -8,13 +8,16 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getListById, ApiParams } from '@kbn/securitysolution-list-api';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+
+const getListByIdWithOptionalSignal = withOptionalSignal(getListById);
 
 const GET_LIST_BY_ID_QUERY_KEY = 'GET_LIST_BY_ID';
 export const useGetListById = ({ http, id }: { http: ApiParams['http']; id: string }) => {
   return useQuery(
     [GET_LIST_BY_ID_QUERY_KEY, id],
     async ({ signal }) => {
-      const respone = await getListById({ http, signal, id });
+      const respone = await getListByIdWithOptionalSignal({ http, signal, id });
       return respone;
     },
     {

@@ -7,7 +7,7 @@
  */
 
 interface SignalArgs {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export type OptionalSignalArgs<Args> = Omit<Args, 'signal'> & Partial<SignalArgs>;

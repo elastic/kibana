@@ -9,7 +9,10 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { findListItems, ApiParams } from '@kbn/securitysolution-list-api';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useCursor } from '../use_cursor';
+
+const findListItemsWithOptionalSignal = withOptionalSignal(findListItems);
 
 const FIND_LIST_ITEMS_QUERY_KEY = 'FIND_LIST_ITEMS';
 
@@ -44,7 +47,7 @@ export const useFindListItems = ({
   return useQuery(
     [FIND_LIST_ITEMS_QUERY_KEY, pageIndex, pageSize, sortField, sortOrder, listId, filter],
     async ({ signal }) => {
-      const response = await findListItems({
+      const response = await findListItemsWithOptionalSignal({
         http,
         signal,
         pageIndex,
