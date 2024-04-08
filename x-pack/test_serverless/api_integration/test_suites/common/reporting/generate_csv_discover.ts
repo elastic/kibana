@@ -160,8 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES PROMOTION SERVERLESS: https://github.com/elastic/kibana/issues/180010
-    describe.skip('with unmapped fields', () => {
+    describe('with unmapped fields', () => {
       before(async () => {
         await esArchiver.load(archives.unmappedFields.data);
         await kibanaServer.importExport.load(archives.unmappedFields.savedObjects);

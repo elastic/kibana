@@ -144,7 +144,7 @@ export function ModalContextProvider<T extends Array<ITabDeclaration<Record<stri
   }, []);
 
   const [state, dispatch] = useReducer(
-    combineReducers(reducersMap!),
+    combineReducers(reducersMap),
     initialModalState.current,
     createInitialState
   );
