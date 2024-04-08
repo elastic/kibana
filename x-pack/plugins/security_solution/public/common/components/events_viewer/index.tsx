@@ -59,7 +59,7 @@ import { useFieldBrowserOptions } from '../../../timelines/components/fields_bro
 import {
   useSessionViewNavigation,
   useSessionView,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import {
   EventsContainerLoading,
   FullScreenContainer,
