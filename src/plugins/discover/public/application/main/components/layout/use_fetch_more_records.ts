@@ -7,8 +7,8 @@
  */
 
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { FetchStatus } from '../../../types';
+import { useDataState } from '../../hooks/use_data_state';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 
 /**
@@ -39,13 +39,13 @@ export const useFetchMoreRecords = ({
 }: UseFetchMoreRecordsParams): UseFetchMoreRecordsResult => {
   const documents$ = stateContainer.dataState.data$.documents$;
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
-  const documentState = useObservable(documents$);
-  const totalHitsState = useObservable(totalHits$);
+  const documentState = useDataState(documents$);
+  const totalHitsState = useDataState(totalHits$);
 
-  const rows = documentState?.result || [];
-  const isMoreDataLoading = documentState?.fetchStatus === FetchStatus.LOADING_MORE;
+  const rows = documentState.result || [];
+  const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
 
-  const totalHits = totalHitsState?.result || 0;
+  const totalHits = totalHitsState.result || 0;
   const canFetchMoreRecords =
     !isTextBasedQuery &&
     rows.length > 0 &&

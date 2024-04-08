@@ -11,9 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverStateContainer } from '../../application/main/services/discover_state';
 import { FetchStatus } from '../../application/types';
+import { useDataState } from '../../application/main/hooks/use_data_state';
 
 export enum HitsCounterMode {
   standalone = 'standalone',
@@ -27,12 +27,7 @@ export interface HitsCounterProps {
 
 export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
-  const totalHitsState = useObservable(totalHits$);
-
-  if (!totalHitsState) {
-    return null;
-  }
-
+  const totalHitsState = useDataState(totalHits$);
   const hitsTotal = totalHitsState.result;
   const hitsStatus = totalHitsState.fetchStatus;
 
