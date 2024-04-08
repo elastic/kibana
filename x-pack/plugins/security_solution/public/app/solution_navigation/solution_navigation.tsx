@@ -33,7 +33,7 @@ export const withNavigationProvider = <T extends object>(
     );
   };
 
-const getPanelContentProvider = (
+const getPanelContent = (
   core: CoreStart,
   solutionNavLinks$: SolutionNavLinks$
 ): React.FC<PanelComponentProps> => {
@@ -68,9 +68,13 @@ export interface SolutionNavigation {
 }
 
 export const getSolutionNavigation = (core: CoreStart): SolutionNavigation => {
-  const panelContentProvider: PanelContentProvider = () => ({
-    content: getPanelContentProvider(core, navLinks$),
-  });
+  const panelContent = getPanelContent(core, navLinks$);
+  const panelContentProvider: PanelContentProvider = (id: string) => {
+    // Stack Management uses the default panel content
+    if (!id.endsWith('.stack_management')) {
+      return { content: panelContent };
+    }
+  };
 
   const navigationTree$ = navLinks$.pipe(
     map((solutionNavLinks) => formatNavigationTree(solutionNavLinks, CATEGORIES, FOOTER_CATEGORIES))

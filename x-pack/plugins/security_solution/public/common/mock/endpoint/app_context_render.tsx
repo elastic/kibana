@@ -230,8 +230,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     logger: {
       error: () => {},
 
+      // eslint-disable-next-line no-console
       log: console.log,
 
+      // eslint-disable-next-line no-console
       warn: console.warn,
     },
   });
