@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Message } from '../../assistant_context/types';
+import type { LLMMessage as Message } from '@kbn/elastic-assistant-common';
 import { getCombinedMessage, getSystemMessages } from './helpers';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { mockSystemPrompt } from '../../mock/system_prompt';

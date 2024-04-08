@@ -25,6 +25,6 @@ export {
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { handleBedrockChunk } from './impl/utils/bedrock';
 
-export type { Message as LLMMessage } from './impl/llm/types';
+export type { Message as LLMMessage, ConversationRole } from './impl/llm/types';
 
 export * from './constants';
