@@ -11,7 +11,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
 import { mockActionResponse } from '../mock/mock_action_response';
-import { ExecuteConnectorRequestBody } from '../schemas';
 
 const connectorId = 'mock-connector-id';
 
@@ -30,14 +29,14 @@ const mockActions = {
 
 const prompt = 'Do you know my name?';
 
-const mockRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
+const mockRequest: KibanaRequest = {
   params: { connectorId },
   body: {
     message: prompt,
     subAction: 'invokeAI',
     isEnabledKnowledgeBase: true,
   },
-} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+} as KibanaRequest;
 
 describe('ActionsClientLlm', () => {
   beforeEach(() => {
