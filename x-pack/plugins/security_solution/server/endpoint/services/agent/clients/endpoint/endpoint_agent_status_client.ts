@@ -51,8 +51,6 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
           capabilities: [...(agentMetadata?.metadata.Endpoint.capabilities ?? [])],
           found: agentMetadata !== undefined,
           isolated: Boolean(agentMetadata?.metadata.Endpoint.state?.isolation),
-          isPendingUninstall: undefined,
-          isUninstalled: undefined,
           lastSeen: agentMetadata?.last_checkin || '',
           pendingActions: pendingActions?.pending_actions ?? {},
           status: agentMetadata?.host_status || HostStatus.OFFLINE,
