@@ -63,7 +63,7 @@ steps:
         timeout_in_minutes: 10
         env:
           LIMIT_CONFIG_TYPE: 'integration'
-          JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+          JEST_INTEGRATION_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh'
         retry:
           automatic:
             - exit_status: '*'

@@ -88,6 +88,7 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
+        image: esTestConfig.getESServerlessImage(),
         // security is enabled by default, if needed kibana requires serviceAccountToken
         esArgs: ['xpack.security.enabled=false'],
       });
