@@ -8,8 +8,9 @@
 import { RouteDependencies } from '../../../types';
 import { registerGetMappingRoute } from './register_mapping_route';
 import { registerUpdateMappingRoute } from './register_update_mapping_route';
-
+import { registerPUTInferenceModel } from './register_put_inference_route';
 export function registerIndexMappingRoutes(dependencies: RouteDependencies) {
   registerGetMappingRoute(dependencies);
   registerUpdateMappingRoute(dependencies);
+  registerPUTInferenceModel(dependencies);
 }

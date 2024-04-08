@@ -6,8 +6,12 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import {
+  IndicesStatsResponse,
+  InferenceModelConfig,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -47,6 +51,7 @@ import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import { Fields } from '../components/mappings_editor/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
@@ -438,5 +443,19 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'put',
     body: JSON.stringify({ ...newFields }),
+  });
+}
+export function createInferenceEndpoint(
+  modelId: string,
+  taskType: InferenceTaskType,
+  modelConfig: ModelConfig
+) {
+  // console.log('modelConfig', modelConfig);
+  return sendRequest({
+    path: `${API_BASE_PATH}/inference/${encodeURIComponent(taskType)}/${encodeURIComponent(
+      modelId
+    )}`,
+    method: 'put',
+    body: JSON.stringify({ ...modelConfig }),
   });
 }

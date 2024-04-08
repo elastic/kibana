@@ -1,0 +1,154 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTab,
+  EuiTitle,
+  EuiTabs,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ModelConfig, Tab, TabType } from '../types';
+import { ElandPythonClient } from './eland_python_client';
+import { ConnectToApi } from './connect_to_api';
+import { ElasticsearchModels } from './elasticsearch_models';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { flyoutHeaderDescriptions } from '../lib/shared_values';
+const tabs: Tab[] = [
+  {
+    id: TabType.elasticsearch_models,
+    name: i18n.translate('xpack.ml.inferenceFlyoutWrapper.elasticsearchModelsTabTitle', {
+      defaultMessage: 'Elasticsearch models',
+    }),
+  },
+  {
+    id: TabType.connect_to_api,
+    name: i18n.translate('xpack.ml.inferenceFlyoutWrapper.connectToAPITabTitle', {
+      defaultMessage: 'Connect to API',
+    }),
+  },
+  {
+    id: TabType.eland_python_client,
+    name: i18n.translate('xpack.ml.inferenceFlyoutWrapper.elandPythonClientTabTitle', {
+      defaultMessage: 'Eland Python Client',
+    }),
+  },
+];
+interface TabProps {
+  setActiveTab: (id: TabType) => void;
+  activeTab: TabType;
+}
+const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = ({
+  setActiveTab,
+  activeTab,
+}) => {
+  return (
+    <EuiTabs>
+      {tabs.map((tab) => (
+        <EuiTab
+          onClick={() => {
+            setActiveTab(tab.id);
+          }}
+          isSelected={tab.id === activeTab}
+          key={tab.id}
+          data-test-subj={`${tab.id}Tab`}
+        >
+          {tab.name}
+        </EuiTab>
+      ))}
+    </EuiTabs>
+  );
+};
+export interface saveMappingOnClick {
+  onSaveInferenceEndpoint: (
+    inferenceId: string,
+    taskType: InferenceTaskType,
+    modelConfig: ModelConfig
+  ) => void;
+}
+export interface DocumentationProps {
+  elserv2documentationUrl?: string;
+  e5documentationUrl?: string;
+  supportedNlpModels?: string;
+  nlpImportModel?: string;
+}
+export interface InferenceFlyoutProps extends saveMappingOnClick, DocumentationProps {
+  onFlyoutClose: (value: boolean) => void;
+  isInferenceFlyoutVisible: boolean;
+}
+export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
+  onSaveInferenceEndpoint,
+  onFlyoutClose,
+  isInferenceFlyoutVisible,
+  e5documentationUrl = '',
+  elserv2documentationUrl = '',
+  supportedNlpModels = '',
+  nlpImportModel = '',
+}) => {
+  const [activeTab, setActiveTab] = useState<TabType>(TabType.elasticsearch_models);
+  const tabToInferenceContentMap: Record<TabType, React.ReactNode> = {
+    elasticsearch_models: (
+      <ElasticsearchModels
+        description={flyoutHeaderDescriptions[activeTab].description}
+        e5documentationUrl={e5documentationUrl}
+        elserv2documentationUrl={elserv2documentationUrl}
+        onSaveInferenceEndpoint={onSaveInferenceEndpoint}
+      />
+    ),
+    connect_to_api: (
+      <ConnectToApi
+        description={flyoutHeaderDescriptions[activeTab].description}
+        onSaveInferenceEndpoint={onSaveInferenceEndpoint}
+      />
+    ),
+    eland_python_client: (
+      <ElandPythonClient supportedNlpModels={supportedNlpModels} nlpImportModel={nlpImportModel} />
+    ),
+  };
+  const tabContent = tabToInferenceContentMap[activeTab];
+  const content: React.ReactNode = (
+    <>
+      <InferenceEndpointFlyoutTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <EuiSpacer size="l" />
+      {tabContent}
+    </>
+  );
+  return (
+    <EuiFlyout
+      onClose={() => onFlyoutClose(!isInferenceFlyoutVisible)}
+      data-test-subj="addInferenceEndpoint"
+      ownFocus
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.inferenceFlyoutWrapper.addInferenceEndpoint.header.title"
+              defaultMessage="Add inference endpoint"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody data-test-subj="inference_endpoint_content">{content}</EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty onClick={() => onFlyoutClose(!isInferenceFlyoutVisible)}>
+          {i18n.translate('xpack.ml.inferenceFlyoutWrapper.addInferenceEndpoint.footer.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};

@@ -4964,6 +4964,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
   version "0.0.0"
   uid ""
