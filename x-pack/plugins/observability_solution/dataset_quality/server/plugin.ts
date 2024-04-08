@@ -40,11 +40,19 @@ export class DatasetQualityServerPlugin implements Plugin {
       };
     }) as DatasetQualityRouteHandlerResources['plugins'];
 
+    const getEsCapabilities = async () => {
+      return await core.getStartServices().then((services) => {
+        const [coreStart] = services;
+        return coreStart.elasticsearch.getCapabilities();
+      });
+    };
+
     registerRoutes({
       core,
       logger: this.logger,
       repository: getDatasetQualityServerRouteRepository(),
       plugins: resourcePlugins,
+      getEsCapabilities,
     });
 
     return {};
