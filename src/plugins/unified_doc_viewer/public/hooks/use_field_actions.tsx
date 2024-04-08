@@ -34,6 +34,9 @@ type UseFieldActionsDeps = Pick<
   'columns' | 'filter' | 'onAddColumn' | 'onRemoveColumn'
 >;
 
+/**
+ * Higher level hook that wraps the logic for the requires actions on a field.
+ */
 const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFieldActionsDeps) => {
   return useMemo(
     () => ({
@@ -59,6 +62,9 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
 
 export const [FieldActionsProvider, useFieldActionsContext] = createContainer(useFieldActions);
 
+/**
+ * This is a preset of the UI elements and related actions that can be used to build an action bar anywhere in a DocView
+ */
 export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldAction[] => {
   const actions = useFieldActionsContext();
 
