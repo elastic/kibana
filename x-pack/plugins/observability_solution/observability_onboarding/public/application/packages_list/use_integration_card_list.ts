@@ -40,8 +40,8 @@ export function useIntegrationCardList(
     return extractFeaturedCards(filteredCards, featuredCardNames);
   }, [filteredCards, featuredCardNames]);
   if (featuredCardNames || generatedCards) {
-    featuredCardNames?.forEach((name) =>
-      list.push(toCustomCard(featuredCards[name]))
+    Object.keys(featuredCards).forEach((key) =>
+      list.push(toCustomCard(featuredCards[key]))
     );
     generatedCards?.forEach((c) => list.push(toCustomCard(c)));
     return list;
