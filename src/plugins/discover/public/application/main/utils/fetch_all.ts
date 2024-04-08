@@ -92,6 +92,7 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
 
+    // histogram for data view mode will send `loading` for totalHits$
     if (shouldFetchTextBased) {
       sendLoadingMsg(dataSubjects.totalHits$, {
         recordRawType,
