@@ -33,13 +33,13 @@ import {
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { SOURCERER } from '../../../../screens/sourcerer';
 import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
-import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
+import { getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();
@@ -96,7 +96,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     beforeEach(() => {
       login();
       deleteTimelines();
-      createTimeline(getTimeline()).then((response) =>
+      createTimeline().then((response) =>
         cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
       );
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
