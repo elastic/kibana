@@ -954,6 +954,102 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           });
         });
+
+        describe('Non grouped alerts', () => {
+          it('should attach non grouped alerts correctly', async () => {
+            await executeConnectorAndVerifyCorrectness({
+              supertest,
+              connectorId,
+              req: getRequest({
+                alerts: [
+                  { _id: 'alert-id-0', _index: 'alert-index-0', 'host.name': 'A' },
+                  { _id: 'alert-id-1', _index: 'alert-index-1', 'dest.ip': '0.0.0.1' },
+                ],
+                groupingBy: ['host.name'],
+              }),
+            });
+
+            const cases = await findCases({ supertest });
+
+            expect(cases.total).to.be(2);
+
+            const firstOracleId = generateOracleId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'A' },
+            });
+
+            const secondOracleId = generateOracleId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'unknown' },
+            });
+
+            const firstOracleRecord = await getOracleRecord({
+              kibanaServer,
+              oracleId: firstOracleId,
+            });
+
+            const secondOracleRecord = await getOracleRecord({
+              kibanaServer,
+              oracleId: secondOracleId,
+            });
+
+            expect(firstOracleRecord.grouping).to.eql({ 'host.name': 'A' });
+            expect(secondOracleRecord.grouping).to.eql({ 'host.name': 'unknown' });
+
+            const firstCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'A' },
+            });
+
+            const secondCaseId = generateCaseId({
+              ruleId: req.params.subActionParams.rule.id,
+              grouping: { 'host.name': 'unknown' },
+            });
+
+            const firstCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === firstCaseId)!
+            );
+
+            const secondCase = removeServerGeneratedData(
+              cases.cases.find((theCase) => theCase.id === secondCaseId)!
+            );
+
+            expect(firstCase.description).to.be(
+              'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A`'
+            );
+            expect(secondCase.description).to.be(
+              'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `unknown`'
+            );
+
+            const firstCaseAttachments = await getAllComments({
+              supertest,
+              caseId: firstCase.id,
+            });
+
+            const secondCaseAttachments = await getAllComments({
+              supertest,
+              caseId: secondCase.id,
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: firstCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-0']),
+              rule: {
+                id: req.params.subActionParams.rule.id,
+                name: req.params.subActionParams.rule.name,
+              },
+            });
+
+            verifyAlertsAttachedToCase({
+              caseAttachments: secondCaseAttachments,
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1']),
+              rule: {
+                id: req.params.subActionParams.rule.id,
+                name: req.params.subActionParams.rule.name,
+              },
+            });
+          });
+        });
       });
     });
 

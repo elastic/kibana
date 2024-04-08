@@ -33,6 +33,7 @@ import {
   reopenClosedCases,
   updatedCounterOracleRecord,
   alertsNested,
+  alertsWithNoGrouping,
 } from './index.mock';
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
@@ -1409,22 +1410,128 @@ describe('CasesConnectorExecutor', () => {
         });
       });
 
-      describe('Skipping execution', () => {
-        it('skips execution if alerts cannot be grouped', async () => {
+      describe('Non grouped alerts', () => {
+        it('attaches the non grouped alerts to a case correctly when no alerts have the fields set in groupingBy', async () => {
           await connectorExecutor.execute({
             ...params,
             groupingBy: ['does.not.exists'],
           });
 
-          expect(mockGetRecordId).not.toHaveBeenCalled();
-          expect(mockBulkGetRecords).not.toHaveBeenCalled();
-          expect(mockBulkCreateRecords).not.toHaveBeenCalled();
-          expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
-          expect(mockGetCaseId).not.toHaveBeenCalled();
-          expect(casesClientMock.cases.bulkGet).not.toHaveBeenCalled();
-          expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
-          expect(casesClientMock.cases.bulkUpdate).not.toHaveBeenCalled();
-          expect(casesClientMock.configure.get).not.toHaveBeenCalled();
+          expect(mockGetRecordId).toHaveBeenCalledWith({
+            ruleId: rule.id,
+            grouping: { 'does.not.exists': 'unknown' },
+            owner,
+            spaceId: 'default',
+          });
+
+          expect(mockBulkGetRecords).toHaveBeenCalledWith(['so-oracle-record-0']);
+
+          expect(mockGetCaseId).toHaveBeenCalledWith({
+            ruleId: rule.id,
+            grouping: { 'does.not.exists': 'unknown' },
+            owner,
+            spaceId: 'default',
+            counter: 1,
+          });
+
+          expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
+            ids: ['mock-id-1'],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+            caseId: 'mock-id-1',
+            attachments: [
+              {
+                alertId: alerts.map((alert) => alert._id),
+                index: alerts.map((alert) => alert._index),
+                owner: 'securitySolution',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                type: 'alert',
+              },
+            ],
+          });
+        });
+
+        it('attaches the non grouped alerts to a case correctly when some alerts do not have the fields set in groupingBy', async () => {
+          mockBulkGetRecords.mockResolvedValue([
+            ...oracleRecords,
+            {
+              id: 'so-oracle-record-3',
+              version: 'so-version-1',
+              counter: 1,
+              cases: [],
+              rules: [],
+              grouping: {},
+              createdAt: '2023-10-12T10:23:42.769Z',
+              updatedAt: '2023-10-12T10:23:42.769Z',
+            },
+          ]);
+
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [...cases, { ...cases[2], id: 'mock-id-4' }],
+            errors: [],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            alerts: alertsWithNoGrouping,
+          });
+
+          expect(mockGetRecordId).toHaveBeenCalledTimes(4);
+          expect(mockGetRecordId).nthCalledWith(4, {
+            ruleId: rule.id,
+            grouping: {
+              'dest.ip': 'unknown',
+              'host.name': 'unknown',
+            },
+            owner,
+            spaceId: 'default',
+          });
+
+          expect(mockBulkGetRecords).toHaveBeenCalledWith([
+            'so-oracle-record-0',
+            'so-oracle-record-1',
+            'so-oracle-record-2',
+            'so-oracle-record-3',
+          ]);
+
+          expect(mockGetCaseId).toHaveBeenCalledTimes(4);
+          expect(mockGetCaseId).nthCalledWith(3, {
+            ruleId: rule.id,
+            grouping: {
+              'dest.ip': 'unknown',
+              'host.name': 'unknown',
+            },
+            owner,
+            spaceId: 'default',
+            counter: 1,
+          });
+
+          expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
+            ids: ['mock-id-1', 'mock-id-2', 'mock-id-3', 'mock-id-4'],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(4);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+            caseId: 'mock-id-3',
+            attachments: [
+              {
+                type: 'alert',
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
+                alertId: ['alert-id-4', 'alert-id-5'],
+                index: ['alert-index-4', 'alert-index-5'],
+                owner: 'securitySolution',
+              },
+            ],
+          });
         });
       });
     });

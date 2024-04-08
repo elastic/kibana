@@ -44,7 +44,6 @@ export const alerts = [
   },
   { _id: 'alert-id-2', _index: 'alert-index-2', 'host.name': 'A', 'dest.ip': '0.0.0.1' },
   { _id: 'alert-id-3', _index: 'alert-index-3', 'host.name': 'B', 'dest.ip': '0.0.0.3' },
-  { _id: 'alert-id-4', _index: 'alert-index-4', 'host.name': 'A', 'source.ip': '0.0.0.5' },
 ];
 
 export const alertsNested = [
@@ -80,6 +79,12 @@ export const alertsNested = [
     host: { name: 'A' },
     source: { ip: '0.0.0.5' },
   },
+];
+
+export const alertsWithNoGrouping = [
+  ...alerts,
+  { _id: 'alert-id-4', _index: 'alert-index-4', 'host.name': 'A', 'source.ip': '0.0.0.5' },
+  { _id: 'alert-id-5', _index: 'alert-index-5' },
 ];
 
 export const groupingBy = ['host.name', 'dest.ip'];

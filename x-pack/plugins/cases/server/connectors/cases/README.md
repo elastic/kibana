@@ -29,7 +29,7 @@ The case action groups all alerts based on the grouping field defined by the use
    2. Check if the case is older than the defined time window. If yes it will create a new case as described in Step 1.
    3. Check if the case is closed. If it is, it will check if the case should be reopened. If yes the case action will reopen the case and attach the alerts to it. If not it will create a new case and attach the alerts to the new case.
 
-If an alert does not belong to a group it will not be attached to any case. Also, if no grouping field is configured by the user, all alerts will be attached to the same case.
+If an alert does not belong to a group it will be attached to a case representing the `unknown` value. Also, if no grouping field is configured by the user, all alerts will be attached to the same case.
 
 ```mermaid
 flowchart TB
@@ -132,7 +132,7 @@ flowchart LR
 
 ## Case creation
 
-For each rule and each group produced by the grouping step, a case will be created and the alerts of that group will be attached to the new case. In future executions of the rule, new alerts that belong to the same group will be attached to the same case. If an alert cannot be grouped, because the grouping field does not exist in its data, it will not be attached to any case.
+For each rule and each group produced by the grouping step, a case will be created and the alerts of that group will be attached to the new case. In future executions of the rule, new alerts that belong to the same group will be attached to the same case. If an alert cannot be grouped, because the grouping field does not exist in its data, it will be attached to a case that represents the `unknown` value.
 
 To support this, the case action constructs a deterministic deduplication ID which will be set as the case ID. The ID can be constructed on each execution of the case action without the need to persist it and can correctly map alerts of the same group to the case that represents that group. A deduplication ID has two main advantages:
 
@@ -178,7 +178,7 @@ flowchart LR
         alert23[Alert 3]
     end
 
-    subgraph no_grouping ["No value"]
+    subgraph no_grouping ["IP: unknown"]
         alert34[Alert 4]
     end
 
@@ -188,6 +188,7 @@ flowchart LR
 
     top --> caseOne
     bottom --> caseTwo
+    no_grouping --> caseThree
 
     alert1[Alert 1]
     alert2[Alert 2]
@@ -196,6 +197,7 @@ flowchart LR
     groupingBy[Grouping by IP]
     caseOne[Case 1]
     caseTwo[Case 2]
+    caseThree[Case 3]
 ```
 
 ## Time window

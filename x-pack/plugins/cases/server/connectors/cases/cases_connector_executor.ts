@@ -180,16 +180,16 @@ export class CasesConnectorExecutor {
      * of the groupingBy fields defined by the users. All other
      * alerts will not be attached to any case.
      */
-    const filteredAlerts = alerts.filter((alert) =>
+    const [alertsWithAllGroupingFields, noGroupedAlerts] = partition(alerts, (alert) =>
       uniqueGroupingByFields.every((groupingByField) => Boolean(get(alert, groupingByField, null)))
     );
 
     this.logger.debug(
-      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Total alerts to be grouped: ${filteredAlerts.length} out of ${alerts.length}`,
+      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Total alerts to be grouped: ${alertsWithAllGroupingFields.length} out of ${alerts.length}`,
       this.getLogMetadata(params, { tags: ['case-connector:groupAlerts'] })
     );
 
-    for (const alert of filteredAlerts) {
+    for (const alert of alertsWithAllGroupingFields) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
       const groupingKey = stringify(alertWithOnlyTheGroupingFields);
 
@@ -205,8 +205,27 @@ export class CasesConnectorExecutor {
       }
     }
 
+    if (noGroupedAlerts.length > 0) {
+      const noGroupedGrouping = this.generateNoGroupAlertGrouping(params.groupingBy);
+
+      groupingMap.set(stringify(noGroupedGrouping), {
+        alerts: noGroupedAlerts,
+        grouping: noGroupedGrouping,
+      });
+    }
+
     return Array.from(groupingMap.values());
   }
+
+  private generateNoGroupAlertGrouping = (groupingBy: string[]) => {
+    const noGroupedGrouping = groupingBy.reduce((acc, field) => {
+      acc[field] = 'unknown';
+
+      return acc;
+    }, {} as Record<string, string>);
+
+    return noGroupedGrouping;
+  };
 
   private applyCircuitBreakers(
     params: CasesConnectorRunParams,
