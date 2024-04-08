@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
           errors: 0,
         });
 
-        expectAssetCriticalityDocMatching({
+        await expectAssetCriticalityDocMatching({
           id_field: 'host.name',
           id_value: 'host-1',
           criticality_level: 'low_impact',
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           errors: 0,
         });
 
-        expectAssetCriticalityDocMatching({
+        await expectAssetCriticalityDocMatching({
           id_field: 'host.name',
           id_value: 'update-host-1',
           criticality_level: 'low_impact',
@@ -163,13 +163,13 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ]);
 
-      expectAssetCriticalityDocMatching({
+      await expectAssetCriticalityDocMatching({
         id_field: 'host.name',
         id_value: 'mix-test-host-1',
         criticality_level: 'low_impact',
       });
 
-      expectAssetCriticalityDocMatching({
+      await expectAssetCriticalityDocMatching({
         id_field: 'host.name',
         id_value: 'mix-test-host-3',
         criticality_level: 'high_impact',
