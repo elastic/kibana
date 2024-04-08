@@ -108,10 +108,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
     !!slo.remote && slo.remote.kibanaUrl !== '';
 
-  // TODO Kevin: MISSING REMOTE ACTIONS HANDLING
-  // With some refactoring, we should be able to
-  // 1. extract the actions regardless of the view used
-  // 2. use the common actions everywhere
   const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
     {
       type: 'icon',
