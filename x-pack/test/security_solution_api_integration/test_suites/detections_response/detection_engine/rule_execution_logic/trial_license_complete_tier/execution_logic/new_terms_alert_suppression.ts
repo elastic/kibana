@@ -2186,18 +2186,39 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched alert with criticality_level', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
+            user: { name: 'root' },
+            id,
+            '@timestamp': timestamp,
+          },
+        ];
+
+        await indexListOfDocuments([...firstExecutionDocuments]);
+
         const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           new_terms_fields: ['host.name'],
-          from: '2019-02-19T20:42:00.000Z',
-          history_window_start: '2019-01-19T20:42:00.000Z',
+          query: `id: "${id}"`,
+          index: ['ecs_compliant'],
+          history_window_start: historicalWindowStart,
           alert_suppression: {
             group_by: ['host.name'],
             missing_fields_strategy: 'suppress',
           },
+          from: 'now-35m',
+          interval: '30m',
         };
 
-        const { previewId } = await previewRule({ supertest, rule });
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+        });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
 
