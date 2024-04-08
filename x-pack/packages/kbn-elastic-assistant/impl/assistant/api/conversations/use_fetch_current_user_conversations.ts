@@ -24,6 +24,7 @@ export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
   onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
   signal?: AbortSignal | undefined;
+  refetchOnWindowFocus?: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
+  refetchOnWindowFocus = true,
 }: UseFetchCurrentUserConversationsParams) => {
   const query = {
     page: 1,
@@ -53,16 +55,20 @@ export const useFetchCurrentUserConversations = ({
     ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ];
 
-  return useQuery([cachingKeys, query], async () => {
-    const res = await http.fetch<FetchConversationsResponse>(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-      {
-        method: 'GET',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-        query,
-        signal,
-      }
-    );
-    return onFetch(res);
-  });
+  return useQuery(
+    [cachingKeys, query],
+    async () => {
+      const res = await http.fetch<FetchConversationsResponse>(
+        ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+        {
+          method: 'GET',
+          version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+          query,
+          signal,
+        }
+      );
+      return onFetch(res);
+    },
+    { refetchOnWindowFocus }
+  );
 };
