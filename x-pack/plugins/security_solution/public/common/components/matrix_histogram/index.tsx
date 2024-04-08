@@ -116,7 +116,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
+  const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
