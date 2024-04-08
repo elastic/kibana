@@ -53,6 +53,7 @@ export const loadSavedSearch = async (
     globalStateContainer,
     services,
   } = deps;
+
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
 
@@ -123,6 +124,8 @@ export const loadSavedSearch = async (
   if (!appState && shouldUpdateWithGlobalFilters) {
     nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
   }
+
+  internalStateContainer.transitions.resetOnSavedSearchChange();
 
   return nextSavedSearch;
 };
