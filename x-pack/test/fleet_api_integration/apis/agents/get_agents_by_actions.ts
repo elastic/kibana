@@ -16,7 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('TMPDEBUGME fleet_get_agents_by_actions', () => {
+  describe('fleet_get_agents_by_actions', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
 
