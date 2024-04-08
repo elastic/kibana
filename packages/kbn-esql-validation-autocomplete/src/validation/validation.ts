@@ -37,7 +37,6 @@ import {
   isArrayType,
   isColumnItem,
   isEqualType,
-  isESQLStringLiteral,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
@@ -86,7 +85,7 @@ function validateFunctionLiteralArg(
   if (isLiteralItem(actualArg)) {
     if (
       // currently only supporting literalOptions with string literals
-      isESQLStringLiteral(actualArg) &&
+      actualArg.literalType === 'string' &&
       argDef.literalOptions &&
       !argDef.literalOptions
         .map((option) => option.toLowerCase())

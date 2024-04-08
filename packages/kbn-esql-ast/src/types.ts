@@ -72,22 +72,35 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
-export interface ESQLLiteral extends ESQLAstBaseItem {
+export type ESQLLiteral =
+  | ESQLNumberLiteral
+  | ESQLBooleanLiteral
+  | ESQLNullLiteral
+  | ESQLStringLiteral;
+
+interface ESQLNumberLiteral extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'string' | 'number' | 'boolean' | 'null';
-  value: string | number;
+  literalType: 'number';
+  value: number;
 }
 
-export interface ESQLStringLiteral extends ESQLLiteral {
+interface ESQLBooleanLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'boolean';
+  value: string;
+}
+
+interface ESQLNullLiteral extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: 'null';
+  value: string;
+}
+
+interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string';
   value: string;
 }
-
-export const isESQLStringLiteral = (literal: ESQLLiteral): literal is ESQLStringLiteral =>
-  literal.literalType === 'string';
-
-export const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
