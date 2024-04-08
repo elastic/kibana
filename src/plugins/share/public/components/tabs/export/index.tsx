@@ -15,13 +15,6 @@ import { useShareTabsContext } from '../../context';
 
 type IExportTab = IModalTabDeclaration;
 
-const exportTabReducer: IExportTab['reducer'] = (state, action) => {
-  switch (action.type) {
-    default:
-      return state;
-  }
-};
-
 const ExportTabContent = () => {
   const { shareMenuItems, objectType, isDirty, onClose, toasts, intl } = useShareTabsContext()!;
 
@@ -80,7 +73,5 @@ export const exportTab: IExportTab = {
   name: i18n.translate('share.contextMenu.exportCodeTab', {
     defaultMessage: 'Export',
   }),
-  reducer: exportTabReducer,
-  // @ts-ignore
   content: ExportTabContent,
 };
