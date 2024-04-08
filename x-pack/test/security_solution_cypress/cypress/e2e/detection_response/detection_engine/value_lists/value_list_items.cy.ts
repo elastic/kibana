@@ -132,7 +132,7 @@ describe(
         mockFetchListItemsError();
         openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
         cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains(
-          'Failed to load list items. You can change the search query or contact your administartor'
+          'Failed to load list items. You can change the search query or contact your administrator'
         );
       });
 
