@@ -333,7 +333,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
-              "description": "Store the stringified indicator params",
+              "description": "Store the indicator params",
               "field": "slo.indicator.params",
               "ignore_failure": true,
               "value": Object {
@@ -482,7 +482,14 @@ exports[`ResetSLO resets all associated resources 11`] = `
             "groupings": Object {},
             "id": "irrelevant",
             "indicator": Object {
-              "params": "{\\"environment\\":\\"irrelevant\\",\\"service\\":\\"irrelevant\\",\\"transactionName\\":\\"irrelevant\\",\\"transactionType\\":\\"irrelevant\\",\\"threshold\\":500,\\"index\\":\\"metrics-apm*\\"}",
+              "params": Object {
+                "environment": "irrelevant",
+                "index": "metrics-apm*",
+                "service": "irrelevant",
+                "threshold": 500,
+                "transactionName": "irrelevant",
+                "transactionType": "irrelevant",
+              },
               "type": "sli.apm.transactionDuration",
             },
             "instanceId": "*",
