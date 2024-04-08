@@ -104,6 +104,10 @@ export const readWithPit =
         });
       })
       .catch((e) => {
+        console.log(e);
+        console.log(e.message);
+        console.log(JSON.stringify(e.meta));
+        console.log(JSON.stringify(e.body));
         if (
           e instanceof EsErrors.RequestAbortedError &&
           /The content length \(\d+\) is bigger than the maximum/.test(e.message)

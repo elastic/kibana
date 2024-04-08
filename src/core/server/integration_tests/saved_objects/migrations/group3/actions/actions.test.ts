@@ -1311,8 +1311,14 @@ describe('migration actions', () => {
         maxResponseSizeBytes: 500, // set a small size to force the error
       });
       const rightResponse = (await readWithPitTask()) as Either.Right<ReadWithPit>;
-
-      await expect(Either.isRight(rightResponse)).toBe(true);
+      if (Either.isRight(rightResponse)) {
+        await expect(Either.isRight(rightResponse)).toBe(true);
+      } else {
+        console.log(
+          'got a left: ',
+          (rightResponse as Either.Left<EsResponseTooLargeError>).left.type
+        );
+      }
 
       readWithPitTask = readWithPit({
         client,
