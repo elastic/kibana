@@ -2,7 +2,6 @@
 
 ### Parameters for this job:
 # PUBLISH_DOCKER_TAG: if set to 1/true, passing runs will promote the tested ES Serverless tag to latest-verified.
-# PUBLISH_MANIFEST: if set to 1/true, passing runs will upload the manifest attesting what (kibana + es) combination was used in the test
 # SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
 # SKIP_CYPRESS: if set to 1/true, it will skip running the cypress tests
 # FTR_EXTRA_ARGS: a string argument, if passed, it will be forwarded verbatim to the FTR run script
