@@ -14,6 +14,7 @@ import {
   isReferenceOrValueEmbeddable,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -38,8 +39,8 @@ const serializeAllPanelState = async (
   const panels = cloneDeep(dashboard.getInput().panels);
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
-    const api = dashboard.reactEmbeddableChildren.value[uuid];
-    if (api) {
+    const api = dashboard.children$.value[uuid];
+    if (api && apiHasSerializableState(api)) {
       const serializedState = api.serializeState();
       panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
       references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
