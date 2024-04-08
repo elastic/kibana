@@ -38,7 +38,7 @@ export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: st
       .reverse()
       .flatMap((context) => context.starterPrompts)
       .filter(nonNullable)
-      .slice(-4)
+      .slice(0, 4)
   );
 
   return (

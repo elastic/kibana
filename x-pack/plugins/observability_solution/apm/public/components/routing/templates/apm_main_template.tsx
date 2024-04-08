@@ -141,8 +141,9 @@ export function ApmMainTemplate({
     return aiAssistant?.service.setScreenContext({
       screenDescription,
       starterPrompts: [
-        ...(!hasApmData
-          ? [
+        ...(hasApmData
+          ? []
+          : [
               {
                 title: i18n.translate(
                   'xpack.apm.aiAssistant.starterPrompts.explainNoData.title',
@@ -154,8 +155,7 @@ export function ApmMainTemplate({
                 ),
                 icon: 'sparkles',
               },
-            ]
-          : []),
+            ]),
       ],
     });
   }, [

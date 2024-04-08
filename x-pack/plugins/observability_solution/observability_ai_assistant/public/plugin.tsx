@@ -21,7 +21,6 @@ import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
-import { defaultStarterPrompts } from './content/starter_prompts';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -64,10 +63,6 @@ export class ObservabilityAIAssistantPlugin
       coreStart,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
     }));
-
-    service.setScreenContext({
-      starterPrompts: defaultStarterPrompts,
-    });
 
     const withProviders = <P extends {}, R = {}>(
       Component: ComponentType<P>,

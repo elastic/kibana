@@ -17,7 +17,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
-import { defaultStarterPrompts } from '@kbn/observability-ai-assistant-plugin/public';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -48,7 +47,7 @@ export class ObservabilityAIAssistantAppPlugin
   }
   setup(
     coreSetup: CoreSetup,
-    pluginsSetup: ObservabilityAIAssistantAppPluginSetupDependencies
+    _: ObservabilityAIAssistantAppPluginSetupDependencies
   ): ObservabilityAIAssistantAppPublicSetup {
     coreSetup.application.register({
       id: AI_ASSISTANT_APP_ID,
@@ -77,10 +76,6 @@ export class ObservabilityAIAssistantAppPlugin
           >,
         ]);
 
-        const clearScreenContext = this.appService?.setScreenContext({
-          starterPrompts: defaultStarterPrompts,
-        });
-
         ReactDOM.render(
           <Application
             {...appMountParameters}
@@ -92,7 +87,6 @@ export class ObservabilityAIAssistantAppPlugin
         );
 
         return () => {
-          clearScreenContext?.();
           ReactDOM.unmountComponentAtNode(appMountParameters.element);
         };
       },

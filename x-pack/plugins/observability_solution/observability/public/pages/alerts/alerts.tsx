@@ -80,9 +80,11 @@ function InternalAlertsPage() {
 
   useEffect(() => {
     return setScreenContext?.({
-      screenDescription: `The rule types that are available are: ${JSON.stringify(
-        ruleTypesWithDescriptions
-      )}`,
+      data: ruleTypesWithDescriptions.map((rule) => ({
+        name: rule.id,
+        value: `${rule.name} ${rule.description}`,
+        description: `An available rule is ${rule.name}.`,
+      })),
       starterPrompts: [
         {
           title: i18n.translate('xpack.observability.app.starterPrompts.explainRules.title', {
