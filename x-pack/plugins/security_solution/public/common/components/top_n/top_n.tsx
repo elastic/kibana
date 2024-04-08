@@ -139,15 +139,11 @@ const TopNComponent: React.FC<Props> = ({
           />
         ) : (
           <SignalsByCategory
-            combinedQueries={combinedQueries}
             filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
-            query={query}
-            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            runtimeMappings={runtimeMappings}
             hideQueryToggle
           />
         )}

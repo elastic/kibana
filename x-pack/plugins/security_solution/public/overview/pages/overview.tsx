@@ -93,7 +93,7 @@ const OverviewComponent = () => {
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
                   {hasIndexRead && hasKibanaREAD && (
                     <EuiFlexItem grow={false}>
-                      <SignalsByCategory filters={filters} query={query} />
+                      <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
                   )}
