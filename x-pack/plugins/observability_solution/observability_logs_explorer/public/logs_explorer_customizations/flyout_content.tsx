@@ -9,17 +9,22 @@ import {
   LogsExplorerCustomizations,
   LogsExplorerFlyoutContentProps,
 } from '@kbn/logs-explorer-plugin/public';
-import type { LogAIAssistantDocument } from '@kbn/logs-shared-plugin/public';
+import type {
+  LogAIAssistantDocument,
+  LogsSharedClientStartExports,
+} from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type RenderFlyoutContentCustomization =
   Required<LogsExplorerCustomizations>['flyout']['renderContent'];
 
-const ObservabilityLogAIAssistant = ({ doc }: LogsExplorerFlyoutContentProps) => {
-  const { services } = useKibanaContextForPlugin();
-  const { LogAIAssistant } = services.logsShared;
-
+const ObservabilityLogAIAssistant = ({
+  doc,
+  LogAIAssistant,
+}: LogsExplorerFlyoutContentProps & {
+  LogAIAssistant: Required<LogsSharedClientStartExports>['LogAIAssistant'];
+}) => {
   const mappedDoc = useMemo(() => mapDocToAIAssistantFormat(doc), [doc]);
 
   return <LogAIAssistant key={doc.id} doc={mappedDoc} />;
@@ -27,12 +32,17 @@ const ObservabilityLogAIAssistant = ({ doc }: LogsExplorerFlyoutContentProps) =>
 
 export const renderFlyoutContent: RenderFlyoutContentCustomization =
   (renderPreviousContent) => (props) => {
+    const { services } = useKibanaContextForPlugin();
+    const { LogAIAssistant } = services.logsShared;
+
     return (
       <>
         {renderPreviousContent(props)}
-        <EuiFlexItem>
-          <ObservabilityLogAIAssistant {...props} />
-        </EuiFlexItem>
+        {LogAIAssistant ? (
+          <EuiFlexItem>
+            <ObservabilityLogAIAssistant {...props} LogAIAssistant={LogAIAssistant} />
+          </EuiFlexItem>
+        ) : null}
       </>
     );
   };

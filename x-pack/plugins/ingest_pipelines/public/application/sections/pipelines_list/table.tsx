@@ -12,14 +12,18 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
+  EuiButtonIcon,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
   EuiPopover,
-  EuiContextMenu,
+  EuiBadge,
+  EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
   EuiSelectableOption,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -30,6 +34,7 @@ import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
+  isLoading: boolean;
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
@@ -48,6 +53,7 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
 
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
+  isLoading,
   onReloadClick,
   onEditPipelineClick,
   onClonePipelineClick,
@@ -59,30 +65,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
   ]);
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
-  const [showPopover, setShowPopover] = useState(false);
-
-  const createMenuItems = [
-    /**
-     * Create pipeline
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-        defaultMessage: 'New pipeline',
-      }),
-      ...reactRouterNavigate(history, '/create'),
-      'data-test-subj': `createNewPipeline`,
-    },
-    /**
-     * Create pipeline from CSV
-     */
-    {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
-        defaultMessage: 'New pipeline from CSV',
-      }),
-      ...reactRouterNavigate(history, '/csv_create'),
-      'data-test-subj': `createPipelineFromCsv`,
-    },
-  ];
 
   const filteredPipelines = useMemo(() => {
     return (pipelines || []).filter((pipeline) => {
@@ -155,49 +137,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButton
+        <EuiButtonIcon
           key="reloadButton"
           iconType="refresh"
           color="success"
+          aria-label="refresh button"
           data-test-subj="reloadButton"
+          size="m"
+          display="base"
           onClick={onReloadClick}
-        >
-          {i18n.translate('xpack.ingestPipelines.list.table.reloadButtonLabel', {
-            defaultMessage: 'Reload',
-          })}
-        </EuiButton>,
-        <EuiPopover
-          key="createPipelinePopover"
-          isOpen={showPopover}
-          closePopover={() => setShowPopover(false)}
-          button={
-            <EuiButton
-              fill
-              iconSide="right"
-              iconType="arrowDown"
-              data-test-subj="createPipelineDropdown"
-              key="createPipelineDropdown"
-              onClick={() => setShowPopover((previousBool) => !previousBool)}
-            >
-              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
-                defaultMessage: 'Create pipeline',
-              })}
-            </EuiButton>
-          }
-          panelPaddingSize="none"
-          repositionOnScroll
-        >
-          <EuiContextMenu
-            initialPanelId={0}
-            data-test-subj="autoFollowPatternActionContextMenu"
-            panels={[
-              {
-                id: 0,
-                items: createMenuItems,
-              },
-            ]}
-          />
-        </EuiPopover>,
+        />,
       ],
       box: {
         incremental: true,
@@ -242,12 +191,13 @@ export const PipelineTable: FunctionComponent<Props> = ({
     },
     columns: [
       {
+        width: '25%',
         field: 'name',
         name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string, pipeline) => (
+        render: (name: string) => (
           <EuiLink
             data-test-subj="pipelineDetailsLink"
             {...reactRouterNavigate(history, {
@@ -256,22 +206,55 @@ export const PipelineTable: FunctionComponent<Props> = ({
             })}
           >
             {name}
-            {pipeline.deprecated && (
-              <>
-                &nbsp;
-                <DeprecatedPipelineBadge />
-              </>
-            )}
-            {pipeline.isManaged && (
-              <>
-                &nbsp;
-                <ManagedPipelineBadge />
-              </>
-            )}
           </EuiLink>
         ),
       },
       {
+        width: '100px',
+        render: (pipeline: Pipeline) => {
+          return (
+            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
+              {pipeline.isManaged && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                    {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
+                      defaultMessage: 'Managed',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+              {pipeline.deprecated && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                    <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
+                      {deprecatedPipelineBadge.badge}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        },
+      },
+      {
+        field: 'description',
+        sortable: true,
+        name: i18n.translate('xpack.ingestPipelines.list.table.descriptionColumnTitle', {
+          defaultMessage: 'Description',
+        }),
+      },
+      {
+        width: '120px',
+        name: i18n.translate('xpack.ingestPipelines.list.table.preprocessorsColumnTitle', {
+          defaultMessage: 'Preprocessors',
+        }),
+        align: 'right',
+        dataType: 'number',
+        sortable: ({ processors }: Pipeline) => processors.length,
+        render: ({ processors }: Pipeline) => processors.length,
+      },
+      {
+        width: '120px',
         name: (
           <FormattedMessage
             id="xpack.ingestPipelines.list.table.actionColumnTitle"
@@ -320,6 +303,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       },
     ],
     items: filteredPipelines,
+    loading: isLoading,
   };
 
   return <EuiInMemoryTable {...tableProps} />;

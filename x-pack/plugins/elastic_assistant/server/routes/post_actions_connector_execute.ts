@@ -7,16 +7,20 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
-  Replacement,
+  Replacements,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getLlmType } from './utils';
+import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -59,15 +63,14 @@ export const postActionsConnectorExecuteRoute = (
         },
       },
       async (context, request, response) => {
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
 
         try {
-          // Get the actions plugin start contract from the request context for the agents
-          const actionsClient = await assistantContext.actions.getActionsClientWithRequest(request);
-
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return response.unauthorized({
@@ -76,31 +79,16 @@ export const postActionsConnectorExecuteRoute = (
           }
           const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
-          let latestReplacements: Replacement[] = request.body.replacements;
-          const onNewReplacements = (newReplacements: Replacement[]) => {
-            const latestReplacementsDict = latestReplacements.reduce(
-              (acc: Record<string, string>, r) => {
-                acc[r.value] = r.uuid;
-                return acc;
-              },
-              {}
-            );
-            const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
-              acc[r.value] = r.uuid;
-              return acc;
-            }, {});
-
-            const updatedReplacements = { ...latestReplacementsDict, ...newReplacementsDict };
-            latestReplacements = Object.keys(updatedReplacements).map((key) => ({
-              value: key,
-              uuid: updatedReplacements[key],
-            }));
+          let latestReplacements: Replacements = request.body.replacements;
+          const onNewReplacements = (newReplacements: Replacements) => {
+            latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
           let onLlmResponse;
           let prevMessages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
+          const actionTypeId = request.body.actionTypeId;
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
           if (request.body.message) {
@@ -179,7 +167,7 @@ export const postActionsConnectorExecuteRoute = (
                   ],
                 });
               }
-              if (latestReplacements.length > 0) {
+              if (Object.keys(latestReplacements).length > 0) {
                 await dataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,
@@ -191,10 +179,6 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
-          const connectors = await actionsClient.getBulk({
-            ids: [connectorId],
-            throwIfSystemAction: false,
-          });
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
@@ -204,21 +188,23 @@ export const postActionsConnectorExecuteRoute = (
             logger.debug('Executing via actions framework directly');
 
             const result = await executeAction({
+              abortSignal,
               onLlmResponse,
               actions,
               request,
               connectorId,
-              llmType: connectors[0]?.actionTypeId,
+              actionTypeId,
               params: {
                 subAction: request.body.subAction,
                 subActionParams: {
                   model: request.body.model,
                   messages: [...(prevMessages ?? []), ...(newMessage ? [newMessage] : [])],
-                  ...(connectors[0]?.actionTypeId === '.gen-ai'
+                  ...(actionTypeId === '.gen-ai'
                     ? { n: 1, stop: null, temperature: 0.2 }
-                    : {}),
+                    : { temperature: 0, stopSequences: [] }),
                 },
               },
+              logger,
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
@@ -254,49 +240,42 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-          const langChainResponseBody = await callAgentExecutor({
-            alertsIndexPattern: request.body.alertsIndexPattern,
-            allow: request.body.allow,
-            allowReplacement: request.body.allowReplacement,
-            actions,
-            isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
-            assistantTools,
-            connectorId,
-            elserId,
-            esClient,
-            kbResource: ESQL_RESOURCE,
-            langChainMessages,
-            logger,
-            onNewReplacements,
-            request,
-            replacements: request.body.replacements,
-            size: request.body.size,
-            telemetry,
-          });
+          const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
+            await callAgentExecutor({
+              abortSignal,
+              alertsIndexPattern: request.body.alertsIndexPattern,
+              allow: request.body.allow,
+              allowReplacement: request.body.allowReplacement,
+              actions,
+              isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
+              assistantTools,
+              connectorId,
+              elserId,
+              esClient,
+              isStream:
+                // TODO implement llmClass for bedrock streaming
+                // tracked here: https://github.com/elastic/security-team/issues/7363
+                request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+              llmType: getLlmType(actionTypeId),
+              kbResource: ESQL_RESOURCE,
+              langChainMessages,
+              logger,
+              onNewReplacements,
+              onLlmResponse,
+              request,
+              replacements: request.body.replacements,
+              size: request.body.size,
+              telemetry,
+            });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
 
-          if (conversationId) {
-            // if conversationId is defined, onLlmResponse will be too. the ? is to satisfy TS
-            await onLlmResponse?.(
-              langChainResponseBody.data,
-              langChainResponseBody.trace_data
-                ? {
-                    traceId: langChainResponseBody.trace_data.trace_id,
-                    transactionId: langChainResponseBody.trace_data.transaction_id,
-                  }
-                : {}
-            );
-          }
-          return response.ok({
-            body: {
-              ...langChainResponseBody,
-              replacements: latestReplacements,
-            },
-          });
+          return response.ok<
+            StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
+          >(result);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

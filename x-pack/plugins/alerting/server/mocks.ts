@@ -36,6 +36,7 @@ const createSetupMock = () => {
       getContextInitializationPromise: jest.fn(),
     },
     getDataStreamAdapter: jest.fn(),
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };

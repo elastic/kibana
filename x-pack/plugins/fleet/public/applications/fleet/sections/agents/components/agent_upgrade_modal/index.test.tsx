@@ -11,9 +11,11 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendGetAgentsAvailableVersions, sendPostBulkAgentUpgrade } from '../../../../hooks';
-
-import { sendAllFleetServerAgents } from './hooks';
+import {
+  sendGetAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
+  sendPostBulkAgentUpgrade,
+} from '../../../../hooks';
 
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
@@ -32,20 +34,20 @@ jest.mock('../../../../hooks', () => {
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
     useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
+    sendGetAllFleetServerAgents: jest.fn(),
   };
 });
 
 jest.mock('./hooks', () => {
   return {
     ...jest.requireActual('./hooks'),
-    sendAllFleetServerAgents: jest.fn(),
   };
 });
 
 const mockSendPostBulkAgentUpgrade = sendPostBulkAgentUpgrade as jest.Mock;
 
 const mockSendGetAgentsAvailableVersions = sendGetAgentsAvailableVersions as jest.Mock;
-const mockSendAllFleetServerAgents = sendAllFleetServerAgents as jest.Mock;
+const mockSendAllFleetServerAgents = sendGetAllFleetServerAgents as jest.Mock;
 
 function renderAgentUpgradeAgentModal(props: Partial<AgentUpgradeAgentModalProps>) {
   const renderer = createFleetTestRendererMock();
@@ -164,6 +166,46 @@ describe('AgentUpgradeAgentModal', () => {
       await waitFor(() => {
         const input = utils.getByTestId('agentUpgradeModal.VersionInput');
         expect(input?.textContent).toEqual('');
+      });
+    });
+
+    it('should display invalid input if version is not a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14' } });
+        expect(
+          utils.getByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should not display invalid input if version is a valid semver', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        fireEvent.input(input, { target: { value: '8.14.0+build123456789' } });
+        expect(
+          utils.queryByText('Invalid version, please use a valid semver version, e.g. 8.14.0')
+        ).toBeNull();
       });
     });
 

@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
@@ -50,8 +50,8 @@ export const requestHasRequiredAnonymizationParams = (
 
   const replacementsIsValid =
     typeof replacements === 'object' &&
-    replacements.every(
-      (replacement) => typeof replacement === 'object' && typeof replacement.value === 'string'
+    Object.keys(replacements).every(
+      (key) => typeof key === 'string' && typeof replacements[key] === 'string'
     );
 
   return allowIsValid && allowReplacementIsValid && replacementsIsValid;
