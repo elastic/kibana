@@ -31,6 +31,7 @@
       "spaces",
       "esUiShared",
       "remoteClusters"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

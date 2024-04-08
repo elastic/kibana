@@ -25,6 +25,7 @@
       "alerting"
     ],
     "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaReact", "usageCollection"]
+    "requiredBundles": ["kibanaReact", "usageCollection"],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

@@ -57,6 +57,7 @@
       "savedObjectsFinder",
       "usageCollection"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }
