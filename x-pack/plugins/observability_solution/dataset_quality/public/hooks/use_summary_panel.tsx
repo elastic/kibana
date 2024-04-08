@@ -63,6 +63,9 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
     summaryPanelStateService,
     (state) => state.matches('estimatedData.fetching') || state.matches('estimatedData.retrying')
   );
+  const isEstimatedDataDisabled = useSelector(summaryPanelStateService, (state) =>
+    state.matches('estimatedData.disabled')
+  );
 
   return {
     datasetsQuality,
@@ -70,6 +73,7 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
 
     isEstimatedDataLoading,
     estimatedData,
+    isEstimatedDataDisabled,
 
     isDatasetsActivityLoading,
     datasetsActivity,
