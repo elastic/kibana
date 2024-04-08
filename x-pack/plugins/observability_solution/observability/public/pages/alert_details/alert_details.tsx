@@ -162,7 +162,10 @@ export function AlertDetails() {
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
-    // when feature flag is enabled, show alert details page with customized overview tab, otherwise show default overview tab
+    /*
+    when feature flag is enabled, show alert details page with customized overview tab, 
+    otherwise show default overview tab 
+    */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
