@@ -36,7 +36,7 @@ export const getSources = (alert: TopAlert) => {
         const fieldValue = alertFields[field];
         matchedSources.push({
           field: source,
-          value: fieldValue[0],
+          value: Array.isArray(fieldValue) ? fieldValue[0] : fieldValue,
         });
       }
     });

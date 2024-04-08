@@ -42,6 +42,7 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { Overview } from '../../components/alerts_flyout/alert_flyout_overview/alerts_flyout_overview';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -159,14 +160,12 @@ export function AlertDetails() {
   const OVERVIEW_TAB_ID = 'overview';
   const METADATA_TAB_ID = 'metadata';
 
-  const overviewTab =
-    AlertDetailsAppSection &&
-    alertDetail &&
-    isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
+  const overviewTab = alertDetail ? (
+    AlertDetailsAppSection && isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
         <AlertSummary alertSummaryFields={summaryFields} />
-        {rule && alertDetail?.formatted && (
+        {rule && alertDetail.formatted && (
           <AlertDetailsAppSection
             alert={alertDetail.formatted}
             rule={rule}
@@ -177,8 +176,11 @@ export function AlertDetails() {
         )}
       </>
     ) : (
-      <></>
-    );
+      <Overview alert={alertDetail.formatted} />
+    )
+  ) : (
+    <></>
+  );
 
   const metadataTab = alertDetail?.raw && (
     <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel">

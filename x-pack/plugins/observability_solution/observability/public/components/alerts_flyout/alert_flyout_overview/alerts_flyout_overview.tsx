@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiHorizontalRule,
+  EuiInMemoryTable,
+} from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
   ALERT_DURATION,
@@ -24,6 +32,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 
+import { get } from 'lodash';
 import { paths } from '../../../../common/locators/paths';
 import { TimeRange } from '../../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../../typings/alerts';
@@ -36,15 +45,27 @@ import {
 } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
 import { getSources } from './helpers/get_sources';
+import { RULE_DETAILS_PAGE_ID } from '../../../pages/rule_details/constants';
 
-export const Overview = memo(({ alert }: { alert: TopAlert }) => {
-  const { http } = useKibana().services;
+export const Overview = memo(({ alert, pageId }: { alert: TopAlert; pageId?: string }) => {
   const { cases, isLoading } = useFetchBulkCases({ ids: alert.fields[ALERT_CASE_IDS] || [] });
   const dateFormat = useUiSetting<string>('dateFormat');
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [ruleCriteria, setRuleCriteria] = useState<FlyoutThresholdData[] | undefined>([]);
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
+
+  const {
+    http: {
+      basePath: { prepend },
+    },
+  } = useKibana().services;
+
+  const ruleId = get(alert.fields, ALERT_RULE_UUID) ?? null;
+  const linkToRule =
+    pageId !== RULE_DETAILS_PAGE_ID && ruleId
+      ? prepend(paths.observability.ruleDetails(ruleId))
+      : null;
 
   useEffect(() => {
     const mappedRuleParams = mapRuleParamsWithFlyout(alert);
@@ -126,7 +147,7 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
         meta: {
           ruleLink:
             alert.fields[ALERT_RULE_UUID] &&
-            http.basePath.prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
+            prepend(paths.observability.ruleDetails(alert.fields[ALERT_RULE_UUID])),
         },
       },
       {
@@ -154,11 +175,42 @@ export const Overview = memo(({ alert }: { alert: TopAlert }) => {
     alertEnd,
     cases,
     dateFormat,
-    http.basePath,
+    prepend,
     isLoading,
     navigateToCaseView,
     ruleCriteria,
     timeRange,
   ]);
-  return <EuiInMemoryTable width={'80%'} columns={overviewColumns} itemId="key" items={items} />;
+
+  return (
+    <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('xpack.observability.alertsFlyout.reasonTitle', {
+            defaultMessage: 'Reason',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">{alert.reason}</EuiText>
+      <EuiSpacer size="s" />
+      {!!linkToRule && (
+        <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
+          {i18n.translate('xpack.observability.alertsFlyout.viewRulesDetailsLinkText', {
+            defaultMessage: 'View rule details',
+          })}
+        </EuiLink>
+      )}
+      <EuiHorizontalRule size="full" />
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate('xpack.observability.alertsFlyout.documentSummaryTitle', {
+            defaultMessage: 'Document Summary',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiInMemoryTable width={'80%'} columns={overviewColumns} itemId="key" items={items} />
+    </EuiPanel>
+  );
 });
