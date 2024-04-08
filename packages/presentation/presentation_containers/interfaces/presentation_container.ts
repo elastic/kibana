@@ -13,17 +13,16 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
+import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage {
   panelType: string;
   initialState?: object;
 }
 
-export interface PresentationContainer extends Partial<PublishesViewMode>, CanAddNewPanel {
-  addNewPanel: <ApiType extends unknown = unknown>(
-    panel: PanelPackage,
-    displaySuccessMessage?: boolean
-  ) => Promise<ApiType | undefined>;
+export interface PresentationContainer
+  extends Partial<PublishesViewMode & PublishesSettings>,
+    CanAddNewPanel {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
