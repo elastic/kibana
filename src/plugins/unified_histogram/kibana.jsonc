@@ -14,6 +14,7 @@
       "inspector",
       "expressions",
       "visualizations"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

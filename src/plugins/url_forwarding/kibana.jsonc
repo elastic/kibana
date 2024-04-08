@@ -5,6 +5,7 @@
   "plugin": {
     "id": "urlForwarding",
     "server": false,
-    "browser": true
+    "browser": true,
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

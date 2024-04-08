@@ -438,6 +438,7 @@ export class PluginsService
       };
     }
 
+    console.log(`${pluginInfo.plugin.name} is disabled because it's missing dependencies: ${missingOrIncompatibleDependencies.join(',')}`)
     return {
       enabled: false,
       missingOrIncompatibleDependencies,

@@ -15,6 +15,7 @@
       "kibanaReact",
       "kibanaUtils",
       "esUiShared"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

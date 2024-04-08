@@ -8,6 +8,7 @@
     "browser": true,
     "optionalPlugins": [
       "savedObjects"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }
