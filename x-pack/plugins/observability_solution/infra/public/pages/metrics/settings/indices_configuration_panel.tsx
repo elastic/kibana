@@ -27,12 +27,21 @@ interface IndicesConfigurationPanelProps {
   metricAliasFieldProps: InputFieldProps;
   metricIndicesExist?: boolean;
   remoteClustersExist?: boolean;
+  isMetricAliasChanged?: boolean;
+  numberOfInfraRules: number;
 }
 
 const METRIC_INDICES_WARNING_TITLE = i18n.translate(
   'xpack.infra.sourceConfiguration.metricIndicesDoNotExistTitle',
   {
     defaultMessage: 'No matching index found',
+  }
+);
+
+const METRIC_INDICES_USED_BY_RULES = i18n.translate(
+  'xpack.infra.sourceConfiguration.metricIndicesUsedByRules',
+  {
+    defaultMessage: 'Rules utilize the current index pattern.',
   }
 );
 
@@ -49,6 +58,8 @@ export const IndicesConfigurationPanel = ({
   metricAliasFieldProps,
   metricIndicesExist,
   remoteClustersExist,
+  isMetricAliasChanged,
+  numberOfInfraRules,
 }: IndicesConfigurationPanelProps) => (
   <EuiForm>
     <EuiTitle size="s">
@@ -105,6 +116,28 @@ export const IndicesConfigurationPanel = ({
           {...metricAliasFieldProps}
         />
       </EuiFormRow>
+      {isMetricAliasChanged && numberOfInfraRules > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            size="s"
+            title={METRIC_INDICES_USED_BY_RULES}
+            color="danger"
+            iconType="warning"
+          >
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExist"
+              defaultMessage="There {isOrAre} {numberOfInfraRules} rule{plural} that rely on the current Metric indices setting. Changing this setting may impact the execution of these rules."
+              values={{
+                numberOfInfraRules,
+                plural: numberOfInfraRules > 1 ? 's' : '',
+                isOrAre: numberOfInfraRules > 1 ? 'are' : 'is',
+              }}
+            />
+          </EuiCallOut>
+        </>
+      )}
       {remoteClustersExist && !metricIndicesExist && (
         <>
           <EuiSpacer size="s" />
