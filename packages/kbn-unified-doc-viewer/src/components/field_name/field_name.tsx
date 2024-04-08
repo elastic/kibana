@@ -27,7 +27,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
-  showEcsInfo?: boolean;
+  useEcsInfo?: boolean;
 }
 
 export function FieldName({
@@ -37,7 +37,7 @@ export function FieldName({
   fieldIconProps,
   scripted = false,
   highlight = '',
-  showEcsInfo = false,
+  useEcsInfo = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -46,7 +46,7 @@ export function FieldName({
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
   const description = fieldMapping
-    ? getFieldDescription(fieldMapping?.name, fieldMapping?.customDescription, showEcsInfo)
+    ? getFieldDescription(fieldMapping?.name, fieldMapping?.customDescription, useEcsInfo)
     : '';
 
   return (

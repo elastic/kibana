@@ -378,7 +378,7 @@ export const DocViewerTable = ({
                     fieldMapping?.displayName ?? field,
                     searchText
                   )}
-                  showEcsInfo={containsEcsFields(dataView.getFieldByName)}
+                  useEcsInfo={containsEcsFields(dataView.getFieldByName.bind(dataView))}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell

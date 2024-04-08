@@ -33,7 +33,7 @@ export interface FieldPopoverHeaderProps {
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
-  showEcsInfo?: boolean;
+  useEcsInfo?: boolean;
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -47,12 +47,12 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onAddFilter,
   onEditField,
   onDeleteField,
-  showEcsInfo,
+  useEcsInfo,
 }) => {
   if (!field) {
     return null;
   }
-  const description = getFieldDescription(field.name, field.customDescription, showEcsInfo);
+  const description = getFieldDescription(field.name, field.customDescription, useEcsInfo);
 
   const addFieldToWorkspaceTooltip = i18n.translate(
     'unifiedFieldList.fieldPopover.addFieldToWorkspaceLabel',

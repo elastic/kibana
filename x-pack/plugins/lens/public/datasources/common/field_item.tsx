@@ -100,7 +100,7 @@ export function InnerFieldItem(props: FieldItemProps) {
     }
     return new DataViewField(field);
   }, [field]);
-  const showEcsInfo = Boolean(
+  const useEcsInfo = Boolean(
     indexPattern && containsEcsFields(indexPattern.getFieldByName as DataView['getFieldByName'])
   );
   const services = useKibana<LensAppServices>().services;
@@ -237,7 +237,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}
               onDeleteField={removeFieldAndClose}
-              showEcsInfo={showEcsInfo}
+              useEcsInfo={useEcsInfo}
             />
           );
         }}
