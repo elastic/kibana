@@ -103,6 +103,7 @@ export class AlertsClient<
   };
 
   private startedAtString: string | null = null;
+  private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -132,6 +133,9 @@ export class AlertsClient<
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
+    if (opts.runTimestamp) {
+      this.runTimestampString = opts.runTimestamp.toISOString();
+    }
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -438,6 +442,7 @@ export class AlertsClient<
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -459,6 +464,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -489,6 +495,7 @@ export class AlertsClient<
                 alert: this.fetchedAlerts.data[id],
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -497,6 +504,7 @@ export class AlertsClient<
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,
               })

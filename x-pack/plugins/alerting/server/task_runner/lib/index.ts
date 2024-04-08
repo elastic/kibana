@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export const adHocRunStatus = {
-  COMPLETE: 'complete',
-  PENDING: 'pending',
-  RUNNING: 'running',
-  ERROR: 'error',
-  TIMEOUT: 'timeout',
-} as const;
-export type AdHocRunStatus = typeof adHocRunStatus[keyof typeof adHocRunStatus];
+export { partiallyUpdateAdHocRun } from './partially_update_ad_hoc_run';
+export { processRunResults } from './process_run_result';

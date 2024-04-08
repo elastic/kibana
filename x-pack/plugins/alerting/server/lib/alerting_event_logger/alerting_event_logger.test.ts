@@ -10,13 +10,18 @@ import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
-  RuleContextOpts,
+  ContextOpts,
+  Context,
+  RuleContext,
   initializeExecuteRecord,
-  createExecuteStartRecord,
   createExecuteTimeoutRecord,
   createAlertRecord,
   createActionExecuteRecord,
   updateEvent,
+  executionType,
+  initializeExecuteBackfillRecord,
+  SavedObjects,
+  updateEventWithRuleData,
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
@@ -28,6 +33,8 @@ import { RuleRunMetrics } from '../rule_run_metrics_store';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';
+import { RULE_SAVED_OBJECT_TYPE } from '../..';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -49,19 +56,6 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   },
   validLegacyConsumers: [],
 };
-
-const context: RuleContextOpts = {
-  ruleId: '123',
-  ruleType,
-  consumer: 'test-consumer',
-  spaceId: 'test-space',
-  executionId: 'abcd-efgh-ijklmnop',
-  taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
-  ruleRevision: 0,
-};
-
-const contextWithScheduleDelay = { ...context, taskScheduleDelay: 7200000 };
-const contextWithName = { ...contextWithScheduleDelay, ruleName: 'my-super-cool-rule' };
 
 const alert = {
   action: EVENT_LOG_ACTIONS.activeInstance,
@@ -89,6 +83,13 @@ let runDate: Date;
 
 describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
+  let ruleData: RuleContext;
+  let ruleContext: ContextOpts;
+  let backfillContext: ContextOpts;
+  let ruleContextWithScheduleDelay: Context;
+  let backfillContextWithScheduleDelay: Context;
+  let alertSO: SavedObjects;
+  let adHocRunSO: SavedObjects;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -98,6 +99,34 @@ describe('AlertingEventLogger', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.clearAllMocks();
+    ruleContext = {
+      savedObjectId: '123',
+      savedObjectType: RULE_SAVED_OBJECT_TYPE,
+      spaceId: 'test-space',
+      executionId: 'abcd-efgh-ijklmnop',
+      taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+    };
+
+    backfillContext = {
+      savedObjectId: 'def',
+      savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      spaceId: 'test-space',
+      executionId: 'wxyz-efgh-ijklmnop',
+      taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+    };
+
+    ruleContextWithScheduleDelay = { ...ruleContext, taskScheduleDelay: 7200000 };
+    backfillContextWithScheduleDelay = { ...backfillContext, taskScheduleDelay: 7200000 };
+
+    ruleData = {
+      id: '123',
+      type: ruleType,
+      consumer: 'test-consumer',
+      revision: 0,
+    };
+    alertSO = { id: '123', relation: 'primary', type: 'alert', typeId: 'test' };
+    adHocRunSO = { id: 'def', relation: 'primary', type: 'ad_hoc_run_params' };
     alertingEventLogger = new AlertingEventLogger(eventLogger);
   });
 
@@ -106,62 +135,146 @@ describe('AlertingEventLogger', () => {
   });
 
   describe('initialize()', () => {
-    test('initialization should succeed if alertingEventLogger has not been initialized', () => {
-      expect(() => alertingEventLogger.initialize(context)).not.toThrow();
+    test('should throw error if alertingEventLogger context is null', () => {
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: null as unknown as ContextOpts,
+          runDate,
+          ruleData,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
+
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: undefined as unknown as ContextOpts,
+          runDate,
+          ruleData,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
+
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: null as unknown as ContextOpts,
+          runDate,
+          type: executionType.BACKFILL,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
+
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: undefined as unknown as ContextOpts,
+          runDate,
+          type: executionType.BACKFILL,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
     });
 
-    test('initialization should fail if alertingEventLogger has already been initialized', () => {
-      alertingEventLogger.initialize(context);
-      expect(() => alertingEventLogger.initialize(context)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger already initialized"`
-      );
-    });
-  });
-
-  describe('start()', () => {
-    test('should throw error if alertingEventLogger has not been initialized', () => {
-      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
+    test('standard initialization should succeed if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData })
+      ).not.toThrow();
+      expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     });
 
-    test('should throw error if alertingEventLogger rule context is null', () => {
-      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
+    test('backfill initialization should succeed if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: backfillContext,
+          runDate,
+          type: executionType.BACKFILL,
+        })
+      ).not.toThrow();
+      expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     });
 
-    test('should throw error if alertingEventLogger rule context is undefined', () => {
-      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.start(runDate)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
+    test('standard initialization should fail if alertingEventLogger has already been initialized', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      expect(() =>
+        alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
     });
 
-    test('should call eventLogger "startTiming" and "logEvent"', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+    test('backfill initialization should fail if alertingEventLogger has already been initialized', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      expect(() =>
+        alertingEventLogger.initialize({
+          context: backfillContext,
+          runDate,
+          type: executionType.BACKFILL,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger already initialized"`);
+    });
+
+    test('standard initialization should fail if ruleData is not provided', () => {
+      expect(() =>
+        alertingEventLogger.initialize({ context: ruleContext, runDate })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger requires rule data"`);
+      expect(eventLogger.startTiming).not.toHaveBeenCalled();
+    });
+
+    test('standard initialization should call eventLogger.logEvent', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith({
+        ...event,
+        event: {
+          ...event.event,
+          action: EVENT_LOG_ACTIONS.executeStart,
+          start: runDate.toISOString(),
+        },
+        message: `rule execution start: "${ruleData.id}"`,
+      });
 
       expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
-      expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-
-      expect(eventLogger.startTiming).toHaveBeenCalledWith(
-        initializeExecuteRecord(contextWithScheduleDelay),
-        new Date(mockNow)
-      );
-      expect(eventLogger.logEvent).toHaveBeenCalledWith(
-        createExecuteStartRecord(contextWithScheduleDelay, new Date(mockNow))
-      );
+      expect(eventLogger.startTiming).toHaveBeenCalledWith(event, new Date(mockNow));
     });
 
-    test('should initialize the "execute" event', () => {
+    test('backfill initialization should not call eventLogger.logEvent', () => {
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+
+      expect(eventLogger.logEvent).not.toHaveBeenCalled();
+      expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+      expect(eventLogger.startTiming).toHaveBeenCalledWith(event, new Date(mockNow));
+    });
+
+    test('standard initialization should correctly initialize the "execute" event', () => {
       mockEventLoggerStartTiming();
 
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        event: {
+          ...event.event,
+          start: new Date(mockNow).toISOString(),
+        },
+      });
+    });
+
+    test('backfill initialization should correctly initialize the "execute" event', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
       expect(alertingEventLogger.getEvent()).toEqual({
         ...event,
         event: {
@@ -172,31 +285,101 @@ describe('AlertingEventLogger', () => {
     });
   });
 
-  describe('setRuleName()', () => {
+  describe('addOrUpdateRuleData()', () => {
     test('should throw error if alertingEventLogger has not been initialized', () => {
-      expect(() => alertingEventLogger.setRuleName('')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => alertingEventLogger.addOrUpdateRuleData({})).toThrowErrorMatchingInlineSnapshot(
         `"AlertingEventLogger not initialized"`
       );
     });
 
-    test('should throw error if event is null', () => {
-      alertingEventLogger.initialize(context);
-      expect(() => alertingEventLogger.setRuleName('')).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
+    test('should throw error if updating rule data that has not been initialized', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+
+      expect(() =>
+        alertingEventLogger.addOrUpdateRuleData({ name: 'new-name' })
+      ).toThrowErrorMatchingInlineSnapshot(`"Cannot update rule data before it is initialized"`);
     });
 
-    test('should update event with rule name correctly', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
-      alertingEventLogger.setRuleName('my-super-cool-rule');
+    test('should update standard event with rule name correctly', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ name: 'my-super-cool-rule' });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
       expect(alertingEventLogger.getEvent()).toEqual({
         ...event,
         rule: {
           ...event.rule,
           name: 'my-super-cool-rule',
+        },
+      });
+    });
+
+    test('should update standard event with rule consumer correctly', () => {
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ consumer: 'my-new-consumer' });
+
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+            },
+          },
+        },
+      });
+    });
+
+    test('should update backfill event with rule data correctly', () => {
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.addOrUpdateRuleData({
+        id: 'bbb',
+        type: ruleType,
+        name: 'rule-name',
+        revision: 10,
+        consumer: 'my-new-consumer',
+      });
+
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        rule: {
+          ...event.rule,
+          id: 'bbb',
+          name: 'rule-name',
+          category: 'test',
+          license: 'basic',
+          ruleset: 'alerts',
+        },
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+              revision: 10,
+              rule_type_id: 'test',
+            },
+          },
+          saved_objects: [
+            // @ts-ignore
+            ...event.kibana?.saved_objects,
+            { id: 'bbb', type: 'alert', type_id: 'test' },
+          ],
         },
       });
     });
@@ -209,22 +392,14 @@ describe('AlertingEventLogger', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
 
-    test('should throw error if event is null', () => {
-      alertingEventLogger.initialize(context);
-      expect(() =>
-        alertingEventLogger.setExecutionSucceeded('')
-      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
-    });
-
-    test('should update execute event correctly', () => {
+    test('should update execute event correctly for standard executions', () => {
       mockEventLoggerStartTiming();
 
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
-      alertingEventLogger.setRuleName('my-super-cool-rule');
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.addOrUpdateRuleData({ name: 'my-super-cool-rule' });
       alertingEventLogger.setExecutionSucceeded('success!');
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       expect(alertingEventLogger.getEvent()).toEqual({
         ...event,
         event: {
@@ -245,6 +420,63 @@ describe('AlertingEventLogger', () => {
         message: 'success!',
       });
     });
+
+    test('should update execute event correctly for backfill executions', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.addOrUpdateRuleData({
+        id: 'bbb',
+        type: ruleType,
+        name: 'rule-name',
+        revision: 10,
+        consumer: 'my-new-consumer',
+      });
+      alertingEventLogger.setExecutionSucceeded('success!');
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        event: {
+          ...event.event,
+          start: new Date(mockNow).toISOString(),
+          outcome: 'success',
+        },
+        rule: {
+          ...event.rule,
+          id: 'bbb',
+          name: 'rule-name',
+          category: 'test',
+          license: 'basic',
+          ruleset: 'alerts',
+        },
+        message: 'success!',
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+              revision: 10,
+              rule_type_id: 'test',
+            },
+          },
+          alerting: {
+            outcome: 'success',
+          },
+          saved_objects: [
+            // @ts-ignore
+            ...event.kibana?.saved_objects,
+            { id: 'bbb', type: 'alert', type_id: 'test' },
+          ],
+        },
+      });
+    });
   });
 
   describe('setExecutionFailed()', () => {
@@ -254,21 +486,13 @@ describe('AlertingEventLogger', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
 
-    test('should throw error if event is null', () => {
-      alertingEventLogger.initialize(context);
-      expect(() =>
-        alertingEventLogger.setExecutionFailed('', '')
-      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
-    });
-
-    test('should update execute event correctly', () => {
+    test('should update execute event correctly for standard executions', () => {
       mockEventLoggerStartTiming();
 
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.setExecutionFailed('rule failed!', 'something went wrong!');
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       expect(alertingEventLogger.getEvent()).toEqual({
         ...event,
         event: {
@@ -288,6 +512,97 @@ describe('AlertingEventLogger', () => {
         message: 'rule failed!',
       });
     });
+
+    test('should update execute event correctly for backfill executions if error occurs after rule data is set', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.addOrUpdateRuleData({
+        id: 'bbb',
+        type: ruleType,
+        name: 'rule-name',
+        revision: 10,
+        consumer: 'my-new-consumer',
+      });
+      alertingEventLogger.setExecutionFailed('rule failed!', 'something went wrong!');
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        event: {
+          ...event.event,
+          start: new Date(mockNow).toISOString(),
+          outcome: 'failure',
+        },
+        rule: {
+          ...event.rule,
+          id: 'bbb',
+          name: 'rule-name',
+          category: 'test',
+          license: 'basic',
+          ruleset: 'alerts',
+        },
+        error: {
+          message: 'something went wrong!',
+        },
+        message: 'rule failed!',
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+              revision: 10,
+              rule_type_id: 'test',
+            },
+          },
+          alerting: {
+            outcome: 'failure',
+          },
+          saved_objects: [
+            // @ts-ignore
+            ...event.kibana?.saved_objects,
+            { id: 'bbb', type: 'alert', type_id: 'test' },
+          ],
+        },
+      });
+    });
+
+    test('should update execute event correctly for backfill executions if error occurs before rule data is set', () => {
+      mockEventLoggerStartTiming();
+
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.setExecutionFailed('rule failed!', 'something went wrong!');
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      expect(alertingEventLogger.getEvent()).toEqual({
+        ...event,
+        event: {
+          ...event.event,
+          start: new Date(mockNow).toISOString(),
+          outcome: 'failure',
+        },
+        error: {
+          message: 'something went wrong!',
+        },
+        message: 'rule failed!',
+        kibana: {
+          ...event.kibana,
+          alerting: {
+            outcome: 'failure',
+          },
+        },
+      });
+    });
   });
 
   describe('setMaintenanceWindowIds()', () => {
@@ -297,19 +612,11 @@ describe('AlertingEventLogger', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
 
-    test('should throw error if event is null', () => {
-      alertingEventLogger.initialize(context);
-      expect(() =>
-        alertingEventLogger.setMaintenanceWindowIds([])
-      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
-    });
-
     it('should update event maintenance window IDs correctly', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.setMaintenanceWindowIds([]);
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       expect(alertingEventLogger.getEvent()).toEqual({
         ...event,
         kibana: {
@@ -336,33 +643,69 @@ describe('AlertingEventLogger', () => {
   });
 
   describe('logTimeout()', () => {
-    test('should throw error if alertingEventLogger has not been initialized', () => {
-      expect(() => alertingEventLogger.logTimeout()).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should throw error if alertingEventLogger rule context is null', () => {
-      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.logTimeout()).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should throw error if alertingEventLogger rule context is undefined', () => {
-      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.logTimeout()).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should log timeout event', () => {
-      alertingEventLogger.initialize(context);
+    test('should log timeout event for standard execution', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.logTimeout();
 
-      const event = createExecuteTimeoutRecord(contextWithName);
+      const event = createExecuteTimeoutRecord(
+        ruleContext,
+        [alertSO],
+        executionType.STANDARD,
+        ruleData
+      );
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+
+    test('should throw error if backfill fields provided when execution type is not backfill', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      expect(() =>
+        alertingEventLogger.logTimeout({ backfill: { id: 'abc' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot set backfill fields for non-backfill event log doc"`
+      );
+    });
+
+    test('should log timeout event for backfill execution if called before rule data is set', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.logTimeout({
+        backfill: {
+          id: 'abc',
+          start: '2024-03-13T00:00:00.000Z',
+          interval: '1h',
+        },
+      });
+
+      const event = createExecuteTimeoutRecord(
+        backfillContextWithScheduleDelay,
+        [adHocRunSO],
+        executionType.BACKFILL
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith({
+        ...event,
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                backfill: {
+                  id: 'abc',
+                  start: '2024-03-13T00:00:00.000Z',
+                  interval: '1h',
+                },
+              },
+            },
+          },
+        },
+      });
     });
   });
 
@@ -373,27 +716,68 @@ describe('AlertingEventLogger', () => {
       );
     });
 
-    test('should throw error if alertingEventLogger rule context is null', () => {
-      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.logAlert(alert)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should throw error if alertingEventLogger rule context is undefined', () => {
-      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.logAlert(alert)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should log timeout event', () => {
-      alertingEventLogger.initialize(context);
+    test('should correct log alerts for standard executions', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.logAlert(alert);
 
-      const event = createAlertRecord(contextWithName, alert);
+      const event = createAlertRecord(ruleContext, ruleData, [alertSO], alert);
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+
+    test('should throw if trying to log alerts for backfill executions when no rule data is set', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      expect(() => alertingEventLogger.logAlert(alert)).toThrowErrorMatchingInlineSnapshot(
+        `"AlertingEventLogger not initialized"`
+      );
+    });
+
+    test('should correct log alerts for backfill executions', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.addOrUpdateRuleData({
+        id: 'bbb',
+        type: ruleType,
+        name: 'rule-name',
+        revision: 10,
+        consumer: 'my-new-consumer',
+      });
+      alertingEventLogger.logAlert(alert);
+
+      const event = createAlertRecord(
+        backfillContext,
+        ruleData,
+        [adHocRunSO, { id: 'bbb', type: 'alert', typeId: 'test' }],
+        alert
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith({
+        ...event,
+        rule: {
+          ...event.rule,
+          id: 'bbb',
+          name: 'rule-name',
+        },
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+              revision: 10,
+              rule_type_id: 'test',
+            },
+          },
+        },
+      });
     });
   });
 
@@ -404,25 +788,22 @@ describe('AlertingEventLogger', () => {
       );
     });
 
-    test('should throw error if alertingEventLogger rule context is null', () => {
-      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
+    test('should throw if trying to log action event when no rule data is set', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
       expect(() => alertingEventLogger.logAction(action)).toThrowErrorMatchingInlineSnapshot(
         `"AlertingEventLogger not initialized"`
       );
     });
 
-    test('should throw error if alertingEventLogger rule context is undefined', () => {
-      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.logAction(action)).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should log timeout event', () => {
-      alertingEventLogger.initialize(context);
+    test('should log action event', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.logAction(action);
 
-      const event = createActionExecuteRecord(contextWithName, action);
+      const event = createActionExecuteRecord(ruleContext, ruleData, [alertSO], action);
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
@@ -435,45 +816,30 @@ describe('AlertingEventLogger', () => {
       );
     });
 
-    test('should throw error if alertingEventLogger rule context is null', () => {
-      alertingEventLogger.initialize(null as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.done({})).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should throw error if alertingEventLogger rule context is undefined', () => {
-      alertingEventLogger.initialize(undefined as unknown as RuleContextOpts);
-      expect(() => alertingEventLogger.done({})).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
-      );
-    });
-
-    test('should throw error if event is null', () => {
-      alertingEventLogger.initialize(context);
-      expect(() => alertingEventLogger.done({})).toThrowErrorMatchingInlineSnapshot(
-        `"AlertingEventLogger not initialized"`
+    test('should throw error if backfill fields provided when execution type is not backfill', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      expect(() =>
+        alertingEventLogger.done({ backfill: { id: 'abc' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot set backfill fields for non-backfill event log doc"`
       );
     });
 
     test('should log event if no status or metrics are provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({});
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
-
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
 
     test('should set fields from execution status if provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: { lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'), status: 'active' },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         kibana: {
@@ -488,8 +854,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is error', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -501,7 +866,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         event: {
@@ -527,8 +892,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is error and uses "unknown" if no reason is provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -540,7 +904,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         event: {
@@ -566,8 +930,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is error and does not overwrite existing error message', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -579,7 +942,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       alertingEventLogger.setExecutionFailed(
         'i am an existing error message',
         'i am an existing error message!'
@@ -609,8 +972,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is warning', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -622,7 +984,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         event: {
@@ -644,8 +1006,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is warning and uses "unknown" if no reason is provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -657,7 +1018,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         event: {
@@ -679,8 +1040,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution status if execution status is warning and uses existing message if no message is provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         status: {
           lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
@@ -692,7 +1052,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       alertingEventLogger.setExecutionSucceeded('success!');
       const loggedEvent = {
         ...event,
@@ -715,9 +1075,72 @@ describe('AlertingEventLogger', () => {
       expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
     });
 
+    test('should set fields from backfill if provided', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+      alertingEventLogger.addOrUpdateRuleData({
+        id: 'bbb',
+        type: ruleType,
+        name: 'rule-name',
+        revision: 10,
+        consumer: 'my-new-consumer',
+      });
+
+      alertingEventLogger.done({
+        backfill: {
+          id: 'abc',
+          start: '2024-03-13T00:00:00.000Z',
+          interval: '1h',
+        },
+      });
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      const loggedEvent = {
+        ...event,
+        rule: {
+          ...event.rule,
+          id: 'bbb',
+          name: 'rule-name',
+          category: 'test',
+          license: 'basic',
+          ruleset: 'alerts',
+        },
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              consumer: 'my-new-consumer',
+              revision: 10,
+              rule_type_id: 'test',
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                backfill: {
+                  id: 'abc',
+                  start: '2024-03-13T00:00:00.000Z',
+                  interval: '1h',
+                },
+              },
+            },
+          },
+          saved_objects: [
+            // @ts-ignore
+            ...event.kibana?.saved_objects,
+            { id: 'bbb', type: 'alert', type_id: 'test' },
+          ],
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
     test('should set fields from execution metrics if provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         metrics: {
           numberOfTriggeredActions: 1,
@@ -735,7 +1158,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         kibana: {
@@ -770,8 +1193,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution timings if provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         timings: {
           [TaskRunnerTimerSpan.StartTaskRun]: 10,
@@ -785,7 +1207,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         kibana: {
@@ -817,8 +1239,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields from execution metrics and timings if both provided', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         metrics: {
           numberOfTriggeredActions: 1,
@@ -846,7 +1267,7 @@ describe('AlertingEventLogger', () => {
         },
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         kibana: {
@@ -889,13 +1310,12 @@ describe('AlertingEventLogger', () => {
     });
 
     test('should set fields to 0 execution metrics are provided but undefined', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.done({
         metrics: {} as unknown as RuleRunMetrics,
       });
 
-      const event = initializeExecuteRecord(contextWithScheduleDelay);
+      const event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
       const loggedEvent = {
         ...event,
         kibana: {
@@ -930,8 +1350,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('overwrites the message when the final status is error', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.setExecutionSucceeded('success message');
 
       expect(alertingEventLogger.getEvent()!.message).toBe('success message');
@@ -948,8 +1367,7 @@ describe('AlertingEventLogger', () => {
     });
 
     test('does not overwrites the message when there is already a failure message', () => {
-      alertingEventLogger.initialize(context);
-      alertingEventLogger.start(runDate);
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
       alertingEventLogger.setExecutionFailed('first failure message', 'failure error message');
 
       expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
@@ -970,376 +1388,610 @@ describe('AlertingEventLogger', () => {
   });
 });
 
-describe('createExecuteStartRecord', () => {
-  test('should create execute-start record', () => {
-    const executeRecord = initializeExecuteRecord(contextWithScheduleDelay);
-    const record = createExecuteStartRecord(contextWithScheduleDelay);
-
-    expect(record).toEqual({
-      ...executeRecord,
-      event: {
-        ...executeRecord.event,
-        action: 'execute-start',
-      },
-      message: `rule execution start: "123"`,
-    });
-  });
-
-  test('should create execute-start record with given start time', () => {
-    const executeRecord = initializeExecuteRecord(contextWithScheduleDelay);
-    const record = createExecuteStartRecord(
-      contextWithScheduleDelay,
-      new Date('2022-01-01T02:00:00.000Z')
-    );
-
-    expect(record).toEqual({
-      ...executeRecord,
-      event: {
-        ...executeRecord.event,
-        action: 'execute-start',
-        start: '2022-01-01T02:00:00.000Z',
-      },
-      message: `rule execution start: "123"`,
-    });
-  });
-});
-
-describe('initializeExecuteRecord', () => {
-  test('should populate initial set of fields in event log record', () => {
-    const record = initializeExecuteRecord(contextWithScheduleDelay);
-
-    expect(record.event).toBeDefined();
-    expect(record.kibana).toBeDefined();
-    expect(record.kibana?.alert).toBeDefined();
-    expect(record.kibana?.alert?.rule).toBeDefined();
-    expect(record.kibana?.alert?.rule?.execution).toBeDefined();
-    expect(record.kibana?.saved_objects).toBeDefined();
-    expect(record.kibana?.space_ids).toBeDefined();
-    expect(record.kibana?.task).toBeDefined();
-    expect(record.rule).toBeDefined();
-
-    // these fields should be explicitly set
-    expect(record.event?.action).toEqual('execute');
-    expect(record.event?.kind).toEqual('alert');
-    expect(record.event?.category).toEqual([contextWithScheduleDelay.ruleType.producer]);
-    expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithScheduleDelay.ruleType.id);
-    expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithScheduleDelay.consumer);
-    expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
-      contextWithScheduleDelay.executionId
-    );
-    expect(record.kibana?.saved_objects).toEqual([
-      {
-        id: contextWithScheduleDelay.ruleId,
-        type: 'alert',
-        type_id: contextWithScheduleDelay.ruleType.id,
-        rel: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ]);
-    expect(record.kibana?.space_ids).toEqual([contextWithScheduleDelay.spaceId]);
-    expect(record.kibana?.task?.scheduled).toEqual(
-      contextWithScheduleDelay.taskScheduledAt.toISOString()
-    );
-    expect(record.kibana?.task?.schedule_delay).toEqual(
-      contextWithScheduleDelay.taskScheduleDelay * 1000000
-    );
-    expect(record?.rule?.id).toEqual(contextWithScheduleDelay.ruleId);
-    expect(record?.rule?.license).toEqual(contextWithScheduleDelay.ruleType.minimumLicenseRequired);
-    expect(record?.rule?.category).toEqual(contextWithScheduleDelay.ruleType.id);
-    expect(record?.rule?.ruleset).toEqual(contextWithScheduleDelay.ruleType.producer);
-
-    // these fields should not be set by this function
-    expect(record['@timestamp']).toBeUndefined();
-    expect(record.event?.provider).toBeUndefined();
-    expect(record.event?.start).toBeUndefined();
-    expect(record.event?.outcome).toBeUndefined();
-    expect(record.event?.end).toBeUndefined();
-    expect(record.event?.duration).toBeUndefined();
-    expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
-    expect(record.kibana?.alerting).toBeUndefined();
-    expect(record.kibana?.server_uuid).toBeUndefined();
-    expect(record.kibana?.version).toBeUndefined();
-    expect(record?.rule?.name).toBeUndefined();
-    expect(record?.message).toBeUndefined();
-    expect(record?.ecs).toBeUndefined();
-  });
-});
-
-describe('createExecuteTimeoutRecord', () => {
-  test('should populate expected fields in event log record', () => {
-    const record = createExecuteTimeoutRecord(contextWithName);
-
-    expect(record.event).toBeDefined();
-    expect(record.kibana).toBeDefined();
-    expect(record.kibana?.alert).toBeDefined();
-    expect(record.kibana?.alert?.rule).toBeDefined();
-    expect(record.kibana?.alert?.rule?.execution).toBeDefined();
-    expect(record.kibana?.saved_objects).toBeDefined();
-    expect(record.kibana?.space_ids).toBeDefined();
-    expect(record.rule).toBeDefined();
-
-    // these fields should be explicitly set
-    expect(record.event?.action).toEqual('execute-timeout');
-    expect(record.event?.kind).toEqual('alert');
-    expect(record.message).toEqual(
-      `rule: test:123: 'my-super-cool-rule' execution cancelled due to timeout - exceeded rule type timeout of 1m`
-    );
-    expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
-    expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
-    expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
-    expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
-    expect(record.kibana?.saved_objects).toEqual([
-      {
-        id: contextWithName.ruleId,
-        type: 'alert',
-        type_id: contextWithName.ruleType.id,
-        rel: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ]);
-    expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
-    expect(record?.rule?.id).toEqual(contextWithName.ruleId);
-    expect(record?.rule?.license).toEqual(contextWithName.ruleType.minimumLicenseRequired);
-    expect(record?.rule?.category).toEqual(contextWithName.ruleType.id);
-    expect(record?.rule?.ruleset).toEqual(contextWithName.ruleType.producer);
-    expect(record?.rule?.name).toEqual(contextWithName.ruleName);
-
-    // these fields should not be set by this function
-    expect(record['@timestamp']).toBeUndefined();
-    expect(record.event?.provider).toBeUndefined();
-    expect(record.event?.start).toBeUndefined();
-    expect(record.event?.outcome).toBeUndefined();
-    expect(record.event?.end).toBeUndefined();
-    expect(record.event?.duration).toBeUndefined();
-    expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
-    expect(record.kibana?.alerting).toBeUndefined();
-    expect(record.kibana?.server_uuid).toBeUndefined();
-    expect(record.kibana?.task).toBeUndefined();
-    expect(record.kibana?.version).toBeUndefined();
-    expect(record?.ecs).toBeUndefined();
-  });
-});
-
-describe('createAlertRecord', () => {
-  test('should populate expected fields in event log record', () => {
-    const record = createAlertRecord(contextWithName, alert);
-
-    // these fields should be explicitly set
-    expect(record.event?.action).toEqual('active-instance');
-    expect(record.event?.kind).toEqual('alert');
-    expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
-    expect(record.event?.start).toEqual(alert.state.start);
-    expect(record.event?.end).toEqual(alert.state.end);
-    expect(record.event?.duration).toEqual(alert.state.duration);
-    expect(record.message).toEqual(
-      `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`
-    );
-    expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
-    expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
-    expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
-    expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
-    expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
-    expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
-    expect(record.kibana?.saved_objects).toEqual([
-      {
-        id: contextWithName.ruleId,
-        type: 'alert',
-        type_id: contextWithName.ruleType.id,
-        rel: SAVED_OBJECT_REL_PRIMARY,
-      },
-    ]);
-    expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
-    expect(record?.rule?.id).toEqual(contextWithName.ruleId);
-    expect(record?.rule?.license).toEqual(contextWithName.ruleType.minimumLicenseRequired);
-    expect(record?.rule?.category).toEqual(contextWithName.ruleType.id);
-    expect(record?.rule?.ruleset).toEqual(contextWithName.ruleType.producer);
-    expect(record?.rule?.name).toEqual(contextWithName.ruleName);
-
-    // these fields should not be set by this function
-    expect(record['@timestamp']).toBeUndefined();
-    expect(record.event?.provider).toBeUndefined();
-    expect(record.event?.outcome).toBeUndefined();
-    expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
-    expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
-    expect(record.kibana?.server_uuid).toBeUndefined();
-    expect(record.kibana?.task).toBeUndefined();
-    expect(record.kibana?.version).toBeUndefined();
-    expect(record?.ecs).toBeUndefined();
-  });
-});
-
-describe('createActionExecuteRecord', () => {
-  test('should populate expected fields in event log record', () => {
-    const record = createActionExecuteRecord(contextWithName, action);
-
-    expect(record.event).toBeDefined();
-    expect(record.kibana).toBeDefined();
-    expect(record.kibana?.alert).toBeDefined();
-    expect(record.kibana?.alert?.rule).toBeDefined();
-    expect(record.kibana?.alert?.rule?.execution).toBeDefined();
-    expect(record.kibana?.saved_objects).toBeDefined();
-    expect(record.kibana?.space_ids).toBeDefined();
-    expect(record.rule).toBeDefined();
-
-    // these fields should be explicitly set
-    expect(record.event?.action).toEqual('execute-action');
-    expect(record.event?.kind).toEqual('alert');
-    expect(record.event?.category).toEqual([contextWithName.ruleType.producer]);
-    expect(record.message).toEqual(
-      `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: 'aGroup' action: .email:abc`
-    );
-    expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(contextWithName.ruleType.id);
-    expect(record.kibana?.alert?.rule?.consumer).toEqual(contextWithName.consumer);
-    expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(contextWithName.executionId);
-    expect(record.kibana?.alerting?.instance_id).toEqual(action.alertId);
-    expect(record.kibana?.alerting?.action_group_id).toEqual(action.alertGroup);
-    expect(record.kibana?.saved_objects).toEqual([
-      {
-        id: contextWithName.ruleId,
-        type: 'alert',
-        type_id: contextWithName.ruleType.id,
-        rel: SAVED_OBJECT_REL_PRIMARY,
-      },
-      {
-        id: action.id,
-        type: 'action',
-        type_id: action.typeId,
-      },
-    ]);
-    expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
-    expect(record?.rule?.id).toEqual(contextWithName.ruleId);
-    expect(record?.rule?.license).toEqual(contextWithName.ruleType.minimumLicenseRequired);
-    expect(record?.rule?.category).toEqual(contextWithName.ruleType.id);
-    expect(record?.rule?.ruleset).toEqual(contextWithName.ruleType.producer);
-    expect(record?.rule?.name).toEqual(contextWithName.ruleName);
-
-    // these fields should not be set by this function
-    expect(record['@timestamp']).toBeUndefined();
-    expect(record.event?.provider).toBeUndefined();
-    expect(record.event?.start).toBeUndefined();
-    expect(record.event?.outcome).toBeUndefined();
-    expect(record.event?.end).toBeUndefined();
-    expect(record.event?.duration).toBeUndefined();
-    expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
-    expect(record.kibana?.server_uuid).toBeUndefined();
-    expect(record.kibana?.task).toBeUndefined();
-    expect(record.kibana?.version).toBeUndefined();
-    expect(record?.ecs).toBeUndefined();
-  });
-});
-
-describe('updateEvent', () => {
-  let event: IEvent;
-  let expectedEvent: IEvent;
+describe('helper functions', () => {
+  let ruleData: RuleContext;
+  let ruleDataWithName: RuleContext;
+  let ruleContext: ContextOpts;
+  let backfillContext: ContextOpts;
+  let ruleContextWithScheduleDelay: Context;
+  let backfillContextWithScheduleDelay: Context;
+  let alertSO: SavedObjects;
+  let adHocRunSO: SavedObjects;
   beforeEach(() => {
-    event = initializeExecuteRecord(contextWithScheduleDelay);
-    expectedEvent = initializeExecuteRecord(contextWithScheduleDelay);
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+    ruleContext = {
+      savedObjectId: '123',
+      savedObjectType: RULE_SAVED_OBJECT_TYPE,
+      spaceId: 'test-space',
+      executionId: 'abcd-efgh-ijklmnop',
+      taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+    };
+
+    backfillContext = {
+      savedObjectId: 'def',
+      savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      spaceId: 'test-space',
+      executionId: 'wxyz-efgh-ijklmnop',
+      taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+    };
+
+    ruleContextWithScheduleDelay = { ...ruleContext, taskScheduleDelay: 7200000 };
+    backfillContextWithScheduleDelay = { ...backfillContext, taskScheduleDelay: 7200000 };
+
+    ruleData = {
+      id: '123',
+      type: ruleType,
+      consumer: 'test-consumer',
+      revision: 0,
+    };
+    ruleDataWithName = { ...ruleData, name: 'my-super-cool-rule' };
+    alertSO = { id: '123', relation: 'primary', type: 'alert', typeId: 'test' };
+    adHocRunSO = { id: 'def', relation: 'primary', type: 'ad_hoc_run_params' };
   });
 
-  test('throws error if event is null', () => {
-    expect(() => updateEvent(null as unknown as IEvent, {})).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot update event because it is not initialized."`
-    );
-  });
+  describe('initializeExecuteRecord', () => {
+    test('should populate initial set of fields in event log record', () => {
+      const record = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
 
-  test('throws error if event is undefined', () => {
-    expect(() =>
-      updateEvent(undefined as unknown as IEvent, {})
-    ).toThrowErrorMatchingInlineSnapshot(`"Cannot update event because it is not initialized."`);
-  });
+      expect(record.event).toBeDefined();
+      expect(record.kibana).toBeDefined();
+      expect(record.kibana?.alert).toBeDefined();
+      expect(record.kibana?.alert?.rule).toBeDefined();
+      expect(record.kibana?.alert?.rule?.execution).toBeDefined();
+      expect(record.kibana?.saved_objects).toBeDefined();
+      expect(record.kibana?.space_ids).toBeDefined();
+      expect(record.kibana?.task).toBeDefined();
+      expect(record.rule).toBeDefined();
 
-  test('updates event message if provided', () => {
-    updateEvent(event, { message: 'tell me something good' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      message: 'tell me something good',
-    });
-  });
-
-  test('updates event outcome if provided', () => {
-    updateEvent(event, { outcome: 'yay' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      event: {
-        ...expectedEvent?.event,
-        outcome: 'yay',
-      },
-    });
-  });
-
-  test('updates event error if provided', () => {
-    updateEvent(event, { error: 'oh no' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      error: {
-        message: 'oh no',
-      },
-    });
-  });
-
-  test('updates event rule name if provided', () => {
-    updateEvent(event, { ruleName: 'test rule' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      rule: {
-        ...expectedEvent?.rule,
-        name: 'test rule',
-      },
-    });
-  });
-
-  test('updates event status if provided', () => {
-    updateEvent(event, { status: 'ok' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      kibana: {
-        ...expectedEvent?.kibana,
-        alerting: {
-          status: 'ok',
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('execute');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.event?.category).toEqual([ruleData.type?.producer]);
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleData.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleData.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: alertSO.id,
+          type: alertSO.type,
+          type_id: alertSO.typeId,
+          rel: SAVED_OBJECT_REL_PRIMARY,
         },
-      },
-    });
-  });
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record.kibana?.task?.scheduled).toEqual(
+        ruleContextWithScheduleDelay.taskScheduledAt.toISOString()
+      );
+      expect(record.kibana?.task?.schedule_delay).toEqual(
+        ruleContextWithScheduleDelay.taskScheduleDelay * 1000000
+      );
+      expect(record?.rule?.id).toEqual(ruleData.id);
+      expect(record?.rule?.license).toEqual(ruleData.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleData.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleData.type?.producer);
 
-  test('updates event reason if provided', () => {
-    updateEvent(event, { reason: 'my-reason' });
-    expect(event).toEqual({
-      ...expectedEvent,
-      event: {
-        ...expectedEvent?.event,
-        reason: 'my-reason',
-      },
+      // these fields should not be set by this function
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.start).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.event?.end).toBeUndefined();
+      expect(record.event?.duration).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.alerting).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.rule?.name).toBeUndefined();
+      expect(record?.message).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
     });
-  });
 
-  test('updates all fields if provided', () => {
-    updateEvent(event, {
-      message: 'tell me something good',
-      outcome: 'yay',
-      error: 'oh no',
-      ruleName: 'test rule',
-      status: 'ok',
-      reason: 'my-reason',
-    });
-    expect(event).toEqual({
-      ...expectedEvent,
-      message: 'tell me something good',
-      kibana: {
-        ...expectedEvent?.kibana,
-        alerting: {
-          status: 'ok',
+    test('should populate initial set of fields in event log record when execution type is BACKFILL', () => {
+      const record = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [
+        adHocRunSO,
+      ]);
+
+      expect(record.event).toBeDefined();
+      expect(record.kibana).toBeDefined();
+      expect(record.kibana?.alert).toBeDefined();
+      expect(record.kibana?.alert?.rule).toBeDefined();
+      expect(record.kibana?.alert?.rule?.execution).toBeDefined();
+      expect(record.kibana?.saved_objects).toBeDefined();
+      expect(record.kibana?.space_ids).toBeDefined();
+      expect(record.kibana?.task).toBeDefined();
+      expect(record.rule).toBeDefined();
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('execute-backfill');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        backfillContextWithScheduleDelay.executionId
+      );
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: adHocRunSO.id,
+          type: adHocRunSO.type,
+          rel: SAVED_OBJECT_REL_PRIMARY,
         },
-      },
-      event: {
-        ...expectedEvent?.event,
+      ]);
+      expect(record.kibana?.space_ids).toEqual([backfillContextWithScheduleDelay.spaceId]);
+      expect(record.kibana?.task?.scheduled).toEqual(
+        backfillContextWithScheduleDelay.taskScheduledAt.toISOString()
+      );
+      expect(record.kibana?.task?.schedule_delay).toEqual(
+        backfillContextWithScheduleDelay.taskScheduleDelay * 1000000
+      );
+
+      // these fields should not be set by this function
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.start).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.event?.end).toBeUndefined();
+      expect(record.event?.duration).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.alerting).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.rule?.name).toBeUndefined();
+      expect(record?.message).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.rule_type_id).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.consumer).toBeUndefined();
+      expect(record?.rule?.id).toBeUndefined();
+      expect(record?.rule?.license).toBeUndefined();
+      expect(record?.rule?.category).toBeUndefined();
+      expect(record?.rule?.ruleset).toBeUndefined();
+    });
+  });
+
+  describe('createExecuteTimeoutRecord', () => {
+    test('should populate expected fields in event log record', () => {
+      const record = createExecuteTimeoutRecord(
+        ruleContextWithScheduleDelay,
+        [alertSO],
+        executionType.STANDARD,
+        ruleDataWithName
+      );
+
+      expect(record.event).toBeDefined();
+      expect(record.kibana).toBeDefined();
+      expect(record.kibana?.alert).toBeDefined();
+      expect(record.kibana?.alert?.rule).toBeDefined();
+      expect(record.kibana?.alert?.rule?.execution).toBeDefined();
+      expect(record.kibana?.saved_objects).toBeDefined();
+      expect(record.kibana?.space_ids).toBeDefined();
+      expect(record.rule).toBeDefined();
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('execute-timeout');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.message).toEqual(
+        `rule: test:123: 'my-super-cool-rule' execution cancelled due to timeout - exceeded rule type timeout of 1m`
+      );
+      expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: alertSO.id,
+          type: alertSO.type,
+          type_id: alertSO.typeId,
+          rel: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record?.rule?.id).toEqual(ruleDataWithName.id);
+      expect(record?.rule?.license).toEqual(ruleDataWithName.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleDataWithName.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleDataWithName.type?.producer);
+      expect(record?.rule?.name).toEqual(ruleDataWithName.name);
+
+      // these fields should not be set by this function
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.start).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.event?.end).toBeUndefined();
+      expect(record.event?.duration).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.alerting).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.task).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
+    });
+  });
+
+  describe('createAlertRecord', () => {
+    test('should populate expected fields in event log record', () => {
+      const record = createAlertRecord(
+        ruleContextWithScheduleDelay,
+        ruleDataWithName,
+        [alertSO],
+        alert
+      );
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('active-instance');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
+      expect(record.event?.start).toEqual(alert.state.start);
+      expect(record.event?.end).toEqual(alert.state.end);
+      expect(record.event?.duration).toEqual(alert.state.duration);
+      expect(record.message).toEqual(
+        `.test-rule-type:123: 'my rule' active alert: 'aaabbb' in actionGroup: 'aGroup';`
+      );
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+      expect(record.kibana?.alert?.maintenance_window_ids).toEqual(alert.maintenanceWindowIds);
+      expect(record.kibana?.alerting?.instance_id).toEqual(alert.id);
+      expect(record.kibana?.alerting?.action_group_id).toEqual(alert.group);
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: ruleContextWithScheduleDelay.savedObjectId,
+          type: ruleContextWithScheduleDelay.savedObjectType,
+          type_id: ruleDataWithName.type?.id,
+          rel: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record?.rule?.id).toEqual(ruleDataWithName.id);
+      expect(record?.rule?.license).toEqual(ruleDataWithName.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleDataWithName.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleDataWithName.type?.producer);
+      expect(record?.rule?.name).toEqual(ruleDataWithName.name);
+
+      // these fields should not be set by this function
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.alert?.uuid).toBe(alert.uuid);
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.task).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
+    });
+  });
+
+  describe('createActionExecuteRecord', () => {
+    test('should populate expected fields in event log record', () => {
+      const record = createActionExecuteRecord(
+        ruleContextWithScheduleDelay,
+        ruleDataWithName,
+        [alertSO],
+        action
+      );
+
+      expect(record.event).toBeDefined();
+      expect(record.kibana).toBeDefined();
+      expect(record.kibana?.alert).toBeDefined();
+      expect(record.kibana?.alert?.rule).toBeDefined();
+      expect(record.kibana?.alert?.rule?.execution).toBeDefined();
+      expect(record.kibana?.saved_objects).toBeDefined();
+      expect(record.kibana?.space_ids).toBeDefined();
+      expect(record.rule).toBeDefined();
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('execute-action');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
+      expect(record.message).toEqual(
+        `alert: test:123: 'my-super-cool-rule' instanceId: '123' scheduled actionGroup: 'aGroup' action: .email:abc`
+      );
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+      expect(record.kibana?.alerting?.instance_id).toEqual(action.alertId);
+      expect(record.kibana?.alerting?.action_group_id).toEqual(action.alertGroup);
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: ruleContextWithScheduleDelay.savedObjectId,
+          type: ruleContextWithScheduleDelay.savedObjectType,
+          type_id: ruleDataWithName.type?.id,
+          rel: SAVED_OBJECT_REL_PRIMARY,
+        },
+        {
+          id: action.id,
+          type: 'action',
+          type_id: action.typeId,
+        },
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record?.rule?.id).toEqual(ruleDataWithName.id);
+      expect(record?.rule?.license).toEqual(ruleDataWithName.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleDataWithName.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleDataWithName.type?.producer);
+      expect(record?.rule?.name).toEqual(ruleDataWithName.name);
+
+      // these fields should not be set by this function
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.start).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.event?.end).toBeUndefined();
+      expect(record.event?.duration).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.task).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
+    });
+  });
+
+  describe('updateEvent', () => {
+    let event: IEvent;
+    let expectedEvent: IEvent;
+    beforeEach(() => {
+      event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      expectedEvent = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+    });
+
+    test('throws error if event is null', () => {
+      expect(() => updateEvent(null as unknown as IEvent, {})).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update event because it is not initialized."`
+      );
+    });
+
+    test('throws error if event is undefined', () => {
+      expect(() =>
+        updateEvent(undefined as unknown as IEvent, {})
+      ).toThrowErrorMatchingInlineSnapshot(`"Cannot update event because it is not initialized."`);
+    });
+
+    test('updates event message if provided', () => {
+      updateEvent(event, { message: 'tell me something good' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        message: 'tell me something good',
+      });
+    });
+
+    test('updates event outcome if provided', () => {
+      updateEvent(event, { outcome: 'yay' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        event: {
+          ...expectedEvent?.event,
+          outcome: 'yay',
+        },
+      });
+    });
+
+    test('updates event error if provided', () => {
+      updateEvent(event, { error: 'oh no' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        error: {
+          message: 'oh no',
+        },
+      });
+    });
+
+    test('updates event status if provided', () => {
+      updateEvent(event, { status: 'ok' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        kibana: {
+          ...expectedEvent?.kibana,
+          alerting: {
+            status: 'ok',
+          },
+        },
+      });
+    });
+
+    test('updates event reason if provided', () => {
+      updateEvent(event, { reason: 'my-reason' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        event: {
+          ...expectedEvent?.event,
+          reason: 'my-reason',
+        },
+      });
+    });
+
+    test('updates all fields if provided', () => {
+      updateEvent(event, {
+        message: 'tell me something good',
         outcome: 'yay',
+        error: 'oh no',
+        status: 'ok',
         reason: 'my-reason',
-      },
-      error: {
-        message: 'oh no',
-      },
-      rule: {
-        ...expectedEvent?.rule,
-        name: 'test rule',
-      },
+      });
+      expect(event).toEqual({
+        ...expectedEvent,
+        message: 'tell me something good',
+        kibana: {
+          ...expectedEvent?.kibana,
+          alerting: {
+            status: 'ok',
+          },
+        },
+        event: {
+          ...expectedEvent?.event,
+          outcome: 'yay',
+          reason: 'my-reason',
+        },
+        error: {
+          message: 'oh no',
+        },
+      });
+    });
+  });
+
+  describe('updateEventWithRuleData', () => {
+    let event: IEvent;
+    let expectedEvent: IEvent;
+    beforeEach(() => {
+      event = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+      expectedEvent = initializeExecuteRecord(ruleContextWithScheduleDelay, ruleData, [alertSO]);
+    });
+
+    test('throws error if event is null', () => {
+      expect(() =>
+        updateEventWithRuleData(null as unknown as IEvent, {})
+      ).toThrowErrorMatchingInlineSnapshot(`"Cannot update event because it is not initialized."`);
+    });
+
+    test('throws error if event is undefined', () => {
+      expect(() =>
+        updateEventWithRuleData(undefined as unknown as IEvent, {})
+      ).toThrowErrorMatchingInlineSnapshot(`"Cannot update event because it is not initialized."`);
+    });
+
+    test('updates event rule name if provided', () => {
+      updateEventWithRuleData(event, { ruleName: 'test rule' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        rule: {
+          ...expectedEvent?.rule,
+          name: 'test rule',
+        },
+      });
+    });
+
+    test('updates event rule id if provided', () => {
+      updateEventWithRuleData(event, { ruleId: 'abcdefghijklmnop' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        rule: {
+          ...expectedEvent?.rule,
+          id: 'abcdefghijklmnop',
+        },
+      });
+    });
+
+    test('updates event rule consumer if provided', () => {
+      updateEventWithRuleData(event, { consumer: 'not-the-original-consumer' });
+      expect(event).toEqual({
+        ...expectedEvent,
+        kibana: {
+          ...expectedEvent?.kibana,
+          alert: {
+            ...expectedEvent?.kibana?.alert,
+            rule: {
+              ...expectedEvent?.kibana?.alert?.rule,
+              consumer: 'not-the-original-consumer',
+            },
+          },
+        },
+      });
+    });
+
+    test('updates event rule ruleTypeId if provided', () => {
+      updateEventWithRuleData(event, {
+        ruleType: { ...ruleType, id: 'not-the-original-rule-type-id' },
+      });
+      expect(event).toEqual({
+        ...expectedEvent,
+        kibana: {
+          ...expectedEvent?.kibana,
+          alert: {
+            ...expectedEvent?.kibana?.alert,
+            rule: {
+              ...expectedEvent?.kibana?.alert?.rule,
+              rule_type_id: 'not-the-original-rule-type-id',
+            },
+          },
+        },
+        rule: {
+          ...expectedEvent?.rule,
+          category: 'not-the-original-rule-type-id',
+        },
+      });
+    });
+
+    test('updates event rule revision if provided', () => {
+      updateEventWithRuleData(event, { revision: 500 });
+      expect(event).toEqual({
+        ...expectedEvent,
+        kibana: {
+          ...expectedEvent?.kibana,
+          alert: {
+            ...expectedEvent?.kibana?.alert,
+            rule: {
+              ...expectedEvent?.kibana?.alert?.rule,
+              revision: 500,
+            },
+          },
+        },
+      });
+    });
+
+    test('updates event rule saved object if provided', () => {
+      updateEventWithRuleData(event, {
+        savedObjects: [
+          { id: 'xyz', relation: 'primary', type: 'alert', typeId: 'test1' },
+          { id: '111', type: 'action', namespace: 'custom' },
+          { id: 'mmm', type: 'ad_hoc_rule_run_params' },
+        ],
+      });
+      expect(event).toEqual({
+        ...expectedEvent,
+        kibana: {
+          ...expectedEvent?.kibana,
+          saved_objects: [
+            { id: 'xyz', rel: 'primary', type: 'alert', type_id: 'test1' },
+            { id: '111', type: 'action', namespace: 'custom' },
+            { id: 'mmm', type: 'ad_hoc_rule_run_params' },
+          ],
+        },
+      });
+    });
+
+    test('updates all fields if provided', () => {
+      updateEventWithRuleData(event, {
+        ruleName: 'test rule',
+        ruleId: 'abcdefghijklmnop',
+        consumer: 'not-the-original-consumer',
+        ruleType: { ...ruleType, id: 'not-the-original-rule-type-id' },
+        revision: 500,
+        savedObjects: [
+          { id: 'xyz', relation: 'primary', type: 'alert', typeId: 'test1' },
+          { id: '111', type: 'action', namespace: 'custom' },
+          { id: 'mmm', type: 'ad_hoc_rule_run_params' },
+        ],
+      });
+      expect(event).toEqual({
+        ...expectedEvent,
+        rule: {
+          ...expectedEvent?.rule,
+          name: 'test rule',
+          id: 'abcdefghijklmnop',
+          category: 'not-the-original-rule-type-id',
+        },
+        kibana: {
+          ...expectedEvent?.kibana,
+          alert: {
+            ...expectedEvent?.kibana?.alert,
+            rule: {
+              ...expectedEvent?.kibana?.alert?.rule,
+              consumer: 'not-the-original-consumer',
+              revision: 500,
+              rule_type_id: 'not-the-original-rule-type-id',
+            },
+          },
+          saved_objects: [
+            { id: 'xyz', rel: 'primary', type: 'alert', type_id: 'test1' },
+            { id: '111', type: 'action', namespace: 'custom' },
+            { id: 'mmm', type: 'ad_hoc_rule_run_params' },
+          ],
+        },
+      });
     });
   });
 });

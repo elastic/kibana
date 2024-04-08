@@ -7,7 +7,12 @@
 
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { RawAlertInstance } from '@kbn/alerting-state-types';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
@@ -16,6 +21,7 @@ import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
   legacyRawAlert: RawAlertInstance;
+  runTimestamp?: string;
   timestamp: string;
   rule: AlertRule;
 }
@@ -29,6 +35,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   alert,
   legacyRawAlert,
   rule,
+  runTimestamp,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
   // Make sure that any alert fields that are updateable are flattened.
@@ -39,6 +46,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Set latest flapping state
     [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
     // Set latest flapping history

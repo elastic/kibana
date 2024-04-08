@@ -82,6 +82,9 @@ const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 // kibana.alert.rule.consumer - consumer for rule that generated this alert
 const ALERT_RULE_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
 
+// kibana.alert.rule.execution.timestamp - timestamp of the rule execution that generated this alert
+const ALERT_RULE_EXECUTION_TIMESTAMP = `${ALERT_RULE_NAMESPACE}.execution.timestamp` as const;
+
 // kibana.alert.rule.execution.uuid - unique ID for the rule execution that generated this alert
 const ALERT_RULE_EXECUTION_UUID = `${ALERT_RULE_NAMESPACE}.execution.uuid` as const;
 
@@ -129,6 +132,7 @@ const fields = {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -170,6 +174,7 @@ export {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
