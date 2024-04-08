@@ -33,4 +33,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
+  setup: '',
 };
