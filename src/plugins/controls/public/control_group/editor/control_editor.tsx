@@ -63,6 +63,7 @@ import { getDataControlFieldRegistry } from './data_control_editor_tools';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 
 export interface EditControlProps {
+  dataViewId?: string;
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
   width: ControlWidth;
@@ -78,6 +79,7 @@ const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 export const ControlEditor = ({
+  dataViewId,
   embeddable,
   isCreate,
   width,
@@ -129,7 +131,10 @@ export const ControlEditor = ({
       if (!mounted) return;
 
       const initialId =
-        embeddable?.getInput().dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
+        dataViewId ??
+        embeddable?.getInput().dataViewId ??
+        getRelevantDataViewId?.() ??
+        (await getDefaultId());
       if (initialId) {
         setSelectedDataViewId(initialId);
         startingInput.current = { ...startingInput.current, dataViewId: initialId };
@@ -274,11 +279,11 @@ export const ControlEditor = ({
                 <DataViewPicker
                   dataViews={dataViewListItems}
                   selectedDataViewId={selectedDataViewId}
-                  onChangeDataViewId={(dataViewId) => {
-                    setLastUsedDataViewId?.(dataViewId);
-                    if (dataViewId === selectedDataViewId) return;
+                  onChangeDataViewId={(newDataViewId) => {
+                    setLastUsedDataViewId?.(newDataViewId);
+                    if (newDataViewId === selectedDataViewId) return;
                     setSelectedField(undefined);
-                    setSelectedDataViewId(dataViewId);
+                    setSelectedDataViewId(newDataViewId);
                   }}
                   trigger={{
                     label:
