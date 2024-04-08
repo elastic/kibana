@@ -126,6 +126,12 @@ export const downloadCsvShareProvider = ({
     return atLeastGold
       ? [
           {
+            shareMenuItem: {
+              name: panelTitle,
+              icon: 'document',
+              disabled: !csvEnabled,
+              sortOrder: 1,
+            },
             downloadCSVLens: async () => {
               await downloadCSVs({
                 title,
