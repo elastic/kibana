@@ -116,13 +116,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const { responses: visualizationResponse } = useVisualizationResponse({ visualizationId });
+  const { responses: visualizationResponses } = useVisualizationResponse({ visualizationId });
   const visualizationTotalCount: number | null = useMemo(() => {
-    if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse)) {
+    if (!visualizationResponses || !visualizationResponseHasData(visualizationResponses)) {
       return 0;
     }
-    return visualizationResponse[0].hits.total;
-  }, [visualizationResponse]);
+    return visualizationResponses[0].hits.total;
+  }, [visualizationResponses]);
 
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
@@ -142,10 +142,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   );
 
   useEffect(() => {
-    if (isInitialLoading && !!visualizationResponse) {
+    if (isInitialLoading && !!visualizationResponses) {
       setIsInitialLoading(false);
     }
-  }, [id, isInitialLoading, visualizationResponse, setIsInitialLoading, setQuery]);
+  }, [id, isInitialLoading, visualizationResponses, setIsInitialLoading, setQuery]);
 
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   const extraVisualizationOptions = useMemo(
