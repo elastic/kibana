@@ -19,7 +19,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
       defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously',
     }),
-    learnMoreLink: 'https://docs.elastic.co/...',
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
     api_field: {
       name: 'agent_limits_go_max_procs',
     },
@@ -36,7 +37,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'Timeout in seconds for downloading the agent binary',
       }
     ),
-    learnMoreLink: 'https://docs.elastic.co/...',
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
     api_field: {
       name: 'agent_download_timeout',
     },
@@ -59,7 +61,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'The disk path to which the agent binary will be downloaded',
       }
     ),
-    learnMoreLink: 'https://docs.elastic.co/...',
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
     schema: z.string(),
   },
   {
@@ -79,7 +82,8 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         defaultMessage: 'The frequency of agent metrics logging',
       }
     ),
-    learnMoreLink: 'https://docs.elastic.co/...',
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-reference-yaml.html',
     schema: z.string().default('30s'),
   },
 ];
