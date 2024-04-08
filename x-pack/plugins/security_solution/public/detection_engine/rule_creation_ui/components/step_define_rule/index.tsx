@@ -1117,7 +1117,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </IntendedRuleTypeEuiFormRow>
           </>
 
-          <RelatedIntegrations path="relatedIntegrations" />
+          <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
 
           <UseField
             path="timeline"
