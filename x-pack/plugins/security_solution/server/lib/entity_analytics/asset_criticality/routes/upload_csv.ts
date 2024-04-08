@@ -13,10 +13,15 @@ import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/ap
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../types';
-import { ASSET_CRITICALITY_CSV_UPLOAD_URL, APP_ID } from '../../../../../common/constants';
+import {
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const assetCriticalityCSVUploadRoute = (
   router: SecuritySolutionPluginRouter,
@@ -54,6 +59,7 @@ export const assetCriticalityCSVUploadRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
           const [coreStart] = await getStartServices();
           const telemetry = coreStart.analytics;
