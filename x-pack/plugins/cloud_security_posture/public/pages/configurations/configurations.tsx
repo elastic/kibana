@@ -10,7 +10,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
@@ -29,7 +28,7 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
+  // if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!,
