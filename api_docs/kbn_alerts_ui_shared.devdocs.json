@@ -446,73 +446,6 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-common.fetchRuleTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "fetchRuleTypes",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
-          },
-          "; }) => Promise<",
-          {
-            "pluginId": "@kbn/triggers-actions-ui-types",
-            "scope": "common",
-            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
-            "section": "def-common.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]>"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/apis/fetch_rule_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.fetchRuleTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/apis/fetch_rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/alerts-ui-shared",
-                "id": "def-common.fetchRuleTypes.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
-                    "text": "HttpSetup"
-                  }
-                ],
-                "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/apis/fetch_rule_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.MaintenanceWindowCallout",
         "type": "Function",
         "tags": [],
@@ -567,6 +500,43 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.RuleTypeModalComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleTypeModalComponent",
+        "description": [],
+        "signature": [
+          "({ http, toasts, filteredRuleTypes, registeredRuleTypes, ...rest }: React.PropsWithChildren<",
+          "RuleTypeModalComponentProps",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/rule_type_modal/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.RuleTypeModalComponent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  http,\n  toasts,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "RuleTypeModalComponentProps",
+              ">"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/rule_type_modal/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -653,53 +623,6 @@
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_alert_data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-common.useLoadRuleTypesQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "useLoadRuleTypesQuery",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.UseLoadRuleTypesQueryProps",
-            "text": "UseLoadRuleTypesQueryProps"
-          },
-          ") => { ruleTypesState: { initialLoad: boolean; isLoading: boolean; data: Map<any, any>; }; hasAnyAuthorizedRuleType: boolean; authorizedRuleTypes: any[]; authorizedToReadAnyRules: boolean; authorizedToCreateAnyRules: boolean; isSuccess: boolean; }"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.useLoadRuleTypesQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.UseLoadRuleTypesQueryProps",
-                "text": "UseLoadRuleTypesQueryProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2047,88 +1970,6 @@
             "label": "loading",
             "description": [],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_alert_data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-common.UseLoadRuleTypesQueryProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseLoadRuleTypesQueryProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.UseLoadRuleTypesQueryProps.filteredRuleTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "filteredRuleTypes",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.UseLoadRuleTypesQueryProps.enabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.UseLoadRuleTypesQueryProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-common.UseLoadRuleTypesQueryProps.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
-                "text": "IToasts"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_load_rule_types_query.ts",
             "deprecated": false,
             "trackAdoption": false
           }

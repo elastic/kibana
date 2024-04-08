@@ -20,6 +20,7 @@ import { useRightPanelContext } from '../context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
+import { EventRenderer } from './event_renderer';
 
 const KEY = 'about';
 
@@ -53,6 +54,7 @@ export const AboutSection: FC = memo(() => {
             // if event kind is not event, show a higher level description on event kind
             <EventKindDescription eventKind={eventKind} />
           ))}
+        <EventRenderer />
       </>
     );
 

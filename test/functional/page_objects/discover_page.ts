@@ -483,21 +483,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async clickCreateNewDataView() {
-    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('dataview-create-new');
-    });
-    await this.testSubjects.click('dataview-create-new');
-    await this.retry.waitForWithTimeout(
-      'index pattern editor form to be visible',
-      15000,
-      async () => {
-        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
-      }
-    );
-    await (await this.find.byClassName('indexPatternEditor__form')).click();
-  }
-
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
