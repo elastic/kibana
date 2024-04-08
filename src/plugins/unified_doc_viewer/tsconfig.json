@@ -26,7 +26,8 @@
     "@kbn/field-utils",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/custom-icons"
+    "@kbn/custom-icons",
+    "@kbn/react-field"
   ],
   "exclude": [
     "target/**/*",
