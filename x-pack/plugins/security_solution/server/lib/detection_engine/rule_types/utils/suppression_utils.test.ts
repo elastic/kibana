@@ -117,6 +117,9 @@ describe('getSuppressionTerms', () => {
         },
         fields: { 'host.name': ['localhost-1'], 'agent.name': 'test', 'host.ip': '127.0.0.1' },
       })
-    ).toEqual([{ field: 'host.name', value: ['localhost-1'] }, { 'host.ip': '127.0.0.1' }]);
+    ).toEqual([
+      { field: 'host.name', value: ['localhost-1'] },
+      { field: 'host.ip', value: '127.0.0.1' },
+    ]);
   });
 });
