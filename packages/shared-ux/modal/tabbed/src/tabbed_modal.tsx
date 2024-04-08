@@ -134,11 +134,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
         <EuiModalFooter>
           <EuiToolTip content={afterMessage} onMouseOut={() => setIsTextVisible(false)}>
             <EuiButton
-              isDisabled={
-                modalActionBtn.style ? modalActionBtn.style({ state: selectedTabState }) : false
-              }
               fill
               data-test-subj={modalActionBtn.dataTestSubj}
+              color={selectedTabState.isNotSaved ? 'warning' : 'primary'}
               data-share-url={state.url}
               onClick={() => {
                 // @ts-ignore state will not be null because of the modalActionBtn check

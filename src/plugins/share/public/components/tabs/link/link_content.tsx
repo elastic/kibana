@@ -160,7 +160,7 @@ export const LinkContent = ({
 
     if (objectType === 'dashboard' || objectType === 'search') {
       tempUrl = getSnapshotUrl();
-    } else {
+    } else if ('lens') {
       tempUrl = getSavedObjectUrl();
     }
     return url === '' || objectType === 'lens' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
@@ -169,9 +169,8 @@ export const LinkContent = ({
   useEffect(() => {
     isMounted();
     setUrlHelper();
-    setDashboardLink(url);
     setIsNotSaved();
-  }, [url, setIsNotSaved, isDirty, isMounted, setUrlHelper, setDashboardLink]);
+  }, [objectType, url, setIsNotSaved, isDirty, isMounted, setUrlHelper]);
 
   const renderSaveState =
     objectType === 'lens' && isNotSaved() ? (
@@ -180,6 +179,8 @@ export const LinkContent = ({
         defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
         values={{ objectType }}
       />
+    ) : objectType === 'lens' || objectType === 'dashboard' ? (
+      shortUrlCache
     ) : (
       shareableUrl ?? shortUrlCache ?? ''
     );

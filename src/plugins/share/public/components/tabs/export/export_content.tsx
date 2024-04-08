@@ -24,7 +24,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ShareMenuItem } from '../../../types';
 import { type IShareContext } from '../../context';
@@ -173,10 +172,15 @@ const ExportContentUi = ({
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
                 >
-                  <FormattedMessage
-                    id="share.modalContent.copyUrlButtonLabel"
-                    defaultMessage="Post URL"
-                  />
+                  <EuiToolTip
+                    id="share.savePostURLMessage"
+                    content="Unsaved changes. This URL will not reflect later saved changes unless you save."
+                  >
+                    <FormattedMessage
+                      id="share.modalContent.copyUrlButtonLabel"
+                      defaultMessage="Post URL"
+                    />
+                  </EuiToolTip>
                 </EuiButtonEmpty>
               )}
             </EuiCopy>
@@ -217,24 +221,10 @@ const ExportContentUi = ({
   ]);
 
   const renderGenerateReportButton = useCallback(() => {
-    return isDirty ? (
-      <EuiToolTip
-        content={i18n.translate('share.panelContent.unsavedStateErrorTitle', {
-          defaultMessage: 'Unsaved work',
-        })}
-      >
-        <EuiButton
-          fill={!isDirty}
-          data-test-subj="generateReportButton"
-          isLoading={Boolean(isCreatingReport)}
-        >
-          {generateReportButton}
-        </EuiButton>
-      </EuiToolTip>
-    ) : (
+    return (
       <EuiButton
-        // allows read only users the ability to generate reports
-        fill={!isDirty}
+        fill
+        color={isDirty ? 'warning' : 'primary'}
         onClick={() => {
           setIsCreatingReport(true);
           getReport();
