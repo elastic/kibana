@@ -6,60 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import React from 'react';
 import { RuleFormPage } from './rule_form_page';
-import { useStore } from '../store';
 import type { RuleFormPageProps } from './rule_form_page';
+import { ContextsProvider } from '../contexts';
 import {
-  ConfigProvider,
-  ValidationProvider,
-  KibanaServicesProvider,
+  RuleFormAppContext,
+  RuleFormConfig,
   RuleFormKibanaServices,
-  DEFAULT_CONFIG,
-} from '../contexts';
-import { useAuthorizedConsumers } from '../hooks';
-import { RuleFormAppContext, RuleFormConfig } from '../types';
+  RuleTypeModelFromRegistry,
+} from '../types';
 
 interface RuleFormPageComponentProps extends RuleFormPageProps, RuleFormKibanaServices {
   config?: RuleFormConfig;
   appContext: RuleFormAppContext;
+  registeredRuleTypeModel: RuleTypeModelFromRegistry;
 }
 
 export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
-  ruleTypeModel,
   http,
   toasts,
-  config = DEFAULT_CONFIG,
+  config,
   appContext: { consumer, validConsumers, canShowConsumerSelection },
+  registeredRuleTypeModel,
   ...rest
 }) => {
-  const initialState = useMemo(
-    () => ({
-      ruleDetails: { name: `${ruleTypeModel.name} rule`, tags: [] },
-      ruleDefinition: { consumer },
-    }),
-    [ruleTypeModel.name, consumer]
-  );
-
-  const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);
-
-  const store = useStore(initialState, authorizedConsumers);
-
   return (
-    <ReduxProvider store={store}>
-      <KibanaServicesProvider value={{ http, toasts }}>
-        <ConfigProvider value={config}>
-          <ValidationProvider ruleTypeModel={ruleTypeModel}>
-            <RuleFormPage
-              ruleTypeModel={ruleTypeModel}
-              canShowConsumerSelection={canShowConsumerSelection}
-              authorizedConsumers={authorizedConsumers}
-              {...rest}
-            />
-          </ValidationProvider>
-        </ConfigProvider>
-      </KibanaServicesProvider>
-    </ReduxProvider>
+    <ContextsProvider
+      registeredRuleTypeModel={registeredRuleTypeModel}
+      appContext={{ consumer, validConsumers }}
+      http={http}
+      toasts={toasts}
+    >
+      <RuleFormPage
+        canShowConsumerSelection={canShowConsumerSelection}
+        validConsumers={validConsumers}
+        {...rest}
+      />
+    </ContextsProvider>
   );
 };

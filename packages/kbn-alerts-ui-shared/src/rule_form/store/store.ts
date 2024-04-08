@@ -13,7 +13,7 @@ import {
   ruleDetailsReducer,
   ruleDefinitionReducer,
   initializeAndValidateConsumer,
-} from './features';
+} from '../features';
 import { metaReducer } from './metaSlice';
 
 const rootReducer = combineReducers({

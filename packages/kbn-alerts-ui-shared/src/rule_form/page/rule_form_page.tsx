@@ -16,19 +16,18 @@ import { useRuleFormSelector, useRuleFormDispatch } from '../hooks';
 import { setRuleName } from '../features/rule_details/slice';
 import { RuleFormPageHeader } from './header';
 import { RuleDetails, RuleDefinition, SaveRuleButton } from '../features';
-import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../types';
-import { useValidation, RuleTypeProvider } from '../contexts';
+import { RuleTypeParamsExpressionPlugins } from '../types';
+import { useValidation } from '../contexts';
 import { ValidationStatus } from '../common/constants';
 
 export interface RuleFormPageProps {
-  ruleTypeModel: RuleTypeModel;
   expressionPlugins: RuleTypeParamsExpressionPlugins;
   onClickReturn: () => void;
   onSaveRule: (ruleId: string) => void;
   referrerHref?: string;
   docLinks: DocLinksStart;
   canShowConsumerSelection?: boolean;
-  authorizedConsumers?: RuleCreationValidConsumer[];
+  validConsumers?: RuleCreationValidConsumer[];
 }
 
 const validationStatusToStepStatus: (
@@ -46,11 +45,10 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   onClickReturn,
   onSaveRule,
   referrerHref,
-  ruleTypeModel,
   expressionPlugins,
   docLinks,
   canShowConsumerSelection,
-  authorizedConsumers,
+  validConsumers,
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
@@ -64,7 +62,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   );
 
   return (
-    <RuleTypeProvider value={ruleTypeModel}>
+    <>
       <RuleFormPageHeader
         ruleName={ruleName}
         onChangeName={(name) => dispatch(setRuleName(name))}
@@ -79,11 +77,10 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
               status: stepStatuses.ruleDefinition,
               children: (
                 <RuleDefinition
-                  ruleTypeModel={ruleTypeModel}
                   expressionPlugins={expressionPlugins}
                   docLinks={docLinks}
                   canShowConsumerSelection={canShowConsumerSelection}
-                  authorizedConsumers={authorizedConsumers}
+                  validConsumers={validConsumers}
                 />
               ),
             },
@@ -123,6 +120,6 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </RuleTypeProvider>
+    </>
   );
 };

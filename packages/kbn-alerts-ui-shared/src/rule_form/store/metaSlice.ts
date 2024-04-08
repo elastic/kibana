@@ -7,7 +7,7 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import { setParam } from './features/rule_definition';
+import { setParam } from '../features/rule_definition';
 
 const initialState: { haveRuleParamsChanged: boolean } = {
   haveRuleParamsChanged: false,

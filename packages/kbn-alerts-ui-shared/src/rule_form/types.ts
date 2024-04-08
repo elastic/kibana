@@ -7,10 +7,17 @@
  */
 
 import type { ComponentType } from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ValidationStatus } from './common/constants';
 import { RuleDefinitionValidation, RuleDetailsValidation } from './features';
+
+export interface RuleFormKibanaServices {
+  http: HttpStart;
+  toasts: ToastsStart;
+}
 
 type RuleTypeParams = Record<string, unknown>;
 
@@ -63,6 +70,8 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   defaultRecoveryMessage?: string;
   defaultSummaryMessage?: string;
 }
+
+export type RuleTypeModelFromRegistry = Omit<RuleTypeModel, 'name' | 'authorizedConsumers'>;
 
 export interface RuleFormConfig {
   isUsingSecurity: boolean;

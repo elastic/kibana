@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { createContext, useContext } from 'react';
-
-export interface RuleFormKibanaServices {
-  http: HttpStart;
-  toasts: ToastsStart;
-}
+import type { RuleFormKibanaServices } from '../types';
 
 const KibanaServicesContext = createContext<RuleFormKibanaServices>({
-  http: {} as HttpStart,
-  toasts: {} as ToastsStart,
-});
+  http: {},
+  toasts: {},
+} as RuleFormKibanaServices);
 
 export const KibanaServicesProvider = KibanaServicesContext.Provider;
 export const useKibanaServices = () => useContext(KibanaServicesContext);

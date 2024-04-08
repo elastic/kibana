@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { createContext, useContext } from 'react';
-import { RuleTypeModel } from '../types';
-
-const RuleTypeContext = createContext<RuleTypeModel>({} as RuleTypeModel);
-
-export const RuleTypeProvider = RuleTypeContext.Provider;
-export const useRuleType = () => useContext(RuleTypeContext);
+export * from './store';

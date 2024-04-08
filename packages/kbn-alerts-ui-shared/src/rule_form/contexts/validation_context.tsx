@@ -14,8 +14,9 @@ import {
   useValidateRuleDefinition,
   useValidateRuleDetails,
 } from '../features';
-import { RuleFormStateValidation, RuleTypeModel } from '../types';
+import { RuleFormStateValidation } from '../types';
 import { useConfig } from './config_context';
+import { useRuleType } from './rule_type_context';
 
 const ValidationContext = createContext<RuleFormStateValidation>({
   ruleDefinition: {
@@ -37,10 +38,9 @@ const ValidationContext = createContext<RuleFormStateValidation>({
   isOverallValid: false,
 });
 
-export const ValidationProvider: React.FC<{
-  ruleTypeModel: RuleTypeModel;
-}> = ({ ruleTypeModel, children }) => {
+export const ValidationProvider: React.FC = ({ children }) => {
   const config = useConfig();
+  const ruleTypeModel = useRuleType();
   const ruleDefinitionValidation: RuleDefinitionValidation = useValidateRuleDefinition({
     config,
     ruleTypeModel,

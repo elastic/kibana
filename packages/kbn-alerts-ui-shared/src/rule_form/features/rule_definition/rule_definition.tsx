@@ -31,20 +31,19 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { useValidation } from '../../contexts';
-import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
-import { RuleTypeModel, RuleTypeParamsExpressionPlugins } from '../../types';
+import { useRuleType, useValidation } from '../../contexts';
+import { useRuleFormSelector, useRuleFormDispatch, useAuthorizedConsumers } from '../../hooks';
+import { RuleTypeParamsExpressionPlugins } from '../../types';
 import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice';
 import { RuleScheduleField } from './rule_schedule_field';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleAlertDelayField } from './rule_alert_delay_field';
 
 interface RuleDefinitionProps {
-  ruleTypeModel: RuleTypeModel;
   expressionPlugins: RuleTypeParamsExpressionPlugins;
   docLinks: DocLinksStart;
   canShowConsumerSelection?: boolean;
-  authorizedConsumers?: RuleCreationValidConsumer[];
+  validConsumers?: RuleCreationValidConsumer[];
 }
 
 const MULTI_CONSUMER_RULE_TYPE_IDS = [
@@ -54,18 +53,19 @@ const MULTI_CONSUMER_RULE_TYPE_IDS = [
 ];
 
 export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
-  ruleTypeModel,
   expressionPlugins,
   docLinks,
   canShowConsumerSelection = false,
-  authorizedConsumers = [],
+  validConsumers = [],
 }) => {
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
   const ruleParamsErrors = useValidation().ruleDefinition.errors.params;
+  const ruleTypeModel = useRuleType();
   const dispatch = useRuleFormDispatch();
 
   const { euiTheme } = useEuiTheme();
+  const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);
 
   // TODO: Hide this in edit mode
   const shouldShowConsumerSelect = useMemo(() => {
