@@ -6,69 +6,62 @@
  */
 
 import {
-  EuiFormLabel,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
-  EuiSteps,
-  EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelect,
+  EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-import { CreateApiKeyForm } from './create_api_key_form';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { ChatForm } from '../../types';
+import { useKibana } from '../../hooks/use_kibana';
+import { MANAGEMENT_API_KEYS } from '../../../common/routes';
+import { LANGCHAIN_PYTHON } from './examples/py_langchain_python';
+import { PY_LANG_CLIENT } from './examples/py_lang_client';
 
 interface ViewCodeFlyoutProps {
   onClose: () => void;
 }
 
+export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
+  if (cloud) {
+    return `
+es_client = Elasticsearch(
+  ${cloud.elasticsearchUrl},
+  api_key=os.environ["ES_API_KEY"]
+)
+      `;
+  }
+
+  return `
+es_client = Elasticsearch(
+  "<your-elasticsearch-url>"
+)
+  `;
+};
+
 export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
-  const steps = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.searchPlayground.viewCode.flyout.step.apiKeyTitle', {
-          defaultMessage: 'Generate and copy an API key',
-        }),
-        children: (
-          <>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.searchPlayground.viewCode.flyout.step.apiKeyDescription"
-                  defaultMessage="You will only be able to see this API key once after creation."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer />
-            <CreateApiKeyForm />
-          </>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.searchPlayground.viewCode.flyout.step.createApplication', {
-          defaultMessage: 'Create application',
-        }),
-        children: (
-          <>
-            <EuiFormLabel>
-              <FormattedMessage
-                id="xpack.searchPlayground.viewCode.flyout.step.installLabel"
-                defaultMessage="Use this code in your CLI"
-              />
-            </EuiFormLabel>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock language="bash" isCopyable>
-              npm install
-            </EuiCodeBlock>
-          </>
-        ),
-      },
-    ],
-    []
-  );
+  const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
+  const { getValues } = useFormContext<ChatForm>();
+  const formValues = getValues();
+  const {
+    services: { cloud, http },
+  } = useKibana();
+
+  const CLIENT_STEP = ES_CLIENT_DETAILS(cloud);
+
+  const steps: Record<string, React.ReactElement> = {
+    'lc-py': LANGCHAIN_PYTHON(formValues, CLIENT_STEP),
+    'py-es-client': PY_LANG_CLIENT(formValues, CLIENT_STEP),
+  };
 
   return (
     <EuiFlyout ownFocus onClose={onClose}>
@@ -77,7 +70,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.title"
-              defaultMessage="Export"
+              defaultMessage="View Code"
             />
           </h2>
         </EuiTitle>
@@ -86,13 +79,42 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.subtitle"
-              defaultMessage="Use this custom built playground experience in your application"
+              defaultMessage="Copy the code into your app to use this. Modify the code as needed to fit your use case."
             />
           </p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiSteps steps={steps} headingElement="h2" />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiSelect
+                  options={[
+                    { value: 'py-es-client', text: 'Python Elasticsearch Client' },
+                    { value: 'lc-py', text: 'LangChain Python' },
+                  ]}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  value={selectedLanguage}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="primary"
+                  iconType="popout"
+                  href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.searchPlayground.viewCode.flyout.apiKeysAction"
+                    defaultMessage="Manage API Keys"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{steps[selectedLanguage]}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
