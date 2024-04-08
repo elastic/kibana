@@ -16,8 +16,6 @@ import {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
   EuiPopover,
-  EuiBadge,
-  EuiToolTip,
   EuiFilterGroup,
   EuiSelectable,
   EuiFilterButton,
@@ -29,6 +27,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { DeprecatedPipelineBadge, ManagedPipelineBadge } from '../../components/pipeline_elements';
 
 export interface Props {
   pipelines: Pipeline[];
@@ -215,20 +214,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
             <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
               {pipeline.isManaged && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" data-test-subj="isManagedBadge">
-                    {i18n.translate('xpack.ingestPipelines.list.table.managedBadgeLabel', {
-                      defaultMessage: 'Managed',
-                    })}
-                  </EuiBadge>
+                  <ManagedPipelineBadge />
                 </EuiFlexItem>
               )}
               {pipeline.deprecated && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
-                    <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
-                      {deprecatedPipelineBadge.badge}
-                    </EuiBadge>
-                  </EuiToolTip>
+                  <DeprecatedPipelineBadge />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
