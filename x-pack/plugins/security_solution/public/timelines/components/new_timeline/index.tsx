@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimelineId } from '../../../../common/types';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
@@ -44,11 +44,15 @@ export const NewTimelineButton = React.memo<NewTimelineButtonProps>(({ type }) =
     type === TimelineType.default ? 'timeline' : 'timeline-template'
   }`;
 
+  const handleCreateNewTimeline = useCallback(async () => {
+    await createNewTimeline();
+  }, [createNewTimeline]);
+
   return (
     <EuiButton
       iconType="plusInCircle"
       data-test-subj={dataTestSubj}
-      onClick={() => createNewTimeline()}
+      onClick={handleCreateNewTimeline}
       fill
     >
       {type === TimelineType.default ? NEW_TIMELINE : NEW_TEMPLATE_TIMELINE}

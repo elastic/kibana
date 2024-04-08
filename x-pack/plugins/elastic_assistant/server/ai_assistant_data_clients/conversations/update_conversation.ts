@@ -8,7 +8,6 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConversationResponse,
-  Replacement,
   Reader,
   ConversationUpdateProps,
   Provider,
@@ -19,6 +18,7 @@ import {
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
+import { EsReplacementSchema } from './types';
 
 export interface UpdateConversationSchema {
   id: UUID;
@@ -36,6 +36,7 @@ export interface UpdateConversationSchema {
     };
   }>;
   api_config?: {
+    action_type_id?: string;
     connector_id?: string;
     default_system_prompt_id?: string;
     provider?: Provider;
@@ -43,7 +44,7 @@ export interface UpdateConversationSchema {
   };
   summary?: ConversationSummary;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: Replacement[];
+  replacements?: EsReplacementSchema[];
   updated_at?: string;
 }
 
@@ -116,23 +117,33 @@ export const transformToUpdateScheme = (
     updated_at: updatedAt,
     title,
     api_config: {
+      action_type_id: apiConfig?.actionTypeId,
       connector_id: apiConfig?.connectorId,
       default_system_prompt_id: apiConfig?.defaultSystemPromptId,
       model: apiConfig?.model,
       provider: apiConfig?.provider,
     },
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    replacements,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
-      trace_data: {
-        trace_id: message.traceData?.traceId,
-        transaction_id: message.traceData?.transactionId,
-      },
+      ...(message.traceData
+        ? {
+            trace_data: {
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
+            },
+          }
+        : {}),
     })),
   };
 };

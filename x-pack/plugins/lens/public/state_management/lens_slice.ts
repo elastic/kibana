@@ -13,6 +13,7 @@ import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { SeriesType } from '@kbn/visualizations-plugin/common';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -244,6 +245,7 @@ export const addLayer = createAction<{
   layerType: LayerType;
   extraArg: unknown;
   ignoreInitialValues?: boolean;
+  seriesType?: SeriesType;
 }>('lens/addLayer');
 export const onDropToDimension = createAction<{
   source: DragDropIdentifier;
@@ -908,7 +910,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       .addCase(
         addLayer,
-        (state, { payload: { layerId, layerType, extraArg, ignoreInitialValues } }) => {
+        (state, { payload: { layerId, layerType, extraArg, seriesType, ignoreInitialValues } }) => {
           if (!state.activeDatasourceId || !state.visualization.activeId) {
             return state;
           }
@@ -924,7 +926,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             layerId,
             layerType,
             currentDataViewsId,
-            extraArg
+            extraArg,
+            seriesType
           );
 
           const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
