@@ -6,18 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  formats,
-  getTranslation,
-  getLocale,
-  getFormats,
-  getRegisteredLocales,
-  translate,
-  init,
-  load,
-  isPseudoLocale,
-  translateUsingPseudoLocale,
-} from './src/core';
+import { getTranslation, getLocale, translate, init, load, handleIntlError } from './src/core';
 
 import {
   registerTranslationFile,
@@ -29,16 +18,12 @@ import {
 } from './src/loader';
 
 const i18n = {
-  formats,
   getTranslation,
   getLocale,
-  getFormats,
-  getRegisteredLocales,
   translate,
   init,
   load,
-  isPseudoLocale,
-  translateUsingPseudoLocale,
+  handleIntlError,
 };
 
 const i18nLoader = {

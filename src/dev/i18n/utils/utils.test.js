@@ -18,6 +18,7 @@ import {
   createParserErrorMessage,
   normalizePath,
   extractMessageValueFromNode,
+  extractValueReferencesFromMessage,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -177,5 +178,14 @@ i18n('namespace.id', {
     );
 
     expect(extractMessageValueFromNode(objectProperty.value)).toMatchSnapshot();
+  });
+
+  test(`should parse html required variables`, () => {
+    const valuesKeys = ['a'];
+    const defaultMessage = 'Click here to go to <a>homepage</a>';
+    const messageId = 'namespace.message.id';
+
+    const result = extractValueReferencesFromMessage(defaultMessage, messageId);
+    expect(result).toEqual(valuesKeys);
   });
 });

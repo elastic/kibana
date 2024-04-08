@@ -38,6 +38,7 @@ export const registerTranslationsRoute = (router: IRouter, locale: string) => {
           body: `Unknown locale: ${req.params.locale}`,
         });
       }
+      // TODO: remove cache since we already cache inside i18n
       if (!translationCache) {
         const translations = JSON.stringify(i18n.getTranslation());
         const hash = createHash('sha1').update(translations).digest('hex');

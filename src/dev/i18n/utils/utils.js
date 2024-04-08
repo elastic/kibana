@@ -22,14 +22,14 @@ import { promisify } from 'util';
 import normalize from 'normalize-path';
 import path from 'path';
 import chalk from 'chalk';
-import parser from 'intl-messageformat-parser';
+
+import { parse, TYPE } from '@formatjs/icu-messageformat-parser';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
-const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 const HTML_KEY_PREFIX = 'html_';
 
 export const readFileAsync = promisify(fs.readFile);
@@ -134,18 +134,19 @@ export function createParserErrorMessage(content, error) {
  * @param {any} node
  * @param {Set<string>} keys
  */
+
 function extractValueReferencesFromIcuAst(node, keys = new Set()) {
-  if (Array.isArray(node.elements)) {
-    for (const element of node.elements) {
-      if (element.type !== ARGUMENT_ELEMENT_TYPE) {
+  if (Array.isArray(node)) {
+    for (const element of node) {
+      if (element.type === TYPE.literal) {
         continue;
       }
 
-      keys.add(element.id);
+      keys.add(element.value);
 
       // format contains all specific parameters for complex argumentElements
-      if (element.format && Array.isArray(element.format.options)) {
-        for (const option of element.format.options) {
+      if (element.options) {
+        for (const option of Object.values(element.options)) {
           extractValueReferencesFromIcuAst(option, keys);
         }
       }
@@ -202,14 +203,19 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
  * @returns {string[]}
  */
 export function extractValueReferencesFromMessage(message, messageId) {
-  // Skip validation if message doesn't use ICU.
-  if (!message.includes('{')) {
-    return [];
-  }
-
-  let messageAST;
   try {
-    messageAST = parser.parse(message);
+    const messageAST = parse(message);
+    // Skip extraction if icu-messageformat-parser didn't return an AST with nonempty elements array.
+    if (!messageAST || !messageAST.length) {
+      return [];
+    }
+
+    // Skip validation if message doesn't use ICU.
+    if (messageAST.every((element) => element.type === TYPE.literal)) {
+      return [];
+    }
+
+    return extractValueReferencesFromIcuAst(messageAST);
   } catch (error) {
     if (error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {
@@ -227,13 +233,6 @@ export function extractValueReferencesFromMessage(message, messageId) {
 
     throw error;
   }
-
-  // Skip extraction if intl-messageformat-parser didn't return an AST with nonempty elements array.
-  if (!messageAST || !messageAST.elements || !messageAST.elements.length) {
-    return [];
-  }
-
-  return extractValueReferencesFromIcuAst(messageAST);
 }
 
 export function extractMessageIdFromNode(node) {

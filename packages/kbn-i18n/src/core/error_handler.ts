@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-declare module 'intl-relativeformat' {
-  export let defaultLocale: string;
-}
+import { OnErrorFn } from '@formatjs/intl';
+
+export const handleIntlError: OnErrorFn = (error) => {
+  if (error.code !== 'MISSING_TRANSLATION') {
+    // console.error('[kbn-i18n]:::', error.code, error);
+  }
+  throw error;
+};

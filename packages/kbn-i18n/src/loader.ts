@@ -9,8 +9,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
-
-import { unique } from './core/helper';
 import { Translation } from './translation';
 
 const TRANSLATION_FILE_EXTENSION = '.json';
@@ -87,10 +85,9 @@ export function registerTranslationFile(translationFilePath: string) {
 
   const locale = getLocaleFromFileName(translationFilePath);
 
-  translationsRegistry[locale] = unique([
-    ...(translationsRegistry[locale] || []),
-    translationFilePath,
-  ]);
+  translationsRegistry[locale] = [
+    ...new Set([...(translationsRegistry[locale] || []), translationFilePath]),
+  ];
 }
 
 /**

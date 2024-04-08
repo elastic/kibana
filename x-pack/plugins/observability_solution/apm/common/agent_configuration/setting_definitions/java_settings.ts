@@ -371,7 +371,7 @@ export const javaSettings: RawSettingDefinition[] = [
           '\n' +
           'Can contain multiple comma separated JMX metric definitions:\n' +
           '\n' +
-          '`object_name[<JMX object name pattern>] attribute[<JMX attribute>:metric_name=<optional metric name>]`\n' +
+          "`object_name['<JMX object name pattern>'] attribute['<JMX attribute>:metric_name=<optional metric name>']`\n" +
           '\n' +
           'See the Java agent documentation for more details.',
       }

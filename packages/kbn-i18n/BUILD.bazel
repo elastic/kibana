@@ -23,9 +23,11 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "@npm//intl-format-cache",
   "@npm//intl-messageformat",
-  "@npm//intl-relativeformat",
+  "@npm//@formatjs/intl",
+  "@npm//@formatjs/intl-pluralrules",
+  "@npm//@formatjs/intl-relativetimeformat",
+  "@npm//@formatjs/intl-utils",
 ]
 
 js_library(

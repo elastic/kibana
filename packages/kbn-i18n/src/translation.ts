@@ -6,19 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { Formats } from './core/formats';
+// import { Formats } from './core/formats';
 
-export interface Translation {
+import { IntlShape, CustomFormats } from '@formatjs/intl';
+
+export interface TranslationInput {
   /**
    * Actual translated messages.
    */
-  messages: Record<string, string>;
+  messages: IntlShape['messages'];
   /**
    * Locale of the translated messages.
    */
-  locale?: string;
+  locale: IntlShape['locale'];
   /**
    * Set of options to the underlying formatter.
    */
-  formats?: Formats;
+  formats?: CustomFormats;
+}
+
+export interface Translation extends TranslationInput {
+  /**
+   * Actual translated messages.
+   */
+  messages: IntlShape['messages'];
+  /**
+   * Locale of the translated messages.
+   */
+  locale: IntlShape['locale'];
+  /**
+   * Default locale to fall back to when the translation is not found for the message id.
+   * Hardcoded to `en` for Kibana.
+   */
+  defaultLocale: IntlShape['defaultLocale'];
+  /**
+   * default formatter formats.
+   */
+  defaultFormats: IntlShape['formats'];
 }

@@ -78,6 +78,9 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
           visible: optInStatusOptionLabels.visible,
           hidden: optInStatusOptionLabels.hidden,
           ask: optInStatusOptionLabels.ask,
+          ul: (chunks) => `<ul>${chunks}</ul>`,
+          li: (chunks) => `<li>${chunks}</li>`,
+          strong: (chunks) => `<strong>${chunks}</strong>`,
         },
       }),
       name: i18n.translate('navigation.uiSettings.optInStatusSolutionNav.name', {
