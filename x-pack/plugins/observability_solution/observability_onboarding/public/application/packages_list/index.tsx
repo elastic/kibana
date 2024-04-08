@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useRef, Suspense, useState } from 'react';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
+import { useIntegrationCardList } from './use_integration_card_list';
 
 interface Props {
   /**
@@ -50,50 +51,37 @@ const Loading = () => (
   </EuiAutoSizer>
 );
 
-const QUICKSTART_FLOWS = ['kubernetes'];
-
-const toCustomCard = (card: IntegrationCardItem) => ({
-  ...card,
-  isQuickstart: QUICKSTART_FLOWS.includes(card.name),
-});
-
 const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
   showSearchBar = false,
-  featuredCards,
+  featuredCards: featuredCardNames,
   generatedCards,
 }: WrapperProps) => {
   const [integrationSearch, setIntegrationSearch] = useState('');
-  const [initialHidden, setInitialHidden] = useState(showSearchBar);
+  const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const availablePackages = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
   const { filteredCards } = availablePackages;
 
-  let list: IntegrationCardItem[] = [];
-  if (featuredCards || generatedCards) {
-    featuredCards?.forEach((name) => {
-      const card = filteredCards.find((c) => c.name === name);
-      if (card) list.push(toCustomCard(card));
-    });
-    generatedCards?.forEach((c) => list.push(c));
-  } else {
-    list = filteredCards
-      .filter((card) => card.categories.includes(selectedCategory))
-      .map(toCustomCard);
-  }
+  const list: IntegrationCardItem[] = useIntegrationCardList(
+    filteredCards,
+    selectedCategory,
+    featuredCardNames,
+    generatedCards
+  );
   const showPackageList =
-    (showSearchBar && !initialHidden) || showSearchBar === false;
+    (showSearchBar && !isInitialHidden) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
-      {!!showSearchBar && (
+      {showSearchBar && (
         <EuiSearchBar
           box={{ incremental: true }}
           onChange={(arg) => {
             setIntegrationSearch(arg.queryText);
-            setInitialHidden(false);
+            setIsInitialHidden(false);
           }}
           query={integrationSearch}
         />
