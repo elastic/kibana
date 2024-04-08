@@ -1136,7 +1136,6 @@ export const expectedCountDsl = {
         ],
       },
     },
-    fields: [],
     _source: false,
   },
   size: 0,

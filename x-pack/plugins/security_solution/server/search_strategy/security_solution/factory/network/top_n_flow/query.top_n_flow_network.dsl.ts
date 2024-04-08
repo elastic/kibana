@@ -8,6 +8,8 @@
 import type {
   AggregationsAggregationContainer,
   AggregationsTopHitsAggregation,
+  Field,
+  QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
@@ -19,6 +21,14 @@ import type { FlowTargetSourceDest } from '../../../../../../common/search_strat
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { getOppositeField } from '../helpers';
 import { getQueryOrder } from './helpers';
+
+interface AggregationsAggregationWithFieldsContainer extends AggregationsAggregationContainer {
+  aggregations?: Record<string, AggregationsAggregationWithFieldsContainer>;
+  aggs?: Record<string, AggregationsAggregationWithFieldsContainer>;
+  top_hits?: AggregationsTopHitsAggregation & {
+    fields?: Array<QueryDslFieldAndFormat | Field>; // fields is missing in the official types but it is used in the query
+  };
+}
 
 export const buildTopNFlowQuery = ({
   defaultIndex,
@@ -107,7 +117,7 @@ const getFlowTargetAggs = (
   sort: NetworkTopNFlowRequestOptions['sort'],
   flowTarget: FlowTargetSourceDest,
   querySize: number
-): Record<string, AggregationsAggregationContainer> => ({
+): Record<string, AggregationsAggregationWithFieldsContainer> => ({
   [flowTarget]: {
     terms: {
       field: `${flowTarget}.ip`,
@@ -160,7 +170,7 @@ const getFlowTargetAggs = (
                 },
               ],
               size: 1,
-            } as AggregationsTopHitsAggregation,
+            },
           },
         },
       },
@@ -182,7 +192,7 @@ const getFlowTargetAggs = (
                 },
               ],
               size: 1,
-            } as AggregationsTopHitsAggregation,
+            },
           },
         },
       },

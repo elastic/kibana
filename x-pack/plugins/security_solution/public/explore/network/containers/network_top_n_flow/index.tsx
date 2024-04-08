@@ -84,7 +84,7 @@ export const useNetworkTopNFlow = ({
   );
 
   const {
-    loading,
+    loading: isLoadingData,
     result: response,
     search,
     refetch: refetchData,
@@ -97,7 +97,7 @@ export const useNetworkTopNFlow = ({
   });
 
   const {
-    loading: loadingTotalCount,
+    loading: isLoadingTotalCount,
     result: responseTotalCount,
     search: searchTotalCount,
     refetch: refetchTotalCount,
@@ -108,6 +108,8 @@ export const useNetworkTopNFlow = ({
     errorMessage: i18n.FAIL_NETWORK_TOP_N_FLOW,
     abort: skip,
   });
+
+  const isLoading = isLoadingData || isLoadingTotalCount;
 
   const refetch = useCallback(() => {
     refetchData();
@@ -171,5 +173,5 @@ export const useNetworkTopNFlow = ({
     }
   }, [networkTopNFlowRequest, search, searchTotalCount, skip]);
 
-  return [loading || loadingTotalCount, networkTopNFlowResponse];
+  return [isLoading, networkTopNFlowResponse];
 };
