@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
-import { useBasePath, useKibana, useToasts } from '../../common/lib/kibana';
+import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
 import { TimelineId } from '../../../common/types';
@@ -27,12 +27,11 @@ interface Props {
 
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const toasts = useToasts();
-  const basePath = useBasePath();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
 
-  const { showAssistantOverlay } = useAssistantContext();
+  const { showAssistantOverlay, traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(
     (noteId: string) => dispatch(timelineActions.addNote({ id: TimelineId.active, noteId })),
@@ -85,7 +84,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   // See: https://github.com/elastic/kibana/issues/171368
   const apmTraceLink =
     message.traceData != null && Object.keys(message.traceData).length > 0
-      ? `${basePath}/app/apm/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
+      ? `${traceOptions.apmUrl}/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
       : undefined;
 
   // Use this link for routing to the services/transactions view which provides a slightly different view
