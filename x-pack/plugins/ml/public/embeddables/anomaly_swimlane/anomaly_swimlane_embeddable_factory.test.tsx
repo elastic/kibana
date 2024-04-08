@@ -44,7 +44,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       (api: AnomalySwimLaneEmbeddableApi) => void
     >;
 
-    const { getByTestId } = render(
+    render(
       <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
         maybeId={'maybe_id'}
         type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
@@ -61,8 +61,5 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       expect(resultApi.jobIds.value).toEqual(['my-job']);
       expect(resultApi.viewBy.value).toEqual('overall');
     });
-
-    // const swimLaneElement = getByTestId('mlSwimLaneEmbeddable_maybe_id');
-    // expect(swimLaneElement).toBeInTheDocument();
   });
 });
