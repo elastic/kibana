@@ -17,7 +17,6 @@ import { defaultEnFormats } from './formats';
 
 const EN_LOCALE = 'en';
 const defaultLocale = EN_LOCALE;
-const cache = createIntlCache();
 
 /**
  * Currently we are depending on this singleton pattern to
@@ -39,7 +38,12 @@ let intl: IntlShape<string>;
  *
  * we need to get there at some point but this means removing all static i18n imports from the server side.
  */
-intl = createIntl({ locale: defaultLocale, defaultFormats: defaultEnFormats, defaultLocale });
+intl = createIntl({
+  locale: defaultLocale,
+  defaultFormats: defaultEnFormats,
+  defaultLocale,
+  onError: () => void 0,
+});
 
 /**
  * Normalizes locale to make it consistent with IntlMessageFormat locales
@@ -59,7 +63,7 @@ export function activateTranslation(newTranslation: TranslationInput) {
   const config: IntlConfig<string> = {
     locale: normalizeLocale(newTranslation.locale),
     messages: newTranslation.messages,
-    // defaultFormats: defaultEnFormats,
+    defaultFormats: defaultEnFormats,
     defaultLocale,
     onError: handleIntlError,
   };
@@ -69,6 +73,7 @@ export function activateTranslation(newTranslation: TranslationInput) {
     config.formats = newTranslation.formats;
   }
 
+  const cache = createIntlCache();
   intl = createIntl(config, cache);
 }
 
@@ -145,7 +150,7 @@ export function translate(
         description,
       },
       values,
-      { ignoreTag }
+      { ignoreTag, shouldParseSkeletons: true }
     );
     /* eslint-enable */
   } catch (e) {

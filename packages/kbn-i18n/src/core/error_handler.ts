@@ -9,8 +9,8 @@
 import { OnErrorFn } from '@formatjs/intl';
 
 export const handleIntlError: OnErrorFn = (error) => {
+  // Dont through on missing translations.
   if (error.code !== 'MISSING_TRANSLATION') {
-    // console.error('[kbn-i18n]:::', error.code, error);
+    throw error;
   }
-  throw error;
 };

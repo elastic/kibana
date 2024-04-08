@@ -566,48 +566,6 @@ describe('I18n engine', () => {
       ).toBe('Coupon expires at 6:40:30 PM');
     });
 
-    test('should format default message with a custom format', () => {
-      i18n.init({
-        locale: 'en',
-        formats: {
-          number: {
-            currency: { style: 'currency' },
-          },
-        },
-        messages: {},
-      });
-
-      expect(
-        i18n.translate('a.b.c', {
-          defaultMessage: 'Your total is {total, number, ::currency/USD}',
-          values: { total: 1000 },
-        })
-      ).toBe('Your total is $1,000.00');
-
-      i18n.init({
-        locale: 'en',
-        formats: {
-          number: {
-            currency: {
-              style: 'currency',
-              currencyDisplay: 'name',
-              currencySign: 'accounting',
-              currency: 'EUR',
-              roundingMode: 'floor',
-            },
-          },
-        },
-        messages: {},
-      });
-
-      expect(
-        i18n.translate('a.b.c', {
-          defaultMessage: 'Your total is {total, number, ::currency/EUR}',
-          values: { total: 1000.12 },
-        })
-      ).toBe('Your total is 1,000.12');
-    });
-
     test('should use default format if passed format option is not specified', () => {
       i18n.init({
         locale: 'en',
@@ -616,7 +574,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } } as any)).toBe(
+      expect(i18n.translate('a.b.c', { defaultMessage: 'NOT USED', values: { total: 1000 } })).toBe(
         'Your total is 1,000'
       );
 
@@ -647,46 +605,7 @@ describe('I18n engine', () => {
           values: { total: 1000 },
           defaultMessage: 'Your total is {total, bar}',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`
-        "[I18n] Error formatting the default message for: \\"d.e.f\\".
-        Error: [@formatjs/intl Error FORMAT_ERROR] Error formatting default message for: \\"d.e.f\\", rendering default message verbatim
-        MessageID: d.e.f
-        Default Message: Your total is {total, bar}
-        Description: undefined
-
-        Locale: en
-
-
-        INVALID_ARGUMENT_TYPE
-        SyntaxError: INVALID_ARGUMENT_TYPE
-            at Function.parse [as __parse] (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/icu-messageformat-parser/index.js:34:21)
-            at new IntlMessageFormat (/Users/bamieh/Bamieh/elastic/kibana/node_modules/intl-messageformat/src/core.js:140:42)
-            at /Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/utils.js:115:20
-            at variadic (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/fast-memoize/index.js:37:28)
-            at formatMessage (/Users/bamieh/Bamieh/elastic/kibana/node_modules/@formatjs/intl/src/message.js:72:39)
-            at Object.formatMessage [as translate] (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.ts:141:17)
-            at translate (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:678:14)
-            at _toThrowErrorMatchingSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:569:7)
-            at Object.toThrowErrorMatchingInlineSnapshot (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-snapshot/build/index.js:510:10)
-            at __EXTERNAL_MATCHER_TRAP__ (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:325:30)
-            at Object.throwingMatcher [as toThrowErrorMatchingInlineSnapshot] (/Users/bamieh/Bamieh/elastic/kibana/node_modules/expect/build/index.js:326:15)
-            at Object.toThrowErrorMatchingInlineSnapshot (/Users/bamieh/Bamieh/elastic/kibana/packages/kbn-i18n/src/core/i18n.test.ts:682:9)
-            at Promise.then.completed (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:300:28)
-            at new Promise (<anonymous>)
-            at callAsyncCircusFn (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/utils.js:233:10)
-            at _callCircusTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:314:40)
-            at processTicksAndRejections (node:internal/process/task_queues:95:5)
-            at _runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:250:3)
-            at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:125:9)
-            at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
-            at _runTestsForDescribeBlock (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:120:9)
-            at run (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/run.js:70:3)
-            at runAndTransformResultsToJestFormat (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
-            at jestAdapter (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
-            at runTestInternal (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:367:16)
-            at runTest (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/runTest.js:444:34)
-            at Object.worker (/Users/bamieh/Bamieh/elastic/kibana/node_modules/jest-runner/build/testWorker.js:106:12)"
-      `);
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 

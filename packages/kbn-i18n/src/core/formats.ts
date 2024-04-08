@@ -23,8 +23,6 @@ export const defaultEnFormats: CustomFormats = {
   number: {
     currency: {
       style: 'currency',
-      currencyDisplay: 'code',
-      currencySign: 'accounting',
     },
     percent: {
       style: 'percent',
