@@ -89,7 +89,17 @@ describe('getSuppressionTerms', () => {
       })
     ).toEqual([{ field: 'host.name', value: 'localhost-1' }]);
   });
-  it('should return sorted suppression terms array', () => {
+  it('should return suppression terms array when fields do not have matches', () => {
+    expect(
+      getSuppressionTerms({
+        alertSuppression: {
+          groupBy: ['host.name'],
+        },
+        fields: { 'host.ip': '127.0.0.1' },
+      })
+    ).toEqual([{ field: 'host.name', value: null }]);
+  });
+  it('should return sorted suppression terms array value', () => {
     expect(
       getSuppressionTerms({
         alertSuppression: {
@@ -98,5 +108,15 @@ describe('getSuppressionTerms', () => {
         fields: { 'host.name': ['localhost-2', 'localhost-1'] },
       })
     ).toEqual([{ field: 'host.name', value: ['localhost-1', 'localhost-2'] }]);
+  });
+  it('should return multiple suppression terms', () => {
+    expect(
+      getSuppressionTerms({
+        alertSuppression: {
+          groupBy: ['host.name', 'host.ip'],
+        },
+        fields: { 'host.name': ['localhost-1'], 'agent.name': 'test', 'host.ip': '127.0.0.1' },
+      })
+    ).toEqual([{ field: 'host.name', value: ['localhost-1'] }, { 'host.ip': '127.0.0.1' }]);
   });
 });
