@@ -16,7 +16,7 @@ export const generateTablePaginationOptions = (
   return {
     activePage,
     cursorStart,
-    fakePossibleCount: 4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5,
+    fakePossibleCount: getFakePossibleCount(activePage, limit),
     querySize: isBucketSort ? limit : limit + cursorStart,
   };
 };
@@ -30,7 +30,9 @@ export const getLimitedPaginationOptions = (
     activePage,
     cursorStart,
     querySize: limit + cursorStart,
-    fakePossibleCount: 0, // TODO: remove this
+    // TODO: Limited pagination behavior is UI-only logic, the server API should not have to know anything about it.
+    // Remove this parameter from the API schema when all security solution requests are updated.
+    fakePossibleCount: 0,
   };
 };
 
@@ -43,7 +45,16 @@ export const getLimitedPaginationTotalCount = ({
   limit: number;
   totalCount: number;
 }): number => {
-  const fakePossibleCount =
-    4 <= activePage && activePage > 0 ? limit * (activePage + 2) : limit * 5;
+  const fakePossibleCount = getFakePossibleCount(activePage, limit);
   return fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+};
+
+/**
+ * This function returns a fake possible count based on the active page and limit.
+ * The goal is to restring the pagination to prevent querying arbitrary pages, which may cause performance issues.
+ * After initializing the table we allow the user to navigate to pages 1-5.
+ * If the user reaches page 5 or higher, we only allow to go to the following page.
+ */
+const getFakePossibleCount = (activePage: number, limit: number): number => {
+  return activePage < 4 ? limit * 5 : limit * (activePage + 2);
 };
