@@ -58,11 +58,19 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   const lowerCaseCriticalityLevel = criticalityLevel.toLowerCase();
 
   if (!isValidCriticalityLevel(lowerCaseCriticalityLevel)) {
-    return { valid: false, error: `Invalid criticality level ${trimColumn(criticalityLevel)}` };
+    return {
+      valid: false,
+      error: `Invalid criticality level ${trimColumn(
+        criticalityLevel
+      )} expected one of ${ValidCriticalityLevels.join(', ')}`,
+    };
   }
 
   if (entityType !== 'host' && entityType !== 'user') {
-    return { valid: false, error: `Invalid entity type ${trimColumn(entityType)}` };
+    return {
+      valid: false,
+      error: `Invalid entity type ${trimColumn(entityType)} expected host or user`,
+    };
   }
 
   const idField = entityType === 'host' ? 'host.name' : 'user.name';

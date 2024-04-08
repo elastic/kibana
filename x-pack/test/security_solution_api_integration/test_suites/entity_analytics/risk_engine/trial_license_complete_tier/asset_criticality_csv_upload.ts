@@ -115,11 +115,12 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.errors).to.eql([
         {
           index: 0,
-          message: 'Invalid criticality level invalid_criticality',
+          message:
+            'Invalid criticality level invalid_criticality expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
         {
           index: 1,
-          message: 'Invalid entity type invalid_entity',
+          message: 'Invalid entity type invalid_entity expected host or user',
         },
         {
           index: 2,
@@ -167,7 +168,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.errors).to.eql([
         {
           index: 1,
-          message: 'Invalid criticality level invalid_criticality',
+          message:
+            'Invalid criticality level invalid_criticality expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
       ]);
 
