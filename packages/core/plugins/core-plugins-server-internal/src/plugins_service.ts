@@ -114,7 +114,7 @@ export class PluginsService
     });
 
     await this.handleDiscoveryErrors(error$);
-    await this.handleDiscoveredPlugins(plugin$);
+    await this.handleDiscoveredPlugins(node, plugin$);
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -254,7 +254,7 @@ export class PluginsService
     }
   }
 
-  private async handleDiscoveredPlugins(plugin$: Observable<PluginWrapper>) {
+  private async handleDiscoveredPlugins(node: InternalNodeServicePreboot, plugin$: Observable<PluginWrapper>) {
     const pluginEnableStatuses = new Map<
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
@@ -330,7 +330,7 @@ export class PluginsService
     const disabledDependantsCauses = new Set<string>();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      this.validatePluginDependencies(plugin, pluginEnableStatuses);
+      this.validatePluginDependencies(node, plugin, pluginEnableStatuses);
 
       const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
 
@@ -365,30 +365,33 @@ export class PluginsService
 
   /** Throws an error if the plugin's dependencies are invalid. */
   private validatePluginDependencies(
+    node: InternalNodeServicePreboot,
     plugin: PluginWrapper,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>
   ) {
     const { name, manifest, requiredBundles, requiredPlugins } = plugin;
 
     // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
-    for (const requiredBundleId of requiredBundles) {
-      if (!pluginEnableStatuses.has(requiredBundleId)) {
-        throw new Error(
-          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it is missing.`
-        );
-      }
-
-      const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
-      if (!requiredPlugin.includesUiPlugin) {
-        throw new Error(
-          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it doesn't have a UI bundle.`
-        );
-      }
-
-      if (requiredPlugin.manifest.type !== plugin.manifest.type) {
-        throw new Error(
-          `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
-        );
+    if (node.roles.ui) {
+      for (const requiredBundleId of requiredBundles) {
+        if (!pluginEnableStatuses.has(requiredBundleId)) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it is missing.`
+          );
+        }
+  
+        const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
+        if (!requiredPlugin.includesUiPlugin) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it doesn't have a UI bundle.`
+          );
+        }
+  
+        if (requiredPlugin.manifest.type !== plugin.manifest.type) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
+          );
+        }
       }
     }
 
