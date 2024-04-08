@@ -172,9 +172,8 @@ export class AssetCriticalityDataClient {
       } else {
         if (item?.update?.result === 'created') {
           return { record: doc.doc, result: 'created' };
-        } else {
-          return { record: doc.doc, result: 'updated' };
         }
+        return { record: doc.doc, result: 'updated' };
       }
     });
   }
