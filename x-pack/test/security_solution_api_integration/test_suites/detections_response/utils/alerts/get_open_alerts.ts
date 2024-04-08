@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { getAlerts } from './get_alerts';
 import type { GetAlerts } from './get_alerts';
 
@@ -15,7 +16,7 @@ export const getOpenAlerts: GetAlerts = async (...args) => {
   const alerts = await getAlerts(...args);
 
   alerts.hits.hits = alerts.hits.hits.filter(
-    (alert) => alert?._source?.['kibana.alert.workflow_status'] === 'open'
+    (alert) => alert?._source?.[ALERT_WORKFLOW_STATUS] === 'open'
   );
 
   return alerts;
