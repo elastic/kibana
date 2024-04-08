@@ -14,6 +14,7 @@
       "cloud",
       "guidedOnboarding",
       "cloudExperiments"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

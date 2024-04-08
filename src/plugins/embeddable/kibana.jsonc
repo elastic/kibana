@@ -17,6 +17,7 @@
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
     "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils", "presentationPanel"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

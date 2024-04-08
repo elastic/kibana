@@ -10,6 +10,7 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

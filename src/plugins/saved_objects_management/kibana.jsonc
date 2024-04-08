@@ -21,6 +21,7 @@
     ],
     "extraPublicDirs": [
       "public/lib"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

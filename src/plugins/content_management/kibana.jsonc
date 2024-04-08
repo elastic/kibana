@@ -6,6 +6,7 @@
   "plugin": {
     "id": "contentManagement",
     "server": true,
-    "browser": true
+    "browser": true,
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

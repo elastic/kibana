@@ -14,6 +14,7 @@
     "extraPublicDirs": [
       "common",
       "common/fonts"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

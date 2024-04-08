@@ -38,6 +38,7 @@
       "uiActions",
       "lens",
       "textBasedLanguages",
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

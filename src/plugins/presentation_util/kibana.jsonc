@@ -17,5 +17,6 @@
     ],
     "extraPublicDirs": ["common"],
     "requiredBundles": ["savedObjects"],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

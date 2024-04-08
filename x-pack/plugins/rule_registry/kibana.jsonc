@@ -21,6 +21,7 @@
     "optionalPlugins": [
       "security",
       "spaces"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

@@ -15,6 +15,7 @@
     "extraPublicDirs": [
       "common",
       "common/adapters/request"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

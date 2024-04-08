@@ -11,6 +11,7 @@
       "actions",
       "data",
       "ml"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

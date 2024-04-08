@@ -28,6 +28,7 @@
       "kibanaReact",
       "data",
       "textBasedLanguages"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

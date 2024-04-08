@@ -10,6 +10,7 @@
     "requiredPlugins": ["cases", "uiActions", "embeddable", "share"],
     "optionalPlugins": ["guidedOnboarding"],
     "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": ["common"],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

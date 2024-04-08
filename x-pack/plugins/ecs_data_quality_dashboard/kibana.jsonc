@@ -12,6 +12,7 @@
     ],
     "optionalPlugins": [
       "spaces",
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

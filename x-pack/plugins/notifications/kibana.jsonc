@@ -9,6 +9,7 @@
     "optionalPlugins": [
       "actions",
       "licensing"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

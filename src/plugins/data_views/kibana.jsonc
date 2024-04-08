@@ -21,6 +21,7 @@
     "runtimePluginDependencies" : ["security"],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }

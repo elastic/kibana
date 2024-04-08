@@ -15,6 +15,7 @@
       "static/forms/helpers",
       "static/forms/components",
       "static/forms/helpers/field_validators/types"
-    ]
+    ],
+    "nodeRoles": ["background_tasks", "ui"]
   }
 }
