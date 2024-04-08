@@ -57,9 +57,10 @@ export interface BulkCreateSuppressedAlertsParams
   experimentalFeatures: ExperimentalFeatures | undefined;
 }
 /**
- * bulk create and suppress alerts in memory,
- * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
- * they will be created as regular alerts
+ * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed, regular alerts will be created for such events without suppression
+ * This function is similar to x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/bulk_create_suppressed_alerts_in_memory.ts, but
+ * it operates with new terms specific eventsAndTerms{@link EventsAndTerms} parameter property, instead of regular events as common utility
  */
 export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   eventsAndTerms,

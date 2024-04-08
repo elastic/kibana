@@ -53,9 +53,8 @@ export interface BulkCreateSuppressedAlertsParams
   experimentalFeatures?: ExperimentalFeatures;
 }
 /**
- * bulk create and suppress alerts in memory,
- * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
- * they will be created as regular alerts
+ * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed, regular alerts will be created for such events without suppression
  */
 export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
