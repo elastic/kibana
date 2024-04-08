@@ -16,9 +16,11 @@ import {
   EuiSearchBar,
   EuiSkeletonText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useEffect, useRef, Suspense, useState } from 'react';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
+import { useCustomMargin } from '../shared/use_custom_margin';
 
 interface Props {
   /**
@@ -60,6 +62,7 @@ const PackageListGridWrapper = ({
 }: WrapperProps) => {
   const [integrationSearch, setIntegrationSearch] = useState('');
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
+  const customMargin = useCustomMargin();
   const availablePackages = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
@@ -76,32 +79,40 @@ const PackageListGridWrapper = ({
 
   return (
     <Suspense fallback={<Loading />}>
-      {showSearchBar && (
-        <EuiSearchBar
-          box={{ incremental: true }}
-          onChange={(arg) => {
-            setIntegrationSearch(arg.queryText);
-            setIsInitialHidden(false);
-          }}
-          query={integrationSearch}
-        />
-      )}
-      {showPackageList && (
-        <PackageList
-          list={list}
-          searchTerm={integrationSearch}
-          showControls={false}
-          showSearchTools={false}
-          // we either don't need these properties (yet) or handle them upstream, but
-          // they are marked as required in the original API.
-          selectedCategory={selectedCategory}
-          setSearchTerm={() => {}}
-          setCategory={() => {}}
-          categories={[]}
-          setUrlandReplaceHistory={() => {}}
-          setUrlandPushHistory={() => {}}
-        />
-      )}
+      <div css={customMargin}>
+        {showSearchBar && (
+          <div
+            css={css`
+              max-width: 600px;
+            `}
+          >
+            <EuiSearchBar
+              box={{ incremental: true }}
+              onChange={(arg) => {
+                setIntegrationSearch(arg.queryText);
+                setIsInitialHidden(false);
+              }}
+              query={integrationSearch}
+            />
+          </div>
+        )}
+        {showPackageList && (
+          <PackageList
+            list={list}
+            searchTerm={integrationSearch}
+            showControls={false}
+            showSearchTools={false}
+            // we either don't need these properties (yet) or handle them upstream, but
+            // they are marked as required in the original API.
+            selectedCategory={selectedCategory}
+            setSearchTerm={() => {}}
+            setCategory={() => {}}
+            categories={[]}
+            setUrlandReplaceHistory={() => {}}
+            setUrlandPushHistory={() => {}}
+          />
+        )}
+      </div>
     </Suspense>
   );
 };

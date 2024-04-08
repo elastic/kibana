@@ -17,10 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiAvatar,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { OnboardingFlowPackageList } from '../packages_list';
+import { useCustomMargin } from '../shared/use_custom_margin';
 
 interface UseCaseOption {
   id: string;
@@ -160,14 +160,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const [selectedId, setSelectedId] = useState<string>();
   const [hoveredId, setHoveredId] = useState<string>();
+  const customMargin = useCustomMargin();
 
   const visibleOption = hoveredId
     ? options.find((option) => option.id === hoveredId)
     : selectedId
     ? options.find((option) => option.id === selectedId)
     : undefined;
-
-  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel hasBorder>
@@ -182,7 +181,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}>
+      <EuiFlexGroup css={customMargin}>
         <EuiFlexItem css={{ fontWeight: 'bold' }}>
           {options.map((option, index) => (
             <div
@@ -267,11 +266,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             ]}
           />
 
-          <EuiText
-            css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}
-            size="s"
-            color="subdued"
-          >
+          <EuiText css={customMargin} size="s" color="subdued">
             {i18n.translate(
               'xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText',
               {
