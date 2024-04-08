@@ -42,44 +42,13 @@ export const fetchMeteringStats = (
   indexPattern: string,
   secondaryAuthorization?: string | string[] | undefined
 ): Promise<MeteringIndicesStatsResponse> =>
-  // client.asInternalUser.transport.request(
-  //   {
-  //     method: 'GET',
-  //     path: `/_metering/stats/${indexPattern}`,
-  //   },
-  //   { headers: { 'es-secondary-authorization': secondaryAuthorization } }
-  // );
-  Promise.resolve({
-    _shards: {
-      total: 4,
-      successful: 2,
-      failed: 0,
+  client.asInternalUser.transport.request(
+    {
+      method: 'GET',
+      path: `/_metering/stats/${indexPattern}`,
     },
-    indices: [
-      {
-        name: '.ds-my-datastream-03-02-2024-00001',
-        num_docs: 3,
-        size_in_bytes: 15785,
-        datastream: 'my-datastream', // ---> ds name
-      },
-      {
-        name: 'my-index-000001',
-        num_docs: 2,
-        size_in_bytes: 11462,
-      },
-    ],
-    datastreams: [
-      {
-        name: 'my-datastream',
-        num_docs: 6,
-        size_in_bytes: 31752,
-      },
-    ],
-    total: {
-      num_docs: 8,
-      size_in_bytes: 47214,
-    },
-  });
+    { headers: { 'es-secondary-authorization': secondaryAuthorization } }
+  );
 
 export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[] | undefined) =>
   meteringStatsIndices?.reduce<Record<string, MeteringStatsIndex>>((acc, curr) => {
