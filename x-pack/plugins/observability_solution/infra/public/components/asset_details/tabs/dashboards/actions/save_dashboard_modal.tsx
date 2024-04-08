@@ -84,6 +84,8 @@ export function SaveDashboardModal({
     [allAvailableDashboards, customDashboards]
   );
 
+  const onChange = () => setAssetNameFiltersEnabled(!assetNameEnabled);
+
   const onClickSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
@@ -172,7 +174,7 @@ export function SaveDashboardModal({
             options={options}
             selectedOptions={selectedDashboard}
             onChange={(newSelection) => setSelectedDashboard(newSelection)}
-            isClearable={true}
+            isClearable
           />
 
           <EuiSwitch
@@ -203,7 +205,7 @@ export function SaveDashboardModal({
                 </EuiToolTip>
               </p>
             }
-            onChange={() => setAssetNameFiltersEnabled(!assetNameEnabled)}
+            onChange={onChange}
             checked={assetNameEnabled}
           />
         </EuiFlexGroup>

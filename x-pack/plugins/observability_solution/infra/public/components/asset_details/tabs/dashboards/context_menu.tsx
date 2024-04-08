@@ -40,7 +40,6 @@ export function ContextMenu({ items }: Props) {
         size="s"
         items={items.map((item, index) => (
           <EuiContextMenuItem key={index} size="s">
-            {' '}
             {item}
           </EuiContextMenuItem>
         ))}

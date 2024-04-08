@@ -26,6 +26,9 @@ export function LinkDashboard({
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const onClick = () => setIsModalVisible(true);
+  const onClose = () => setIsModalVisible(false);
+
   return (
     <>
       {newDashboardButton ? (
@@ -34,14 +37,14 @@ export function LinkDashboard({
           size="s"
           iconType="plusInCircle"
           data-test-subj="infraLinkDashboardMenu"
-          onClick={() => setIsModalVisible(true)}
+          onClick={onClick}
         >
           {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
             defaultMessage: 'Link new dashboard',
           })}
         </EuiButtonEmpty>
       ) : (
-        <EuiButton data-test-subj="infraAddDashboard" onClick={() => setIsModalVisible(true)}>
+        <EuiButton data-test-subj="infraAddDashboard" onClick={onClick}>
           {i18n.translate('xpack.infra.assetDetails.dashboards.linkButtonLabel', {
             defaultMessage: 'Link dashboard',
           })}
@@ -49,7 +52,7 @@ export function LinkDashboard({
       )}
       {isModalVisible && (
         <SaveDashboardModal
-          onClose={() => setIsModalVisible(false)}
+          onClose={onClose}
           onRefresh={onRefresh}
           customDashboards={customDashboards}
           assetType={assetType}

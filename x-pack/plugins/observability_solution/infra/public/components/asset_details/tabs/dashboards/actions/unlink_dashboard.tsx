@@ -32,14 +32,16 @@ export function UnlinkDashboard({
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
   const { dashboards, loading } = useFetchCustomDashboards({ assetType });
 
+  const onClick = () => setIsModalVisible(true);
+  const onCancel = () => setIsModalVisible(false);
+
   const onConfirm = useCallback(
     async function () {
       try {
-        const linkedDashboards =
-          dashboards?.filter(
-            ({ dashboardSavedObjectId }) =>
-              dashboardSavedObjectId !== currentDashboard.dashboardSavedObjectId
-          ) || [];
+        const linkedDashboards = (dashboards ?? []).filter(
+          ({ dashboardSavedObjectId }) =>
+            dashboardSavedObjectId !== currentDashboard.dashboardSavedObjectId
+        );
         const result = await deleteCustomDashboard({
           assetType,
           id: currentDashboard.id,
@@ -88,7 +90,7 @@ export function UnlinkDashboard({
         size="s"
         iconType="unlink"
         data-test-subj="infraUnLinkCustomDashboardMenu"
-        onClick={() => setIsModalVisible(true)}
+        onClick={onClick}
       >
         {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
           defaultMessage: 'Unlink dashboard',
@@ -102,7 +104,7 @@ export function UnlinkDashboard({
               defaultMessage: 'Unlink Dashboard',
             }
           )}
-          onCancel={() => setIsModalVisible(false)}
+          onCancel={onCancel}
           onConfirm={onConfirm}
           confirmButtonText={i18n.translate(
             'xpack.infra.customDashboards.unlinkEmptyButtonLabel.confirm.button',

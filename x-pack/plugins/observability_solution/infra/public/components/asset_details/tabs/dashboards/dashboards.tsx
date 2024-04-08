@@ -25,6 +25,7 @@ import {
 } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import { buildAssetIdFilter } from '../../../../utils/filters/build';
 import type {
   InfraSavedCustomDashboard,
   DashboardItemWithTitle,
@@ -40,7 +41,6 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-import { getFilterByAssetName } from './build_asset_name_filter';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
@@ -105,7 +105,7 @@ export function Dashboards() {
     dashboard.updateInput({
       filters:
         metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
-          ? getFilterByAssetName(asset.name, asset.type, metrics.dataView)
+          ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
           : [],
       timeRange: { from: dateRange.from, to: dateRange.to },
     });

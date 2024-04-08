@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -89,15 +89,9 @@ export const useUpdateCustomDashboard = () => {
     []
   );
 
-  const isUpdateLoading = useMemo(
-    () => updateCustomDashboardRequest.state === 'pending',
-    [updateCustomDashboardRequest.state]
-  );
+  const isUpdateLoading = updateCustomDashboardRequest.state === 'pending';
 
-  const hasUpdateError = useMemo(
-    () => updateCustomDashboardRequest.state === 'rejected',
-    [updateCustomDashboardRequest.state]
-  );
+  const hasUpdateError = updateCustomDashboardRequest.state === 'rejected';
 
   return {
     updateCustomDashboard,
@@ -154,15 +148,9 @@ export const useDeleteCustomDashboard = () => {
     []
   );
 
-  const isDeleteLoading = useMemo(
-    () => deleteCustomDashboardRequest.state === 'pending',
-    [deleteCustomDashboardRequest.state]
-  );
+  const isDeleteLoading = deleteCustomDashboardRequest.state === 'pending';
 
-  const hasDeleteError = useMemo(
-    () => deleteCustomDashboardRequest.state === 'rejected',
-    [deleteCustomDashboardRequest.state]
-  );
+  const hasDeleteError = deleteCustomDashboardRequest.state === 'rejected';
 
   return {
     deleteCustomDashboard,
@@ -211,15 +199,9 @@ export const useCreateCustomDashboard = () => {
     []
   );
 
-  const isCreateLoading = useMemo(
-    () => createCustomDashboardRequest.state === 'pending',
-    [createCustomDashboardRequest.state]
-  );
+  const isCreateLoading = createCustomDashboardRequest.state === 'pending';
 
-  const hasCreateError = useMemo(
-    () => createCustomDashboardRequest.state === 'rejected',
-    [createCustomDashboardRequest.state]
-  );
+  const hasCreateError = createCustomDashboardRequest.state === 'rejected';
 
   return {
     createCustomDashboard,
