@@ -26,7 +26,6 @@ interface SelectOptions {
 export class DataGridService extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly header = this.ctx.getPageObject('header');
   private readonly retry = this.ctx.getService('retry');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
@@ -434,19 +433,6 @@ export class DataGridService extends FtrService {
     return detailRows[0];
   }
 
-  public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-  }
-
-  public async getAddInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~addInclusiveFilterButton`);
-  }
-
   public async getTableDocViewRow(
     detailsRow: WebElementWrapper,
     fieldName: string
@@ -469,16 +455,6 @@ export class DataGridService extends FtrService {
       await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
     }
     await this.testSubjects.click(`${actionName}-${fieldName}`);
-  }
-
-  public async removeInclusiveFilter(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<void> {
-    const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
-    const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
-    await addInclusiveFilterButton.click();
-    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async hasNoResults() {
