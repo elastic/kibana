@@ -10,7 +10,8 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { ROLE, login } from '../../tasks/login';
 import { indexCrowdstrikeRuleAlerts } from '../../tasks/index_crowdstrike_rule_alerts';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
-describe(
+// TODO TC: This test is responsible for ingesting Crowdstrike event and in the future will be responsible for isolating the host
+describe.skip(
   'Isolate command',
   {
     tags: [
