@@ -161,7 +161,9 @@ export function AlertDetails() {
   const METADATA_TAB_ID = 'metadata';
 
   const overviewTab = alertDetail ? (
-    AlertDetailsAppSection && isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
+    AlertDetailsAppSection &&
+    // when feature flag is enabled, show alert details page with customized overview tab, otherwise show default overview tab
+    isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
         <EuiSpacer size="l" />
         <AlertSummary alertSummaryFields={summaryFields} />
