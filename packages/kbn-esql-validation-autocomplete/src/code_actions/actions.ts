@@ -150,10 +150,13 @@ function extractUnquotedFieldText(
     // scope it down to column items for now
     const { node } = getAstContext(query, ast, possibleStart - 1);
     if (node && isColumnItem(node)) {
-      return query.substring(node.location.min, end).trimEnd();
+      return {
+        start: node.location.min + 1,
+        name: query.substring(node.location.min, end).trimEnd(),
+      };
     }
   }
-  return query.substring(possibleStart, end).trimEnd();
+  return { start: possibleStart + 1, name: query.substring(possibleStart, end).trimEnd() };
 }
 
 async function getQuotableActionForColumns(
@@ -183,7 +186,7 @@ async function getQuotableActionForColumns(
     error.endColumn - 1,
     error.endColumn + stopIndex
   );
-  const errorText = extractUnquotedFieldText(
+  const { start, name: errorText } = extractUnquotedFieldText(
     queryString,
     error.code || 'syntaxError',
     ast,
@@ -206,7 +209,7 @@ async function getQuotableActionForColumns(
             },
           }),
           solution,
-          { ...error, endColumn: error.startColumn + errorText.length } // override the location
+          { ...error, startColumn: start, endColumn: start + errorText.length } // override the location
         )
       );
     } else {
@@ -221,7 +224,7 @@ async function getQuotableActionForColumns(
               },
             }),
             solution,
-            { ...error, endColumn: error.startColumn + errorText.length } // override the location
+            { ...error, startColumn: start, endColumn: start + errorText.length } // override the location
           )
         );
       }
