@@ -208,20 +208,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'status',
       name: 'Status',
-      render: (_, slo: SLOWithSummaryResponse) =>
-        !slo.summary ? (
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-        ) : (
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <SloStatusBadge slo={slo} />
-          </EuiFlexGroup>
-        ),
+      render: (_, slo: SLOWithSummaryResponse) => (
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <SloStatusBadge slo={slo} />
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'alerts',
