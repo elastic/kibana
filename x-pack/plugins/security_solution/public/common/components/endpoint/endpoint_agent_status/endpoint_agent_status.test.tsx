@@ -14,7 +14,6 @@ import React from 'react';
 import { fireEvent, waitFor, within } from '@testing-library/react';
 import { useAgentStatus } from '../../../hooks/use_agent_status';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../hooks/use_agent_status');
 const useAgentStatusMock = useAgentStatus as jest.Mock;
@@ -30,7 +29,6 @@ describe('When showing Endpoint Agent Status', () => {
   const getAgentStatusMock = ({
     agentId = testAgentId,
     agentType = 'endpoint',
-    capabilities = [...ENDPOINT_CAPABILITIES],
     found = true,
     isolated = true,
     lastSeen = new Date().toISOString(),
@@ -40,7 +38,6 @@ describe('When showing Endpoint Agent Status', () => {
     actionGenerator.generateAgentStatus({
       agentId,
       agentType,
-      capabilities,
       found,
       isolated,
       lastSeen,

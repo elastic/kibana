@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostStatus, type AgentStatuses } from '../../../../../../common/endpoint/types';
+import { type AgentStatuses, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { getPendingActionsSummary } from '../../../actions';
@@ -48,7 +48,6 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
         acc[agentId] = {
           agentId,
           agentType: this.agentType,
-          capabilities: [...(agentMetadata?.metadata.Endpoint.capabilities ?? [])],
           found: agentMetadata !== undefined,
           isolated: Boolean(agentMetadata?.metadata.Endpoint.state?.isolation),
           lastSeen: agentMetadata?.last_checkin || '',

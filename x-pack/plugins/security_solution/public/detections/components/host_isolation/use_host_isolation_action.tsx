@@ -5,13 +5,14 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useGetEndpointDetails } from '../../../management/hooks';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   getSentinelOneAgentId,
   isAlertFromSentinelOneEvent,
 } from '../../../common/utils/sentinelone_alert_check';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
@@ -69,14 +70,18 @@ export const useHostIsolationAction = ({
   );
 
   const agentType = sentinelOneAgentId ? 'sentinel_one' : 'endpoint';
+  const isSentinelOneAgent = agentType === 'sentinel_one';
+  const isEndpointAgent = agentType === 'endpoint';
 
   const agentId = sentinelOneAgentId || endpointAgentId;
 
+  const { data: endpointAgentInfo } = useGetEndpointDetails(agentId, {
+    enabled: isEndpointAgent,
+  });
+
   const { data: agentStatusData } = useAgentStatus([agentId], agentType, {
     refetchInterval: 2000,
-    enabled:
-      agentType === 'endpoint' ||
-      (agentType === 'sentinel_one' && sentinelOneManualHostActionsEnabled),
+    enabled: isEndpointAgent || (isSentinelOneAgent && sentinelOneManualHostActionsEnabled),
   });
   const agentStatus = agentStatusData?.[`${agentId}`];
 
@@ -93,7 +98,11 @@ export const useHostIsolationAction = ({
       return isIsolationSupported({
         osName: hostOsFamily,
         version: agentVersion,
-        capabilities: agentStatus?.capabilities,
+        capabilities: isSentinelOneAgent
+          ? ['isolation']
+          : isEndpointAgent
+          ? endpointAgentInfo?.metadata?.Endpoint?.capabilities || []
+          : [],
       });
     }
 
@@ -104,8 +113,11 @@ export const useHostIsolationAction = ({
   }, [
     agentStatus,
     agentVersion,
+    endpointAgentInfo?.metadata?.Endpoint?.capabilities,
     hostOsFamily,
+    isEndpointAgent,
     isEndpointAlert,
+    isSentinelOneAgent,
     isSentinelOneAlert,
     sentinelOneManualHostActionsEnabled,
   ]);
