@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { LogsExplorerFlyoutContentProps } from './types';
 import { useLogsExplorerControllerContext } from '../controller';
 import { LogDocument } from '../../common/document';
@@ -55,7 +54,8 @@ const CustomFlyoutContent = ({
 
 const renderContent = ({ actions, dataView, doc }: LogsExplorerFlyoutContentProps) => (
   <EuiFlexItem>
-    <FlyoutDetail actions={actions} dataView={dataView} doc={doc} />
+    {/* TOREMOVE */}
+    {/* <FlyoutDetail actions={actions} dataView={dataView} doc={doc} /> */}
   </EuiFlexItem>
 );
 

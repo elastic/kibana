@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { LogsExplorerController } from '../controller';
-import { LogsExplorerControllerProvider } from '../controller/provider';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
@@ -23,7 +22,6 @@ import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
 const LazyCustomDataSourceSelector = dynamic(() => import('./custom_data_source_selector'));
-const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogsExplorerProfileCustomizationsDeps {
   core: CoreStart;
