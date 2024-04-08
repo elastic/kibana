@@ -692,6 +692,7 @@ x-pack/plugins/search_connectors @elastic/enterprise-search-frontend
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend
+x-pack/plugins/search_notebooks @elastic/enterprise-search-frontend
 x-pack/plugins/search_playground @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
