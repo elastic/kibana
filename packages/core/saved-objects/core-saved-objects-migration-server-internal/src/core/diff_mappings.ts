@@ -11,7 +11,7 @@ import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
 
 /**
  * Diffs the stored vs app mappings.
- * One one hand, it compares changes in root fields, by deep comparing the actual mappings.
+ * On one hand, it compares changes in root fields, by deep comparing the actual mappings.
  * On the other hand, it compares changes in SO types mappings:
  * Historically, this comparison was done using md5 hashes.
  * Currently, and in order to be FIPS compliant, this has been replaced by comparing model versions.

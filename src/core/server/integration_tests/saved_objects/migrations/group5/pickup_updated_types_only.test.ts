@@ -43,7 +43,9 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(logFilePath);
 
       expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
-      expect(logs).not.toContainLogEntry('There are no changes in SO types mappings');
+      expect(logs).not.toContainLogEntry(
+        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
+      );
     });
   });
 
@@ -76,7 +78,7 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(logFilePath);
 
       expect(logs).toContainLogEntry(
-        'There are no changes in SO types mappings, skipping UPDATE_TARGET_MAPPINGS steps.'
+        'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.'
       );
       expect(logs).not.toContainLogEntry('Documents of the following SO types will be updated');
     });

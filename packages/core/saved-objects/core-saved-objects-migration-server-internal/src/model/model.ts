@@ -1429,56 +1429,47 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      // The mappings have NOT changed, no need to pick up changes in any documents
+      // The types mappings have NOT changed, no need to pick up changes in any documents
       return {
         ...stateP,
         controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+        logs: [
+          ...stateP.logs,
+          {
+            level: 'info',
+            message:
+              'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.',
+          },
+        ],
       };
     } else {
       const left = res.left;
       if (isTypeof(left, 'index_mappings_incomplete')) {
         // reindex migration
-        // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetMappings())
+        // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetTypesMappings())
         // we must "pick-up" all documents on the index (by not providing a query)
         return {
           ...stateP,
           controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
           updatedTypesQuery: Option.none,
         };
-      } else if (isTypeof(left, 'mappings_changed')) {
-        if (left.updatedTypes?.length) {
-          // compatible migration: the mappings of some SO types have been updated
-          const updatedTypesQuery = Option.fromNullable(
-            buildPickupMappingsQuery(left.updatedTypes)
-          );
+      } else if (isTypeof(left, 'types_changed')) {
+        // compatible migration: the mappings of some SO types have been updated
+        const updatedTypesQuery = Option.some(buildPickupMappingsQuery(left.updatedTypes));
 
-          return {
-            ...stateP,
-            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-            // we can "pick-up" only the SO types that have changed
-            updatedTypesQuery,
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'info',
-                message: `Documents of the following SO types will be updated, so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
-              },
-            ],
-          };
-        } else {
-          // only core fields have changed (no need to update docs in order to pickup changes in mappings)
-          return {
-            ...stateP,
-            controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'info',
-                message: `There are no changes in SO types mappings, skipping UPDATE_TARGET_MAPPINGS steps.`,
-              },
-            ],
-          };
-        }
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+          // we can "pick-up" only the SO types that have changed
+          updatedTypesQuery,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'info',
+              message: `Documents of the following SO types will be updated, so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+            },
+          ],
+        };
       } else {
         throwBadResponse(stateP, res as never);
       }
