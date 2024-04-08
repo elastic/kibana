@@ -28,7 +28,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
 
-import { MockedShowValueListModal } from '../__mock__/ShowValueListModal.mock';
+import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock';
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
