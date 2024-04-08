@@ -100,19 +100,23 @@ export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.interse
 
 export const conversationRt: t.Type<Conversation> = t.intersection([
   baseConversationRt,
-  t.type({
-    user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    namespace: t.string,
-    conversation: t.intersection([
-      t.type({
-        id: t.string,
-        last_updated: t.string,
-      }),
-      t.partial({
-        token_count: tokenCountRt,
-      }),
-    ]),
-  }),
+  t.intersection([
+    t.type({
+      namespace: t.string,
+      conversation: t.intersection([
+        t.type({
+          id: t.string,
+          last_updated: t.string,
+        }),
+        t.partial({
+          token_count: tokenCountRt,
+        }),
+      ]),
+    }),
+    t.partial({
+      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
+    }),
+  ]),
 ]);
 
 export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
