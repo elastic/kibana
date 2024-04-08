@@ -14,12 +14,13 @@ import type {
 import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
 import { AssistantAvatar } from '../components/assistant_avatar';
+import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
 export function getConnectorType(
   service: ObservabilityAIAssistantService
 ): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
   return {
-    id: '.observability-ai-assistant',
+    id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     modalWidth: 675,
     iconClass: () => <AssistantAvatar />,
     isSystemActionType: true,

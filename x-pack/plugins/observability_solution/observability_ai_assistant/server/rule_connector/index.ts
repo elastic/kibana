@@ -23,6 +23,7 @@ import {
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../common';
+import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 const ParamsSchema = schema.object({
@@ -44,7 +45,7 @@ export function getObsAIAssistantConnectorType(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): ObsAIAssistantConnectorType {
   return {
-    id: '.observability-ai-assistant',
+    id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     isSystemActionType: true,
     getKibanaPrivileges: (params) => [],
     minimumLicenseRequired: 'gold',
@@ -164,7 +165,7 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   ActionParamsType
 > => {
   return {
-    connectorTypeId: '.observability-ai-assistant',
+    connectorTypeId: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     ruleActionParamsSchema: ParamsSchema,
     buildActionParams: ({ params }) => {
       return { connector: params.connector, message: params.message };
