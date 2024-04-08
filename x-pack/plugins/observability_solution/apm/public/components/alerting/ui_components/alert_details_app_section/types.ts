@@ -16,8 +16,6 @@ import type {
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
-  CONTAINER_ID,
-  HOST_NAME,
 } from '../../../../../common/es_fields/apm';
 export interface AlertDetailsAppSectionProps {
   rule: Rule<{
