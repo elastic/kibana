@@ -28,7 +28,7 @@ interface HighlightFieldProps {
   formattedValue: string;
   icon?: ReactNode;
   label: string;
-  value?: string;
+  value?: unknown;
   width: number;
 }
 

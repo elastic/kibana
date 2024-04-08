@@ -10,6 +10,8 @@ export * from './build_data_record';
 export * from './format_hit';
 export * from './format_value';
 export * from './get_doc_id';
+export * from './get_document_overview';
 export * from './get_ignored_reason';
+export * from './get_message_field_with_fallbacks';
 export * from './get_should_show_field_handler';
 export * from './nested_fields';

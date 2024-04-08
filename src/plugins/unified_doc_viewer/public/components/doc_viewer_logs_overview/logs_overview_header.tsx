@@ -16,29 +16,35 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import { FlyoutDoc } from '../../../common/document';
-import { getMessageWithFallbacks } from '../../hooks/use_doc_detail';
-import { LogLevel } from '../common/log_level';
+import {
+  DocumentOverview,
+  fieldConstants,
+  getMessageFieldWithFallbacks,
+} from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
 import { Timestamp } from './sub_components/timestamp';
-import * as constants from '../../../common/constants';
-import { flyoutContentLabel } from '../common/translations';
 import { HoverActionPopover } from './sub_components/hover_popover_action';
+import { LogLevel } from './sub_components/log_level';
 
-export function LogsOverviewHeader({ doc }: { doc: FlyoutDoc }) {
-  const hasTimestamp = Boolean(doc[constants.TIMESTAMP_FIELD]);
-  const hasLogLevel = Boolean(doc[constants.LOG_LEVEL_FIELD]);
+export const contentLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.content', {
+  defaultMessage: 'Content breakdown',
+});
+
+export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
+  const hasTimestamp = Boolean(doc[fieldConstants.TIMESTAMP_FIELD]);
+  const hasLogLevel = Boolean(doc[fieldConstants.LOG_LEVEL_FIELD]);
   const hasBadges = hasTimestamp || hasLogLevel;
-  const { field, value } = getMessageWithFallbacks(doc);
+  const { field, value } = getMessageFieldWithFallbacks(doc);
   const hasMessageField = field && value;
   const hasFlyoutHeader = hasMessageField || hasBadges;
 
   const accordionId = useGeneratedHtmlId({
-    prefix: flyoutContentLabel,
+    prefix: contentLabel,
   });
 
   const accordionTitle = (
     <EuiTitle size="xs">
-      <p>{flyoutContentLabel}</p>
+      <p>{contentLabel}</p>
     </EuiTitle>
   );
 
@@ -46,23 +52,19 @@ export function LogsOverviewHeader({ doc }: { doc: FlyoutDoc }) {
     <EuiFlexItem grow={false}>
       {hasBadges && (
         <EuiFlexGroup responsive={false} gutterSize="m" justifyContent="flexEnd">
-          {doc[constants.LOG_LEVEL_FIELD] && (
+          {doc[fieldConstants.LOG_LEVEL_FIELD] && (
             <HoverActionPopover
-              value={doc[constants.LOG_LEVEL_FIELD]}
-              field={constants.LOG_LEVEL_FIELD}
+              value={doc[fieldConstants.LOG_LEVEL_FIELD]}
+              field={fieldConstants.LOG_LEVEL_FIELD}
             >
               <EuiFlexItem grow={false}>
-                <LogLevel
-                  level={doc[constants.LOG_LEVEL_FIELD]}
-                  renderInFlyout={true}
-                  dataTestSubj="logsExplorerFlyoutLogLevel"
-                />
+                <LogLevel level={doc[fieldConstants.LOG_LEVEL_FIELD]} />
               </EuiFlexItem>
             </HoverActionPopover>
           )}
           {hasTimestamp && (
             <EuiFlexItem grow={false}>
-              <Timestamp timestamp={doc[constants.TIMESTAMP_FIELD]} />
+              <Timestamp timestamp={doc[fieldConstants.TIMESTAMP_FIELD]} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -111,7 +113,7 @@ export function LogsOverviewHeader({ doc }: { doc: FlyoutDoc }) {
       buttonContent={accordionTitle}
       paddingSize="m"
       initialIsOpen={true}
-      data-test-subj={`logsExplorerFlyoutHeaderSection${flyoutContentLabel}`}
+      data-test-subj={`logsExplorerFlyoutHeaderSection${contentLabel}`}
     >
       <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logsExplorerFlyoutDetail">
         {hasMessageField ? contentField : logLevelAndTimestamp}

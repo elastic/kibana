@@ -46,3 +46,41 @@ type FormattedHitPair = readonly [
  * Pairs array for each field in the hit
  */
 export type FormattedHit = FormattedHitPair[];
+
+export interface DocumentOverview extends ResourceFields, StackTraceFields, CloudFields {
+  '@timestamp': string;
+  'log.level'?: string;
+  message?: string;
+  'error.message'?: string;
+  'event.original'?: string;
+  'trace.id'?: string;
+  'log.file.path'?: string;
+  'data_stream.namespace': string;
+  'data_stream.dataset': string;
+}
+
+export interface ResourceFields {
+  'host.name'?: string;
+  'service.name'?: string;
+  'agent.name'?: string;
+  'orchestrator.cluster.name'?: string;
+  'orchestrator.cluster.id'?: string;
+  'orchestrator.resource.id'?: string;
+  'orchestrator.namespace'?: string;
+  'container.name'?: string;
+  'container.id'?: string;
+}
+
+export interface StackTraceFields {
+  'error.stack_trace'?: string;
+  'error.exception.stacktrace'?: string;
+  'error.log.stacktrace'?: string;
+}
+
+export interface CloudFields {
+  'cloud.provider'?: string;
+  'cloud.region'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.project.id'?: string;
+  'cloud.instance.id'?: string;
+}

@@ -35,8 +35,12 @@ export {
   formatFieldValue,
   formatHit,
   getDocId,
+  getDocumentOverview,
   getIgnoredReason,
+  getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
 } from './src';
+
+export * from './src/types';

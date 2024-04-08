@@ -17,7 +17,7 @@ interface WithFieldParam {
 }
 
 interface WithValueParam {
-  value: string;
+  value: unknown;
 }
 
 interface TFieldActionParams extends WithFieldParam, WithValueParam {}
@@ -67,13 +67,13 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
       {
         id: 'addFilterInAction',
         iconType: 'plusInCircle',
-        label: actionFilterForText(value),
+        label: actionFilterForText(value as string),
         onClick: () => actions.addFilterIn({ field, value }),
       },
       {
         id: 'addFilterOutremoveFromFilterAction',
         iconType: 'minusInCircle',
-        label: actionFilterOutText(value),
+        label: actionFilterOutText(value as string),
         onClick: () => actions.addFilterOut({ field, value }),
       },
       {
@@ -92,7 +92,7 @@ export const useUIFieldActions = ({ field, value }: TFieldActionParams): TFieldA
         id: 'copyToClipboardAction',
         iconType: 'copyClipboard',
         label: copyToClipboardLabel,
-        onClick: () => actions.copyToClipboard(value),
+        onClick: () => actions.copyToClipboard(value as string),
       },
     ],
     [actions, field, value]

@@ -21,8 +21,8 @@ import { useUIFieldActions } from '../../../hooks/use_field_actions';
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   field: string;
-  value: string;
-  title?: string;
+  value: unknown;
+  title?: unknown;
   anchorPosition?: PopoverAnchorPosition;
   display?: EuiPopoverProps['display'];
 }

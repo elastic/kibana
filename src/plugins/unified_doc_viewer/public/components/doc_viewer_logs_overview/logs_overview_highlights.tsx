@@ -12,18 +12,17 @@ import { useMeasure } from 'react-use/lib';
 import { first } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { fieldConstants } from '@kbn/discover-utils';
-import { FlyoutDoc, LogDocument } from '../../../common/document';
+import { DataTableRecord, DocumentOverview, fieldConstants } from '@kbn/discover-utils';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { HighlightContainer } from './sub_components/highlight_container';
 
-interface FlyoutColumnWidth {
+interface ColumnWidth {
   columns: 1 | 2 | 3;
   fieldWidth: number;
 }
 
-export const useFlyoutColumnWidth = (width: number): FlyoutColumnWidth => {
+export const useColumnWidth = (width: number): ColumnWidth => {
   const { euiTheme } = useEuiTheme();
 
   const numberOfColumns = width > euiTheme.breakpoint.m ? 3 : width > euiTheme.breakpoint.s ? 2 : 1;
@@ -40,65 +39,65 @@ export function LogsOverviewHighlights({
   formattedDoc,
   flattenedDoc,
 }: {
-  formattedDoc: FlyoutDoc;
-  flattenedDoc: LogDocument['flattened'];
+  formattedDoc: DocumentOverview;
+  flattenedDoc: DataTableRecord['flattened'];
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
-  const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
+  const { columns, fieldWidth } = useColumnWidth(dimensions.width);
   return (
     <HighlightContainer ref={ref}>
       {/* Service & Infrastructure highlight */}
       <HighlightSection
         title={serviceInfraAccordionTitle}
         columns={columns}
-        data-test-subj="logsExplorerFlyoutHighlightSectionServiceInfra"
+        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionServiceInfra"
       >
         {formattedDoc[fieldConstants.SERVICE_NAME_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutService"
+            data-test-subj="unifiedDocViewLogsOverviewService"
             field={fieldConstants.SERVICE_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.SERVICE_NAME_FIELD]}
-            label={flyoutServiceLabel}
+            label={ServiceLabel}
             value={flattenedDoc[fieldConstants.SERVICE_NAME_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.HOST_NAME_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutHostName"
+            data-test-subj="unifiedDocViewLogsOverviewHostName"
             field={fieldConstants.HOST_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.HOST_NAME_FIELD]}
-            label={flyoutHostNameLabel}
+            label={HostNameLabel}
             value={flattenedDoc[fieldConstants.HOST_NAME_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.TRACE_ID_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutTrace"
+            data-test-subj="unifiedDocViewLogsOverviewTrace"
             field={fieldConstants.TRACE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.TRACE_ID_FIELD]}
-            label={flyoutTraceLabel}
+            label={TraceLabel}
             value={flattenedDoc[fieldConstants.TRACE_ID_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutClusterName"
+            data-test-subj="unifiedDocViewLogsOverviewClusterName"
             field={fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
-            label={flyoutOrchestratorClusterNameLabel}
+            label={OrchestratorClusterNameLabel}
             value={flattenedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutResourceId"
+            data-test-subj="unifiedDocViewLogsOverviewResourceId"
             field={fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
-            label={flyoutOrchestratorResourceIdLabel}
+            label={OrchestratorResourceIdLabel}
             value={flattenedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
             width={fieldWidth}
           />
@@ -108,11 +107,11 @@ export function LogsOverviewHighlights({
       <HighlightSection
         title={cloudAccordionTitle}
         columns={columns}
-        data-test-subj="logsExplorerFlyoutHighlightSectionCloud"
+        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionCloud"
       >
         {formattedDoc[fieldConstants.CLOUD_PROVIDER_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutCloudProvider"
+            data-test-subj="unifiedDocViewLogsOverviewCloudProvider"
             field={fieldConstants.CLOUD_PROVIDER_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_PROVIDER_FIELD]}
             icon={
@@ -122,47 +121,47 @@ export function LogsOverviewHighlights({
                 )}
               />
             }
-            label={flyoutCloudProviderLabel}
+            label={CloudProviderLabel}
             value={flattenedDoc[fieldConstants.CLOUD_PROVIDER_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.CLOUD_REGION_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutCloudRegion"
+            data-test-subj="unifiedDocViewLogsOverviewCloudRegion"
             field={fieldConstants.CLOUD_REGION_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_REGION_FIELD]}
-            label={flyoutCloudRegionLabel}
+            label={CloudRegionLabel}
             value={flattenedDoc[fieldConstants.CLOUD_REGION_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutCloudAz"
+            data-test-subj="unifiedDocViewLogsOverviewCloudAz"
             field={fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
-            label={flyoutCloudAvailabilityZoneLabel}
+            label={CloudAvailabilityZoneLabel}
             value={flattenedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutCloudProjectId"
+            data-test-subj="unifiedDocViewLogsOverviewCloudProjectId"
             field={fieldConstants.CLOUD_PROJECT_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
-            label={flyoutCloudProjectIdLabel}
+            label={CloudProjectIdLabel}
             value={flattenedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutCloudInstanceId"
+            data-test-subj="unifiedDocViewLogsOverviewCloudInstanceId"
             field={fieldConstants.CLOUD_INSTANCE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
-            label={flyoutCloudInstanceIdLabel}
+            label={CloudInstanceIdLabel}
             value={flattenedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
             width={fieldWidth}
           />
@@ -172,34 +171,34 @@ export function LogsOverviewHighlights({
       <HighlightSection
         title={otherAccordionTitle}
         columns={columns}
-        data-test-subj="logsExplorerFlyoutHighlightSectionOther"
+        data-test-subj="unifiedDocViewLogsOverviewHighlightSectionOther"
       >
         {formattedDoc[fieldConstants.LOG_FILE_PATH_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutLogPathFile"
+            data-test-subj="unifiedDocViewLogsOverviewLogPathFile"
             field={fieldConstants.LOG_FILE_PATH_FIELD}
             formattedValue={formattedDoc[fieldConstants.LOG_FILE_PATH_FIELD]}
-            label={flyoutLogPathFileLabel}
+            label={LogPathFileLabel}
             value={flattenedDoc[fieldConstants.LOG_FILE_PATH_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.DATASTREAM_DATASET_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutDataset"
+            data-test-subj="unifiedDocViewLogsOverviewDataset"
             field={fieldConstants.DATASTREAM_DATASET_FIELD}
             formattedValue={formattedDoc[fieldConstants.DATASTREAM_DATASET_FIELD]}
-            label={flyoutDatasetLabel}
+            label={DatasetLabel}
             value={flattenedDoc[fieldConstants.DATASTREAM_DATASET_FIELD]}
             width={fieldWidth}
           />
         )}
         {formattedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutNamespace"
+            data-test-subj="unifiedDocViewLogsOverviewNamespace"
             field={fieldConstants.DATASTREAM_NAMESPACE_FIELD}
             formattedValue={formattedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
-            label={flyoutNamespaceLabel}
+            label={NamespaceLabel}
             value={flattenedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
             width={fieldWidth}
             useBadge
@@ -207,10 +206,10 @@ export function LogsOverviewHighlights({
         )}
         {formattedDoc[fieldConstants.AGENT_NAME_FIELD] && (
           <HighlightField
-            data-test-subj="logsExplorerFlyoutLogShipper"
+            data-test-subj="unifiedDocViewLogsOverviewLogShipper"
             field={fieldConstants.AGENT_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.AGENT_NAME_FIELD]}
-            label={flyoutShipperLabel}
+            label={ShipperLabel}
             value={flattenedDoc[fieldConstants.AGENT_NAME_FIELD]}
             width={fieldWidth}
           />
@@ -220,97 +219,97 @@ export function LogsOverviewHighlights({
   );
 }
 
-const flyoutServiceLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.service', {
+const ServiceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
   defaultMessage: 'Service',
 });
 
-const flyoutTraceLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.trace', {
+const TraceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.trace', {
   defaultMessage: 'Trace',
 });
 
-const flyoutHostNameLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.hostName', {
+const HostNameLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.hostName', {
   defaultMessage: 'Host name',
 });
 
 const serviceInfraAccordionTitle = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.accordion.title.serviceInfra',
+  'unifiedDocViewer.docView.logsOverview.accordion.title.serviceInfra',
   {
     defaultMessage: 'Service & Infrastructure',
   }
 );
 
 const cloudAccordionTitle = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.accordion.title.cloud',
+  'unifiedDocViewer.docView.logsOverview.accordion.title.cloud',
   {
     defaultMessage: 'Cloud',
   }
 );
 
 const otherAccordionTitle = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.accordion.title.other',
+  'unifiedDocViewer.docView.logsOverview.accordion.title.other',
   {
     defaultMessage: 'Other',
   }
 );
 
-const flyoutOrchestratorClusterNameLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.orchestratorClusterName',
+const OrchestratorClusterNameLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.orchestratorClusterName',
   {
     defaultMessage: 'Orchestrator cluster Name',
   }
 );
 
-const flyoutOrchestratorResourceIdLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.orchestratorResourceId',
+const OrchestratorResourceIdLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.orchestratorResourceId',
   {
     defaultMessage: 'Orchestrator resource ID',
   }
 );
 
-const flyoutCloudProviderLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.cloudProvider',
+const CloudProviderLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.cloudProvider',
   {
     defaultMessage: 'Cloud provider',
   }
 );
 
-const flyoutCloudRegionLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.cloudRegion', {
+const CloudRegionLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudRegion', {
   defaultMessage: 'Cloud region',
 });
 
-const flyoutCloudAvailabilityZoneLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.cloudAvailabilityZone',
+const CloudAvailabilityZoneLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.cloudAvailabilityZone',
   {
     defaultMessage: 'Cloud availability zone',
   }
 );
 
-const flyoutCloudProjectIdLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.cloudProjectId',
+const CloudProjectIdLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.cloudProjectId',
   {
     defaultMessage: 'Cloud project ID',
   }
 );
 
-const flyoutCloudInstanceIdLabel = i18n.translate(
-  'xpack.logsExplorer.flyoutDetail.label.cloudInstanceId',
+const CloudInstanceIdLabel = i18n.translate(
+  'unifiedDocViewer.docView.logsOverview.label.cloudInstanceId',
   {
     defaultMessage: 'Cloud instance ID',
   }
 );
 
-const flyoutLogPathFileLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.logPathFile', {
+const LogPathFileLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.logPathFile', {
   defaultMessage: 'Log path file',
 });
 
-const flyoutNamespaceLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.namespace', {
+const NamespaceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.namespace', {
   defaultMessage: 'Namespace',
 });
 
-const flyoutDatasetLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.dataset', {
+const DatasetLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.dataset', {
   defaultMessage: 'Dataset',
 });
 
-const flyoutShipperLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.shipper', {
+const ShipperLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
   defaultMessage: 'Shipper',
 });
