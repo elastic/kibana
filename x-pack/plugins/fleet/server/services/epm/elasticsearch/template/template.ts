@@ -451,6 +451,10 @@ function _generateMappings(
             );
         }
 
+        if (field.dimension && isIndexModeTimeSeries) {
+          dynProperties.time_series_dimension = field.dimension;
+        }
+
         // When a wildcard field specifies the subobjects setting,
         // the parent intermediate object should set the subobjects
         // setting.
