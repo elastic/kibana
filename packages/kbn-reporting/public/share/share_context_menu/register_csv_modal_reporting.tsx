@@ -8,14 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import url from 'url';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -24,6 +23,7 @@ export const reportingCsvShareProvider = ({
   application,
   license,
   usesUiCapabilities,
+  i18n: i18nStart,
   theme,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
@@ -89,13 +89,13 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
-    const generateReportingJobCSV = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
+    const generateReportingJobCSV = () => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
         .createReportingJob(reportType, decoratedJobParams)
         .then(() => {
-          toastsReport.addSuccess({
-            title: intlReport?.formatMessage(
+          toasts.addSuccess({
+            title: intl.formatMessage(
               {
                 id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
                 defaultMessage: 'Queued report for {objectType}',
@@ -117,7 +117,7 @@ export const reportingCsvShareProvider = ({
                   ),
                 }}
               />,
-              { theme$: theme.theme$ }
+              { theme, i18n }
             ),
             'data-test-subj': 'queueReportSuccess',
           });
@@ -126,15 +126,12 @@ export const reportingCsvShareProvider = ({
           }
         })
         .catch((error) => {
-          toastsReport.addError(error, {
-            title: intlReport!.formatMessage({
+          toasts.addError(error, {
+            title: intl.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };
@@ -154,7 +151,7 @@ export const reportingCsvShareProvider = ({
         apiClient.getDecoratedJobParams(getJobParams())
       );
 
-      const absoluteUrl = url.resolve(window.location.href, relativePath);
+      const absoluteUrl = new URL(relativePath, window.location.href).toString();
 
       shareActions.push({
         shareMenuItem: {

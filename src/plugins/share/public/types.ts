@@ -53,7 +53,7 @@ export interface ShareContext {
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
   toasts: ToastsSetup;
-  intl?: InjectedIntl;
+  intl: InjectedIntl;
 }
 
 /**
