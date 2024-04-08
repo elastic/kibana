@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { PresentationContainer } from './interfaces/presentation_container';
 
 export const getMockPresentationContainer = (): PresentationContainer => {
@@ -14,10 +14,6 @@ export const getMockPresentationContainer = (): PresentationContainer => {
     removePanel: jest.fn(),
     addNewPanel: jest.fn(),
     replacePanel: jest.fn(),
-    registerPanelApi: jest.fn(),
-    lastSavedState: new Subject<void>(),
-    getLastSavedStateForChild: jest.fn(),
-    getChildIds: jest.fn(),
-    getChild: jest.fn(),
+    children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
   };
 };

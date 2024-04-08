@@ -88,6 +88,7 @@ const AssistantComponent: React.FC<Props> = ({
     docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationTitle,
     getLastConversationTitle,
@@ -112,12 +113,18 @@ const AssistantComponent: React.FC<Props> = ({
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
+  const [isStreaming, setIsStreaming] = useState(false);
+
   const {
     data: conversationsData,
     isLoading,
     isError,
     refetch,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    refetchOnWindowFocus: !isStreaming,
+  });
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -441,6 +448,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
@@ -465,11 +473,14 @@ const AssistantComponent: React.FC<Props> = ({
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
+            setIsStreaming,
           })}
           css={css`
             margin-right: 20px;
@@ -497,12 +508,15 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      abortStream,
       refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,
