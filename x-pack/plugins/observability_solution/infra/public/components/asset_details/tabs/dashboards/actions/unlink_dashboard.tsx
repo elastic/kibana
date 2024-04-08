@@ -48,7 +48,7 @@ export function UnlinkDashboard({
         });
         setUrlState({ dashboardId: linkedDashboards[0]?.dashboardSavedObjectId });
 
-        if (result && !isDeleteLoading) {
+        if (result) {
           notifications.toasts.success({
             title: i18n.translate('xpack.infra.customDashboards.unlinkSuccess.toast.title', {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
@@ -77,7 +77,6 @@ export function UnlinkDashboard({
       currentDashboard.dashboardSavedObjectId,
       currentDashboard?.title,
       setUrlState,
-      isDeleteLoading,
       notifications.toasts,
       onRefresh,
     ]

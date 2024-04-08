@@ -90,33 +90,32 @@ export function SaveDashboardModal({
     async function () {
       const [newDashboard] = selectedDashboard;
       try {
-        if (newDashboard.value) {
-          if (isEditMode && currentDashboard.id) {
-            const result = await updateCustomDashboard({
-              assetType,
-              id: currentDashboard.id,
-              dashboardSavedObjectId: newDashboard.value,
-              dashboardFilterAssetIdEnabled: assetNameEnabled,
-            });
-
-            if (result && !isUpdateLoading) {
-              notifications.toasts.success(getEditSuccessToastLabels(newDashboard.label));
-            }
-          } else {
-            const result = await createCustomDashboard({
-              assetType,
-              dashboardSavedObjectId: newDashboard.value,
-              dashboardFilterAssetIdEnabled: assetNameEnabled,
-            });
-
-            if (result && !isCreateLoading) {
-              notifications.toasts.success(getLinkSuccessToastLabels(newDashboard.label));
-            }
-          }
-
-          setUrlState({ dashboardId: newDashboard.value });
-          onRefresh();
+        if (!newDashboard.value) {
+          return;
         }
+
+        const dashboardParams = {
+          assetType,
+          dashboardSavedObjectId: newDashboard.value,
+          dashboardFilterAssetIdEnabled: assetNameEnabled,
+        };
+
+        const result =
+          isEditMode && currentDashboard?.id
+            ? await updateCustomDashboard({
+                ...dashboardParams,
+                id: currentDashboard.id,
+              })
+            : await createCustomDashboard(dashboardParams);
+
+        const getToastLabels = isEditMode ? getLinkSuccessToastLabels : getEditSuccessToastLabels;
+
+        if (result && !(isEditMode ? isUpdateLoading : isCreateLoading)) {
+          notifications.toasts.success(getToastLabels(newDashboard.label));
+        }
+
+        setUrlState({ dashboardId: newDashboard.value });
+        onRefresh();
       } catch (error) {
         notifications.toasts.danger({
           title: i18n.translate('xpack.infra.customDashboards.addFailure.toast.title', {
@@ -259,7 +258,7 @@ function getEditSuccessToastLabels(dashboardName: string) {
       values: { dashboardName },
     }),
     text: i18n.translate('xpack.infra.customDashboards.editSuccess.toast.text', {
-      defaultMessage: 'Your dashboard link have been updated',
+      defaultMessage: 'Your dashboard link has been updated',
     }),
   };
 }
