@@ -11,6 +11,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiSpacer,
   useEuiTheme,
@@ -19,6 +20,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadBlob } from '../../../../common/utils/download_blob';
+import type { RowValidationErrors } from '../validations';
 
 interface AssetCriticalityValidationStepProps {
   validLinesCount: number;
@@ -28,7 +30,10 @@ interface AssetCriticalityValidationStepProps {
   fileName: string;
   onConfirm: () => void;
   onReturn: () => void;
+  invalidLinesErrors: RowValidationErrors[];
 }
+
+const CODE_BLOCK_HEIGHT = 250;
 
 export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidationStepProps> = ({
   validLinesCount,
@@ -38,8 +43,14 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
   fileName,
   onConfirm,
   onReturn,
+  invalidLinesErrors,
 }) => {
   const { euiTheme } = useEuiTheme();
+
+  const annotations = invalidLinesErrors.reduce<Record<number, string>>((acc, e) => {
+    acc[e.index] = e.error;
+    return acc;
+  }, {});
 
   return (
     <>
@@ -65,7 +76,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   <span>
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
-                      defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset will be assigned} other {{validLinesCountBold} assets will be assigned}}"
+                      defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality will be assigned} other {{validLinesCountBold} assets criticalities will be assigned}}"
                       values={{ validLinesCount, validLinesCountBold: <b>{validLinesCount}</b> }}
                     />
                   </span>
@@ -86,7 +97,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
           <EuiSpacer size="xs" />
 
           <EuiCodeBlock
-            overflowHeight={400}
+            overflowHeight={CODE_BLOCK_HEIGHT}
             lineNumbers
             language="CSV"
             isVirtualized
@@ -96,7 +107,6 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
           >
             {validLinesAsText}
           </EuiCodeBlock>
-
           <EuiSpacer size="l" />
         </>
       )}
@@ -113,7 +123,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   <span>
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
-                      defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} invalid line won't be assigned} other {{invalidLinesCountBold} invalid lines won't be assigned}}"
+                      defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} line is invalid and won't be assigned} other {{invalidLinesCountBold} lines are invalid and won't be assigned}}"
                       values={{
                         invalidLinesCount,
                         invalidLinesCountBold: <b>{invalidLinesCount}</b>,
@@ -145,8 +155,8 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
           </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiCodeBlock
-            overflowHeight={400}
-            lineNumbers
+            overflowHeight={CODE_BLOCK_HEIGHT}
+            lineNumbers={{ annotations }}
             language="CSV"
             isVirtualized
             css={css`
@@ -155,23 +165,32 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
           >
             {invalidLinesAsText}
           </EuiCodeBlock>
+          <EuiSpacer size="l" />
         </>
       )}
 
+      <EuiHorizontalRule />
       <EuiSpacer size="s" />
-      <EuiButtonEmpty onClick={onReturn}>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.back"
-          defaultMessage="back"
-        />
-      </EuiButtonEmpty>
 
-      <EuiButton fill onClick={onConfirm} disabled={validLinesCount === 0}>
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assign"
-          defaultMessage="Assign"
-        />
-      </EuiButton>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onReturn}>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.backButtonText"
+              defaultMessage="Back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton fill onClick={onConfirm} disabled={validLinesCount === 0}>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assignButtonText"
+              defaultMessage="Assign"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

@@ -156,7 +156,6 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         headers: {
-          // 'Content-Type': 'text/csv',
           'Content-Type': undefined,
         },
         body,

@@ -6,6 +6,7 @@
  */
 
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { RowValidationErrors } from './validations';
 
 interface ReducerState {
   fileError?: string;
@@ -18,18 +19,23 @@ interface ReducerState {
   // invalidLines?: string[][];
   step: number;
   fileUploadResponse?: AssetCriticalityCsvUploadResponse;
-
+  fileUploadError?: string;
   fileName?: string;
   invalidLinesAsText?: string;
   validLinesAsText?: string;
   validLinesCount?: number;
   invalidLinesCount?: number;
+  invalidLinesErrors?: RowValidationErrors[];
 }
 
 type ReducerAction =
   | { type: 'uploadingFile' }
-  | { type: 'fileUploaded'; payload: AssetCriticalityCsvUploadResponse }
+  | {
+      type: 'fileUploaded';
+      payload: { response?: AssetCriticalityCsvUploadResponse; errorMessage?: string };
+    }
   | { type: 'goToStep'; payload: { step: number } }
+  | { type: 'resetState' }
   | { type: 'loadingFile'; payload: { fileName: string } }
   | {
       type: 'fileValidated';
@@ -38,41 +44,22 @@ type ReducerAction =
         invalidLinesAsText: string;
         validLinesAsText: string;
         validLinesCount: number;
+        invalidLinesErrors: RowValidationErrors[];
         invalidLinesCount: number;
       };
     }
   | { type: 'fileError'; payload: { message: string; file: File } };
 
+const initialState = {
+  isLoading: false,
+  step: 1,
+};
+
 export const reducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   switch (action.type) {
-    case 'goToStep':
-      if (action.payload.step > state.step || state.step === 3) {
-        return state;
-      }
+    case 'resetState':
+      return initialState;
 
-      if (action.payload.step === 1) {
-        return {
-          ...action.payload,
-          isLoading: false,
-          step: 1,
-        };
-      }
-
-      if (action.payload.step === 2) {
-        return {
-          isLoading: false,
-          step: 2,
-        };
-      }
-
-      if (action.payload.step === 3) {
-        return {
-          isLoading: false,
-          step: 3,
-        };
-      }
-
-      return state;
     case 'loadingFile':
       return {
         isLoading: true,
@@ -103,7 +90,8 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
     case 'fileUploaded':
       return {
         ...state,
-        fileUploadResponse: action.payload,
+        fileUploadResponse: action.payload.response,
+        fileUploadError: action.payload.errorMessage,
         isLoading: false,
         step: 3,
       };

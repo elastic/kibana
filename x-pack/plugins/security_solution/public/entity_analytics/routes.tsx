@@ -14,7 +14,7 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 
 import {
-  ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   SecurityPageName,
 } from '../../common/constants';
@@ -58,7 +58,7 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   return (
     <Switch>
       <Route
-        path={ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH}
+        path={ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH}
         exact
         component={EntityAnalyticsAssetClassificationTelemetry}
       />
@@ -76,7 +76,7 @@ export const routes = [
     component: EntityAnalyticsManagementContainer,
   },
   {
-    path: ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
+    path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
     component: EntityAnalyticsAssetClassificationContainer,
   },
 ];

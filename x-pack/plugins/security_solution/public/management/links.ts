@@ -16,7 +16,7 @@ import {
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -37,6 +37,7 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
+  ASSET_CRITICALITY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -51,6 +52,7 @@ import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { IconAssetCriticality } from '../common/icons/asset_criticality';
 
 const categories = [
   {
@@ -186,12 +188,15 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsAssetClassification,
-      title: 'Asset classification', // TODO i18n
-      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: 'Description test 1 2 3',
-      }),
-      landingIcon: IconEntityAnalytics,
-      path: ENTITY_ANALYTICS_ASSET_CLASSIFICATION_PATH,
+      title: ASSET_CRITICALITY,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.assetClassificationDescription',
+        {
+          defaultMessage: 'Represents the criticality of an asset to your business infrastructure.',
+        }
+      ),
+      landingIcon: IconAssetCriticality,
+      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
