@@ -7,7 +7,7 @@
  */
 
 import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import { combineLatest, distinctUntilChanged, merge, Observable } from 'rxjs';
+import { combineLatest, distinctUntilChanged, merge, Observable, skip, tap } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
@@ -56,7 +56,8 @@ export function newSession$(api: unknown) {
     }
   }
 
+  const combine$ = combineLatest(observables).pipe(skip(1));
   return apiPublishesReload(api)
-    ? merge(api.reload$, combineLatest(observables))
-    : combineLatest(observables);
+    ? merge(api.reload$, combine$)
+    : combine$;
 }

@@ -14,7 +14,7 @@ import { newSession$ } from './new_session';
 describe('newSession$', () => {
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject(undefined);
-  const reload$ = new Subject();
+  const reload$ = new Subject<void>();
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
   const api = {
     filters$,
@@ -22,6 +22,17 @@ describe('newSession$', () => {
     reload$,
     timeRange$,
   };
+
+  test('should not fire on subscribe', async () => {
+    let count = 0;
+    const subscription = newSession$(api)
+      .subscribe(() => {
+        count++;
+      });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(count).toBe(0);
+    subscription.unsubscribe();
+  });
 
   describe('filter$', () => {
     const existsFilter = buildExistsFilter(
@@ -36,19 +47,15 @@ describe('newSession$', () => {
     test('should fire on filter change', async () => {
       filters$.next([existsFilter]);
 
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++;
         });
 
       filters$.next([toggleFilterNegated(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(true);
+      expect(count).toBe(1);
       subscription.unsubscribe();
     });
 
@@ -56,76 +63,60 @@ describe('newSession$', () => {
       const disabledFilter = disableFilter(existsFilter);
       filters$.next([disabledFilter]);
 
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++;
         });
 
       filters$.next([toggleFilterNegated(disabledFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(false);
+      expect(count).toBe(0);
       subscription.unsubscribe();
     });
 
     test('should not fire on unpinned filter changing to pinned', async () => {
       filters$.next([existsFilter]);
 
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++;
         });
 
       filters$.next([pinFilter(existsFilter)]);
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(false);
+      expect(count).toBe(0);
       subscription.unsubscribe();
     });
 
     test('should not fire on pinned filter changing to unpinned', async () => {
       filters$.next([pinFilter(existsFilter)]);
 
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++
         });
 
       filters$.next([existsFilter]);
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(false);
+      expect(count).toBe(0);
       subscription.unsubscribe();
     });
   });
 
   describe('reload$', () => {
     test('should fire on reload', async () => {
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++;
         });
 
-      reload$.next(undefined);
+      reload$.next();
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(true);
+      expect(count).toBe(1);
       subscription.unsubscribe();
     });
   });
@@ -134,19 +125,15 @@ describe('newSession$', () => {
     test('should fire on timeRange change', async () => {
       timeRange$.next({ from: 'now-15m', to: 'now' });
 
-      let fired = false;
+      let count = 0;
       const subscription = newSession$(api)
-        .pipe(
-          // ignore emit on subscribe
-          skip(1)
-        )
         .subscribe(() => {
-          fired = true;
+          count++;
         });
 
       timeRange$.next({ from: 'now-30m', to: 'now' });
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(fired).toBe(true);
+      expect(count).toBe(1);
       subscription.unsubscribe();
     });
   });
