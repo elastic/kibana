@@ -78,25 +78,25 @@ export type ESQLLiteral =
   | ESQLNullLiteral
   | ESQLStringLiteral;
 
-interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumberLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'number';
   value: number;
 }
 
-interface ESQLBooleanLiteral extends ESQLAstBaseItem {
+export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'boolean';
   value: string;
 }
 
-interface ESQLNullLiteral extends ESQLAstBaseItem {
+export interface ESQLNullLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'null';
   value: string;
 }
 
-interface ESQLStringLiteral extends ESQLAstBaseItem {
+export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'string';
   value: string;
