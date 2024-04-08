@@ -28,20 +28,6 @@ interface ReputationServiceProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
 }
 
-const USE_REPUTATION_SERVICE_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.useReputationService',
-  {
-    defaultMessage: 'Use reputation service',
-  }
-);
-
-const DO_NOT_USE_REPUTATION_SERVICE_CHECKBOX_LABEL = i18n.translate(
-  'xpack.securitySolution.endpoint.policyDetail.doNotUseReputationService',
-  {
-    defaultMessage: "Don't use reputation service",
-  }
-);
-
 export const ReputationService = React.memo(
   ({
     policy,
@@ -73,10 +59,6 @@ export const ReputationService = React.memo(
       },
       [policy, onChange]
     );
-
-    const checkboxLabel = checkboxChecked
-      ? USE_REPUTATION_SERVICE_CHECKBOX_LABEL
-      : DO_NOT_USE_REPUTATION_SERVICE_CHECKBOX_LABEL;
 
     if (!isCloud) {
       return null;
@@ -112,23 +94,16 @@ export const ReputationService = React.memo(
           </EuiFlexGroup>
         </SettingCardHeader>
         <EuiSpacer size="s" />
-        {isEditMode ? (
-          <EuiCheckbox
-            data-test-subj={getTestId('checkbox')}
-            id={`${protection}ReputationServiceCheckbox}`}
-            onChange={handleChange}
-            checked={checkboxChecked}
-            disabled={!protectionTurnedOn}
-            label={i18n.translate(
-              'xpack.securitySolution.endpoint.policyDetail.reputationService',
-              {
-                defaultMessage: 'Reputation service',
-              }
-            )}
-          />
-        ) : (
-          <>{checkboxLabel}</>
-        )}
+        <EuiCheckbox
+          data-test-subj={getTestId('checkbox')}
+          id={`${protection}ReputationServiceCheckbox}`}
+          onChange={handleChange}
+          checked={checkboxChecked}
+          disabled={!protectionTurnedOn || !isEditMode}
+          label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.reputationService', {
+            defaultMessage: 'Reputation service',
+          })}
+        />
       </div>
     );
   }
