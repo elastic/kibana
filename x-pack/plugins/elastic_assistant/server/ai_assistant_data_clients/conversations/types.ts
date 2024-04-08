@@ -11,10 +11,14 @@ import {
   MessageRole,
   Provider,
   Reader,
-  Replacement,
 } from '@kbn/elastic-assistant-common';
 
-export interface SearchEsConversationSchema {
+export interface EsReplacementSchema {
+  value: string;
+  uuid: string;
+}
+
+export interface EsConversationSchema {
   id: string;
   '@timestamp': string;
   created_at: string;
@@ -39,13 +43,14 @@ export interface SearchEsConversationSchema {
   }>;
   api_config?: {
     connector_id: string;
+    action_type_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
   is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: Replacement[];
+  replacements?: EsReplacementSchema[];
   users?: Array<{
     id?: string;
     name?: string;
@@ -72,14 +77,15 @@ export interface CreateMessageSchema {
     };
   }>;
   api_config?: {
-    connector_id?: string;
+    action_type_id: string;
+    connector_id: string;
     default_system_prompt_id?: string;
     provider?: Provider;
     model?: string;
   };
   is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: Replacement[];
+  replacements?: EsReplacementSchema[];
   users: Array<{
     id?: string;
     name?: string;

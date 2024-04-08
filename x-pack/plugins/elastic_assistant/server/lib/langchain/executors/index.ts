@@ -13,7 +13,7 @@ import { callOpenAIFunctionsExecutor } from './openai_functions_executor';
  * To support additional Agent Executors from the UI, add them to this map
  * and reference your specific AgentExecutor function
  */
-export const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
+export const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor<false>> = {
   DefaultAgentExecutor: callAgentExecutor,
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
 };

@@ -39,18 +39,11 @@ components:
           type: string
           description: Could be any string, not necessarily a UUID
 
-    Replacement:
+    Replacements:
       type: object
-      required:
-        - 'value'
-        - 'uuid'
+      additionalProperties:
+        type: string
       description: Replacements object used to anonymize/deanomymize messsages
-      properties:
-        value:
-          type: string
-          description: Actual value was anonymized.
-        uuid:
-          $ref: '#/components/schemas/UUID'
 
     Reader:
       type: object
@@ -117,10 +110,14 @@ components:
       type: object
       required:
         - connectorId
+        - actionTypeId
       properties:
         connectorId:
           type: string
           description: connector Id
+        actionTypeId:
+          type: string
+          description: action type Id
         defaultSystemPromptId:
           type: string
           description: defaultSystemPromptId
@@ -198,9 +195,7 @@ components:
           description: The last time conversation was updated.
           type: string
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacements'
         users:
           type: array
           items:
@@ -252,9 +247,7 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacements'
 
     ConversationCreateProps:
       type: object
@@ -282,9 +275,7 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacements'
 
     ConversationMessageCreateProps:
       type: object

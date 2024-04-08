@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Agent } from '@kbn/fleet-plugin/common';
+
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import type { AllowlistFields } from './filterlists/types';
 
@@ -102,6 +104,7 @@ export enum TelemetryCounter {
   FATAL_ERROR = 'fatal_error',
   TELEMETRY_OPTED_OUT = 'telemetry_opted_out',
   TELEMETRY_NOT_REACHABLE = 'telemetry_not_reachable',
+  NUM_ENDPOINT = 'num_endpoint',
 }
 
 // EP Policy Response
@@ -124,7 +127,7 @@ export interface EndpointPolicyResponseAggregation {
 interface EndpointPolicyResponseHits {
   hits: {
     total: { value: number };
-    hits: EndpointPolicyResponseDocument[];
+    hits: Array<{ _source: EndpointPolicyResponseDocument }>;
   };
 }
 
@@ -133,33 +136,30 @@ interface NonPolicyConfiguration {
 }
 
 export interface EndpointPolicyResponseDocument {
-  _source: {
-    '@timestamp': string;
-    agent: {
-      id: string;
-    };
-    event: {
-      agent_id_status: string;
-    };
-    Endpoint: {
-      policy: {
-        applied: {
-          actions: Array<{
-            name: string;
-            message: string;
-            status: string;
-          }>;
-          artifacts: {
-            global: {
-              version: string;
-            };
-          };
+  agent: {
+    id: string;
+  };
+  event: {
+    agent_id_status: string;
+  };
+  Endpoint: {
+    policy: {
+      applied: {
+        actions: Array<{
+          name: string;
+          message: string;
           status: string;
+        }>;
+        artifacts: {
+          global: {
+            version: string;
+          };
         };
+        status: string;
       };
-      configuration: NonPolicyConfiguration;
-      state: NonPolicyConfiguration;
     };
+    configuration: NonPolicyConfiguration;
+    state: NonPolicyConfiguration;
   };
 }
 
@@ -180,32 +180,35 @@ export interface EndpointMetricsAggregation {
 interface EndpointMetricHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetricDocument[];
+    hits: Array<{ _id: string; _source: EndpointMetricDocument }>;
   };
 }
 
-interface EndpointMetricDocument {
-  _source: {
-    '@timestamp': string;
+export interface EndpointMetricDocument {
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    metrics: EndpointMetrics;
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      metrics: EndpointMetrics;
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
-    };
-    host: {
-      os: EndpointMetricOS;
-    };
-    event: {
-      agent_id_status: string;
     };
   };
+  host: {
+    os: EndpointMetricOS;
+  };
+  event: {
+    agent_id_status: string;
+  };
+}
+
+export interface EndpointMetricsAbstract {
+  endpointMetricIds: string[];
+  totalEndpoints: number;
 }
 
 interface DocumentsVolumeMetrics {
@@ -308,24 +311,22 @@ export interface EndpointMetadataAggregation {
 interface EndpointMetadataHits {
   hits: {
     total: { value: number };
-    hits: EndpointMetadataDocument[];
+    hits: Array<{ _source: EndpointMetadataDocument }>;
   };
 }
 
 export interface EndpointMetadataDocument {
-  _source: {
-    '@timestamp': string;
+  '@timestamp': string;
+  agent: {
+    id: string;
+    version: string;
+  };
+  Endpoint: {
+    capabilities: string[];
+  };
+  elastic: {
     agent: {
       id: string;
-      version: string;
-    };
-    Endpoint: {
-      capabilities: string[];
-    };
-    elastic: {
-      agent: {
-        id: string;
-      };
     };
   };
 }
@@ -463,6 +464,12 @@ export interface TelemetryConfiguration {
   sender_channels?: {
     [key: string]: TelemetrySenderChannelConfiguration;
   };
+  pagination_config?: PaginationConfiguration;
+}
+
+export interface PaginationConfiguration {
+  max_page_size_bytes: number;
+  num_docs_to_sample: number;
 }
 
 export interface TelemetrySenderChannelConfiguration {
@@ -488,7 +495,7 @@ export type Nullable<T> = T | null | undefined;
 
 export interface ExtraInfo {
   clusterInfo: ESClusterInfo;
-  licenseInfo: ESLicense | undefined;
+  licenseInfo: Nullable<ESLicense>;
 }
 
 export interface TimeFrame {
@@ -500,4 +507,11 @@ export interface TimelineResult {
   nodes: number;
   events: number;
   timeline: TimelineTelemetryTemplate | undefined;
+}
+
+export interface FleetAgentResponse {
+  agents: Agent[];
+  total: number;
+  page: number;
+  perPage: number;
 }
