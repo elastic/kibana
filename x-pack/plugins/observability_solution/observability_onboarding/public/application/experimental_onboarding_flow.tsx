@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import React from 'react';
@@ -21,37 +20,29 @@ const queryClient = new QueryClient();
 export function ExperimentalOnboardingFlow() {
   return (
     <QueryClientProvider client={queryClient}>
-      <EuiThemeProvider darkMode={false}>
-        <>
-          <EuiPageTemplate.Section
-            paddingSize="xl"
-            css={css`
-              & > div {
-                background-image: url(${backgroundImageUrl});
-                background-position: right center;
-                background-repeat: no-repeat;
-              }
-            `}
-            grow={false}
-            restrictWidth
-          >
-            <EuiSpacer size="xl" />
-            <Header />
-          </EuiPageTemplate.Section>
-          <EuiPageTemplate.Section
-            paddingSize="xl"
-            color="subdued"
-            restrictWidth
-          >
-            <OnboardingFlowForm />
-            <EuiSpacer size="xl" />
-          </EuiPageTemplate.Section>
-          <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
-            <Footer />
-            <EuiSpacer size="xl" />
-          </EuiPageTemplate.Section>
-        </>
-      </EuiThemeProvider>
+      <EuiPageTemplate.Section
+        paddingSize="xl"
+        css={css`
+          & > div {
+            background-image: url(${backgroundImageUrl});
+            background-position: right center;
+            background-repeat: no-repeat;
+          }
+        `}
+        grow={false}
+        restrictWidth
+      >
+        <EuiSpacer size="xl" />
+        <Header />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
+        <OnboardingFlowForm />
+        <EuiSpacer size="xl" />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
+        <Footer />
+        <EuiSpacer size="xl" />
+      </EuiPageTemplate.Section>
     </QueryClientProvider>
   );
 }
