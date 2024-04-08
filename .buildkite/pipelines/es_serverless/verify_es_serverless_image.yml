@@ -39,7 +39,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: "Pick Test Group Run Order - Serverless FTR"
+      - label: "Pick Test Group Run Order (FTR + Integration)"
         command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
         agents:
           queue: kibana-default
@@ -47,28 +47,14 @@ steps:
         timeout_in_minutes: 10
         env:
           FTR_CONFIGS_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh'
+          JEST_INTEGRATION_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh'
           FTR_CONFIG_PATTERNS: '**/test_serverless/**'
           FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
-          LIMIT_CONFIG_TYPE: 'functional'
+          LIMIT_CONFIG_TYPE: 'functional,integration'
         retry:
           automatic:
             - exit_status: '*'
               limit: 1
-
-      - label: "Pick Test Group Run Order - Jest Integration"
-        command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-        agents:
-          queue: kibana-default
-        depends_on: build
-        timeout_in_minutes: 10
-        env:
-          LIMIT_CONFIG_TYPE: 'integration'
-          JEST_INTEGRATION_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh'
-        retry:
-          automatic:
-            - exit_status: '*'
-              limit: 1
-
 
       - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
         label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
