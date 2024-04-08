@@ -33,7 +33,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { PluginContext } from '../../../context/plugin_context';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
-import { GroupListView } from '../../../pages/slos/components/grouped_slos/group_list_view';
+import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
 import type { SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
@@ -90,20 +90,11 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
 
     const renderOverview = () => {
       if (overviewMode === 'groups') {
-        const groups = groupFilters?.groups;
+        const groupBy = groupFilters?.groupBy ?? 'status';
         return (
           <Wrapper>
             <EuiFlexItem grow={false}>
-              {groups &&
-                groups.map((group) => (
-                  <GroupListView
-                    key={group.group}
-                    groupBy={groupFilters!.groupBy}
-                    group={group.group}
-                    sloView="cardView"
-                    summary={group.summary}
-                  />
-                ))}
+              <GroupView sloView="cardView" groupBy={groupBy} />
             </EuiFlexItem>
           </Wrapper>
         );

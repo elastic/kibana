@@ -130,8 +130,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
 
 function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: 'slo.tags',
-    groups: [],
+    groupBy: 'status',
   });
   const [hasError, setHasError] = useState(false);
 

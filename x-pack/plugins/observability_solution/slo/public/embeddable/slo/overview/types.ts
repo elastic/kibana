@@ -12,7 +12,7 @@ export type OverviewMode = 'single' | 'groups';
 type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   groupBy: GroupBy;
-  groups: SLOGroupWithSummaryResponse[];
+  groups?: SLOGroupWithSummaryResponse[];
 }
 
 export type SingleSloProps = EmbeddableSloProps & {
