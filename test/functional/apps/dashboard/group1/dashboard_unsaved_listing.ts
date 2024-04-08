@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a warning on create new, and restores panels if continue is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboardExpectWarning(true);
+      await PageObjects.dashboard.clickNewDashboard({ continueEditing: true, expectWarning: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.dashboard.getPanelCount()).to.eql(2);
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -94,7 +94,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a warning on create new, and clears unsaved panels if discard is selected', async () => {
-      await PageObjects.dashboard.clickNewDashboardExpectWarning();
+      await PageObjects.dashboard.clickNewDashboard({
+        continueEditing: false,
+        expectWarning: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.dashboard.getPanelCount()).to.eql(0);
       await PageObjects.dashboard.gotoDashboardLandingPage();
