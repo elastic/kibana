@@ -8,41 +8,40 @@ import {
   DefaultItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiSkeletonRectangle,
+  EuiFlexGroup,
   EuiText,
   EuiToolTip,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
+import { RulesParams } from '@kbn/observability-plugin/public';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
-import { useKibana } from '../../../../utils/kibana_react';
-import { SloTagsList } from '../common/slo_tags_list';
-import { useCloneSlo } from '../../../../hooks/use_clone_slo';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCapabilities } from '../../../../hooks/use_capabilities';
+import { useCloneSlo } from '../../../../hooks/use_clone_slo';
 import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
+import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
+import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
+import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
+import { SLOGroupings } from '../common/slo_groupings';
+import { SloTagsList } from '../common/slo_tags_list';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { SLOGroupings } from '../common/slo_groupings';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -211,6 +210,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => (
         <EuiFlexGroup direction="row" gutterSize="s">
           <SloStatusBadge slo={slo} />
+          <SloRemoteBadge slo={slo} />
         </EuiFlexGroup>
       ),
     },

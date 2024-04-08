@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { SloRemoteBadge } from '../../slos/components/card_view/slo_remote_badge';
+import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
