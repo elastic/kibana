@@ -19,8 +19,10 @@ import {
   enableInfrastructureAssetCustomDashboards,
   enableInfrastructureHostsView,
 } from '@kbn/observability-plugin/common';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -29,6 +31,7 @@ import {
   DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -113,6 +116,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -125,17 +129,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
-
-  const getKibanaServerUrl = () => {
-    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-    const kibanaServerUrlWithAuth = url
-      .format({
-        ...url.parse(kibanaServerUrl),
-        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-      })
-      .slice(0, -1);
-    return kibanaServerUrlWithAuth;
-  };
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
@@ -162,17 +155,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      const kibanaClient = new ApmSynthtraceKibanaClient({
-        target: getKibanaServerUrl(),
-        logger: createLogger(LogLevel.debug),
-      });
-      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-      await kibanaClient.installApmPackage(kibanaVersion);
-      synthtraceApmClient = new ApmSynthtraceEsClient({
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
         client: esClient,
-        logger: createLogger(LogLevel.info),
-        version: kibanaVersion,
-        refreshAfterIndex: true,
+        packageVersion: version,
       });
 
       const services = generateAddServicesToExistingHost({
@@ -189,12 +175,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-        kibanaServer.savedObjects.cleanStandardList(),
       ]);
     });
 
     after(async () => {
       return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
