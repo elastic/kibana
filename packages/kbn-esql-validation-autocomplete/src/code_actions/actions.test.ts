@@ -11,6 +11,7 @@ import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { wrapAsEditorMessage } from './testing_utils';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { CodeActionOptions } from './types';
 
 function getCallbackMocks() {
   return {
@@ -61,6 +62,8 @@ function getCallbackMocks() {
   };
 }
 
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+
 /**
  * There are different wats to test the code here: one is a direct unit test of the feature, another is
  * an integration test passing from the query statement validation. The latter is more realistic, but
@@ -69,28 +72,42 @@ function getCallbackMocks() {
 function testQuickFixesFn(
   statement: string,
   expectedFixes: string[] = [],
-  options: { equalityCheck?: 'include' | 'equal' } = {},
+  options: Simplify<{ equalityCheck?: 'include' | 'equal' } & CodeActionOptions> = {},
   { only, skip }: { only?: boolean; skip?: boolean } = {}
 ) {
   const testFn = only ? it.only : skip ? it.skip : it;
-  testFn(`${statement} => ["${expectedFixes.join('","')}"]`, async () => {
-    const callbackMocks = getCallbackMocks();
-    const { errors } = await validateQuery(
-      statement,
-      getAstAndSyntaxErrors,
-      undefined,
-      callbackMocks
-    );
+  testFn(
+    `${statement} => ["${expectedFixes.join('","')}"]${
+      options.relaxOnMissingCallbacks != null
+        ? ` (Relaxed = ${options.relaxOnMissingCallbacks})`
+        : ''
+    } `,
+    async () => {
+      const callbackMocks = getCallbackMocks();
+      const { errors } = await validateQuery(
+        statement,
+        getAstAndSyntaxErrors,
+        undefined,
+        callbackMocks
+      );
+      const { equalityCheck, ...fnOptions } = options || {};
 
-    const monacoErrors = wrapAsEditorMessage('error', errors);
-    const actions = await getActions(statement, monacoErrors, getAstAndSyntaxErrors, callbackMocks);
-    const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
-    expect(edits).toEqual(
-      !options || !options.equalityCheck || options.equalityCheck === 'equal'
-        ? expectedFixes
-        : expect.arrayContaining(expectedFixes)
-    );
-  });
+      const monacoErrors = wrapAsEditorMessage('error', errors);
+      const actions = await getActions(
+        statement,
+        monacoErrors,
+        getAstAndSyntaxErrors,
+        fnOptions,
+        callbackMocks
+      );
+      const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
+      expect(edits).toEqual(
+        !equalityCheck || equalityCheck === 'equal'
+          ? expectedFixes
+          : expect.arrayContaining(expectedFixes)
+      );
+    }
+  );
 }
 
 type TestArgs = [string, string[], { equalityCheck?: 'include' | 'equal' }?];
@@ -113,84 +130,128 @@ const testQuickFixes = Object.assign(testQuickFixesFn, {
 
 describe('quick fixes logic', () => {
   describe('fixing index spellchecks', () => {
-    // No error, no quick action
-    testQuickFixes('FROM index', []);
-    testQuickFixes('FROM index2', ['index']);
-    testQuickFixes('FROM myindex', ['index', 'my-index']);
-    // wildcards
-    testQuickFixes('FROM index*', []);
-    testQuickFixes('FROM ind*', []);
-    testQuickFixes('FROM end*', ['ind*']);
-    testQuickFixes('FROM endex*', ['index']);
-    // Too far for the levenstein distance and should not fix with a hidden index
-    testQuickFixes('FROM secretIndex', []);
-    testQuickFixes('FROM secretIndex2', []);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      // No error, no quick action
+      testQuickFixes('FROM index', [], options);
+      testQuickFixes('FROM index2', ['index'], options);
+      testQuickFixes('FROM myindex', ['index', 'my-index'], options);
+      // wildcards
+      testQuickFixes('FROM index*', [], options);
+      testQuickFixes('FROM ind*', [], options);
+      testQuickFixes('FROM end*', ['ind*']);
+      testQuickFixes('FROM endex*', ['index'], options);
+      // Too far for the levenstein distance and should not fix with a hidden index
+      testQuickFixes('FROM secretIndex', [], options);
+      testQuickFixes('FROM secretIndex2', [], options);
+    }
   });
 
   describe('fixing fields spellchecks', () => {
-    for (const command of ['KEEP', 'DROP', 'EVAL']) {
-      testQuickFixes(`FROM index | ${command} stringField`, []);
-      // strongField => stringField
-      testQuickFixes(`FROM index | ${command} strongField`, ['stringField']);
-      testQuickFixes(`FROM index | ${command} numberField, strongField`, ['stringField']);
-    }
-    testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField']);
-    testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField']);
-    // This levarage the knowledge of the enrich policy fields to suggest the right field
-    testQuickFixes(`FROM index | ENRICH policy | KEEP yetAnotherField2`, ['yetAnotherField']);
-    testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField']);
-    testQuickFixes(`FROM index | ENRICH policy ON stringField WITH yetAnotherField2`, [
-      'yetAnotherField',
-    ]);
-
-    describe('metafields spellchecks', () => {
-      for (const isWrapped of [true, false]) {
-        function setWrapping(text: string) {
-          return isWrapped ? `[${text}]` : text;
-        }
-        testQuickFixes(`FROM index ${setWrapping('metadata _i_ndex')}`, ['_index']);
-        testQuickFixes(`FROM index ${setWrapping('metadata _id, _i_ndex')}`, ['_index']);
-        testQuickFixes(`FROM index ${setWrapping('METADATA _id, _i_ndex')}`, ['_index']);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      for (const command of ['KEEP', 'DROP', 'EVAL']) {
+        testQuickFixes(`FROM index | ${command} stringField`, [], options);
+        // strongField => stringField
+        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(
+          `FROM index | ${command} numberField, strongField`,
+          ['stringField'],
+          options
+        );
       }
-    });
+      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      // This levarage the knowledge of the enrich policy fields to suggest the right field
+      testQuickFixes(
+        `FROM index | ENRICH policy | KEEP yetAnotherField2`,
+        ['yetAnotherField'],
+        options
+      );
+      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(
+        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        ['yetAnotherField'],
+        options
+      );
+
+      describe('metafields spellchecks', () => {
+        for (const isWrapped of [true, false]) {
+          function setWrapping(text: string) {
+            return isWrapped ? `[${text}]` : text;
+          }
+          testQuickFixes(`FROM index ${setWrapping('metadata _i_ndex')}`, ['_index'], options);
+          testQuickFixes(`FROM index ${setWrapping('metadata _id, _i_ndex')}`, ['_index'], options);
+          testQuickFixes(`FROM index ${setWrapping('METADATA _id, _i_ndex')}`, ['_index'], options);
+        }
+      });
+    }
   });
 
   describe('fixing meta fields spellchecks', () => {
-    for (const command of ['KEEP', 'DROP', 'EVAL']) {
-      testQuickFixes(`FROM index | ${command} stringField`, []);
-      // strongField => stringField
-      testQuickFixes(`FROM index | ${command} strongField`, ['stringField']);
-      testQuickFixes(`FROM index | ${command} numberField, strongField`, ['stringField']);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      for (const command of ['KEEP', 'DROP', 'EVAL']) {
+        testQuickFixes(`FROM index | ${command} stringField`, [], options);
+        // strongField => stringField
+        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(
+          `FROM index | ${command} numberField, strongField`,
+          ['stringField'],
+          options
+        );
+      }
+      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
+      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      // This levarage the knowledge of the enrich policy fields to suggest the right field
+      testQuickFixes(
+        `FROM index | ENRICH policy | KEEP yetAnotherField2`,
+        ['yetAnotherField'],
+        options
+      );
+      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(
+        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        ['yetAnotherField'],
+        options
+      );
     }
-    testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField']);
-    testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField']);
-    testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField']);
-    // This levarage the knowledge of the enrich policy fields to suggest the right field
-    testQuickFixes(`FROM index | ENRICH policy | KEEP yetAnotherField2`, ['yetAnotherField']);
-    testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField']);
-    testQuickFixes(`FROM index | ENRICH policy ON stringField WITH yetAnotherField2`, [
-      'yetAnotherField',
-    ]);
   });
 
   describe('fixing policies spellchecks', () => {
-    testQuickFixes(`FROM index | ENRICH poli`, ['policy']);
-    testQuickFixes(`FROM index | ENRICH mypolicy`, ['policy']);
-    testQuickFixes(`FROM index | ENRICH policy[`, ['policy', 'policy[]']);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      testQuickFixes(`FROM index | ENRICH poli`, ['policy'], options);
+      testQuickFixes(`FROM index | ENRICH mypolicy`, ['policy'], options);
+      testQuickFixes(`FROM index | ENRICH policy[`, ['policy', 'policy[]'], options);
 
-    describe('modes', () => {
-      testQuickFixes(`FROM index | ENRICH _ann:policy`, ['_any']);
-      const modes = ['_any', '_coordinator', '_remote'];
-      for (const mode of modes) {
-        testQuickFixes(`FROM index | ENRICH ${mode.replace('_', '@')}:policy`, [mode]);
-      }
-      testQuickFixes(`FROM index | ENRICH unknown:policy`, modes);
-    });
+      describe('modes', () => {
+        testQuickFixes(`FROM index | ENRICH _ann:policy`, ['_any'], options);
+        const modes = ['_any', '_coordinator', '_remote'];
+        for (const mode of modes) {
+          testQuickFixes(`FROM index | ENRICH ${mode.replace('_', '@')}:policy`, [mode], options);
+        }
+        testQuickFixes(`FROM index | ENRICH unknown:policy`, modes, options);
+      });
+    }
   });
 
   describe('fixing function spellchecks', () => {
@@ -199,68 +260,157 @@ describe('quick fixes logic', () => {
     }
     // it should be strange enough to make the function invalid
     const BROKEN_PREFIX = 'Q';
-    for (const fn of getAllFunctions({ type: 'eval' })) {
-      // add an A to the function name to make it invalid
-      testQuickFixes(
-        `FROM index | EVAL ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-      testQuickFixes(
-        `FROM index | EVAL var0 = ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-      testQuickFixes(
-        `FROM index | STATS avg(${BROKEN_PREFIX}${fn.name}())`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-      testQuickFixes(
-        `FROM index | STATS avg(numberField) BY ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-      testQuickFixes(
-        `FROM index | STATS avg(numberField) BY var0 = ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      for (const fn of getAllFunctions({ type: 'eval' })) {
+        // add an A to the function name to make it invalid
+        testQuickFixes(
+          `FROM index | EVAL ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | EVAL var0 = ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | STATS avg(${BROKEN_PREFIX}${fn.name}())`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | STATS avg(numberField) BY ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | STATS avg(numberField) BY var0 = ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+      }
+      for (const fn of getAllFunctions({ type: 'agg' })) {
+        // add an A to the function name to make it invalid
+        testQuickFixes(
+          `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+        testQuickFixes(
+          `FROM index | STATS var0 = ${BROKEN_PREFIX}${fn.name}()`,
+          [fn.name].map(toFunctionSignature),
+          { equalityCheck: 'include', ...options }
+        );
+      }
+      // it should preserve the arguments
+      testQuickFixes(`FROM index | EVAL rAund(numberField)`, ['round(numberField)'], {
+        equalityCheck: 'include',
+        ...options,
+      });
+      testQuickFixes(`FROM index | STATS AVVG(numberField)`, ['avg(numberField)'], {
+        equalityCheck: 'include',
+        ...options,
+      });
     }
-    for (const fn of getAllFunctions({ type: 'agg' })) {
-      // add an A to the function name to make it invalid
-      testQuickFixes(
-        `FROM index | STATS ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-      testQuickFixes(
-        `FROM index | STATS var0 = ${BROKEN_PREFIX}${fn.name}()`,
-        [fn.name].map(toFunctionSignature),
-        { equalityCheck: 'include' }
-      );
-    }
-    // it should preserve the arguments
-    testQuickFixes(`FROM index | EVAL rAund(numberField)`, ['round(numberField)'], {
-      equalityCheck: 'include',
-    });
-    testQuickFixes(`FROM index | STATS AVVG(numberField)`, ['avg(numberField)'], {
-      equalityCheck: 'include',
-    });
   });
 
   describe('fixing wrong quotes', () => {
-    testQuickFixes(`FROM index | WHERE stringField like 'asda'`, ['"asda"']);
-    testQuickFixes(`FROM index | WHERE stringField not like 'asda'`, ['"asda"']);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      testQuickFixes(`FROM index | WHERE stringField like 'asda'`, ['"asda"'], options);
+      testQuickFixes(`FROM index | WHERE stringField not like 'asda'`, ['"asda"'], options);
+    }
   });
 
   describe('fixing unquoted field names', () => {
-    testQuickFixes('FROM index | DROP any#Char$Field', ['`any#Char$Field`']);
-    testQuickFixes('FROM index | DROP numberField, any#Char$Field', ['`any#Char$Field`']);
+    for (const options of [
+      undefined,
+      { relaxOnMissingCallbacks: false },
+      { relaxOnMissingCallbacks: false },
+    ]) {
+      testQuickFixes('FROM index | DROP any#Char$Field', ['`any#Char$Field`'], options);
+      testQuickFixes(
+        'FROM index | DROP numberField, any#Char$Field',
+        ['`any#Char$Field`'],
+        options
+      );
+    }
+    describe('with no callbacks', () => {
+      describe('with no relaxed option', () => {
+        it('return no result without callbacks and relaxed option', async () => {
+          const statement = `FROM index | DROP any#Char$Field`;
+          const { errors } = await validateQuery(statement, getAstAndSyntaxErrors);
+          const monacoErrors = wrapAsEditorMessage('error', errors);
+          const edits = await getActions(statement, monacoErrors, getAstAndSyntaxErrors);
+          expect(edits.length).toBe(0);
+        });
+
+        it('return no result without specific callback and relaxed option', async () => {
+          const callbackMocks = getCallbackMocks();
+          const statement = `FROM index | DROP any#Char$Field`;
+          const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
+            ...callbackMocks,
+            getFieldsFor: undefined,
+          });
+          const monacoErrors = wrapAsEditorMessage('error', errors);
+          const edits = await getActions(
+            statement,
+            monacoErrors,
+            getAstAndSyntaxErrors,
+            undefined,
+            {
+              ...callbackMocks,
+              getFieldsFor: undefined,
+            }
+          );
+          expect(edits.length).toBe(0);
+        });
+      });
+      describe('with relaxed option', () => {
+        it('return a result without callbacks and relaxed option', async () => {
+          const statement = `FROM index | DROP any#Char$Field`;
+          const { errors } = await validateQuery(statement, getAstAndSyntaxErrors);
+          const monacoErrors = wrapAsEditorMessage('error', errors);
+          const actions = await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+            relaxOnMissingCallbacks: true,
+          });
+          const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
+          expect(edits).toEqual(['`any#Char$Field`']);
+        });
+
+        it('return a result without specific callback and relaxed option', async () => {
+          const callbackMocks = getCallbackMocks();
+          const statement = `FROM index | DROP any#Char$Field`;
+          const { errors } = await validateQuery(statement, getAstAndSyntaxErrors, undefined, {
+            ...callbackMocks,
+            getFieldsFor: undefined,
+          });
+          const monacoErrors = wrapAsEditorMessage('error', errors);
+          const actions = await getActions(
+            statement,
+            monacoErrors,
+            getAstAndSyntaxErrors,
+            {
+              relaxOnMissingCallbacks: true,
+            },
+            { ...callbackMocks, getFieldsFor: undefined }
+          );
+          const edits = actions.map(({ edits: actionEdits }) => actionEdits[0].text);
+          expect(edits).toEqual(['`any#Char$Field`']);
+        });
+      });
+    });
   });
 
   describe('callbacks', () => {
-    it('should not crash if callback functions are not passed', async () => {
+    it('should not crash if specific callback functions are not passed', async () => {
       const callbackMocks = getCallbackMocks();
       const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
       const { errors } = await validateQuery(
@@ -271,12 +421,40 @@ describe('quick fixes logic', () => {
       );
       const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, undefined, {
           getFieldsFor: undefined,
           getSources: undefined,
           getPolicies: undefined,
           getMetaFields: undefined,
         });
+      } catch {
+        fail('Should not throw');
+      }
+    });
+
+    it('should not crash if specific callback functions are not passed with relaxed option', async () => {
+      const callbackMocks = getCallbackMocks();
+      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const { errors } = await validateQuery(
+        statement,
+        getAstAndSyntaxErrors,
+        undefined,
+        callbackMocks
+      );
+      const monacoErrors = wrapAsEditorMessage('error', errors);
+      try {
+        await getActions(
+          statement,
+          monacoErrors,
+          getAstAndSyntaxErrors,
+          { relaxOnMissingCallbacks: true },
+          {
+            getFieldsFor: undefined,
+            getSources: undefined,
+            getPolicies: undefined,
+            getMetaFields: undefined,
+          }
+        );
       } catch {
         fail('Should not throw');
       }
@@ -293,7 +471,26 @@ describe('quick fixes logic', () => {
       );
       const monacoErrors = wrapAsEditorMessage('error', errors);
       try {
-        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, undefined);
+        await getActions(statement, monacoErrors, getAstAndSyntaxErrors);
+      } catch {
+        fail('Should not throw');
+      }
+    });
+
+    it('should not crash no callbacks are passed with relaxed option', async () => {
+      const callbackMocks = getCallbackMocks();
+      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const { errors } = await validateQuery(
+        statement,
+        getAstAndSyntaxErrors,
+        undefined,
+        callbackMocks
+      );
+      const monacoErrors = wrapAsEditorMessage('error', errors);
+      try {
+        await getActions(statement, monacoErrors, getAstAndSyntaxErrors, {
+          relaxOnMissingCallbacks: true,
+        });
       } catch {
         fail('Should not throw');
       }
