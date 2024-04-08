@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Privileges', () => {
+  describe('Privileges (basic)', () => {
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
@@ -45,7 +45,18 @@ export default function ({ getService }: FtrProviderContext) {
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
-            fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fleetv2: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'agents_all',
+              'agents_read',
+              'agent_policies_all',
+              'agent_policies_read',
+              'settings_all',
+              'settings_read',
+            ],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
