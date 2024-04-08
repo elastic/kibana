@@ -10,7 +10,7 @@ import './field_picker.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
@@ -18,7 +18,7 @@ import type { FieldOptionValue, FieldOption } from './types';
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {
   options: Array<FieldOption<T>>;
-  selectedField?: string;
+  activeField: EuiComboBoxOptionOption<FieldOption<T>['value']> | undefined;
   onChoose: (choice: T | undefined) => void;
   onDelete?: () => void;
   fieldIsInvalid: boolean;
@@ -32,7 +32,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
   props: FieldPickerProps<T>
 ) {
   const {
-    selectedOptions,
+    activeField,
     options,
     onChoose,
     onDelete,
@@ -41,11 +41,11 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
     ...rest
   } = props;
 
-  const [localChoices, setLocalChoices] = React.useState(selectedOptions);
+  const [selectedOptions, setSelectedOptions] = React.useState(activeField ? [activeField] : []);
 
   React.useEffect(() => {
-    setLocalChoices(selectedOptions);
-  }, [selectedOptions]);
+    setSelectedOptions(activeField ? [activeField] : []);
+  }, [activeField]);
 
   let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
@@ -97,7 +97,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       })}
       options={styledOptions}
       isInvalid={fieldIsInvalid}
-      selectedOptions={localChoices}
+      selectedOptions={selectedOptions}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{
@@ -105,17 +105,18 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
         anchorPosition: 'downRight',
       }}
       onBlur={() => {
-        if (localChoices?.length === 0) {
-          setLocalChoices(selectedOptions);
+        if (selectedOptions?.length === 0) {
+          setSelectedOptions(activeField ? [activeField] : []);
         }
       }}
       onChange={(choices) => {
         if (choices.length === 0) {
-          setLocalChoices([]);
+          setSelectedOptions([]);
+          onDelete?.();
           return;
         }
-        if (choices[0] && choices[0]?.value !== selectedOptions?.[0]?.value) {
-          setLocalChoices([
+        if (choices[0] && choices[0]?.value !== activeField?.value) {
+          setSelectedOptions([
             {
               label: choices[0].label,
               value: choices[0].value,
