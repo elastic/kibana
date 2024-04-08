@@ -7,7 +7,6 @@
  */
 
 const Path = require('path');
-const { getPkgDirMap } = require('./get_packages');
 
 /**
  * @param {{ rootDir: string }} options
@@ -91,15 +90,19 @@ function matchBrowserServer(selector, pkg) {
  * @param {string[] | undefined} packageNodeRoles
  */
 function matchNodeRoles(selector, packageNodeRoles) {
+  // no node roles, all plugins
+  if (selector.nodeRoles == null) {
+    return true;
+  }
+
   // the migrator node needs to load all plugins, this can't be configured in the manifest
   if (selector.nodeRoles?.migrator) {
     return true;
   }
 
-  if (selector.nodeRoles == null || packageNodeRoles == null || packageNodeRoles.length == 0) {
-    return true;
-  }
-
+  // if the package doesn't specify the node roles, assume only for UI
+  packageNodeRoles = packageNodeRoles || ['ui'];
+  
   if (selector.nodeRoles?.ui && packageNodeRoles.includes('ui')) {
     return true;
   }

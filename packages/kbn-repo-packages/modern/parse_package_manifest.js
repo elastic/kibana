@@ -155,7 +155,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     );
   }
 
-  if (nodeRoles !== undefined && !isArrOfStrings(nodeRoles)) {
+  if (nodeRoles != null && !isArrOfStrings(nodeRoles)) {
     throw err(`plugin.nodeRoles`, nodeRoles, `must be an array of strings`);
   }
 
