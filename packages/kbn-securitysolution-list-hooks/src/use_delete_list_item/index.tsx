@@ -12,7 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import { deleteListItem } from '@kbn/securitysolution-list-api';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DeleteListItemParams } from '@kbn/securitysolution-list-api';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useInvalidateListItemQuery } from '../use_find_list_items';
+
+const deleteListItemWithOptionalSignal = withOptionalSignal(deleteListItem);
 
 export const DELETE_LIST_ITEM_MUTATION_KEY = ['POST', ' DELETE_LIST_ITEM_MUTATION'];
 type DeleteListMutationParams = Omit<DeleteListItemParams, 'refresh'>;
@@ -22,7 +25,7 @@ export const useDeleteListItemMutation = (
 ) => {
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, DeleteListMutationParams>(
-    ({ id, http, signal }) => deleteListItem({ id, http, refresh: true, signal }),
+    ({ id, http, signal }) => deleteListItemWithOptionalSignal({ id, http, refresh: true, signal }),
     {
       ...options,
       mutationKey: DELETE_LIST_ITEM_MUTATION_KEY,

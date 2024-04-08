@@ -12,7 +12,10 @@ import { useMutation } from '@tanstack/react-query';
 import type { PatchListItemParams } from '@kbn/securitysolution-list-api';
 import { patchListItem } from '@kbn/securitysolution-list-api';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useInvalidateListItemQuery } from '../use_find_list_items';
+
+const patchListItemWithOptionalSignal = withOptionalSignal(patchListItem);
 
 export const PATCH_LIST_ITEM_MUTATION_KEY = ['PATCH', 'LIST_ITEM_MUTATION'];
 type PatchListMutationParams = Omit<PatchListItemParams, 'refresh'>;
@@ -23,7 +26,7 @@ export const usePatchListItemMutation = (
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, PatchListMutationParams>(
     ({ id, value, _version, signal, http }: PatchListMutationParams) =>
-      patchListItem({ id, value, http, refresh: true, _version, signal }),
+      patchListItemWithOptionalSignal({ id, value, http, refresh: true, _version, signal }),
     {
       ...options,
       mutationKey: PATCH_LIST_ITEM_MUTATION_KEY,

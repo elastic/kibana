@@ -12,8 +12,11 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
 import { createListItem } from '@kbn/securitysolution-list-api';
 import type { CreateListItemParams } from '@kbn/securitysolution-list-api';
+import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { useInvalidateListItemQuery } from '../use_find_list_items';
+
+const createListItemWithOptionalSignal = withOptionalSignal(createListItem);
 
 export const CREATE_LIST_ITEM_MUTATION_KEY = ['POST', 'LIST_ITEM_CREATE'];
 type CreateListMutationParams = Omit<CreateListItemParams, 'refresh'>;
@@ -24,7 +27,7 @@ export const useCreateListItemMutation = (
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, CreateListMutationParams>(
     ({ listId, value, http, signal }) =>
-      createListItem({ listId, value, http, refresh: true, signal }),
+      createListItemWithOptionalSignal({ listId, value, http, refresh: true, signal }),
     {
       ...options,
       mutationKey: CREATE_LIST_ITEM_MUTATION_KEY,
