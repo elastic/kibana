@@ -23,5 +23,3 @@ export const metaSlice = createSlice({
     });
   },
 });
-
-export const metaReducer = metaSlice.reducer;

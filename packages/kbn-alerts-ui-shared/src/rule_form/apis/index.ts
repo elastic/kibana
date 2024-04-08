@@ -8,3 +8,4 @@
 
 export * from './create';
 export * from './common_transformations';
+export * from './use_rule_type_model_with_data_from_server';

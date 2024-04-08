@@ -9,25 +9,20 @@
 import { useRef } from 'react';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import {
-  ruleDetailsReducer,
-  ruleDefinitionReducer,
-  initializeAndValidateConsumer,
-} from '../features';
-import { metaReducer } from './metaSlice';
-
-const rootReducer = combineReducers({
-  ruleDefinition: ruleDefinitionReducer,
-  ruleDetails: ruleDetailsReducer,
-  meta: metaReducer,
-});
+import { ruleDetailsSlice, ruleDefinitionSlice, initializeAndValidateConsumer } from '../features';
+import { metaSlice } from './meta_slice';
 
 const initializeStore = (
   partialInitialState: {
     [K in keyof RuleFormRootState]?: Partial<RuleFormRootState[K]>;
   },
-  validConsumers?: RuleCreationValidConsumer[]
+  authorizedConsumers?: RuleCreationValidConsumer[]
 ) => {
+  const rootReducer = combineReducers({
+    ruleDefinition: ruleDefinitionSlice.reducer,
+    ruleDetails: ruleDetailsSlice.reducer,
+    meta: metaSlice.reducer,
+  });
   const preloadedState: RuleFormRootState = rootReducer(undefined, { type: 'INIT' });
   if (partialInitialState.ruleDefinition) {
     preloadedState.ruleDefinition = {
@@ -47,12 +42,16 @@ const initializeStore = (
     preloadedState,
   });
   // Dispatch an initial action for reducers to correct the preloadedState
-  store.dispatch(initializeAndValidateConsumer(validConsumers));
+  store.dispatch(initializeAndValidateConsumer(authorizedConsumers));
   return store;
 };
 
 export const useStore = (...args: Parameters<typeof initializeStore>) =>
   useRef(initializeStore(...args)).current;
 
-export type RuleFormRootState = ReturnType<typeof rootReducer>;
+export interface RuleFormRootState {
+  ruleDefinition: ReturnType<typeof ruleDefinitionSlice.reducer>;
+  ruleDetails: ReturnType<typeof ruleDetailsSlice.reducer>;
+  meta: ReturnType<typeof metaSlice.reducer>;
+}
 export type RuleFormDispatch = ReturnType<typeof initializeStore>['dispatch'];

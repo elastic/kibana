@@ -39,13 +39,17 @@ export const ContextsProvider: React.FC<ContextsProviderProps> = ({
 }) => {
   return (
     <KibanaServicesProvider value={{ http, toasts }}>
-      <ConfigProvider value={config}>
-        <RuleTypeProvider registeredRuleTypeModel={registeredRuleTypeModel}>
+      <RuleTypeProvider registeredRuleTypeModel={registeredRuleTypeModel}>
+        <ConfigProvider value={config}>
+          {/**  ReduxStoreProvider requires the rule type to initialize
+           * RuleTypeProvider does not render children if it fails to load the rule type,
+           * so the Redux store MUST be a child of the RuleTypeProvider
+           */}
           <ReduxStoreProvider appContext={appContext}>
             <ValidationProvider>{children}</ValidationProvider>
           </ReduxStoreProvider>
-        </RuleTypeProvider>
-      </ConfigProvider>
+        </ConfigProvider>
+      </RuleTypeProvider>
     </KibanaServicesProvider>
   );
 };

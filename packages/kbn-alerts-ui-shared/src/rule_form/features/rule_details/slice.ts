@@ -33,5 +33,4 @@ export const ruleDetailsSlice = createSlice({
   },
 });
 
-export const ruleDetailsReducer = ruleDetailsSlice.reducer;
 export const { setRuleName, addTag, setTags } = ruleDetailsSlice.actions;
