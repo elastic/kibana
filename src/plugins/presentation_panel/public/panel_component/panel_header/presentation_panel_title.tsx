@@ -38,11 +38,10 @@ export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement |
   const onClick = useRef<Observable<{ dragged: boolean }> | null>(null);
   const [initialized, setInitialized] = useState(false);
 
-  const mouseup = createDocumentMouseUpListener();
-  const mousemove = createDocumentMouseMoveListener();
-
   useEffect(() => {
     if (titleElmRef) {
+      const mouseup = createDocumentMouseUpListener();
+      const mousemove = createDocumentMouseMoveListener();
       const mousedown = fromEvent<MouseEvent>(titleElmRef, 'mousedown');
       const keydown = fromEvent<KeyboardEvent>(titleElmRef, 'keydown');
 
@@ -72,7 +71,7 @@ export const usePresentationPanelTitleClickHandler = (titleElmRef: HTMLElement |
 
       setInitialized(true);
     }
-  }, [mousemove, mouseup, titleElmRef]);
+  }, [titleElmRef]);
 
   return initialized ? onClick.current : null;
 };
