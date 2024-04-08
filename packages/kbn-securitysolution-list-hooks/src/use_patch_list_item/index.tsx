@@ -25,8 +25,8 @@ export const usePatchListItemMutation = (
 ) => {
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, PatchListMutationParams>(
-    ({ id, value, _version, signal, http }: PatchListMutationParams) =>
-      patchListItemWithOptionalSignal({ id, value, http, refresh: true, _version, signal }),
+    ({ id, value, _version, http }: PatchListMutationParams) =>
+      patchListItemWithOptionalSignal({ id, value, http, refresh: true, _version }),
     {
       ...options,
       mutationKey: PATCH_LIST_ITEM_MUTATION_KEY,

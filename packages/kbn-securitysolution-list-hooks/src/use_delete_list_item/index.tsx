@@ -25,7 +25,7 @@ export const useDeleteListItemMutation = (
 ) => {
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, DeleteListMutationParams>(
-    ({ id, http, signal }) => deleteListItemWithOptionalSignal({ id, http, refresh: true, signal }),
+    ({ id, http }) => deleteListItemWithOptionalSignal({ id, http, refresh: true }),
     {
       ...options,
       mutationKey: DELETE_LIST_ITEM_MUTATION_KEY,
