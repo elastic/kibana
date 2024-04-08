@@ -47,11 +47,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
-
-  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -228,6 +223,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Apr 23, 2024
    */
   perFieldPrebuiltRulesDiffingEnabled: true,
+
+  /**
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
+   */
+  malwareOnWriteScanOptionAvailable: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

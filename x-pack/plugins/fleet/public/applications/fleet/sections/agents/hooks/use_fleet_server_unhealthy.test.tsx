@@ -95,6 +95,9 @@ describe('useFleetServerUnhealthy', () => {
         allAgents: true,
         readAgentPolicies: true,
       },
+      integrations: {
+        readIntegrationPolicies: true,
+      },
     } as any);
   });
   it('should return isUnHealthy:false with an online fleet slerver', async () => {

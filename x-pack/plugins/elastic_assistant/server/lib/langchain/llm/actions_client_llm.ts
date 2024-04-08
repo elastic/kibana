@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { LLM } from 'langchain/llms/base';
+import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
@@ -77,7 +77,8 @@ export class ActionsClientLlm extends LLM {
     const requestBody = {
       actionId: this.#connectorId,
       params: {
-        subAction: this.#request.body.subAction,
+        // hard code to non-streaming subaction as this class only supports non-streaming
+        subAction: 'invokeAI',
         subActionParams: {
           model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
