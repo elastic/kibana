@@ -70,10 +70,19 @@ interface ExpandedRowStatsPaneProps {
 
 export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) => {
   const { data: fullStats } = useGetTransformStats(item.id, false, true);
-  console.log('fullStats', fullStats);
+  const fullStatsSection: SectionConfig = {
+    title: 'Full Stats',
+    items: fullStats
+      ? Object.entries(fullStats.transforms[0].stats).map((s) => {
+          return { title: s[0].toString(), description: getItemDescription(s[1]) };
+        })
+      : [],
+    position: 'right',
+  };
+  console.log('fullStatsSection', fullStats);
 
-  const basicStats: SectionConfig = {
-    title: 'Stats',
+  const basicStatsSection: SectionConfig = {
+    title: 'Basic Stats',
     items: isTransformListRowWithStats(item)
       ? Object.entries(item.stats.stats).map((s) => {
           return { title: s[0].toString(), description: getItemDescription(s[1]) };
@@ -81,9 +90,13 @@ export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) =>
       : [],
     position: 'left',
   };
+  console.log('basicStatsSection', basicStatsSection);
 
   return isTransformListRowWithStats(item) ? (
-    <ExpandedRowDetailsPane sections={[basicStats]} dataTestSubj={'transformStatsTabContent'} />
+    <ExpandedRowDetailsPane
+      sections={[basicStatsSection, fullStatsSection]}
+      dataTestSubj={'transformStatsTabContent'}
+    />
   ) : (
     <NoStatsFallbackTabContent transformsStatsLoading={false} />
   );
