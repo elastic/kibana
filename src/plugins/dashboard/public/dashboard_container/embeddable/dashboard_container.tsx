@@ -156,6 +156,7 @@ export class DashboardContainer
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+  private hadContentfulRender = false;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -166,9 +167,10 @@ export class DashboardContainer
   private customBranding;
 
   public trackContentfulRender() {
-    if (this.analyticsService) {
+    if (!this.hadContentfulRender && this.analyticsService) {
       this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
     }
+    this.hadContentfulRender = true;
   }
 
   private trackPanelAddMetric:
@@ -243,6 +245,11 @@ export class DashboardContainer
       this.onStateChange(() => {
         if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
         this.savedObjectId.next(this.getDashboardSavedObjectId());
+      })
+    );
+    this.publishingSubscription.add(
+      this.savedObjectId.subscribe(() => {
+        this.hadContentfulRender = false;
       })
     );
 
