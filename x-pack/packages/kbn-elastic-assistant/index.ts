@@ -99,8 +99,6 @@ export type {
   AssistantTelemetry,
   /** Conversation Interface */
   Conversation,
-  /** Message Interface */
-  Message,
 } from './impl/assistant_context/types';
 
 /** Interface for defining system/user prompts */
