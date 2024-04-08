@@ -150,12 +150,17 @@ export class ConfirmDelete extends Component<Props, State> {
             );
           } else {
             this.props.notifications.toasts.addDanger({
-              title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+              title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
                 defaultMessage: 'Custom role deleted',
               }),
               text: toMountPoint(
                 <>
-                  <p>A good toast message is short and to the point</p>
+                  <p>
+                    {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                      defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                      Management and on the User Profile for those that don't have admin access.`,
+                    })}
+                  </p>
 
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
