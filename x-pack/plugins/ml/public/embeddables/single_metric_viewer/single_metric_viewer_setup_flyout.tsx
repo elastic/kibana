@@ -10,18 +10,19 @@ import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDefaultSingleMetricViewerPanelTitle } from './single_metric_viewer_embeddable';
-import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerServices } from '..';
+import type { SingleMetricViewerEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlStartDependencies } from '../../plugin';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies,
-  input: SingleMetricViewerServices
+  mlApiServices: MlApiServices,
+  input?: SingleMetricViewerEmbeddableInput
 ): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
   const { overlays, theme, i18n } = coreStart;
-  const { mlApiServices } = input;
   const timefilter = pluginStart.data.query.timefilter.timefilter;
 
   return new Promise(async (resolve, reject) => {
@@ -29,39 +30,30 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
       const { jobIds } = await resolveJobSelection(
         coreStart,
         pluginStart.data.dataViews,
-        undefined,
+        input?.jobIds ? input.jobIds : undefined,
         true
       );
-      const title = getDefaultSingleMetricViewerPanelTitle(jobIds);
+      const title = input?.title ?? getDefaultSingleMetricViewerPanelTitle(jobIds);
       const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
 
       const modalSession = overlays.openModal(
         toMountPoint(
           <KibanaContextProvider
             services={{
-              mlServices: { ...input },
+              mlServices: { mlApiServices },
               ...coreStart,
             }}
           >
             <SingleMetricViewerInitializer
+              bounds={timefilter.getActiveBounds()!}
               defaultTitle={title}
               initialInput={input}
               job={jobs[0]}
-              bounds={timefilter.getActiveBounds()!}
-              onCreate={({
-                functionDescription,
-                panelTitle,
-                selectedDetectorIndex,
-                selectedEntities,
-              }) => {
+              onCreate={(explicitInput) => {
                 modalSession.close();
                 resolve({
                   jobIds,
-                  title: panelTitle,
-                  functionDescription,
-                  panelTitle,
-                  selectedDetectorIndex,
-                  selectedEntities,
+                  ...explicitInput,
                 });
               }}
               onCancel={() => {
