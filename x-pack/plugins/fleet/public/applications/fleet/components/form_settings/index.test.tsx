@@ -17,21 +17,31 @@ import { createFleetTestRendererMock } from '../../../../mock';
 
 import { ConfiguredSettings } from '.';
 
+const mockUpdateAgentPolicy = jest.fn();
+const mockUpdateAdvancedSettingsHasErrors = jest.fn();
+
+jest.mock('../../sections/agent_policy/components/agent_policy_form', () => ({
+  useAgentPolicyFormContext: () => ({
+    updateAdvancedSettingsHasErrors: mockUpdateAdvancedSettingsHasErrors,
+    updateAgentPolicy: mockUpdateAgentPolicy,
+    agentPolicy: {
+      advanced_settings: {
+        agent_limits_go_max_procs: 0,
+        agent_download_timeout: '120s',
+      },
+    },
+  }),
+}));
+
 describe('ConfiguredSettings', () => {
   const testRenderer = createFleetTestRendererMock();
-  const updateAdvancedSettingsHasErrors = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   function render(settingsConfig: SettingsConfig[]) {
-    return testRenderer.render(
-      <ConfiguredSettings
-        configuredSettings={settingsConfig}
-        updateAdvancedSettingsHasErrors={updateAdvancedSettingsHasErrors}
-      />
-    );
+    return testRenderer.render(<ConfiguredSettings configuredSettings={settingsConfig} />);
   }
 
   it('should render number field', () => {
@@ -49,7 +59,18 @@ describe('ConfiguredSettings', () => {
     ]);
 
     expect(result.getByText('GO_MAX_PROCS')).not.toBeNull();
-    expect(result.getByTestId('configuredSetting-agent.limits.go_max_procs')).toHaveValue(0);
+    const input = result.getByTestId('configuredSetting-agent.limits.go_max_procs');
+    expect(input).toHaveValue(0);
+
+    act(() => {
+      fireEvent.change(input, { target: { value: '1' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ agent_limits_go_max_procs: 1 }),
+      })
+    );
   });
 
   it('should render string field with time duration validation', () => {
@@ -74,10 +95,10 @@ describe('ConfiguredSettings', () => {
       fireEvent.change(input, { target: { value: '120' } });
     });
 
-    expect(updateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(
       result.getByText('Must be a string with a time unit, e.g. 30s, 5m, 2h, 1d')
     ).not.toBeNull();
+    expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 });
