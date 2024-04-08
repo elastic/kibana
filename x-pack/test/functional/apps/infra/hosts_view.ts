@@ -7,14 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   enableInfrastructureAssetCustomDashboards,
   enableInfrastructureHostsView,
@@ -22,7 +15,6 @@ import {
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
