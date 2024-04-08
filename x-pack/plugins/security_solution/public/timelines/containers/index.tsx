@@ -365,11 +365,21 @@ export const useTimelineEventsHandler = ({
         ? activePage
         : 0;
 
+      let finalFieldsRequested = fields;
+      // check if current requested fields is the subset of the previous requested fields
+
+      if (prevRequest?.fieldRequested && fields.length > 0) {
+        const isSubset = fields.every((field) => prevRequest.fieldRequested.includes(field));
+        if (isSubset) {
+          finalFieldsRequested = prevRequest.fieldRequested;
+        }
+      }
+
       const currentRequest = {
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: fields,
-        fields,
+        fieldRequested: finalFieldsRequested,
+        fields: finalFieldsRequested,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,

@@ -76,9 +76,9 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
-import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;

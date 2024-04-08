@@ -220,9 +220,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
+      console.log('header', { newState });
       if (newState.sort) {
         onSort(newState.sort);
-      } else {
+      }
+
+      if (newState.columns) {
         const columnsStates = newState.columns.map((columnId) =>
           getColumnHeader(columnId, defaultUdtHeaders)
         );
@@ -232,16 +235,27 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     [dispatch, onSort, timelineId]
   );
 
-  const { onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+  const {
+    columns: currentColumns,
+    onAddColumn,
+    onRemoveColumn,
+    onSetColumns,
+  } = useColumns({
     capabilities,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    dataView: dataView!,
+    dataView,
     dataViews,
     setAppState,
     useNewFieldsApi: true,
     columns: columnIds,
     sort: sortingColumns,
   });
+
+  const onSetColumnsTimeline: typeof onSetColumns = useCallback(
+    (nextColumns) => {
+      onSetColumns(nextColumns, true);
+    },
+    [onSetColumns]
+  );
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -301,17 +315,10 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onRemoveFieldFromWorkspace = useCallback(
     (field: DataViewField) => {
-      if (columns.some(({ id }) => id === field.name)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId: field.name,
-            id: timelineId,
-          })
-        );
-      }
+      debugger;
       onRemoveColumn(field.name);
     },
-    [columns, dispatch, onRemoveColumn, timelineId]
+    [onRemoveColumn]
   );
 
   const onFieldEdited = useCallback(() => {
@@ -374,13 +381,14 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
                       columns={columns}
+                      columnIds={currentColumns}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}
                       onSort={onSort}
-                      onSetColumns={onSetColumns}
+                      onSetColumns={onSetColumnsTimeline}
                       events={events}
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}

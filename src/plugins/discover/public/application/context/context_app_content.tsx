@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -159,6 +159,10 @@ export function ContextAppContent({
     },
     [setGridSettings]
   );
+
+  useEffect(() => {
+    console.log(`discover columns chnaged`, { columns });
+  }, [columns]);
 
   return (
     <Fragment>

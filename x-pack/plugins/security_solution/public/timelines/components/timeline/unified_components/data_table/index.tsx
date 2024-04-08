@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -41,12 +41,14 @@ import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
+import { defaultUdtHeaders } from '../default_headers';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
 type CommonDataTableProps = {
   columns: ColumnHeaderOptions[];
+  columnIds: string[];
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -72,6 +74,7 @@ interface DataTableProps extends CommonDataTableProps {
 export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
   function TimelineDataTableMemo({
     columns,
+    columnIds,
     dataView,
     activeTab,
     timelineId,
@@ -136,7 +139,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       };
     }, [columns]);
 
-    const defaultColumnIds = useMemo(() => columns.map((c) => c.id), [columns]);
+    const defaultColumnIds = useMemo(() => defaultUdtHeaders.map((c) => c.id), []);
 
     const { timeline: { rowHeight, sampleSize } = timelineDefaults } = useSelector((state: State) =>
       timelineBodySelector(state, timelineId)
@@ -227,6 +230,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
+    useEffect(() => {
+      console.log(`Columns changed`);
+    }, [columns]);
+
     const customColumnRenderers = useMemo(
       () =>
         getFormattedFields({
@@ -288,6 +295,21 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       dataPluginContract,
     ]);
 
+    useEffect(() => {
+      console.log(`Changes : customRenderers`);
+    }, [customColumnRenderers]);
+    useEffect(() => {
+      console.log(`Changes : tableRows`);
+    }, [tableRows]);
+
+    useEffect(() => {
+      console.log(`Changes : defaultColumnIds`);
+    }, [defaultColumnIds]);
+
+    useEffect(() => {
+      console.log(`Changes : onSetColumns`);
+    }, [onSetColumns]);
+
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -298,7 +320,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           <DataGridMemoized
             ariaLabelledBy="timelineDocumentsAriaLabel"
             className={'udtTimeline'}
-            columns={defaultColumnIds}
+            columns={columnIds}
             expandedDoc={expandedDoc}
             dataView={dataView}
             showColumnTokens={true}
@@ -311,8 +333,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             sampleSizeState={sampleSize || 500}
             onUpdateSampleSize={onUpdateSampleSize}
             setExpandedDoc={onSetExpandedDoc}
-            settings={tableSettings}
-            showTimeCol={showTimeCol}
+            showTimeCol={false}
             isSortEnabled={true}
             sort={sort}
             rowHeightState={rowHeight}
@@ -324,7 +345,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
-            externalCustomRenderers={customColumnRenderers}
             renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
@@ -336,7 +356,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             configRowHeight={3}
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
-            externalAdditionalControls={additionalControls}
           />
           {showExpandedDetails && (
             <DetailsPanel
