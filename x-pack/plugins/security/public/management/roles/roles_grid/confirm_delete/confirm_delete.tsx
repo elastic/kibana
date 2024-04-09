@@ -161,47 +161,19 @@ export class ConfirmDelete extends Component<Props, State> {
   };
 
   private deleteRoles = async () => {
-    const { rolesToDelete, callback, rolesAPIClient, notifications } = this.props;
+    const { rolesToDelete, callback, rolesAPIClient, notifications, buildFlavor } = this.props;
     const errors: string[] = [];
     const deleteOperations = rolesToDelete.map((roleName) => {
       const deleteRoleTask = async () => {
         try {
           await rolesAPIClient.deleteRole(roleName);
-          if (this.props.buildFlavor === 'traditional') {
+          if (buildFlavor === 'traditional') {
             notifications.toasts.addSuccess(
               i18n.translate(
                 'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
                 { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
               )
             );
-          } else {
-            this.props.notifications.toasts.addDanger({
-              title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
-                defaultMessage: 'Custom role deleted',
-              }),
-              text: toMountPoint(
-                <>
-                  <p>
-                    {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
-                      defaultMessage: `The deleted role will still appear listed on the user profile in Organization
-                      Management and on the User Profile for those that don't have admin access.`,
-                    })}
-                  </p>
-
-                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton size="s" href={this.props.cloudOrgUrl}>
-                        Manage Members
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>,
-                {
-                  i18n: this.props.i18nStart,
-                  theme: this.props.theme,
-                }
-              ),
-            });
           }
         } catch (e) {
           errors.push(roleName);
@@ -218,6 +190,38 @@ export class ConfirmDelete extends Component<Props, State> {
     });
 
     await Promise.all(deleteOperations);
+
+    if (buildFlavor === 'serverless') {
+      this.props.notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
+          defaultMessage:
+            '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
+          values: { numberOfCustomRoles: deleteOperations.length },
+        }),
+        text: toMountPoint(
+          <>
+            <p>
+              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                  Management and on the User Profile for those that don't have admin access.`,
+              })}
+            </p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={this.props.cloudOrgUrl}>
+                  Manage Members
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          {
+            i18n: this.props.i18nStart,
+            theme: this.props.theme,
+          }
+        ),
+      });
+    }
 
     callback(rolesToDelete, errors);
   };
