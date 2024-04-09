@@ -35,7 +35,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, list_id: listId, value, meta } = request.body;
+          const { id, list_id: listId, value, meta, refresh } = request.body;
           const lists = await getListClient(context);
           const list = await lists.getList({ id: listId });
           if (list == null) {
@@ -58,6 +58,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
               id,
               listId,
               meta,
+              refresh,
               serializer: list.serializer,
               type: list.type,
               value,

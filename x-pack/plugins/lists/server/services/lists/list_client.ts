@@ -839,6 +839,7 @@ export class ListClient {
     value,
     type,
     meta,
+    refresh,
   }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { esClient, user } = this;
     const listItemName = this.getListItemName();
@@ -849,6 +850,7 @@ export class ListClient {
       listId,
       listItemIndex: listItemName,
       meta,
+      refresh,
       serializer,
       type,
       user,

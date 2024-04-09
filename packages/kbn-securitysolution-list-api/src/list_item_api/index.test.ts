@@ -147,7 +147,7 @@ describe('Value list item API', () => {
         http: httpMock,
         signal: abortCtrl.signal,
         id: 'item_id',
-        refresh: true,
+        refresh: 'true',
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith(

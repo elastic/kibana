@@ -13,7 +13,7 @@ import { list_id } from '../../common/list_id';
 import { value } from '../../common/value';
 import { id } from '../../common/id';
 import { meta } from '../../common/meta';
-import { refresh } from '../../common/refresh';
+import { refreshWithWaitFor } from '../../common/refresh';
 
 export const createListItemSchema = t.intersection([
   t.exact(
@@ -22,7 +22,7 @@ export const createListItemSchema = t.intersection([
       value,
     })
   ),
-  t.exact(t.partial({ id, meta, refresh })),
+  t.exact(t.partial({ id, meta, refresh: refreshWithWaitFor })),
 ]);
 
 export type CreateListItemSchema = t.OutputOf<typeof createListItemSchema>;

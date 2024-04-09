@@ -33,7 +33,6 @@ import {
   listSchema,
   foundListsBySizeSchema,
   FoundListsBySizeSchema,
-  Refresh,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
@@ -191,7 +190,7 @@ const importListWithValidation = async ({
     {
       list_id: listId,
       type,
-      refresh: refresh ? (refresh.toString() as Refresh) : undefined,
+      refresh,
     },
     (query) => fromEither(validateEither(importListItemQuerySchema, query)),
     chain((query) =>

@@ -13,6 +13,7 @@ import type {
   ListIdOrUndefined,
   ListSchema,
   MetaOrUndefined,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -38,7 +39,7 @@ export interface ImportListItemsToStreamOptions {
   user: string;
   meta: MetaOrUndefined;
   version: Version;
-  refresh?: boolean;
+  refresh?: RefreshWithWaitFor;
 }
 
 export const importListItemsToStream = ({
@@ -139,7 +140,7 @@ export interface WriteBufferToItemsOptions {
   type: Type;
   user: string;
   meta: MetaOrUndefined;
-  refresh?: boolean;
+  refresh?: RefreshWithWaitFor;
 }
 
 export interface LinesResult {

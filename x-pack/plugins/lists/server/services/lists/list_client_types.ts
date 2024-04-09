@@ -23,6 +23,7 @@ import type {
   NameOrUndefined,
   Page,
   PerPage,
+  RefreshWithWaitFor,
   SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
@@ -184,7 +185,7 @@ export interface ImportListItemsToStreamOptions {
   /** Version number of the list, typically this should be 1 unless you are re-creating a list you deleted or something unusual. */
   version: Version;
   /** If true refresh index after import list items */
-  refresh?: boolean;
+  refresh?: RefreshWithWaitFor;
 }
 
 /**
@@ -206,6 +207,7 @@ export interface CreateListItemOptions {
   value: string;
   /** Additional meta data to associate with the list items as an object of "key/value" pairs. You can set this to "undefined" for no meta values. */
   meta: MetaOrUndefined;
+  refresh?: RefreshWithWaitFor;
 }
 
 /**
