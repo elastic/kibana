@@ -160,7 +160,7 @@ export const HASH_TO_VERSION_MAP = {
   'endpoint:user-artifact-manifest|7502b5c5bc923abe8aa5ccfd636e8c3d': '10.0.0',
   'enterprise_search_telemetry|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'epm-packages-assets|44621b2f6052ef966da47b7c3a00f33b': '10.0.0',
-  'epm-packages|c1e2020399dbebba2448096ca007c668': '10.1.0',
+  'epm-packages|8ce219acd0f6f3529237d52193866afb': '10.2.0',
   'event_loop_delays_daily|5df7e292ddd5028e07c1482e130e6654': '10.0.0',
   'event-annotation-group|df07b1a361c32daf4e6842c1d5521dbe': '10.0.0',
   'exception-list-agnostic|8a1defe5981db16792cb9a772e84bb9a': '10.0.0',
