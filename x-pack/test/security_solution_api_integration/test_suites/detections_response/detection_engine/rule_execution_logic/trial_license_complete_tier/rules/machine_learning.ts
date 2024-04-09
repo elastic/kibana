@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // TODO add ticket about it failing
+    // TODO: https://github.com/elastic/kibana/issues/179768
     describe.skip('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');

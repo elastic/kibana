@@ -46,6 +46,8 @@ export default ({ getService }: FtrProviderContext): void => {
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_ignored.ts
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_eql_bug_77152.ts
    */
+
+  // TODO: Fix for serverless - https://github.com/elastic/kibana/issues/179767
   describe('@ess @serverless @brokenInServerless ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');

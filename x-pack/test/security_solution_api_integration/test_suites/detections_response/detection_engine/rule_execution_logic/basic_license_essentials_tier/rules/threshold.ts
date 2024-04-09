@@ -25,11 +25,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../../common/utils/security_solution';
+import { createRule, deleteAllAlerts } from '../../../../../../../common/utils/security_solution';
 import {
   getOpenAlerts,
   getPreviewAlerts,

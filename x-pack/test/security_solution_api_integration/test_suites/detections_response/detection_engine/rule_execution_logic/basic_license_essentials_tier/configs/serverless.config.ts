@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Rule Execution Logic Integration Tests - Serverless Env - Essentials License ',
+      'Detection Engine - Rule Execution Logic Integration Tests - Serverless Env - Essentials Tier ',
   },
 });

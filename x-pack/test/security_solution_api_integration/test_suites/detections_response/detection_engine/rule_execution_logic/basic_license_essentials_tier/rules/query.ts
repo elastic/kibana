@@ -76,10 +76,6 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
-      // await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
-      //   useCreate: true,
-      //   docsOnly: true,
-      // });
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -93,7 +89,6 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      // await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0');
     });
 
     // First test creates a real rule - most remaining tests use preview API
