@@ -9,10 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
@@ -67,8 +67,6 @@ export function ApmMainTemplate({
   const basePath = http?.basePath.get();
   const { config } = useApmPluginContext();
 
-  const aiAssistant = services.observabilityAIAssistant;
-
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
 
   const { data, status } = useFetcher((callApmApi) => {
@@ -119,52 +117,11 @@ export function ApmMainTemplate({
     isServerless: config?.serverlessOnboarding,
   });
 
-  let screenDescription = '';
-
-  if (!hasApmData && !hasApmIntegrations) {
-    screenDescription =
-      'The user does not have the APM integration installed and does not have APM data.';
-  } else {
-    screenDescription = hasApmData
-      ? 'The user has APM data.'
-      : 'The user does not have APM data.';
-    screenDescription = hasApmIntegrations
-      ? `${screenDescription} The user has the APM integration installed.`
-      : `${screenDescription} The user does not have the APM integration installed.`;
-  }
-
-  if (noDataConfig !== undefined) {
-    screenDescription = `${screenDescription} The user is looking at a screen that tells them they do not have any data.`;
-  }
-
-  useEffect(() => {
-    return aiAssistant?.service.setScreenContext({
-      screenDescription,
-      starterPrompts: [
-        ...(hasApmData
-          ? []
-          : [
-              {
-                title: i18n.translate(
-                  'xpack.apm.aiAssistant.starterPrompts.explainNoData.title',
-                  { defaultMessage: 'Explain' }
-                ),
-                prompt: i18n.translate(
-                  'xpack.apm.aiAssistant.starterPrompts.explainNoData.prompt',
-                  { defaultMessage: "Why don't I see any data?" }
-                ),
-                icon: 'sparkles',
-              },
-            ]),
-      ],
-    });
-  }, [
+  useDefaultAiAssistantStarterPromptsForAPM({
     hasApmData,
     hasApmIntegrations,
     noDataConfig,
-    aiAssistant,
-    screenDescription,
-  ]);
+  });
 
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
