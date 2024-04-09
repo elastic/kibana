@@ -20,6 +20,7 @@ describe('getLensAttributesFromSuggestion', () => {
     timeFieldName: '@timestamp',
     isPersisted: () => false,
     toSpec: () => ({}),
+    toMinimalSpec: () => ({}),
   } as unknown as DataView;
   const query: AggregateQuery = { esql: 'from foo | limit 10' };
 

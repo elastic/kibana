@@ -88,9 +88,9 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         timestamp={
           createdAt &&
           i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
-            defaultMessage: 'on {date}',
+            defaultMessage: 'at {time}',
             values: {
-              date: moment(createdAt).format('MMM DD, YYYY'),
+              time: moment(createdAt).format('HH:mm'),
             },
           })
         }

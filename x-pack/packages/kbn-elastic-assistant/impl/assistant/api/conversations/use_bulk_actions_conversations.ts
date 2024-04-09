@@ -12,7 +12,7 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, Message } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface BulkActionSummary {
   failed: number;
@@ -52,7 +52,7 @@ export interface BulkActionResponse {
 export interface ConversationUpdateParams {
   id?: string;
   title?: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
   apiConfig?: ApiConfig;
 }
 
