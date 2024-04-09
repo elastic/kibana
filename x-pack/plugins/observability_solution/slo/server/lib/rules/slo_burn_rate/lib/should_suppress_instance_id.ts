@@ -6,7 +6,6 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { EvaulateDependenciesResponse } from './evaluate_dependencies';
 
 export function shouldSuppressInstanceId(
   results: EvaluateDependenciesResponse['activeRules'],
