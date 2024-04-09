@@ -18,6 +18,7 @@ const onboardingPageService = new OnboardingPageService();
 
 export const contractStartServicesMock: ContractStartServices = {
   getComponents$: jest.fn(() => of({})),
+  isSolutionNavEnabled$: of(false),
   upselling,
   onboarding: onboardingPageService,
 };
