@@ -5,68 +5,70 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
-
-import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import type { SignalSourceHit } from '../types';
-
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
   BaseFieldsLatest,
+  NewTermsFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
+import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
+import type { CompleteRule, NewTermsRuleParams } from '../../rule_schema';
+import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
+import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
+import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 
-import type { BuildReasonMessage } from './reason_formatters';
+export interface EventsAndTerms {
+  event: estypes.SearchHit<SignalSource>;
+  newTerms: Array<string | number | null>;
+}
 
-/**
- * wraps suppressed alerts
- * creates instanceId hash, which is used to search on time interval alerts
- * populates alert's suppression fields
- */
-export const wrapSuppressedAlerts = ({
-  events,
+export const wrapSuppressedNewTermsAlerts = ({
+  eventsAndTerms,
   spaceId,
   completeRule,
   mergeStrategy,
   indicesToQuery,
-  buildReasonMessage,
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
 }: {
-  events: SignalSourceHit[];
-  spaceId: string;
-  completeRule: CompleteRule<ThreatRuleParams>;
+  eventsAndTerms: EventsAndTerms[];
+  spaceId: string | null | undefined;
+  completeRule: CompleteRule<NewTermsRuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
-  buildReasonMessage: BuildReasonMessage;
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  return events.map((event) => {
+}): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
+  return eventsAndTerms.map((eventAndTerms) => {
+    const event = eventAndTerms.event;
+
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
       fields: event.fields,
     });
 
+    const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
     const id = objectHash([
-      event._index,
-      event._id,
+      eventAndTerms.event._index,
+      eventAndTerms.event._id,
+      String(eventAndTerms.event._version),
       `${spaceId}:${completeRule.alertId}`,
+      eventAndTerms.newTerms,
       suppressionTerms,
     ]);
-
-    const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
     const baseAlert: BaseFieldsLatest = buildBulkBody(
       spaceId,
@@ -75,7 +77,7 @@ export const wrapSuppressedAlerts = ({
       mergeStrategy,
       [],
       true,
-      buildReasonMessage,
+      buildReasonMessageForNewTermsAlert,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
@@ -88,6 +90,7 @@ export const wrapSuppressedAlerts = ({
       _index: '',
       _source: {
         ...baseAlert,
+        [ALERT_NEW_TERMS]: eventAndTerms.newTerms,
         ...getSuppressionAlertFields({
           primaryTimestamp,
           secondaryTimestamp,
