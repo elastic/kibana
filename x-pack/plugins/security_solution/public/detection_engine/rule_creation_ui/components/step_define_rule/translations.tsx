@@ -254,10 +254,3 @@ export const GROUP_BY_LABEL = i18n.translate(
     defaultMessage: 'Suppress alerts by',
   }
 );
-
-export const RELATED_INTEGRATIONS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.related_integrations',
-  {
-    defaultMessage: 'Related integrations',
-  }
-);

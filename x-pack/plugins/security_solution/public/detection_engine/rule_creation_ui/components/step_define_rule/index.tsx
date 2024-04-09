@@ -55,7 +55,6 @@ import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
-import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
