@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { cleanup, Dataset, generate, PartialConfig } from '@kbn/data-forge';
 import expect from '@kbn/expect';
+import {
+  Aggregators,
+  Comparator,
+  InfraRuleType,
+  MetricThresholdParams,
+} from '@kbn/infra-plugin/common/alerting/metrics';
+
+import { createRule } from '../../../alerting_api_integration/observability/helpers/alerting_api_helper';
+import {
+  waitForDocumentInIndex,
+  waitForRuleStatus,
+} from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -116,6 +129,120 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
+      });
+    });
+
+    describe('Infrastructure Source Configuration with Rules', function () {
+      const esClient = getService('es');
+      const supertest = getService('supertest');
+      const esDeleteAllIndices = getService('esDeleteAllIndices');
+      const logger = getService('log');
+      const retryService = getService('retry');
+
+      describe('Create Metric threshold', () => {
+        let ruleId: string;
+        let dataForgeConfig: PartialConfig;
+        let dataForgeIndices: string[];
+
+        const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
+        const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
+
+        describe('alert and action creation', () => {
+          before(async () => {
+            await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
+              anomalyThreshold: 50,
+              description: '',
+              metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+              name: 'Default',
+            });
+            dataForgeConfig = {
+              schedule: [
+                {
+                  template: 'good',
+                  start: 'now-10m',
+                  end: 'now+5m',
+                  metrics: [
+                    { name: 'system.cpu.user.pct', method: 'linear', start: 0.9, end: 0.9 },
+                  ],
+                },
+              ],
+              indexing: { dataset: 'fake_hosts' as Dataset },
+            };
+            dataForgeIndices = await generate({
+              client: esClient,
+              config: dataForgeConfig,
+              logger,
+            });
+            await waitForDocumentInIndex({
+              esClient,
+              indexName: dataForgeIndices.join(','),
+              docCountTarget: 45,
+              retryService,
+              logger,
+            });
+            const createdRule = await createRule<MetricThresholdParams>({
+              supertest,
+              logger,
+              esClient,
+              ruleTypeId: InfraRuleType.MetricThreshold,
+              consumer: 'infrastructure',
+              tags: ['infrastructure'],
+              name: 'Metric threshold rule',
+              params: {
+                criteria: [
+                  {
+                    aggType: Aggregators.AVERAGE,
+                    comparator: Comparator.GT,
+                    threshold: [0.5],
+                    timeSize: 5,
+                    timeUnit: 'm',
+                    metric: 'system.cpu.user.pct',
+                  },
+                ],
+                sourceId: 'default',
+                alertOnNoData: true,
+                alertOnGroupDisappear: true,
+              },
+              schedule: {
+                interval: '1m',
+              },
+            });
+            ruleId = createdRule.id;
+          });
+
+          after(async () => {
+            await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
+            await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+            await esClient.deleteByQuery({
+              index: METRICS_ALERTS_INDEX,
+              query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+            });
+            await esClient.deleteByQuery({
+              index: '.kibana-event-log-*',
+              query: { term: { 'kibana.alert.rule.consumer': 'infrastructure' } },
+            });
+            await cleanup({ client: esClient, config: dataForgeConfig, logger });
+          });
+
+          it('rule should be active', async () => {
+            const executionStatus = await waitForRuleStatus({
+              id: ruleId,
+              expectedStatus: 'active',
+              supertest,
+              retryService,
+              logger,
+            });
+            expect(executionStatus.status).to.be('active');
+          });
+
+          it('should show a warning callout when user edit the index pattern while at least one rule utilize it ', async () => {
+            await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
+            const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
+            await metricIndicesInput.clearValueWithKeyboard();
+            await metricIndicesInput.type('newMatch');
+            await pageObjects.infraHome.getInfraIndicesPanelSettingsDangerCalloutUsedByRules();
+          });
+        });
       });
     });
   });
