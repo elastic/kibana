@@ -177,6 +177,9 @@ export const MaxLinesInput = ({
 };
 
 const noop = () => {};
+const PANEL_STYLE = {
+  width: '500px',
+};
 
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
@@ -214,7 +217,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
       type="legend"
       groupPosition={groupPosition}
       buttonDataTestSubj="lnsLegendButton"
-      panelStyle={{ width: '500px' }}
+      panelStyle={PANEL_STYLE}
     >
       <EuiFormRow
         display="columnCompressed"
