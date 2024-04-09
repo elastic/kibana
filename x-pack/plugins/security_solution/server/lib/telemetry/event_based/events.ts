@@ -83,9 +83,6 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
 };
 
 interface AssetCriticalitySystemProcessedAssignmentFileEvent {
-  parameters: {
-    fileSizeBytes?: number;
-  };
   processing: {
     startTime: string;
     endTime: string;
@@ -98,14 +95,6 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
   {
     eventType: 'asset_criticality_system_processed_assignment_file',
     schema: {
-      parameters: {
-        properties: {
-          fileSizeBytes: {
-            type: 'long',
-            _meta: { description: 'Size of the supplied file in bytes', optional: true }, // optional as it may not be available in content-length header
-          },
-        },
-      },
       processing: {
         properties: {
           startTime: { type: 'date', _meta: { description: 'Processing start time' } },

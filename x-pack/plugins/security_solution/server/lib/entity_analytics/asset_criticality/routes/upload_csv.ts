@@ -69,12 +69,7 @@ export const assetCriticalityCSVUploadRoute = (
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
 
-          const fileSize = fileStream.hapi.headers['content-length']
-            ? parseInt(fileStream.hapi.headers['content-length'], 10)
-            : undefined;
-          logger.debug(
-            `Parsing asset criticality CSV file ${fileStream.hapi.filename} of size ${fileSize} bytes`
-          );
+          logger.debug(`Parsing asset criticality CSV file ${fileStream.hapi.filename}`);
 
           const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
             header: false,
@@ -100,9 +95,6 @@ export const assetCriticalityCSVUploadRoute = (
           const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
 
           const [eventType, event] = createAssetCriticalityProcessedFileEvent({
-            parameters: {
-              fileSizeBytes: fileSize,
-            },
             processing: {
               startTime: start.toISOString(),
               endTime: end.toISOString(),
