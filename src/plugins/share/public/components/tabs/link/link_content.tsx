@@ -180,7 +180,7 @@ export const LinkContent = ({
         values={{ objectType }}
       />
     ) : objectType === 'lens' || objectType === 'dashboard' ? (
-      shortUrlCache
+      shortUrlCache ?? shareableUrl
     ) : (
       shareableUrl ?? shortUrlCache ?? ''
     );
