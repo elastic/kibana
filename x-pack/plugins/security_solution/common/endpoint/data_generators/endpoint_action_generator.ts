@@ -39,39 +39,47 @@ import { getFileDownloadId } from '../service/response_actions/get_file_download
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
-  generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
+  generate<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
+  ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
-
-    return merge(
-      {
-        '@timestamp': timeStamp.toISOString(),
-        agent: {
-          id: [this.seededUUIDv4()],
-        },
-        EndpointActions: {
-          action_id: this.seededUUIDv4(),
-          expiration: this.randomFutureDate(timeStamp),
-          type: 'INPUT_ACTION',
-          input_type: 'endpoint',
-          data: {
-            command: this.randomResponseActionCommand(),
-            comment: this.randomString(15),
-            parameters: undefined,
-          },
-        },
-        error: undefined,
-        user: {
-          id: this.randomUser(),
-        },
-        rule: undefined,
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
+      '@timestamp': timeStamp.toISOString(),
+      agent: {
+        id: [this.seededUUIDv4()],
       },
-      overrides
-    );
+      EndpointActions: {
+        action_id: this.seededUUIDv4(),
+        expiration: this.randomFutureDate(timeStamp),
+        type: 'INPUT_ACTION',
+        input_type: 'endpoint',
+        data: {
+          command: this.randomResponseActionCommand(),
+          comment: this.randomString(15),
+          parameters: undefined,
+        },
+      },
+      error: undefined,
+      user: {
+        id: this.randomUser(),
+      },
+      rule: undefined,
+    };
+
+    return merge(doc, overrides);
   }
 
-  generateActionEsHit(
-    overrides: DeepPartial<LogsEndpointAction> = {}
-  ): estypes.SearchHit<LogsEndpointAction> {
+  generateActionEsHit<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
+  ): estypes.SearchHit<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
       _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
