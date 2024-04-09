@@ -114,7 +114,7 @@ export function createLiteral(
   }
   const text = node.getText();
 
-  const partialLiteral: Pick<ESQLLiteral, 'incomplete' | 'location' | 'name' | 'text' | 'type'> = {
+  const partialLiteral: Omit<ESQLLiteral, 'literalType' | 'value'> = {
     type: 'literal',
     text,
     name: text,
