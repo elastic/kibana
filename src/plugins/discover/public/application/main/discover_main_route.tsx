@@ -30,16 +30,15 @@ import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
 import {
   CustomizationCallback,
+  DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import type { DiscoverCustomizationContext } from '../types';
-import { DiscoverTopNavServerless } from './components/top_nav/discover_topnav_serverless';
+import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { isTextBasedQuery } from './utils/is_text_based_query';
 import { DiscoverStateContainer, LoadParams } from './services/discover_state';
 
@@ -52,7 +51,6 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  isDev: boolean;
   customizationContext: DiscoverCustomizationContext;
 }
 
@@ -71,6 +69,7 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
+    getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
@@ -96,8 +95,8 @@ export function DiscoverMainRoute({
    * Get location state of scoped history only on initial load
    */
   const historyLocationState = useMemo(
-    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
-    []
+    () => getScopedHistory<MainHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useAlertResultsToast({
@@ -205,7 +204,7 @@ export function DiscoverMainRoute({
             },
             toastNotifications,
             onBeforeRedirect() {
-              getUrlTracker().setTrackedUrl('/');
+              services.urlTracker.setTrackedUrl('/');
             },
             theme: core.theme,
           })(e);
@@ -353,7 +352,7 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <>
-          <DiscoverTopNavServerless stateContainer={stateContainer} hideNavMenuItems={loading} />
+          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
           {mainContent}
         </>
       </DiscoverMainProvider>

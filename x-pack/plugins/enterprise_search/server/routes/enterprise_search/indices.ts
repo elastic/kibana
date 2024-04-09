@@ -24,7 +24,11 @@ import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
-import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
+import type {
+  AttachMlInferencePipelineResponse,
+  MlInferenceError,
+  MlInferenceHistoryResponse,
+} from '../../../common/types/pipelines';
 
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
@@ -463,7 +467,6 @@ export function registerIndexRoutes({
         const createPipelineResult = await preparePipelineAndIndexForMlInference(
           indexName,
           pipelineName,
-          // @ts-expect-error pipeline._meta defined as mandatory
           pipelineDefinition,
           modelId,
           fieldMappings,
@@ -660,7 +663,6 @@ export function registerIndexRoutes({
 
       const simulateRequest: IngestSimulateRequest = {
         docs,
-        // @ts-expect-error pipeline._meta defined as mandatory
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
@@ -776,8 +778,14 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
-
+      let errors: MlInferenceError[] = [];
+      try {
+        errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: {
           errors,
@@ -916,9 +924,14 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-
-      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
-
+      let history: MlInferenceHistoryResponse = { history: [] };
+      try {
+        history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: history,
         headers: { 'content-type': 'application/json' },
@@ -1127,7 +1140,7 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const modelsResult = await fetchMlModels(trainedModelsProvider);
+      const modelsResult = await fetchMlModels(trainedModelsProvider, log);
 
       return response.ok({
         body: modelsResult,

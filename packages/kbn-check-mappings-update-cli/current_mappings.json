@@ -837,6 +837,11 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "doc_values": false,
+            "index": false,
+            "type": "boolean"
           }
         }
       },
@@ -997,6 +1002,10 @@
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
+      },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
       },
       "latest_install_failed_attempts": {
         "enabled": false,
@@ -1554,15 +1563,16 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
+      "dashboardSavedObjectId": {
         "type": "keyword"
       },
-      "kuery": {
-        "type": "text"
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       }
     }
   },
@@ -2429,6 +2439,9 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

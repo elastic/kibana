@@ -24,12 +24,11 @@ export const setupNavigation = (
 };
 
 export const startNavigation = (services: Services) => {
-  const { serverless, management } = services;
+  const { serverless } = services;
   serverless.setProjectHome(APP_PATH);
   initSideNavigation(services);
 
   enableManagementCardsLanding(services);
-  management.setIsSidebarEnabled(false);
 
   subscribeBreadcrumbs(services);
 };

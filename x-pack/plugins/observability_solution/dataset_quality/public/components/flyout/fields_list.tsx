@@ -20,15 +20,20 @@ import {
 export function FieldsList({
   title,
   fields,
+  actionsMenu: ActionsMenu,
 }: {
   title: string;
   fields: Array<{ fieldTitle: string; fieldValue: ReactNode }>;
+  actionsMenu?: ReactNode;
 }) {
   return (
     <EuiPanel hasBorder grow={false}>
-      <EuiTitle size="s">
-        <span>{title}</span>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiTitle size="s">
+          <span>{title}</span>
+        </EuiTitle>
+        <EuiFlexItem grow={false}>{ActionsMenu}</EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup direction="column" gutterSize="none">
         {fields.map(({ fieldTitle, fieldValue }, index) => (
@@ -39,7 +44,9 @@ export function FieldsList({
                   <span>{fieldTitle}</span>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={4}>{fieldValue}</EuiFlexItem>
+              <EuiFlexItem grow={4} data-test-subj="datasetQualityFlyoutFieldValue">
+                {fieldValue}
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}

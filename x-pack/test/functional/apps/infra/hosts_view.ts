@@ -7,17 +7,10 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -26,6 +19,7 @@ import {
   DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -110,6 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -122,17 +117,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
-
-  const getKibanaServerUrl = () => {
-    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-    const kibanaServerUrlWithAuth = url
-      .format({
-        ...url.parse(kibanaServerUrl),
-        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-      })
-      .slice(0, -1);
-    return kibanaServerUrlWithAuth;
-  };
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
@@ -154,39 +138,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   describe('Hosts View', function () {
-    let synthtraceApmClient: any;
+    let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      const kibanaClient = new ApmSynthtraceKibanaClient({
-        target: getKibanaServerUrl(),
-        logger: createLogger(LogLevel.debug),
-      });
-      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-      await kibanaClient.installApmPackage(kibanaVersion);
-      synthtraceApmClient = new ApmSynthtraceEsClient({
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
         client: esClient,
-        logger: createLogger(LogLevel.info),
-        version: kibanaVersion,
-        refreshAfterIndex: true,
+        packageVersion: version,
       });
-      await Promise.all([
-        synthtraceApmClient.index(
-          generateAddServicesToExistingHost({
-            from: DATES.metricsAndLogs.hosts.processesDataStartDate,
-            to: DATES.metricsAndLogs.hosts.processesDataEndDate,
-            hostName: 'Jennys-MBP.fritz.box',
-            servicesPerHost: 3,
-          })
-        ),
+
+      const services = generateAddServicesToExistingHost({
+        from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+        to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+        hostName: 'Jennys-MBP.fritz.box',
+        servicesPerHost: 3,
+      });
+
+      await browser.setWindowSize(1600, 1200);
+
+      return Promise.all([
+        synthtraceApmClient.index(services),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-        kibanaServer.savedObjects.cleanStandardList(),
       ]);
-      await browser.setWindowSize(1600, 1200);
     });
 
     after(async () => {
-      await Promise.all([
+      return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
@@ -232,8 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/176951
-        describe.skip('Overview Tab', () => {
+        describe('Overview Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickOverviewTab();
           });

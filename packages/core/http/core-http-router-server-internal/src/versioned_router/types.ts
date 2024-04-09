@@ -22,7 +22,7 @@ export interface VersionedRouterRoute {
   /** @internal */
   path: string;
   /** @internal */
-  options: VersionedRouteConfig<RouteMethod>;
+  options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
   /** @internal */
   handlers: Array<{
     fn: RequestHandler;

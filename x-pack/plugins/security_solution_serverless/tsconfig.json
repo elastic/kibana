@@ -45,6 +45,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/management-cards-navigation",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/discover-plugin",
   ]
 }

@@ -20,7 +20,6 @@ kbnEs
     'source-path': resolve(__dirname, '../../elasticsearch'),
     'base-path': resolve(__dirname, '../.es'),
     ssl: false,
-    kibanaUrl: 'https://localhost:5601/',
   })
   .catch(function (e) {
     console.error(e);

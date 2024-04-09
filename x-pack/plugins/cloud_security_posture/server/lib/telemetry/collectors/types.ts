@@ -143,6 +143,7 @@ export interface CloudSecurityInstallationStats {
   created_at: string;
   agent_count: number;
   is_setup_automatic: boolean;
+  is_agentless: boolean;
   account_type?: 'single-account' | 'organization-account';
   setup_access_option: SetupAccessOption;
 }

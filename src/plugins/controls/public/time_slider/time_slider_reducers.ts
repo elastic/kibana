@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { EuiRangeTick } from '@elastic/eui';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { EuiRangeTick } from '@elastic/eui';
+
+import { TimeSlice } from '../../common/types';
 import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
   publishValue: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ value?: [number, number] }>
+    action: PayloadAction<{ value?: TimeSlice }>
   ) => {
     state.output.timeslice = action.payload.value;
   },
@@ -47,7 +49,7 @@ export const timeSliderReducers = {
   setValue: (
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<{
-      value?: [number, number];
+      value?: TimeSlice;
     }>
   ) => {
     state.componentState.value = action.payload.value;

@@ -9,20 +9,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import type { Moment } from 'moment';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { PLUGIN_ID } from '../../common';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { GroupTableItem } from '../components/log_rate_analysis_results_table/types';
 
-import { useTimeBuckets } from './use_time_buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 import { useDocumentCountStats } from './use_document_count_stats';
@@ -39,17 +38,17 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   timeRange?: { min: Moment; max: Moment }
 ) => {
-  const { executionContext } = useAiopsAppContext();
+  const { executionContext, uiSettings } = useAiopsAppContext();
 
   useExecutionContext(executionContext, {
-    name: PLUGIN_ID,
+    name: AIOPS_PLUGIN_ID,
     type: 'application',
     id: contextId,
   });
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,

@@ -222,6 +222,26 @@ const histogramIndicatorSchema = t.type({
   ]),
 });
 
+const syntheticsParamSchema = t.type({
+  value: allOrAnyString,
+  label: allOrAnyString,
+});
+const syntheticsAvailabilityIndicatorTypeSchema = t.literal('sli.synthetics.availability');
+const syntheticsAvailabilityIndicatorSchema = t.type({
+  type: syntheticsAvailabilityIndicatorTypeSchema,
+  params: t.intersection([
+    t.type({
+      monitorIds: t.array(syntheticsParamSchema),
+      index: t.string,
+    }),
+    t.partial({
+      tags: t.array(syntheticsParamSchema),
+      projects: t.array(syntheticsParamSchema),
+      filter: querySchema,
+    }),
+  ]),
+});
+
 const indicatorDataSchema = t.type({
   dateRange: dateRangeSchema,
   good: t.number,
@@ -231,6 +251,7 @@ const indicatorDataSchema = t.type({
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorTypeSchema,
   timesliceMetricIndicatorTypeSchema,
@@ -259,6 +280,7 @@ const indicatorTypesArraySchema = new t.Type<string[], string, unknown>(
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  syntheticsAvailabilityIndicatorSchema,
   kqlCustomIndicatorSchema,
   metricCustomIndicatorSchema,
   timesliceMetricIndicatorSchema,
@@ -270,6 +292,8 @@ export {
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  syntheticsAvailabilityIndicatorSchema,
+  syntheticsAvailabilityIndicatorTypeSchema,
   kqlCustomIndicatorSchema,
   kqlCustomIndicatorTypeSchema,
   metricCustomIndicatorSchema,

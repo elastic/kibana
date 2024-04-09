@@ -44,7 +44,7 @@ import {
 } from '@kbn/logs-shared-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -96,7 +96,7 @@ export interface InfraClientStartDeps {
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   osquery?: unknown; // OsqueryPluginStart - can't be imported due to cyclic dependency;
   share: SharePluginStart;
   spaces: SpacesPluginStart;

@@ -11,10 +11,16 @@ import type { ObservabilityAIAssistantConfig } from './config';
 export type { ObservabilityAIAssistantServerRouteRepository } from './routes/get_global_observability_ai_assistant_route_repository';
 
 import { config as configSchema } from './config';
+export type { RegistrationCallback } from './service/types';
 export type {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantServerSetup,
 } from './types';
+
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+} from '../common/utils/advanced_settings';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [

@@ -37,6 +37,8 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { TimeRange } from '@kbn/es-query';
 import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -51,6 +53,8 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -105,19 +109,26 @@ export default function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const services = useKibana().services;
-  const { charts, data } = services;
+  const {
+    charts,
+    data,
+    share: {
+      url: { locators },
+    },
+  } = services;
   const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
+  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-  const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
@@ -155,6 +166,25 @@ export default function AlertDetailsAppSection({
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
+    setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
+  }, [alertStart, alertEnd]);
+
+  useEffect(() => {
+    const appUrl = getViewInAppUrl({
+      dataViewId: dataView?.id,
+      groups,
+      logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
+      metrics: ruleParams.criteria[0]?.metrics,
+      searchConfiguration:
+        ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
+      startedAt: alertStart,
+      endedAt: alertEnd,
+    });
+
+    setViewInAppUrl(appUrl);
+  }, [dataView, alertStart, alertEnd, groups, ruleParams, locators]);
+
+  useEffect(() => {
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -164,7 +194,28 @@ export default function AlertDetailsAppSection({
             defaultMessage: 'Source',
           }
         ),
-        value: <Groups groups={groups} />,
+        value: (
+          <>
+            <Groups
+              groups={groups}
+              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+            />
+            <span>
+              <EuiLink
+                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+                href={viewInAppUrl}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
+                  {
+                    defaultMessage: 'View related logs',
+                  }
+                )}
+              </EuiLink>
+            </span>
+          </>
+        ),
       });
     }
     if (tags && tags.length > 0) {
@@ -193,7 +244,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, alertEnd, viewInAppUrl]);
 
   useEffect(() => {
     const initDataView = async () => {

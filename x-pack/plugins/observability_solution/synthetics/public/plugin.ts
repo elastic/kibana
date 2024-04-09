@@ -14,7 +14,7 @@ import {
   PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -50,9 +50,10 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import {
-  ObservabilityAIAssistantPluginStart,
-  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN } from '../common/constants/plugin';
@@ -67,7 +68,7 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -84,7 +85,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
@@ -100,6 +101,7 @@ export interface ClientPluginsStart {
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {

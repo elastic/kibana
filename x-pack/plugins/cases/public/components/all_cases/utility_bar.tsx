@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import {
@@ -29,6 +28,7 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface Props {
   isSelectorView?: boolean;
@@ -56,12 +56,15 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
   }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
-    const { permissions, appId } = useCasesContext();
+    const { permissions } = useCasesContext();
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.${appId}.utilityBar.hideMaxLimitWarning`;
-    const [localStorageWarning, setLocalStorageWarning] = useLocalStorage<boolean>(localStorageKey);
+    const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
+    const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
+      localStorageKey,
+      false
+    );
 
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -83,7 +86,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     });
 
     const handleNotShowAgain = () => {
-      setLocalStorageWarning(true);
+      setDoNotShowAgain(true);
     };
 
     /**
@@ -101,8 +104,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
       totalCases >= MAX_DOCS_PER_PAGE &&
       pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
 
-    const isDoNotShowAgainSelected = localStorageWarning && localStorageWarning === true;
-
     const renderMaxLimitWarning = (): React.ReactNode => (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
@@ -110,7 +111,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             color="default"
             size="m"
             css={css`
-              margin-top: 4px;
+              margin-top: ${euiTheme.size.xs};
             `}
           >
             {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}
@@ -145,23 +146,21 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
           justifyContent="spaceBetween"
           alignItems="center"
           gutterSize="s"
-          css={{
-            borderBottom: euiTheme.border.thin,
-            marginTop: 0,
-            marginBottom: 0,
-            paddingTop: euiTheme.size.s,
-            paddingBottom: euiTheme.size.s,
-          }}
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+            padding-top: ${euiTheme.size.s};
+            padding-bottom: ${euiTheme.size.s};
+          `}
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
               <EuiFlexItem
                 data-test-subj="case-table-case-count"
                 grow={false}
-                css={{
-                  borderRight: euiTheme.border.thin,
-                  paddingRight: euiTheme.size.s,
-                }}
+                css={css`
+                  border-right: ${euiTheme.border.thin};
+                  padding-right: ${euiTheme.size.s};
+                `}
               >
                 <EuiText size="xs" color="subdued">
                   {i18n.SHOWING_CASES(totalCases, visibleCases)}
@@ -245,7 +244,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
         </EuiFlexGroup>
         {modals}
         {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !isDoNotShowAgainSelected && (
+        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup>

@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule RATE - GROUP_BY - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -46,9 +47,11 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
-            end: 'now',
-            metrics: [{ name: 'system.network.in.bytes', method: 'exp', start: 10, end: 100 }],
+            start: 'now-10m',
+            end: 'now+5m',
+            metrics: [
+              { name: 'system.network.in.bytes', method: 'linear', start: 0, end: 54000000 },
+            ],
           },
         ],
         indexing: {
@@ -63,12 +66,15 @@ export default function ({ getService }: FtrProviderContext) {
         esClient,
         indexName: dataForgeIndices.join(','),
         docCountTarget: 270,
+        retryService,
+        logger,
       });
       await createDataView({
         supertest,
         name: DATE_VIEW,
         id: DATA_VIEW_ID,
         title: DATE_VIEW,
+        logger,
       });
     });
 
@@ -86,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
@@ -97,10 +104,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -109,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 comparator: Comparator.GT_OR_EQ,
-                threshold: [0.2],
+                threshold: [50_000],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [
@@ -161,6 +171,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -170,6 +182,8 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
@@ -230,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 comparator: '>=',
-                threshold: [0.2],
+                threshold: [50_000],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', field: 'system.network.in.bytes', aggType: 'rate' }],
@@ -247,6 +261,8 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
@@ -254,9 +270,9 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Rate of system.network.in.bytes is 0.3 B/s, above or equal the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
+          `Rate of system.network.in.bytes is 60 kB/s, above or equal the threshold of 50 kB/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('0.3 B/s');
+        expect(resp.hits.hits[0]._source?.value).eql('60 kB/s');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );

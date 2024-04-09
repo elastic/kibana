@@ -12,13 +12,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-} from '@kbn/aiops-utils/log_rate_analysis_type';
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { CustomThresholdRuleTypeParams } from '../../types';
 import { TopAlert } from '../../../..';
@@ -47,7 +47,10 @@ export function LogRateAnalysis({
   services,
 }: AlertDetailsLogRateAnalysisProps) {
   const {
-    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+    observabilityAIAssistant: {
+      ObservabilityAIAssistantContextualInsight,
+      getContextualInsightMessages,
+    },
   } = services;
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
@@ -162,18 +165,12 @@ export function LogRateAnalysis({
       Do not repeat the full list of field names and field values back to the user.
       Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
 
-    const now = new Date().toISOString();
-
-    return [
-      {
-        '@timestamp': now,
-        message: {
-          content,
-          role: MessageRole.User,
-        },
-      },
-    ];
-  }, [logRateAnalysisParams]);
+    return getContextualInsightMessages({
+      message:
+        'Can you identify possible causes and remediations for these log rate analysis results',
+      instructions: content,
+    });
+  }, [logRateAnalysisParams, getContextualInsightMessages]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -205,6 +202,7 @@ export function LogRateAnalysis({
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
+              'analytics',
               'application',
               'data',
               'executionContext',

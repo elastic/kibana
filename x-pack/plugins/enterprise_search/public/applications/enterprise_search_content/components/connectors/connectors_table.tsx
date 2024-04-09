@@ -20,8 +20,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
-
 import { Meta } from '../../../../../common/types/pagination';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -41,7 +39,7 @@ interface ConnectorsTableProps {
   isLoading?: boolean;
   items: ConnectorViewItem[];
   meta?: Meta;
-  onChange: (criteria: CriteriaWithPagination<Connector>) => void;
+  onChange: (criteria: CriteriaWithPagination<ConnectorViewItem>) => void;
   onDelete: (connectorName: string, connectorId: string, indexName: string | null) => void;
 }
 export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
@@ -69,7 +67,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
                 defaultMessage: 'Connector name',
               }
             ),
-            render: (connector: Connector) => (
+            render: (connector: ConnectorViewItem) => (
               <EuiLinkTo
                 to={generateEncodedPath(CONNECTOR_DETAIL_PATH, { connectorId: connector.id })}
               >
@@ -81,18 +79,23 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ]
       : []),
     {
-      field: 'index_name',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.indexName',
         {
           defaultMessage: 'Index name',
         }
       ),
-      render: (indexName: string) =>
-        indexName ? (
-          <EuiLinkTo to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName })}>
-            {indexName}
-          </EuiLinkTo>
+      render: (connector: ConnectorViewItem) =>
+        connector.index_name ? (
+          connector.indexExists ? (
+            <EuiLinkTo
+              to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: connector.index_name })}
+            >
+              {connector.index_name}
+            </EuiLinkTo>
+          ) : (
+            connector.index_name
+          )
         ) : (
           '--'
         ),
@@ -125,16 +128,19 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         ]
       : []),
     {
-      field: 'status',
       name: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorTable.columns.status',
         {
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connectorStatus: ConnectorStatus) => {
-        const label = connectorStatusToText(connectorStatus);
-        return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
+      render: (connector: ConnectorViewItem) => {
+        const label = connectorStatusToText(connector.status, !!connector.index_name);
+        return (
+          <EuiBadge color={connectorStatusToColor(connector.status, !!connector.index_name)}>
+            {label}
+          </EuiBadge>
+        );
       },
       truncateText: true,
       width: '15%',
@@ -159,10 +165,15 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           type: 'icon',
         },
         {
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
-            { defaultMessage: 'View this connector' }
-          ),
+          description: isCrawler
+            ? i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewCrawler',
+                { defaultMessage: 'View this crawler' }
+              )
+            : i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',
+                { defaultMessage: 'View this connector' }
+              ),
           enabled: (connector) => !!connector.index_name,
           icon: 'eye',
           isPrimary: false,
@@ -177,11 +188,22 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               }
             ),
           onClick: (connector) => {
-            navigateToUrl(
-              generateEncodedPath(CONNECTOR_DETAIL_PATH, {
-                connectorId: connector.id,
-              })
-            );
+            if (isCrawler) {
+              // crawler always has an index this is to satisfy TS
+              if (connector.index_name) {
+                navigateToUrl(
+                  generateEncodedPath(SEARCH_INDEX_PATH, {
+                    indexName: connector.index_name,
+                  })
+                );
+              }
+            } else {
+              navigateToUrl(
+                generateEncodedPath(CONNECTOR_DETAIL_PATH, {
+                  connectorId: connector.id,
+                })
+              );
+            }
           },
           type: 'icon',
         },

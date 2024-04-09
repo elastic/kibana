@@ -18,3 +18,4 @@ export const DEFAULT_SORT_DIRECTION = 'asc';
 export const NONE = 'none';
 
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
+export const DEFAULT_DEGRADED_DOCS = { percentage: 0, count: 0 };

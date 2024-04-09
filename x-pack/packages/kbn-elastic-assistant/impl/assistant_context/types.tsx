@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
+import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 
 export interface MessagePresentation {
   delay?: number;
   stream?: boolean;
 }
-export interface Message {
-  role: ConversationRole;
+
+// The ClientMessage is different from the Message in that it content
+// can be undefined and reader is the correct type which is unavailable in Zod
+export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Record<string, string>;
   content?: string;
-  timestamp: string;
-  isError?: boolean;
   presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
 }
 
 export interface ConversationTheme {
@@ -43,24 +36,25 @@ export interface ConversationTheme {
     icon?: string;
   };
 }
-
 /**
  * Complete state to reconstruct a conversation instance.
  * Includes all messages, connector configured, and relevant UI state.
  *
  */
 export interface Conversation {
-  apiConfig: {
-    connectorId?: string;
-    connectorTypeTitle?: string;
-    defaultSystemPromptId?: string;
-    provider?: OpenAiProviderType;
-    model?: string;
+  '@timestamp'?: string;
+  apiConfig?: ApiConfig;
+  user?: {
+    id?: string;
+    name?: string;
   };
+  category: string;
   id: string;
-  messages: Message[];
-  replacements?: Record<string, string>;
-  theme?: ConversationTheme;
+  title: string;
+  messages: ClientMessage[];
+  updatedAt?: Date;
+  createdAt?: Date;
+  replacements: Replacements;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -77,6 +71,7 @@ export interface AssistantTelemetry {
   reportAssistantSettingToggled: (params: {
     isEnabledKnowledgeBase?: boolean;
     isEnabledRAGAlerts?: boolean;
+    assistantStreamingEnabled?: boolean;
   }) => void;
 }
 

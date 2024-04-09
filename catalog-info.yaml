@@ -36,8 +36,8 @@ metadata:
   name: kibana-buildkite-pipelines
   description: A location re-routing file, pointing to individual buildkite pipeline definition files
 spec:
-  type: file
-  target: .buildkite/pipeline-resource-definitions/locations.yml
+  type: url
+  target: https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/locations.yml
 
 ---
 
@@ -220,3 +220,6 @@ spec:
           access_level: BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+
+# Please avoid creating new kibana pipelines in this file to avoid bloating.
+# Instead, create a new file in the pipeline-resource-definitions directory, and wire it in through the locations.yml file.

@@ -44,6 +44,7 @@ export const getEditAction = ({
     ),
     type: 'icon',
     icon: 'pencil',
+    available: (tag) => !tag.managed,
     onClick: (tag: TagWithRelations) => {
       editModalOpener({
         tagId: tag.id,

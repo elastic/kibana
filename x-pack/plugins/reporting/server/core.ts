@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs';
 
 import type {
   AnalyticsServiceStart,
@@ -418,6 +418,10 @@ export class ReportingCore {
     return new ReportingEventLogger(report, task);
   }
 
+  /**
+   * @deprecated
+   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
+   */
   public async getCsvSearchSourceImmediate() {
     const startDeps = await this.getPluginStartDeps();
 

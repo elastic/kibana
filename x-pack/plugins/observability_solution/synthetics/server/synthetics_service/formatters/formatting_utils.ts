@@ -50,9 +50,10 @@ export const replaceStringWithParams = (
   return value as string | null;
 };
 
+const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
+
 export const hasNoParams = (strVal: string) => {
-  const shellParamsRegex = /\$\{[a-zA-Z_][a-zA-Z0-9_]*\}/g;
-  return strVal.match(shellParamsRegex) === null;
+  return strVal.match(SHELL_PARAMS_REGEX) === null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {

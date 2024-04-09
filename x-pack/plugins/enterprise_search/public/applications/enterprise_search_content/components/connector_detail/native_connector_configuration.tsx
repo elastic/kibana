@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -31,7 +31,6 @@ import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callou
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { HttpLogic } from '../../../shared/http';
-import { CONNECTOR_ICONS } from '../../../shared/icons/connector_icons';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
@@ -41,7 +40,6 @@ import { hasConfiguredConfiguration } from '../../utils/has_configured_configura
 
 import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
-import { BETA_CONNECTORS, NATIVE_CONNECTORS } from '../search_index/connector/constants';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
@@ -52,9 +50,15 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const NativeConnectorConfiguration: React.FC = () => {
   const { connector } = useValues(ConnectorViewLogic);
-  const { config } = useValues(KibanaLogic);
+  const { config, connectorTypes: connectors } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
+
+  const NATIVE_CONNECTORS = useMemo(
+    () => connectors.filter(({ isNative }) => isNative),
+    [connectors]
+  );
+  const BETA_CONNECTORS = useMemo(() => connectors.filter(({ isBeta }) => isBeta), [connectors]);
 
   if (!connector) {
     return <></>;
@@ -66,7 +70,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
     docsUrl: '',
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.custom,
     iconPath: 'custom.svg',
     isBeta: true,
     isNative: true,
@@ -82,7 +85,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
     connector.scheduling.full.enabled ||
     connector.scheduling.incremental.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
-  const icon = nativeConnector.icon;
+  const iconPath = nativeConnector.iconPath;
   const hasDocumentLevelSecurity =
     connector.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false;
 
@@ -100,9 +103,9 @@ export const NativeConnectorConfiguration: React.FC = () => {
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
-              {icon && (
+              {iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xl" type={icon} />
+                  <EuiIcon size="xl" type={iconPath} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
@@ -233,12 +236,12 @@ export const NativeConnectorConfiguration: React.FC = () => {
               ]}
             />
           </EuiPanel>
-          {!connector.index_name && (
+          {
             <>
               <EuiSpacer />
               <AttachIndexBox connector={connector} />
             </>
-          )}
+          }
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column">
@@ -273,27 +276,27 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 </EuiText>
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder hasShadow={false}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="globe" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h3>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
-                          {
-                            defaultMessage: 'Document level security',
-                          }
-                        )}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                {hasDocumentLevelSecurity && (
+            {hasDocumentLevelSecurity && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder hasShadow={false}>
+                  <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="globe" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h3>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
+                            {
+                              defaultMessage: 'Document level security',
+                            }
+                          )}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
                   <EuiText size="s">
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.description',
@@ -312,9 +315,9 @@ export const NativeConnectorConfiguration: React.FC = () => {
                       )}
                     </EuiLink>
                   </EuiText>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder hasShadow={false}>
                 <ConvertConnector />

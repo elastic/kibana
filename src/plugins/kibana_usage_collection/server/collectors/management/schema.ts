@@ -464,6 +464,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableServiceInventoryTableSearchBar': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -471,6 +475,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmAWSLambdaRequestCostPerMillion': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:logsExplorer:allowedDataViews': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
   },
   'banners:placement': {
     type: 'keyword',
@@ -505,10 +516,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:linksPanel': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -646,6 +653,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'devTools:enablePersistentConsole': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'aiAssistant:preferredAIAssistantType': {
+    type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

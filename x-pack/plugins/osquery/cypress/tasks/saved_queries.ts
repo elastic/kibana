@@ -21,7 +21,8 @@ import {
 import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = () =>
-  describe('Saved queries Complex Test', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/169786
+  describe.skip('Saved queries Complex Test', () => {
     const timeout = '601';
     const suffix = generateRandomStringName(1)[0];
     const savedQueryId = `Saved-Query-Id-${suffix}`;

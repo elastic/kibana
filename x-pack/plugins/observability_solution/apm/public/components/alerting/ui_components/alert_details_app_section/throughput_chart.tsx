@@ -33,6 +33,7 @@ const INITIAL_STATE = {
 };
 function ThroughputChart({
   transactionType,
+  transactionName,
   serviceName,
   environment,
   start,
@@ -43,6 +44,7 @@ function ThroughputChart({
   timeZone,
 }: {
   transactionType: string;
+  transactionName?: string;
   serviceName: string;
   environment: string;
   start: string;
@@ -59,7 +61,9 @@ function ThroughputChart({
     end,
     numBuckets: 100,
     kuery: '',
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
 
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
@@ -79,7 +83,7 @@ function ThroughputChart({
                   start,
                   end,
                   transactionType,
-                  transactionName: undefined,
+                  transactionName,
                   documentType: preferred.source.documentType,
                   rollupInterval: preferred.source.rollupInterval,
                   bucketSizeInSeconds: preferred.bucketSizeInSeconds,
@@ -89,7 +93,15 @@ function ThroughputChart({
           );
         }
       },
-      [environment, serviceName, start, end, transactionType, preferred]
+      [
+        environment,
+        serviceName,
+        start,
+        end,
+        transactionType,
+        transactionName,
+        preferred,
+      ]
     );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
     ChartType.THROUGHPUT

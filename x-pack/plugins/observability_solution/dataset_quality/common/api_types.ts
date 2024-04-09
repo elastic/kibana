@@ -21,6 +21,20 @@ export const dataStreamStatRt = rt.intersection([
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
+export const dashboardRT = rt.type({
+  id: rt.string,
+  title: rt.string,
+});
+
+export const integrationDashboardsRT = rt.type({
+  dashboards: rt.array(dashboardRT),
+});
+
+export type IntegrationDashboards = rt.TypeOf<typeof integrationDashboardsRT>;
+export type Dashboard = rt.TypeOf<typeof dashboardRT>;
+
+export const getIntegrationDashboardsResponseRt = rt.exact(integrationDashboardsRT);
+
 export const integrationIconRt = rt.intersection([
   rt.type({
     path: rt.string,
@@ -42,6 +56,7 @@ export const integrationRt = rt.intersection([
     version: rt.string,
     icons: rt.array(integrationIconRt),
     datasets: rt.record(rt.string, rt.string),
+    dashboards: rt.array(dashboardRT),
   }),
 ]);
 
@@ -50,6 +65,7 @@ export type Integration = rt.TypeOf<typeof integrationRt>;
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
   percentage: rt.number,
+  count: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
@@ -81,7 +97,7 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.number,
+  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
 });
 
 export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;

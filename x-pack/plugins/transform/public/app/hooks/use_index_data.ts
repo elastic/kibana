@@ -12,7 +12,7 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { buildBaseFilterCriteria, isDefaultQuery, matchAllQuery } from '@kbn/ml-query-utils';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
@@ -36,7 +36,6 @@ import {
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import type { TransformConfigQuery } from '../common';
-import { isDefaultQuery, matchAllQuery } from '../common';
 import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 

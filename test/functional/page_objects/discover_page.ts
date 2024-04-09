@@ -243,6 +243,12 @@ export class DiscoverPageObject extends FtrService {
     await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
   }
 
+  public async getCurrentLensChart() {
+    return (
+      await this.comboBox.getComboBoxSelectedOptions('unifiedHistogramSuggestionSelector')
+    )?.[0];
+  }
+
   public async getHistogramLegendList() {
     const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
     const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
@@ -481,21 +487,6 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click('indexPattern-add-field');
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
-  }
-
-  public async clickCreateNewDataView() {
-    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('dataview-create-new');
-    });
-    await this.testSubjects.click('dataview-create-new');
-    await this.retry.waitForWithTimeout(
-      'index pattern editor form to be visible',
-      15000,
-      async () => {
-        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
-      }
-    );
-    await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
   async createAdHocDataView(name: string, hasTimeField = false) {
@@ -763,9 +754,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async addRuntimeField(name: string, script: string) {
+  public async addRuntimeField(name: string, script: string, type?: string) {
     await this.clickAddField();
     await this.fieldEditor.setName(name);
+    if (type) {
+      await this.fieldEditor.setFieldType(type);
+    }
     await this.fieldEditor.enableValue();
     await this.fieldEditor.typeScript(script);
     await this.fieldEditor.save();
@@ -807,12 +801,12 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);

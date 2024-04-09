@@ -15,7 +15,7 @@ const { setup } = pageHelpers.componentTemplateDetails;
 
 const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   name: 'comp-1',
-  isDeprecated: true,
+  deprecated: true,
   template: {
     mappings: { properties: { ip_address: { type: 'ip' } } },
     aliases: { mydata: {} },

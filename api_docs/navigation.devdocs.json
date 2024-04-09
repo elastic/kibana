@@ -47,7 +47,7 @@
           "NavigationPublicStartDependencies",
           ">"
         ],
-        "path": "src/plugins/navigation/public/plugin.ts",
+        "path": "src/plugins/navigation/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,7 +84,7 @@
                   "ConfigSchema",
                   ">"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -117,7 +117,7 @@
                 "text": "NavigationPublicSetup"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,7 +138,7 @@
                   },
                   "<object, unknown>"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -162,7 +162,7 @@
                 "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
-              ", { unifiedSearch, cloud }: ",
+              ", depsStart: ",
               "NavigationPublicStartDependencies",
               ") => ",
               {
@@ -173,7 +173,7 @@
                 "text": "NavigationPublicStart"
               }
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -193,7 +193,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -203,12 +203,12 @@
                 "id": "def-public.NavigationPublicPlugin.start.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ unifiedSearch, cloud }",
+                "label": "depsStart",
                 "description": [],
                 "signature": [
                   "NavigationPublicStartDependencies"
                 ],
-                "path": "src/plugins/navigation/public/plugin.ts",
+                "path": "src/plugins/navigation/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -226,7 +226,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/navigation/public/plugin.ts",
+            "path": "src/plugins/navigation/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1099,6 +1099,23 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "navigation",
+          "id": "def-public.NavigationPublicStart.isSolutionNavEnabled$",
+          "type": "Object",
+          "tags": [],
+          "label": "isSolutionNavEnabled$",
+          "description": [
+            "Flag to indicate if the solution navigation is enabled."
+          ],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
+          "path": "src/plugins/navigation/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

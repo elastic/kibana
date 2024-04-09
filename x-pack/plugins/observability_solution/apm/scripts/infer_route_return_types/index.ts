@@ -21,6 +21,7 @@ import {
 import Path from 'path';
 import { execSync } from 'child_process';
 import { argv } from 'yargs';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 // This script adds explicit return types to route handlers,
 // for performance reasons. See https://github.com/elastic/kibana/pull/123266
@@ -33,7 +34,7 @@ type ConvertibleDeclaration =
   | MethodDeclaration;
 
 const project = new Project({
-  tsConfigFilePath: Path.resolve(__dirname, '../../../../../tsconfig.json'),
+  tsConfigFilePath: Path.resolve(__dirname, `${REPO_ROOT}/tsconfig.json`),
 });
 
 const glob =

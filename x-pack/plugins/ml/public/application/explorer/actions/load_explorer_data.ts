@@ -11,12 +11,13 @@ import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
 import { forkJoin, of, Subject } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs';
 
 import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getDateFormatTz,
@@ -34,7 +35,6 @@ import { useMlKibana } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 
 // Memoize the data fetching methods.

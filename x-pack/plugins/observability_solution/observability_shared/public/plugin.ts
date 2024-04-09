@@ -19,6 +19,15 @@ import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import {
+  type AssetDetailsFlyoutLocator,
+  AssetDetailsFlyoutLocatorDefinition,
+} from './locators/infra/asset_details_flyout_locator';
+import {
+  type AssetDetailsLocator,
+  AssetDetailsLocatorDefinition,
+} from './locators/infra/asset_details_locator';
+import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
+import {
   type FlamegraphLocator,
   FlamegraphLocatorDefinition,
 } from './locators/profiling/flamegraph_locator';
@@ -31,7 +40,6 @@ import {
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -40,7 +48,6 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -50,6 +57,11 @@ export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugi
 export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
 
 interface ObservabilitySharedLocators {
+  infra: {
+    assetDetailsLocator: AssetDetailsLocator;
+    assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
+    hostsLocator: HostsLocator;
+  };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
     topNFunctionsLocator: TopNFunctionsLocator;
@@ -66,6 +78,12 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
+    coreSetup.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
@@ -94,7 +112,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),
     };
   }
 
@@ -102,6 +119,13 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {
+      infra: {
+        assetDetailsLocator: urlService.locators.create(new AssetDetailsLocatorDefinition()),
+        assetDetailsFlyoutLocator: urlService.locators.create(
+          new AssetDetailsFlyoutLocatorDefinition()
+        ),
+        hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
+      },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
         topNFunctionsLocator: urlService.locators.create(new TopNFunctionsLocatorDefinition()),

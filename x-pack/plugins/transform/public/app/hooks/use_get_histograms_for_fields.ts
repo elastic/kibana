@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
+import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 
 import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 import type {
@@ -18,8 +19,6 @@ import type {
 } from '../../../common/api_schemas/field_histograms';
 
 import { useAppDependencies } from '../app_dependencies';
-
-import type { SavedSearchQuery } from './use_search_items';
 
 export interface FieldHistogramRequestConfig {
   fieldName: string;

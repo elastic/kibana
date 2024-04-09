@@ -59,7 +59,14 @@ import { StepContentWrapper } from '../../../rule_creation/components/step_conte
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
-import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
+import {
+  Field,
+  Form,
+  getUseField,
+  HiddenField,
+  UseField,
+  UseMultiFields,
+} from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
@@ -768,14 +775,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       onOpenTimeline,
     ]
   );
+
   const onOptionsChange = useCallback(
     (field: FieldsEqlOptions, value: string | undefined) => {
-      setOptionsSelected((prevOptions) => ({
-        ...prevOptions,
-        [field]: value,
-      }));
+      setOptionsSelected((prevOptions) => {
+        const newOptions = {
+          ...prevOptions,
+          [field]: value,
+        };
+
+        setFieldValue('eqlOptions', newOptions);
+        return newOptions;
+      });
     },
-    [setOptionsSelected]
+    [setFieldValue, setOptionsSelected]
   );
 
   const optionsData = useMemo(
@@ -814,17 +827,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <StyledVisibleContainer isVisible={false}>
-            <UseField
-              path="dataSourceType"
-              componentProps={{
-                euiFieldProps: {
-                  fullWidth: true,
-                  placeholder: '',
-                },
-              }}
-            />
-          </StyledVisibleContainer>
+          <UseField
+            path="dataSourceType"
+            component={HiddenField}
+            componentProps={{
+              euiFieldProps: {
+                fullWidth: true,
+                placeholder: '',
+              },
+            }}
+          />
           <UseField
             path="ruleType"
             component={SelectRuleType}
@@ -838,29 +850,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </StyledVisibleContainer>
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
-                <UseField
-                  key="EqlQueryBar"
-                  path="queryBar"
-                  component={EqlQueryBar}
-                  componentProps={{
-                    optionsData,
-                    optionsSelected,
-                    isSizeOptionDisabled: true,
-                    onOptionsChange,
-                    onValidityChange: setIsQueryBarValid,
-                    idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
-                    isDisabled: isLoading,
-                    isLoading: isIndexPatternLoading,
-                    indexPattern,
-                    showFilterBar: true,
-                    // isLoading: indexPatternsLoading,
-                    dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                  }}
-                  config={{
-                    ...schema.queryBar,
-                    label: i18n.EQL_QUERY_BAR_LABEL,
-                  }}
-                />
+                <>
+                  <UseField
+                    key="EqlQueryBar"
+                    path="queryBar"
+                    component={EqlQueryBar}
+                    componentProps={{
+                      optionsData,
+                      optionsSelected,
+                      isSizeOptionDisabled: true,
+                      onOptionsChange,
+                      onValidityChange: setIsQueryBarValid,
+                      idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
+                      isDisabled: isLoading,
+                      isLoading: isIndexPatternLoading,
+                      indexPattern,
+                      showFilterBar: true,
+                      dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
+                    }}
+                    config={{
+                      ...schema.queryBar,
+                      label: i18n.EQL_QUERY_BAR_LABEL,
+                    }}
+                  />
+                  <UseField path="eqlOptions" component={HiddenField} />
+                </>
               ) : isEsqlRule(ruleType) ? (
                 EsqlQueryBarMemo
               ) : (
