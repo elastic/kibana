@@ -6,9 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-
 import type { GetAllIntegrationsResponse } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { GET_ALL_INTEGRATIONS_URL } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { extractIntegrations } from './extract_integrations';
@@ -42,9 +42,9 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
             fleet.packages.getPackages(),
             fleet.packagePolicy.list(fleet.internalReadonlySoClient, {}),
           ]);
-          // Elastic prebuilt rules is a special packages and should be skipped
+          // Elastic prebuilt rules is a special package and should be skipped
           const packagesWithoutPrebuiltSecurityRules = packages.filter(
-            (x) => x.name !== 'security_detection_engine'
+            (x) => x.name !== PREBUILT_RULES_PACKAGE_NAME
           );
 
           sortPackagesBySecurityCategory(packagesWithoutPrebuiltSecurityRules);
