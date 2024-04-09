@@ -86,6 +86,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
     "@kbn/aiops-plugin",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-rate-analysis"
   ]
 }
