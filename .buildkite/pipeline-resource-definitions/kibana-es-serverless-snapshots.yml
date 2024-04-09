@@ -23,7 +23,7 @@ spec:
         ES_SERVERLESS_IMAGE: latest
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
-      branch_configuration: main 8.13 7.17
+      branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_serverless/verify_es_serverless_image.yml
