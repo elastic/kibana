@@ -188,7 +188,7 @@ export const LinkContent = ({
         defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
         values={{ objectType }}
       />
-    ) : objectType === 'lens' || objectType === 'dashboard' ? (
+    ) : objectType === 'lens' ? (
       shortUrlCache ?? shareableUrl
     ) : (
       shareableUrl ?? shortUrlCache ?? ''
