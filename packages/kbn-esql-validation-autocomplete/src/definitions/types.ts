@@ -13,6 +13,7 @@ export type ParameterType =
   | 'date'
   | 'string'
   | 'boolean'
+  | 'null'
   | 'any'
   | 'ip'
   | 'chrono_literal'
