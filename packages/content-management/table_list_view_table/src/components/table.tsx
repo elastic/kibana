@@ -207,15 +207,19 @@ export function Table<T extends UserContentCommonSchema>({
     clearTagSelection,
   ]);
 
-  const userFilterPanel = useMemo<SearchFilterConfig>(() => {
-    return {
-      type: 'custom_component',
-      component: UserFilterPanel,
-    };
-  }, []);
+  const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    return suggestUsers
+      ? {
+          type: 'custom_component',
+          component: UserFilterPanel,
+        }
+      : null;
+  }, [suggestUsers]);
 
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel];
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
+      Boolean
+    ) as SearchFilterConfig[];
   }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
 
   const search = useMemo((): Search => {
