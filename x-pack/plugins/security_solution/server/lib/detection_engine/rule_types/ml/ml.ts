@@ -112,7 +112,7 @@ export const mlExecutor = async ({
         exceptionFilter,
       });
     } catch (error) {
-      if ((error.message as string).endsWith('missing')) {
+      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
         result.userError = true;
       }
       result.errors.push(error.message);

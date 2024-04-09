@@ -137,7 +137,10 @@ export const eqlExecutor = async ({
       }
       return result;
     } catch (error) {
-      if ((error.message as string).includes('verification_exception')) {
+      if (
+        typeof error.message === 'string' &&
+        (error.message as string).includes('verification_exception')
+      ) {
         // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
         // so SLO dashboards can show less noise around system outages
         result.userError = true;
