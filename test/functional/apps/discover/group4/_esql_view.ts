@@ -155,6 +155,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'machine.ram_range',
         ]);
       });
+
+      it('should work without a FROM statement', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `ROW a = 1, b = "two", c = null`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.dragFieldToTable('a');
+        const cell = await dataGrid.getCellElement(0, 2);
+        expect(await cell.getVisibleText()).to.be('1');
+      });
     });
 
     describe('errors', () => {
