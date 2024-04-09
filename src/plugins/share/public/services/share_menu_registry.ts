@@ -12,7 +12,7 @@ export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
   newVersionEnabled: boolean;
 
-  constructor({ newVersionEnabled }) {
+  constructor({ newVersionEnabled }: { newVersionEnabled: boolean }) {
     this.newVersionEnabled = newVersionEnabled;
   }
 
