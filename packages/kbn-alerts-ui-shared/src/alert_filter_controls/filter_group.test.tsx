@@ -72,7 +72,7 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
         },
       ]}
       chainingSystem="HIERARCHICAL"
-      onFilterChange={onFilterChangeMock}
+      onFiltersChange={onFilterChangeMock}
       onInit={onInitMock}
       ControlGroupRenderer={MockedControlGroupRenderer}
       Storage={Storage}

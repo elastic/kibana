@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
-import type { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { SecurityPageName } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import { useNavigation } from '../lib/kibana';
@@ -16,7 +16,7 @@ import { URL_PARAM_KEY } from './use_url_state';
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
-  return (filterItems: FilterItemObj | FilterItemObj[]) => {
+  return (filterItems: FilterControlConfig | FilterControlConfig[]) => {
     const urlFilterParams = encode(
       formatPageFilterSearchParam(Array.isArray(filterItems) ? filterItems : [filterItems])
     );

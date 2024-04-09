@@ -25,13 +25,13 @@ export type FilterUrlFormat = Record<
 >;
 
 export interface FilterContextType {
-  allControls: FilterItemObj[] | undefined;
-  addControl: (controls: FilterItemObj) => void;
+  allControls: FilterControlConfig[] | undefined;
+  addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> & {
+export type FilterControlConfig = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> & {
   /*
-   * Determines the present and order of a control
+   * Determines the presence and order of a control
    * */
   persist?: boolean;
 };
@@ -43,15 +43,27 @@ export interface FilterGroupProps
   spaceId?: string;
   dataViewId: string | null;
   featureIds: AlertConsumers[];
-  onFilterChange?: (newFilters: Filter[]) => void;
-  defaultControls: FilterItemObj[];
+  /**
+   * Filters changed callback
+   */
+  onFiltersChange?: (newFilters: Filter[]) => void;
+  defaultControls: FilterControlConfig[];
   /**
    * The controls configuration stored in the URL
    * (takes precedence over the localStorage configuration)
    */
-  controlsUrlState?: FilterItemObj[];
+  controlsUrlState?: FilterControlConfig[];
+  /**
+   * Init callback
+   */
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
+  /**
+   * Maximum number of controls that can be added to the group
+   */
   maxControls?: number;
+  /**
+   * The control embeddable renderer
+   */
   ControlGroupRenderer: typeof ControlGroupRenderer;
   Storage: typeof Storage;
 }

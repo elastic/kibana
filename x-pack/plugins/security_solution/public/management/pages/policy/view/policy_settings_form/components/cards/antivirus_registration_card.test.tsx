@@ -8,11 +8,7 @@
 import React from 'react';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AntivirusRegistrationCardProps } from './antivirus_registration_card';
-import {
-  NOT_REGISTERED_LABEL,
-  REGISTERED_LABEL,
-  AntivirusRegistrationCard,
-} from './antivirus_registration_card';
+import { LABEL, AntivirusRegistrationCard } from './antivirus_registration_card';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -107,9 +103,10 @@ describe('Policy Form Antivirus Registration Card', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(renderResult.getByTestId(antivirusTestSubj.viewOnlyValue)).toHaveTextContent(
-        NOT_REGISTERED_LABEL
-      );
+      expect(renderResult.getByTestId(antivirusTestSubj.switchLabel)).toHaveTextContent(LABEL);
+      expect(
+        renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('false');
     });
 
     it('should render in view mode (option enabled)', () => {
@@ -117,9 +114,10 @@ describe('Policy Form Antivirus Registration Card', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(renderResult.getByTestId(antivirusTestSubj.viewOnlyValue)).toHaveTextContent(
-        REGISTERED_LABEL
-      );
+      expect(renderResult.getByTestId(antivirusTestSubj.switchLabel)).toHaveTextContent(LABEL);
+      expect(
+        renderResult.getByTestId(antivirusTestSubj.enableDisableSwitch).getAttribute('aria-checked')
+      ).toBe('true');
     });
   });
 });
