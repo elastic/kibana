@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { take } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -63,6 +64,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -179,6 +181,7 @@ export interface LensPluginStartDependencies {
   eventAnnotationService: EventAnnotationServiceType;
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface LensPublicSetup {
@@ -393,6 +396,16 @@ export class LensPlugin {
         downloadCsvShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          atLeastGold: () => {
+            let isGold = false;
+            startServices()
+              .plugins.licensing?.license$.pipe(take(1))
+              .subscribe((license) => {
+                isGold = license.hasAtLeast('gold');
+              });
+            return isGold;
+          },
+          isNewVersion: share.isNewVersion(),
         })
       );
     }

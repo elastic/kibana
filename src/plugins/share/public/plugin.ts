@@ -33,6 +33,11 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
   url: BrowserUrlService;
 
   /**
+   * this plugin exposes the kibana version for other plugins needing to pass a Reporting API client
+   */
+  kibanaVersion: string;
+
+  /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
    * the locator, then using the locator to navigate.
    */
@@ -42,6 +47,11 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
+  /**
+   * Allows for canvas to register the older versioned way whereas reporting for Discover/Lens/Dashboard
+   * can use the new share version and show the share context modals
+   */
+  isNewVersion: () => boolean;
 };
 
 /** @public */
@@ -74,14 +84,17 @@ export class SharePlugin
     >
 {
   private config: ClientConfigType;
-  private readonly shareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareMenuRegistry?: ShareMenuRegistry;
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.shareMenuRegistry = new ShareMenuRegistry(this.config.new_version.enabled);
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
@@ -126,7 +139,8 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry.setup(),
+      ...this.shareMenuRegistry!.setup(),
+      kibanaVersion: this.kibanaVersion,
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -135,6 +149,7 @@ export class SharePlugin
         }
         this.anonymousAccessServiceProvider = provider;
       },
+      isNewVersion: () => this.config.new_version.enabled,
     };
   }
 
@@ -143,7 +158,7 @@ export class SharePlugin
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
-      this.shareMenuRegistry.start(),
+      this.shareMenuRegistry!.start(),
       disableEmbed,
       this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider

@@ -51,12 +51,6 @@ export const LinkContent = ({
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    // propagate url updates upwards to tab
-    setDashboardLink(url);
-    setIsNotSaved();
-  }, [setDashboardLink, url, setIsNotSaved, isDirty]);
-
   const isNotSaved = useCallback(() => {
     return objectId === undefined || objectId === '' || isDirty;
   }, [objectId, isDirty]);
@@ -156,8 +150,9 @@ export const LinkContent = ({
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
       setShortUrlCache(shortUrl as string);
       setUrl(shortUrl as string);
+      setDashboardLink(shortUrl as string);
     },
-    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache]
+    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache, setDashboardLink]
   );
 
   const setUrlHelper = useCallback(() => {
@@ -165,7 +160,7 @@ export const LinkContent = ({
 
     if (objectType === 'dashboard' || objectType === 'search') {
       tempUrl = getSnapshotUrl();
-    } else {
+    } else if ('lens') {
       tempUrl = getSavedObjectUrl();
     }
     return url === '' || objectType === 'lens' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
@@ -174,7 +169,21 @@ export const LinkContent = ({
   useEffect(() => {
     isMounted();
     setUrlHelper();
-  }, [isMounted, setUrlHelper]);
+    setIsNotSaved();
+  }, [objectType, url, setIsNotSaved, isDirty, isMounted, setUrlHelper]);
+
+  const renderSaveState =
+    objectType === 'lens' && isNotSaved() ? (
+      <FormattedMessage
+        id="share.link.lens.saveUrlBox"
+        defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
+        values={{ objectType }}
+      />
+    ) : objectType === 'lens' || objectType === 'dashboard' ? (
+      shortUrlCache ?? shareableUrl
+    ) : (
+      shareableUrl ?? shortUrlCache ?? ''
+    );
 
   return (
     <EuiForm>
@@ -188,14 +197,7 @@ export const LinkContent = ({
       </EuiText>
       <EuiSpacer size="l" />
       <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-        {objectType === 'lens' && isNotSaved() ? (
-          <FormattedMessage
-            id="share.link.lens.saveUrlBox"
-            defaultMessage="There are unsaved changes. Before you generate a link, save the lens."
-          />
-        ) : (
-          shareableUrl ?? url ?? ''
-        )}
+        {renderSaveState}
       </EuiCodeBlock>
       <EuiSpacer />
     </EuiForm>

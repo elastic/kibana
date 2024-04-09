@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { linkTab } from './link';
-export { embedTab } from './embed';
-export { exportTab } from './export';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/kbn-reporting/get_csv_panel_actions'],
+};

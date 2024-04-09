@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import { I18nStart, ToastsStart } from '@kbn/core/public';
 import { createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
@@ -26,6 +28,9 @@ export interface IShareContext extends ShareContext {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   isEmbedded: boolean;
+  theme: ThemeServiceSetup;
+  i18n: I18nStart;
+  toasts: ToastsStart;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

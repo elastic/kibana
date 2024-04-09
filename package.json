@@ -649,7 +649,7 @@
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
-    "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
+    "@kbn/reporting-csv-share-panel": "link:packages/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-csv-common": "link:packages/kbn-reporting/export_types/csv_common",
     "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/pdf",

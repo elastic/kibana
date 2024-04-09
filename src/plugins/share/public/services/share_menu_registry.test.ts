@@ -12,18 +12,18 @@ import { ShareMenuItem, ShareContext } from '../types';
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
     test('throws when registering duplicate id', () => {
-      const setup = new ShareMenuRegistry().setup();
+      const setup = new ShareMenuRegistry(false).setup();
       setup.register({
-        id: 'myTest',
+        id: 'csvReports',
         getShareMenuItems: () => [],
       });
       expect(() =>
         setup.register({
-          id: 'myTest',
+          id: 'csvReports',
           getShareMenuItems: () => [],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Share menu provider with id [myTest] has already been registered. Use a unique id."`
+        `"Share menu provider with id [csvReports] has already been registered. Use a unique id."`
       );
     });
   });
@@ -31,7 +31,7 @@ describe('ShareActionsRegistry', () => {
   describe('start', () => {
     describe('getActions', () => {
       test('returns a flat list of actions returned by all providers', () => {
-        const service = new ShareMenuRegistry();
+        const service = new ShareMenuRegistry(false);
         const registerFunction = service.setup().register;
         const shareAction1 = {} as ShareMenuItem;
         const shareAction2 = {} as ShareMenuItem;
@@ -39,11 +39,11 @@ describe('ShareActionsRegistry', () => {
         const provider1Callback = jest.fn(() => [shareAction1]);
         const provider2Callback = jest.fn(() => [shareAction2, shareAction3]);
         registerFunction({
-          id: 'myTest',
+          id: 'csvReports',
           getShareMenuItems: provider1Callback,
         });
         registerFunction({
-          id: 'myTest2',
+          id: 'screenCaptureReports',
           getShareMenuItems: provider2Callback,
         });
         const context = {} as ShareContext;

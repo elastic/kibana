@@ -25,6 +25,7 @@ type EmbedProps = Pick<
   | 'objectType'
 > & {
   onChange: (url: string) => void;
+  setIsNotSaved: () => void;
 };
 
 interface UrlParams {
@@ -45,6 +46,7 @@ export const EmbedContent = ({
   isEmbedded,
   onChange,
   objectType,
+  setIsNotSaved,
 }: EmbedProps) => {
   const isMounted = useMountedState();
   const [urlParams, setUrlParams] = useState<UrlParams | undefined>(undefined);
@@ -57,7 +59,8 @@ export const EmbedContent = ({
 
   useEffect(() => {
     onChange(url);
-  }, [url, onChange]);
+    setIsNotSaved();
+  }, [url, setIsNotSaved, onChange]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -195,8 +198,9 @@ export const EmbedContent = ({
     setUrlHelper();
     getUrlParamExtensions(url);
     window.addEventListener('hashchange', resetUrl, false);
+    onChange(url);
     isMounted();
-  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
+  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted, onChange]);
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {

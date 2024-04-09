@@ -11,9 +11,10 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FormatFactory } from '../../../common/types';
-import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
+import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 
 declare global {
   interface Window {
@@ -96,17 +97,20 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
+  atLeastGold: () => boolean;
+  isNewVersion: boolean;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
+  atLeastGold,
+  isNewVersion,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
-
     const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
       title: string;
       activeData: TableInspectorAdapter;
@@ -121,40 +125,86 @@ export const downloadCsvShareProvider = ({
       }
     );
 
+    const menuItemMetadata = {
+      shareMenuItem: {
+        name: panelTitle,
+        icon: 'document',
+        disabled: !csvEnabled,
+        sortOrder: 1,
+      },
+    };
+
+    const onClick = async () => {
+      await downloadCSVs({
+        title,
+        formatFactory: formatFactoryFn(),
+        activeData,
+        uiSettings,
+        columnsSorting,
+      });
+      onClose?.();
+    };
+
+    if (!isNewVersion) {
+      return [
+        {
+          ...menuItemMetadata,
+          panel: {
+            id: 'csvDownloadPanel',
+            title: panelTitle,
+            content: (
+              <DownloadPanelContent
+                isDisabled={!csvEnabled}
+                warnings={getWarnings(activeData)}
+                onClick={onClick}
+              />
+            ),
+          },
+        },
+      ];
+    }
+
     return [
       {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
-        panel: {
-          id: 'csvDownloadPanel',
-          title: panelTitle,
-          content: (
-            <DownloadPanelContent
-              isDisabled={!csvEnabled}
-              warnings={getWarnings(activeData)}
-              onClick={async () => {
-                await downloadCSVs({
-                  title,
-                  formatFactory: formatFactoryFn(),
-                  activeData,
-                  uiSettings,
-                  columnsSorting,
-                });
-                onClose?.();
-              }}
-            />
-          ),
-        },
+        ...menuItemMetadata,
+        downloadCSVLens: onClick,
+        label: 'CSV' as const,
+        reportType: 'csv',
+        ...(atLeastGold()
+          ? {
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.share.helpText"
+                  defaultMessage="Export a PDF, PNG, or CSV of this visualization."
+                />
+              ),
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
+              ),
+              renderLayoutOptionSwitch: false,
+              getJobParams: undefined,
+              showRadios: true,
+            }
+          : {
+              isDisabled: !csvEnabled,
+              warnings: getWarnings(activeData),
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.application.csvPanelContent.generationDescription"
+                  defaultMessage="Download the data displayed in the visualization."
+                />
+              ),
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+              ),
+              showRadios: false,
+            }),
       },
     ];
   };
 
   return {
-    id: 'csvDownload',
+    id: 'csvDownloadLens',
     getShareMenuItems,
   };
 };

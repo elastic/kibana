@@ -7,21 +7,19 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import React from 'react';
-
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
-
-import { ReportingAPIClient } from '../../reporting_api_client';
+import React from 'react';
+import { ReportingAPIClient } from '../..';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
-
 /**
  * Properties for displaying a share menu with Reporting features.
  */
 export interface ApplicationProps {
   /**
    * A function that Reporting calls to get the sharing data from the application.
+   * Needed for CSV exports and Canvas PDF reports.
    */
   getJobParams: ReportingPanelProps['getJobParams'];
 
@@ -41,25 +39,12 @@ export interface ApplicationProps {
   onClose: () => void;
 }
 
-/**
- * React components used to display share menus with Reporting features in an application.
- */
 export interface ReportingPublicComponents {
-  /**
-   * An element to display a form to export the page as PDF
-   * @deprecated
-   */
-  ReportingPanelPDF(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PDF
-   */
-  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PNG
-   */
-  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element;
+  /** Needed for Canvas PDF reports */
+  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | null;
+  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element | undefined;
+  ReportingModalPDF(props: ApplicationProps): JSX.Element | undefined;
+  ReportingModalPNG(props: ApplicationProps): JSX.Element | undefined;
 }
 
 /**
@@ -72,44 +57,79 @@ export function getSharedComponents(
   apiClient: ReportingAPIClient
 ): ReportingPublicComponents {
   return {
-    ReportingPanelPDF(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
     ReportingPanelPDFV2(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE_V2}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      } else {
+        return null;
+      }
     },
     ReportingPanelPNGV2(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PNG_REPORT_TYPE_V2}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PNG_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingModalPDF(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
+    },
+    ReportingModalPNG(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            toasts={core.notifications.toasts}
+            uiSettings={core.uiSettings}
+            theme={core.theme}
+            layoutOption={'canvas' as const}
+            {...props}
+            getJobParams={getJobParams}
+          />
+        );
+      }
     },
   };
 }
