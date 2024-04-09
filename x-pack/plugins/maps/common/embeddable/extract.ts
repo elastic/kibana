@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import {
+  EmbeddableRegistryDefinition,
+  extractSavedObjectIdRef,
+} from '@kbn/embeddable-plugin/common';
 import { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences } from '../migrations/references';
 
-export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
-  const typedState = state as MapEmbeddablePersistableState;
+export const extract: EmbeddableRegistryDefinition['extract'] = (_state) => {
+  const typedState = _state as MapEmbeddablePersistableState;
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
-    // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-    return { state, references: [] };
+    const { state, references } = extractSavedObjectIdRef(_state, []);
+    // return only the reference from the saved object ID since other references are stored with by-reference saved object
+    return { state, references };
   }
 
   // by-value embeddable
@@ -26,7 +30,7 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
 
   return {
     state: {
-      ...state,
+      ..._state,
       attributes,
     },
     references,

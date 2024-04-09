@@ -7,13 +7,19 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+
+import {
+  injectSavedObjectIdRef,
+  extractSavedObjectIdRef,
+  type EmbeddableStateWithType,
+} from '@kbn/embeddable-plugin/common';
 import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
 
 export const inject = (
-  state: EmbeddableStateWithType,
+  _state: EmbeddableStateWithType,
   injectedReferences: SavedObjectReference[]
 ): EmbeddableStateWithType => {
+  let state = injectSavedObjectIdRef(_state, injectedReferences);
   if (hasAttributes(state)) {
     // Filter out references that are not in the state
     // https://github.com/elastic/kibana/pull/119079
@@ -36,12 +42,12 @@ export const inject = (
 };
 
 export const extract = (
-  state: EmbeddableStateWithType
+  _state: EmbeddableStateWithType
 ): { state: EmbeddableStateWithType; references: SavedObjectReference[] } => {
-  let references: SavedObjectReference[] = [];
+  const { state, references } = extractSavedObjectIdRef(_state, []);
 
   if (hasAttributes(state)) {
-    references = state.attributes.references;
+    references.push(...state.attributes.references);
   }
 
   return { state, references };

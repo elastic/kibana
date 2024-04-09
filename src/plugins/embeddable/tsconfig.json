@@ -30,6 +30,7 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
+    "@kbn/content-management-utils"
   ],
   "exclude": ["target/**/*"]
 }

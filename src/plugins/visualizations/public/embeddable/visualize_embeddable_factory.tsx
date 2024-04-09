@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import {
+  EmbeddableStateWithType,
+  injectSavedObjectIdRef,
+  extractSavedObjectIdRef,
+} from '@kbn/embeddable-plugin/common';
 
 import {
   injectSearchSourceReferences,
@@ -277,7 +281,8 @@ export class VisualizeEmbeddableFactory
   }
 
   public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
-    let state = _state as unknown as VisualizeInput;
+    const stateWithSORef = injectSavedObjectIdRef(_state, references);
+    let state = stateWithSORef as unknown as VisualizeInput;
 
     const { type, params } = state.savedVis ?? {};
 
@@ -317,8 +322,8 @@ export class VisualizeEmbeddableFactory
   }
 
   public extract(_state: EmbeddableStateWithType) {
-    let state = _state as unknown as VisualizeInput;
-    const references = [];
+    const { state: extractedSOIdState, references } = extractSavedObjectIdRef(_state, []);
+    let state = extractedSOIdState as unknown as VisualizeInput;
 
     if (state.savedVis?.data.savedSearchId) {
       references.push({

@@ -15,6 +15,9 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { ParsedDashboardAttributesWithType } from '../../types';
 
+const controlGroupReferencePrefix = 'controlGroup_';
+const controlGroupId = 'dashboard_control_group';
+
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
   const filteredReferences = references
@@ -33,9 +36,6 @@ export const prefixReferencesFromPanel = (id: string, references: Reference[]): 
     }));
 };
 
-const controlGroupReferencePrefix = 'controlGroup_';
-const controlGroupId = 'dashboard_control_group';
-
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['inject'] => {
@@ -47,46 +47,17 @@ export const createInject = (
     if ('panels' in workingState) {
       workingState.panels = { ...workingState.panels };
 
-      for (const [key, panel] of Object.entries(workingState.panels)) {
-        workingState.panels[key] = { ...panel };
-        const filteredReferences = getReferencesForPanelId(key, references);
-        const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+      for (const [id, panel] of Object.entries(workingState.panels)) {
+        workingState.panels[id] = { ...panel };
 
-        /**
-         * Inject saved object ID back into the explicit input.
-         *
-         * TODO move this logic into the persistable state service inject method for each panel type
-         * that could be by value or by reference
-         */
-        if (panel.panelRefName !== undefined) {
-          const matchingReference = panelReferences.find(
-            (reference) => reference.name === panel.panelRefName
-          );
-
-          if (!matchingReference) {
-            throw new Error(`Could not find reference "${panel.panelRefName}"`);
-          }
-
-          if (matchingReference !== undefined) {
-            workingState.panels[key] = {
-              ...panel,
-              type: matchingReference.type,
-              explicitInput: {
-                ...workingState.panels[key].explicitInput,
-                savedObjectId: matchingReference.id,
-              },
-            };
-
-            delete workingState.panels[key].panelRefName;
-          }
-        }
+        const panelReferences = getReferencesForPanelId(id, references);
 
         const { type, ...injectedState } = persistableStateService.inject(
-          { ...workingState.panels[key].explicitInput, type: workingState.panels[key].type },
+          { ...workingState.panels[id].explicitInput, type: workingState.panels[id].type },
           panelReferences
         );
 
-        workingState.panels[key].explicitInput = injectedState as EmbeddableInput;
+        workingState.panels[id].explicitInput = injectedState as EmbeddableInput;
       }
     }
 
@@ -130,31 +101,11 @@ export const createExtract = (
 
       // Run every panel through the state service to get the nested references
       for (const [id, panel] of Object.entries(workingState.panels)) {
-        /**
-         * Extract saved object ID reference from the explicit input.
-         *
-         * TODO move this logic into the persistable state service extract method for each panel type
-         * that could be by value or by reference.
-         */
-        if (panel.explicitInput.savedObjectId) {
-          panel.panelRefName = `panel_${id}`;
-
-          references.push({
-            name: `${id}:panel_${id}`,
-            type: panel.type,
-            id: panel.explicitInput.savedObjectId as string,
-          });
-
-          delete panel.explicitInput.savedObjectId;
-        }
-
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
           type: panel.type,
         });
-
         references.push(...prefixReferencesFromPanel(id, panelReferences));
-
         const { type, ...restOfState } = panelState;
         workingState.panels[id].explicitInput = restOfState as EmbeddableInput;
       }
