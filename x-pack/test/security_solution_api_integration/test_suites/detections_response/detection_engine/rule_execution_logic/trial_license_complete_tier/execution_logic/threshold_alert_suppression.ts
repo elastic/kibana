@@ -25,7 +25,7 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         interval: '30m',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
 
       // suppression start equal to alert timestamp
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
       await patchRule(supertest, log, { id: createdRule.id, enabled: false });
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
       const afterTimestamp = new Date();
-      const secondAlerts = await getOpenAlerts(
+      const secondAlerts = await getAlerts(
         supertest,
         log,
         es,
@@ -177,7 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
         interval: '30m',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
 
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
@@ -202,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
       await patchRule(supertest, log, { id: createdRule.id, enabled: false });
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
       const afterTimestamp = new Date();
-      const secondAlerts = await getOpenAlerts(
+      const secondAlerts = await getAlerts(
         supertest,
         log,
         es,

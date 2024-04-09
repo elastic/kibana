@@ -11,6 +11,7 @@ import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
 import { restartInstallation, createInstallation } from '../../install';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepCreateRestartInstallation(context: InstallContext) {
   const {
@@ -42,13 +43,15 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
 
       if (force) {
         logger.debug(`Package install - Forced installation, restarting`);
-        await restartInstallation({
-          savedObjectsClient,
-          pkgName,
-          pkgVersion,
-          installSource,
-          verificationResult,
-        });
+        await withPackageSpan('Restarting installation with force flag', () =>
+          restartInstallation({
+            savedObjectsClient,
+            pkgName,
+            pkgVersion,
+            installSource,
+            verificationResult,
+          })
+        );
       } else {
         throw new ConcurrentInstallOperationError(
           `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
@@ -62,23 +65,27 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
       logger.debug(
         `Package install - no installation running or the installation has been running longer than ${MAX_TIME_COMPLETE_INSTALL}, restarting`
       );
-      await restartInstallation({
-        savedObjectsClient,
-        pkgName,
-        pkgVersion,
-        installSource,
-        verificationResult,
-      });
+      await withPackageSpan('Restarting installation', () =>
+        restartInstallation({
+          savedObjectsClient,
+          pkgName,
+          pkgVersion,
+          installSource,
+          verificationResult,
+        })
+      );
     }
   } else {
     logger.debug(`Package install - Create installation`);
 
-    await createInstallation({
-      savedObjectsClient,
-      packageInfo,
-      installSource,
-      spaceId,
-      verificationResult,
-    });
+    await withPackageSpan('Creating installation', () =>
+      createInstallation({
+        savedObjectsClient,
+        packageInfo,
+        installSource,
+        spaceId,
+        verificationResult,
+      })
+    );
   }
 }
