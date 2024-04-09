@@ -814,12 +814,42 @@
       "warning": []
     },
     {
-      "query": "row var = auto_bucket(now(), 5, 5, 5)",
+      "query": "row var = auto_bucket(now(), 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "row auto_bucket(now(), 5, 5, 5)",
+      "query": "row auto_bucket(now(), 5, now(), now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = auto_bucket(now(), 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row auto_bucket(now(), 5, \"a\", now())",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = auto_bucket(now(), 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row auto_bucket(now(), 5, now(), \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = auto_bucket(5, 5, 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row auto_bucket(5, 5, 5, 5)",
       "error": [],
       "warning": []
     },
@@ -5351,6 +5381,21 @@
       "warning": []
     },
     {
+      "query": "from a_index | where auto_bucket(numberField, numberField, numberField, numberField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where auto_bucket(stringField, stringField, booleanField, booleanField) > 0",
+      "error": [
+        "Argument of [auto_bucket] must be [date], found value [stringField] type [string]",
+        "Argument of [auto_bucket] must be [number], found value [stringField] type [string]",
+        "Argument of [auto_bucket] must be [string], found value [booleanField] type [boolean]",
+        "Argument of [auto_bucket] must be [string], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where ceil(numberField) > 0",
       "error": [],
       "warning": []
@@ -7058,39 +7103,53 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, \"a\", \"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, \"a\", \"a\")",
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, stringField, stringField)",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, stringField)",
-      "error": [
-        "Argument of [auto_bucket] must be a constant, received [stringField]",
-        "Argument of [auto_bucket] must be a constant, received [stringField]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, 5, 5)",
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, dateField, dateField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval auto_bucket(dateField, numberField, numberField, numberField)",
-      "error": [
-        "Argument of [auto_bucket] must be a constant, received [numberField]",
-        "Argument of [auto_bucket] must be a constant, received [numberField]"
-      ],
+      "query": "from a_index | eval auto_bucket(dateField, numberField, dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, stringField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, dateField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval auto_bucket(dateField, numberField, dateField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(numberField, numberField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval auto_bucket(numberField, numberField, numberField, numberField)",
+      "error": [],
       "warning": []
     },
     {

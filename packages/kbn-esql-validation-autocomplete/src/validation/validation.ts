@@ -184,7 +184,7 @@ function validateFunctionColumnArg(
     if (actualArg.name) {
       const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
       if (!columnCheck) {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',
@@ -207,7 +207,7 @@ function validateFunctionColumnArg(
           );
         }
       } else {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',

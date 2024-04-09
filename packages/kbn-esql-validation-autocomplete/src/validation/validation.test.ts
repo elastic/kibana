@@ -164,11 +164,11 @@ function getFieldMapping(
     string: `"a"`,
     number: '5',
   };
-  return params.map(({ name: _name, type, literalOnly, ...rest }) => {
+  return params.map(({ name: _name, type, constantOnly, ...rest }) => {
     const typeString: string = type;
     if (fieldTypes.includes(typeString)) {
       const fieldName =
-        literalOnly && typeString in literalValues
+        constantOnly && typeString in literalValues
           ? literalValues[typeString as keyof typeof literalValues]!
           : getFieldName(typeString, {
               useNestedFunction,
@@ -208,9 +208,9 @@ function generateWrongMappingForArgs(
     string: `"a"`,
     number: '5',
   };
-  const wrongFieldMapping = currentParams.map(({ name: _name, literalOnly, type, ...rest }, i) => {
+  const wrongFieldMapping = currentParams.map(({ name: _name, constantOnly, type, ...rest }, i) => {
     // this thing is complex enough, let's not make it harder for constants
-    if (literalOnly) {
+    if (constantOnly) {
       return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
     }
     const canBeFieldButNotString = Boolean(
@@ -238,7 +238,7 @@ function generateWrongMappingForArgs(
   };
 
   const expectedErrors = signatures[0].params
-    .filter(({ literalOnly }) => !literalOnly)
+    .filter(({ constantOnly }) => !constantOnly)
     .map(({ type }, i) => {
       const fieldName = wrongFieldMapping[i].name;
       if (
@@ -1388,15 +1388,15 @@ describe('validation logic', () => {
             }`,
             []
           );
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | eval ${
@@ -1930,15 +1930,15 @@ describe('validation logic', () => {
             );
           }
 
-          if (params.some(({ literalOnly }) => literalOnly)) {
+          if (params.some(({ constantOnly }) => constantOnly)) {
             const fieldReplacedType = params
-              .filter(({ literalOnly }) => literalOnly)
+              .filter(({ constantOnly }) => constantOnly)
               .map(({ type }) => type);
             // create the mapping without the literal flag
             // this will make the signature wrong on purpose where in place on constants
             // the arg will be a column of the same type
             const fieldMappingWithoutLiterals = getFieldMapping(
-              params.map(({ literalOnly, ...rest }) => rest)
+              params.map(({ constantOnly, ...rest }) => rest)
             );
             testErrorsAndWarnings(
               `from a_index | stats ${
@@ -2072,7 +2072,7 @@ describe('validation logic', () => {
               useLiterals: false,
             });
             const nestedAggsExpectedErrors = params
-              .filter(({ literalOnly }) => !literalOnly)
+              .filter(({ constantOnly }) => !constantOnly)
               .map(
                 (_) =>
                   `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`

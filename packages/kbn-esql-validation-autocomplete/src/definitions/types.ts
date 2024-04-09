@@ -23,7 +23,11 @@ export interface FunctionDefinition {
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
-      literalOnly?: boolean;
+      /**
+       * If set, this parameter does not accept a field. It only accepts a constant,
+       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+       */
+      constantOnly?: boolean;
     }>;
     minParams?: number;
     returnType: string;
@@ -47,7 +51,7 @@ export interface CommandBaseDefinition {
       innerType?: string;
       values?: string[];
       valueDescriptions?: string[];
-      literalOnly?: boolean;
+      constantOnly?: boolean;
       wildcards?: boolean;
     }>;
   };

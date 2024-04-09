@@ -574,9 +574,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number' },
-          { name: 'startDate', type: 'string', literalOnly: true },
-          { name: 'endDate', type: 'string', literalOnly: true },
+          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'startDate', type: 'string', constantOnly: true },
+          { name: 'endDate', type: 'string', constantOnly: true },
         ],
         returnType: 'date',
         examples: [
@@ -586,9 +586,45 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [
           { name: 'field', type: 'date' },
-          { name: 'buckets', type: 'number' },
-          { name: 'startValue', type: 'number', literalOnly: true },
-          { name: 'endValue', type: 'number', literalOnly: true },
+          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'startDate', type: 'date', constantOnly: true },
+          { name: 'endDate', type: 'date', constantOnly: true },
+        ],
+        returnType: 'date',
+        examples: [
+          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+        ],
+      },
+      {
+        params: [
+          { name: 'field', type: 'date' },
+          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'startDate', type: 'string', constantOnly: true },
+          { name: 'endDate', type: 'date', constantOnly: true },
+        ],
+        returnType: 'date',
+        examples: [
+          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+        ],
+      },
+      {
+        params: [
+          { name: 'field', type: 'date' },
+          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'startDate', type: 'date', constantOnly: true },
+          { name: 'endDate', type: 'string', constantOnly: true },
+        ],
+        returnType: 'date',
+        examples: [
+          'from index | eval hd = auto_bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+        ],
+      },
+      {
+        params: [
+          { name: 'field', type: 'number' },
+          { name: 'buckets', type: 'number', constantOnly: true },
+          { name: 'startValue', type: 'number', constantOnly: true },
+          { name: 'endValue', type: 'number', constantOnly: true },
         ],
         returnType: 'number',
         examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],

@@ -543,7 +543,7 @@ async function getExpressionSuggestionsByType(
         prevArg &&
         (prevArg.type === 'function' || (!Array.isArray(nodeArg) && prevArg.type !== nodeArg.type))
       ) {
-        if (!isLiteralItem(nodeArg) || !prevArg.literalOnly) {
+        if (!isLiteralItem(nodeArg) || !prevArg.constantOnly) {
           argDef = prevArg;
         }
       }
@@ -736,7 +736,7 @@ async function getExpressionSuggestionsByType(
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
       // it can be just literal values (i.e. "string")
-      if (argDef.literalOnly) {
+      if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
         suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
       } else {
