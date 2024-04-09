@@ -205,6 +205,8 @@ export class AssetCriticalityDataClient {
       total: 0,
     };
 
+    const batchPomises: Array<Promise<void>> = [];
+
     async function* recordsGenerator(): AsyncGenerator<
       AssetCriticalityUpsert | Error,
       void,
@@ -261,7 +263,7 @@ export class AssetCriticalityDataClient {
       } else {
         currentBatch.push({ record, index });
         if (currentBatch.length === batchSize) {
-          await processBatch(currentBatch);
+          batchPomises.push(processBatch(currentBatch));
           currentBatch = [];
         }
       }
@@ -269,8 +271,10 @@ export class AssetCriticalityDataClient {
     }
 
     if (currentBatch.length > 0) {
-      await processBatch(currentBatch);
+      batchPomises.push(processBatch(currentBatch));
     }
+
+    await Promise.all(batchPomises);
 
     return { errors, stats };
   };
