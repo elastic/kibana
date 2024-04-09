@@ -74,9 +74,7 @@ export class AttributeService<
   ) {
     if (getEmbeddableFactory) {
       const factory = getEmbeddableFactory(this.type);
-      if (!factory) {
-        throw new EmbeddableFactoryNotFoundError(this.type);
-      }
+
       this.embeddableFactory = factory;
     }
   }

@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { DashboardItem } from '../../embeddable/types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
@@ -31,19 +30,17 @@ type DashboardComboBoxOption = EuiComboBoxOptionOption<DashboardItem>;
 export const DashboardLinkDestinationPicker = ({
   onDestinationPicked,
   initialSelection,
-  parentDashboard,
+  parentDashboardId,
   onUnmount,
   ...other
 }: {
   initialSelection?: string;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   onUnmount: (dashboardId?: string) => void;
   onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
-
-  const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
 
   const getDashboardItem = useCallback((dashboard: DashboardItem) => {
     return {

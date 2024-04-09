@@ -11,22 +11,20 @@ import { skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { isSavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { Link, LinksLayoutType } from '../../common/content_management';
+import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
+import { LinksLayoutType } from '../../common/content_management';
 import { runSaveToLibrary } from '../content_management/save_to_library';
-import {
-  LinksByReferenceInput,
-  LinksByValueInput,
-  LinksEditorFlyoutReturn,
-  LinksInput,
-} from '../embeddable/types';
+import { LinksEditorFlyoutReturn } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
+import { LinksSerializedState, ResolvedLink } from '../react_embeddable/types';
+import { getLinksAttributeService } from '../services/attribute_service';
+import { resolveLinks } from '../react_embeddable/utils';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
@@ -40,23 +38,20 @@ const LinksEditor = withSuspense(
 /**
  * @throws in case user cancels
  */
-export async function openEditorFlyout(
-  initialInput: LinksInput,
-  parentDashboard?: DashboardContainer
-): Promise<LinksEditorFlyoutReturn> {
-  // TODO Uncomment when attributeService supports new react embeddables
-  // const attributeService = getLinksAttributeService();
-  // const { attributes } = await attributeService.unwrapAttributes(initialInput);
-  // const isByReference = attributeService.inputIsRefType(initialInput);
-  // const initialLinks = attributes?.links;
-
-  const isByReference = isSavedObjectEmbeddableInput(initialInput);
-
-  const { attributes } = initialInput as LinksByValueInput;
-  const overlayTracker =
-    parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
-
-  if (!attributes.links) {
+export async function openEditorFlyout({
+  initialState,
+  parentDashboard,
+  resolvedLinks$,
+  layout$,
+  savedObjectId$,
+}: {
+  initialState?: LinksSerializedState;
+  parentDashboard?: unknown;
+  resolvedLinks$?: BehaviorSubject<ResolvedLink[]>;
+  layout$?: BehaviorSubject<LinksLayoutType | undefined>;
+  savedObjectId$?: BehaviorSubject<string | undefined>;
+}): Promise<LinksEditorFlyoutReturn> {
+  if (!initialState) {
     /**
      * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
      * and can cause a "double opening" animation if the flyout opens before the tooltip has time to unmount; so,
@@ -67,6 +62,19 @@ export async function openEditorFlyout(
      */
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
+
+  const overlayTracker =
+    parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
+
+  const parentDashboardId =
+    parentDashboard && apiPublishesSavedObjectId(parentDashboard)
+      ? parentDashboard.savedObjectId.value
+      : undefined;
+  const attributeService = getLinksAttributeService();
+  const { attributes } = initialState ? await attributeService.unwrapAttributes(initialState) : {};
+  const isByReference = Boolean(initialState?.savedObjectId);
+
+  const resolvedLinks = resolvedLinks$?.getValue() ?? (await resolveLinks(attributes?.links));
 
   return new Promise((resolve, reject) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -87,47 +95,41 @@ export async function openEditorFlyout(
       if (!overlayTracker) editorFlyout.close();
     });
 
-    const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
-      resolve(console.log('onSaveToLibrary'));
-      // const newAttributes = {
-      //   ...attributes,
-      //   links: newLinks,
-      //   layout: newLayout,
-      // };
-      // const updatedInput = (initialInput as LinksByReferenceInput).savedObjectId
-      //   ? await attributeService.wrapAttributes(newAttributes, true, initialInput)
-      //   : await runSaveToLibrary(newAttributes, initialInput);
-      // if (!updatedInput) {
-      //   return;
-      // }
-      // resolve({
-      //   newInput: updatedInput,
-
-      //   // pass attributes via attributes so that the Dashboard can choose the right panel size.
-      //   attributes: newAttributes,
-      // });
-      // parentDashboard?.reload();
+    const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
+      // remove the title and description state from the resolved links before saving
+      const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
+      const newAttributes = {
+        ...attributes,
+        links,
+        layout: newLayout,
+      };
+      resolvedLinks$?.next(newLinks);
+      const savedAttributes = initialState?.savedObjectId
+        ? await attributeService.wrapAttributes(newAttributes, true)
+        : await runSaveToLibrary(newAttributes, initialState);
+      savedObjectId$?.next(savedAttributes?.savedObjectId);
+      resolve(savedAttributes);
       closeEditorFlyout(editorFlyout);
     };
 
-    const onAddToDashboard = (newLinks: Link[], newLayout: LinksLayoutType) => {
-      debugger;
+    const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
+      // remove the title and description state from the resolved links before saving
+      const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
       const newAttributes = {
         ...attributes,
-        links: newLinks,
+        links,
         layout: newLayout,
       };
-      const newInput: LinksInput = {
-        ...initialInput,
-        attributes: newAttributes,
+      const newState = {
+        ...initialState,
+        attributes: {
+          ...initialState?.attributes,
+          ...newAttributes,
+        },
       };
-      resolve({
-        newInput,
-
-        // pass attributes so that the Dashboard can choose the right panel size.
-        attributes: newAttributes,
-      });
-      parentDashboard?.reload();
+      resolvedLinks$?.next(newLinks);
+      layout$?.next(newLayout);
+      resolve(newState);
       closeEditorFlyout(editorFlyout);
     };
 
@@ -140,12 +142,12 @@ export async function openEditorFlyout(
       toMountPoint(
         <LinksEditor
           flyoutId={flyoutId}
-          initialLinks={attributes?.links}
+          initialLinks={resolvedLinks}
           initialLayout={attributes?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}
-          parentDashboard={parentDashboard}
+          parentDashboardId={parentDashboardId}
           isByReference={isByReference}
         />,
         { theme: coreServices.theme, i18n: coreServices.i18n }

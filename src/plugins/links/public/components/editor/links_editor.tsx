@@ -28,15 +28,13 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  Link,
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
-import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
@@ -47,6 +45,8 @@ import { LinksEditorSingleLink } from './links_editor_single_link';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './links_editor.scss';
+import { ResolvedLink } from '../../react_embeddable/types';
+import { getOrderedLinkList } from '../../react_embeddable/utils';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
@@ -67,16 +67,16 @@ const LinksEditor = ({
   onClose,
   initialLinks,
   initialLayout,
-  parentDashboard,
+  parentDashboardId,
   isByReference,
   flyoutId,
 }: {
-  onSaveToLibrary: (newLinks: Link[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: Link[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
+  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
   onClose: () => void;
-  initialLinks?: Link[];
+  initialLinks?: ResolvedLink[];
   initialLayout?: LinksLayoutType;
-  parentDashboard?: DashboardContainer;
+  parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }) => {
@@ -88,7 +88,7 @@ const LinksEditor = ({
     initialLayout ?? LINKS_VERTICAL_LAYOUT
   );
   const [isSaving, setIsSaving] = useState(false);
-  const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
+  const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(!initialLinks ? false : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
@@ -98,7 +98,7 @@ const LinksEditor = ({
       setOrderedLinks([]);
       return;
     }
-    setOrderedLinks(memoizedGetOrderedLinkList(initialLinks));
+    setOrderedLinks(getOrderedLinkList(initialLinks));
   }, [initialLinks]);
 
   const onDragEnd = useCallback(
@@ -116,9 +116,9 @@ const LinksEditor = ({
   );
 
   const addOrEditLink = useCallback(
-    async (linkToEdit?: Link) => {
+    async (linkToEdit?: ResolvedLink) => {
       const newLink = await openLinkEditorFlyout({
-        parentDashboard,
+        parentDashboardId,
         link: linkToEdit,
         mainFlyoutId: flyoutId,
         ref: editLinkFlyoutRef,
@@ -128,17 +128,20 @@ const LinksEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order } as Link;
+                return { ...newLink, order: linkToEdit.order } as ResolvedLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length } as Link]);
+          setOrderedLinks([
+            ...orderedLinks,
+            { ...newLink, order: orderedLinks.length } as ResolvedLink,
+          ]);
         }
       }
     },
-    [editLinkFlyoutRef, orderedLinks, parentDashboard, flyoutId]
+    [editLinkFlyoutRef, orderedLinks, parentDashboardId, flyoutId]
   );
 
   const hasZeroLinks = useMemo(() => {
@@ -213,7 +216,6 @@ const LinksEditor = ({
                           {(provided) => (
                             <LinksEditorSingleLink
                               link={link}
-                              parentDashboard={parentDashboard}
                               editLink={() => addOrEditLink(link)}
                               deleteLink={() => deleteLink(link.id)}
                               dragHandleProps={provided.dragHandleProps ?? undefined} // casting `null` to `undefined`

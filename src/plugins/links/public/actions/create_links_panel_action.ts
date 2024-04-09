@@ -10,24 +10,10 @@ import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
-import { APP_ICON, APP_NAME } from '../../common';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
-import { LinksInput } from '../embeddable/types';
-import { LINKS_VERTICAL_LAYOUT } from '../../common/content_management';
 
 const ADD_LINKS_PANEL_ACTION_ID = 'create_links_panel';
-
-const getDefaultLinksConfig = (): LinksInput => ({
-  id: '',
-  attributes: {
-    title: '',
-    links: [],
-    layout: LINKS_VERTICAL_LAYOUT,
-  },
-  // TODO: Replace string 'OPEN_FLYOUT_ADD_DRILLDOWN' with constant once the dashboardEnhanced plugin is removed
-  // and it is no longer locked behind `x-pack`
-  disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
-});
 
 export const registerCreateLinksPanelAction = () => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -40,11 +26,13 @@ export const registerCreateLinksPanelAction = () => {
       if (!apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
-      const linksConfig = await openEditorFlyout(getDefaultLinksConfig());
+      const initialState = await openEditorFlyout({
+        parentDashboard: embeddable,
+      });
 
       embeddable.addNewPanel({
-        panelType: 'links',
-        initialState: linksConfig,
+        panelType: CONTENT_ID,
+        initialState,
       });
     },
     getDisplayName: () => APP_NAME,

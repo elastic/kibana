@@ -27,10 +27,7 @@ import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { registerLinksEmbeddableFactory } from './react_embeddable/links_react_embeddable';
-import { LinksByReferenceInput } from './embeddable/types';
 import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -81,9 +78,10 @@ export class LinksPlugin
                 id,
                 title,
                 editor: {
-                  onEdit: (savedObjectId: string) =>
-                    // TODO: create ui action to edit inline items like links
-                    Promise.resolve(console.log(`Click on Links library item ${savedObjectId}`)),
+                  onEdit: async (savedObjectId: string) => {
+                    const { openEditorFlyout } = await import('./editor/open_editor_flyout');
+                    openEditorFlyout({ initialState: { savedObjectId } });
+                  },
                 },
                 description,
                 updatedAt,

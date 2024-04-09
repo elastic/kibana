@@ -7,125 +7,92 @@
  */
 
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
-import fastIsEqual from 'fast-deep-equal';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
-import { useStateFromPublishingSubject, initializeTitles } from '@kbn/presentation-publishing';
+import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import React, { createContext, useMemo } from 'react';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { LinksPersistableState } from '../../common/embeddable/types';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { extract, inject } from '../../common/embeddable';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
-  Link,
-  LinksAttributes,
-  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
-import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
-import { LinksApi, LinksSerializableState } from './types';
-import { resolveLinkInfo } from './utils';
+import { LinksApi, LinksSerializedState } from './types';
 import { APP_NAME } from '../../common';
-import { openEditorFlyout } from '../editor/open_editor_flyout';
-import { LinksByValueInput } from '../embeddable/types';
+import { intializeLibraryTransforms } from './initialize_library_transforms';
+import { initializeLinks } from './initialize_links';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
-  const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializableState, LinksApi> = {
+  const linksEmbeddableFactory: ReactEmbeddableFactory<LinksSerializedState, LinksApi> = {
     type: CONTENT_ID,
     deserializeState: (state) => {
       const serializedState = cloneDeep(state.rawState) as EmbeddableStateWithType;
       if (serializedState === undefined) return {};
-      return inject(serializedState, state.references ?? []) as unknown as LinksSerializableState;
+      const deserializedState = inject(
+        serializedState,
+        state.references ?? []
+      ) as unknown as LinksSerializedState;
+      return deserializedState;
     },
-    buildEmbeddable: async (state, buildApi) => {
+    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const links$ = new BehaviorSubject(state.attributes?.links);
-      const layout$ = new BehaviorSubject(state.attributes?.layout);
+      const { linksApi, linksComparators, serializeLinks } = await initializeLinks(
+        state,
+        parentApi
+      );
+      const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.title);
+      const defaultPanelDescription = new BehaviorSubject<string | undefined>(state.description);
 
-      const resolveLinks = async (links: Link[] = []) => {
-        const orderedLinks = memoizedGetOrderedLinkList(links);
-        return await Promise.all(
-          orderedLinks.map(async (link) => {
-            return { ...link, ...(await resolveLinkInfo(link)) };
-          })
-        );
-        // return await Promise.reject(new Error('boom'));
+      const serializeState = (): SerializedPanelState<LinksSerializedState> => {
+        const { state: rawState, references } = extract({
+          ...state,
+          ...serializeTitles(),
+          ...serializeLinks(),
+        });
+        return {
+          rawState: rawState as unknown as LinksSerializedState,
+          references,
+        };
       };
 
-      const resolvedLinks$ = new BehaviorSubject<
-        Array<Link & { title: string; description?: string; error?: Error }>
-      >([]);
-      const error$ = new BehaviorSubject<Error | undefined>(undefined);
+      const isByReference = state.savedObjectId !== undefined;
 
-      // write an observable that takes changes from links$ and executes the resolveLinks promise. subscribe to the results and update resolvedLinks$.
-      links$.pipe(switchMap((links) => resolveLinks(links))).subscribe({
-        next: (result) => resolvedLinks$.next(result),
-        error: (error) => error$.next(error),
-      });
-
-      const linksApi = buildApi(
+      const api = buildApi(
         {
+          defaultPanelTitle,
+          defaultPanelDescription,
           ...titlesApi,
-          canLinkToLibrary: async () => true,
-          linkToLibrary: async () => {},
-          canUnlinkFromLibrary: async () => true,
-          unlinkFromLibrary: async () => {},
-          blockingError: error$,
-          onEdit: async () => {
-            try {
-              const { newInput } = await openEditorFlyout(
-                {
-                  attributes: {
-                    links: links$.getValue() ?? [],
-                    layout: layout$.getValue() ?? LINKS_VERTICAL_LAYOUT,
-                  },
-                },
-                linksApi.parentApi
-              );
-              links$.next((newInput as LinksByValueInput).attributes.links);
-              layout$.next((newInput as LinksByValueInput).attributes.layout);
-            } catch {
-              // do nothing, user cancelled
-            }
-          },
+          ...linksApi,
+          ...intializeLibraryTransforms(
+            { links: linksApi.links$.value, layout: linksApi.layout$.value },
+            serializeState,
+            isByReference
+          ),
           isEditingEnabled: () => true,
           getTypeDisplayName: () => APP_NAME,
-          serializeState: () => {
-            const { state: rawState, references } = extract({
-              ...state,
-              ...serializeTitles(),
-              links: links$.getValue(),
-              layout: layout$.getValue(),
-            } as unknown as LinksPersistableState);
-            return {
-              rawState: rawState as unknown as LinksAttributes,
-              references,
-            };
-          },
+          serializeState,
         },
         {
-          links: [links$, (nextLinks?: Link[]) => links$.next(nextLinks), fastIsEqual],
-          layout: [
-            layout$,
-            (nextLayout?: LinksLayoutType) => layout$.next(nextLayout),
-            fastIsEqual,
-          ],
+          ...linksComparators,
           ...titleComparators,
         }
       );
 
       const Component = () => {
-        const resolvedLinks = useStateFromPublishingSubject(resolvedLinks$);
-        const layout = useStateFromPublishingSubject(layout$);
+        const [resolvedLinks, layout] = useBatchedPublishingSubjects(
+          api.resolvedLinks$,
+          api.layout$
+        );
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           return resolvedLinks.reduce((prev, currentLink) => {
@@ -139,7 +106,7 @@ export const getLinksEmbeddableFactory = () => {
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
-                      api={linksApi}
+                      api={api}
                     />
                   ) : (
                     <ExternalLinkComponent
@@ -171,7 +138,7 @@ export const getLinksEmbeddableFactory = () => {
         );
       };
       return {
-        api: linksApi,
+        api,
         Component,
       };
     },

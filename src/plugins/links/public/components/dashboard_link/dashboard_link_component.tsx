@@ -24,20 +24,19 @@ import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-pub
 
 import {
   DASHBOARD_LINK_TYPE,
-  Link,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { LinksApi } from '../../react_embeddable/types';
+import { LinksApi, ResolvedLink } from '../../react_embeddable/types';
 
 export const DashboardLinkComponent = ({
   link,
   layout,
   api,
 }: {
-  link: Link & { title: string; description?: string; error?: Error };
+  link: ResolvedLink;
   layout: LinksLayoutType;
   api: LinksApi;
 }) => {
@@ -52,7 +51,7 @@ export const DashboardLinkComponent = ({
   const [dashboardTitle, dashboardDescription] = useMemo(() => {
     return link.destination === parentDashboardId
       ? [dashboardContainer.getTitle(), dashboardContainer.getDescription()]
-      : [link.title, link.description];
+      : [link.label ?? link.title, link.description];
   }, [link, parentDashboardId, dashboardContainer]);
 
   const { tooltipTitle, tooltipMessage } = useMemo(() => {

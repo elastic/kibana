@@ -17,6 +17,7 @@ import {
   DEFAULT_URL_DRILLDOWN_OPTIONS,
   UrlDrilldownOptions,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { memoize } from 'lodash';
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
@@ -29,6 +30,38 @@ import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tool
 import { validateUrl } from '../components/external_link/external_link_tools';
 import { DashboardItem } from '../embeddable/types';
 import { coreServices, trackUiMetric } from '../services/kibana_services';
+
+import { ResolvedLink } from './types';
+
+export const getOrderedLinkList = (links: ResolvedLink[]): ResolvedLink[] => {
+  return [...links].sort((linkA, linkB) => {
+    return linkA.order - linkB.order;
+  });
+};
+
+/**
+ * Memoizing this prevents the links panel editor from having to unnecessarily calculate this
+ * a second time once the embeddable exists - after all, the links component should have already
+ * calculated this so, we can get away with using the cached version in the editor
+ */
+export const memoizedGetOrderedLinkList = memoize(
+  (links: ResolvedLink[]) => {
+    return getOrderedLinkList(links);
+  },
+  (links: ResolvedLink[]) => {
+    return links;
+  }
+);
+
+export async function resolveLinks(links: Link[] = []) {
+  const resolvedLinkInfos = await Promise.all(
+    links.map(async (link) => {
+      return { ...link, ...(await resolveLinkInfo(link)) };
+    })
+  );
+  return getOrderedLinkList(resolvedLinkInfos);
+  // return await Promise.reject(new Error('boom'));
+}
 
 export async function resolveLinkInfo(
   link: Link

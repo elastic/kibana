@@ -14,7 +14,7 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
-import { memoizedGetOrderedLinkList } from '../editor/links_editor_tools';
+import { memoizedGetOrderedLinkList } from '../react_embeddable/utils';
 import { DashboardLinkComponent } from './dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from './external_link/external_link_component';
 

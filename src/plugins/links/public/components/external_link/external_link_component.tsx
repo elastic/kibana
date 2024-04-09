@@ -16,17 +16,17 @@ import {
 
 import {
   EXTERNAL_LINK_TYPE,
-  Link,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
+import { ResolvedLink } from '../../react_embeddable/types';
 
 export const ExternalLinkComponent = ({
   link,
   layout,
 }: {
-  link: Link & { title: string; description?: string; error?: Error };
+  link: ResolvedLink;
   layout: LinksLayoutType;
 }) => {
   const linkOptions = useMemo(() => {
