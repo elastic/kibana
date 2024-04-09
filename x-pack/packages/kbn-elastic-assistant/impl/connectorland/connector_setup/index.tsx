@@ -15,7 +15,7 @@ import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/c
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, Message } from '../../..';
+import { Conversation, ClientMessage } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
@@ -109,7 +109,7 @@ export const useConnectorSetup = ({
 
   // Create EuiCommentProps[] from conversation messages
   const commentBody = useCallback(
-    (message: Message, index: number, length: number) => {
+    (message: ClientMessage, index: number, length: number) => {
       // If timestamp is not set, set it to current time (will update conversation at end of setup)
       if (
         conversation.messages[index].timestamp == null ||

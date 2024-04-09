@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -17,8 +18,7 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
-import { InvokeAIActionParamsSchema } from '../types';
+import { InvokeAIActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
@@ -27,10 +27,11 @@ interface ActionsClientChatOpenAIParams {
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  request: KibanaRequest;
   streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
+  model?: string;
   signal?: AbortSignal;
 }
 
@@ -51,12 +52,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   // ChatOpenAI class needs these, but they do not matter as we override the openai client with the actions client
   azureOpenAIApiKey = '';
   openAIApiKey = '';
+  model?: string;
 
   // Kibana variables
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  #request: KibanaRequest;
   #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
@@ -68,6 +70,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     logger,
     request,
     maxRetries,
+    model,
     signal,
   }: ActionsClientChatOpenAIParams) {
     super({
@@ -90,6 +93,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#actionResultData = '';
     this.streaming = true;
     this.#signal = signal;
+    this.model = model;
   }
 
   getActionResultData(): string {
@@ -173,7 +177,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           temperature: completionRequest.temperature,
           functions: completionRequest.functions,
           // possible client model override
-          model: this.#request.body.model ?? completionRequest.model,
+          model: this.model ?? completionRequest.model,
           // ensure we take the messages from the completion request, not the client request
           messages: completionRequest.messages.map((message) => ({
             role: message.role,

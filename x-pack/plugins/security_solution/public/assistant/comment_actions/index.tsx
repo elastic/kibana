@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { Message } from '@kbn/elastic-assistant';
+import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -22,7 +22,7 @@ import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 interface Props {
-  message: Message;
+  message: ClientMessage;
   isFlyoutMode: boolean;
 }
 

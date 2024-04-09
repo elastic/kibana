@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
@@ -29,7 +29,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
 
 interface CreateConversationProps {
   cTitle: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
   conversationIds?: string[];
   apiConfig?: Conversation['apiConfig'];
 }
@@ -48,7 +48,7 @@ interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
-  removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
+  removeLastMessage: (conversationId: string) => Promise<ClientMessage[] | undefined>;
   setApiConfig: ({
     conversation,
     apiConfig,
@@ -76,7 +76,7 @@ export const useConversation = (): UseConversation => {
    */
   const removeLastMessage = useCallback(
     async (conversationId: string) => {
-      let messages: Message[] = [];
+      let messages: ClientMessage[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId, toasts });
       if (prevConversation != null) {
         messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
