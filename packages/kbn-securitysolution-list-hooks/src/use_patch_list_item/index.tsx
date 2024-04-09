@@ -18,7 +18,7 @@ import { useInvalidateListItemQuery } from '../use_find_list_items';
 const patchListItemWithOptionalSignal = withOptionalSignal(patchListItem);
 
 export const PATCH_LIST_ITEM_MUTATION_KEY = ['PATCH', 'LIST_ITEM_MUTATION'];
-type PatchListMutationParams = Omit<PatchListItemParams, 'refresh'>;
+type PatchListMutationParams = Omit<PatchListItemParams, 'refresh' | 'signal'>;
 
 export const usePatchListItemMutation = (
   options?: UseMutationOptions<ListItemSchema, IHttpFetchError<Error>, PatchListMutationParams>

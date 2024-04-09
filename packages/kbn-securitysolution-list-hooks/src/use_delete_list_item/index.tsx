@@ -18,7 +18,7 @@ import { useInvalidateListItemQuery } from '../use_find_list_items';
 const deleteListItemWithOptionalSignal = withOptionalSignal(deleteListItem);
 
 export const DELETE_LIST_ITEM_MUTATION_KEY = ['POST', ' DELETE_LIST_ITEM_MUTATION'];
-type DeleteListMutationParams = Omit<DeleteListItemParams, 'refresh'>;
+type DeleteListMutationParams = Omit<DeleteListItemParams, 'refresh' | 'delete'>;
 
 export const useDeleteListItemMutation = (
   options?: UseMutationOptions<ListItemSchema, IHttpFetchError<Error>, DeleteListMutationParams>

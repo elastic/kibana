@@ -19,7 +19,7 @@ import { useInvalidateListItemQuery } from '../use_find_list_items';
 const createListItemWithOptionalSignal = withOptionalSignal(createListItem);
 
 export const CREATE_LIST_ITEM_MUTATION_KEY = ['POST', 'LIST_ITEM_CREATE'];
-type CreateListMutationParams = Omit<CreateListItemParams, 'refresh'>;
+type CreateListMutationParams = Omit<CreateListItemParams, 'refresh' | 'signal'>;
 
 export const useCreateListItemMutation = (
   options?: UseMutationOptions<ListItemSchema, IHttpFetchError<Error>, CreateListMutationParams>
