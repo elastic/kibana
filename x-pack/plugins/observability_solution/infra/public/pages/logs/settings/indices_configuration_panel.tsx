@@ -165,16 +165,7 @@ export const IndicesConfigurationPanel = React.memo<{
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.logsIndicesUsedByRulesMessage"
-              defaultMessage="There {isOrAre} {numberOfLogsRules} rule{plural} that rely on the current {sourceType} setting. Changing this setting may impact the execution of these rules."
-              values={{
-                numberOfLogsRules,
-                plural: numberOfLogsRules > 1 ? 's' : '',
-                isOrAre: numberOfLogsRules > 1 ? 'are' : 'is',
-                sourceType:
-                  indicesFormElement.initialValue?.type === 'index_name'
-                    ? 'Log indices'
-                    : 'Data view',
-              }}
+              defaultMessage="One or more rules rely on this data source setting. Changing this setting may impact the execution of these rules."
             />
           </EuiCallOut>
         </>

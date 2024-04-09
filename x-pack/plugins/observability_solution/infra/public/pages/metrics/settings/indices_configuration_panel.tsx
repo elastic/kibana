@@ -128,12 +128,7 @@ export const IndicesConfigurationPanel = ({
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.metricIndicesUsedByRulesMessage"
-              defaultMessage="There {isOrAre} {numberOfInfraRules} rule{plural} that rely on the current Metric indices setting. Changing this setting may impact the execution of these rules."
-              values={{
-                numberOfInfraRules,
-                plural: numberOfInfraRules > 1 ? 's' : '',
-                isOrAre: numberOfInfraRules > 1 ? 'are' : 'is',
-              }}
+              defaultMessage="One or more rules rely on this data source setting.. Changing this setting may impact the execution of these rules."
             />
           </EuiCallOut>
         </>
