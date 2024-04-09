@@ -97,6 +97,20 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         // index doesn't exist
       }
+
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-policies',
+          refresh: true,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesn't exist
+      }
     };
 
     const cleanupSecrets = async () => {
@@ -325,8 +339,14 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    beforeEach(async () => {
+    before(async () => {
       await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+      );
+    });
+
+    after(async () => {
+      await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
@@ -334,10 +354,6 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       await cleanupAgents();
       await cleanupSecrets();
-
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
     });
 
     describe('create package policy with secrets', () => {
@@ -979,6 +995,15 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
         ).to.eql(true);
+
+        // Managed policies can't be deleted easily, so just unload + reload the archive
+        await getService('esArchiver').unload(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
+
+        await getService('esArchiver').load(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it('should store secrets if additional fleet server does not meet minimum version, but is unenrolled', async () => {
@@ -1013,6 +1038,15 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
         expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
           true
+        );
+
+        // Managed policies can't be deleted easily, so just unload + reload the archive
+        await getService('esArchiver').unload(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        );
+
+        await getService('esArchiver').load(
+          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
         );
       });
 
