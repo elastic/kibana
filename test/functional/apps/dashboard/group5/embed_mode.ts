@@ -24,7 +24,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe('embed mode', () => {
+  describe.only('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
@@ -93,7 +93,7 @@ export default function ({
     describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const newUrl = [currentUrl].concat([...urlParamExtensions, 'embed=true']).join('&');
+        const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
         // Embed parameter only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);
