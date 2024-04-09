@@ -23,14 +23,13 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
     "@kbn/data-views-plugin",
     "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
-    "@kbn/presentation-library",
+    "@kbn/analytics",
   ],
   "exclude": ["target/**/*"]
 }

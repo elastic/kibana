@@ -239,6 +239,59 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.createScreenContextAction",
+        "type": "Function",
+        "tags": [],
+        "label": "createScreenContextAction",
+        "description": [],
+        "signature": [
+          "(definition: TActionDefinition, respond: ",
+          "ScreenContextActionRespondFunction",
+          "<TResponse>) => ",
+          "ScreenContextActionDefinition",
+          "<TResponse>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.createScreenContextAction.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              "TActionDefinition"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.createScreenContextAction.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "respond",
+            "description": [],
+            "signature": [
+              "ScreenContextActionRespondFunction",
+              "<TResponse>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.createStorybookChatService",
         "type": "Function",
         "tags": [],
@@ -601,7 +654,9 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -1068,7 +1123,7 @@
             "label": "complete",
             "description": [],
             "signature": [
-              "(options: { screenContexts: ",
+              "(options: { getScreenContexts: () => ",
               "ObservabilityAIAssistantScreenContext",
               "[]; conversationId?: string | undefined; connectorId: string; messages: ",
               {
@@ -1107,18 +1162,21 @@
                 "children": [
                   {
                     "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.screenContexts",
-                    "type": "Array",
+                    "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.getScreenContexts",
+                    "type": "Function",
                     "tags": [],
-                    "label": "screenContexts",
+                    "label": "getScreenContexts",
                     "description": [],
                     "signature": [
+                      "() => ",
                       "ObservabilityAIAssistantScreenContext",
                       "[]"
                     ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [],
+                    "returnComment": []
                   },
                   {
                     "parentPluginId": "observabilityAIAssistant",
@@ -1241,9 +1299,7 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<",
-              "CompatibleJSONSchema",
-              ">[]"
+              "<any>[]"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
@@ -1752,9 +1808,7 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<",
-              "CompatibleJSONSchema",
-              ">[]; contextDefinitions: ",
+              "<any>[]; contextDefinitions: ",
               "ContextDefinition",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -1921,9 +1975,9 @@
               "<",
               "Type",
               "<",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", ",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -1947,7 +2001,7 @@
                 "text": "Message"
               },
               "[]; screenContexts: ",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
@@ -1985,14 +2039,18 @@
               "; functions: ",
               "ArrayC",
               "<",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ name: ",
               "StringC",
               "; description: ",
               "StringC",
-              "; parameters: ",
+              "; }>, ",
+              "PartialC",
+              "<{ parameters: ",
               "AnyC",
-              "; }>>; }>, ",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ functionCall: ",
               "StringC",
@@ -2006,7 +2064,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+              "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -2266,9 +2324,7 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<",
-              "CompatibleJSONSchema",
-              ">[]; contextDefinitions: ",
+              "<any>[]; contextDefinitions: ",
               "ContextDefinition",
               "[]; }>; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -2435,9 +2491,9 @@
               "<",
               "Type",
               "<",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", ",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               ", unknown>>; connectorId: ",
               "StringC",
               "; persist: ",
@@ -2461,7 +2517,7 @@
                 "text": "Message"
               },
               "[]; screenContexts: ",
-              "ObservabilityAIAssistantScreenContext",
+              "ObservabilityAIAssistantScreenContextRequest",
               "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
@@ -2499,14 +2555,18 @@
               "; functions: ",
               "ArrayC",
               "<",
+              "IntersectionC",
+              "<[",
               "TypeC",
               "<{ name: ",
               "StringC",
               "; description: ",
               "StringC",
-              "; parameters: ",
+              "; }>, ",
+              "PartialC",
+              "<{ parameters: ",
               "AnyC",
-              "; }>>; }>, ",
+              "; }>]>>; }>, ",
               "PartialC",
               "<{ functionCall: ",
               "StringC",
@@ -2520,7 +2580,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+              "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
@@ -2753,6 +2813,48 @@
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantService.navigate",
+            "type": "Function",
+            "tags": [],
+            "label": "navigate",
+            "description": [],
+            "signature": [
+              "(callback: () => void) => Promise<",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.MessageAddEvent",
+                "text": "MessageAddEvent"
+              },
+              ">>"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.ObservabilityAIAssistantService.navigate.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3281,9 +3383,7 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -3450,9 +3550,9 @@
           "<",
           "Type",
           "<",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -3476,7 +3576,7 @@
             "text": "Message"
           },
           "[]; screenContexts: ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
@@ -3514,14 +3614,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -3535,7 +3639,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -3898,9 +4002,7 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -4067,9 +4169,9 @@
           "<",
           "Type",
           "<",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -4093,7 +4195,7 @@
             "text": "Message"
           },
           "[]; screenContexts: ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
@@ -4131,14 +4233,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -4152,7 +4258,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -4705,6 +4811,108 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "observabilityAIAssistant",
+          "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction",
+          "type": "Function",
+          "tags": [],
+          "label": "createScreenContextAction",
+          "description": [],
+          "signature": [
+            "<TActionDefinition extends Omit<",
+            "ScreenContextActionDefinition",
+            "<undefined>, \"respond\">, TResponse = ReturnOf<TActionDefinition>>(definition: TActionDefinition, respond: ",
+            "ScreenContextActionRespondFunction",
+            "<TResponse>) => ",
+            "ScreenContextActionDefinition",
+            "<TResponse>"
+          ],
+          "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$1",
+              "type": "Uncategorized",
+              "tags": [],
+              "label": "definition",
+              "description": [],
+              "signature": [
+                "TActionDefinition"
+              ],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "observabilityAIAssistant",
+              "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "respond",
+              "description": [],
+              "signature": [
+                "({}: { args: TResponse; signal: AbortSignal; connectorId: string; client: Pick<",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "public",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-public.ObservabilityAIAssistantChatService",
+                  "text": "ObservabilityAIAssistantChatService"
+                },
+                ", \"complete\" | \"chat\">; messages: ",
+                {
+                  "pluginId": "observabilityAIAssistant",
+                  "scope": "common",
+                  "docId": "kibObservabilityAIAssistantPluginApi",
+                  "section": "def-common.Message",
+                  "text": "Message"
+                },
+                "[]; }) => Promise<",
+                "FunctionResponse",
+                ">"
+              ],
+              "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": [
+                {
+                  "parentPluginId": "observabilityAIAssistant",
+                  "id": "def-public.ObservabilityAIAssistantPublicStart.createScreenContextAction.$2.$1",
+                  "type": "Object",
+                  "tags": [],
+                  "label": "__0",
+                  "description": [],
+                  "signature": [
+                    "{ args: TArguments; signal: AbortSignal; connectorId: string; client: Pick<",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "public",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-public.ObservabilityAIAssistantChatService",
+                      "text": "ObservabilityAIAssistantChatService"
+                    },
+                    ", \"complete\" | \"chat\">; messages: ",
+                    {
+                      "pluginId": "observabilityAIAssistant",
+                      "scope": "common",
+                      "docId": "kibObservabilityAIAssistantPluginApi",
+                      "section": "def-common.Message",
+                      "text": "Message"
+                    },
+                    "[]; }"
+                  ],
+                  "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
+                  "deprecated": false,
+                  "trackAdoption": false
+                }
+              ]
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -4973,9 +5181,7 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<",
-          "CompatibleJSONSchema",
-          ">[]; contextDefinitions: ",
+          "<any>[]; contextDefinitions: ",
           "ContextDefinition",
           "[]; }>; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -5142,9 +5348,9 @@
           "<",
           "Type",
           "<",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           ", unknown>>; connectorId: ",
           "StringC",
           "; persist: ",
@@ -5168,7 +5374,7 @@
             "text": "Message"
           },
           "[]; screenContexts: ",
-          "ObservabilityAIAssistantScreenContext",
+          "ObservabilityAIAssistantScreenContextRequest",
           "[]; connectorId: string; persist: boolean; } & { conversationId?: string | undefined; title?: string | undefined; responseLanguage?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
@@ -5206,14 +5412,18 @@
           "; functions: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
           "; description: ",
           "StringC",
-          "; parameters: ",
+          "; }>, ",
+          "PartialC",
+          "<{ parameters: ",
           "AnyC",
-          "; }>>; }>, ",
+          "; }>]>>; }>, ",
           "PartialC",
           "<{ functionCall: ",
           "StringC",
@@ -5227,7 +5437,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
+          "[]; connectorId: string; functions: ({ name: string; description: string; } & { parameters?: any; })[]; } & { functionCall?: string | undefined; }; }; }) => Promise<",
           "Readable",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
@@ -5728,7 +5938,9 @@
             "label": "conversation",
             "description": [],
             "signature": [
-              "{ id: string; title: string; last_updated: string; }"
+              "{ id: string; title: string; last_updated: string; token_count?: ",
+              "TokenCount",
+              " | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -5894,7 +6106,7 @@
             "label": "parameters",
             "description": [],
             "signature": [
-              "TParameters"
+              "TParameters | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
@@ -6285,7 +6497,9 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
+          ".ConversationCreate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -6308,7 +6522,9 @@
             "section": "def-common.Conversation",
             "text": "Conversation"
           },
-          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; }; }"
+          ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,
@@ -6331,7 +6547,9 @@
             "section": "def-common.StreamingChatResponseEventType",
             "text": "StreamingChatResponseEventType"
           },
-          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; }; }"
+          ".ConversationUpdate; } & { conversation: { id: string; title: string; last_updated: string; token_count?: ",
+          "TokenCount",
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
@@ -6397,16 +6615,16 @@
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
           },
           " | ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.MessageAddEvent",
-            "text": "MessageAddEvent"
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
           },
           " | ",
           {
@@ -6450,16 +6668,16 @@
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
+            "section": "def-common.MessageAddEvent",
+            "text": "MessageAddEvent"
           },
           " | ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.MessageAddEvent",
-            "text": "MessageAddEvent"
+            "section": "def-common.ChatCompletionChunkEvent",
+            "text": "ChatCompletionChunkEvent"
           }
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",

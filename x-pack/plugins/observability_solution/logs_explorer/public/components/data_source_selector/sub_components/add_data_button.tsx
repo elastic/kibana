@@ -37,7 +37,12 @@ export const AddDataButton: React.FunctionComponent<{}> = ({}) => {
   });
 
   return (
-    <EuiButtonEmpty {...onboardingLinkProps} iconType="plusInCircleFilled" size="xs">
+    <EuiButtonEmpty
+      data-test-subj="logsExplorerAddDataButtonButton"
+      {...onboardingLinkProps}
+      iconType="plusInCircleFilled"
+      size="xs"
+    >
       {addDataLabel}
     </EuiButtonEmpty>
   );

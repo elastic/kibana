@@ -9,85 +9,85 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Toast } from '@kbn/core/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   SavedObjectFinder,
   SavedObjectFinderProps,
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
+import { PresentationContainer } from '@kbn/presentation-containers';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   core,
   embeddableStart,
-  usageCollection,
   savedObjectsTaggingOss,
   contentManagement,
+  usageCollection,
 } from '../kibana_services';
-import {
-  IContainer,
-  EmbeddableFactory,
-  SavedObjectEmbeddableInput,
-  EmbeddableFactoryNotFoundError,
-} from '../lib';
 import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
+import {
+  getReactEmbeddableSavedObjects,
+  ReactEmbeddableSavedObject,
+} from '../lib/embeddable_saved_object_registry/embeddable_saved_object_registry';
+import { EmbeddableFactory, EmbeddableFactoryNotFoundError } from '../lib';
 
-type FactoryMap = { [key: string]: EmbeddableFactory };
-
-let lastToast: string | Toast;
-const showSuccessToast = (name: string) => {
-  if (lastToast) core.notifications.toasts.remove(lastToast);
-
-  lastToast = core.notifications.toasts.addSuccess({
-    title: i18n.translate('embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
-      defaultMessage: '{savedObjectName} was added',
-      values: {
-        savedObjectName: name,
-      },
-    }),
-    'data-test-subj': 'addObjectToContainerSuccess',
-  });
+type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
+type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
+  [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type: string };
 };
 
 const runAddTelemetry = (
   parentType: string,
-  factory: EmbeddableFactory,
-  savedObject: SavedObjectCommon
+  factoryType: string,
+  savedObject: SavedObjectCommon,
+  savedObjectMetaData?: SavedObjectMetaData
 ) => {
-  const type = factory.savedObjectMetaData?.getSavedObjectSubType
-    ? factory.savedObjectMetaData.getSavedObjectSubType(savedObject)
-    : factory.type;
+  const type = savedObjectMetaData?.getSavedObjectSubType
+    ? savedObjectMetaData.getSavedObjectSubType(savedObject)
+    : factoryType;
 
   usageCollection?.reportUiCounter?.(parentType, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
-export const AddPanelFlyout = ({
-  container,
-  onAddPanel,
-}: {
-  container: IContainer;
-  onAddPanel?: (id: string) => void;
-}) => {
-  const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
+export const AddPanelFlyout = ({ container }: { container: PresentationContainer }) => {
+  const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]
-      .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData?.type))
+      .filter(
+        (embeddableFactory) =>
+          Boolean(embeddableFactory.savedObjectMetaData?.type) && !embeddableFactory.isContainerType
+      )
       .reduce((acc, factory) => {
         acc[factory.savedObjectMetaData!.type] = factory;
+        return acc;
+      }, {} as LegacyFactoryMap);
+  }, []);
+
+  const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
+    return [...getReactEmbeddableSavedObjects()]
+      .filter(([type, embeddableFactory]) => {
+        return Boolean(embeddableFactory.savedObjectMetaData?.type);
+      })
+      .reduce((acc, [type, factory]) => {
+        acc[factory.savedObjectMetaData!.type] = {
+          ...factory,
+          type,
+        };
         return acc;
       }, {} as FactoryMap);
   }, []);
 
   const metaData = useMemo(
     () =>
-      Object.values(factoriesBySavedObjectType)
-        .filter(
-          (embeddableFactory) =>
-            Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
-        )
-        .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData),
-    [factoriesBySavedObjectType]
+      [
+        ...Object.values(factoriesBySavedObjectType),
+        ...Object.values(legacyFactoriesBySavedObjectType),
+      ]
+        .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData))
+        .map(({ savedObjectMetaData }) => savedObjectMetaData!)
+        .sort((a, b) => a.type.localeCompare(b.type)),
+    [factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -97,40 +97,30 @@ export const AddPanelFlyout = ({
       name: string,
       savedObject: SavedObjectCommon
     ) => {
-      const factoryForSavedObjectType = factoriesBySavedObjectType[type];
-      if (!factoryForSavedObjectType) {
+      if (factoriesBySavedObjectType[type]) {
+        const factory = factoriesBySavedObjectType[type];
+        const { onAdd, savedObjectMetaData } = factory;
+
+        onAdd(container, savedObject);
+        runAddTelemetry(container.type, factory.type, savedObject, savedObjectMetaData);
+        return;
+      }
+
+      const legacyFactoryForSavedObjectType = legacyFactoriesBySavedObjectType[type];
+      if (!legacyFactoryForSavedObjectType) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      let embeddableId: string;
+      const initialState = savedObjectToPanel[type](savedObject) ?? { savedObjectId: id };
+      container.addNewPanel({
+        panelType: legacyFactoryForSavedObjectType.type,
+        initialState,
+      });
 
-      if (savedObjectToPanel[type]) {
-        // this panel type has a custom method for converting saved objects to panels
-        const panel = savedObjectToPanel[type](savedObject);
-
-        const { id: _embeddableId } = await container.addNewEmbeddable(
-          factoryForSavedObjectType.type,
-          panel,
-          savedObject.attributes
-        );
-
-        embeddableId = _embeddableId;
-      } else {
-        const { id: _embeddableId } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
-          factoryForSavedObjectType.type,
-          { savedObjectId: id },
-          savedObject.attributes
-        );
-
-        embeddableId = _embeddableId;
-      }
-
-      onAddPanel?.(embeddableId);
-
-      showSuccessToast(name);
-      runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
+      const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
+      runAddTelemetry(container.type, factoryType, savedObject, savedObjectMetaData);
     },
-    [container, factoriesBySavedObjectType, onAddPanel]
+    [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );
 
   return (

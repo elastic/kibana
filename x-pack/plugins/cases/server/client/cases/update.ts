@@ -47,7 +47,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type {
   Cases,
   Case,
@@ -58,7 +58,6 @@ import type {
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 

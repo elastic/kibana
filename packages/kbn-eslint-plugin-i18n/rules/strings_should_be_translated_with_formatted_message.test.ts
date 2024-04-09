@@ -181,7 +181,7 @@ function TestComponent() {
 }`,
   },
   {
-    name: 'JSX elements that have a label or aria-label prop with a string value should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a string value should be translated with i18n',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
 import React from 'react';
@@ -191,10 +191,28 @@ function TestComponent() {
   return (
     <SomeChildComponent label="This is a test" />
   )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label="This is a test" />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title="This is a test" />
+  )
 }`,
     errors: [
       {
         line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
         message: RULE_WARNING_MESSAGE,
       },
     ],
@@ -206,10 +224,20 @@ function TestComponent() {
   return (
     <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
   )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={<FormattedMessage id="xpack.observability.testComponent2.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={<FormattedMessage id="xpack.observability.testComponent3.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+  )
 }`,
   },
   {
-    name: 'JSX elements that have a label or aria-label prop with a JSXExpression value that is a string should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string should be translated with i18n',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
   import React from 'react';
@@ -219,10 +247,28 @@ function TestComponent() {
     return (
       <SomeChildComponent label={'This is a test'} />
     )
+  }
+  function TestComponent2() {
+    return (
+      <SomeChildComponent aria-label={'This is a test'} />
+    )
+  }
+  function TestComponent3() {
+    return (
+      <SomeChildComponent title={'This is a test'} />
+    )
   }`,
     errors: [
       {
         line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
         message: RULE_WARNING_MESSAGE,
       },
     ],
@@ -233,6 +279,16 @@ function TestComponent() {
   function TestComponent() {
     return (
       <SomeChildComponent label={<FormattedMessage id="xpack.observability.testComponent.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+    )
+  }
+  function TestComponent2() {
+    return (
+      <SomeChildComponent aria-label={<FormattedMessage id="xpack.observability.testComponent2.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
+    )
+  }
+  function TestComponent3() {
+    return (
+      <SomeChildComponent title={<FormattedMessage id="xpack.observability.testComponent3.someChildComponent.thisIsATestLabel" defaultMessage="This is a test" />} />
     )
   }`,
   },

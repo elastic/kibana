@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     it('opens the flyout for the right dataset', async () => {

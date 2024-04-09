@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/178564
-  describe.skip('lens show underlying data from dashboard', () => {
+  describe('lens show underlying data from dashboard', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -61,8 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.createLayer('annotations');
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+
       await PageObjects.lens.createLayer('referenceLine');
       await PageObjects.lens.save('Embedded Visualization', false);
 

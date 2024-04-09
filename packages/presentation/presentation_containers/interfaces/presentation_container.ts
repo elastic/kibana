@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { apiHasParentApi, PublishesViewMode } from '@kbn/presentation-publishing';
+import {
+  apiHasParentApi,
+  apiHasType,
+  HasType,
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
@@ -14,7 +19,8 @@ export interface PanelPackage {
   initialState?: object;
 }
 
-export type PresentationContainer = Partial<PublishesViewMode> &
+export type PresentationContainer = HasType &
+  Partial<PublishesViewMode> &
   PublishesLastSavedState & {
     addNewPanel: <ApiType extends unknown = unknown>(
       panel: PanelPackage,
@@ -33,7 +39,8 @@ export type PresentationContainer = Partial<PublishesViewMode> &
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
-    typeof (api as PresentationContainer)?.removePanel === 'function' &&
+    apiHasType(api) &&
+      typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.registerPanelApi === 'function' &&
       typeof (api as PresentationContainer)?.replacePanel === 'function' &&
       typeof (api as PresentationContainer)?.addNewPanel === 'function' &&

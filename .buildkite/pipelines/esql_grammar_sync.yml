@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/steps/esql_grammar_sync.sh
+    label: ES|QL Grammar Sync
+    timeout_in_minutes: 10
+    agents:
+      queue: n2-2-spot

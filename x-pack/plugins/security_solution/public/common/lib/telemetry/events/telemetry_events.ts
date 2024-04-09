@@ -26,6 +26,10 @@ import {
   assistantQuickPrompt,
 } from './ai_assistant';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
+import {
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+} from './document_details';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -155,4 +159,6 @@ export const telemetryEvents = [
   dataQualityIndexCheckedEvent,
   dataQualityCheckAllClickedEvent,
   breadCrumbClickedEvent,
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
 ];

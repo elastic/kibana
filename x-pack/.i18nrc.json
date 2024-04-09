@@ -4,6 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
       "packages/ml/aiops_components",
+      "packages/ml/aiops_log_pattern_analysis",
       "plugins/aiops"
     ],
     "xpack.alerting": "plugins/alerting",
@@ -86,6 +87,7 @@
       "plugins/observability_solution/observability_ai_assistant",
       "plugins/observability_solution/observability_ai_assistant_app"
     ],
+    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",
@@ -105,6 +107,7 @@
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
@@ -115,6 +118,7 @@
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
+    "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [

@@ -83,7 +83,9 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/serverless",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/index-management-plugin",
+    "@kbn/license-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

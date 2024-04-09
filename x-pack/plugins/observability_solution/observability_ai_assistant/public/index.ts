@@ -33,6 +33,8 @@ export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortab
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
+export { createScreenContextAction } from './utils/create_screen_context_action';
+
 export { ChatState } from './hooks/use_chat';
 
 export { FeedbackButtons, type Feedback } from './components/buttons/feedback_buttons';

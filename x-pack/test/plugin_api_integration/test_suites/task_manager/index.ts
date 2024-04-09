@@ -17,7 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./task_management_scheduled_at'));
     loadTestFile(require.resolve('./task_management_removed_types'));
     loadTestFile(require.resolve('./check_registered_task_types'));
-    loadTestFile(require.resolve('./skip'));
 
     loadTestFile(require.resolve('./migrations'));
   });

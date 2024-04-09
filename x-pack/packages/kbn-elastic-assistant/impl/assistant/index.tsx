@@ -29,14 +29,16 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
 import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { getDefaultConnector, getBlockBotConversation } from './helpers';
+import {
+  getDefaultConnector,
+  getBlockBotConversation,
+  mergeBaseWithPersistedConversations,
+} from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -49,14 +51,20 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import {
+  FetchConversationsResponse,
+  useFetchCurrentUserConversations,
+} from './api/conversations/use_fetch_current_user_conversations';
+import { Conversation } from '../assistant_context/types';
+import { clearPresentationData } from '../connectorland/connector_setup/helpers';
 
 export interface Props {
-  conversationId?: string;
+  conversationTitle?: string;
   embeddedLayout?: boolean;
   promptContextId?: string;
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
-  setConversationId?: Dispatch<SetStateAction<string>>;
+  setConversationTitle?: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -64,76 +72,124 @@ export interface Props {
  * quick prompts for common actions, settings, and prompt context providers.
  */
 const AssistantComponent: React.FC<Props> = ({
-  conversationId,
+  conversationTitle,
   embeddedLayout = false,
   promptContextId = '',
   shouldRefocusPrompt = false,
   showTitle = true,
-  setConversationId,
+  setConversationTitle,
 }) => {
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    conversations,
     defaultAllow,
     defaultAllowReplacement,
     docLinks,
     getComments,
     http,
     promptContexts,
-    setLastConversationId,
-    getConversationId,
+    setLastConversationTitle,
+    getLastConversationTitle,
     title,
     allSystemPrompts,
+    baseConversations,
   } = useAssistantContext();
+
+  const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
   >({});
+  const [conversations, setConversations] = useState<Record<string, Conversation>>({});
   const selectedPromptContextsCount = useMemo(
     () => Object.keys(selectedPromptContexts).length,
     [selectedPromptContexts]
   );
 
-  const { amendMessage, createConversation } = useConversation();
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
+    [baseConversations]
+  );
+  const {
+    data: conversationsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      setConversations(conversationsData ?? {});
+    }
+  }, [conversationsData, isError, isLoading]);
+
+  const refetchResults = useCallback(async () => {
+    const updatedConv = await refetch();
+    if (!updatedConv.isLoading) {
+      setConversations(updatedConv.data ?? {});
+      return updatedConv.data;
+    }
+  }, [refetch]);
 
   // Connector details
-  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
-  const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
-  const defaultProvider = useMemo(
-    () =>
-      (
-        getDefaultConnector(connectors) as ActionConnectorProps<
-          { apiProvider: OpenAiProviderType },
-          unknown
-        >
-      )?.config?.apiProvider,
-    [connectors]
-  );
+  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
+    http,
+  });
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isAssistantEnabled ? getConversationId(conversationId) : WELCOME_CONVERSATION_TITLE
+  const [selectedConversationTitle, setSelectedConversationTitle] = useState<string>(
+    isAssistantEnabled ? getLastConversationTitle(conversationTitle) : WELCOME_CONVERSATION_TITLE
   );
 
   useEffect(() => {
-    if (setConversationId) {
-      setConversationId(selectedConversationId);
+    if (setConversationTitle) {
+      setConversationTitle(selectedConversationTitle);
     }
-  }, [selectedConversationId, setConversationId]);
+  }, [selectedConversationTitle, setConversationTitle]);
 
-  const currentConversation = useMemo(
-    () =>
-      conversations[selectedConversationId] ??
-      createConversation({ conversationId: selectedConversationId }),
-    [conversations, createConversation, selectedConversationId]
+  const [currentConversation, setCurrentConversation] = useState<Conversation>(
+    getDefaultConversation({ cTitle: selectedConversationTitle })
   );
+
+  const refetchCurrentConversation = useCallback(
+    async (cId?: string) => {
+      if (cId === '' || !conversations[selectedConversationTitle]) {
+        return;
+      }
+      const updatedConversation = await getConversation(
+        cId ?? conversations[selectedConversationTitle].id
+      );
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
+      return updatedConversation;
+    },
+    [conversations, getConversation, selectedConversationTitle]
+  );
+
+  useEffect(() => {
+    if (!isLoading && Object.keys(conversations).length > 0) {
+      const conversation =
+        conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
+      if (conversation) {
+        setCurrentConversation(conversation);
+      }
+    }
+  }, [
+    conversationTitle,
+    conversations,
+    getLastConversationTitle,
+    isLoading,
+    selectedConversationTitle,
+  ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
     // if any conversation has a connector id, we're not in welcome set up
     return Object.keys(conversations).some(
-      (conversation) => conversations[conversation].apiConfig.connectorId != null
+      (conversation) => conversations[conversation].apiConfig?.connectorId != null
     )
       ? false
       : (connectors?.length ?? 0) === 0;
@@ -154,20 +210,20 @@ const AssistantComponent: React.FC<Props> = ({
   // Clear it if there is no connectors
   useEffect(() => {
     if (areConnectorsFetched && !connectors?.length) {
-      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
+      return setLastConversationTitle(WELCOME_CONVERSATION_TITLE);
     }
 
     if (!currentConversation.excludeFromLastConversationStorage) {
-      setLastConversationId(currentConversation.id);
+      setLastConversationTitle(currentConversation.title);
     }
-  }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
-
-  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    conversation: blockBotConversation,
-  });
-
-  const currentTitle: string | JSX.Element =
-    isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
+  }, [
+    areConnectorsFetched,
+    connectors?.length,
+    conversationsData,
+    currentConversation,
+    isLoading,
+    setLastConversationTitle,
+  ]);
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
@@ -182,9 +238,9 @@ const AssistantComponent: React.FC<Props> = ({
   useLayoutEffect(() => {
     // need in order for code block controls to be added to the DOM
     setTimeout(() => {
-      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation));
+      setMessageCodeBlocks(augmentMessageCodeBlocks(currentConversation, showAnonymizedValues));
     }, 0);
-  }, [augmentMessageCodeBlocks, currentConversation]);
+  }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -235,13 +291,48 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    (cId: string) => {
-      setSelectedConversationId(cId);
-      setEditingSystemPromptId(
-        getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
-      );
+    async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
+      if (cId === '') {
+        const updatedConv = await refetchResults();
+        if (updatedConv) {
+          setCurrentConversation(updatedConv[cTitle]);
+          setSelectedConversationTitle(cTitle);
+          setEditingSystemPromptId(
+            getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cTitle] })?.id
+          );
+        }
+      } else {
+        setSelectedConversationTitle(cTitle);
+        const refetchedConversation = await refetchCurrentConversation(cId);
+        setEditingSystemPromptId(
+          getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
+        );
+      }
     },
-    [allSystemPrompts, conversations]
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
+  );
+
+  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
+    conversation: blockBotConversation,
+    onConversationUpdate: handleOnConversationSelected,
+    onSetupComplete: () => {
+      setConversations({
+        ...conversations,
+        [currentConversation.title]: clearPresentationData(currentConversation),
+      });
+    },
+  });
+
+  const handleOnConversationDeleted = useCallback(
+    async (cTitle: string) => {
+      setTimeout(() => {
+        deleteConversation(conversations[cTitle].id);
+      }, 0);
+      const deletedConv = { ...conversations };
+      delete deletedConv[cTitle];
+      setConversations(deletedConv);
+    },
+    [conversations, deleteConversation]
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -264,8 +355,8 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    // Adding `conversationId !== selectedConversationId` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation.messages.length || conversationId !== selectedConversationId) {
+    // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
+    if (currentConversation.messages.length || conversationTitle !== selectedConversationTitle) {
       return;
     }
 
@@ -302,8 +393,8 @@ const AssistantComponent: React.FC<Props> = ({
     currentConversation.messages,
     promptContexts,
     promptContextId,
-    conversationId,
-    selectedConversationId,
+    conversationTitle,
+    selectedConversationTitle,
     selectedPromptContexts,
     autoPopulatedOnce,
     defaultAllow,
@@ -356,6 +447,8 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
+    setCurrentConversation,
+    refresh: refetchCurrentConversation,
   });
 
   const chatbotComments = useMemo(
@@ -365,7 +458,7 @@ const AssistantComponent: React.FC<Props> = ({
           comments={getComments({
             currentConversation,
             showAnonymizedValues,
-            amendMessage,
+            refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
           })}
@@ -395,7 +488,7 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      amendMessage,
+      refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,
@@ -429,12 +522,19 @@ const AssistantComponent: React.FC<Props> = ({
   const trackPrompt = useCallback(
     (promptTitle: string) => {
       assistantTelemetry?.reportAssistantQuickPrompt({
-        conversationId: selectedConversationId,
+        conversationId: currentConversation.title,
         promptTitle,
       });
     },
-    [assistantTelemetry, selectedConversationId]
+    [assistantTelemetry, currentConversation.title]
   );
+
+  const refetchConversationsState = useCallback(async () => {
+    const refetchedConversations = await refetchResults();
+    if (refetchedConversations && refetchedConversations[currentConversation.title]) {
+      setCurrentConversation(refetchedConversations[currentConversation.title]);
+    }
+  }, [currentConversation.title, refetchResults]);
 
   return getWrapper(
     <>
@@ -447,18 +547,19 @@ const AssistantComponent: React.FC<Props> = ({
         {showTitle && (
           <AssistantHeader
             currentConversation={currentConversation}
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            setCurrentConversation={setCurrentConversation}
+            defaultConnector={defaultConnector}
             docLinks={docLinks}
             isDisabled={isDisabled}
             isSettingsModalVisible={isSettingsModalVisible}
             onConversationSelected={handleOnConversationSelected}
             onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-            selectedConversationId={selectedConversationId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
-            title={currentTitle}
+            title={title}
+            conversations={conversations}
+            onConversationDeleted={handleOnConversationDeleted}
+            refetchConversationsState={refetchConversationsState}
           />
         )}
 

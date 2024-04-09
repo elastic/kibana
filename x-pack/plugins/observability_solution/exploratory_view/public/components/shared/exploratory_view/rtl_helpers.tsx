@@ -108,6 +108,7 @@ const defaultCore = coreMock.createStart();
 export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsStart> = () => {
   const core: Partial<CoreStart & ExploratoryViewPublicPluginsStart> = {
     ...defaultCore,
+    security: undefined,
     application: {
       ...defaultCore.application,
       getUrlForApp: () => '/app/exploratory-view',

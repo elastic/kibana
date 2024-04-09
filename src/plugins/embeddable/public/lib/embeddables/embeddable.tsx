@@ -123,15 +123,15 @@ export abstract class Embeddable<
       dataViews: this.dataViews,
       parentApi: this.parentApi,
       panelTitle: this.panelTitle,
-      localQuery: this.localQuery,
+      query$: this.query$,
       dataLoading: this.dataLoading,
-      localFilters: this.localFilters,
+      filters$: this.filters$,
       blockingError: this.blockingError,
       onPhaseChange: this.onPhaseChange,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
       hidePanelTitle: this.hidePanelTitle,
-      localTimeRange: this.localTimeRange,
+      timeRange$: this.timeRange$,
       isEditingEnabled: this.isEditingEnabled,
       panelDescription: this.panelDescription,
       canLinkToLibrary: this.canLinkToLibrary,
@@ -139,12 +139,11 @@ export abstract class Embeddable<
       unlinkFromLibrary: this.unlinkFromLibrary,
       setHidePanelTitle: this.setHidePanelTitle,
       defaultPanelTitle: this.defaultPanelTitle,
-      setLocalTimeRange: this.setLocalTimeRange,
+      setTimeRange: this.setTimeRange,
       getTypeDisplayName: this.getTypeDisplayName,
       setPanelDescription: this.setPanelDescription,
-      getFallbackTimeRange: this.getFallbackTimeRange,
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
-      isCompatibleWithLocalUnifiedSearch: this.isCompatibleWithLocalUnifiedSearch,
+      isCompatibleWithUnifiedSearch: this.isCompatibleWithUnifiedSearch,
       savedObjectId: this.savedObjectId,
     } = api);
 
@@ -164,29 +163,28 @@ export abstract class Embeddable<
   public viewMode: LegacyEmbeddableAPI['viewMode'];
   public parentApi: LegacyEmbeddableAPI['parentApi'];
   public dataViews: LegacyEmbeddableAPI['dataViews'];
-  public localQuery: LegacyEmbeddableAPI['localQuery'];
+  public query$: LegacyEmbeddableAPI['query$'];
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
-  public localFilters: LegacyEmbeddableAPI['localFilters'];
+  public filters$: LegacyEmbeddableAPI['filters$'];
   public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
-  public localTimeRange: LegacyEmbeddableAPI['localTimeRange'];
+  public timeRange$: LegacyEmbeddableAPI['timeRange$'];
   public hidePanelTitle: LegacyEmbeddableAPI['hidePanelTitle'];
   public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
   public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
   public panelDescription: LegacyEmbeddableAPI['panelDescription'];
   public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
   public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
-  public setLocalTimeRange: LegacyEmbeddableAPI['setLocalTimeRange'];
+  public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];
   public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
   public setHidePanelTitle: LegacyEmbeddableAPI['setHidePanelTitle'];
   public getTypeDisplayName: LegacyEmbeddableAPI['getTypeDisplayName'];
   public setPanelDescription: LegacyEmbeddableAPI['setPanelDescription'];
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
-  public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
-  public isCompatibleWithLocalUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithLocalUnifiedSearch'];
+  public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
   public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
 
   public getEditHref(): string | undefined {

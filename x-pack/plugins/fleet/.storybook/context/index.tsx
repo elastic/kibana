@@ -13,7 +13,7 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import type { PluginsServiceStart } from '@kbn/core/public';
+import type { PluginsServiceStart, SecurityServiceStart } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
@@ -95,6 +95,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
         theme$: EMPTY,
         getTheme: () => ({ darkMode: false }),
       },
+      security: {} as unknown as SecurityServiceStart,
       plugins: {} as unknown as PluginsServiceStart,
       authz: {
         fleet: {
@@ -109,6 +110,8 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           readSettings: true,
           readAgentPolicies: true,
           allAgentPolicies: true,
+          addAgents: true,
+          addFleetServers: true,
         },
         integrations: {
           readPackageInfo: true,

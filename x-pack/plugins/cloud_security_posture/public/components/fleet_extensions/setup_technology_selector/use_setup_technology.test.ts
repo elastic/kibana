@@ -10,7 +10,12 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 
-import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from '../../../../common/constants';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+} from '../../../../common/constants';
 import { useSetupTechnology } from './use_setup_technology';
 
 describe('useSetupTechnology', () => {
@@ -47,9 +52,19 @@ describe('useSetupTechnology', () => {
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
     });
 
-    it('sets to AGENT_BASED when agentless is available and Azure cloud', () => {
+    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {
       const agentlessPolicy = { id: 'agentlessPolicyId' } as AgentPolicy;
       const input = { type: CLOUDBEAT_AZURE } as NewPackagePolicyInput;
+      const { result } = renderHook(() =>
+        useSetupTechnology({ input, agentlessPolicy, isEditPage })
+      );
+      expect(result.current.isAgentlessAvailable).toBeTruthy();
+      expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
+    });
+
+    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless', () => {
+      const agentlessPolicy = { id: 'agentlessPolicyId' } as AgentPolicy;
+      const input = { type: CLOUDBEAT_EKS } as NewPackagePolicyInput;
       const { result } = renderHook(() =>
         useSetupTechnology({ input, agentlessPolicy, isEditPage })
       );
