@@ -25,6 +25,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -521,7 +522,7 @@ export class ObservabilityAIAssistantClient {
         )
           .then((instructions) => {
             return next(
-              this.extendSystemMessage(messages, [
+              extendSystemMessage(messages, [
                 `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
                 instructions,
               ])
@@ -982,19 +983,5 @@ export class ObservabilityAIAssistantClient {
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 
     return `${instructionsPrompt}${instructions}`;
-  };
-
-  private extendSystemMessage = (messages: Message[], extensions: string[]) => {
-    const [systemMessage, ...rest] = messages;
-
-    const extendedSystemMessage: Message = {
-      ...systemMessage,
-      message: {
-        ...systemMessage.message,
-        content: `${systemMessage.message.content}\n\n${extensions.join('\n\n').trim()}`,
-      },
-    };
-
-    return [extendedSystemMessage].concat(rest);
   };
 }
