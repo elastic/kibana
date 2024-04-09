@@ -512,18 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
             "plugin": "uiActions",
             "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
           },
@@ -710,18 +698,6 @@
           {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
           },
           {
             "plugin": "security",
@@ -1948,6 +1924,76 @@
       },
       {
         "parentPluginId": "kibanaReact",
+        "id": "def-public.Markdown",
+        "type": "Function",
+        "tags": [],
+        "label": "Markdown",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "MarkdownProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.Markdown.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "MarkdownProps"
+            ],
+            "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.MarkdownSimple",
+        "type": "Function",
+        "tags": [],
+        "label": "MarkdownSimple",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "MarkdownSimpleProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.MarkdownSimple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "MarkdownSimpleProps"
+            ],
+            "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
         "id": "def-public.NoDataCard",
         "type": "Function",
         "tags": [],
@@ -2448,27 +2494,11 @@
           },
           {
             "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
             "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
           },
           {
             "plugin": "security",
             "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
-          },
-          {
-            "plugin": "navigation",
-            "path": "src/plugins/navigation/public/solution_nav_userprofile_toggle/solution_nav_userprofile_toggle.tsx"
           },
           {
             "plugin": "visualizations",
@@ -2608,14 +2638,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
@@ -2697,14 +2719,6 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
           },
           {
             "plugin": "cases",
@@ -2947,14 +2961,6 @@
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/flyout_edit_drilldown.tsx"
           },
           {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -3069,14 +3075,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
           },
           {
             "plugin": "synthetics",

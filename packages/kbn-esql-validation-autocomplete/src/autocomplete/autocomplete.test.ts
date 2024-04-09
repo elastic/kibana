@@ -15,6 +15,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { SuggestionRawDefinition } from './types';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -200,14 +201,14 @@ function getPolicyFields(policyName: string) {
 describe('autocomplete', () => {
   type TestArgs = [
     string,
-    string[],
+    Array<string | Partial<SuggestionRawDefinition>>,
     (string | number)?,
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
   const testSuggestionsFn = (
     statement: string,
-    expected: string[],
+    expected: Array<string | Partial<SuggestionRawDefinition>>,
     triggerCharacter: string | number = '',
     customCallbacksArgs: Parameters<typeof createCustomCallbackMocks> = [
       undefined,
@@ -242,10 +243,16 @@ describe('autocomplete', () => {
         );
         const suggestionInertTextSorted = suggestions
           // simulate the editor behaviour for sorting suggestions
-          .sort((a, b) => (a.sortText || '').localeCompare(b.sortText || ''))
-          .map((i) => i.text);
+          .sort((a, b) => (a.sortText || '').localeCompare(b.sortText || ''));
         for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
-          expect(receivedSuggestion).toEqual(expected[index]);
+          if (typeof expected[index] === 'string') {
+            expect(receivedSuggestion.text).toEqual(expected[index]);
+          } else {
+            // check all properties that are defined in the expected suggestion
+            for (const [key, value] of Object.entries(expected[index])) {
+              expect(receivedSuggestion[key as keyof SuggestionRawDefinition]).toEqual(value);
+            }
+          }
         }
       }
     );
@@ -571,7 +578,9 @@ describe('autocomplete', () => {
       evalMath: true,
     });
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
-    testSuggestions('from a | stats a ', ['= $0']);
+    testSuggestions('from a | stats a ', [
+      { text: '= $0', asSnippet: true, command: TRIGGER_SUGGESTION_COMMAND },
+    ]);
     testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [
       'var0 =',

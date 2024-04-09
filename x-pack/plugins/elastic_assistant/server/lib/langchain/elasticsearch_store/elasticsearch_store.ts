@@ -12,9 +12,9 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Callbacks } from 'langchain/callbacks';
+import { Callbacks } from '@langchain/core/callbacks/manager';
 import { Document } from 'langchain/document';
-import { VectorStore } from 'langchain/vectorstores/base';
+import { VectorStore } from '@langchain/core/vectorstores';
 import * as uuid from 'uuid';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
