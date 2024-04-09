@@ -69,14 +69,10 @@ export class ListingTableService extends FtrService {
 
   private async getAllSelectableItemsNamesOnCurrentPage(): Promise<string[]> {
     const visualizationNames = [];
-    // TODO - use .euiTableRow-isSelectable when it's working again (https://github.com/elastic/eui/issues/7515)
-    const rows = await this.find.allByCssSelector('.euiTableRow');
+    const rows = await this.find.allByCssSelector('.euiTableRow-isSelectable');
     for (let i = 0; i < rows.length; i++) {
-      const checkbox = await rows[i].findByCssSelector('.euiCheckbox__input');
-      if (await checkbox.isEnabled()) {
-        const link = await rows[i].findByCssSelector('.euiLink');
-        visualizationNames.push(await link.getVisibleText());
-      }
+      const link = await rows[i].findByCssSelector('.euiLink');
+      visualizationNames.push(await link.getVisibleText());
     }
     this.log.debug(`Found ${visualizationNames.length} selectable visualizations on current page`);
     return visualizationNames;

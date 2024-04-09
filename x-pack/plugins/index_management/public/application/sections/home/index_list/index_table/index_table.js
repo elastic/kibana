@@ -437,6 +437,7 @@ export class IndexTable extends Component {
           data-test-subj="indexTableRow"
           isSelected={this.isItemSelected(name)}
           isSelectable
+          hasSelection
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
