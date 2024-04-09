@@ -18,7 +18,6 @@ export type ParameterType =
   | 'ip'
   | 'chrono_literal'
   | 'time_literal'
-  | 'version'
   | 'cartesian_point'
   | 'geo_point'
   | 'number[]'
