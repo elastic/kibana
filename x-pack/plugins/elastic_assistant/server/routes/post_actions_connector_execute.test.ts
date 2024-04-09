@@ -522,6 +522,40 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
+  it('reports error events to telemetry - kb off, RAG alerts off', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
   it('returns the expected response when subAction=invokeStream and actionTypeId=.gen-ai', async () => {
     const mockRouter = {
       versioned: {

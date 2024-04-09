@@ -184,7 +184,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                 }
               },
               handleChainEnd(outputs, runId, parentRunId) {
-                // if parentRunId is null, this is the end of the stream
+                // if parentRunId is undefined, this is the end of the stream
                 if (!parentRunId) {
                   handleStreamEnd(outputs.output);
                 }
