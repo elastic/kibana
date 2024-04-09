@@ -327,6 +327,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         $state: { store: 'appState' },
       },
     ],
+    alert_suppression: undefined,
   });
 
   const ESQL_RULE = createRuleAssetSavedObject({

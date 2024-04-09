@@ -6,7 +6,11 @@
  */
 import { useCallback } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isNewTermsRule,
+  isSuppressibleAlertRule,
+} from '../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface UseAlertSuppressionReturn {
@@ -14,19 +18,34 @@ export interface UseAlertSuppressionReturn {
 }
 
 export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
-  const isNonSequenceEQLRuleFFEnabled = useIsExperimentalFeatureEnabled(
+  const isAlertSuppressionForNonSequenceEQLRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForNonSequenceEqlRuleEnabled'
+  );
+  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNewTermsRuleEnabled'
   );
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
-    if (!ruleType) return false;
+    if (!ruleType) {
+      return false;
+    }
+
+    // Remove this condition when the Feature Flag for enabling Suppression in the New terms rule is removed.
+    if (isNewTermsRule(ruleType)) {
+      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNewTermsRuleEnabled;
+    }
 
     // Remove this condition when the Feature Flag for enabling Suppression in the EQL rule is removed.
-    if (ruleType === 'eql')
-      return isNonSequenceEQLRuleFFEnabled && isSuppressibleAlertRule(ruleType);
+    if (isEqlRule(ruleType)) {
+      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForNonSequenceEQLRuleEnabled;
+    }
 
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType, isNonSequenceEQLRuleFFEnabled]);
+  }, [
+    ruleType,
+    isAlertSuppressionForNewTermsRuleEnabled,
+    isAlertSuppressionForNonSequenceEQLRuleEnabled,
+  ]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

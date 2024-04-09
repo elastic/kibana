@@ -491,6 +491,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
       }
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {

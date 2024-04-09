@@ -11,6 +11,7 @@ import {
   getCreateEqlRuleSchemaMock,
   getCreateEsqlRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
+  getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
   getCreateRulesSchemaMockWithDataView,
   getCreateSavedQueryRulesSchemaMock,
@@ -1269,6 +1270,7 @@ describe('rules schema', () => {
       { ruleType: 'query', ruleMock: getCreateRulesSchemaMock() },
       { ruleType: 'saved_query', ruleMock: getCreateSavedQueryRulesSchemaMock() },
       { ruleType: 'eql', ruleMock: getCreateEqlRuleSchemaMock() },
+      { ruleType: 'new_terms', ruleMock: getCreateNewTermsRulesSchemaMock() },
     ];
 
     cases.forEach(({ ruleType, ruleMock }) => {

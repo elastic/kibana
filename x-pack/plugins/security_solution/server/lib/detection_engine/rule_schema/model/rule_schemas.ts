@@ -269,6 +269,7 @@ export const NewTermsSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;

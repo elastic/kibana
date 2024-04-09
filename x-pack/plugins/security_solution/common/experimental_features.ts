@@ -171,6 +171,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for new terms rules
+   */
+  alertSuppressionForNewTermsRuleEnabled: false,
+
+  /**
    * Enables alerts suppression for Eql rules with non-sequence queries
    */
   alertSuppressionForNonSequenceEqlRuleEnabled: false,

@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isEqlRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule, isNewTermsRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -19,13 +19,18 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   const isAlertSuppressionForNonSequenceEqlRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForNonSequenceEqlRuleEnabled'
   );
+  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNewTermsRuleEnabled'
+  );
+
   const transformer = useCallback(
     (fields: T) => {
-      const isEqlSuppressionDisabled = isEqlRule(fields.ruleType)
-        ? !isAlertSuppressionForNonSequenceEqlRuleEnabled
-        : false;
+      const isSuppressionDisabled =
+        (isNewTermsRule(fields.ruleType) && !isAlertSuppressionForNewTermsRuleEnabled) ||
+        (isEqlRule(fields.ruleType) && !isAlertSuppressionForNonSequenceEqlRuleEnabled);
+
       // reset any alert suppression values hidden behind feature flag
-      if (isEqlSuppressionDisabled) {
+      if (isSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],
@@ -37,7 +42,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForNonSequenceEqlRuleEnabled]
+    [isAlertSuppressionForNewTermsRuleEnabled, isAlertSuppressionForNonSequenceEqlRuleEnabled]
   );
 
   return transformer;

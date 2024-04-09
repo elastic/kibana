@@ -6,6 +6,7 @@
  */
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
@@ -20,6 +21,12 @@ import { partitionMissingFieldsEvents } from './partition_missing_fields_events'
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { createEnrichEventsFunction } from './enrichments';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
+import type { ExperimentalFeatures } from '../../../../../common';
+
+import type {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -43,11 +50,11 @@ export interface BulkCreateSuppressedAlertsParams
   > {
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 /**
- * bulk create and suppress alerts in memory,
- * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
- * they will be created as regular alerts
+ * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
+ * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed, regular alerts will be created for such events without suppression
  */
 export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
@@ -62,33 +69,90 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   wrapSuppressedHits,
   alertWithSuppression,
   alertTimestampOverride,
+  experimentalFeatures,
 }: BulkCreateSuppressedAlertsParams) => {
-  // max signals for suppression includes suppressed and created alerts
-  // this allows to lift max signals limitation to higher value
-  // and can detects events beyond default max_signals value
-  const suppressionMaxSignals = MAX_SIGNALS_SUPPRESSION_MULTIPLIER * tuple.maxSignals;
-
-  const suppressionDuration = alertSuppression?.duration;
-  const suppressionWindow = suppressionDuration
-    ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
-    : tuple.from.toISOString();
-
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = enrichedEvents;
+  let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
+
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
       alertSuppression?.groupBy || []
     );
 
-    const wrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
+    unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
     suppressibleEvents = partitionedEvents[0];
+  }
 
+  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
+
+  return executeBulkCreateAlerts({
+    suppressibleWrappedDocs,
+    unsuppressibleWrappedDocs,
+    toReturn,
+    bulkCreate,
+    services,
+    ruleExecutionLogger,
+    tuple,
+    alertSuppression,
+    alertWithSuppression,
+    alertTimestampOverride,
+    experimentalFeatures,
+  });
+};
+
+export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest & BaseFieldsLatest>
+  extends Pick<
+    SearchAfterAndBulkCreateSuppressedAlertsParams,
+    | 'bulkCreate'
+    | 'services'
+    | 'ruleExecutionLogger'
+    | 'tuple'
+    | 'alertSuppression'
+    | 'alertWithSuppression'
+    | 'alertTimestampOverride'
+  > {
+  unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
+  toReturn: SearchAfterAndBulkCreateReturnType;
+  experimentalFeatures?: ExperimentalFeatures;
+}
+
+/**
+ * creates alerts in ES, both suppressed and unsuppressed
+ */
+export const executeBulkCreateAlerts = async <
+  T extends SuppressionFieldsLatest & BaseFieldsLatest
+>({
+  unsuppressibleWrappedDocs,
+  suppressibleWrappedDocs,
+  toReturn,
+  bulkCreate,
+  services,
+  ruleExecutionLogger,
+  tuple,
+  alertSuppression,
+  alertWithSuppression,
+  alertTimestampOverride,
+  experimentalFeatures,
+}: ExecuteBulkCreateAlertsParams<T>) => {
+  // max signals for suppression includes suppressed and created alerts
+  // this allows to lift max signals limitation to higher value
+  // and can detects events beyond default max_signals value
+  const suppressionMaxSignals = MAX_SIGNALS_SUPPRESSION_MULTIPLIER * tuple.maxSignals;
+  const suppressionDuration = alertSuppression?.duration;
+
+  const suppressionWindow = suppressionDuration
+    ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
+    : tuple.from.toISOString();
+
+  if (unsuppressibleWrappedDocs.length) {
     const unsuppressedResult = await bulkCreate(
-      wrappedDocs,
+      unsuppressibleWrappedDocs,
       tuple.maxSignals - toReturn.createdSignalsCount,
       createEnrichEventsFunction({
         services,
@@ -99,16 +163,16 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     addToSearchAfterReturn({ current: toReturn, next: unsuppressedResult });
   }
 
-  const wrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
-
   const bulkCreateResult = await bulkCreateWithSuppression({
     alertWithSuppression,
     ruleExecutionLogger,
-    wrappedDocs,
+    wrappedDocs: suppressibleWrappedDocs,
     services,
     suppressionWindow,
     alertTimestampOverride,
     isSuppressionPerRuleExecution: !suppressionDuration,
+    maxAlerts: tuple.maxSignals - toReturn.createdSignalsCount,
+    experimentalFeatures,
   });
 
   addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });

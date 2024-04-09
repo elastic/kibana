@@ -10,13 +10,24 @@ import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  beforeEach(() => {
+  beforeEach(() => {});
+
+  it('should return isSuppressionEnabled false if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
+    const { result } = renderHook(() => useAlertSuppression('new_terms'));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return isSuppressionEnabled true if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
     jest
       .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
       .mockReturnValueOnce(true);
+    const { result } = renderHook(() => useAlertSuppression('new_terms'));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
   });
 
-  it('should return the correct isSuppressionEnabled value for threat_match rule type', () => {
+  it('should return the correct isSuppressionEnabled value fot threat_match rule type', () => {
     const { result } = renderHook(() => useAlertSuppression('threat_match'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
@@ -24,16 +35,15 @@ describe('useAlertSuppression', () => {
 
   describe('Eql Rule', () => {
     it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
+      jest
+        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+        .mockReturnValueOnce(true);
       const { result } = renderHook(() => useAlertSuppression('eql'));
 
       expect(result.current.isSuppressionEnabled).toBe(true);
     });
 
     it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
-      jest
-        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-        .mockReset()
-        .mockReturnValueOnce(false);
       const { result } = renderHook(() => useAlertSuppression('eql'));
 
       expect(result.current.isSuppressionEnabled).toBe(false);

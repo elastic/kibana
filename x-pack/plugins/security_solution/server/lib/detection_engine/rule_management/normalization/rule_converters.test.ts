@@ -250,6 +250,27 @@ describe('rule_converters', () => {
       );
     });
 
+    test('should accept new_terms alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
+          missing_fields_strategy: 'suppress' as const,
+        },
+      };
+      const rule = getNewTermsRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'suppress',
+            duration: { value: 4, unit: 'h' },
+          },
+        })
+      );
+    });
+
     test('should accept machine learning params when existing rule type is machine learning', () => {
       const patchParams = {
         anomaly_threshold: 5,

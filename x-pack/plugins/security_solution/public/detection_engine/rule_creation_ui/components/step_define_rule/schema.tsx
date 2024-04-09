@@ -21,9 +21,9 @@ import {
   isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
-  isSuppressionRuleConfiguredWithGroupBy,
   isThreatMatchRule,
   isThresholdRule,
+  isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -578,96 +578,6 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  groupByFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-      {
-        defaultMessage: 'Suppress alerts by',
-      }
-    ),
-    labelAppend: (
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend',
-          {
-            defaultMessage: 'Optional (Technical Preview)',
-          }
-        )}
-      </EuiText>
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
-      {
-        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          if (!isSuppressionRuleConfiguredWithGroupBy(formData.ruleType)) {
-            return;
-          }
-          return fieldValidators.maxLengthField({
-            length: 3,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
-              {
-                defaultMessage: 'Number of grouping fields must be at most 3',
-              }
-            ),
-          })(...args);
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData, value }] = args;
-          const groupByLength = (value as string[]).length;
-          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
-          if (!needsValidation) {
-            return;
-          }
-
-          const query: string = formData.queryBar?.query?.query ?? '';
-          if (isEqlSequenceQuery(query)) {
-            return {
-              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
-            };
-          }
-        },
-      },
-    ],
-  },
-  groupByRadioSelection: {},
-  groupByDuration: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    value: {},
-    unit: {},
-  },
-  suppressionMissingFields: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
-      {
-        defaultMessage: 'If a suppression field is missing',
-      }
-    ),
-  },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
@@ -736,6 +646,98 @@ export const schema: FormSchema<DefineStepRule> = {
       'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
       {
         defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
+      }
+    ),
+  },
+  groupByFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
+      {
+        defaultMessage: 'Suppress alerts by',
+      }
+    ),
+    labelAppend: (
+      <EuiText color="subdued" size="xs">
+        {i18n.translate(
+          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend',
+          {
+            defaultMessage: 'Optional (Technical Preview)',
+          }
+        )}
+      </EuiText>
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
+      {
+        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
+      }
+    ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: 3,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
+              {
+                defaultMessage: 'Number of grouping fields must be at most 3',
+              }
+            ),
+          })(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+          const groupByLength = (value as string[]).length;
+          const needsValidation = isEqlRule(formData.ruleType) && groupByLength > 0;
+          if (!needsValidation) {
+            return;
+          }
+
+          const query: string = formData.queryBar?.query?.query ?? '';
+          if (isEqlSequenceQuery(query)) {
+            return {
+              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
+            };
+          }
+        },
+      },
+    ],
+  },
+  groupByRadioSelection: {},
+  groupByDuration: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
+      {
+        defaultMessage: 'Suppress alerts for',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
+      {
+        defaultMessage: 'Suppress alerts for',
+      }
+    ),
+    value: {},
+    unit: {},
+  },
+  suppressionMissingFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
+      {
+        defaultMessage: 'If a suppression field is missing',
       }
     ),
   },
