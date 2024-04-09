@@ -80,7 +80,7 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
 
   const googleCloudShellCommand = `gcloud config set project ${gcpProjectId} && ${
     gcpAccountType === 'organization-account' ? `ORG_ID=${gcpOrganizationId}` : ``
-  } FLEET_URL=${fleetServerUrl?.trim()} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy.sh`;
+  } FLEET_URL=${fleetServerUrl?.trim()} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${agentVersion} ./deploy_compute.sh`;
 
   return {
     linux: linuxCommand,
