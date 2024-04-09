@@ -10,7 +10,11 @@ import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  beforeEach(() => {});
+  beforeEach(() => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockReturnValue(false);
+  });
 
   it('should return isSuppressionEnabled false if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
     const { result } = renderHook(() => useAlertSuppression('new_terms'));
@@ -21,7 +25,8 @@ describe('useAlertSuppression', () => {
   it('should return isSuppressionEnabled true if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
     jest
       .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockReturnValueOnce(true);
+      .mockReset()
+      .mockReturnValue(true);
     const { result } = renderHook(() => useAlertSuppression('new_terms'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
@@ -37,7 +42,8 @@ describe('useAlertSuppression', () => {
     it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
       jest
         .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-        .mockReturnValueOnce(true);
+        .mockReset()
+        .mockReturnValue(true);
       const { result } = renderHook(() => useAlertSuppression('eql'));
 
       expect(result.current.isSuppressionEnabled).toBe(true);
