@@ -12,7 +12,10 @@ import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { selectEqlRuleType } from '../../../../tasks/create_new_rule';
-import { ALERT_SUPPRESSION_FIELDS_INPUT } from '../../../../screens/create_new_rule';
+import {
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+} from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
   SUPPRESS_FOR_DETAILS,
@@ -58,7 +61,10 @@ describe(
       selectEqlRuleType();
 
       cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-      // TODO  the upsell tooltip is displayed here, but triggering it via a disabled element is very flaky (both in cypress and in the actual UI). Until we can figure out a better way to do this, we're just going to assert the disablement itself.
+      cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
+
+      // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
+      cy.get(TOOLTIP).contains('Platinum license');
     });
 
     it('shows upselling message on rule details with suppression on basic license', () => {
