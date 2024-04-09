@@ -20,29 +20,30 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 
 import * as t from 'io-ts';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-} from '@kbn/rule-data-utils';
 import { datemathStringRt } from '@kbn/io-ts-utils';
 import { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../common/lib/kibana';
 
-const ALERT_STATUS_ALL = 'all';
-
-export type AlertStatus =
-  | typeof ALERT_STATUS_ACTIVE
-  | typeof ALERT_STATUS_RECOVERED
-  | typeof ALERT_STATUS_UNTRACKED
-  | typeof ALERT_STATUS_ALL;
-
 interface AlertSearchBarContainerState {
+  /**
+   * Time range start
+   */
   rangeFrom: string;
+  /**
+   * Time range end
+   */
   rangeTo: string;
+  /**
+   * KQL bar query
+   */
   kuery: string;
-  status: AlertStatus;
+  /**
+   * Filters applied from the KQL bar
+   */
   filters: Filter[];
+  /**
+   * Saved query ID
+   */
   savedQueryId?: string;
 }
 
@@ -56,9 +57,6 @@ interface AlertSearchBarStateTransitions {
   setKuery: (
     state: AlertSearchBarContainerState
   ) => (kuery: string) => AlertSearchBarContainerState;
-  setStatus: (
-    state: AlertSearchBarContainerState
-  ) => (status: AlertStatus) => AlertSearchBarContainerState;
   setFilters: (
     state: AlertSearchBarContainerState
   ) => (filters: Filter[]) => AlertSearchBarContainerState;
@@ -71,7 +69,6 @@ const defaultState: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
-  status: ALERT_STATUS_ALL,
   filters: [],
 };
 
@@ -79,7 +76,6 @@ const transitions: AlertSearchBarStateTransitions = {
   setRangeFrom: (state) => (rangeFrom) => ({ ...state, rangeFrom }),
   setRangeTo: (state) => (rangeTo) => ({ ...state, rangeTo }),
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
-  setStatus: (state) => (status) => ({ ...state, status }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
 };
@@ -100,9 +96,9 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
+  const { setRangeFrom, setRangeTo, setKuery, setFilters, setSavedQueryId } =
     stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
+  const { rangeFrom, rangeTo, kuery, filters, savedQueryId } = useContainerSelector(
     stateContainer,
     (state) => state
   );
@@ -142,12 +138,10 @@ export function useAlertSearchBarStateContainer(
     onKueryChange: setKuery,
     onRangeFromChange: setRangeFrom,
     onRangeToChange: setRangeTo,
-    onStatusChange: setStatus,
     onFiltersChange: setFilters,
     filters,
     rangeFrom,
     rangeTo,
-    status,
     savedQuery,
     setSavedQuery,
     clearSavedQuery() {
@@ -156,11 +150,35 @@ export function useAlertSearchBarStateContainer(
   };
 }
 
-function useUrlStateSyncEffect(
+const setupUrlStateSync = (
+  stateContainer: AlertSearchBarStateContainer,
+  urlStateStorage: IKbnUrlStateStorage,
+  urlStorageKey: string,
+  replace: boolean = true
+) => {
+  // This handles filling the state when an incomplete URL set is provided
+  const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
+    stateContainer.set({ ...defaultState, ...changedState });
+  };
+
+  return syncState({
+    storageKey: urlStorageKey,
+    stateContainer: {
+      ...stateContainer,
+      set: setWithDefaults,
+    },
+    stateStorage: {
+      ...urlStateStorage,
+      set: <T,>(key: string, state: T) => urlStateStorage.set(key, state, { replace }),
+    },
+  });
+};
+
+const useUrlStateSyncEffect = (
   stateContainer: AlertSearchBarStateContainer,
   urlStorageKey: string,
   replace: boolean = true
-) {
+) => {
   const history = useHistory();
   const {
     data: {
@@ -195,50 +213,21 @@ function useUrlStateSyncEffect(
 
     return stop;
   }, [stateContainer, history, timeFilterService, urlStorageKey, replace]);
-}
-
-function setupUrlStateSync(
-  stateContainer: AlertSearchBarStateContainer,
-  urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string,
-  replace: boolean = true
-) {
-  // This handles filling the state when an incomplete URL set is provided
-  const setWithDefaults = (changedState: Partial<AlertSearchBarContainerState> | null) => {
-    stateContainer.set({ ...defaultState, ...changedState });
-  };
-
-  return syncState({
-    storageKey: urlStorageKey,
-    stateContainer: {
-      ...stateContainer,
-      set: setWithDefaults,
-    },
-    stateStorage: {
-      ...urlStateStorage,
-      set: <T,>(key: string, state: T) => urlStateStorage.set(key, state, { replace }),
-    },
-  });
-}
+};
 
 export const alertSearchBarState = t.partial({
   rangeFrom: datemathStringRt,
   rangeTo: datemathStringRt,
   kuery: t.string,
-  status: t.union([
-    t.literal(ALERT_STATUS_ACTIVE),
-    t.literal(ALERT_STATUS_RECOVERED),
-    t.literal(ALERT_STATUS_ALL),
-  ]),
 });
 
-function syncUrlStateWithInitialContainerState(
-  timefilterService: TimefilterContract,
+const syncUrlStateWithInitialContainerState = (
+  timeFilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
   urlStorageKey: string,
   replace: boolean = true
-) {
+) => {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
@@ -254,8 +243,8 @@ function syncUrlStateWithInitialContainerState(
       replace: true,
     });
     return;
-  } else if (timefilterService.isTimeTouched()) {
-    const { from, to } = timefilterService.getTime();
+  } else if (timeFilterService.isTimeTouched()) {
+    const { from, to } = timeFilterService.getTime();
     const newState = {
       ...defaultState,
       rangeFrom: from,
@@ -271,4 +260,4 @@ function syncUrlStateWithInitialContainerState(
   urlStateStorage.set(urlStorageKey, stateContainer.get(), {
     replace,
   });
-}
+};

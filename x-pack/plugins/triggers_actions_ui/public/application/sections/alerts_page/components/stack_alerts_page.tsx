@@ -24,31 +24,32 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QuickFiltersMenuItem } from '../alerts_search_bar/quick_filters';
-import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
-import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
-import { useRuleStats } from './hooks/use_rule_stats';
-import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
-import { NON_SIEM_FEATURE_IDS } from '../alerts_search_bar/constants';
-import { alertProducersData } from '../alerts_table/constants';
-import { UrlSyncedAlertsSearchBar } from '../alerts_search_bar/url_synced_alerts_search_bar';
-import { useKibana } from '../../../common/lib/kibana';
-import { alertsTableQueryClient } from '../alerts_table/query_client';
+import { ALERTS_PAGE_ID } from '../../../../common/constants';
+import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
+import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
+import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
+import { useRuleStats } from '../hooks/use_rule_stats';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
+import { alertProducersData } from '../../alerts_table/constants';
+import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertsTableQueryClient } from '../../alerts_table/query_client';
 import {
   alertSearchBarStateContainer,
   Provider,
-} from '../alerts_search_bar/use_alert_search_bar_state_container';
-import { getCurrentDocTitle } from '../../lib/doc_title';
-import { createMatchPhraseFilter, createRuleTypesFilter } from '../../lib/search_filters';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
-import { nonNullable } from '../../../../common/utils';
-import { useRuleTypeIdsByFeatureId } from './hooks/use_rule_type_ids_by_feature_id';
-const AlertsTable = lazy(() => import('../alerts_table/alerts_table_state'));
+} from '../../alerts_search_bar/use_alert_search_bar_state_container';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { createMatchPhraseFilter, createRuleTypesFilter } from '../../../lib/search_filters';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { nonNullable } from '../../../../../common/utils';
+import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
+const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
  * A unified view for all types of alerts
  */
-export const GlobalAlertsPage = () => {
+export const StackAlertsPage = () => {
   return (
     <Provider value={alertSearchBarStateContainer}>
       <QueryClientProvider client={alertsTableQueryClient}>
@@ -59,7 +60,7 @@ export const GlobalAlertsPage = () => {
 };
 
 const getFeatureFilterLabel = (featureName: string) =>
-  i18n.translate('xpack.triggersActionsUI.sections.globalAlertsPage.featureRuleTypes', {
+  i18n.translate('xpack.triggersActionsUI.sections.stackAlertsPage.featureRuleTypes', {
     defaultMessage: '{feature} rule types',
     values: {
       feature: featureName,
@@ -178,9 +179,9 @@ const PageContent = () => {
       {!isInitialLoadingRuleTypes && !authorizedToReadAnyRules ? (
         <NoPermissionPrompt />
       ) : (
-        <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="globalAlertsPageContent">
+        <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="stackAlertsPageContent">
           <UrlSyncedAlertsSearchBar
-            appName="test"
+            appName={ALERTS_PAGE_ID}
             featureIds={featureIds}
             showFilterBar
             quickFilters={quickFilters}
@@ -192,7 +193,7 @@ const PageContent = () => {
               // Here we force a rerender when switching feature ids to prevent the data grid
               // columns alignment from breaking after a change in the number of columns
               key={featureIds.join()}
-              id="global-alerts-page-table"
+              id="stack-alerts-page-table"
               configurationId={tableConfigurationId}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               featureIds={featureIds}
