@@ -13,5 +13,6 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/security-plugin-types-common",
+    "@kbn/core-user-profile-server",
   ]
 }

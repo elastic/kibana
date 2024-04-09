@@ -79,6 +79,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-security-common",
+    "@kbn/core-user-profile-server",
   ],
   "exclude": [
     "target/**/*",

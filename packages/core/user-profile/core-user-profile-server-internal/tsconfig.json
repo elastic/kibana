@@ -13,5 +13,11 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-user-profile-server",
+    "@kbn/core-http-server",
+    "@kbn/core-user-profile-common",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+  ]
 }
