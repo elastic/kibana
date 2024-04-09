@@ -62,6 +62,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
     } else {
       inputs.sslKeySecretInput.setValue('');
     }
+    setIsConvertedToSecret({ sslKey: false });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -154,7 +155,6 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
             />
           }
           {...inputs.sslKeyInput.formRowProps}
-          initialValue={inputs.sslKeyInput.value}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleSecretAndClearValue}
         >
@@ -177,7 +177,6 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
             defaultMessage: 'Client SSL certificate key',
           })}
           {...inputs.sslKeySecretInput.formRowProps}
-          initialValue={inputs.sslKeySecretInput.value}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.sslKey}
           onToggleSecretStorage={onToggleSecretAndClearValue}

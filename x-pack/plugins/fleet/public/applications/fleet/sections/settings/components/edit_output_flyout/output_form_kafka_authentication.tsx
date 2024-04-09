@@ -117,6 +117,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
       inputs.kafkaAuthPasswordSecretInput.setValue('');
       inputs.kafkaSslKeySecretInput.setValue('');
     }
+    setIsConvertedToSecret({ kafkaAuthPassword: false, kafkaSslKey: false });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -202,7 +203,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaSslKeyInput.formRowProps}
-                initialValue={inputs.kafkaSslKeyInput.value}
                 useSecretsStorage={useSecretsStorage}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
               >
@@ -228,7 +228,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaSslKeySecretInput.formRowProps}
-                initialValue={inputs.kafkaSslKeySecretInput.value}
                 useSecretsStorage={useSecretsStorage}
                 isConvertedToSecret={isConvertedToSecret.kafkaSslKey}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
@@ -280,7 +279,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaAuthPasswordInput.formRowProps}
-                initialValue={inputs.kafkaAuthPasswordInput.value}
                 useSecretsStorage={useSecretsStorage}
                 onToggleSecretStorage={onToggleSecretAndClearValue}
               >
@@ -301,7 +299,6 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
-                initialValue={inputs.kafkaAuthPasswordSecretInput.value}
                 useSecretsStorage={useSecretsStorage}
                 isConvertedToSecret={isConvertedToSecret.kafkaAuthPassword}
                 onToggleSecretStorage={onToggleSecretAndClearValue}

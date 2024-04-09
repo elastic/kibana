@@ -37,7 +37,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
         inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
         inputs.serviceTokenInput.clear();
-        setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: true });
+        setIsConvertedToSecret({ serviceToken: true });
       }
     }
   }, [
