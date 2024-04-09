@@ -100,7 +100,7 @@ describe('Sourcerer', { tags: ['@ess', '@serverless'] }, () => {
 
   it(
     'adds a pattern to the default index and correctly filters out auditbeat-*',
-    { tags: '@brokenInServerless' },
+    { tags: '@skipInServerless' },
     () => {
       openSourcerer();
       isSourcererSelection(`auditbeat-*`);
