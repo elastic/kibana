@@ -207,16 +207,6 @@ export class AssetCriticalityDataClient {
 
     const batchPomises: Array<Promise<void>> = [];
 
-    async function* recordsGenerator(): AsyncGenerator<
-      AssetCriticalityUpsert | Error,
-      void,
-      undefined
-    > {
-      for await (const record of recordsStream) {
-        yield record as unknown as AssetCriticalityUpsert | Error;
-      }
-    }
-
     const processBatch = async (
       batch: Array<{ record: AssetCriticalityUpsert; index: number }>
     ) => {
@@ -248,11 +238,11 @@ export class AssetCriticalityDataClient {
       }
     };
 
-    const gen = recordsGenerator();
     let index = 0;
     let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
 
-    for await (const record of gen) {
+    for await (const untypedRecord of recordsStream) {
+      const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
       stats.total++;
       if (record instanceof Error) {
         stats.errors++;
