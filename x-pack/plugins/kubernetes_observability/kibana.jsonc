@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kubernetes-observability-plugin",
+  "owner": "@elastic/obs-ds-hosted-services",
+  "description": "Kubernetes Observability API",
+  "plugin": {
+    "id": "kubernetesObservability",
+    "configPath": [
+      "xpack",
+      "kubernetesObservability"
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredPlugins": [
+      "apmDataAccess",
+      "metricsDataAccess"
+    ],
+    "browser": true,
+    "server": true,
+    "requiredBundles": [
+    ]
+  }
+}
