@@ -36,7 +36,7 @@ type ExportProps = Pick<
   aggregateReportTypes: ShareMenuItem[];
 };
 
-type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
+type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'lens_csv';
 
 const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: ExportProps) => {
   // needed for CSV in Discover
@@ -78,7 +78,6 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: 
     downloadCSVLens,
     absoluteUrl,
     renderLayoutOptionSwitch,
-    showRadios,
   } = getProperties();
 
   const getRadioOptions = useCallback(() => {
@@ -196,7 +195,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: 
     if (!generateReportForPrinting && !generateReport && !downloadCSVLens) {
       throw new Error('Report cannot be run due to no generate report method registered');
     }
-    if (objectType === 'lens' && selectedRadio === 'csv') {
+    if (objectType === 'lens' && selectedRadio === 'lens_csv') {
       return downloadCSVLens!();
     }
     return usePrintLayout ? generateReportForPrinting!() : generateReport!();
@@ -228,7 +227,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: 
   }, [isDirty, generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
-    if (showRadios && getRadioOptions() !== undefined) {
+    if (getRadioOptions().length > 1) {
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup

@@ -90,7 +90,6 @@ export interface ShareMenuItem {
   absoluteUrl?: string;
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
-  showRadios?: boolean;
 }
 
 /**
@@ -101,7 +100,7 @@ export interface ShareMenuItem {
  * default built-in share options. Each share provider needs a globally unique id.
  * */
 export interface ShareMenuProvider {
-  id: string;
+  readonly id: string;
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 

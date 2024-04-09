@@ -10,10 +10,10 @@ import { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
-  private newVersion: boolean;
+  newVersionEnabled: boolean;
 
-  constructor(newVersion: boolean) {
-    this.newVersion = newVersion;
+  constructor({ newVersionEnabled }) {
+    this.newVersionEnabled = newVersionEnabled;
   }
 
   public setup() {
@@ -27,7 +27,7 @@ export class ShareMenuRegistry {
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
         if (
-          !this.newVersion &&
+          !this.newVersionEnabled &&
           (shareMenuProvider.id === 'csvReports' ||
             shareMenuProvider.id === 'screenCaptureReports' ||
             shareMenuProvider.id === 'csvDownloadLens')
@@ -46,13 +46,6 @@ export class ShareMenuRegistry {
           this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
         }
       },
-      //     if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-      //       throw new Error(
-      //         `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
-      //       );
-      //     }
-      //     this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
-      //   },
     };
   }
 

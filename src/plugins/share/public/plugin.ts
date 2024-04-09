@@ -33,11 +33,6 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
   url: BrowserUrlService;
 
   /**
-   * this plugin exposes the kibana version for other plugins needing to pass a Reporting API client
-   */
-  kibanaVersion: string;
-
-  /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
    * the locator, then using the locator to navigate.
    */
@@ -89,12 +84,12 @@ export class SharePlugin
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
-  private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.shareMenuRegistry = new ShareMenuRegistry(this.config.new_version.enabled);
+    this.shareMenuRegistry = new ShareMenuRegistry({
+      newVersionEnabled: this.config.new_version.enabled,
+    });
   }
 
   public setup(core: CoreSetup): SharePublicSetup {
@@ -140,7 +135,6 @@ export class SharePlugin
 
     return {
       ...this.shareMenuRegistry!.setup(),
-      kibanaVersion: this.kibanaVersion,
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
