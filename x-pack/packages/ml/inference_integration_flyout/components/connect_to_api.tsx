@@ -44,9 +44,16 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
       return isFieldEmpty(cohereApiKey);
     } else {
       // open ai
-      return isFieldEmpty(openaiApiKey);
+      return isFieldEmpty(openaiApiKey) || isFieldEmpty(openaiModelId);
     }
-  }, [selectedModelType, huggingFaceModelUrl, huggingFaceApiKey, cohereApiKey, openaiApiKey]);
+  }, [
+    selectedModelType,
+    huggingFaceModelUrl,
+    huggingFaceApiKey,
+    cohereApiKey,
+    openaiApiKey,
+    openaiModelId,
+  ]);
 
   // reset form values
   const onChangeModelType = (newSelectedServiceType: Service) => {
@@ -85,7 +92,7 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
     } else {
       return setModalConfigResponse(Service.openai, {
         api_key: openaiApiKey,
-        model_id: isFieldEmpty(openaiModelId) ? undefined : openaiModelId,
+        model_id: openaiModelId,
         organization_id: isFieldEmpty(openaiOrganizationId) ? undefined : openaiOrganizationId,
         url: isFieldEmpty(openaiEndpointlUrl) ? defaultOpenaiUrl : openaiEndpointlUrl,
       });
