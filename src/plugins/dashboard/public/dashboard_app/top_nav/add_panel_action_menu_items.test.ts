@@ -42,6 +42,7 @@ describe('getAddPanelActionMenuItems', () => {
         type: 'TEST_ACTION_02',
         getDisplayName: () => 'Action name',
         getDisplayNameTooltip: () => 'Action tooltip',
+        getIconType: () => undefined,
         isCompatible: () => Promise.resolve(true),
         execute: jest.fn(),
         grouping: [

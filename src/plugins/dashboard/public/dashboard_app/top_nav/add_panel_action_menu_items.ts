@@ -52,7 +52,8 @@ export const getAddPanelActionMenuItems = (
 
     return {
       name: actionName,
-      icon: typeof item.getIconType === 'function' ? item.getIconType(context) : 'empty',
+      icon:
+        (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
       onClick: onAddPanelActionClick(item, context, closePopover),
       'data-test-subj': `create-action-${actionName}`,
       toolTipContent: item?.getDisplayNameTooltip?.(context),
@@ -65,7 +66,9 @@ export const getAddPanelActionMenuItems = (
         if (!grouped[group.id]) {
           grouped[group.id] = {
             id: group.id,
-            icon: typeof group.getIconType === 'function' ? group.getIconType(context) : 'empty',
+            icon:
+              (typeof group.getIconType === 'function' ? group.getIconType(context) : undefined) ??
+              'empty',
             title: group.getDisplayName ? group.getDisplayName(context) : undefined,
             items: [],
           };
