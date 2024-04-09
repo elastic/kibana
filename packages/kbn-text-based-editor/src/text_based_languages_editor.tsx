@@ -22,6 +22,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,
@@ -40,7 +41,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
-import { SerializedEnrichPolicy } from '@kbn/index-management';
 
 import {
   textBasedLanguagedEditorStyles,
@@ -128,10 +128,7 @@ interface TextBasedEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
-  getAllEnrichPolicies: () => Promise<{
-    data: SerializedEnrichPolicy[] | null;
-    error?: string | null;
-  }>;
+  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -187,7 +184,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, getAllEnrichPolicies, application, docLinks, core } =
+  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
     kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
   const [code, setCode] = useState<string>(queryString ?? '');
@@ -419,7 +416,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       },
       getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
-        const { data: policies, error } = (await getAllEnrichPolicies()) || {};
+        const { data: policies, error } =
+          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
         if (error || !policies) {
           return [];
         }
@@ -429,7 +427,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [
       dataViews,
       expressions,
-      getAllEnrichPolicies,
+      indexManagementApiService,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
       abortController,

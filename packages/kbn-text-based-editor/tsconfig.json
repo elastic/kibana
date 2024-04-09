@@ -23,10 +23,10 @@
     "@kbn/data-plugin",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/index-management",
     "@kbn/visualization-utils",
     "@kbn/code-editor",
     "@kbn/shared-ux-markdown",
-    "@kbn/index-management"
   ],
   "exclude": [
     "target/**/*",
