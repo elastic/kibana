@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/discover-shared-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "A stateful layer to register shared features and provide an access point to discover without a direct dependency",
+  "plugin": {
+    "id": "discoverShared",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": ["common"]
+  },
+}
