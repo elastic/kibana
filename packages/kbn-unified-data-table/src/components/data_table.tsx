@@ -33,10 +33,7 @@ import {
   EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  useDataGridColumnsCellActions,
-  type UseDataGridColumnsCellActionsProps,
-} from '@kbn/cell-actions';
+import { type UseDataGridColumnsCellActionsProps } from '@kbn/cell-actions';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -462,6 +459,20 @@ export const UnifiedDataTable = ({
     return result;
   }, [selectedDocs, rows, isFilterActive]);
 
+  // rows, usedSelectedDocs, isFilterActive
+
+  useEffect(() => {
+    console.log(`Changes rows before euiGridColumns : `, { rows });
+  }, [rows]);
+
+  useEffect(() => {
+    console.log(`Changes usedSelectedDocs before euiGridColumns : `, { usedSelectedDocs });
+  }, [usedSelectedDocs]);
+
+  useEffect(() => {
+    console.log(`Changes isFilterActive before euiGridColumns : `, { isFilterActive });
+  }, [isFilterActive]);
+
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
@@ -476,6 +487,22 @@ export const UnifiedDataTable = ({
     }
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
+
+  // displayedRows, dataView, fieldFormats
+  // check which the above changed with useEffect
+  //
+
+  useEffect(() => {
+    console.log(`Changes displayedRows before euiGridColumns : `, { displayedRows });
+  }, [displayedRows]);
+
+  useEffect(() => {
+    console.log(`Changes dataView before euiGridColumns : `, { dataView });
+  }, [dataView]);
+
+  useEffect(() => {
+    console.log(`Changes fieldFormats before euiGridColumns : `, { fieldFormats });
+  }, [fieldFormats]);
 
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
@@ -684,13 +711,15 @@ export const UnifiedDataTable = ({
     [dataView, cellActionsMetadata]
   );
 
-  const columnsCellActions = useDataGridColumnsCellActions({
-    fields: cellActionsFields,
-    getCellValue,
-    triggerId: cellActionsTriggerId,
-    dataGridRef,
-    metadata: allCellActionsMetadata,
-  });
+  // const columnsCellActions = useDataGridColumnsCellActions({
+  //   fields: cellActionsFields,
+  //   getCellValue,
+  //   triggerId: cellActionsTriggerId,
+  //   dataGridRef,
+  //   metadata: allCellActionsMetadata,
+  // });
+
+  const columnsCellActions = useMemo(() => [], []);
 
   const {
     rowHeight: headerRowHeight,
@@ -715,11 +744,114 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight,
   });
 
+  //
+  // showColumnTokens,
+  // columnsMeta,
+  // columnsCellActions,
+  // customGridColumnsConfiguration,
+  // dataView,
+  // dataViewFieldEditor,
+  // defaultColumns,
+  // displayedRows.length,
+  // editField,
+  // headerRowHeightLines,
+  // isPlainRecord,
+  // isSortEnabled,
+  // onFilter,
+  // settings,
+  // toastNotifications,
+  // uiSettings,
+  // valueToStringConverter,
+  // visibleCellActions,
+  // visibleColumns,
+  //
+  useEffect(() => {
+    console.log(`Changes showColumnTokens before euiGridColumns : `, { showColumnTokens });
+  }, [showColumnTokens]);
+
+  useEffect(() => {
+    console.log(`Changes columnsMeta before euiGridColumns : `, { columnsMeta });
+  }, [columnsMeta]);
+
+  useEffect(() => {
+    console.log(`Changes columnsCellActions before euiGridColumns : `, { columnsCellActions });
+  }, [columnsCellActions]);
+
+  useEffect(() => {
+    console.log(`Changes customGridColumnsConfiguration before euiGridColumns : `, {
+      customGridColumnsConfiguration,
+    });
+  }, [customGridColumnsConfiguration]);
+
+  useEffect(() => {
+    console.log(`Changes dataView before euiGridColumns : `, { dataView });
+  }, [dataView]);
+
+  useEffect(() => {
+    console.log(`Changes dataViewFieldEditor before euiGridColumns : `, { dataViewFieldEditor });
+  }, [dataViewFieldEditor]);
+
+  useEffect(() => {
+    console.log(`Changes defaultColumns before euiGridColumns : `, { defaultColumns });
+  }, [defaultColumns]);
+
+  useEffect(() => {
+    console.log(`Changes displayedRows.length before euiGridColumns : `, {
+      displayedRowsLength: displayedRows.length,
+    });
+  }, [displayedRows.length]);
+
+  useEffect(() => {
+    console.log(`Changes editField before euiGridColumns : `, { editField });
+  }, [editField]);
+
+  useEffect(() => {
+    console.log(`Changes headerRowHeightLines before euiGridColumns : `, { headerRowHeightLines });
+  }, [headerRowHeightLines]);
+
+  useEffect(() => {
+    console.log(`Changes isPlainRecord before euiGridColumns : `, { isPlainRecord });
+  }, [isPlainRecord]);
+
+  useEffect(() => {
+    console.log(`Changes isSortEnabled before euiGridColumns : `, { isSortEnabled });
+  }, [isSortEnabled]);
+
+  useEffect(() => {
+    console.log(`Changes onFilter before euiGridColumns : `, { onFilter });
+  }, [onFilter]);
+
+  useEffect(() => {
+    console.log(`Changes settings before euiGridColumns : `, { settings });
+  }, [settings]);
+
+  useEffect(() => {
+    console.log(`Changes toastNotifications before euiGridColumns : `, { toastNotifications });
+  }, [toastNotifications]);
+
+  useEffect(() => {
+    console.log(`Changes uiSettings before euiGridColumns : `, { uiSettings });
+  }, [uiSettings]);
+
+  useEffect(() => {
+    console.log(`Changes valueToStringConverter before euiGridColumns : `, {
+      valueToStringConverter,
+    });
+  }, [valueToStringConverter]);
+
+  useEffect(() => {
+    console.log(`Changes visibleCellActions before euiGridColumns : `, { visibleCellActions });
+  }, [visibleCellActions]);
+
+  useEffect(() => {
+    console.log(`Changes visibleColumns before euiGridColumns : `, { visibleColumns });
+  }, [visibleColumns]);
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
         columns: visibleColumns,
-        columnsCellActions,
+        columnsCellActions: [],
         rowsCount: displayedRows.length,
         settings,
         dataView,
@@ -743,7 +875,6 @@ export const UnifiedDataTable = ({
     [
       showColumnTokens,
       columnsMeta,
-      columnsCellActions,
       customGridColumnsConfiguration,
       dataView,
       dataViewFieldEditor,
@@ -947,6 +1078,14 @@ export const UnifiedDataTable = ({
   const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  useEffect(() => {
+    console.log(`Changed columns before euiGridColumns : `, visibleColumns);
+  }, [visibleColumns]);
+
+  useEffect(() => {
+    console.log(`Changed euiGridColumns : `, euiGridColumns);
+  }, [euiGridColumns]);
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
     return (

@@ -41,7 +41,7 @@ import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
 import { AdditionalRow } from './additional_row';
-import { RenderCustomBody } from './custom_body';
+import { RenderCustomBody } from './custom_grid_body';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -318,7 +318,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [enabledRowRenderers, tableRows, timelineId]
     );
 
-    const RenderCustomBodyCallback = useCallback(
+    const renderCustomBodyCallback = useCallback(
       ({
         Cell,
         visibleRowData,
@@ -386,7 +386,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
             trailingControlColumns={trailingControlColumns}
-            renderCustomGridBody={RenderCustomBodyCallback}
+            renderCustomGridBody={renderCustomBodyCallback}
           />
           {showExpandedDetails && (
             <DetailsPanel
