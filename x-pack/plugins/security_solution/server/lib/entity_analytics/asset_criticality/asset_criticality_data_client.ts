@@ -25,6 +25,10 @@ interface AssetCriticalityClientOpts {
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
 
+type BulkUpsertFromStreamOptions = {
+  recordsStream: NodeJS.ReadableStream;
+} & Pick<Parameters<ElasticsearchClient['helpers']['bulk']>[0], 'flushBytes' | 'retries'>;
+
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
 
@@ -132,10 +136,12 @@ export class AssetCriticalityDataClient {
 
     return doc;
   }
+
   /**
    * Bulk upsert asset criticality records from a stream.
    * @param recordsStream a stream of records to upsert, records may also be an error e.g if there was an error parsing
-   * @param batchSize the number of records to upsert in a single batch
+   * @param flushBytes how big elasticsearch bulk requests should be before they are sent
+   * @param retries the number of times to retry a failed bulk request
    * @returns an object containing the number of records updated, created, errored, and the total number of records processed
    * @throws an error if the stream emits an error
    * @remarks
@@ -146,11 +152,9 @@ export class AssetCriticalityDataClient {
    **/
   public bulkUpsertFromStream = async ({
     recordsStream,
-    batchSize,
-  }: {
-    recordsStream: NodeJS.ReadableStream;
-    batchSize: number;
-  }): Promise<AssetCriticalityCsvUploadResponse> => {
+    flushBytes,
+    retries,
+  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityCsvUploadResponse> => {
     const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
     const stats: AssetCriticalityCsvUploadResponse['stats'] = {
       successful: 0,
@@ -182,8 +186,8 @@ export class AssetCriticalityDataClient {
     const { failed, successful } = await this.options.esClient.helpers.bulk({
       datasource: recordGenerator(),
       index: this.getIndex(),
-      flushBytes: 500000, // flush every 0.5mb
-      wait: 500, // wait for half a second before retrying errors
+      flushBytes,
+      retries,
       refreshOnCompletion: true, // refresh the index after all records are processed
       onDocument: ({ record }) => [
         { update: { _id: createId(record) } },

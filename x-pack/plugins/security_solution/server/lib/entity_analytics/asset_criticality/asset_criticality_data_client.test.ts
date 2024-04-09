@@ -7,10 +7,7 @@
 
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
-
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import type { AssetCriticalityUpsert } from '../../../../common/entity_analytics/asset_criticality/types';
-import { Readable } from 'node:stream';
 
 type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
@@ -18,31 +15,6 @@ type MockInternalEsClient = ReturnType<
 jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
-
-const createBulkResponseFromRecords = (records: AssetCriticalityUpsert[]) => {
-  return {
-    errors: false,
-    took: 54,
-    items: records.map((record) => {
-      return {
-        update: {
-          _index: '.asset-criticality.asset-criticality-default',
-          _id: record.idValue,
-          _version: 1,
-          result: 'updated',
-          _shards: {
-            total: 2,
-            successful: 1,
-            failed: 0,
-          },
-          status: 200,
-          _seq_no: 1,
-          _primary_term: 1,
-        },
-      };
-    }),
-  };
-};
 
 describe('AssetCriticalityDataClient', () => {
   const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
@@ -147,161 +119,6 @@ describe('AssetCriticalityDataClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({ ignore_unavailable: true })
       );
-    });
-  });
-
-  describe('bulkUpsert', () => {
-    it('should call bulkUpsert and preserve record order', async () => {
-      const assetCriticalityDataClient = new AssetCriticalityDataClient({
-        esClient: esClientInternal,
-        logger,
-        namespace: 'default',
-      });
-
-      const records: AssetCriticalityUpsert[] = [
-        {
-          idField: 'host.name',
-          idValue: 'host-1',
-          criticalityLevel: 'low_impact',
-        },
-        {
-          idField: 'host.name',
-          idValue: 'host-2',
-          criticalityLevel: 'high_impact',
-        },
-      ];
-
-      esClientInternal.bulk.mockResolvedValue(createBulkResponseFromRecords(records));
-
-      const res = await assetCriticalityDataClient.bulkUpsert(records);
-
-      expect(esClientInternal.bulk).toHaveBeenCalled();
-
-      expect(res).toEqual([
-        {
-          record: {
-            '@timestamp': expect.any(String),
-            criticality_level: 'low_impact',
-            id_field: 'host.name',
-            id_value: 'host-1',
-          },
-          result: 'updated',
-        },
-        {
-          record: {
-            '@timestamp': expect.any(String),
-            criticality_level: 'high_impact',
-            id_field: 'host.name',
-            id_value: 'host-2',
-          },
-          result: 'updated',
-        },
-      ]);
-    });
-  });
-
-  describe('bulkUpsertFromStream', () => {
-    const recordsToStream = (records: AssetCriticalityUpsert[]) => {
-      return new Readable({
-        objectMode: true,
-        read() {
-          records.forEach((record) => {
-            this.push(record);
-          });
-          this.push(null);
-        },
-      });
-    };
-
-    let subject: AssetCriticalityDataClient;
-    let esClientMock: MockInternalEsClient;
-
-    beforeEach(() => {
-      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-      subject = new AssetCriticalityDataClient({
-        esClient: esClientMock,
-        logger: loggingSystemMock.createLogger(),
-        namespace: 'default',
-      });
-    });
-
-    it('should call bulkUpsert and preserve record order', async () => {
-      const records: AssetCriticalityUpsert[] = [
-        {
-          idField: 'host.name',
-          idValue: 'host-1',
-          criticalityLevel: 'low_impact',
-        },
-        {
-          idField: 'host.name',
-          idValue: 'host-2',
-          criticalityLevel: 'high_impact',
-        },
-      ];
-
-      records.forEach((record) => {
-        esClientMock.bulk.mockResolvedValueOnce(createBulkResponseFromRecords([record]));
-      });
-
-      const res = await subject.bulkUpsertFromStream({
-        recordsStream: recordsToStream(records),
-        batchSize: 1,
-      });
-
-      expect(esClientMock.bulk).toHaveBeenCalled();
-
-      expect(res).toEqual({
-        errors: [],
-        stats: {
-          created: 0,
-          updated: 2,
-          errors: 0,
-          total: 2,
-        },
-      });
-    });
-
-    it('should handle catastrophic bulkUpsert errors errors', async () => {
-      const records: AssetCriticalityUpsert[] = [
-        {
-          idField: 'host.name',
-          idValue: 'host-1',
-          criticalityLevel: 'low_impact',
-        },
-        {
-          idField: 'host.name',
-          idValue: 'host-2',
-          criticalityLevel: 'high_impact',
-        },
-      ];
-
-      esClientMock.bulk.mockRejectedValue(new Error('catastrophic error'));
-
-      const res = await subject.bulkUpsertFromStream({
-        recordsStream: recordsToStream(records),
-        batchSize: 2,
-      });
-
-      expect(esClientMock.bulk).toHaveBeenCalled();
-
-      expect(res).toEqual({
-        errors: [
-          {
-            index: 0,
-            message: 'catastrophic error',
-          },
-          {
-            index: 1,
-            message: 'catastrophic error',
-          },
-        ],
-        stats: {
-          created: 0,
-          updated: 0,
-          errors: 2,
-          total: 2,
-        },
-      });
     });
   });
 });

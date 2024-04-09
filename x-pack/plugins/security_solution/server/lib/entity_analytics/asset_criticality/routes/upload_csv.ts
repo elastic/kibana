@@ -30,7 +30,8 @@ export const assetCriticalityCSVUploadRoute = (
   config: ConfigType,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
-  const { batchSize } = config.entityAnalytics.assetCriticality.csvUpload;
+  const { errorRetries, maxBulkRequestBodySizeBytes } =
+    config.entityAnalytics.assetCriticality.csvUpload;
   router.versioned
     .post({
       access: 'internal',
@@ -85,7 +86,8 @@ export const assetCriticalityCSVUploadRoute = (
 
           const { errors, stats } = await assetCriticalityClient.bulkUpsertFromStream({
             recordsStream,
-            batchSize,
+            retries: errorRetries,
+            flushBytes: maxBulkRequestBodySizeBytes,
           });
           const end = new Date();
 
