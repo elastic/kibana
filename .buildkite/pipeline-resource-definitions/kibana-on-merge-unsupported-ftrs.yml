@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-on-merge-unsupported-ftrs
+  description: Runs unsupported ftr tests for each commit of Kibana
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-on-merge-unsupported-ftrs'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / on merge unsupported ftrs
+      description: Runs unsupported ftr tests for each commit of Kibana
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-unsupported-ftrs-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: false
+      branch_configuration: main 8.13 7.17
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/on_merge_unsupported_ftrs.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
