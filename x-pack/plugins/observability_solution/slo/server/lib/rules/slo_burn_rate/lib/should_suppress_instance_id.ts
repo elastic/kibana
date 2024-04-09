@@ -9,7 +9,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { EvaulateDependenciesResponse } from './evaluate_dependencies';
 
 export function shouldSuppressInstanceId(
-  results: EvaulateDependenciesResponse['activeRules'],
+  results: EvaluateDependenciesResponse['activeRules'],
   instanceId: string
 ) {
   return results.reduce((acc, res) => {
