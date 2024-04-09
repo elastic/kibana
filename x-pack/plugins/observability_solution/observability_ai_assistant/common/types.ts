@@ -68,7 +68,7 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string; token_count?: TokenCount };
+  conversation: { title: string; token_count?: TokenCount; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;

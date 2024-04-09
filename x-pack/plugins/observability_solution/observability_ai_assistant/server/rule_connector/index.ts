@@ -111,6 +111,14 @@ async function executor(
     client,
     screenContexts: [],
   });
+
+  let systemMessage = functionClient.getContexts().find((def) => def.name === 'core')?.description;
+  systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
+    execOptions.params.rule
+  )} just fired.`;
+  systemMessage += ` As a background process you are not interacting with a user. Only generate a single answer and wrap all your findings in that answer.`;
+  systemMessage += ` If available, include the link to the conversation at the end of your answer.`;
+
   const actionsClient = await (
     await resources.plugins.actions.start()
   ).getActionsClientWithRequest(request);
@@ -120,18 +128,16 @@ async function executor(
       .complete({
         functionClient,
         persist: true,
+        isPublic: true,
         connectorId: execOptions.params.connector,
         signal: new AbortController().signal,
+        kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
         messages: [
           {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.System,
-              content: `You are a helpful assistant for Elastic Observability.
-                     An alert about a specific metric just fired. Your task is to
-                     execute the workflow asked by the user. You can use the function
-                     execute_connector if a webhook needs to be called. When a
-                     webhook is called, include what url was called in your response.`,
+              content: systemMessage,
             },
           },
           {
