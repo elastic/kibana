@@ -166,9 +166,6 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {i18n.translate('xpack.apm.alertDetailsAppSection.foobarFlexGroupLabel', {
-        defaultMessage: 'foobar',
-      })}
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
