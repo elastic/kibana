@@ -297,7 +297,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={rules}
-            isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}

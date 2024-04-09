@@ -368,13 +368,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('case table should not be selectable when isSelectorView=true', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={true} />);
-    await waitFor(() => {
-      expect(screen.queryByTestId('cases-table')).not.toHaveAttribute('isSelectable');
-    });
-  });
-
   it('should call onRowClick with no cases and isSelectorView=true when create case is clicked', async () => {
     appMockRenderer.render(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
     userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));

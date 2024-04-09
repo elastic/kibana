@@ -82,7 +82,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
-        isSelectable={!isSelectorView}
         itemId="id"
         items={data.cases}
         loading={isCommentUpdating}
