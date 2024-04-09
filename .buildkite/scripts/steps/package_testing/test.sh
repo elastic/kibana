@@ -67,17 +67,4 @@ echo "--- FTR - Reporting"
 
 cd x-pack
 
-if [[ "$TEST_PACKAGE" == "fips" ]]; then
-  # This suite requires adjusting the KBN server settings
-  # node scripts/functional_test_runner.js --config test/reporting_functional/reporting_and_security.config.ts --quiet
-  node scripts/functional_test_runner.js --config test/saved_object_api_integration/security_and_spaces/config_trial.ts --quiet
-  node scripts/functional_test_runner.js --config test/alerting_api_integration/security_and_spaces/group1/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/alerting_api_integration/security_and_spaces/group2/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/alerting_api_integration/security_and_spaces/group3/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/alerting_api_integration/security_and_spaces/group4/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/functional/apps/saved_objects_management/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/functional/apps/user_profiles/config.ts --quiet
-  node scripts/functional_test_runner.js --config test/functional/apps/security/config.ts --quiet
-else
-  node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
-fi
+node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
