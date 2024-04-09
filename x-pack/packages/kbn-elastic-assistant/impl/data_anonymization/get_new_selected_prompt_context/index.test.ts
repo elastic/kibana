@@ -34,7 +34,7 @@ describe('getNewSelectedPromptContext', () => {
     });
 
     const excepted: SelectedPromptContext = {
-      contextAnonymizationFields: anonymizationFields,
+      contextAnonymizationFields: undefined,
       promptContextId: promptContext.id,
       rawData: 'string data',
     };
@@ -49,7 +49,15 @@ describe('getNewSelectedPromptContext', () => {
     };
 
     const excepted: SelectedPromptContext = {
-      contextAnonymizationFields: anonymizationFields,
+      contextAnonymizationFields: {
+        total: 2,
+        page: 1,
+        perPage: 100,
+        data: [
+          { field: 'field1', id: 'field1', allowed: true, anonymized: false },
+          { field: 'field2', id: 'field2', allowed: true, anonymized: false },
+        ],
+      },
       promptContextId: promptContext.id,
       rawData: { field1: ['value1'], field2: ['value2'] },
     };

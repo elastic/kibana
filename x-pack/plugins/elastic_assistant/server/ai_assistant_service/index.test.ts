@@ -197,6 +197,9 @@ describe('AI Assistant Service', () => {
 
     test('should retry initializing common resources if common resource initialization failed', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
 
       assistantService = new AIAssistantService({
         logger,
@@ -249,6 +252,9 @@ describe('AI Assistant Service', () => {
     test('should not retry initializing common resources if common resource initialization is in progress', async () => {
       // this is the initial call that fails
       clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
 
       // this is the retry call that we'll artificially inflate the duration of
       clusterClient.cluster.putComponentTemplate.mockImplementationOnce(async () => {
@@ -325,6 +331,9 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
       clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
@@ -775,6 +784,9 @@ describe('AI Assistant Service', () => {
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [] },
+      });
 
       const assistantService = new AIAssistantService({
         logger,

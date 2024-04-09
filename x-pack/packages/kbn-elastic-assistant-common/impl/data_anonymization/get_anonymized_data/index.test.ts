@@ -19,8 +19,37 @@ describe('getAnonymizedData', () => {
   };
 
   const commonArgs = {
-    allow: ['doNotReplace', 'empty', 'host.ip', 'host.name'],
-    allowReplacement: ['empty', 'host.ip', 'host.name'],
+    anonymizationFields: {
+      total: 0,
+      page: 1,
+      perPage: 100,
+      data: [
+        {
+          id: 'doNotReplace',
+          field: 'doNotReplace',
+          anonymized: false,
+          allowed: true,
+        },
+        {
+          id: 'empty',
+          field: 'empty',
+          anonymized: true,
+          allowed: true,
+        },
+        {
+          id: 'host.ip',
+          field: 'host.ip',
+          anonymized: true,
+          allowed: true,
+        },
+        {
+          id: 'host.name',
+          field: 'host.name',
+          anonymized: true,
+          allowed: true,
+        },
+      ],
+    },
     currentReplacements: {},
     rawData,
     getAnonymizedValue: mockGetAnonymizedValue,

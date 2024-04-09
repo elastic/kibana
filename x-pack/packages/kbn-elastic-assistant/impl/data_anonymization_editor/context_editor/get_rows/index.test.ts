@@ -61,30 +61,6 @@ describe('getRows', () => {
   };
 
   it('returns only the allowed fields if no rawData is provided', () => {
-    const expected: ContextEditorRow[] = [
-      {
-        allowed: true,
-        anonymized: false,
-        denied: false,
-        field: 'event.action',
-        rawValues: [],
-      },
-      {
-        allowed: true,
-        anonymized: false,
-        denied: false,
-        field: 'other.field',
-        rawValues: [],
-      },
-      {
-        allowed: true,
-        anonymized: true,
-        denied: false,
-        field: 'user.name',
-        rawValues: [],
-      },
-    ];
-
     const nullRawData: {
       anonymizationFields: SelectedPromptContext['contextAnonymizationFields'];
       rawData: Record<string, string[]> | null;
@@ -95,7 +71,9 @@ describe('getRows', () => {
 
     const rows = getRows(nullRawData);
 
-    expect(rows).toEqual(expected);
+    expect(JSON.stringify(rows)).toEqual(
+      '[{"field":"event.action","allowed":true,"anonymized":false,"denied":false,"rawValues":[]},{"field":"user.name","allowed":true,"anonymized":true,"denied":false,"rawValues":[]},{"field":"other.field","allowed":true,"anonymized":false,"denied":false,"rawValues":[]},{"field":"host.ip","allowed":false,"anonymized":true,"denied":true,"rawValues":[]}]'
+    );
   });
 
   it('returns the expected metadata and raw values', () => {

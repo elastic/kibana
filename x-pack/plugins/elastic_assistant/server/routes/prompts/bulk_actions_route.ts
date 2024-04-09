@@ -32,6 +32,7 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
   transformESToPrompts,
+  transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
 import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
 
@@ -199,10 +200,18 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
               getUpdateScript({ prompt: document, isPatch: true }),
             authenticatedUser,
           });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsPromptsSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
             updated: docsUpdated ? transformESToPrompts(docsUpdated as EsPromptsSchema[]) : [],
-            created: docsCreated ? transformESToPrompts(docsCreated as EsPromptsSchema[]) : [],
+            created: created ? transformESSearchToPrompts(created.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

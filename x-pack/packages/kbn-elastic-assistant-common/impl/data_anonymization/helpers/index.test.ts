@@ -114,7 +114,7 @@ describe('helpers', () => {
         perPage: 100,
         data: [
           { id: 'field1', field: 'field1', allowed: true, anonymized: false },
-          { id: '', field: '', allowed: false, anonymized: false },
+          { id: '', field: '', allowed: true, anonymized: false },
         ],
       };
       const field = '';

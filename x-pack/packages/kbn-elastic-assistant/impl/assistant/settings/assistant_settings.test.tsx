@@ -52,6 +52,8 @@ const testProps = {
   onSave,
   onConversationSelected,
   conversations: {},
+  anonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 jest.mock('../../assistant_context');
 

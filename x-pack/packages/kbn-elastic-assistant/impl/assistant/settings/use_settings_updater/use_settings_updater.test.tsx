@@ -124,9 +124,7 @@ describe('useSettingsUpdater', () => {
       expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
       expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
       expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
-      expect(result.current.updatedAnonymizationData).toEqual(
-        updatedValues.updatedAnonymizationData
-      );
+      expect(result.current.updatedAnonymizationData).toEqual(anonymizationFields);
       expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
       expect(result.current.assistantStreamingEnabled).toEqual(
         updatedValues.assistantStreamingEnabled
@@ -158,7 +156,6 @@ describe('useSettingsUpdater', () => {
         setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
-        // setUpdatedAnonymizationData,
         setAnonymizationFieldsBulkActions,
         setUpdatedKnowledgeBaseSettings,
       } = result.current;

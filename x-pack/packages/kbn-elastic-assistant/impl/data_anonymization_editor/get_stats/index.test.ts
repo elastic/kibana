@@ -12,7 +12,7 @@ import { getStats } from '.';
 describe('getStats', () => {
   it('returns ZERO_STATS for string rawData', () => {
     const context: SelectedPromptContext = {
-      anonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+      contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
       promptContextId: 'abcd',
       rawData: 'this will not be anonymized',
     };
@@ -29,7 +29,7 @@ describe('getStats', () => {
 
   it('returns the expected stats for object rawData', () => {
     const context: SelectedPromptContext = {
-      anonymizationFields: {
+      contextAnonymizationFields: {
         total: 4,
         page: 1,
         perPage: 100,

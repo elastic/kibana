@@ -15,15 +15,14 @@ import { bulkChangeAnonymizationFields } from './use_bulk_anonymization_fields';
 
 const anonymizationField1 = {
   id: 'conversation1',
-  title: 'Anonymization field 1',
-  apiConfig: { connectorId: '123' },
-  replacements: [],
-  category: 'default',
+  field: 'Anonymization field 1',
+  anonymized: true,
+  allowed: true,
 };
 const anonymizationField2 = {
   ...anonymizationField1,
   id: 'conversation2',
-  title: 'Conversation 2',
+  field: 'Conversation 2',
 };
 const toasts = {
   addError: jest.fn(),
@@ -38,8 +37,8 @@ describe('bulkChangeAnonymizationFields', () => {
   });
   it('should send a POST request with the correct parameters and receive a successful response', async () => {
     const anonymizationFieldsActions = {
-      create: {},
-      update: {},
+      create: [],
+      update: [],
       delete: { ids: [] },
     };
 
@@ -51,8 +50,8 @@ describe('bulkChangeAnonymizationFields', () => {
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         body: JSON.stringify({
-          update: [],
           create: [],
+          update: [],
           delete: { ids: [] },
         }),
       }
@@ -61,11 +60,8 @@ describe('bulkChangeAnonymizationFields', () => {
 
   it('should transform the anonymization field dictionary to an array of conversations to create', async () => {
     const anonymizationFieldsActions = {
-      create: {
-        anonymizationField1,
-        anonymizationField2,
-      },
-      update: {},
+      create: [anonymizationField1, anonymizationField2],
+      update: [],
       delete: { ids: [] },
     };
 
@@ -77,8 +73,8 @@ describe('bulkChangeAnonymizationFields', () => {
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         body: JSON.stringify({
-          update: [],
           create: [anonymizationField1, anonymizationField2],
+          update: [],
           delete: { ids: [] },
         }),
       }
@@ -87,10 +83,7 @@ describe('bulkChangeAnonymizationFields', () => {
 
   it('should transform the anonymization field dictionary to an array of conversations to update', async () => {
     const anonymizationFieldsActions = {
-      update: {
-        anonymizationField1,
-        anonymizationField2,
-      },
+      update: [anonymizationField1, anonymizationField2],
       delete: { ids: [] },
     };
 
@@ -117,14 +110,14 @@ describe('bulkChangeAnonymizationFields', () => {
           {
             statusCode: 400,
             message: 'Error updating anonymization field',
-            conversations: [{ id: anonymizationField1.id, name: anonymizationField1.title }],
+            anonymizationFields: [{ id: anonymizationField1.id, name: anonymizationField1.field }],
           },
         ],
       },
     });
     const anonymizationFieldsActions = {
-      create: {},
-      update: {},
+      create: [],
+      update: [anonymizationField1],
       delete: { ids: [] },
     };
     await bulkChangeAnonymizationFields(
@@ -143,8 +136,8 @@ describe('bulkChangeAnonymizationFields', () => {
       attributes: {},
     });
     const anonymizationFieldsActions = {
-      create: {},
-      update: {},
+      create: [],
+      update: [],
       delete: { ids: [] },
     };
 

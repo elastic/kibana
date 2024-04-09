@@ -167,12 +167,21 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         });
       }
       const saveResult = await saveSettings();
-      await onSave(saveResult);
+      if (
+        (anonymizationFieldsBulkActions?.create?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.update?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.delete?.ids?.length ?? 0) > 0
+      ) {
+        refetchAnonymizationFieldsResults();
+      }
+      onSave(saveResult);
     }, [
+      anonymizationFieldsBulkActions,
       conversationSettings,
       defaultSelectedConversation.title,
       onConversationSelected,
       onSave,
+      refetchAnonymizationFieldsResults,
       saveSettings,
     ]);
 

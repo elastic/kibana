@@ -33,7 +33,7 @@ const createWrapper = () => {
 };
 
 describe('useFetchAnonymizationFields', () => {
-  it(`should make http request to fetch conversations`, async () => {
+  it(`should make http request to fetch anonymization fields`, async () => {
     renderHook(() => useFetchAnonymizationFields(defaultProps), {
       wrapper: createWrapper(),
     });
@@ -46,7 +46,7 @@ describe('useFetchAnonymizationFields', () => {
       const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields(defaultProps));
       await waitForNextUpdate();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/current_user/conversations/_find',
+        '/api/elastic_assistant/anonymization_fields/_find',
         {
           method: 'GET',
           query: {
