@@ -208,7 +208,6 @@ export const AnomaliesTable: React.FunctionComponent<{
           itemId="id"
           itemIdToExpandedRowMap={expandedIdsRowContents}
           isExpandable={true}
-          hasActions={true}
           columns={columns}
           sorting={tableSortOptions}
           onChange={handleTableChange}

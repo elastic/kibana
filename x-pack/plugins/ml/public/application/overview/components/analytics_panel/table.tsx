@@ -112,7 +112,6 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
-      hasActions={true}
       isExpandable={false}
       isSelectable={false}
       items={items}

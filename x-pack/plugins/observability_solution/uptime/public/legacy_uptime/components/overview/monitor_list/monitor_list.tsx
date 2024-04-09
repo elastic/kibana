@@ -227,7 +227,6 @@ export const MonitorListComponent: ({
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
         isExpandable={true}
-        hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}

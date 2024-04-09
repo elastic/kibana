@@ -297,7 +297,6 @@ const SentinelOneParamsFields: React.FunctionComponent<
                   search={search}
                   pagination={pagination}
                   sorting
-                  hasActions
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                 />
               )}

@@ -158,7 +158,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         rowProps={{
           'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
         }}
-        hasActions={true}
         sorting={{
           sort: {
             field: 'drilldownName',

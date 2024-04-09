@@ -283,7 +283,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 items={roleMappings!}
                 itemId="name"
                 columns={this.getColumnConfig(deleteRoleMappingPrompt)}
-                hasActions={true}
                 search={search}
                 sorting={sorting}
                 selection={this.props.readOnly ? undefined : selection}

@@ -264,7 +264,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       <EuiInMemoryTable
         columns={columns}
         items={rows}
-        hasActions
         rowProps={(item: TableRow) => {
           return {
             className: isGlobalPrivilegeDefinition(item.privileges)

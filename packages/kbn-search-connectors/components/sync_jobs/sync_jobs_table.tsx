@@ -140,7 +140,6 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
         data-test-subj={`entSearchContent-index-${type}-syncJobs-table`}
         items={syncJobs}
         columns={columns}
-        hasActions
         onChange={onPaginate}
         pagination={pagination}
         tableLayout="fixed"

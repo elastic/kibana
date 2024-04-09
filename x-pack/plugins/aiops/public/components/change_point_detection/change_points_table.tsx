@@ -324,7 +324,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       }
       sorting={sorting}
       onTableChange={onTableChange}
-      hasActions={hasActions}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
       })}

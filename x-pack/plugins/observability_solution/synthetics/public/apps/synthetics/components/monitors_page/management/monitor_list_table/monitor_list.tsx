@@ -113,7 +113,6 @@ export const MonitorList = ({
           error={error?.body?.message}
           loading={loading}
           isExpandable={true}
-          hasActions={true}
           itemId="monitor_id"
           items={syntheticsMonitors}
           columns={columns}

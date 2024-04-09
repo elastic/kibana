@@ -237,7 +237,6 @@ export const StepsList = ({
         columns={columns}
         error={error?.message}
         isExpandable={true}
-        hasActions={true}
         items={steps}
         itemIdToExpandedRowMap={expandedRows}
         noItemsMessage={

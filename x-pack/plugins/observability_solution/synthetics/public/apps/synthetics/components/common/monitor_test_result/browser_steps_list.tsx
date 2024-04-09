@@ -299,7 +299,6 @@ export const BrowserStepsList = ({
         columns={columns}
         error={error?.message}
         isExpandable={showExpand}
-        hasActions={false}
         items={stepEnds}
         noItemsMessage={
           loading

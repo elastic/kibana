@@ -145,7 +145,6 @@ export class RolesGridPage extends Component<Props, State> {
             itemId="name"
             responsiveBreakpoint={false}
             columns={this.getColumnConfig()}
-            hasActions={true}
             selection={
               this.props.readOnly
                 ? undefined

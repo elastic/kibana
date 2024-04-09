@@ -769,9 +769,7 @@ export const ModelsList: FC<Props> = ({
       <div data-test-subj="mlModelsTableContainer">
         <EuiInMemoryTable<ModelItem>
           css={{ overflowX: 'auto' }}
-          isSelectable={true}
           isExpandable={true}
-          hasActions={true}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

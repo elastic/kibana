@@ -220,7 +220,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}
-          hasActions={false}
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}

@@ -191,7 +191,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         sorting={sorting}
         rowProps={rowProps}
         search={search}
-        hasActions={true}
       />
     );
   }

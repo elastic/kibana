@@ -170,7 +170,6 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                             ],
                           },
                         ]}
-                        hasActions
                       />
                     </EuiAccordion>
                   </EuiPanel>

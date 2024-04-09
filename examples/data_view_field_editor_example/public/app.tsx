@@ -121,7 +121,6 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
         items={fields}
         columns={columns}
         pagination={true}
-        hasActions={true}
         sorting={{
           sort: {
             field: 'name',

@@ -116,7 +116,6 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
       columns={columns}
       error={error?.message}
       isExpandable={true}
-      hasActions={true}
       items={pings}
       itemId="docId"
       itemIdToExpandedRowMap={expandedRows}

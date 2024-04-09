@@ -321,7 +321,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
-      hasActions={true}
       noItemsMessage={noItemsMessage}
       items={
         totalAgents

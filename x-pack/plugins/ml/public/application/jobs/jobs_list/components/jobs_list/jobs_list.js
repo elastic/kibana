@@ -395,7 +395,6 @@ export class JobsList extends Component {
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         isExpandable={true}
         sorting={sorting}
-        hasActions={true}
         rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,
         })}

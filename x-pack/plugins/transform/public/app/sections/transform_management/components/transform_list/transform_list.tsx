@@ -356,7 +356,6 @@ export const TransformList: FC<TransformListProps> = ({
         className="transform__TransformTable"
         columns={columns}
         error={searchError}
-        hasActions={false}
         isExpandable={true}
         isSelectable={false}
         items={filteredTransforms}
