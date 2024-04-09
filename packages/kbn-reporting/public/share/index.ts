@@ -9,3 +9,5 @@
 export { reportingExportModalProvider } from './share_context_menu/register_pdf_png_modal_reporting';
 export { reportingCsvShareProvider as reportingCsvShareModalProvider } from './share_context_menu/register_csv_modal_reporting';
 export type { JobParamsProviderOptions } from './share_context_menu';
+export { getSharedComponents } from './shared';
+export type { ReportingPublicComponents } from './shared';

@@ -104,6 +104,7 @@ export class ReportingPublicPlugin
     if (core) {
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
+        // needed for Canvas
         components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
     }
