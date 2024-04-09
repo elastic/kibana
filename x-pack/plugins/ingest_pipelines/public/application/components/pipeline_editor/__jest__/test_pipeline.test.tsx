@@ -75,7 +75,7 @@ describe('Test pipeline', () => {
       expect(exists('documentsDropdown')).toBe(false);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      await actions.clickAddDocumentsButton();
 
       // Flyout should be visible with output tab initially disabled
       expect(exists('testPipelineFlyout')).toBe(true);
@@ -144,7 +144,7 @@ describe('Test pipeline', () => {
       httpRequestsMockHelpers.setSimulatePipelineResponse(SIMULATE_RESPONSE);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      await actions.clickAddDocumentsButton();
 
       // Add sample documents and click run
       actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
@@ -175,7 +175,7 @@ describe('Test pipeline', () => {
       httpRequestsMockHelpers.setSimulatePipelineResponse(undefined, error);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      await actions.clickAddDocumentsButton();
 
       // Add invalid sample documents array and run the pipeline
       actions.addDocumentsJson(
@@ -208,7 +208,7 @@ describe('Test pipeline', () => {
         httpRequestsMockHelpers.setFetchDocumentsResponse(index, documentId, DOCUMENTS[0]);
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        await actions.clickAddDocumentsButton();
 
         // Open documents accordion, click run without required fields, and verify error messages
         await actions.toggleDocumentsAccordion();
@@ -256,7 +256,7 @@ describe('Test pipeline', () => {
         );
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        await actions.clickAddDocumentsButton();
 
         // Open documents accordion, add required fields, and click run
         await actions.toggleDocumentsAccordion();
@@ -280,7 +280,8 @@ describe('Test pipeline', () => {
         );
 
         // Open flyout
-        actions.clickAddDocumentsButton();
+        await actions.clickAddDocumentsButton();
+
         // Add sample documents and click run
         actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
         await actions.clickRunPipelineButton();
@@ -354,7 +355,7 @@ describe('Test pipeline', () => {
       httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);
 
       // Open flyout
-      actions.clickAddDocumentsButton();
+      await actions.clickAddDocumentsButton();
 
       // Add sample documents and click run
       actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
@@ -390,8 +391,9 @@ describe('Test pipeline', () => {
         const mockVerboseOutputWithProcessorTag = addProcessorTagtoMockOutput(SIMULATE_RESPONSE);
         httpRequestsMockHelpers.setSimulatePipelineResponse(mockVerboseOutputWithProcessorTag);
 
-        // Add documents and run the pipeline
-        actions.clickAddDocumentsButton();
+        // Open flyout
+        await actions.clickAddDocumentsButton();
+
         actions.addDocumentsJson(JSON.stringify(DOCUMENTS));
         await actions.clickRunPipelineButton();
         actions.closeTestPipelineFlyout();

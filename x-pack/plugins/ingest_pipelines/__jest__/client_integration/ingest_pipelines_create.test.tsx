@@ -50,13 +50,12 @@ describe('<PipelinesCreate />', () => {
     test('should render the correct page header', () => {
       const { exists, find } = testBed;
 
-      // Verify page title
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create pipeline');
+      // Verify pipeline name is visible
+      expect(exists('pipelineName')).toBe(true);
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Create pipeline docs');
+      expect(find('documentationLink').text()).toBe('Documentation');
     });
 
     test('should toggle the version field', async () => {
@@ -102,26 +101,25 @@ describe('<PipelinesCreate />', () => {
 
       testBed.component.update();
 
-      expect(testBed.exists('nameField.input')).toBe(true);
-      expect(testBed.find('nameField.input').props().disabled).toBe(true);
-      expect(testBed.find('nameField.input').props().value).toBe('test-pipeline');
+      expect(testBed.exists('pipelineName')).toBe(true);
+      expect(testBed.find('pipelineName').text()).toContain('test-pipeline');
+      // if the inline title edit has an svg
+      expect(testBed.exists('pipelineName > svg')).toBe(false);
     });
 
     describe('form validation', () => {
       test('should prevent form submission if required fields are missing', async () => {
-        const { form, actions, component, find } = testBed;
+        const { actions, component, find } = testBed;
 
         await actions.clickSubmitButton();
 
-        expect(form.getErrorsMessages()).toEqual(['Name is required.']);
-        expect(find('submitButton').props().disabled).toEqual(true);
+        // There doesnt seem to be a prop we can send to the form to set a data-test-subj
+        // for the error callout, so we manually select it from the form.
+        const errorCallout = component.find('.euiForm__errors').at(0);
+        expect(errorCallout.text()).toContain('Please address the highlighted errors.');
+        expect(errorCallout.text()).toContain('Name is required.');
 
-        await act(async () => {
-          // Add required fields and verify button is enabled again
-          form.setInputValue('nameField.input', 'my_pipeline');
-        });
-
-        component.update();
+        await actions.setInlineEditValue('pipelineName', 'my_pipeline');
 
         expect(find('submitButton').props().disabled).toEqual(false);
       });
@@ -135,17 +133,8 @@ describe('<PipelinesCreate />', () => {
 
         testBed.component.update();
 
-        await act(async () => {
-          testBed.form.setInputValue('nameField.input', 'my_pipeline');
-        });
-
-        testBed.component.update();
-
-        await act(async () => {
-          testBed.form.setInputValue('descriptionField.input', 'pipeline description');
-        });
-
-        testBed.component.update();
+        await testBed.actions.setInlineEditValue('pipelineName', 'my_pipeline');
+        await testBed.actions.setInlineEditValue('pipelineDescription', 'pipeline description');
       });
 
       test('should send the correct payload', async () => {

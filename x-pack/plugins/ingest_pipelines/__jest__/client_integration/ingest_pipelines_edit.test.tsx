@@ -32,20 +32,19 @@ describe('<PipelinesEdit />', () => {
   test('should render the correct page header', () => {
     const { exists, find } = testBed;
 
-    // Verify page title
-    expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual(`Edit pipeline '${PIPELINE_TO_EDIT.name}'`);
+    // Verify pipeline name is visible
+    expect(exists('pipelineName')).toBe(true);
 
     // Verify documentation link
     expect(exists('documentationLink')).toBe(true);
-    expect(find('documentationLink').text()).toBe('Edit pipeline docs');
+    expect(find('documentationLink').text()).toBe('Documentation');
   });
 
   it('should disable the name field', () => {
     const { find } = testBed;
 
-    const nameInput = find('nameField.input');
-    expect(nameInput.props().disabled).toEqual(true);
+    const inlineEditButton = find('pipelineName').find('button');
+    expect(inlineEditButton.props().disabled).toEqual(true);
   });
 
   it('should show deprecated callout', () => {
@@ -57,10 +56,10 @@ describe('<PipelinesEdit />', () => {
   describe('form submission', () => {
     it('should send the correct payload with changed values', async () => {
       const UPDATED_DESCRIPTION = 'updated pipeline description';
-      const { actions, form } = testBed;
+      const { actions } = testBed;
 
       // Make change to description field
-      form.setInputValue('descriptionField.input', UPDATED_DESCRIPTION);
+      await actions.setInlineEditValue('pipelineDescription', UPDATED_DESCRIPTION);
 
       await actions.clickSubmitButton();
 

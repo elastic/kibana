@@ -192,6 +192,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                         heading="h1"
                         size="l"
                         inputAriaLabel="Edit title inline"
+                        data-test-subj="pipelineName"
                         onSave={setValue}
                         defaultValue={value}
                         placeholder={i18nStrings.placeholderPipelineName}
@@ -228,6 +229,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                       <EuiInlineEditText
                         size="m"
                         inputAriaLabel="Edit description inline"
+                        data-test-subj="pipelineDescription"
                         onSave={setValue}
                         defaultValue={value}
                         placeholder={i18nStrings.placeholderPipelineDescription}
@@ -278,6 +280,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                       flush="right"
                       href={services.documentation.getCreatePipelineUrl()}
                       target="_blank"
+                      iconType="help"
                       data-test-subj="documentationLink"
                     >
                       <FormattedMessage
