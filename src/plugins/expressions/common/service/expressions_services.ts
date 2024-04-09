@@ -174,8 +174,11 @@ export interface ExpressionExecutionParams {
    */
   throttle?: number;
 
-  inspectorTitle?: string;
-  inspectorDescription?: string;
+  /**
+   * Requests' meta for showing in Inspector
+   */
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 /**

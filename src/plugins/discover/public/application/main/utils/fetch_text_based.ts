@@ -47,10 +47,10 @@ export function fetchTextBased(
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
-          inspectorTitle: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
+          titleForInspector: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
             defaultMessage: 'Results',
           }),
-          inspectorDescription: i18n.translate(
+          descriptionForInspector: i18n.translate(
             'discover.inspectorTextBasedRequestDescriptionDocument',
             {
               defaultMessage: 'This request queries Elasticsearch using ES|QL to fetch results.',
