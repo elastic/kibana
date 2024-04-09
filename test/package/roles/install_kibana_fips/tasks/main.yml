@@ -16,6 +16,7 @@
     src: "{{ kibana_tar.files[0].path }}"
     dest: /usr/share/kibana
     remote_src: yes
+    extra_opts: ["--strip-components=1"]
 # - name: find docker image
 #   find:
 #     paths: /packages/
