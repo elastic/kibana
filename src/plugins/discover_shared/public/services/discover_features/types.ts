@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FeaturesRegistry } from '@kbn/discover-utils';
+import { DocumentOverview, FeaturesRegistry } from '@kbn/discover-utils';
 
 /**
  * Features types
@@ -19,9 +19,13 @@ import { FeaturesRegistry } from '@kbn/discover-utils';
  * It will be opinionatedly used as an additional tool to investigate a log document and
  * will be shown on the logs-overview preset tab of the UnifiedDocViewer.
  */
+
+export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
+  doc: DocumentOverview;
+}
 export interface ObservabilityLogsAIAssistantFeature {
   id: 'observability-logs-ai-assistant';
-  render: (/* TODO: Update with deps required for this integration */) => React.ReactNode;
+  render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => React.ReactNode;
 }
 
 // This should be a union of all the available client features.
