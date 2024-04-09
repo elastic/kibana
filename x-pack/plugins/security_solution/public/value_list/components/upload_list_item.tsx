@@ -51,7 +51,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
         http,
         signal: ctrl.current.signal,
         type,
-        refresh: true,
+        refresh: 'true',
       });
     }
   }, [importState.loading, file, importList, http, type, listId]);
