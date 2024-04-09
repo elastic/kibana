@@ -48,32 +48,31 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import type { PluginStartContract } from '@kbn/actions-plugin/server';
-import { responseActionsClientMock } from './services/actions/clients/mocks';
-import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
-import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { responseActionsClientMock } from '../services/actions/clients/mocks';
+import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
+import { createMockConfig, requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import type {
   EndpointAppContextService,
   EndpointAppContextServiceSetupContract,
   EndpointAppContextServiceStartContract,
-} from './endpoint_app_context_services';
-import type { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
-import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
-import type { EndpointAppContext } from './types';
+} from '../endpoint_app_context_services';
+import type { ManifestManager } from '../services/artifacts/manifest_manager/manifest_manager';
+import { getManifestManagerMock } from '../services/artifacts/manifest_manager/manifest_manager.mock';
+import type { EndpointAppContext } from '../types';
 import {
   allowedExperimentalValues,
   parseExperimentalConfigValue,
-} from '../../common/experimental_features';
-import { requestContextFactoryMock } from '../request_context_factory.mock';
-import { EndpointMetadataService } from './services/metadata';
-import type { SecuritySolutionRequestHandlerContextMock } from '../lib/detection_engine/routes/__mocks__/request_context';
-import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
-import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
-
-import type { EndpointAuthz } from '../../common/endpoint/types/authz';
-import { EndpointFleetServicesFactory } from './services/fleet';
-import { createLicenseServiceMock } from '../../common/license/mocks';
-import { createFeatureUsageServiceMock } from './services/feature_usage/mocks';
-import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
+} from '../../../common/experimental_features';
+import { requestContextFactoryMock } from '../../request_context_factory.mock';
+import { EndpointMetadataService } from '../services/metadata';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../lib/detection_engine/routes/__mocks__/request_context';
+import { createMockClients } from '../../lib/detection_engine/routes/__mocks__/request_context';
+import { createEndpointMetadataServiceTestContextMock } from '../services/metadata/mocks';
+import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
+import { EndpointFleetServicesFactory } from '../services/fleet';
+import { createLicenseServiceMock } from '../../../common/license/mocks';
+import { createFeatureUsageServiceMock } from '../services/feature_usage/mocks';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 /**
  * Creates a mocked EndpointAppContext.
  */
