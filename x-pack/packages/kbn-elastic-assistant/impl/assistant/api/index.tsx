@@ -10,6 +10,7 @@ import { IHttpFetchError } from '@kbn/core-http-browser';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
+import { TraceOptions } from '../types';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
@@ -26,6 +27,7 @@ export interface FetchConnectorExecuteAction {
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
+  traceOptions?: TraceOptions;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -52,6 +54,7 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const isStream =
     assistantStreamingEnabled &&
@@ -77,6 +80,8 @@ export const fetchConnectorExecuteAction = async ({
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
+    langSmithProject: traceOptions?.langSmithProject,
+    langSmithApiKey: traceOptions?.langSmithApiKey,
     ...optionalRequestParams,
   };
 

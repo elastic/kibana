@@ -72,7 +72,7 @@ const handleIntercepts = () => {
 describe(
   'Discover Timeline State Integration',
   {
-    tags: ['@ess', '@brokenInServerless'],
+    tags: ['@ess', '@skipInServerless'],
   },
 
   () => {
