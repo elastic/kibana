@@ -557,8 +557,7 @@ export class DataGridService extends FtrService {
   public async selectComparisonDiffMode(diffMode: 'basic' | 'chars' | 'words' | 'lines') {
     await this.openComparisonSettingsMenu();
     const menuEntry = await this.testSubjects.find(`unifiedDataTableDiffMode-${diffMode}`);
-    const button = await menuEntry.findByTagName('button');
-    await button.click();
+    await menuEntry.click();
   }
 
   public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {

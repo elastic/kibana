@@ -92,6 +92,7 @@ const renderComparisonControls = ({
       userEvent.click(screen.getByRole('button', { name: 'By line' }), undefined, {
         skipPointerEventsCheck: true,
       }),
+    getDiffModeEntry,
     diffModeIsSelected: (mode: DocumentDiffMode) =>
       getDiffModeEntry(mode).getAttribute('aria-current') === 'true',
     getShowAllFieldsSwitch,
@@ -137,8 +138,18 @@ describe('ComparisonControls', () => {
     const result = renderComparisonControls();
     result.clickComparisonSettingsButton();
     expect(result.getShowDiffSwitch()).toBeChecked();
+    expect(result.getDiffModeEntry('basic')).toBeEnabled();
+    expect(result.getDiffModeEntry('chars')).toBeEnabled();
+    expect(result.getDiffModeEntry('words')).toBeEnabled();
+    expect(result.getDiffModeEntry('lines')).toBeEnabled();
+    expect(result.getShowDiffDecorationsSwitch()).toBeEnabled();
     result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).not.toBeChecked();
+    expect(result.getDiffModeEntry('basic')).toBeDisabled();
+    expect(result.getDiffModeEntry('chars')).toBeDisabled();
+    expect(result.getDiffModeEntry('words')).toBeDisabled();
+    expect(result.getDiffModeEntry('lines')).toBeDisabled();
+    expect(result.getShowDiffDecorationsSwitch()).toBeDisabled();
     result.clickShowDiffSwitch();
     expect(result.getShowDiffSwitch()).toBeChecked();
   });

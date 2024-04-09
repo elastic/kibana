@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiLink,
   EuiPopover,
   EuiSwitch,
   EuiSwitchProps,
@@ -209,7 +208,12 @@ const ComparisonSettings = ({
           type="subsection"
         />
 
-        <DiffModeEntry entryDiffMode="basic" diffMode={diffMode} setDiffMode={setDiffMode}>
+        <DiffModeEntry
+          entryDiffMode="basic"
+          diffMode={diffMode}
+          setDiffMode={setDiffMode}
+          disabled={!showDiff}
+        >
           <FormattedMessage id="unifiedDataTable.diffModeFullValue" defaultMessage="Full value" />
         </DiffModeEntry>
 
@@ -227,15 +231,30 @@ const ComparisonSettings = ({
           noPadding
         />
 
-        <DiffModeEntry entryDiffMode="chars" diffMode={diffMode} setDiffMode={setDiffMode}>
+        <DiffModeEntry
+          entryDiffMode="chars"
+          diffMode={diffMode}
+          setDiffMode={setDiffMode}
+          disabled={!showDiff}
+        >
           <FormattedMessage id="unifiedDataTable.diffModeChars" defaultMessage="By character" />
         </DiffModeEntry>
 
-        <DiffModeEntry entryDiffMode="words" diffMode={diffMode} setDiffMode={setDiffMode}>
+        <DiffModeEntry
+          entryDiffMode="words"
+          diffMode={diffMode}
+          setDiffMode={setDiffMode}
+          disabled={!showDiff}
+        >
           <FormattedMessage id="unifiedDataTable.diffModeWords" defaultMessage="By word" />
         </DiffModeEntry>
 
-        <DiffModeEntry entryDiffMode="lines" diffMode={diffMode} setDiffMode={setDiffMode}>
+        <DiffModeEntry
+          entryDiffMode="lines"
+          diffMode={diffMode}
+          setDiffMode={setDiffMode}
+          disabled={!showDiff}
+        >
           <FormattedMessage id="unifiedDataTable.diffModeLines" defaultMessage="By line" />
         </DiffModeEntry>
 
@@ -288,6 +307,7 @@ const ComparisonSettings = ({
               'Show text decorations in diffs if enabled, otherwise only use highlighting.',
           })}
           checked={showDiffDecorations ?? true}
+          disabled={!showDiff}
           data-test-subj="showDiffDecorations"
           onChange={(e) => {
             setShowDiffDecorations(e.target.checked);
@@ -343,11 +363,16 @@ const SectionHeader = ({
   );
 };
 
+const enableShowDiffTooltip = i18n.translate('unifiedDataTable.enableShowDiff', {
+  defaultMessage: 'You need to enable Show diff',
+});
+
 const DiffModeEntry: FC<
   Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
     entryDiffMode: DocumentDiffMode;
+    disabled?: boolean;
   }
-> = ({ children, entryDiffMode, diffMode, setDiffMode }) => {
+> = ({ children, entryDiffMode, diffMode, disabled, setDiffMode }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -356,31 +381,15 @@ const DiffModeEntry: FC<
       icon={diffMode === entryDiffMode ? 'check' : 'empty'}
       size="s"
       aria-current={diffMode === entryDiffMode}
-      data-test-subj={`unifiedDataTableDiffMode-${entryDiffMode}`}
-      css={{
-        paddingTop: 0,
-        paddingBottom: 0,
-        paddingLeft: `calc(${euiTheme.size.m} + ${euiTheme.size.xxs})`,
+      disabled={disabled}
+      toolTipContent={disabled ? enableShowDiffTooltip : undefined}
+      onClick={() => {
+        setDiffMode(entryDiffMode);
       }}
+      data-test-subj={`unifiedDataTableDiffMode-${entryDiffMode}`}
+      css={{ paddingLeft: `calc(${euiTheme.size.m} + ${euiTheme.size.xxs})` }}
     >
-      <EuiFlexGroup
-        gutterSize="m"
-        alignItems="center"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiLink
-            color="text"
-            onClick={() => {
-              setDiffMode(entryDiffMode);
-            }}
-            css={{ padding: `${euiTheme.size.s} 0`, fontWeight: euiTheme.font.weight.regular }}
-          >
-            {children}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {children}
     </EuiContextMenuItem>
   );
 };
@@ -389,29 +398,42 @@ const DiffOptionSwitch = ({
   label,
   description,
   checked,
+  disabled,
   onChange,
   ['data-test-subj']: dataTestSubj,
   itemCss,
 }: Pick<EuiSwitchProps, 'label' | 'checked' | 'onChange'> & {
   description?: string;
+  disabled?: boolean;
   ['data-test-subj']: string;
   itemCss?: EuiContextMenuItemProps['css'];
 }) => {
   return (
-    <EuiContextMenuItem size="s" css={itemCss}>
+    <EuiContextMenuItem
+      size="s"
+      disabled={disabled}
+      toolTipContent={disabled ? enableShowDiffTooltip : undefined}
+      css={itemCss}
+    >
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={label}
             checked={checked}
             compressed
+            disabled={disabled}
             onChange={onChange}
             data-test-subj={`unifiedDataTableDiffOptionSwitch-${dataTestSubj}`}
           />
         </EuiFlexItem>
         {description && (
           <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>
-            <EuiIconTip type="questionInCircle" position="right" content={description} />
+            <EuiIconTip
+              type="questionInCircle"
+              position="right"
+              content={description}
+              iconProps={disabled ? { tabIndex: -1 } : undefined}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
