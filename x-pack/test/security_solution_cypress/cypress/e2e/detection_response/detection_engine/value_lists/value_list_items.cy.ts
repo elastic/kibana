@@ -61,6 +61,11 @@ describe(
         KNOWN_VALUE_LIST_FILES.CIDRs,
       ]);
       createListsIndex();
+      visit(RULES_MANAGEMENT_URL);
+      waitForListsIndex();
+      waitForValueListsModalToBeLoaded();
+      importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
+      openValueListsModal();
     });
 
     afterEach(() => {
@@ -71,90 +76,80 @@ describe(
       ]);
     });
 
-    describe('value list items modal with all priveleges', () => {
-      beforeEach(() => {
-        visit(RULES_MANAGEMENT_URL);
-        waitForListsIndex();
-        waitForValueListsModalToBeLoaded();
-        importValueList(KNOWN_VALUE_LIST_FILES.TEXT, 'keyword');
-        openValueListsModal();
-      });
+    it('can CRUD value list items', () => {
+      openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+      const totalItems = 12;
+      const perPage = 10;
 
-      it('can CRUD value list items', () => {
-        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
-        const totalItems = 12;
-        const perPage = 10;
+      // check modal title and info
+      cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
+      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
+      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
+      checkTotalItems(totalItems);
 
-        // check modal title and info
-        cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
-        cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
-        cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
-        checkTotalItems(totalItems);
+      // search working
+      getValueListItemsTableRow().should('have.length', perPage);
+      searchValueListItemsModal('keyword:not_exists');
+      getValueListItemsTableRow().should('have.length', 1);
+      cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('No items found');
 
-        // search working
-        getValueListItemsTableRow().should('have.length', perPage);
-        searchValueListItemsModal('keyword:not_exists');
-        getValueListItemsTableRow().should('have.length', 1);
-        cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains('No items found');
+      searchValueListItemsModal('keyword:*or*');
+      getValueListItemsTableRow().should('have.length', 4);
 
-        searchValueListItemsModal('keyword:*or*');
-        getValueListItemsTableRow().should('have.length', 4);
+      clearSearchValueListItemsModal('');
+      getValueListItemsTableRow().should('have.length', perPage);
 
-        clearSearchValueListItemsModal('');
-        getValueListItemsTableRow().should('have.length', perPage);
+      // sort working
+      sortByValue();
+      getValueListItemsTableRow().first().contains('a');
 
-        // sort working
-        sortByValue();
-        getValueListItemsTableRow().first().contains('a');
+      // delete item
+      deleteListItem('a');
+      checkTotalItems(totalItems - 1);
 
-        // delete item
-        deleteListItem('a');
-        checkTotalItems(totalItems - 1);
+      getValueListItemsTableRow().first().contains('are');
 
-        getValueListItemsTableRow().first().contains('are');
+      // update item
+      updateListItem('are', 'b');
+      getValueListItemsTableRow().first().contains('b');
 
-        // update item
-        updateListItem('are', 'b');
-        getValueListItemsTableRow().first().contains('b');
+      // add item
+      addListItem('a new item');
+      getValueListItemsTableRow().first().contains('a new item');
+      checkTotalItems(totalItems);
 
-        // add item
-        addListItem('a new item');
-        getValueListItemsTableRow().first().contains('a new item');
-        checkTotalItems(totalItems);
+      // upload file just append all items from the file to the list
+      selectValueListsItemsFile(KNOWN_VALUE_LIST_FILES.TEXT);
+      uploadValueListsItemsFile();
+      checkTotalItems(totalItems + totalItems);
+    });
 
-        // upload file just append all items from the file to the list
-        selectValueListsItemsFile(KNOWN_VALUE_LIST_FILES.TEXT);
-        uploadValueListsItemsFile();
-        checkTotalItems(totalItems + totalItems);
-      });
+    it('error to find', () => {
+      mockFetchListItemsError();
+      openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+      cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains(
+        'Failed to load list items. You can change the search query or contact your administrator'
+      );
+    });
 
-      it('error to find', () => {
-        mockFetchListItemsError();
-        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
-        cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains(
-          'Failed to load list items. You can change the search query or contact your administrator'
-        );
-      });
+    it('errors to actions with list items elements', () => {
+      mockCreateListItemError();
+      mockUpdateListItemError();
+      mockDeleteListItemError();
+      openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
+      addListItem('a new item');
+      cy.get(TOASTER_BODY).contains('error to create list item');
+      closeErrorToast();
 
-      it('errors to actions with list items elements', () => {
-        mockCreateListItemError();
-        mockUpdateListItemError();
-        mockDeleteListItemError();
-        openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
-        addListItem('a new item');
-        cy.get(TOASTER_BODY).contains('error to create list item');
-        closeErrorToast();
+      sortByValue();
 
-        sortByValue();
+      deleteListItem('a');
+      cy.get(TOASTER_BODY).contains('error to delete list item');
+      closeErrorToast();
 
-        deleteListItem('a');
-        cy.get(TOASTER_BODY).contains('error to delete list item');
-        closeErrorToast();
-
-        updateListItem('a', 'b');
-        cy.get(TOASTER_BODY).contains('error to update list item');
-        closeErrorToast();
-      });
+      updateListItem('a', 'b');
+      cy.get(TOASTER_BODY).contains('error to update list item');
+      closeErrorToast();
     });
   }
 );
