@@ -8,7 +8,8 @@
 
 export const DEFAULT_INPUT_VALUE = `# Welcome to the Dev Tools Console!
 #
-# You can use Console to explore the Elasticsearch API. See the Elasticsearch API reference to learn more: https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+# You can use Console to explore the Elasticsearch API. See the Elasticsearch API reference to learn more:
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
 #
 # Here are a few examples to get you started.
 

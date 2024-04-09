@@ -11,7 +11,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const DEFAULT_REQUEST = `
 # Welcome to the Dev Tools Console!
 #
-# You can use Console to explore the Elasticsearch API. See the Elasticsearch API reference to learn more: https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html
+# You can use Console to explore the Elasticsearch API. See the \n  Elasticsearch API reference to learn more:
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/rest\n  -apis.html
 #
 # Here are a few examples to get you started.
 
@@ -25,7 +26,7 @@ POST /my-index/_doc
 {
     "id": "park_rocky-mountain",
     "title": "Rocky Mountain",
-    "description": "Bisected north to south by the Continental Divide, this portion of the Rockies has ecosystems varying from over 150 riparian lakes to montane and subalpine forests to treeless alpine tundra."
+    "description": "Bisected north to south by the Continental Divide, \n      this portion of the Rockies has ecosystems varying from over 150 \n      riparian lakes to montane and subalpine forests to treeless \n      alpine tundra."
 }
 
 
