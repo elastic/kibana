@@ -115,7 +115,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
         title: 'health',
         description: (
           <TransformHealthColoredDot
-            healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats?.health?.status)}
+            healthStatus={mapEsHealthStatus2TransformHealthStatus(displayStats.health.status)}
           />
         ),
       });
