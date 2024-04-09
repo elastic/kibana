@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { checkLicense } from '../../license_check';
 import {
@@ -74,7 +74,8 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-}: ExportPanelShareOpts): ShareMenuProvider => {
+  intl,
+}: ExportPanelShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -232,7 +233,8 @@ export const reportingExportModalProvider = ({
   usesUiCapabilities,
   theme,
   i18n: i18nStart,
-}: ExportModalShareOpts): ShareMenuProvider => {
+  intl,
+}: ExportModalShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -240,7 +242,6 @@ export const reportingExportModalProvider = ({
     onClose,
     shareableUrl,
     shareableUrlForSavedObject,
-    intl,
     toasts,
     ...shareOpts
   }: ShareContext) => {
@@ -356,10 +357,7 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPDFForPrinting = ({
-      intl: intlReport,
-      toasts: toastsReport,
-    }: ShareContext) => {
+    const generateReportPDFForPrinting = () => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
@@ -405,8 +403,8 @@ export const reportingExportModalProvider = ({
           }
         })
         .catch((error: any) => {
-          toastsReport.addError(error, {
-            title: intlReport!.formatMessage({
+          toasts.addError(error, {
+            title: intl.formatMessage({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
@@ -418,7 +416,7 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPNG = ({ intl: intlReport, toasts: toastsReport }: ShareContext) => {
+    const generateReportPNG = () => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };

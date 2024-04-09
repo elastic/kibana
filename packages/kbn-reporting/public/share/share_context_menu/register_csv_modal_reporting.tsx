@@ -14,7 +14,7 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -25,8 +25,9 @@ export const reportingCsvShareProvider = ({
   usesUiCapabilities,
   i18n: i18nStart,
   theme,
-}: ExportModalShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose, intl, toasts }: ShareContext) => {
+  intl,
+}: ExportModalShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+  const getShareMenuItems = ({ objectType, sharingData, onClose, toasts }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }

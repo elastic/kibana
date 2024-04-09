@@ -93,7 +93,6 @@ export class ShareMenuManager {
     isDirty,
     newVersionEnabled,
     toasts,
-    intl,
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItem[];
@@ -182,7 +181,6 @@ export class ShareMenuManager {
                 },
                 theme,
                 i18n,
-                intl,
               }}
             />,
             { i18n, theme }
