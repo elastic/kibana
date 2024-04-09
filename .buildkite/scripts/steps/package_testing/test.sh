@@ -30,7 +30,12 @@ fi
 cd ..
 
 export VAGRANT_CWD=$PWD/test/package
-vagrant up "$TEST_PACKAGE" --no-provision
+
+if [[ "$TEST_PACKAGE" == "fips" ]]; then
+  vagrant up "$TEST_PACKAGE"
+else
+  vagrant up "$TEST_PACKAGE" --no-provision
+fi
 
 node scripts/es snapshot \
   -E network.bind_host=127.0.0.1,192.168.56.1 \
