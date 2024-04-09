@@ -72,11 +72,17 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             .set('kbn-xsrf', 'foo')
             .send([
               {
+                // set a long time range so the backfill doesn't finish running and get deleted
                 rule_id: ruleId1,
                 start: '2023-10-19T12:00:00.000Z',
-                end: '2023-10-25T12:00:00.000Z',
+                end: '2023-11-19T12:00:00.000Z',
               },
-              { rule_id: ruleId2, start: '2023-10-19T12:00:00.000Z' },
+              {
+                // set a long time range so the backfill doesn't finish running and get deleted
+                rule_id: ruleId2,
+                start: '2023-10-19T12:00:00.000Z',
+                end: '2023-11-19T12:00:00.000Z',
+              },
             ]);
 
           const scheduleResult = scheduleResponse.body;
