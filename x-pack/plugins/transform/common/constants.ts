@@ -103,31 +103,52 @@ export const TRANSFORM_STATE = {
 
 export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
-export const TRANSFORM_HEALTH = {
+export const TRANSFORM_HEALTH_STATUS = {
+  GREEN: 'GREEN',
   green: 'green',
+  UNKNOWN: 'UNKNOWN',
   unknown: 'unknown',
+  YELLOW: 'YELLOW',
   yellow: 'yellow',
+  RED: 'RED',
   red: 'red',
 } as const;
 
-export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
+export type TransformHealthStatus =
+  typeof TRANSFORM_HEALTH_STATUS[keyof typeof TRANSFORM_HEALTH_STATUS];
 
 export const TRANSFORM_HEALTH_COLOR = {
+  GREEN: 'success',
   green: 'success',
+  UNKNOWN: 'subdued',
   unknown: 'subdued',
+  YELLOW: 'warning',
   yellow: 'warning',
+  RED: 'danger',
   red: 'danger',
 } as const;
 
 export const TRANSFORM_HEALTH_LABEL = {
+  GREEN: i18n.translate('xpack.transform.transformHealth.greenLabel', {
+    defaultMessage: 'Healthy',
+  }),
   green: i18n.translate('xpack.transform.transformHealth.greenLabel', {
     defaultMessage: 'Healthy',
+  }),
+  UNKNOWN: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
+    defaultMessage: 'Unknown',
   }),
   unknown: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
     defaultMessage: 'Unknown',
   }),
+  YELLOW: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
+    defaultMessage: 'Degraded',
+  }),
   yellow: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
     defaultMessage: 'Degraded',
+  }),
+  RED: i18n.translate('xpack.transform.transformHealth.redLabel', {
+    defaultMessage: 'Unavailable',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
     defaultMessage: 'Unavailable',
@@ -135,15 +156,28 @@ export const TRANSFORM_HEALTH_LABEL = {
 } as const;
 
 export const TRANSFORM_HEALTH_DESCRIPTION = {
+  GREEN: i18n.translate('xpack.transform.transformHealth.greenDescription', {
+    defaultMessage: 'The transform is running as expected.',
+  }),
   green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
     defaultMessage: 'The transform is running as expected.',
+  }),
+  UNKNOWN: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
+    defaultMessage: 'The health of the transform could not be determined.',
   }),
   unknown: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
     defaultMessage: 'The health of the transform could not be determined.',
   }),
+  YELLOW: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
+    defaultMessage:
+      'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
+  }),
   yellow: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
     defaultMessage:
       'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
+  }),
+  RED: i18n.translate('xpack.transform.transformHealth.redDescription', {
+    defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redDescription', {
     defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',

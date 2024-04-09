@@ -349,10 +349,10 @@ export const useColumns = (
     {
       name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
       'data-test-subj': 'transformListColumnHealth',
-      sortable: (item: TransformListRow) => item.stats?.health.status,
+      sortable: (item: TransformListRow) => item.stats?.health?.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return item.stats ? (
+        return item.stats && item.stats.health ? (
           <TransformHealthColoredDot healthStatus={item.stats.health.status} />
         ) : (
           <NoStatsFallbackComponent />

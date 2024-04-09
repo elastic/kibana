@@ -7,14 +7,15 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TransformHealthIssue } from '../../../common/types/transform_stats';
-import { TRANSFORM_HEALTH } from '../../../common/constants';
+import { TRANSFORM_HEALTH_STATUS } from '../../../common/constants';
 import type { TransformListRow } from './transform_list';
 
 export const needsReauthorization = (transform: Partial<TransformListRow>) => {
   return (
     isPopulatedObject(transform.config?.authorization, ['api_key']) &&
     isPopulatedObject(transform.stats) &&
-    transform.stats.health.status === TRANSFORM_HEALTH.red &&
+    isPopulatedObject(transform.stats.health) &&
+    transform.stats.health.status === TRANSFORM_HEALTH_STATUS.red &&
     transform.stats.health.issues?.find(
       (issue) => (issue as TransformHealthIssue).issue === 'Privileges check failed'
     ) !== undefined

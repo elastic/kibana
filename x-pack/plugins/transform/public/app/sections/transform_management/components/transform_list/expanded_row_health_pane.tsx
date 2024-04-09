@@ -16,6 +16,10 @@ import type {
   TransformHealthIssue,
   TransformStats,
 } from '../../../../../../common/types/transform_stats';
+import {
+  type TransformHealthStatus,
+  TRANSFORM_HEALTH_STATUS,
+} from '../../../../../../common/constants';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
@@ -24,7 +28,8 @@ interface ExpandedRowHealthPaneProps {
 }
 
 export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {
-  const { status, issues } = health;
+  const status: TransformHealthStatus = health?.status ?? TRANSFORM_HEALTH_STATUS.UNKNOWN;
+  const issues = health?.issues;
 
   const sorting = {
     sort: {
