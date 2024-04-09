@@ -154,7 +154,6 @@ export const reportingCsvShareProvider = ({
           disabled: licenseDisabled,
           ['data-test-subj']: 'Export',
         },
-        showRadios: false,
         helpText: (
           <FormattedMessage
             id="reporting.share.csv.reporting.helpTextCSV"

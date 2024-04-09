@@ -56,6 +56,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     shareableUrlForSavedObject,
     urlService,
     shareableUrlLocatorParams,
+    allowShortUrl,
   } = useShareTabsContext()!;
 
   const setDashboardLink = useCallback(
@@ -87,6 +88,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         setDashboardLink,
         isNotSaved: state?.isNotSaved,
         setIsNotSaved,
+        allowShortUrl,
       }}
     />
   );

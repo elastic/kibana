@@ -23,6 +23,7 @@ type LinkProps = Pick<
   | 'shareableUrl'
   | 'shareableUrlForSavedObject'
   | 'shareableUrlLocatorParams'
+  | 'allowShortUrl'
 > & {
   setDashboardLink: (url: string) => void;
   setIsNotSaved: () => void;
@@ -45,6 +46,7 @@ export const LinkContent = ({
   shareableUrlLocatorParams,
   setDashboardLink,
   setIsNotSaved,
+  allowShortUrl,
 }: LinkProps) => {
   const isMounted = useMountedState();
   const [url, setUrl] = useState<string>('');
@@ -150,9 +152,16 @@ export const LinkContent = ({
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
       setShortUrlCache(shortUrl as string);
       setUrl(shortUrl as string);
-      setDashboardLink(shortUrl as string);
+      return allowShortUrl ? setDashboardLink(shortUrl as string) : setDashboardLink(tempUrl);
     },
-    [isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache, setDashboardLink]
+    [
+      allowShortUrl,
+      setDashboardLink,
+      isMounted,
+      shareableUrlLocatorParams,
+      urlService.shortUrls,
+      shortUrlCache,
+    ]
   );
 
   const setUrlHelper = useCallback(() => {
@@ -163,8 +172,8 @@ export const LinkContent = ({
     } else if ('lens') {
       tempUrl = getSavedObjectUrl();
     }
-    return url === '' || objectType === 'lens' ? setUrl(tempUrl!) : createShortUrl(tempUrl!);
-  }, [getSavedObjectUrl, getSnapshotUrl, createShortUrl, objectType, url]);
+    return allowShortUrl ? createShortUrl(tempUrl!) : setUrl(tempUrl!);
+  }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType]);
 
   useEffect(() => {
     isMounted();
@@ -196,9 +205,11 @@ export const LinkContent = ({
         />
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-        {renderSaveState}
-      </EuiCodeBlock>
+      {objectType !== 'dashboard' && (
+        <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
+          {renderSaveState}
+        </EuiCodeBlock>
+      )}
       <EuiSpacer />
     </EuiForm>
   );
