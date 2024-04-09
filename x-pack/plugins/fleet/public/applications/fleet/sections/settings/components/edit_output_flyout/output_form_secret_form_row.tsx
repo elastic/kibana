@@ -131,24 +131,6 @@ export const SecretFormRow: React.FC<{
   );
 
   const helpText = useMemo(() => {
-    if (!initialValue)
-      return (
-        <FormattedMessage
-          id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
-          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
-          values={{
-            revertLink: (
-              <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
-                  defaultMessage="Click to use plain text storage instead"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      );
-
     if (isConvertedToSecret)
       return (
         <EuiCallOut size="s" color="warning">
@@ -167,6 +149,24 @@ export const SecretFormRow: React.FC<{
             }}
           />
         </EuiCallOut>
+      );
+
+    if (!initialValue)
+      return (
+        <FormattedMessage
+          id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
+          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
+          values={{
+            revertLink: (
+              <EuiLink onClick={() => onToggleSecretStorage(false)} color="primary">
+                <FormattedMessage
+                  id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
+                  defaultMessage="Click to use plain text storage instead"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       );
     return undefined;
   }, [initialValue, isConvertedToSecret, onToggleSecretStorage]);

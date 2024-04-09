@@ -55,6 +55,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     } else {
       inputs.serviceTokenSecretInput.setValue('');
     }
+    setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: false });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -85,7 +86,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             />
           }
           {...inputs.serviceTokenInput.formRowProps}
-          initialValue={inputs.serviceTokenInput.value}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleSecretAndClearValue}
         >
@@ -109,7 +109,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           })}
           {...inputs.serviceTokenSecretInput.formRowProps}
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
-          initialValue={inputs.serviceTokenSecretInput.value}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.serviceToken}
           onToggleSecretStorage={onToggleSecretAndClearValue}
