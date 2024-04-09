@@ -39,7 +39,7 @@ const METRIC_INDICES_WARNING_TITLE = i18n.translate(
 );
 
 const METRIC_INDICES_USED_BY_RULES = i18n.translate(
-  'xpack.infra.sourceConfiguration.metricIndicesUsedByRules',
+  'xpack.infra.sourceConfiguration.metricIndicesUsedByRulesTitle',
   {
     defaultMessage: 'Rules utilize the current index pattern.',
   }
@@ -120,14 +120,14 @@ export const IndicesConfigurationPanel = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
-            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            data-test-subj="infraIndicesPanelSettingsDangerCalloutUsedByRules"
             size="s"
             title={METRIC_INDICES_USED_BY_RULES}
             color="danger"
             iconType="warning"
           >
             <FormattedMessage
-              id="xpack.infra.sourceConfiguration.remoteClusterConnectionDoNotExist"
+              id="xpack.infra.sourceConfiguration.metricIndicesUsedByRulesMessage"
               defaultMessage="There {isOrAre} {numberOfInfraRules} rule{plural} that rely on the current Metric indices setting. Changing this setting may impact the execution of these rules."
               values={{
                 numberOfInfraRules,
