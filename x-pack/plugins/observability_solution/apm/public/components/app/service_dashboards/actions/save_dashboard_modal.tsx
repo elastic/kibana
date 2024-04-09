@@ -208,7 +208,13 @@ export function SaveDashboardModal({
                     }
                   )}
                 >
-                  <EuiIcon type="questionInCircle" title="Icon with tooltip" />
+                  <EuiIcon
+                    type="questionInCircle"
+                    title={i18n.translate(
+                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                      { defaultMessage: 'Icon with tooltip' }
+                    )}
+                  />
                 </EuiToolTip>
               </p>
             }

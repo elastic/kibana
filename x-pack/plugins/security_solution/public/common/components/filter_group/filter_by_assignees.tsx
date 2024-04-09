@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { TEST_IDS } from './constants';
+import { TEST_IDS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import type { AssigneesIdsSelection } from '../assignees/types';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';

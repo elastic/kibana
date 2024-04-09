@@ -29,7 +29,10 @@
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/ui-theme",
+    "@kbn/controls-plugin",
+    "@kbn/embeddable-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
+    "@kbn/kibana-utils-plugin",
   ]
 }

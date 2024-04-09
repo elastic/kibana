@@ -61,7 +61,8 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/controls-plugin"
   ],
   "exclude": ["target/**/*"]
 }

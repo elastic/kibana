@@ -38,7 +38,8 @@
       "dashboard",
       "expressions",
       "logsExplorer",
-      "licensing"
+      "licensing",
+      "embeddable",
     ],
     "optionalPlugins": [
       "discover",

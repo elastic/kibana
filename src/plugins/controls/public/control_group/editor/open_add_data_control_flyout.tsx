@@ -116,6 +116,7 @@ export function openAddDataControlFlyout(
     toMountPoint(
       <ControlGroupContainerContext.Provider value={this}>
         <ControlEditor
+          dataViewId={this.getOutput().dataViewIds?.[0]}
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
           getRelevantDataViewId={this.getMostRelevantDataViewId}
           isCreate={true}

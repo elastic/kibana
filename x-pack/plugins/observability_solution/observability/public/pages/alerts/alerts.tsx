@@ -16,6 +16,9 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
@@ -53,7 +56,7 @@ function InternalAlertsPage() {
       },
     },
     http,
-    notifications: { toasts },
+    notifications,
     share: {
       url: { locators },
     },
@@ -64,11 +67,15 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
     uiSettings,
+    spaces,
+    dataViews,
   } = kibanaServices;
+  const { toasts } = notifications;
   const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
+  const [spaceId, setSpaceId] = useState<string>();
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
@@ -168,6 +175,12 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
+
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
   return (
@@ -201,6 +214,25 @@ function InternalAlertsPage() {
               onEsQueryChange={setEsQuery}
               showFilterBar
               services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertFilterControls
+              dataViewSpec={{
+                id: 'observability-alert-filters-dv',
+              }}
+              featureIds={observabilityAlertFeatureIds}
+              spaceId={spaceId}
+              chainingSystem="HIERARCHICAL"
+              filters={alertSearchBarStateProps.controlFilters}
+              onFiltersChange={alertSearchBarStateProps.onControlFiltersChange}
+              ControlGroupRenderer={ControlGroupRenderer}
+              services={{
+                http,
+                notifications,
+                dataViews,
+                storage: Storage,
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
