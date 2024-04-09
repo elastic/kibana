@@ -21,6 +21,7 @@ import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import { FtrService } from '../../functional/ftr_provider_context';
 import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
+import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations_feature_flag/mocks';
 
 export interface ArtifactTestData {
   artifact: ExceptionListItemSchema;
@@ -122,7 +123,12 @@ export class EndpointArtifactsTestResources extends FtrService {
     return this.createExceptionItem(blocklist);
   }
 
-  async getArtifacts() {
+  async getArtifacts(): Promise<
+    Pick<
+      InternalManifestSchemaResponseType['_source']['endpoint:user-artifact-manifest'],
+      'artifacts'
+    >
+  > {
     const {
       hits: { hits: manifestResults },
     } = await this.esClient.search({
@@ -133,6 +139,26 @@ export class EndpointArtifactsTestResources extends FtrService {
 
     const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
     const artifacts = manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
+
+    return artifacts;
+  }
+
+  async getArtifactsFromUnifiedManifestSO(): Promise<
+    Array<Pick<InternalManifestSchemaResponseType['_source'], 'endpoint:user-artifact-manifest'>>
+  > {
+    const {
+      hits: { hits: manifestResults },
+    } = await this.esClient.search({
+      index: '.kibana*',
+      query: {
+        bool: { filter: [{ term: { type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE } }] },
+      },
+    });
+
+    const artifacts = manifestResults.map((result) => {
+      const _source = result._source as InternalUnifiedManifestSchemaResponseType['_source'];
+      return _source[ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE];
+    });
 
     return artifacts;
   }
