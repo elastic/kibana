@@ -6,17 +6,19 @@
  */
 
 import { filter, lastValueFrom } from 'rxjs';
+import parse from 'joi-to-json';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
-import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import { ParamsSchema as SlackConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/slack';
+import { ParamsSchema as EmailConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/email';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -143,7 +145,26 @@ async function executor(
             message: {
               role: MessageRole.User,
               name: 'get_connectors',
-              content: JSON.stringify({ connectors: await actionsClient.getAll() }),
+              content: JSON.stringify({
+                connectors: await actionsClient.getAll().then((connectors) => {
+                  return connectors.map((connector) => {
+                    if (connector.actionTypeId === '.slack') {
+                      return {
+                        ...connector,
+                        params: parse(SlackConnectorParamsSchema.getSchema(), 'json').properties,
+                      };
+                    }
+
+                    if (connector.actionTypeId === '.email') {
+                      return {
+                        ...connector,
+                        params: parse(EmailConnectorParamsSchema.getSchema(), 'json').properties,
+                      };
+                    }
+                    return connector;
+                  });
+                }),
+              }),
             },
           },
         ],
