@@ -58,9 +58,9 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
@@ -210,7 +210,7 @@ export function registerTransactionErrorRateRuleType({
                     terms: {
                       field: EVENT_OUTCOME,
                     },
-                    aggs: getServiceGroupFieldsAgg(),
+                    aggs: getApmAlertSourceFieldsAgg(),
                   },
                 },
               },
@@ -253,7 +253,7 @@ export function registerTransactionErrorRateRuleType({
           if (errorRate >= ruleParams.threshold) {
             results.push({
               errorRate,
-              sourceFields: getServiceGroupFields(failedOutcomeBucket),
+              sourceFields: getApmAlertSourceFields(failedOutcomeBucket),
               groupByFields,
               bucketKey,
             });

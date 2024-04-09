@@ -19,6 +19,7 @@ import {
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { apiHasType } from '@kbn/presentation-publishing';
 import {
   core,
   embeddableStart,
@@ -39,16 +40,17 @@ type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttribut
 };
 
 const runAddTelemetry = (
-  parentType: string,
+  parent: unknown,
   factoryType: string,
   savedObject: SavedObjectCommon,
   savedObjectMetaData?: SavedObjectMetaData
 ) => {
+  if (!apiHasType(parent)) return;
   const type = savedObjectMetaData?.getSavedObjectSubType
     ? savedObjectMetaData.getSavedObjectSubType(savedObject)
     : factoryType;
 
-  usageCollection?.reportUiCounter?.(parentType, METRIC_TYPE.CLICK, `${type}:add`);
+  usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
 export const AddPanelFlyout = ({ container }: { container: PresentationContainer }) => {
@@ -102,7 +104,7 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
         const { onAdd, savedObjectMetaData } = factory;
 
         onAdd(container, savedObject);
-        runAddTelemetry(container.type, factory.type, savedObject, savedObjectMetaData);
+        runAddTelemetry(container, factory.type, savedObject, savedObjectMetaData);
         return;
       }
 
@@ -118,7 +120,7 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
       });
 
       const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
-      runAddTelemetry(container.type, factoryType, savedObject, savedObjectMetaData);
+      runAddTelemetry(container, factoryType, savedObject, savedObjectMetaData);
     },
     [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
   );

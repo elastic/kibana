@@ -17,6 +17,7 @@ import {
   PostEvaluateResponse,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
@@ -24,12 +25,11 @@ import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
 import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
-import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
 import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
+import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
@@ -129,9 +129,7 @@ export const postEvaluateRoute = (
           });
 
           // Fetch any tools registered by the request's originating plugin
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(
-            'securitySolution'
-          );
+          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
 
           // Get a scoped esClient for passing to the agents for retrieval, and
           // writing results to the output index
@@ -149,7 +147,9 @@ export const postEvaluateRoute = (
               allow: [],
               allowReplacement: [],
               subAction: 'invokeAI',
-              replacements: [],
+              // The actionTypeId is irrelevant when used with the invokeAI subaction
+              actionTypeId: '.gen-ai',
+              replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
@@ -164,21 +164,21 @@ export const postEvaluateRoute = (
           connectorIds.forEach((connectorId) => {
             agentNames.forEach((agentName) => {
               logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-              const llmType = getLlmType(connectorId, connectors);
               const connectorName =
                 getConnectorName(connectorId, connectors) ?? '[unknown connector]';
               const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
               agents.push({
-                agentEvaluator: (langChainMessages, exampleId) =>
-                  AGENT_EXECUTOR_MAP[agentName]({
+                agentEvaluator: async (langChainMessages, exampleId) => {
+                  const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actions,
                     isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
                     esClient,
                     elserId,
+                    isStream: false,
                     langChainMessages,
-                    llmType,
+                    llmType: 'openai',
                     logger,
                     request: skeletonRequest,
                     kbResource: ESQL_RESOURCE,
@@ -193,10 +193,16 @@ export const postEvaluateRoute = (
                         ...(connectorName != null ? [connectorName] : []),
                         runName,
                       ],
-                      tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
+                      tracers: getLangSmithTracer({
+                        projectName: detailedRunName,
+                        exampleId,
+                        logger,
+                      }),
                     },
-                    replacements: [],
-                  }),
+                    replacements: {},
+                  });
+                  return evalResult.body;
+                },
                 metadata: {
                   connectorName,
                   runName: detailedRunName,
@@ -215,6 +221,7 @@ export const postEvaluateRoute = (
                   connectorId: evalModel,
                   request: skeletonRequest,
                   logger,
+                  model: skeletonRequest.body.model,
                 });
 
           const { evaluationResults, evaluationSummary } = await performEvaluation({

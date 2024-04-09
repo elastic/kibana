@@ -75,7 +75,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    describe('When risk engine is enabled', () => {
+    // https://github.com/elastic/kibana/issues/179687
+    describe('When risk engine is enabled', { tags: ['@skipInServerless'] }, () => {
       beforeEach(() => {
         login();
         mockRiskEngineEnabled();
