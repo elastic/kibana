@@ -8,14 +8,15 @@
 import React, { useMemo } from 'react';
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiLink,
   EuiSuperSelect,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -96,6 +97,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
 
   return (
     <EuiFormRow
+      css={{ '.euiFormLabel': { display: 'flex', alignItems: 'center' } }}
       label={
         <>
           <FormattedMessage
@@ -110,14 +112,28 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         </>
       }
       labelAppend={
-        <EuiText size="xs">
-          <EuiLink target="_blank" href={managementLink} data-test-subj="manageConnectorsLink">
-            <FormattedMessage
-              id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectors"
-              defaultMessage="Manage GenAI connectors"
-            />
-          </EuiLink>
-        </EuiText>
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate(
+            'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip',
+            {
+              defaultMessage: 'Manage GenAI connector',
+            }
+          )}
+        >
+          <EuiButtonIcon
+            target="_blank"
+            href={managementLink}
+            data-test-subj="manageConnectorsLink"
+            iconType="wrench"
+            aria-label={i18n.translate(
+              'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
+              {
+                defaultMessage: 'Manage GenAI connector link',
+              }
+            )}
+          />
+        </EuiToolTip>
       }
     >
       <EuiSuperSelect
