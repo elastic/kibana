@@ -41,7 +41,7 @@ const METRIC_INDICES_WARNING_TITLE = i18n.translate(
 const METRIC_INDICES_USED_BY_RULES = i18n.translate(
   'xpack.infra.sourceConfiguration.metricIndicesUsedByRulesTitle',
   {
-    defaultMessage: 'Rules utilize the current index pattern.',
+    defaultMessage: 'Rules utilize this data source.',
   }
 );
 
@@ -128,7 +128,7 @@ export const IndicesConfigurationPanel = ({
           >
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.metricIndicesUsedByRulesMessage"
-              defaultMessage="One or more rules rely on this data source setting.. Changing this setting may impact the execution of these rules."
+              defaultMessage="One or more rules rely on this data source setting. Changing this setting may impact the execution of these rules."
             />
           </EuiCallOut>
         </>

@@ -158,7 +158,7 @@ export const IndicesConfigurationPanel = React.memo<{
             data-test-subj="infraIndicesPanelSettingsDangerCallout"
             size="s"
             title={i18n.translate('xpack.infra.sourceConfiguration.logsIndicesUsedByRulesTitle', {
-              defaultMessage: 'Rules utilize the current index pattern.',
+              defaultMessage: 'Rules utilize this data source.',
             })}
             color="danger"
             iconType="warning"
