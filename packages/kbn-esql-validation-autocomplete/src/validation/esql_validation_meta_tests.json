@@ -1371,12 +1371,12 @@
       "warning": []
     },
     {
-      "query": "row var = mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "query": "row var = mv_sort(\"a\", \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "row mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "query": "row mv_sort(\"a\", \"asc\")",
       "error": [],
       "warning": []
     },
@@ -1998,21 +1998,6 @@
       "error": [
         "Argument of [to_upper] must be [string], found value [5] type [number]"
       ],
-      "warning": []
-    },
-    {
-      "query": "row var = to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_ver(\"a\")",
-      "error": [],
       "warning": []
     },
     {
@@ -5769,6 +5754,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | where length(to_version(stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(to_version(numberField)) > 0",
+      "error": [
+        "Argument of [to_version] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where length(trim(stringField)) > 0",
       "error": [],
       "warning": []
@@ -7917,12 +7914,12 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "query": "from a_index | eval var = mv_sort(stringField, \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval mv_sort([\"a\", \"b\", \"c\"], \"asc\")",
+      "query": "from a_index | eval mv_sort(stringField, \"asc\")",
       "error": [],
       "warning": []
     },
@@ -8851,28 +8848,6 @@
       "query": "from a_index | eval var = to_upper(*)",
       "error": [
         "Using wildcards (*) in to_upper is not allowed"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_ver(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_version(*)",
-      "error": [
-        "Using wildcards (*) in to_version is not allowed"
       ],
       "warning": []
     },

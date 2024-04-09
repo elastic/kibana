@@ -22,7 +22,7 @@ import type {
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
-  FunctionArg,
+  FunctionArgSignature,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
@@ -52,7 +52,7 @@ import {
   isSettingItem,
   isAssignment,
   isVariable,
-  unwrapStringLiteralQuotes,
+  isValidLiteralOption,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
@@ -77,19 +77,16 @@ import {
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: FunctionArg,
+  argDef: FunctionArgSignature,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
     if (
-      // currently only supporting literalOptions with string literals
       actualArg.literalType === 'string' &&
       argDef.literalOptions &&
-      !argDef.literalOptions
-        .map((option) => option.toLowerCase())
-        .includes(unwrapStringLiteralQuotes(actualArg.value).toLowerCase())
+      isValidLiteralOption(actualArg, argDef)
     ) {
       messages.push(
         getMessageFromId({
@@ -97,7 +94,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: actualArg.value,
-            supportedOptions: argDef.literalOptions.map((option) => `"${option}"`).join(', '),
+            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
           },
           locations: actualArg.location,
         })

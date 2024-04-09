@@ -34,6 +34,7 @@ import {
 import type {
   CommandDefinition,
   CommandOptionsDefinition,
+  FunctionArgSignature,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
@@ -179,7 +180,7 @@ export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
 
-export const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
+const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
 function buildCommandLookup() {
   if (!commandLookups) {
@@ -339,8 +340,26 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
   return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
 }
 
+/**
+ * Checks if this argument is one of the possible options
+ * if they are defined on the arg definition.
+ */
+export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignature) {
+  return (
+    arg.literalType === 'string' &&
+    argDef.literalOptions &&
+    !argDef.literalOptions
+      .map((option) => option.toLowerCase())
+      .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
+  );
+}
+
+/**
+ * Checks if an AST argument is of the correct type
+ * given the definition.
+ */
 export function isEqualType(
-  item: ESQLSingleAstItem,
+  arg: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
   parentCommand?: string,
@@ -350,24 +369,24 @@ export function isEqualType(
   if (argType === 'any') {
     return true;
   }
-  if (item.type === 'literal') {
-    return compareLiteralType(argType, item);
+  if (arg.type === 'literal') {
+    return compareLiteralType(argType, arg);
   }
-  if (item.type === 'function') {
-    if (isSupportedFunction(item.name, parentCommand).supported) {
-      const fnDef = buildFunctionLookup().get(item.name)!;
+  if (arg.type === 'function') {
+    if (isSupportedFunction(arg.name, parentCommand).supported) {
+      const fnDef = buildFunctionLookup().get(arg.name)!;
       return fnDef.signatures.some((signature) => argType === signature.returnType);
     }
   }
-  if (item.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(item);
+  if (arg.type === 'timeInterval') {
+    return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
-  if (item.type === 'column') {
+  if (arg.type === 'column') {
     if (argType === 'column') {
       // anything goes, so avoid any effort here
       return true;
     }
-    const hit = getColumnHit(nameHit ?? item.name, references);
+    const hit = getColumnHit(nameHit ?? arg.name, references);
     const validHit = hit;
     if (!validHit) {
       return false;
