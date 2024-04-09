@@ -91,7 +91,11 @@ export const PresentationPanelInternal = <
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) attrs['data-loading'] = true;
+    if (dataLoading) {
+      attrs['data-loading'] = true;
+    } else {
+      attrs['data-render-complete'] = true;
+    }
     if (blockingError) attrs['data-error'] = true;
     return attrs;
   }, [dataLoading, blockingError]);
@@ -108,6 +112,7 @@ export const PresentationPanelInternal = <
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
+      {...contentAttrs}
     >
       {!hideHeader && api && (
         <PresentationPanelHeader
@@ -139,7 +144,6 @@ export const PresentationPanelInternal = <
         <EuiErrorBoundary>
           <Component
             {...(componentProps as React.ComponentProps<typeof Component>)}
-            {...contentAttrs}
             ref={(newApi) => {
               if (newApi && !api) setApi(newApi);
             }}
