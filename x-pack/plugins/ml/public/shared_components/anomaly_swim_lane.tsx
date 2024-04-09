@@ -6,7 +6,10 @@
  */
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import React, { useMemo, type FC } from 'react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
+import React, { useEffect, useMemo, useRef, type FC } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimlaneEmbeddableCustomInput,
@@ -27,18 +30,80 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   filters,
   query,
   refreshConfig,
+  perPage,
 }) => {
+  const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
+
   const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
     return {
       jobIds,
       swimlaneType,
-      timeRange,
       refreshConfig,
       viewBy,
-      query,
-      filters,
+      timeRange,
     };
-  }, [filters, jobIds, query, refreshConfig, swimlaneType, timeRange, viewBy]);
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
+
+  useEffect(
+    function syncState() {
+      if (!embeddableApi.current) return;
+
+      embeddableApi.current.updateUserInput({
+        jobIds,
+        swimlaneType,
+        viewBy,
+      });
+    },
+    [jobIds, swimlaneType, viewBy]
+  );
+
+  useEffect(
+    function syncPagination() {
+      if (!embeddableApi.current) return;
+      embeddableApi.current.updatePagination({
+        perPage,
+        fromPage: 1,
+      });
+    },
+    [perPage]
+  );
+
+  const parentApi = useMemo<PublishesWritableUnifiedSearch>(() => {
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(filters);
+    const query$ = new BehaviorSubject<Query | undefined>(query);
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
+
+    return {
+      filters$,
+      setFilters: (newFilters) => {
+        filters$.next(newFilters);
+      },
+      query$,
+      setQuery: (newQuery) => {
+        query$.next(newQuery);
+      },
+      timeRange$,
+      setTimeRange: (newTimeRange) => {
+        timeRange$.next(newTimeRange);
+      },
+    } as PublishesWritableUnifiedSearch;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(
+    function syncTimeRange() {
+      parentApi.setTimeRange(timeRange);
+    },
+    [timeRange, parentApi]
+  );
+
+  useEffect(
+    function syncUnifiedSearch() {
+      parentApi.setFilters(filters);
+      parentApi.setQuery(query);
+    },
+    [filters, query, parentApi]
+  );
 
   return (
     <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
@@ -46,6 +111,10 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
       state={{
         rawState,
+      }}
+      parentApi={parentApi}
+      onApiAvailable={(api) => {
+        embeddableApi.current = api;
       }}
     />
   );

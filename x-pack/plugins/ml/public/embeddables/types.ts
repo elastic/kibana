@@ -62,7 +62,7 @@ export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 /** Manual input by the user */
 export interface AnomalySwimlaneEmbeddableUserInput {
   jobIds: JobId[];
-  panelTitle: string;
+  panelTitle?: string;
   swimlaneType: SwimlaneType;
   viewBy?: string;
 }
