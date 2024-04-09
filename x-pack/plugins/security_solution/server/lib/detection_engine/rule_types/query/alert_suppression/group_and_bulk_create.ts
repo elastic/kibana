@@ -47,7 +47,7 @@ export interface GroupAndBulkCreateParams {
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures | undefined;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface GroupAndBulkCreateReturnType extends SearchAfterAndBulkCreateReturnType {
