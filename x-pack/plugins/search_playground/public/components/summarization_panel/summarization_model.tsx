@@ -56,14 +56,21 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type={model.icon} />
             </EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+              gutterSize="s"
+              css={{ overflow: 'hidden' }}
+            >
               <EuiText size="s">{model.name}</EuiText>
               {model.showConnectorName && model.connectorName && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    <span title={model.connectorName}>{model.connectorName}</span>
-                  </EuiText>
-                </EuiFlexItem>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={{ overflow: 'hidden', textOverflow: 'ellipsis', textWrap: 'nowrap' }}
+                >
+                  <span title={model.connectorName}>{model.connectorName}</span>
+                </EuiText>
               )}
             </EuiFlexGroup>
           </EuiFlexGroup>
