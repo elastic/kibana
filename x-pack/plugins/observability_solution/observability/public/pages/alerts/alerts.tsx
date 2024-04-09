@@ -16,7 +16,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-import { AlertsFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rulesLocatorID } from '../../../common';
@@ -217,7 +217,7 @@ function InternalAlertsPage() {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <AlertsFilterControls
+            <AlertFilterControls
               dataViewSpec={{
                 id: 'observability-alert-filters-dv',
               }}
@@ -225,14 +225,14 @@ function InternalAlertsPage() {
               spaceId={spaceId}
               chainingSystem="HIERARCHICAL"
               filters={alertSearchBarStateProps.controlFilters}
-              onFilterChange={alertSearchBarStateProps.onControlFiltersChange}
-              dependencies={{
+              onFiltersChange={alertSearchBarStateProps.onControlFiltersChange}
+              ControlGroupRenderer={ControlGroupRenderer}
+              services={{
                 http,
                 notifications,
                 dataViews,
+                storage: Storage,
               }}
-              ControlGroupRenderer={ControlGroupRenderer}
-              Storage={Storage}
             />
           </EuiFlexItem>
           <EuiFlexItem>
