@@ -17,6 +17,25 @@
     dest: /usr/share/kibana
     remote_src: yes
     extra_opts: ["--strip-components=1"]
+
+- name: copy configuration
+  become: yes
+  template:
+    src: templates/kibana.yml
+    dest: /usr/share/kibana/config/kibana.yml
+  register: config
+
+- name: copy fips node.options
+  become: yes
+  template:
+    src: templates/fips/node.options
+    dest: /usr/share/kibana/config/node.options
+
+- name: copy fips openssl config
+  become: yes
+  template:
+    src: templates/fips/nodejs.cnf
+    dest: /usr/share/kibana/config/openssl-3.0.8/nodejs.cnf
 # - name: find docker image
 #   find:
 #     paths: /packages/
@@ -50,21 +69,3 @@
 #       ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'
 #       XPACK_REPORTING_CAPTURE_BROWSER_CHROMIUM_DISABLESANDBOX: 'true'
 
-# - name: copy configuration
-#   become: yes
-#   template:
-#     src: templates/kibana.yml
-#     dest: /usr/share/kibana/kibana.yml
-#   register: config
-
-# - name: copy fips node.options
-#   become: yes
-#   template:
-#     src: templates/fips/node.options
-#     dest: /usr/share/kibana/node.options
-
-# - name: copy fips openssl config
-#   become: yes
-#   template:
-#     src: templates/fips/nodejs.cnf
-#     dest: /usr/share/kibana/openssl-3.0.8/nodejs.cnf
