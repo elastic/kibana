@@ -38,6 +38,7 @@
     dest: /usr/share/kibana/config/nodejs.cnf
 
 - name: download FIPS certified OpenSSL
+  become: yes
   retries: 5
   delay: 10
   get_url:
