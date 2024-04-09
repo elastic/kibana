@@ -71,9 +71,13 @@ export const getAllMarkdownCommentsFromResults = ({
     stats: patternRollup.stats,
   });
 
+  let displayDocSize = false;
+
   const summaryTableMarkdownRows: string[] = summaryTableItems.map((item) => {
     const result: DataQualityCheckResult | undefined =
       patternRollup.results != null ? patternRollup.results[item.indexName] : undefined;
+    const sizeInBytes = getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats });
+    displayDocSize = Number.isInteger(sizeInBytes);
 
     return getSummaryTableMarkdownRow({
       docsCount: item.docsCount,
@@ -84,13 +88,13 @@ export const getAllMarkdownCommentsFromResults = ({
       incompatible: result?.incompatible,
       isILMAvailable,
       patternDocsCount: patternRollup.docsCount ?? 0,
-      sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
+      sizeInBytes,
     }).trim();
   });
 
   const initialComments: string[] =
     summaryTableMarkdownRows.length > 0
-      ? [getSummaryTableMarkdownHeader(isILMAvailable), ...summaryTableMarkdownRows]
+      ? [getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize), ...summaryTableMarkdownRows]
       : [];
 
   return sortedResults.reduce<string[]>(
