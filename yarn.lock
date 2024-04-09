@@ -5620,6 +5620,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
   version "0.0.0"
   uid ""
@@ -10811,15 +10815,6 @@
     "@types/graceful-fs" "*"
     "@types/node" "*"
     chokidar "^2.1.2"
-
-"@types/webpack-bundle-analyzer@^4.7.0":
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/@types/webpack-bundle-analyzer/-/webpack-bundle-analyzer-4.7.0.tgz#fe199e724ce3d38705f6f1ba4d62429b7c360541"
-  integrity sha512-c5i2ThslSNSG8W891BRvOd/RoCjI2zwph8maD22b1adtSns20j+0azDDMCK06DiVrzTgnwiDl5Ntmu1YRJw8Sg==
-  dependencies:
-    "@types/node" "*"
-    tapable "^2.2.0"
-    webpack "^5"
 
 "@types/webpack-env@^1.15.3", "@types/webpack-env@^1.16.0":
   version "1.16.3"

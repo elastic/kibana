@@ -31,5 +31,10 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-mount",
+    "@kbn/discover-utils",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
   ]
 }

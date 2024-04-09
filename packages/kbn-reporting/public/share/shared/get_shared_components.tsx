@@ -8,7 +8,6 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import React from 'react';
 import { ReportingAPIClient } from '../..';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
@@ -42,9 +41,6 @@ export interface ApplicationProps {
 export interface ReportingPublicComponents {
   /** Needed for Canvas PDF reports */
   ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | null;
-  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element | undefined;
-  ReportingModalPDF(props: ApplicationProps): JSX.Element | undefined;
-  ReportingModalPNG(props: ApplicationProps): JSX.Element | undefined;
 }
 
 /**
@@ -73,63 +69,8 @@ export function getSharedComponents(
             getJobParams={getJobParams}
           />
         );
-      } else {
-        return null;
       }
-    },
-    ReportingPanelPNGV2(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
-      if (props.layoutOption === 'canvas') {
-        return (
-          <ScreenCapturePanelContent
-            requiresSavedState={false}
-            reportType={PNG_REPORT_TYPE_V2}
-            apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
-            layoutOption={'canvas' as const}
-            {...props}
-            getJobParams={getJobParams}
-          />
-        );
-      }
-    },
-    ReportingModalPDF(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
-      if (props.layoutOption === 'canvas') {
-        return (
-          <ScreenCapturePanelContent
-            requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
-            apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
-            layoutOption={'canvas' as const}
-            {...props}
-            getJobParams={getJobParams}
-          />
-        );
-      }
-    },
-    ReportingModalPNG(props: ApplicationProps) {
-      const getJobParams = props.getJobParams as ReportingPanelProps['getJobParams'];
-      if (props.layoutOption === 'canvas') {
-        return (
-          <ScreenCapturePanelContent
-            requiresSavedState={false}
-            reportType={PDF_REPORT_TYPE_V2}
-            apiClient={apiClient}
-            toasts={core.notifications.toasts}
-            uiSettings={core.uiSettings}
-            theme={core.theme}
-            layoutOption={'canvas' as const}
-            {...props}
-            getJobParams={getJobParams}
-          />
-        );
-      }
+      return null;
     },
   };
 }

@@ -31,10 +31,8 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
   getSharedComponents,
-  reportingCsvShareProvider,
   reportingCsvShareModalProvider,
   reportingExportModalProvider,
-  reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -210,38 +208,24 @@ export class ReportingPublicPlugin
     );
 
     const reportingStart = this.getContract(core);
-    const { toasts } = core.notifications;
 
     startServices$.subscribe(([{ application, i18n: i18nStart }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
-          reportingCsvShareProvider({
+          reportingCsvShareModalProvider({
             apiClient,
-            toasts,
             uiSettings,
             license,
             application,
             usesUiCapabilities,
             theme: core.theme,
+            i18n: i18nStart,
+            intl: setupDeps.intl,
           })
         );
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          // needed for Canvas and legacy tests
           shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              toasts,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-            })
-          );
-        }
-        if (shareSetup.isNewVersion()) {
-          shareSetup.register(
-            reportingCsvShareModalProvider({
+            reportingExportModalProvider({
               apiClient,
               uiSettings,
               license,
@@ -252,21 +236,6 @@ export class ReportingPublicPlugin
               intl: setupDeps.intl,
             })
           );
-
-          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-            shareSetup.register(
-              reportingExportModalProvider({
-                apiClient,
-                uiSettings,
-                license,
-                application,
-                usesUiCapabilities,
-                theme: core.theme,
-                i18n: i18nStart,
-                intl: setupDeps.intl,
-              })
-            );
-          }
         }
       });
     });

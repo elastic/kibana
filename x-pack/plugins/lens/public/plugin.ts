@@ -405,7 +405,6 @@ export class LensPlugin {
               });
             return isGold;
           },
-          isNewVersion: share.isNewVersion(),
         })
       );
     }

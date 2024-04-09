@@ -14,7 +14,6 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormatFactory } from '../../../common/types';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
-import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 
 declare global {
   interface Window {
@@ -76,7 +75,7 @@ async function downloadCSVs({
 }
 
 function getWarnings(activeData: TableInspectorAdapter) {
-  const messages = [];
+  const messages: string[] = [];
   if (activeData) {
     const datatables = Object.values(activeData);
     const formulaDetected = datatables.some((datatable) => {
@@ -98,14 +97,12 @@ interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
   atLeastGold: () => boolean;
-  isNewVersion: boolean;
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-  isNewVersion,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
@@ -144,25 +141,6 @@ export const downloadCsvShareProvider = ({
       });
       onClose?.();
     };
-
-    if (!isNewVersion) {
-      return [
-        {
-          ...menuItemMetadata,
-          panel: {
-            id: 'csvDownloadPanel',
-            title: panelTitle,
-            content: (
-              <DownloadPanelContent
-                isDisabled={!csvEnabled}
-                warnings={getWarnings(activeData)}
-                onClick={onClick}
-              />
-            ),
-          },
-        },
-      ];
-    }
 
     return [
       {
