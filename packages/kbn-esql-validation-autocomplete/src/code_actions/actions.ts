@@ -172,10 +172,12 @@ async function getQuotableActionForColumns(
       error.startColumn > command.location.min && error.startColumn < command.location.max
   )?.location.max;
 
-  const remainingCommandText = commandEndIndex
-    ? queryString.substring(error.endColumn - 1, commandEndIndex + 1)
-    : queryString.substring(error.startColumn, error.endColumn);
-
+  // the error received is unknwonColumn here, but look around the column to see if there's more
+  // which broke the grammar and the validation code couldn't identify as unquoted column
+  const remainingCommandText = queryString.substring(
+    error.endColumn - 1,
+    commandEndIndex ? commandEndIndex + 1 : undefined
+  );
   const stopIndex = Math.max(
     /[()]/.test(remainingCommandText)
       ? remainingCommandText.indexOf(')')
@@ -198,14 +200,14 @@ async function getQuotableActionForColumns(
     error.endColumn + possibleUnquotedText.length - 1
   );
   const actions: CodeAction[] = [];
-  const textHasAlreadyQuotes = /`/.test(errorText);
-  if (textHasAlreadyQuotes) {
-    return [];
-  }
   if (shouldBeQuotedText(errorText)) {
     const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (!getFieldsByType) {
       if (!options.relaxOnMissingCallbacks) {
+        return [];
+      }
+      const textHasAlreadyQuotes = /`/.test(errorText);
+      if (textHasAlreadyQuotes) {
         return [];
       }
       actions.push(
