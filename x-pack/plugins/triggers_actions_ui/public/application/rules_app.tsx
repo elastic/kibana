@@ -48,7 +48,7 @@ import {
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
-import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
@@ -136,7 +136,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           exact
           path={legacyRouteToAlerts}
           render={() => {
-            navigateToApp(`management/insightsAndAlerting/${ALERTS_PLUGIN_ID}`);
+            navigateToApp(`management/insightsAndAlerting/${ALERTS_PAGE_ID}`);
             return null;
           }}
         />

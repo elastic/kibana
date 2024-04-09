@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
 
-  describe('Global alerts page', function () {
+  describe('Stack alerts page', function () {
     describe('Loads the page with limited privileges', () => {
       beforeEach(async () => {
         await security.testUser.restoreDefaults();

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { GlobalAlertsPage } from './global_alerts_page';
+import { StackAlertsPage } from './components/stack_alerts_page';
 // eslint-disable-next-line import/no-default-export
-export default GlobalAlertsPage;
+export default StackAlertsPage;

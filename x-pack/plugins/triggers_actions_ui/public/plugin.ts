@@ -82,7 +82,7 @@ import type {
   RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -288,7 +288,7 @@ export class Plugin
           unknown
         ];
 
-        const { renderApp } = await import('./application/app');
+        const { renderApp } = await import('./application/rules_app');
 
         // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
         // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -380,7 +380,7 @@ export class Plugin
 
     if (this.experimentalFeatures.globalAlertsPage) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
-        id: ALERTS_PLUGIN_ID,
+        id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
         capabilitiesId: PLUGIN_ID,
         order: 0,
@@ -429,7 +429,7 @@ export class Plugin
       });
       if (plugins.home) {
         plugins.home.featureCatalogue.register({
-          id: ALERTS_PLUGIN_ID,
+          id: ALERTS_PAGE_ID,
           title: alertsFeatureTitle,
           description: alertsFeatureDescription,
           icon: 'watchesApp',

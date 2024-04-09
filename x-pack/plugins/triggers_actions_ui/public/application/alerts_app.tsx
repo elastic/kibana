@@ -16,9 +16,9 @@ import { suspendedComponentWithProps } from './lib/suspended_component_with_prop
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
-import type { TriggersAndActionsUiServices } from './app';
+import type { TriggersAndActionsUiServices } from './rules_app';
 
-const GlobalAlertsPage = lazy(() => import('./sections/global_alerts_page'));
+const StackAlertsPage = lazy(() => import('./sections/alerts_page'));
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
@@ -40,7 +40,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <Routes>
-                <Route path={`/`} component={suspendedComponentWithProps(GlobalAlertsPage, 'xl')} />
+                <Route path={`/`} component={suspendedComponentWithProps(StackAlertsPage, 'xl')} />
               </Routes>
             </Router>
           </KibanaContextProvider>
