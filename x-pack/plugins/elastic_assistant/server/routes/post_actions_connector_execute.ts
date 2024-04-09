@@ -211,6 +211,7 @@ export const postActionsConnectorExecuteRoute = (
               actionTypeId,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+              model: request.body.model,
               assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
             });
             return response.ok({
@@ -274,6 +275,7 @@ export const postActionsConnectorExecuteRoute = (
             actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
             // tracked here: https://github.com/elastic/security-team/issues/7363
             assistantStreamingEnabled:
@@ -290,6 +292,7 @@ export const postActionsConnectorExecuteRoute = (
             actionTypeId: request.body.actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
             errorMessage: error.message,
             assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
           });

@@ -75,6 +75,7 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
+  model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
@@ -102,6 +103,13 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         description: 'Kibana action type id',
       },
     },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -111,6 +119,7 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
+  model?: string;
 }> = {
   eventType: 'invoke_assistant_error',
   schema: {
@@ -142,6 +151,13 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Kibana action type id',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
       },
     },
   },
