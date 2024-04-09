@@ -34,4 +34,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
   threat: threatDefault,
   note: '',
   maxSignals: 100,
+  setup: '',
 };

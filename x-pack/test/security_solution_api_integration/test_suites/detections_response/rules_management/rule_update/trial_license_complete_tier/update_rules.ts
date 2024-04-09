@@ -834,6 +834,40 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.message).to.be('max_signals value cannot be higher than 1000');
         });
       });
+
+      describe('setup guide', () => {
+        it('should overwrite setup value on update', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            setup: 'A setup guide',
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            setup: 'A different setup guide',
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
+
+          expect(body.setup).to.eql('A different setup guide');
+        });
+
+        it('should reset setup field to empty string on unset', async () => {
+          await createRule(supertest, log, {
+            ...getSimpleRule('rule-1'),
+            setup: 'A setup guide',
+          });
+
+          const ruleUpdate = {
+            ...getSimpleRuleUpdate('rule-1'),
+            setup: undefined,
+          };
+
+          const { body } = await securitySolutionApi.updateRule({ body: ruleUpdate }).expect(200);
+
+          expect(body.setup).to.eql('');
+        });
+      });
     });
   });
 };

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ILicense } from '@kbn/licensing-plugin/common/types';

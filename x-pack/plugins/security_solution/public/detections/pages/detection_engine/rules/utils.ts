@@ -93,6 +93,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
+  setup: '',
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
   maxSignals: 100,

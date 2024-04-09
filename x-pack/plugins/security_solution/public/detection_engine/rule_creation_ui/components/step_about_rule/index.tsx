@@ -255,6 +255,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <EuiSpacer size="l" />
             <UseField
+              path="setup"
+              component={MarkdownEditorForm}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleSetup',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleSetup',
+                placeholder: I18n.ADD_RULE_SETUP_HELP_TEXT,
+                includePlugins: false,
+              }}
+            />
+            <EuiSpacer size="l" />
+            <UseField
               path="note"
               component={MarkdownEditorForm}
               componentProps={{

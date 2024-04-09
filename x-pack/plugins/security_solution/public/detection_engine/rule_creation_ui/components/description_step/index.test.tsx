@@ -559,6 +559,21 @@ describe('description_step', () => {
       });
     });
 
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
     describe('alert suppression', () => {
       const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
       const suppressionFields = {
