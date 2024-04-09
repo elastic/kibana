@@ -62,8 +62,8 @@ export const SourceConfigurationSettings = ({
         );
         setNumberOfInfraRules(numberOfRules);
       }
-      getNumberOfInfraRules();
     };
+    getNumberOfInfraRules();
   }, [http]);
 
   const {
