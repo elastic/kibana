@@ -54,9 +54,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.errors).to.eql([]);
         expect(body.stats).to.eql({
           total: 1,
-          created: 1,
-          updated: 0,
-          errors: 0,
+          successful: 1,
+          failed: 0,
         });
 
         await expectAssetCriticalityDocMatching({
@@ -78,9 +77,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.errors).to.eql([]);
         expect(body.stats).to.eql({
           total: 1,
-          created: 0,
-          updated: 1,
-          errors: 0,
+          successful: 1,
+          failed: 0,
         });
 
         await expectAssetCriticalityDocMatching({
@@ -107,9 +105,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.stats).to.eql({
         total: 8,
-        created: 0,
-        updated: 0,
-        errors: 8,
+        successful: 0,
+        failed: 8,
       });
 
       expect(body.errors).to.eql([
@@ -160,9 +157,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.stats).to.eql({
         total: 3,
-        created: 2,
-        updated: 0,
-        errors: 1,
+        successful: 2,
+        failed: 1,
       });
 
       expect(body.errors).to.eql([
@@ -190,9 +186,8 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await assetCriticalityRoutes.uploadCsv('');
       expect(body.stats).to.eql({
         total: 0,
-        created: 0,
-        updated: 0,
-        errors: 0,
+        successful: 0,
+        failed: 0,
       });
     });
 

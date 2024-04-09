@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -90,12 +91,7 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
     endTime: string;
     tookMs: number;
   };
-  result: {
-    updated: number;
-    created: number;
-    errors: number;
-    total: number;
-  };
+  result: AssetCriticalityCsvUploadResponse['stats'];
 }
 
 export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventTypeOpts<AssetCriticalitySystemProcessedAssignmentFileEvent> =
@@ -119,17 +115,13 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
       },
       result: {
         properties: {
-          updated: {
+          successful: {
             type: 'long',
-            _meta: { description: 'Number of criticality records updated' },
+            _meta: { description: 'Number of criticality records successfully created or updated' },
           },
-          created: {
+          failed: {
             type: 'long',
-            _meta: { description: 'Number of criticality records updated' },
-          },
-          errors: {
-            type: 'long',
-            _meta: { description: 'Number if lines which encountered errors' },
+            _meta: { description: 'Number of criticality records which had errors' },
           },
           total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
         },
