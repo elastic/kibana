@@ -18,6 +18,7 @@ const initializeStore = (
   },
   authorizedConsumers?: RuleCreationValidConsumer[]
 ) => {
+  // Call combineReducers inside this function to avoid Webpack import order problems
   const rootReducer = combineReducers({
     ruleDefinition: ruleDefinitionSlice.reducer,
     ruleDetails: ruleDetailsSlice.reducer,

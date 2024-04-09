@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import { hydrateState } from '../../common/constants';
 
 const initialState: {
   name: string;
@@ -30,6 +32,11 @@ export const ruleDetailsSlice = createSlice({
     setTags: (state, action: PayloadAction<string[]>) => {
       state.tags = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateState, (state, action) => {
+      Object.assign(state, pick(action.payload, Object.keys(initialState)));
+    });
   },
 });
 

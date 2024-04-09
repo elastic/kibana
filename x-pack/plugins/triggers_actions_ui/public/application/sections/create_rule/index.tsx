@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { RuleFormPage } from '@kbn/alerts-ui-shared';
@@ -61,11 +62,15 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: 'Rules',
+        text: i18n.translate('xpack.triggersActionsUI.sections.createRule.breadcrumbsRulesTitle', {
+          defaultMessage: 'Rules',
+        }),
         href: '/rules',
       },
       {
-        text: 'Create',
+        text: i18n.translate('xpack.triggersActionsUI.sections.createRule.breadcrumbsCreateTitle', {
+          defaultMessage: 'Create',
+        }),
       },
     ]);
   }, [setBreadcrumbs]);

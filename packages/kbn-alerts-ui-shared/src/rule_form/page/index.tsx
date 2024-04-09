@@ -17,30 +17,57 @@ import {
   RuleTypeModelFromRegistry,
 } from '../types';
 
+interface EditRuleFormPageComponentProps {
+  isEdit: true;
+  ruleId: string;
+  isRuleTypeModelPending: boolean;
+  onLoadRuleSuccess: (ruleTypeId: string, ruleName: string) => void;
+}
+
+interface CreateRuleFormPageComponentProps {
+  isEdit?: false | undefined;
+  isRuleTypeModelPending?: never;
+  onLoadRuleSuccess?: never;
+  ruleId?: never;
+}
+
+type RuleFormModeDependentProps = EditRuleFormPageComponentProps | CreateRuleFormPageComponentProps;
+
 interface RuleFormPageComponentProps extends RuleFormPageProps, RuleFormKibanaServices {
   config?: RuleFormConfig;
   appContext: RuleFormAppContext;
-  registeredRuleTypeModel: RuleTypeModelFromRegistry;
+  registeredRuleTypeModel: RuleTypeModelFromRegistry | null;
 }
 
-export const RuleFormPageComponent: React.FC<RuleFormPageComponentProps> = ({
+export const RuleFormPageComponent: React.FC<
+  RuleFormPageComponentProps & RuleFormModeDependentProps
+> = ({
   http,
   toasts,
   config,
   appContext: { consumer, validConsumers, canShowConsumerSelection },
   registeredRuleTypeModel,
+  isRuleTypeModelPending = false,
+  onLoadRuleSuccess = () => {}, // Not needed for Create, only for Edit
+  isEdit,
+  ruleId,
   ...rest
 }) => {
   return (
     <ContextsProvider
+      onLoadRuleSuccess={onLoadRuleSuccess}
       registeredRuleTypeModel={registeredRuleTypeModel}
+      isRuleTypeModelPending={isRuleTypeModelPending}
       appContext={{ consumer, validConsumers }}
       http={http}
       toasts={toasts}
+      isEdit={isEdit}
+      ruleId={ruleId}
     >
       <RuleFormPage
         canShowConsumerSelection={canShowConsumerSelection}
         validConsumers={validConsumers}
+        isEdit={isEdit}
         {...rest}
       />
     </ContextsProvider>

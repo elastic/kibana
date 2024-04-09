@@ -81,7 +81,7 @@ export interface RuleFormConfig {
   };
 }
 export interface RuleFormAppContext {
-  consumer: RuleCreationValidConsumer;
+  consumer?: RuleCreationValidConsumer;
   validConsumers?: RuleCreationValidConsumer[];
   canShowConsumerSelection?: boolean;
 }

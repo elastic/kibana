@@ -26,6 +26,7 @@ export interface RuleFormPageProps {
   onSaveRule: (ruleId: string) => void;
   referrerHref?: string;
   docLinks: DocLinksStart;
+  isEdit?: boolean;
   canShowConsumerSelection?: boolean;
   validConsumers?: RuleCreationValidConsumer[];
 }
@@ -49,6 +50,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
   docLinks,
   canShowConsumerSelection,
   validConsumers,
+  isEdit,
 }) => {
   const ruleName = useRuleFormSelector((state) => state.ruleDetails.name);
   const dispatch = useRuleFormDispatch();
@@ -116,7 +118,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SaveRuleButton isEdit={false} onSuccessfulSave={onSaveRule} />
+            <SaveRuleButton isEdit={isEdit} onSuccessfulSave={onSaveRule} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

@@ -17,12 +17,12 @@ const RuleTypeContext = createContext<RuleTypeModel>({} as RuleTypeModel);
 
 type RuleTypeModelFromRegistry = Omit<RuleTypeModel, 'name' | 'authorizedConsumers'>;
 
-export const RuleTypeProvider: React.FC<{ registeredRuleTypeModel: RuleTypeModelFromRegistry }> = ({
-  registeredRuleTypeModel,
-  children,
-}) => {
+export const RuleTypeProvider: React.FC<{
+  registeredRuleTypeModel: RuleTypeModelFromRegistry | null;
+  isRuleTypeModelPending: boolean;
+}> = ({ registeredRuleTypeModel, isRuleTypeModelPending, children }) => {
   const { http, toasts } = useKibanaServices();
-  const { id: ruleTypeId } = registeredRuleTypeModel;
+  const { id: ruleTypeId } = registeredRuleTypeModel ?? {};
 
   const {
     ruleTypesState,
@@ -35,7 +35,7 @@ export const RuleTypeProvider: React.FC<{ registeredRuleTypeModel: RuleTypeModel
     [authorizedRuleTypes, ruleTypeId]
   );
 
-  if (ruleTypesState.isLoading) {
+  if (ruleTypesState.isLoading || isRuleTypeModelPending) {
     return (
       <EuiEmptyPrompt
         icon={<EuiLoadingLogo size="xl" />}

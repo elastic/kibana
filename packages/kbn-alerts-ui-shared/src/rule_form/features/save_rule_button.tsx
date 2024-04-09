@@ -9,7 +9,7 @@
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
-import { useCreateRuleApi } from '../apis';
+import { useCreateRuleApi, useUpdateRuleApi } from '../apis';
 import { useValidation } from '../contexts';
 
 const createRuleButtonLabel = i18n.translate('alertsUIShared.ruleForm.createRuleButtonLabel', {
@@ -21,29 +21,33 @@ const saveRuleButtonLabel = i18n.translate('alertsUIShared.ruleForm.saveRuleButt
 });
 
 interface SaveRuleButtonProps {
-  isEdit: boolean;
+  isEdit?: boolean;
   onSuccessfulSave: (ruleId: string) => void;
 }
 
-export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({ isEdit, onSuccessfulSave }) => {
+export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
+  isEdit = false,
+  onSuccessfulSave,
+}) => {
   const [isSaving, setIsSaving] = useState(false);
   const createRule = useCreateRuleApi();
+  const updateRule = useUpdateRuleApi();
   const { isOverallValid } = useValidation();
 
   const onClickSave = useCallback(async () => {
     setIsSaving(true);
-    const newRule = await createRule();
+    if (isEdit) {
+      const updatedRule = await updateRule();
+      if (updatedRule) onSuccessfulSave(updatedRule.id);
+    } else {
+      const newRule = await createRule();
+      if (newRule) onSuccessfulSave(newRule.id);
+    }
     setIsSaving(false);
-    onSuccessfulSave(newRule.id);
-  }, [createRule, onSuccessfulSave]);
+  }, [createRule, updateRule, onSuccessfulSave, isEdit]);
 
   return (
-    <EuiButton
-      isDisabled={!isOverallValid}
-      isLoading={isSaving}
-      onClick={isEdit ? () => {} : onClickSave}
-      fill
-    >
+    <EuiButton isDisabled={!isOverallValid} isLoading={isSaving} onClick={onClickSave} fill>
       {isEdit ? saveRuleButtonLabel : createRuleButtonLabel}
     </EuiButton>
   );

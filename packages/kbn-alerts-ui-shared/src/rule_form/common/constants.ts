@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import {
   AlertConsumers,
   RuleCreationValidConsumer,
@@ -31,3 +32,5 @@ export enum ValidationStatus {
 
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
+
+export const hydrateState = createAction<ResolveRule>('hydrateState');

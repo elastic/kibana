@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useMemo, useCallback } from 'react';
-import { createRule } from './create_rule';
+import { updateRule } from './update_rule';
 import { parseRuleCircuitBreakerErrorMessage } from '../../../common/helpers';
-import { useRuleType, useKibanaServices } from '../../contexts';
+import { useKibanaServices } from '../../contexts';
 import { useRuleFormSelector } from '../../hooks';
 
-export const useCreateRuleApi = () => {
-  const { id: ruleTypeId } = useRuleType();
+export const useUpdateRuleApi = () => {
   const { http, toasts } = useKibanaServices();
   const ruleDefinition = useRuleFormSelector((state) => state.ruleDefinition);
   const ruleDetails = useRuleFormSelector((state) => state.ruleDetails);
@@ -23,25 +21,24 @@ export const useCreateRuleApi = () => {
   const rule = useMemo(
     () => ({
       ...ruleDetails,
-      ...omit(ruleDefinition, 'id'),
-      ruleTypeId,
+      ...ruleDefinition,
       actions: [],
     }),
-    [ruleDefinition, ruleDetails, ruleTypeId]
+    [ruleDefinition, ruleDetails]
   );
 
   return useCallback(async () => {
     try {
-      const newRule = await createRule({ http, rule });
+      const updatedRule = await updateRule({ http, rule, id: rule.id });
       toasts.addSuccess(
         i18n.translate('alertsUIShared.ruleForm.saveSuccessNotificationText', {
-          defaultMessage: 'Created rule "{ruleName}"',
+          defaultMessage: 'Updated rule "{ruleName}"',
           values: {
-            ruleName: newRule.name,
+            ruleName: updatedRule.name,
           },
         })
       );
-      return newRule;
+      return updatedRule;
     } catch (errorRes) {
       const message = parseRuleCircuitBreakerErrorMessage(
         errorRes.body?.message ||

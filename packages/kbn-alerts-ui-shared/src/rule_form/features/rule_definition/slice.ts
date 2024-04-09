@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import {
@@ -18,7 +19,7 @@ import {
   getDurationUnitValue,
 } from '../../../common/helpers/parse_duration';
 import { useRuleFormSelector } from '../../hooks';
-import { DEFAULT_VALID_CONSUMERS } from '../../common/constants';
+import { DEFAULT_VALID_CONSUMERS, hydrateState } from '../../common/constants';
 
 const initialState: {
   id: string;
@@ -91,6 +92,11 @@ export const ruleDefinitionSlice = createSlice({
         state.consumer = validConsumers[0];
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateState, (state, action) => {
+      Object.assign(state, pick(action.payload, Object.keys(initialState)));
+    });
   },
 });
 
