@@ -116,11 +116,11 @@ export default ({ getService }: FtrProviderContext) => {
         {
           index: 0,
           message:
-            'Invalid criticality level invalid_criticality expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
         {
           index: 1,
-          message: 'Invalid entity type invalid_entity expected host or user',
+          message: 'Invalid entity type "invalid_entity", expected host or user',
         },
         {
           index: 2,
@@ -136,15 +136,15 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           index: 5,
-          message: 'Expected 3 columns got 2',
+          message: 'Expected 3 columns, got 2',
         },
         {
           index: 6,
-          message: 'Expected 3 columns got 4',
+          message: 'Expected 3 columns, got 4',
         },
         {
           index: 7,
-          message: `ID is too long, expected less than 1000 characters got 1001`,
+          message: `ID is too long, expected less than 1000 characters, got 1001`,
         },
       ]);
     });
@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           index: 1,
           message:
-            'Invalid criticality level invalid_criticality expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
       ]);
 
