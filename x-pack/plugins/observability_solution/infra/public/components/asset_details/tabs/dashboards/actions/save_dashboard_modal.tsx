@@ -20,6 +20,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
@@ -53,6 +54,7 @@ export function SaveDashboardModal({
   const { notifications } = useKibana();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const [, setUrlState] = useAssetDetailsUrlState();
+  const { euiTheme } = useEuiTheme();
 
   const [assetNameEnabled, setAssetNameFiltersEnabled] = useState(
     currentDashboard?.dashboardFilterAssetIdEnabled ?? true
@@ -185,9 +187,14 @@ export function SaveDashboardModal({
             compressed
             label={
               <p>
-                {i18n.translate('xpack.infra.customDashboard.addDashboard.useContextFilterLabel', {
-                  defaultMessage: 'Filter by host name',
-                })}{' '}
+                <span css={{ marginRight: euiTheme.size.xs }}>
+                  {i18n.translate(
+                    'xpack.infra.customDashboard.addDashboard.useContextFilterLabel',
+                    {
+                      defaultMessage: 'Filter by host name',
+                    }
+                  )}
+                </span>
                 <EuiToolTip
                   position="bottom"
                   content={i18n.translate(

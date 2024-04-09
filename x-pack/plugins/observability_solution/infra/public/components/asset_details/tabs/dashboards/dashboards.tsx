@@ -119,9 +119,9 @@ export function Dashboards() {
     asset.type,
   ]);
 
-  return (
-    <EuiPanel hasBorder>
-      {loading || status === FETCH_STATUS.LOADING ? (
+  if (loading || status === FETCH_STATUS.LOADING) {
+    return (
+      <EuiPanel hasBorder>
         <EuiEmptyPrompt
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={
@@ -132,7 +132,13 @@ export function Dashboards() {
             </h4>
           }
         />
-      ) : !!dashboards?.length ? (
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <EuiPanel hasBorder>
+      {!!dashboards?.length ? (
         <>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow>
