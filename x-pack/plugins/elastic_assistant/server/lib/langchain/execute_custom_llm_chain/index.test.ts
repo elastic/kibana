@@ -10,6 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
@@ -39,14 +40,7 @@ const mockCall = jest.fn().mockImplementation(() =>
   })
 );
 const mockInvoke = jest.fn().mockImplementation(() => Promise.resolve());
-jest.mock('langchain/agents', () => ({
-  initializeAgentExecutorWithOptions: jest.fn().mockImplementation((_a, _b, { agentType }) => ({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    call: (props: any) => mockCall({ ...props, agentType }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    invoke: (props: any) => mockInvoke({ ...props, agentType }),
-  })),
-}));
+jest.mock('langchain/agents');
 
 jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
   ElasticsearchStore: jest.fn().mockImplementation(() => ({
@@ -86,6 +80,14 @@ const defaultProps = {
 describe('callAgentExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
+      (_a, _b, { agentType }) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        invoke: (props: any, more: any) => mockInvoke({ ...props, agentType }, more),
+      })
+    );
   });
 
   describe('callAgentExecutor', () => {
@@ -177,6 +179,30 @@ describe('callAgentExecutor', () => {
         'Transfer-Encoding': 'chunked',
         'X-Accel-Buffering': 'no',
         'X-Content-Type-Options': 'nosniff',
+      });
+    });
+
+    it('onLlmResponse gets called only after final chain step', async () => {
+      const mockInvokeWithChainCallback = jest.fn().mockImplementation((a, b, c, d, e, f, g) => {
+        b.callbacks[0].handleChainEnd({ output: 'hi' }, '123', '456');
+        b.callbacks[0].handleChainEnd({ output: 'hello' }, '123');
+        return Promise.resolve();
+      });
+      (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
+        (_a, _b, { agentType }) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          invoke: (props: any, more: any) =>
+            mockInvokeWithChainCallback({ ...props, agentType }, more),
+        })
+      );
+      const onLlmResponse = jest.fn();
+      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+
+      expect(onLlmResponse).toHaveBeenCalledWith('hello', {
+        traceId: undefined,
+        transactionId: undefined,
       });
     });
   });
