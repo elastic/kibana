@@ -45,7 +45,13 @@ export const getTopNavBadges = ({
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push({
       data: getTopNavUnsavedChangesBadge({
-        onRevert: stateContainer.actions.undoSavedSearchChanges,
+        onRevert: async () => {
+          const lensEditFlyoutCancelButton = document.getElementById('lnsCancelEditOnFlyFlyout');
+          if (lensEditFlyoutCancelButton) {
+            lensEditFlyoutCancelButton.click?.();
+          }
+          await stateContainer.actions.undoSavedSearchChanges();
+        },
         onSave:
           services.capabilities.discover.save && !isManaged
             ? async () => {
