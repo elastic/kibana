@@ -92,6 +92,17 @@ export interface BlockListFormProps {
   item: CreateExceptionListItemSchema;
 }
 
+export interface Blocking {
+  canWriteBlocklist: boolean;
+  exceptionListApiClient: unknown;
+  useSetUrlParams: () => (
+    params: Record<string, string | number | null | undefined>,
+    replace?: boolean | undefined
+  ) => void;
+  getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
+  getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
+}
+
 /**
  * Methods exposed from the security solution to the threat intelligence application.
  */
@@ -151,16 +162,7 @@ export interface SecuritySolutionPluginContext {
   /**
    * Add to blocklist feature
    */
-  blockList: {
-    canWriteBlocklist: boolean;
-    exceptionListApiClient: unknown;
-    useSetUrlParams: () => (
-      params: Record<string, string | number | null | undefined>,
-      replace?: boolean | undefined
-    ) => void;
-    getFlyoutComponent: () => NamedExoticComponent<BlockListFlyoutProps>;
-    getFormComponent: () => NamedExoticComponent<BlockListFormProps>;
-  };
+  blockList: Blocking;
 }
 
 /**
