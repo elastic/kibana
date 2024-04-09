@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('expanded row with connected calendar shows link to calendar', async () => {
       await ml.testExecution.logTestStep('calendar present for connected job');
-      await ml.expandedJobDetails.assertCalendarPresent(jobId, calendarId);
+      await ml.expandedJobDetails.assertJobRowCalendars(jobId, [calendarId]);
     });
 
     it('expanded row with forecast should display open forecast button', async () => {

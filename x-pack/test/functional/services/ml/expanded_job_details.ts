@@ -19,14 +19,20 @@ export function MachineLearningExpandedJobDetailsProvider(
   const find = getService('find');
 
   return {
-    async assertCalendarPresent(jobId: string, expectedCalendar: string): Promise<void> {
-      await jobTable.withDetailsOpen(jobId, async function verifyCalendar() {
-        const calendarSelector = `${jobId}-${expectedCalendar}`;
-        await testSubjects.existOrFail(calendarSelector, {
-          timeout: 3_000,
-        });
-        const calendarVisibleText = await testSubjects.getVisibleText(calendarSelector);
-        expect(calendarVisibleText).to.be(expectedCalendar);
+    async assertJobRowCalendars(
+      jobId: string,
+      expectedCalendars: string[],
+      checkForExists: boolean = true
+    ): Promise<void> {
+      await jobTable.withDetailsOpen(jobId, async function verifyJobRowCalendars(): Promise<void> {
+        for await (const expectedCalendar of expectedCalendars) {
+          const calendarSelector = `mlJobDetailsCalendar-${expectedCalendar}`;
+          await testSubjects[checkForExists ? 'existOrFail' : 'missingOrFail'](calendarSelector, {
+            timeout: 3_000,
+          });
+          if (checkForExists)
+            expect(await testSubjects.getVisibleText(calendarSelector)).to.be(expectedCalendar);
+        }
       });
     },
 
