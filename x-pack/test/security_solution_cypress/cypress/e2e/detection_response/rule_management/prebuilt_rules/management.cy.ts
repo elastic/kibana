@@ -51,7 +51,7 @@ const rules = Array.from(Array(5)).map((_, i) => {
 });
 
 // https://github.com/elastic/kibana/issues/179973
-describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

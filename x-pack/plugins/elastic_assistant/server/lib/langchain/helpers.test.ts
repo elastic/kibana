@@ -6,14 +6,13 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant';
+import type { Message } from '@kbn/elastic-assistant-common';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
   getLangChainMessage,
   getLangChainMessages,
-  getMessageContentAndRole,
   requestHasRequiredAnonymizationParams,
 } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
@@ -94,22 +93,6 @@ describe('helpers', () => {
 
     it('returns the expected BaseMessage instances', () => {
       expect(getLangChainMessages(assistantMessages)).toEqual(langChainMessages);
-    });
-  });
-
-  describe('getMessageContentAndRole', () => {
-    const testCases: Array<[string, Pick<Message, 'content' | 'role'>]> = [
-      ['Prompt 1', { content: 'Prompt 1', role: 'user' }],
-      ['Prompt 2', { content: 'Prompt 2', role: 'user' }],
-      ['', { content: '', role: 'user' }],
-    ];
-
-    testCases.forEach(([prompt, expectedOutput]) => {
-      test(`Given the prompt "${prompt}", it returns the prompt as content with a "user" role`, () => {
-        const result = getMessageContentAndRole(prompt);
-
-        expect(result).toEqual(expectedOutput);
-      });
     });
   });
 
