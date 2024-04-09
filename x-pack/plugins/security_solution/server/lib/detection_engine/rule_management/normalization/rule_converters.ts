@@ -23,7 +23,6 @@ import type { PatchRuleRequestBody } from '../../../../../common/api/detection_e
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -200,6 +199,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     default: {
@@ -346,6 +346,8 @@ const patchNewTermsParams = (
     filters: params.filters ?? existingRule.filters,
     newTermsFields: params.new_terms_fields ?? existingRule.newTermsFields,
     historyWindowStart: params.history_window_start ?? existingRule.historyWindowStart,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -426,7 +428,6 @@ export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
@@ -487,7 +488,6 @@ export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   immutable = false,
   defaultEnabled = true
@@ -646,6 +646,7 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         language: params.language,
         data_view_id: params.dataViewId,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     default: {

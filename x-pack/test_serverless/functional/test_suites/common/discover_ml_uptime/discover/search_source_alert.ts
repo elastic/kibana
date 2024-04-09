@@ -341,7 +341,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/180311
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -601,14 +602,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('createRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click('.es-query-SelectOption');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       await retry.waitFor('rule name value is correct', async () => {
         await testSubjects.setValue('ruleNameInput', newAlert);
         const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
         return ruleName === newAlert;
       });
 
-      await testSubjects.click('.es-query-SelectOption');
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('queryFormType_searchSource');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

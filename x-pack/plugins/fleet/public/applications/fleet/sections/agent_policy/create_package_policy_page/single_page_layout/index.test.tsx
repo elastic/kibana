@@ -536,7 +536,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {
@@ -553,7 +553,7 @@ describe('when on the package policy create page', () => {
 
         test('should submit form with changed package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {

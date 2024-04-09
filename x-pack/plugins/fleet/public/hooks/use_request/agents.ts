@@ -15,6 +15,7 @@ import type {
   PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
   PostRequestBulkDiagnosticsRequest,
+  PostRequestDiagnosticsRequest,
   PostRequestDiagnosticsResponse,
   UpdateAgentRequest,
 } from '../../../common/types';
@@ -207,10 +208,15 @@ export function sendPostAgentUpgrade(
   });
 }
 
-export function sendPostRequestDiagnostics(agentId: string, options?: RequestOptions) {
+export function sendPostRequestDiagnostics(
+  agentId: string,
+  body: PostRequestDiagnosticsRequest['body'],
+  options?: RequestOptions
+) {
   return sendRequest<PostRequestDiagnosticsResponse>({
     path: agentRouteService.getRequestDiagnosticsPath(agentId),
     method: 'post',
+    body,
     version: API_VERSIONS.public.v1,
     ...options,
   });

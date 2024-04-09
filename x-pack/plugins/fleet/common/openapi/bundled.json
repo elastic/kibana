@@ -15,8 +15,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601/api/fleet",
-      "description": "local"
+      "url": "http://KIBANA_HOST:5601/api/fleet"
     }
   ],
   "paths": {
@@ -1530,6 +1529,9 @@
           "Elastic Package Manager (EPM)"
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "$ref": "#/components/responses/error"
           }
@@ -3076,6 +3078,30 @@
         "tags": [
           "Agents"
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "additional_metrics": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "CPU"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -3159,6 +3185,19 @@
                         "description": "list of agent IDs"
                       }
                     ]
+                  },
+                  "additional_metrics": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "CPU"
+                          ]
+                        }
+                      ]
+                    }
                   }
                 },
                 "required": [
@@ -6260,6 +6299,34 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "latest_executed_state": {
+            "description": "Latest successfully executed state in package install state machine",
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "create_restart_installation",
+                  "install_kibana_assets",
+                  "install_ilm_policies",
+                  "install_ml_model",
+                  "install_index_template_pipelines",
+                  "remove_legacy_templates",
+                  "update_current_write_indices",
+                  "install_transforms",
+                  "delete_previous_pipelines",
+                  "save_archive_entries_from_assets_map",
+                  "update_so"
+                ]
+              },
+              "started_at": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
               }
             }
           },

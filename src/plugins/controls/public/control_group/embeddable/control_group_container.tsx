@@ -236,10 +236,10 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.getInput$()
         .pipe(
-          skip(1),
           distinctUntilChanged(
             (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
-          )
+          ),
+          skip(1)
         )
         .subscribe(() => {
           const { filters, timeslice } = this.recalculateFilters();
@@ -378,7 +378,8 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters = (): ControlGroupFilterOutput => {
     const allFilters: Filter[] = [];
     let timeslice;
-    Object.values(this.children).map((child: ControlEmbeddable) => {
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
+    controlChildren.map((child: ControlEmbeddable) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
       if (childOutput.timeslice) {
@@ -393,8 +394,9 @@ export class ControlGroupContainer extends Container<
   ): Promise<ControlGroupFilterOutput> {
     let filtersArray: Filter[] = [];
     let timeslice;
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
     await Promise.all(
-      Object.values(this.children).map(async (child) => {
+      controlChildren.map(async (child) => {
         if (panels[child.id]) {
           const controlOutput =
             (await (child as ControlEmbeddable).selectionsToFilters?.(
@@ -452,7 +454,8 @@ export class ControlGroupContainer extends Container<
 
   private recalculateDataViews = () => {
     const allDataViewIds: Set<string> = new Set();
-    Object.values(this.children).map((child) => {
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
+    controlChildren.map((child) => {
       const dataViewId = (child.getOutput() as ControlOutput).dataViewId;
       if (dataViewId) allDataViewIds.add(dataViewId);
     });
