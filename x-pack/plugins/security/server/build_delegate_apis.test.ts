@@ -9,7 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CoreSecurityContract } from '@kbn/core-security-server';
 
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
 
 describe('buildSecurityApi', () => {
