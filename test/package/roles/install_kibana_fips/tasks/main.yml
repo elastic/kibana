@@ -1,4 +1,4 @@
-- name: ensures usr/share/kibana dir exists
+- name: ensure usr/share/kibana dir exists
   become: yes
   file:
     path: /usr/share/kibana
@@ -43,8 +43,7 @@
   get_url:
     url: https://www.openssl.org/source/openssl-3.0.8.tar.gz
     dest: /usr/share/kibana/openssl-3.0.8.tar.gz
-    checksum: "sha256:https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256"
-    # checksum: "sha256:6c13d2bf38fdf31eac3ce2a347073673f5d63263398f1f69d0df4a41253e4b3e"
+    checksum: "sha256:6c13d2bf38fdf31eac3ce2a347073673f5d63263398f1f69d0df4a41253e4b3e"
 
 - name: extract OpenSSL
   become: yes
