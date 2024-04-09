@@ -216,7 +216,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
               errorCallout={
-                inferenceAddError ? (
+                inferenceAddError && (
                   <EuiFlexItem grow={false}>
                     <EuiCallOut
                       color="danger"
@@ -239,8 +239,6 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
                     </EuiCallOut>
                     <EuiSpacer />
                   </EuiFlexItem>
-                ) : (
-                  <></>
                 )
               }
             />

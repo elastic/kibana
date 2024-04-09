@@ -7,4 +7,4 @@
 
 export { InferenceFlyoutWrapper } from './components/inference_flyout_wrapper';
 export { ElandPythonClient } from './components/eland_python_client';
-export type { ModelConfig } from './types';
+export  { type ModelConfig } from './types';

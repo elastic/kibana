@@ -10,10 +10,3 @@ module.exports = {
   rootDir: '../../../..',
   roots: ['<rootDir>/x-pack/packages/ml/inference_integration_flyout'],
 };
-
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-
-  roots: ['<rootDir>/x-pack/packages/ml/kibana_theme'],
-};

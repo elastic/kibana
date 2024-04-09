@@ -44,8 +44,8 @@ export const connectToApiOptions: Array<EuiSuperSelectOption<Service>> = [
   },
   {
     value: Service.openai,
-    inputDisplay: 'Open Ai',
-    'data-test-subj': 'serviceType-openAi',
+    inputDisplay: 'Open AI',
+    'data-test-subj': 'serviceType-openai',
   },
 ];
 

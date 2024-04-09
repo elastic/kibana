@@ -30,7 +30,7 @@ export const CohereForm: React.FC<CohereFormProps> = ({
         hasChildLabel={false}
       >
         <EuiFieldText
-          data-test-subj={'cohereModelId'}
+          data-test-subj="cohereModelId"
           value={modelId}
           onChange={(e) => setModelId(e.target.value)}
         />
@@ -43,7 +43,7 @@ export const CohereForm: React.FC<CohereFormProps> = ({
       >
         <EuiFieldPassword
           type="dual"
-          data-test-subj="cohereModelUrl"
+          data-test-subj="cohereApiKey"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
         />

@@ -27,7 +27,7 @@ export const HuggingFaceForm: React.FC<HuggingFaceProps> = ({ apiKey, url, setAp
         hasChildLabel={false}
       >
         <EuiFieldText
-          data-test-subj="openaiModelUrl"
+          data-test-subj="huggingFaceUrl"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
@@ -43,7 +43,7 @@ export const HuggingFaceForm: React.FC<HuggingFaceProps> = ({ apiKey, url, setAp
       >
         <EuiFieldPassword
           type="dual"
-          data-test-subj="openaiApiKey"
+          data-test-subj="huggingFaceUrlApiKey"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
         />

@@ -137,6 +137,7 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
     <>
       <EuiSuperSelect
         fullWidth
+        data-test-subj="modelTypeSelect"
         options={connectToApiOptions}
         valueOfSelected={selectedModelType}
         onChange={(value) => onChangeModelType(value)}

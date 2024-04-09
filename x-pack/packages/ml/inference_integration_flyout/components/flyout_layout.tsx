@@ -20,7 +20,6 @@ import { isFieldEmpty, serviceTypeMap } from '../lib/shared_values';
 import type { Service, ModelConfig } from '../types';
 import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { SaveInferenceEndpoint } from './save_inference_mappings_button';
-// import { SaveInferenceEndpoint } from './save_inference_mappings_button';
 
 interface GenericInferenceFlyoutProps extends SaveMappingOnClick {
   inferenceComponent: React.ReactNode;

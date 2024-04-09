@@ -87,7 +87,7 @@ export interface DocumentationProps {
 export interface InferenceFlyoutProps extends SaveMappingOnClick, DocumentationProps {
   onFlyoutClose: (value: boolean) => void;
   isInferenceFlyoutVisible: boolean;
-  errorCallout: JSX.Element;
+  errorCallout?: JSX.Element | '';
 }
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   onSaveInferenceEndpoint,
@@ -97,7 +97,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   elserv2documentationUrl = '',
   supportedNlpModels = '',
   nlpImportModel = '',
-  errorCallout = <></>,
+  errorCallout,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.elasticsearch_models);
   const tabToInferenceContentMap: Record<TabType, React.ReactNode> = {
@@ -136,7 +136,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
       ownFocus
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="addInferenceEndpointTitle">
           <h2>
             <FormattedMessage
               id="xpack.ml.addInferenceEndpoint.header.title"
@@ -147,7 +147,10 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="inference_endpoint_content">{content}</EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={() => onFlyoutClose(!isInferenceFlyoutVisible)}>
+        <EuiButtonEmpty
+          onClick={() => onFlyoutClose(!isInferenceFlyoutVisible)}
+          data-test-subj="closeInferenceFlyout"
+        >
           {i18n.translate('xpack.ml.addInferenceEndpoint.footer.cancel', {
             defaultMessage: 'Cancel',
           })}

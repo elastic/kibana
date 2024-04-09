@@ -32,70 +32,61 @@ export const ElandPythonClient: React.FC<{
             }),
             children: (
               <EuiText>
-                <p>
-                  <EuiText size={'s'} color={'subdued'}>
-                    <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.pipInstallLabel"
-                      defaultMessage="Eland can be installed with {pipLink} from {pypiLink}:"
-                      values={{
-                        pipLink: (
-                          <EuiLink
-                            href={'https://pypi.org/project/pip/'}
-                            target={'_blank'}
-                            external
-                          >
-                            pip
-                          </EuiLink>
-                        ),
-                        pypiLink: (
-                          <EuiLink href={'https://pypi.org/'} target={'_blank'} external>
-                            PyPI
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </p>
-                <p>
-                  <EuiCodeBlock
-                    isCopyable
-                    language="shell"
-                    fontSize={'m'}
-                    data-test-subj={'mlElandPipInstallCodeBlock'}
-                  >
-                    $ python -m pip install eland
-                  </EuiCodeBlock>
-                </p>
-                <p>
-                  <EuiText size={'s'} color={'subdued'}>
-                    <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.condaInstallLabel"
-                      defaultMessage="or it can also be installed with {condaLink} from {condaForgeLink}:"
-                      values={{
-                        condaLink: (
-                          <EuiLink href={'https://docs.conda.io/'} target={'_blank'} external>
-                            Conda
-                          </EuiLink>
-                        ),
-                        condaForgeLink: (
-                          <EuiLink href={'https://conda-forge.org/'} target={'_blank'} external>
-                            Conda Forge
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </p>
-                <p>
-                  <EuiCodeBlock
-                    isCopyable
-                    language="shell"
-                    fontSize={'m'}
-                    data-test-subj="mlElandCondaInstallCodeBlock"
-                  >
-                    $ conda install -c conda-forge eland
-                  </EuiCodeBlock>
-                </p>
+                <EuiText size={'s'} color={'subdued'}>
+                  <FormattedMessage
+                    id="xpack.ml.addInferenceEndpoint.elandPythonClient.pipInstallLabel"
+                    defaultMessage="Eland can be installed with {pipLink} from {pypiLink}:"
+                    values={{
+                      pipLink: (
+                        <EuiLink href={'https://pypi.org/project/pip/'} target={'_blank'} external>
+                          pip
+                        </EuiLink>
+                      ),
+                      pypiLink: (
+                        <EuiLink href={'https://pypi.org/'} target={'_blank'} external>
+                          PyPI
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+
+                <EuiCodeBlock
+                  isCopyable
+                  language="shell"
+                  fontSize={'m'}
+                  data-test-subj={'mlElandPipInstallCodeBlock'}
+                >
+                  <p>$ python -m pip install eland</p>
+                </EuiCodeBlock>
+
+                <EuiText size={'s'} color={'subdued'}>
+                  <FormattedMessage
+                    id="xpack.ml.addInferenceEndpoint.elandPythonClient.condaInstallLabel"
+                    defaultMessage="or it can also be installed with {condaLink} from {condaForgeLink}:"
+                    values={{
+                      condaLink: (
+                        <EuiLink href={'https://docs.conda.io/'} target={'_blank'} external>
+                          Conda
+                        </EuiLink>
+                      ),
+                      condaForgeLink: (
+                        <EuiLink href={'https://conda-forge.org/'} target={'_blank'} external>
+                          Conda Forge
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+
+                <EuiCodeBlock
+                  isCopyable
+                  language="shell"
+                  fontSize={'m'}
+                  data-test-subj="mlElandCondaInstallCodeBlock"
+                >
+                  <p> $ conda install -c conda-forge eland</p>
+                </EuiCodeBlock>
               </EuiText>
             ),
           },
