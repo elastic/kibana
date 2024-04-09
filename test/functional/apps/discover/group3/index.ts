@@ -25,5 +25,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_request_counts'));
     loadTestFile(require.resolve('./_doc_viewer'));
     loadTestFile(require.resolve('./_panels_toggle'));
+    loadTestFile(require.resolve('./_lens_vis'));
   });
 }

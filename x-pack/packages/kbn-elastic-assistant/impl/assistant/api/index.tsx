@@ -10,6 +10,7 @@ import { IHttpFetchError } from '@kbn/core-http-browser';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
+import { TraceOptions } from '../types';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
@@ -26,6 +27,7 @@ export interface FetchConnectorExecuteAction {
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
+  traceOptions?: TraceOptions;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -52,12 +54,15 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  // TODO: Remove in part 3 of streaming work for security solution
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  // In part 3 I will make enhancements to langchain to introduce streaming
-  // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
+  const isStream =
+    assistantStreamingEnabled &&
+    (apiConfig.actionTypeId === '.gen-ai' ||
+      // TODO add streaming support for bedrock with langchain on
+      // tracked here: https://github.com/elastic/security-team/issues/7363
+      (apiConfig.actionTypeId === '.bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
@@ -71,9 +76,12 @@ export const fetchConnectorExecuteAction = async ({
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
+    actionTypeId: apiConfig.actionTypeId,
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
+    langSmithProject: traceOptions?.langSmithProject,
+    langSmithApiKey: traceOptions?.langSmithApiKey,
     ...optionalRequestParams,
   };
 
@@ -85,8 +93,8 @@ export const fetchConnectorExecuteAction = async ({
           method: 'POST',
           body: JSON.stringify(requestBody),
           signal,
-          asResponse: isStream,
-          rawResponse: isStream,
+          asResponse: true,
+          rawResponse: true,
           version: '1',
         }
       );
@@ -107,9 +115,6 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
-    // TODO: Remove in part 3 of streaming work for security solution
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;
