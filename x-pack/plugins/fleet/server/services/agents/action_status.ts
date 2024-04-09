@@ -416,30 +416,66 @@ async function getPolicyChangeActions(
     {} as { [key: string]: AgentPolicyRevision }
   );
 
-  const agentsPerPolicyRevisionRes = await esClient.search({
-    index: AGENTS_INDEX,
-    size: 0,
-    // ignore unenrolled agents
-    query: {
-      bool: { must_not: [{ exists: { field: 'unenrolled_at' } }] },
-    },
-    aggs: {
-      policies: {
-        terms: {
-          field: 'policy_id',
-          size: 10,
-        },
-        aggs: {
-          agents_per_rev: {
-            terms: {
-              field: 'policy_revision_idx',
-              size: 10,
+  let agentsPerPolicyRevisionRes;
+  let agentPolicyUpdateActions: ActionStatus[];
+
+  try {
+    agentsPerPolicyRevisionRes = await esClient.search({
+      index: AGENTS_INDEX,
+      size: 0,
+      // ignore unenrolled agents
+      query: {
+        bool: { must_not: [{ exists: { field: 'unenrolled_at' } }] },
+      },
+      aggs: {
+        policies: {
+          terms: {
+            field: 'policy_id',
+            size: 10,
+          },
+          aggs: {
+            agents_per_rev: {
+              terms: {
+                field: 'policy_revision_idx',
+                size: 10,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-agents does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+
+  if (!agentsPerPolicyRevisionRes) {
+    agentPolicyUpdateActions = Object.entries(agentPolicies).map(
+      ([updateKey, updateObj]: [updateKey: string, updateObj: AgentPolicyRevision]) => {
+        return {
+          actionId: updateKey,
+          creationTime: updateObj.timestamp,
+          completionTime: updateObj.timestamp,
+          type: 'POLICY_CHANGE',
+          nbAgentsActioned: updateObj.agentsAssignedToPolicy,
+          nbAgentsAck: updateObj.agentsOnAtLeastThisRevision,
+          nbAgentsActionCreated: updateObj.agentsAssignedToPolicy,
+          nbAgentsFailed: 0,
+          status:
+            updateObj.agentsAssignedToPolicy === updateObj.agentsOnAtLeastThisRevision
+              ? 'COMPLETE'
+              : 'IN_PROGRESS',
+          policyId: updateObj.policyId,
+          revision: updateObj.revision,
+        };
+      }
+    );
+    return agentPolicyUpdateActions;
+  }
 
   interface AgentsPerPolicyRev {
     total: number;
@@ -489,7 +525,7 @@ async function getPolicyChangeActions(
     }
   });
 
-  const agentPolicyUpdateActions: ActionStatus[] = Object.entries(agentPolicies).map(
+  agentPolicyUpdateActions = Object.entries(agentPolicies).map(
     ([updateKey, updateObj]: [updateKey: string, updateObj: AgentPolicyRevision]) => {
       return {
         actionId: updateKey,
