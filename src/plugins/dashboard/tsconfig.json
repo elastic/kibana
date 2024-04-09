@@ -78,6 +78,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/user-profile-components",
     "@kbn/security-plugin-types-server",
+    "@kbn/saved-objects-settings",
   ],
   "exclude": ["target/**/*"]
 }
