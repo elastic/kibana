@@ -121,10 +121,11 @@ EOF
 
 cat << EOF | buildkite-agent pipeline upload
 steps:
-  - trigger: 'kibana-elasticsearch-snapshot-verify'
+  - trigger: 'kibana-migration-pipeline-staging'
     async: true
     build:
       env:
+        TESTED_PIPELINE_PATH=".buildkite/pipelines/es_snapshots/verify.yml"
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
       branch: '$BUILDKITE_BRANCH'
 EOF
