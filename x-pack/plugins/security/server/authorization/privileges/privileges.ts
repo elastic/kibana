@@ -8,6 +8,10 @@
 import { uniq } from 'lodash';
 
 import type {
+  FeatureKibanaPrivileges,
+  FeatureKibanaPrivilegesReference,
+} from '@kbn/features-plugin/common';
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
@@ -41,6 +45,10 @@ export function privilegesFactory(
       const readActionsSet = new Set<string>();
 
       basePrivilegeFeatures.forEach((feature) => {
+        if (feature.disabled) {
+          return;
+        }
+
         for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
           licenseHasAtLeast,
@@ -56,9 +64,31 @@ export function privilegesFactory(
         }
       });
 
-      const allActions = [...allActionsSet];
-      const readActions = [...readActionsSet];
+      // Remember privilege as composable to update it later, once actions for all referenced privileges are also
+      // calculated and registered.
+      const composableFeaturePrivileges: Array<{
+        featureId: string;
+        privilegeId: string;
+        excludeFromBasePrivileges?: boolean;
+        composedOf: readonly FeatureKibanaPrivilegesReference[];
+      }> = [];
+      const tryStoreComposableFeature = (
+        feature: KibanaFeature,
+        privilegeId: string,
+        privilege: FeatureKibanaPrivileges
+      ) => {
+        if (privilege.composedOf) {
+          composableFeaturePrivileges.push({
+            featureId: feature.id,
+            privilegeId,
+            composedOf: privilege.composedOf,
+            excludeFromBasePrivileges:
+              feature.excludeFromBasePrivileges || privilege.excludeFromBasePrivileges,
+          });
+        }
+      };
 
+      const disabledFeatures = new Set<string>();
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {
         featurePrivileges[feature.id] = {};
@@ -66,20 +96,26 @@ export function privilegesFactory(
           augmentWithSubFeaturePrivileges: true,
           licenseHasAtLeast,
         })) {
-          featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
+          const fullPrivilegeId = featurePrivilege.privilegeId;
+          featurePrivileges[feature.id][fullPrivilegeId] = [
             actions.login,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
+
+          tryStoreComposableFeature(feature, fullPrivilegeId, featurePrivilege.privilege);
         }
 
         for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: false,
           licenseHasAtLeast,
         })) {
-          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+          const minimalPrivilegeId = `minimal_${featurePrivilege.privilegeId}`;
+          featurePrivileges[feature.id][minimalPrivilegeId] = [
             actions.login,
             ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
+
+          tryStoreComposableFeature(feature, minimalPrivilegeId, featurePrivilege.privilege);
         }
 
         if (
@@ -97,10 +133,49 @@ export function privilegesFactory(
           }
         }
 
-        if (Object.keys(featurePrivileges[feature.id]).length === 0) {
-          delete featurePrivileges[feature.id];
+        if (feature.disabled || Object.keys(featurePrivileges[feature.id]).length === 0) {
+          disabledFeatures.add(feature.id);
         }
       }
+
+      // Update composable feature privileges to include and deduplicate actions from the referenced privileges.
+      // Note that we should do it _before_ removing disabled features.
+      for (const composableFeature of composableFeaturePrivileges) {
+        const composedActions = composableFeature.composedOf.flatMap((privilegeReference) =>
+          privilegeReference.privileges.flatMap(
+            (privilege) => featurePrivileges[privilegeReference.feature][privilege]
+          )
+        );
+        featurePrivileges[composableFeature.featureId][composableFeature.privilegeId] = [
+          ...new Set(
+            featurePrivileges[composableFeature.featureId][composableFeature.privilegeId].concat(
+              composedActions
+            )
+          ),
+        ];
+
+        if (!composableFeature.excludeFromBasePrivileges) {
+          for (const action of composedActions) {
+            // Login action is special since it's added explicitly for feature and base privileges.
+            if (action === actions.login) {
+              continue;
+            }
+
+            allActionsSet.add(action);
+            if (composableFeature.privilegeId === 'read') {
+              readActionsSet.add(action);
+            }
+          }
+        }
+      }
+
+      // Remove disabled features to avoid registering standalone privileges for them.
+      for (const disabledFeatureId of disabledFeatures) {
+        delete featurePrivileges[disabledFeatureId];
+      }
+
+      const allActions = [...allActionsSet];
+      const readActions = [...readActionsSet];
       return {
         features: featurePrivileges,
         global: {
