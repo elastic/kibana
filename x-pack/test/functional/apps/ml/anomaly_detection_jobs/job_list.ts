@@ -8,13 +8,10 @@
 import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getCommonRequestHeader } from '../../../services/ml/common_api';
-import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const supertest = getService('supertestWithoutAuth');
 
   const jobId = `fq_single_1_job_list_test_${Date.now()}`;
   const calendarId = `test-calendar-${Date.now()}`;
@@ -55,12 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.waitForJobState(jobId, JOB_STATE.CLOSED);
       await ml.api.openAnomalyDetectionJob(jobId);
 
-      const { body, status } = await supertest
-        .post(`/internal/ml/anomaly_detectors/${jobId}/_forecast`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('1'))
-        .send({ duration: '1d' });
-      ml.api.assertResponseStatusCode(200, status, body);
+      await ml.api.addForecast(jobId);
 
       await ml.api.assertForecastResultsExist(jobId);
 

@@ -28,6 +28,7 @@ import {
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
 import { getCommonRequestHeader } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlSecurityCommon, USER } from './security_common';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
@@ -74,7 +75,10 @@ export interface TrainedModelVocabulary {
   vocabulary: string[];
 }
 
-export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
+export function MachineLearningAPIProvider(
+  { getService }: FtrProviderContext,
+  mlSecurityCommon: MlSecurityCommon
+) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
@@ -205,6 +209,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
 
       return body.hits.hits.length > 0;
+    },
+
+    async addForecast(jobId: string): Promise<void> {
+      const { body, status } = await kbnSupertest
+        .post(`/internal/ml/anomaly_detectors/${jobId}/_forecast`)
+        .auth(USER.ML_POWERUSER, mlSecurityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(getCommonRequestHeader('1'))
+        .send({ duration: '1d' });
+      this.assertResponseStatusCode(200, status, body);
     },
 
     async assertForecastResultsExist(jobId: string) {
