@@ -6,20 +6,20 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { of } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
 
+const mockUseBreadcrumbsNav = jest.fn();
 jest.mock('../breadcrumbs', () => ({
-  useBreadcrumbsNav: () => jest.fn(),
+  useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
 }));
 
-const mockIsSideNavEnabled = jest.fn(() => true);
+const mockIsSolutionNavEnabled$ = jest.fn(() => of(false));
 jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
-        configSettings: {
-          sideNavEnabled: mockIsSideNavEnabled(),
-        },
+        isSolutionNavEnabled$: mockIsSolutionNavEnabled$(),
       },
     }),
   };
@@ -29,23 +29,43 @@ describe('Security Solution Navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  describe('when classic navigation is enabled', () => {
+    beforeAll(() => {
+      mockIsSolutionNavEnabled$.mockReturnValue(of(false));
+    });
 
-  it('should return proper navigation props', () => {
-    const { result } = renderHook(useSecuritySolutionNavigation);
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        canBeCollapsed: true,
-        name: 'Security',
-        icon: 'logoSecurity',
-        closeFlyoutButtonPosition: 'inside',
-      })
-    );
-    expect(result.current?.children).toBeDefined();
+    it('should return proper navigation props', () => {
+      const { result } = renderHook(useSecuritySolutionNavigation);
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          canBeCollapsed: true,
+          name: 'Security',
+          icon: 'logoSecurity',
+          closeFlyoutButtonPosition: 'inside',
+        })
+      );
+      expect(result.current?.children).toBeDefined();
+    });
+
+    it('should initialize breadcrumbs', () => {
+      renderHook(useSecuritySolutionNavigation);
+      expect(mockUseBreadcrumbsNav).toHaveBeenCalled();
+    });
   });
 
-  it('should return undefined props when disabled', () => {
-    mockIsSideNavEnabled.mockReturnValueOnce(false);
-    const { result } = renderHook(useSecuritySolutionNavigation);
-    expect(result.current).toEqual(undefined);
+  describe('when solution navigation is enabled', () => {
+    beforeAll(() => {
+      mockIsSolutionNavEnabled$.mockReturnValue(of(true));
+    });
+
+    it('should return undefined props when disabled', () => {
+      const { result } = renderHook(useSecuritySolutionNavigation);
+      expect(result.current).toEqual(undefined);
+    });
+
+    it('should initialize breadcrumbs', () => {
+      renderHook(useSecuritySolutionNavigation);
+      expect(mockUseBreadcrumbsNav).toHaveBeenCalled();
+    });
   });
 });

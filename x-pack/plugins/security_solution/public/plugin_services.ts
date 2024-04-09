@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
 import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
@@ -113,14 +112,12 @@ export class PluginServices {
     });
     const customDataService = this.startCustomDataService(query, startPlugins.data);
 
-    const sideNavEnabled = await this.getIsSidebarEnabled(coreStart);
-
     return {
       ...coreStart,
       ...plugins,
       ...this.contract.getStartServices(),
       apm,
-      configSettings: { ...this.configSettings, sideNavEnabled },
+      configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       setHeaderActionMenu: params.setHeaderActionMenu,
       storage: this.storage,
@@ -153,9 +150,4 @@ export class PluginServices {
     customDataService.query.filterManager._name = 'customFilterManager';
     return customDataService;
   };
-
-  private async getIsSidebarEnabled(coreStart: CoreStart) {
-    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
-    return chromeStyle === 'classic';
-  }
 }

@@ -15,7 +15,7 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 const MachineLearningPage = React.memo(function MachineLearningPage() {
   return (
     <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.mlLanding}>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.mlLanding} redirectOnMissing>
         <MachineLearning />
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>

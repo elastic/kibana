@@ -25,7 +25,7 @@ export class PluginContract {
     this.onboardingPageService = new OnboardingPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
-    this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false);
+    this.isSolutionNavigationEnabled$ = new BehaviorSubject<boolean>(false); // defaults to classic navigation
   }
 
   public getSetupContract(): PluginSetup {
@@ -56,6 +56,7 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
+      isSolutionNavEnabled$: this.isSolutionNavigationEnabled$.asObservable(),
       upselling: this.upsellingService,
       onboarding: this.onboardingPageService,
     };

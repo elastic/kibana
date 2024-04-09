@@ -15,7 +15,7 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 const AssetsPage = React.memo(function AssetsPage() {
   return (
     <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.assets}>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.assets} redirectOnMissing>
         <Assets />
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
