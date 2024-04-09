@@ -7,7 +7,7 @@
 
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   logIndexNameReferenceRT,
@@ -15,6 +15,12 @@ import {
   logDataViewReferenceRT,
   LogIndexReference,
 } from '@kbn/logs-shared-plugin/common';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
@@ -25,6 +31,11 @@ export const IndicesConfigurationPanel = React.memo<{
   isReadOnly: boolean;
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
 }>(({ isLoading, isReadOnly, indicesFormElement }) => {
+  const {
+    services: { http },
+  } = useKibanaContextForPlugin();
+  const [numberOfLogsRules, setNumberOfLogsRules] = useState(0);
+
   const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
   const changeToIndexPatternType = useCallback(() => {
@@ -53,6 +64,23 @@ export const IndicesConfigurationPanel = React.memo<{
       metric: 'configuration_switch_to_index_names_reference',
     });
   }, [indicesFormElement, trackChangeIndexSourceType]);
+
+  useEffect(() => {
+    const getNumberOfInfraRules = async () => {
+      if (http) {
+        const { ruleExecutionStatus } = await loadRuleAggregations({
+          http,
+          filterConsumers: [AlertConsumers.LOGS],
+        });
+        const numberOfRules = Object.values(ruleExecutionStatus).reduce(
+          (acc, value) => acc + value,
+          0
+        );
+        setNumberOfLogsRules(numberOfRules);
+      }
+    };
+    getNumberOfInfraRules();
+  }, [http]);
 
   return (
     <EuiFormFieldset
@@ -123,6 +151,34 @@ export const IndicesConfigurationPanel = React.memo<{
           />
         )}
       </EuiCheckableCard>
+      {numberOfLogsRules > 0 && indicesFormElement.isDirty && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            size="s"
+            title={i18n.translate('xpack.infra.sourceConfiguration.logsIndicesUsedByRulesTitle', {
+              defaultMessage: 'Rules utilize the current index pattern.',
+            })}
+            color="danger"
+            iconType="warning"
+          >
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logsIndicesUsedByRulesMessage"
+              defaultMessage="There {isOrAre} {numberOfLogsRules} rule{plural} that rely on the current {sourceType} setting. Changing this setting may impact the execution of these rules."
+              values={{
+                numberOfLogsRules,
+                plural: numberOfLogsRules > 1 ? 's' : '',
+                isOrAre: numberOfLogsRules > 1 ? 'are' : 'is',
+                sourceType:
+                  indicesFormElement.initialValue?.type === 'index_name'
+                    ? 'Log indices'
+                    : 'Data view',
+              }}
+            />
+          </EuiCallOut>
+        </>
+      )}
     </EuiFormFieldset>
   );
 });
