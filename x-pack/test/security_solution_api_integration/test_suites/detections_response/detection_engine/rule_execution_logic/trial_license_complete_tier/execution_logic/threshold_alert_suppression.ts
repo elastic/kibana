@@ -57,10 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     before(async () => {
+      await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
+      await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
@@ -865,13 +867,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', async () => {
       before(async () => {
-        await esArchiver.load(path);
         await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
-        await esArchiver.unload(path);
       });
 
       it('should be enriched with host risk score', async () => {
@@ -900,7 +900,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', async () => {
       before(async () => {
-        await esArchiver.load(path);
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
         await kibanaServer.uiSettings.update({
           [ENABLE_ASSET_CRITICALITY_SETTING]: true,
@@ -909,7 +908,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
-        await esArchiver.unload(path);
       });
 
       it('should be enriched alert with criticality_level', async () => {
