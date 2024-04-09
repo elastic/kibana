@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import type { TransformHealthTests } from './types/alerting';
@@ -104,51 +105,37 @@ export const TRANSFORM_STATE = {
 export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH_STATUS = {
-  GREEN: 'GREEN',
   green: 'green',
-  UNKNOWN: 'UNKNOWN',
-  unknown: 'unknown',
-  YELLOW: 'YELLOW',
   yellow: 'yellow',
-  RED: 'RED',
   red: 'red',
+  unknown: 'unknown',
 } as const;
-
-export type TransformHealthStatus =
-  typeof TRANSFORM_HEALTH_STATUS[keyof typeof TRANSFORM_HEALTH_STATUS];
+export type TransformHealthStatus = keyof typeof TRANSFORM_HEALTH_STATUS;
+export const isTransformHealthStatus = (arg: unknown): arg is TransformHealthStatus =>
+  typeof arg === 'string' && Object.keys(TRANSFORM_HEALTH_STATUS).includes(arg);
+export const mapEsHealthStatus2TransformHealthStatus = (
+  healthStatus?: estypes.HealthStatus
+): TransformHealthStatus =>
+  typeof healthStatus === 'string' && isTransformHealthStatus(healthStatus.toLowerCase())
+    ? (healthStatus.toLowerCase() as TransformHealthStatus)
+    : 'unknown';
 
 export const TRANSFORM_HEALTH_COLOR = {
-  GREEN: 'success',
   green: 'success',
-  UNKNOWN: 'subdued',
   unknown: 'subdued',
-  YELLOW: 'warning',
   yellow: 'warning',
-  RED: 'danger',
   red: 'danger',
 } as const;
 
 export const TRANSFORM_HEALTH_LABEL = {
-  GREEN: i18n.translate('xpack.transform.transformHealth.greenLabel', {
-    defaultMessage: 'Healthy',
-  }),
   green: i18n.translate('xpack.transform.transformHealth.greenLabel', {
     defaultMessage: 'Healthy',
-  }),
-  UNKNOWN: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
-    defaultMessage: 'Unknown',
   }),
   unknown: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
     defaultMessage: 'Unknown',
   }),
-  YELLOW: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
-    defaultMessage: 'Degraded',
-  }),
   yellow: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
     defaultMessage: 'Degraded',
-  }),
-  RED: i18n.translate('xpack.transform.transformHealth.redLabel', {
-    defaultMessage: 'Unavailable',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
     defaultMessage: 'Unavailable',
@@ -156,28 +143,15 @@ export const TRANSFORM_HEALTH_LABEL = {
 } as const;
 
 export const TRANSFORM_HEALTH_DESCRIPTION = {
-  GREEN: i18n.translate('xpack.transform.transformHealth.greenDescription', {
-    defaultMessage: 'The transform is running as expected.',
-  }),
   green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
     defaultMessage: 'The transform is running as expected.',
-  }),
-  UNKNOWN: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
-    defaultMessage: 'The health of the transform could not be determined.',
   }),
   unknown: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
     defaultMessage: 'The health of the transform could not be determined.',
   }),
-  YELLOW: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
-    defaultMessage:
-      'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
-  }),
   yellow: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
     defaultMessage:
       'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
-  }),
-  RED: i18n.translate('xpack.transform.transformHealth.redDescription', {
-    defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redDescription', {
     defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',
