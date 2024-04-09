@@ -51,7 +51,7 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Allows for canvas to register the older versioned way whereas reporting for Discover/Lens/Dashboard
    * can use the new share version and show the share context modals
    */
-  isNewVersion: boolean;
+  isNewVersion: () => boolean;
 };
 
 /** @public */
@@ -149,7 +149,7 @@ export class SharePlugin
         }
         this.anonymousAccessServiceProvider = provider;
       },
-      isNewVersion: this.config.new_version.enabled,
+      isNewVersion: () => this.config.new_version.enabled,
     };
   }
 

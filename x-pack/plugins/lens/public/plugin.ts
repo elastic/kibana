@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
-
+import { take } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -406,7 +405,7 @@ export class LensPlugin {
               });
             return isGold;
           },
-          isNewVersion: share.isNewVersion,
+          isNewVersion: share.isNewVersion(),
         })
       );
     }

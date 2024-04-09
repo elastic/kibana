@@ -97,7 +97,7 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
-  atLeastGold: boolean;
+  atLeastGold: () => boolean;
   isNewVersion: boolean;
 }
 
@@ -111,7 +111,6 @@ export const downloadCsvShareProvider = ({
     if ('lens' !== objectType) {
       return [];
     }
-
     const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
       title: string;
       activeData: TableInspectorAdapter;
@@ -126,7 +125,7 @@ export const downloadCsvShareProvider = ({
       }
     );
 
-const menuItemMetadata = {
+    const menuItemMetadata = {
       shareMenuItem: {
         name: panelTitle,
         icon: 'document',
@@ -171,7 +170,7 @@ const menuItemMetadata = {
         downloadCSVLens: onClick,
         label: 'CSV' as const,
         reportType: 'csv',
-        ...(atLeastGold
+        ...(atLeastGold()
           ? {
               helpText: (
                 <FormattedMessage
