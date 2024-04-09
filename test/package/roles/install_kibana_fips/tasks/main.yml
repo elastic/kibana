@@ -55,9 +55,9 @@
 
 - name: configure OpenSSL for FIPS
   become: yes
-  chdir: /usr/share/kibana/openssl-3.0.8
-  shell: |
-    ./Configure enable-fips
+  shell:
+    chdir: /usr/share/kibana/openssl-3.0.8
+    cmd: ./Configure enable-fips
 
 - name: compile OpenSSL with FIPS
   become: yes
