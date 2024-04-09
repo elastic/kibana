@@ -6,7 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, filter, map, merge, Observable, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  combineLatestWith,
+  debounceTime,
+  delay,
+  filter,
+  map,
+  merge,
+  Observable,
+  of,
+  startWith,
+  Subject,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   apiPublishesTimeRange,
@@ -41,45 +57,27 @@ function getFetchContext(api: unknown, isReload: boolean) {
   };
 }
 
-export function getFetch$(api: unknown): Observable<FetchContext> {
-  function hasSearchSession() {
-    return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
-      ? typeof api.parentApi.searchSessionId$.value === 'string'
-      : false;
-  }
+function hasSearchSession(api: unknown) {
+  return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
+    ? typeof api.parentApi.searchSessionId$.value === 'string'
+    : false;
+}
 
-  function hasLocalTimeRange() {
-    return apiPublishesTimeRange(api)
-      ?  typeof api.timeRange$.value === 'object'
-      : false;
-  }
+function hasLocalTimeRange(api: unknown) {
+  return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
+}
 
-  const observables: Observable<{ isReload: boolean }>[] = [];
+function getDelayedObservables(api: unknown): Observable<unknown>[] {
+  const delayedObservables: Observable<unknown>[] = [];
 
   if (apiPublishesTimeRange(api)) {
-    observables.push(
-      api.timeRange$.pipe(
-        skip(1),
-        map(() => ({ isReload: false }))
-      )
-    );
-  }
-
-  if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    observables.push(
-      api.parentApi.searchSessionId$.pipe(
-        skip(1),
-        map(() => ({ isReload: true }))
-      )
-    );
+    delayedObservables.push(api.timeRange$.pipe(tap(() => console.log('timeRange$ emit'))));
   }
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.push(
+    delayedObservables.push(
       combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(
-        skip(1),
-        filter(() => !hasSearchSession()),
-        map(() => ({ isReload: false }))
+        filter(() => !hasSearchSession(api))
       )
     );
 
@@ -88,28 +86,63 @@ export function getFetch$(api: unknown): Observable<FetchContext> {
       if (api.parentApi.timeslice$) {
         timeObservables.push(api.parentApi.timeslice$);
       }
-      observables.push(
+      delayedObservables.push(
         combineLatest(timeObservables).pipe(
-          skip(1),
-          filter(() => !hasSearchSession() && !hasLocalTimeRange()),
-          map(() => ({ isReload: false }))
-        )
-      );
-    }
-    if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
-      observables.push(
-        api.parentApi.reload$.pipe(
-          filter(() => !hasSearchSession() && !hasLocalTimeRange()),
-          map(() => ({ isReload: true }))
+          filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
         )
       );
     }
   }
 
-  return merge(...observables).pipe(
-    map(({ isReload }) => {
-      console.log('isReload', isReload);
-      return getFetchContext(api, isReload);
-    })
+  return delayedObservables;
+}
+
+function getImmediateObservables(api: unknown): Observable<unknown>[] {
+  const immediateObservables: Observable<unknown>[] = [];
+  if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
+    immediateObservables.push(api.parentApi.searchSessionId$);
+  }
+  if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
+    immediateObservables.push(
+      api.parentApi.reload$.pipe(
+        filter(() => !hasSearchSession(api)),
+      )
+    );
+  }
+  return immediateObservables;
+}
+
+export function getFetch$(api: unknown): Observable<FetchContext> {
+  const delayedObservables = getDelayedObservables(api);
+  const immediateObservables = getImmediateObservables(api);
+
+  console.log('delayedObservables count', delayedObservables.length);
+
+  if (immediateObservables.length === 0) {
+    return merge(...delayedObservables).pipe(
+      debounceTime(0),
+      map(() => (getFetchContext(api, false)))
+    );
+  }
+
+  const interrupt = new Subject<void>();
+  const cancellableChanges$ = merge(...delayedObservables).pipe(
+    tap(() => console.log('delayedObservables emit')),
+    switchMap((value) =>
+      of(value).pipe(
+        delay(1),
+        takeUntil(interrupt),
+        tap(() => console.log('cancellableChanges$ emit')),
+        map(() => (getFetchContext(api, false)))
+      )
+    )
   );
+
+  const immediateChange$ = merge(...immediateObservables).pipe(
+    tap(() => interrupt.next()),
+    tap(() => console.log('immediateChange$ emit')),
+    map(() => (getFetchContext(api, true)))
+  );
+
+  return merge(immediateChange$, cancellableChanges$);*/
 }

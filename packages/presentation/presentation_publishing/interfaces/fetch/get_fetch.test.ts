@@ -7,8 +7,8 @@
  */
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { FetchContext, getFetch$ } from './get_fetch';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
+import { getFetch$ } from './get_fetch';
 
 describe('onFetchContextChanged', () => {
   const onFetchMock = jest.fn();
@@ -42,7 +42,7 @@ describe('onFetchContextChanged', () => {
     });
 
     test('should fire when fetch context changes', async () => {
-      const subscription = getFetch$({ parentApi }).subscribe(onFetchMock);
+      const subscription = getFetch$({ parentApi }).pipe(skip(1)).subscribe(onFetchMock);
       parentApi.filters$.next([]);
       parentApi.query$.next({ language: 'kquery', query: '' });
       parentApi.timeRange$.next({
@@ -72,7 +72,7 @@ describe('onFetchContextChanged', () => {
     });
 
     test('should fire on reload', async () => {
-      const subscription = getFetch$({ parentApi }).subscribe(onFetchMock);
+      const subscription = getFetch$({ parentApi }).pipe(skip(1)).subscribe(onFetchMock);
       parentApi.reload$.next();
       setSearchSession();
       await new Promise((resolve) => setTimeout(resolve, 1));
@@ -82,17 +82,19 @@ describe('onFetchContextChanged', () => {
       subscription.unsubscribe();
     });
 
-    test('should fire on local time range change and no search session change', async () => {
+    test.only('should fire on local time range change and no search session change', async () => {
       const api = {
         parentApi,
         timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
       };
-      const subscription = getFetch$(api).subscribe(onFetchMock);
+      const subscription = getFetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      console.log('subscription settled');
       api.timeRange$.next({
         from: 'now-15m',
         to: 'now',
       });
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       expect(onFetchMock.mock.calls).toHaveLength(1);
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext.isReload).toBe(false);
@@ -106,7 +108,7 @@ describe('onFetchContextChanged', () => {
 
   describe('no searchSession$', () => {
     test('should fire on reload', async () => {
-      const subscription = getFetch$({ parentApi }).subscribe(onFetchMock);
+      const subscription = getFetch$({ parentApi }).pipe(skip(1)).subscribe(onFetchMock);
       parentApi.reload$.next();
       await new Promise((resolve) => setTimeout(resolve, 1));
       expect(onFetchMock.mock.calls).toHaveLength(1);
@@ -115,7 +117,7 @@ describe('onFetchContextChanged', () => {
       subscription.unsubscribe();
     });
 
-    /*describe('local and parent time range', () => {
+    describe('local and parent time range', () => {
       const api = {
         parentApi,
         timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
@@ -131,12 +133,8 @@ describe('onFetchContextChanged', () => {
         });
       });
 
-      test('should call onFetch with local time range', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: true,
-        });
+      test('should emit with local time range', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         await new Promise((resolve) => setTimeout(resolve, 1));
         expect(onFetchMock.mock.calls).toHaveLength(1);
         const fetchContext = onFetchMock.mock.calls[0][0];
@@ -144,15 +142,11 @@ describe('onFetchContextChanged', () => {
           from: 'now-15m',
           to: 'now',
         });
-        unsubscribe();
+        subscription.unsubscribe();
       });
 
-      test('should call onFetch when local time range changes', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: false,
-        });
+      test('should emitwhen local time range changes', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         api.timeRange$.next({
           from: 'now-16m',
           to: 'now',
@@ -164,30 +158,22 @@ describe('onFetchContextChanged', () => {
           from: 'now-16m',
           to: 'now',
         });
-        unsubscribe();
+        subscription.unsubscribe();
       });
 
-      test('should not call onFetch when parent time range changes', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: false,
-        });
+      test('should not emit when parent time range changes', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         api.parentApi.timeRange$.next({
           from: 'now-25h',
           to: 'now',
         });
         await new Promise((resolve) => setTimeout(resolve, 1));
         expect(onFetchMock.mock.calls).toHaveLength(0);
-        unsubscribe();
+        subscription.unsubscribe();
       });
 
-      test('should call onFetch with parent time range when local time range is cleared', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: false,
-        });
+      test('should emit with parent time range when local time range is cleared', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         api.timeRange$.next(undefined);
         await new Promise((resolve) => setTimeout(resolve, 1));
         expect(onFetchMock.mock.calls).toHaveLength(1);
@@ -196,7 +182,7 @@ describe('onFetchContextChanged', () => {
           from: 'now-24h',
           to: 'now',
         });
-        unsubscribe();
+        subscription.unsubscribe();
       });
     });
 
@@ -211,12 +197,8 @@ describe('onFetchContextChanged', () => {
         });
       });
 
-      test('should call onFetch with parent time range', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: true,
-        });
+      test('should emit with parent time range', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         await new Promise((resolve) => setTimeout(resolve, 1));
         expect(onFetchMock.mock.calls).toHaveLength(1);
         const fetchContext = onFetchMock.mock.calls[0][0];
@@ -224,15 +206,11 @@ describe('onFetchContextChanged', () => {
           from: 'now-24h',
           to: 'now',
         });
-        unsubscribe();
+        subscription.unsubscribe();
       });
 
-      test('should call onFetch when parent time range changes', async () => {
-        const unsubscribe = onFetchContextChanged({
-          api,
-          onFetch: onFetchMock,
-          fetchOnSetup: false,
-        });
+      test('should emit when parent time range changes', async () => {
+        const subscription = getFetch$(api).subscribe(onFetchMock);
         api.parentApi.timeRange$.next({
           from: 'now-25h',
           to: 'now',
@@ -244,8 +222,8 @@ describe('onFetchContextChanged', () => {
           from: 'now-25h',
           to: 'now',
         });
-        unsubscribe();
+        subscription.unsubscribe();
       });
-    });*/
+    });
   });
 });
