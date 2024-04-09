@@ -15,7 +15,6 @@ import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import useMount from 'react-use/lib/useMount';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
@@ -41,7 +40,7 @@ import { FieldValidationCallout } from '../category_validation_callout';
 import { EmbeddableMenu } from './embeddable_menu';
 import { useMinimumTimeRange } from './use_minimum_time_range';
 
-import { createDocumentStatsHash, getMessageField } from '../utils';
+import { createAdditionalConfigHash, createDocumentStatsHash, getMessageField } from '../utils';
 
 export interface LogCategorizationPageProps {
   onClose: () => void;
@@ -92,8 +91,15 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedField, setSelectedField] = useState<DataViewField | null>(null);
   const [fields, setFields] = useState<DataViewField[]>([]);
+  const [currentDocumentStatsHash, setCurrentDocumentStatsHash] = useState<number | null>(null);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+  const [currentAdditionalConfigsHash, setCurrentAdditionalConfigsHash] = useState<number | null>(
+    null
+  );
+  const [previousAdditionalConfigsHash, setPreviousAdditionalConfigsHash] = useState<number | null>(
+    null
+  );
+  const [loading, setLoading] = useState(false);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
@@ -105,13 +111,16 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     null
   );
 
-  useMount(function loadFields() {
-    const { dataViewFields, messageField } = getMessageField(dataView);
-    setFields(dataViewFields);
-    if (messageField !== undefined) {
+  useEffect(
+    function initFields() {
+      setCurrentDocumentStatsHash(null);
+      setSelectedField(null);
+      const { dataViewFields, messageField } = getMessageField(dataView);
+      setFields(dataViewFields);
       setSelectedField(messageField);
-    }
-  });
+    },
+    [dataView]
+  );
 
   const cancelRequest = useCallback(() => {
     cancelWiderTimeRangeRequest();
@@ -131,7 +140,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     [cancelRequest, mounted, setPatternCount]
   );
 
-  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+  const { searchQuery } = useSearch(
     { dataView, savedSearch: savedSearch ?? null },
     stateFromUrl,
     true
@@ -147,11 +156,40 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     BAR_TARGET
   );
 
+  useEffect(
+    function createDocumentStatHash() {
+      if (documentStats.documentCountStats === undefined) {
+        return;
+      }
+
+      const hash = createDocumentStatsHash(documentStats);
+      if (hash !== previousDocumentStatsHash) {
+        setCurrentDocumentStatsHash(hash);
+      }
+    },
+    [documentStats, previousDocumentStatsHash]
+  );
+
+  useEffect(
+    function createAdditionalConfigHash2() {
+      if (!selectedField?.name) {
+        return;
+      }
+
+      const hash = createAdditionalConfigHash([selectedField.name, minimumTimeRangeOption]);
+      if (hash !== previousAdditionalConfigsHash) {
+        setCurrentAdditionalConfigsHash(hash);
+      }
+    },
+    [minimumTimeRangeOption, previousAdditionalConfigsHash, selectedField]
+  );
+
   const loadCategories = useCallback(async () => {
     const { getIndexPattern, timeFieldName: timeField } = dataView;
     const index = getIndexPattern();
 
     if (
+      loading === true ||
       selectedField === null ||
       timeField === undefined ||
       earliest === undefined ||
@@ -243,12 +281,13 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     }
   }, [
     dataView,
+    loading,
     selectedField,
     earliest,
     latest,
+    minimumTimeRangeOption,
     cancelRequest,
     getMinimumTimeRange,
-    minimumTimeRangeOption,
     searchQuery,
     runValidateFieldRequest,
     embeddingOrigin,
@@ -312,41 +351,42 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     [dataView.id, filterManager, input]
   );
 
-  useEffect(() => {
-    const buckets = documentStats.documentCountStats?.buckets;
-    if (buckets === undefined || selectedField === null) {
-      return;
-    }
+  useEffect(
+    function triggerAnalysis() {
+      const buckets = documentStats.documentCountStats?.buckets;
+      if (buckets === undefined || currentDocumentStatsHash === null) {
+        return;
+      }
 
-    const hash = createDocumentStatsHash(documentStats, [
-      selectedField.name,
-      minimumTimeRangeOption,
-    ]);
-    if (hash !== previousDocumentStatsHash) {
-      randomSampler.setDocCount(documentStats.totalCount);
-      setEventRate(
-        Object.entries(buckets).map(([key, docCount]) => ({
-          key: +key,
-          docCount,
-        }))
-      );
-      loadCategories();
-      setPreviousDocumentStatsHash(hash);
-    }
-  }, [
-    documentStats,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    loadCategories,
-    randomSampler,
-    previousDocumentStatsHash,
-    fieldValidationResult,
-    selectedField,
-    minimumTimeRangeOption,
-  ]);
+      if (
+        currentDocumentStatsHash !== previousDocumentStatsHash ||
+        (currentAdditionalConfigsHash !== previousAdditionalConfigsHash &&
+          currentDocumentStatsHash !== null)
+      ) {
+        randomSampler.setDocCount(documentStats.totalCount);
+        setEventRate(
+          Object.entries(buckets).map(([key, docCount]) => ({
+            key: +key,
+            docCount,
+          }))
+        );
+        loadCategories();
+        setPreviousDocumentStatsHash(currentDocumentStatsHash);
+        setPreviousAdditionalConfigsHash(currentAdditionalConfigsHash);
+      }
+    },
+    [
+      loadCategories,
+      randomSampler,
+      previousDocumentStatsHash,
+      fieldValidationResult,
+      currentDocumentStatsHash,
+      currentAdditionalConfigsHash,
+      documentStats.documentCountStats?.buckets,
+      documentStats.totalCount,
+      previousAdditionalConfigsHash,
+    ]
+  );
 
   useEffect(
     function refreshTriggeredFromButton() {

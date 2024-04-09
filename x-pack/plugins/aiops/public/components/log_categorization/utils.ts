@@ -6,27 +6,25 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 /**
  * Creates a hash from the document stats to determine if the document stats have changed.
  */
-export function createDocumentStatsHash(
-  documentStats: DocumentStats,
-  additionalStrings: string[] = []
-) {
+export function createDocumentStatsHash(documentStats: DocumentStats) {
   const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
   const totalCount = documentStats.documentCountStats?.totalCount;
   const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
   const firstBucketTimeStamp = times.length ? times[0] : undefined;
   const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
-  return stringHash(
-    `${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}${additionalStrings.join(
-      ''
-    )}`
-  );
+
+  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
+}
+
+export function createAdditionalConfigHash(additionalStrings: string[] = []) {
+  return stringHash(`${additionalStrings.join('')}`);
 }
 
 /**
@@ -36,10 +34,15 @@ export function createDocumentStatsHash(
  * @param dataView - The DataView object containing the fields.
  * @returns An object containing the message field and all the fields in the DataView.
  */
-export function getMessageField(dataView: DataView) {
+export function getMessageField(dataView: DataView): {
+  messageField: DataViewField | null;
+  dataViewFields: DataViewField[];
+} {
   const dataViewFields = dataView.fields.filter((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT));
-  // setFields(dataViewFields);
-  let messageField = dataViewFields.find((f) => f.name === 'message');
+
+  let messageField: DataViewField | null | undefined = dataViewFields.find(
+    (f) => f.name === 'message'
+  );
   if (messageField === undefined) {
     messageField = dataViewFields.find((f) => f.name === 'error.message');
   }
@@ -47,7 +50,11 @@ export function getMessageField(dataView: DataView) {
     messageField = dataViewFields.find((f) => f.name === 'event.original ');
   }
   if (messageField === undefined) {
-    messageField = dataViewFields[0];
+    if (dataViewFields.length > 0) {
+      messageField = dataViewFields[0];
+    } else {
+      messageField = null;
+    }
   }
   return { messageField, dataViewFields };
 }
