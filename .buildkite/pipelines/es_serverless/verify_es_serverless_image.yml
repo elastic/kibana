@@ -208,6 +208,7 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           localSsds: 1
+          localSsdInterface: nvme
           machineType: n2-standard-4
         depends_on: build
         timeout_in_minutes: 60
