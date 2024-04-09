@@ -25,7 +25,14 @@ export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBanner
                 id="xpack.idxMgmt.indexDetails.mappings.semanticText.description"
                 defaultMessage="{label} Add a field to your mapping and choose 'semantic_text' to get started.'"
                 values={{
-                  label: <strong>semantic_text field type now available!</strong>,
+                  label: (
+                    <strong>
+                      <FormattedMessage
+                        id="yourApp.semanticTextFieldAvailable"
+                        defaultMessage="semantic_text field type now available!"
+                      />
+                    </strong>
+                  ),
                 }}
               />
             </EuiText>
