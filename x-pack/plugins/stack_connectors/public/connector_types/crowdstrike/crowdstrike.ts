@@ -39,7 +39,7 @@ export function getConnectorType(): ConnectorTypeModel<
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.crowdstrike.config.selectMessageText',
       {
-        defaultMessage: 'Execute CrowdStrike scripts',
+        defaultMessage: 'Execute CrowdStrike response actions',
       }
     ),
     validateParams: async (

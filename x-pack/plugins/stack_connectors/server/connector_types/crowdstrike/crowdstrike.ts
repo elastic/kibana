@@ -34,6 +34,13 @@ const paramsSerializer = (params: Record<string, string>) => {
     .join('&');
 };
 
+/**
+ * Represents a book.
+ * @constructor
+ * @param {string} token - Authorization token received from OAuth2 API, that needs to be sent along with each request.
+ * @param {number} tokenExpiryTimeout - Tokens are valid for 30 minutes, so we will refresh them every 29 minutes
+ */
+
 export class CrowdstrikeConnector extends SubActionConnector<
   CrowdstrikeConfig,
   CrowdstrikeSecrets
