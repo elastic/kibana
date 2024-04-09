@@ -8,7 +8,8 @@
 import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
-import { CanAddNewPanel, PublishesViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode } from '@kbn/presentation-publishing';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 
 export type EmbeddableInput = Input & {
   timeRange?: TimeRange;
