@@ -160,6 +160,19 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
+const ConditionalToolTip: FC<{
+  children: React.ReactElement;
+  content: string;
+  showTooltip: boolean;
+}> = ({ children, content, showTooltip }) =>
+  showTooltip ? (
+    <EuiToolTip content={content} position="right">
+      {children}
+    </EuiToolTip>
+  ) : (
+    children
+  );
+
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
@@ -1027,34 +1040,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiToolTip
-            content={
-              areSuppressionFieldsDisabledBySequence
-                ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                : null
-            }
-            position="right"
-          >
-            <>
-              <RuleTypeEuiFormRow
-                $isVisible={isAlertSuppressionEnabled && isThresholdRule}
-                fullWidth
-              >
-                <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
-                  <CommonUseField
-                    path="enableThresholdSuppression"
-                    componentProps={{
-                      idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                      'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
-                      euiFieldProps: {
-                        label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
-                        disabled: !isAlertSuppressionLicenseValid,
-                      },
-                    }}
-                  />
-                </EuiToolTip>
-              </RuleTypeEuiFormRow>
+          <>
+            <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
+              <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
+                <CommonUseField
+                  path="enableThresholdSuppression"
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                    'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                    euiFieldProps: {
+                      label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
+                      disabled: !isAlertSuppressionLicenseValid,
+                    },
+                  }}
+                />
+              </EuiToolTip>
+            </RuleTypeEuiFormRow>
 
+            <ConditionalToolTip
+              showTooltip={areSuppressionFieldsDisabledBySequence}
+              content={i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP}
+            >
               <RuleTypeEuiFormRow
                 $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
                 data-test-subj="alertSuppressionInput"
@@ -1070,51 +1076,51 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   }}
                 />
               </RuleTypeEuiFormRow>
+            </ConditionalToolTip>
 
-              <IntendedRuleTypeEuiFormRow
-                $isVisible={isAlertSuppressionEnabled}
-                data-test-subj="alertSuppressionDuration"
+            <IntendedRuleTypeEuiFormRow
+              $isVisible={isAlertSuppressionEnabled}
+              data-test-subj="alertSuppressionDuration"
+            >
+              <UseMultiFields
+                fields={{
+                  groupByRadioSelection: {
+                    path: 'groupByRadioSelection',
+                  },
+                  groupByDurationValue: {
+                    path: 'groupByDuration.value',
+                  },
+                  groupByDurationUnit: {
+                    path: 'groupByDuration.unit',
+                  },
+                }}
               >
-                <UseMultiFields
-                  fields={{
-                    groupByRadioSelection: {
-                      path: 'groupByRadioSelection',
-                    },
-                    groupByDurationValue: {
-                      path: 'groupByDuration.value',
-                    },
-                    groupByDurationUnit: {
-                      path: 'groupByDuration.unit',
-                    },
-                  }}
-                >
-                  {GroupByChildren}
-                </UseMultiFields>
-              </IntendedRuleTypeEuiFormRow>
+                {GroupByChildren}
+              </UseMultiFields>
+            </IntendedRuleTypeEuiFormRow>
 
-              <IntendedRuleTypeEuiFormRow
-                // threshold rule does not have this suppression configuration
-                $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-                data-test-subj="alertSuppressionMissingFields"
-                label={
-                  <span>
-                    {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
-                  </span>
-                }
-                fullWidth
+            <IntendedRuleTypeEuiFormRow
+              // threshold rule does not have this suppression configuration
+              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+              data-test-subj="alertSuppressionMissingFields"
+              label={
+                <span>
+                  {i18n.ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL} <SuppressionInfoIcon />
+                </span>
+              }
+              fullWidth
+            >
+              <UseMultiFields
+                fields={{
+                  suppressionMissingFields: {
+                    path: 'suppressionMissingFields',
+                  },
+                }}
               >
-                <UseMultiFields
-                  fields={{
-                    suppressionMissingFields: {
-                      path: 'suppressionMissingFields',
-                    },
-                  }}
-                >
-                  {AlertSuppressionMissingFields}
-                </UseMultiFields>
-              </IntendedRuleTypeEuiFormRow>
-            </>
-          </EuiToolTip>
+                {AlertSuppressionMissingFields}
+              </UseMultiFields>
+            </IntendedRuleTypeEuiFormRow>
+          </>
           <UseField
             path="timeline"
             component={PickTimeline}
