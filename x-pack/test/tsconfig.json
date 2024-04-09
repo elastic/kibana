@@ -100,6 +100,7 @@
     "@kbn/es-archiver",
     "@kbn/config-schema",
     "@kbn/kubernetes-security-plugin",
+    "@kbn/kubernetes-observability-plugin",
     "@kbn/es-query",
     "@kbn/session-view-plugin",
     "@kbn/ml-is-populated-object",
