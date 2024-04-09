@@ -38,7 +38,7 @@ interface AppStateZoom {
 export interface EmbeddableSingleMetricViewerContainerProps {
   id: string;
   embeddableContext: InstanceType<ISingleMetricViewerEmbeddable>;
-  embeddableInput: Observable<SingleMetricViewerEmbeddableInput>;
+  embeddableInput$: Observable<SingleMetricViewerEmbeddableInput>;
   services: SingleMetricViewerEmbeddableServices;
   refresh: Observable<void>;
   onInputChange: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
@@ -50,10 +50,10 @@ export interface EmbeddableSingleMetricViewerContainerProps {
 
 export const EmbeddableSingleMetricViewerContainer: FC<
   EmbeddableSingleMetricViewerContainerProps
-> = ({ id, embeddableContext, embeddableInput, services, refresh, onRenderComplete }) => {
+> = ({ id, embeddableContext, embeddableInput$, services, refresh, onRenderComplete }) => {
   useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
     services[0].executionContext,
-    embeddableInput,
+    embeddableInput$,
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     id
   );
@@ -66,7 +66,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
 
   const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
-    embeddableInput,
+    embeddableInput$,
     refresh,
     services[1].data.query.timefilter.timefilter,
     onRenderComplete

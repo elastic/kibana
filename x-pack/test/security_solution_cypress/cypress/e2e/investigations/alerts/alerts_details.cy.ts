@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataTableModel } from '@kbn/securitysolution-data-table';
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
@@ -34,7 +33,6 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { tablePageSelector } from '../../../screens/table_pagination';
 import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
 import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
-import { getLocalstorageEntryAsObject } from '../../../helpers/common';
 import {
   visitRuleDetailsPage,
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
@@ -181,7 +179,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Localstorage management', { tags: ['@brokenInServerlessQA'] }, () => {
+  describe('Localstorage management', () => {
     const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
     const ARCHIVED_RULE_NAME = 'Endpoint Security';
 
@@ -204,40 +202,28 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
     });
 
-    const alertTableKey = 'alerts-page';
-    const getFlyoutConfig = (dataTable: { [alertTableKey]: DataTableModel }) =>
-      dataTable?.[alertTableKey]?.expandedDetail?.query;
-
     /**
      * Localstorage is updated after a delay here x-pack/plugins/security_solution/public/common/store/data_table/epic_local_storage.ts
      * We create this config to re-check localStorage 3 times, every 500ms to avoid any potential flakyness from that delay
      */
-    const storageCheckRetryConfig = {
-      timeout: 1500,
-      interval: 500,
-    };
 
     it('should store the flyout state in localstorage', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === 'eventDetail';
-        });
 
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      cy.window().then((win) => {
+        const securityDataTableStorage = win.localStorage.getItem('securityDataTable');
+        cy.wrap(securityDataTableStorage).should('contain', '"panelView":"eventDetail"');
+      });
     });
 
     it('should remove the flyout details from local storage when closed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
       closeAlertFlyout();
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === undefined;
-        });
 
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      cy.window().then((win) => {
+        const securityDataTableStorage = win.localStorage.getItem('securityDataTable');
+        cy.wrap(securityDataTableStorage).should('not.contain', '"panelView"');
+      });
     });
 
     it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
@@ -246,13 +232,10 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       visitRuleDetailsPage(ARCHIVED_RULE_ID);
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
-      const localStorageCheck = () =>
-        cy.getAllLocalStorage().then((storage) => {
-          const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
-          return getFlyoutConfig(securityDataTable)?.panelView === undefined;
-        });
-
-      cy.waitUntil(localStorageCheck, storageCheckRetryConfig);
+      cy.window().then((win) => {
+        const securityDataTableStorage = win.localStorage.getItem('securityDataTable');
+        cy.wrap(securityDataTableStorage).should('not.contain', '"panelView"');
+      });
     });
 
     it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
