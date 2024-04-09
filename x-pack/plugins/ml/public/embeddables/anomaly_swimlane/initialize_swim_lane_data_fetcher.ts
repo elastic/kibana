@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
@@ -96,7 +97,7 @@ export const initializeSwimLaneDataFetcher = (
 
         const { viewBy, swimlaneType, perPage, fromPage } = input;
 
-        let appliedFilters: any;
+        let appliedFilters: estypes.QueryDslQueryContainer;
         try {
           if (filters || query) {
             appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
@@ -116,15 +117,18 @@ export const initializeSwimLaneDataFetcher = (
             if (overallSwimlaneData && swimlaneType === SWIMLANE_TYPE.VIEW_BY) {
               const swimlaneData = swimLaneData$.value;
 
+              let swimLaneLimit = ANOMALY_SWIM_LANE_HARD_LIMIT;
+              if (isViewBySwimLaneData(swimlaneData) && viewBy === swimlaneData.fieldName) {
+                swimLaneLimit = swimlaneData.cardinality;
+              }
+
               return from(
                 anomalyTimelineService.loadViewBySwimlane(
                   [],
                   { earliest, latest },
                   explorerJobs,
                   viewBy!,
-                  isViewBySwimLaneData(swimlaneData)
-                    ? swimlaneData.cardinality
-                    : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                  swimLaneLimit,
                   perPage!,
                   fromPage,
                   undefined,
