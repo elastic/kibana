@@ -7,3 +7,4 @@
  */
 
 export { DashboardStorage } from './dashboard_storage';
+export { registerSuggestUsersRoute } from './suggest_users';

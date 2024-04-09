@@ -155,6 +155,9 @@ export interface URLState {
     field: SortColumnField;
     direction: Direction;
   };
+  filter?: {
+    createdBy?: string[];
+  };
 
   [key: string]: unknown;
 }
@@ -164,6 +167,7 @@ interface URLQueryParams {
   title?: string;
   sort?: string;
   sortdir?: string;
+  created_by?: string[];
 
   [key: string]: unknown;
 }
@@ -202,6 +206,16 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   }
 
+  if (sanitizedParams.created_by) {
+    stateFromURL.filter = {
+      createdBy: Array.isArray(sanitizedParams.created_by)
+        ? sanitizedParams.created_by
+        : [sanitizedParams.created_by],
+    };
+  } else {
+    stateFromURL.filter = { createdBy: [] };
+  }
+
   return stateFromURL;
 };
 
@@ -214,6 +228,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
 const urlStateSerializer = (updated: {
   s?: string;
   sort?: { field: 'title' | 'updatedAt'; direction: Direction };
+  filter?: { createdBy?: string[] };
 }) => {
   const updatedQueryParams: Partial<URLQueryParams> = {};
 
@@ -230,6 +245,10 @@ const urlStateSerializer = (updated: {
   if (typeof updatedQueryParams.s === 'string' && updatedQueryParams.s.trim() === '') {
     updatedQueryParams.s = undefined;
     updatedQueryParams.title = undefined;
+  }
+
+  if (updated.filter?.createdBy) {
+    updatedQueryParams.created_by = updated.filter.createdBy;
   }
 
   return updatedQueryParams;
@@ -730,7 +749,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         });
       }
 
-      if (data.page || data.filter || !urlStateEnabled) {
+      if (data.filter && urlStateEnabled) {
+        setUrlState({
+          filter: data.filter,
+        });
+      }
+
+      if (data.page || !urlStateEnabled) {
         dispatch({
           type: 'onTableChange',
           data,
@@ -933,8 +958,24 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
+    const updateFilterFromURL = (filter?: URLState['filter']) => {
+      if (!filter) {
+        return;
+      }
+
+      dispatch({
+        type: 'onTableChange',
+        data: {
+          filter: {
+            createdBy: filter.createdBy ?? [],
+          },
+        },
+      });
+    };
+
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
+    updateFilterFromURL(urlState.filter);
   }, [urlState, buildQueryFromText, urlStateEnabled]);
 
   useEffect(() => {
