@@ -35,7 +35,7 @@ describe('shouldSuppressInstanceId', () => {
     ];
     expect(shouldSuppressInstanceId(results, ALL_VALUE)).toBeTruthy();
   });
-  it('should suppress when instanceId is maches the same instanceId in the results', () => {
+  it('should suppress when instanceId is matching the same instanceId in the results', () => {
     const results = [
       {
         slo: {} as unknown as SLO,
