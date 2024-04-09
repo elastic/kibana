@@ -68,6 +68,7 @@ import {
   buildVariablesDefinitions,
   buildOptionDefinition,
   buildSettingDefinitions,
+  buildValueDefinitions,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -1088,7 +1089,7 @@ async function getFunctionArgsSuggestions(
   }, [] as string[]);
 
   if (literalOptions.length) {
-    return buildConstantsDefinitions(literalOptions);
+    return buildValueDefinitions(literalOptions);
   }
 
   const arg = node.args[argIndex];
