@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -19,6 +20,7 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
   id?: string;
+  executionContext: KibanaExecutionContext;
 }
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
@@ -31,6 +33,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   query,
   refreshConfig,
   perPage,
+  executionContext,
 }) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
@@ -68,9 +71,11 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     [perPage]
   );
 
-  const parentApi = useMemo<PublishesWritableUnifiedSearch>(() => {
+  const parentApi = useMemo<
+    PublishesWritableUnifiedSearch & { executionContext: KibanaExecutionContext }
+  >(() => {
     const filters$ = new BehaviorSubject<Filter[] | undefined>(filters);
-    const query$ = new BehaviorSubject<Query | undefined>(query);
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(query);
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
     return {
@@ -86,7 +91,8 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       setTimeRange: (newTimeRange) => {
         timeRange$.next(newTimeRange);
       },
-    } as PublishesWritableUnifiedSearch;
+      executionContext,
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

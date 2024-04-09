@@ -57,6 +57,7 @@ export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selec
   return (
     <AnomalySwimLane
       id="LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE"
+      executionContext={{ name: 'infra_logs' }}
       jobIds={jobIds}
       swimlaneType="viewBy"
       viewBy={partitionField}

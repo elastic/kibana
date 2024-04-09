@@ -38,6 +38,7 @@ import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
+import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls } from './initialize_swim_lane_controls';
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './types';
@@ -209,6 +210,15 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
           const I18nContext = i18n.Context;
           const timeBuckets = useTimeBuckets(uiSettings);
+
+          useReactEmbeddableExecutionContext(
+            services[0].executionContext,
+            // TODO https://github.com/elastic/kibana/issues/180055
+            // @ts-ignore
+            parentApi?.executionContext?.value ?? { name: 'dashboard' },
+            ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+            uuid
+          );
 
           useUnmount(() => {
             onSwimLaneDestroy();
