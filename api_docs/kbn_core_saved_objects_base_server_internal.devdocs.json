@@ -2812,10 +2812,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.infracustomdashboards6eed22cbe14594bad8c076fa864930de",
+            "id": "def-common.HASH_TO_VERSION_MAP.infracustomdashboards1eb3c9e1888b8daea8495769e8d3ba2d",
             "type": "string",
             "tags": [],
-            "label": "'infra-custom-dashboards|6eed22cbe14594bad8c076fa864930de'",
+            "label": "'infra-custom-dashboards|1eb3c9e1888b8daea8495769e8d3ba2d'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,

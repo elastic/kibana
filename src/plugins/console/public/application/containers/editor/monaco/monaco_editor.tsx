@@ -6,16 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
-import { useEditorReadContext } from '../../../contexts';
+import { useSetInitialValue } from './use_set_initial_value';
+import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
-export const MonacoEditor: FunctionComponent = () => {
+export interface EditorProps {
+  initialTextValue: string;
+}
+
+export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useServicesContext();
   const { settings } = useEditorReadContext();
 
-  const [value, setValue] = useState('GET /.kibana/_search');
+  const [value, setValue] = useState(initialTextValue);
+
+  const setInitialValue = useSetInitialValue;
+
+  useEffect(() => {
+    setInitialValue({ initialTextValue, setValue, toasts });
+  }, [initialTextValue, setInitialValue, toasts]);
+
   return (
     <div
       css={css`

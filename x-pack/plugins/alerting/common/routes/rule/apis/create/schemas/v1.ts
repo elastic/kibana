@@ -46,7 +46,7 @@ export const actionAlertsFilterSchema = schema.object({
 
 export const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   actionTypeId: schema.maybe(schema.string()),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),

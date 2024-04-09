@@ -50,7 +50,6 @@ import {
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
-import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
@@ -119,7 +118,10 @@ export const createCustomThresholdExecutor = ({
     const groupByIsSame = isEqual(state.groupBy, params.groupBy);
     const previousMissingGroups =
       alertOnGroupDisappear && queryIsSame && groupByIsSame && state.missingGroups
-        ? state.missingGroups
+        ? state.missingGroups.filter((missingGroup) =>
+            // We use isTrackedAlert to remove missing groups that are untracked by the user
+            alertsClient.isTrackedAlert(missingGroup.key)
+          )
         : [];
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
@@ -145,7 +147,7 @@ export const createCustomThresholdExecutor = ({
       logger,
       { end: dateEnd, start: dateStart },
       state.lastRunTimestamp,
-      convertStringsToMissingGroupsRecord(previousMissingGroups)
+      previousMissingGroups
     );
 
     const resultGroupSet = new Set<string>();

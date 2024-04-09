@@ -48,8 +48,8 @@ const EnabledCustomRuleMitreData = getMockThreatData()[2];
 const DisabledCustomRuleMitreData = getMockThreatData()[3];
 
 // Mitre data used for duplicate technique tests
-const DuplicateTechniqueMitreData1 = getDuplicateTechniqueThreatData()[1];
-const DuplicateTechniqueMitreData2 = getDuplicateTechniqueThreatData()[0];
+const DuplicateTechniqueMitreData1 = getDuplicateTechniqueThreatData()[0];
+const DuplicateTechniqueMitreData2 = getDuplicateTechniqueThreatData()[1];
 
 const MockEnabledPrebuiltRuleThreat: Threat = {
   framework: 'MITRE ATT&CK',
@@ -189,7 +189,8 @@ const prebuiltRules = [
   }),
 ];
 
-describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
+// https://github.com/elastic/kibana/issues/179052
+describe('Coverage overview', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   describe('base cases', () => {
     beforeEach(() => {
       login();

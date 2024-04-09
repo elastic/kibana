@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DynamicTool } from 'langchain/tools';
+import type { DynamicTool } from '@langchain/core/tools';
 import { omit } from 'lodash/fp';
 
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
@@ -19,7 +19,7 @@ describe('AlertCountsTool', () => {
   const esClient = {
     search: jest.fn().mockResolvedValue({}),
   } as unknown as ElasticsearchClient;
-  const replacements = [{ uuid: 'key', value: 'value' }];
+  const replacements = { key: 'value' };
   const request = {
     body: {
       isEnabledKnowledgeBase: false,
