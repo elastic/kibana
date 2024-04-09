@@ -61,9 +61,9 @@
 
 - name: compile OpenSSL with FIPS
   become: yes
-  jobs: "{{ ansible_processor_vcpus }}"
   make:
     chdir: /usr/share/kibana/openssl-3.0.8
+    jobs: "{{ ansible_processor_vcpus }}"
 
 - name: install OpenSSL with FIPS
   become: yes
