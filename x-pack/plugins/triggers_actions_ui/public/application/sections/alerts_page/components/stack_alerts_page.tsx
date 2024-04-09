@@ -8,8 +8,9 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBadge,
+  EuiBetaBadge,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
@@ -44,6 +45,7 @@ import { createMatchPhraseFilter, createRuleTypesFilter } from '../../../lib/sea
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
@@ -156,24 +158,23 @@ const PageContent = () => {
     <>
       <EuiPageTemplate.Header
         paddingSize="none"
-        bottomBorder
         pageTitle={
-          <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.managementSection.alerts.displayName"
-              defaultMessage="Alerts"
-            />
-          </span>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <span data-test-subj="appTitle">
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.managementSection.alerts.displayName"
+                  defaultMessage="Alerts"
+                />
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge label={TECH_PREVIEW_LABEL} tooltipContent={TECH_PREVIEW_DESCRIPTION} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
+        bottomBorder
         rightSideItems={ruleStats}
-        description={
-          <EuiBadge color="hollow">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.managementSection.alerts.technicalPreview"
-              defaultMessage="Technical preview"
-            />
-          </EuiBadge>
-        }
       />
       <EuiSpacer size="l" />
       {!isInitialLoadingRuleTypes && !authorizedToReadAnyRules ? (
