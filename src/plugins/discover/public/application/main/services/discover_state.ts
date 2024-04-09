@@ -496,6 +496,7 @@ export function getDiscoverStateContainer({
       });
     }
 
+    internalStateContainer.transitions.resetOnSavedSearchChange();
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
