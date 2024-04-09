@@ -31,7 +31,7 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const sampleCSVContent = `type,identifier,criticality\nuser,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
+const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
 const listStyle = css`
   list-style-type: disc;
@@ -54,10 +54,8 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
-              defaultMessage={'CSV File Format Requirements'}
-              id={
-                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.csvFileFormatRequirements'
-              }
+              defaultMessage="CSV File Format Requirements"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.csvFileFormatRequirements"
             />
           </h3>
         </EuiTitle>
@@ -75,10 +73,8 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           </li>
           <li>
             <FormattedMessage
-              defaultMessage={'You can upload file up to {maxFileSize}'}
-              id={
-                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit'
-              }
+              defaultMessage="You can upload file up to {maxFileSize}"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit"
               values={{
                 maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
               }}
@@ -89,10 +85,8 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
-              defaultMessage={'Required CSV Structure'}
-              id={
-                'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.CSVStructureTitle'
-              }
+              defaultMessage="Required CSV Structure"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.CSVStructureTitle"
             />
           </h3>
         </EuiTitle>
@@ -102,12 +96,8 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <li>
             {
               <FormattedMessage
-                defaultMessage={
-                  'Identifier: The unique identifier for each asset {hostName} or {userName}.'
-                }
-                id={
-                  'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription'
-                }
+                defaultMessage="Identifier: The unique identifier for each asset {hostName} or {userName}."
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                 values={{
                   hostName: <b>{'Host.name'}</b>,
                   userName: <b>{'User.name'}</b>,
@@ -139,8 +129,8 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
-              defaultMessage={'Example'}
-              id={'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.exampleTitle'}
+              defaultMessage="Example"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.exampleTitle"
             />
           </h3>
         </EuiTitle>
