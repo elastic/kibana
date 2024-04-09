@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import type { SectionConfig } from './expanded_row_details_pane';
-import { ExpandedRowDetailsPane, Section } from './expanded_row_details_pane';
+import type { SectionConfig } from './expanded_row_column_view';
+import { ExpandedRowColumnView, Section } from './expanded_row_column_view';
 
 const section: SectionConfig = {
   title: 'the-section-title',
@@ -24,7 +24,7 @@ const section: SectionConfig = {
 
 describe('Transform: Job List Expanded Row <ExpandedRowDetailsPane />', () => {
   test('Minimal initialization', () => {
-    const { container } = render(<ExpandedRowDetailsPane sections={[section]} />);
+    const { container } = render(<ExpandedRowColumnView sections={[section]} />);
 
     expect(container.textContent).toContain('the-section-title');
     expect(container.textContent).toContain('the-item-title');

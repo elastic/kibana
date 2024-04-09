@@ -52,13 +52,13 @@ export const Section: FC<SectionProps> = ({ section }) => {
 
 interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
-  showErrorCallout: boolean;
+  showErrorCallout?: boolean;
   dataTestSubj?: string;
 }
 
 export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
   sections,
-  showErrorCallout,
+  showErrorCallout = false,
   dataTestSubj,
 }) => {
   return (
