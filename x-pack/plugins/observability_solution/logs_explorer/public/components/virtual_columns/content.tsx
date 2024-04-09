@@ -10,12 +10,14 @@ import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  getDocumentOverview,
+  getMessageFieldWithFallbacks,
+  getShouldShowFieldHandler,
+} from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
-import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 
@@ -85,8 +87,8 @@ export const Content = ({
   columnId,
   closePopover,
 }: DataGridCellValueElementProps) => {
-  const parsedDoc = useDocDetail(row as LogDocument, { dataView });
-  const { field, value } = getMessageWithFallbacks(parsedDoc);
+  const documentOverview = getDocumentOverview(row, { dataView, fieldFormats });
+  const { field, value } = getMessageFieldWithFallbacks(documentOverview);
   const renderLogMessage = field && value;
 
   const shouldShowFieldHandler = useMemo(() => {
@@ -106,8 +108,8 @@ export const Content = ({
 
   return (
     <span>
-      {parsedDoc[constants.LOG_LEVEL_FIELD] && (
-        <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
+      {documentOverview[constants.LOG_LEVEL_FIELD] && (
+        <LogLevel level={documentOverview[constants.LOG_LEVEL_FIELD]} />
       )}
       {renderLogMessage ? (
         <LogMessage field={field} value={value} />
