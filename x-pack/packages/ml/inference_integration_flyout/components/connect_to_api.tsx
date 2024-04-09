@@ -13,7 +13,7 @@ import { Service } from '../types';
 import { InferenceFlyout } from './flyout_layout';
 import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { CohereForm } from './service_forms/cohere_form';
-import { HuggingFaceForm } from './service_forms/huggingFace_form';
+import { HuggingFaceForm } from './service_forms/huggingface_form';
 import { OpenaiForm } from './service_forms/openai_form';
 
 interface Props extends SaveMappingOnClick {
