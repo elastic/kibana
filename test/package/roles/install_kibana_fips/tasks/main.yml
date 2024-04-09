@@ -36,26 +36,6 @@
   template:
     src: templates/fips/nodejs.cnf
     dest: /usr/share/kibana/config/nodejs.cnf
-# - name: find docker image
-#   find:
-#     paths: /packages/
-#     patterns: kibana-ubi-fips-[0-9]*-docker-image.tar.gz
-#   register: kibana_fips
-
-# - name: set image tag
-#   set_fact:
-#     kibana_image_tag: "{{ kibana_fips.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}-7f16d8b7f7e0faca2ecc49980dbd19563e78ceeb"
-
-# - name: load image
-#   become: yes
-#   docker_image:
-#     name: "docker.elastic.co/kibana-ci/kibana-ubi-fips"
-#     tag: "{{ kibana_image_tag }}"
-#     load_path: '{{ kibana_fips.files[0].path }}'
-#     timeout: 300
-#     source: load
-#     state: present
-
 # - name: start kibana
 #   become: yes
 #   docker_container:
