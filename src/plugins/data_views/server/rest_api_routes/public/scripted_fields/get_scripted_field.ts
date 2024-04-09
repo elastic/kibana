@@ -69,8 +69,8 @@ export const registerGetScriptedFieldRoute = (
           const id = req.params.id;
           const name = req.params.name;
 
-          const indexPattern = await indexPatternsService.get(id);
-          const field = indexPattern.fields.getByName(name);
+          const indexPattern = await indexPatternsService.getDataViewLazy(id);
+          const field = await indexPattern.getFieldByName(name);
 
           if (!field) {
             throw new ErrorIndexPatternFieldNotFound(id, name);

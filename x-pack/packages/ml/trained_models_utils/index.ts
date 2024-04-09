@@ -19,6 +19,7 @@ export {
   type ModelDefinition,
   type ModelDefinitionResponse,
   type ElserVersion,
+  type InferenceAPIConfigResponse,
   type GetModelDownloadConfigOptions,
   type ElasticCuratedModelName,
   ELSER_ID_V1,

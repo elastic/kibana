@@ -2035,15 +2035,7 @@
           },
           "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; validate: { params: ",
           "RuleTypeParamsValidator",
-          "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
-          {
-            "pluginId": "alerting",
-            "scope": "server",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-server.IRuleTypeAlerts",
-            "text": "IRuleTypeAlerts"
-          },
-          "<never> | undefined; recoveryActionGroup?: ",
+          "<TParams>; }; recoveryActionGroup?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -2107,7 +2099,15 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
+          "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; doesSetRecoveryContext?: boolean | undefined; alerts?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.IRuleTypeAlerts",
+            "text": "IRuleTypeAlerts"
+          },
+          "<never> | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
           "<TParams> | undefined; fieldsForAAD?: string[] | undefined; }"
         ],

@@ -8,7 +8,7 @@
 
 import React, { useEffect, FunctionComponent, useState, useCallback } from 'react';
 import { act } from 'react-dom/test-utils';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import { registerTestBed, TestBed } from '../shared_imports';
 import { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';

@@ -15,12 +15,4 @@ export interface AssetCriticalityUpsert {
   criticalityLevel: AssetCriticalityRecord['criticality_level'];
 }
 
-export interface AssetCriticalityCsvUploadResponse {
-  errors: Array<{ message: string; index: number }>;
-  stats: {
-    updated: number;
-    created: number;
-    errors: number;
-    total: number;
-  };
-}
+export * from '../../api/entity_analytics/asset_criticality';

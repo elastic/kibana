@@ -81,8 +81,71 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
   },
 };
 
+interface AssetCriticalitySystemProcessedAssignmentFileEvent {
+  parameters: {
+    fileSizeBytes?: number;
+  };
+  processing: {
+    startTime: string;
+    endTime: string;
+    tookMs: number;
+  };
+  result: {
+    updated: number;
+    created: number;
+    errors: number;
+    total: number;
+  };
+}
+
+export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventTypeOpts<AssetCriticalitySystemProcessedAssignmentFileEvent> =
+  {
+    eventType: 'asset_criticality_system_processed_assignment_file',
+    schema: {
+      parameters: {
+        properties: {
+          fileSizeBytes: {
+            type: 'long',
+            _meta: { description: 'Size of the supplied file in bytes', optional: true }, // optional as it may not be available in content-length header
+          },
+        },
+      },
+      processing: {
+        properties: {
+          startTime: { type: 'date', _meta: { description: 'Processing start time' } },
+          endTime: { type: 'date', _meta: { description: 'Processing end time' } },
+          tookMs: { type: 'long', _meta: { description: 'How long processing took ms' } },
+        },
+      },
+      result: {
+        properties: {
+          updated: {
+            type: 'long',
+            _meta: { description: 'Number of criticality records updated' },
+          },
+          created: {
+            type: 'long',
+            _meta: { description: 'Number of criticality records updated' },
+          },
+          errors: {
+            type: 'long',
+            _meta: { description: 'Number if lines which encountered errors' },
+          },
+          total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
+        },
+      },
+    },
+  };
+
+export const createAssetCriticalityProcessedFileEvent = (
+  event: AssetCriticalitySystemProcessedAssignmentFileEvent
+): [string, AssetCriticalitySystemProcessedAssignmentFileEvent] => {
+  return [ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT.eventType, event];
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
+  ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
 ];

@@ -39,7 +39,7 @@ describe('parseAssetCriticalityCsvRow', () => {
   it('should return valid false if the entity type is invalid', () => {
     expect(parseAssetCriticalityCsvRow(['invalid', 'host-1', 'low_impact'])).toEqual({
       valid: false,
-      error: 'Invalid entity type invalid',
+      error: 'Invalid entity type invalid expected host or user',
     });
   });
 
@@ -47,7 +47,7 @@ describe('parseAssetCriticalityCsvRow', () => {
     const invalidEntityType = 'x'.repeat(1001);
     expect(parseAssetCriticalityCsvRow([invalidEntityType, 'host-1', 'low_impact'])).toEqual({
       valid: false,
-      error: `Invalid entity type ${invalidEntityType.substring(0, 1000)}...`,
+      error: `Invalid entity type ${invalidEntityType.substring(0, 1000)}... expected host or user`,
     });
   });
 
@@ -68,7 +68,8 @@ describe('parseAssetCriticalityCsvRow', () => {
   it('should return valid false if the criticality level is invalid', () => {
     expect(parseAssetCriticalityCsvRow(['host', 'host-1', 'invalid'])).toEqual({
       valid: false,
-      error: 'Invalid criticality level invalid',
+      error:
+        'Invalid criticality level invalid expected one of extreme_impact, high_impact, medium_impact, low_impact',
     });
   });
 
@@ -76,7 +77,10 @@ describe('parseAssetCriticalityCsvRow', () => {
     const invalidCriticalityLevel = 'x'.repeat(1001);
     expect(parseAssetCriticalityCsvRow(['host', 'host-1', invalidCriticalityLevel])).toEqual({
       valid: false,
-      error: `Invalid criticality level ${invalidCriticalityLevel.substring(0, 1000)}...`,
+      error: `Invalid criticality level ${invalidCriticalityLevel.substring(
+        0,
+        1000
+      )}... expected one of extreme_impact, high_impact, medium_impact, low_impact`,
     });
   });
 

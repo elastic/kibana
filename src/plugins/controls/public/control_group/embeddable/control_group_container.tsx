@@ -12,7 +12,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, first, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -173,6 +173,13 @@ export class ControlGroupContainer extends Container<
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });
+
+      this.calculateFiltersFromSelections(initialComponentState?.lastSavedInput?.panels ?? {}).then(
+        (filterOutput) => {
+          this.dispatch.setLastSavedFilters(filterOutput);
+        }
+      );
+
       this.initialized$.next(true);
     });
 
@@ -207,29 +214,6 @@ export class ControlGroupContainer extends Container<
 
   private setupSubscriptions = () => {
     /**
-     * on initialization, in order for comparison to be performed, calculate the last saved filters based on the
-     * selections from the last saved input and save them to component state. This is done as a subscription so that
-     * it can be done async without actually slowing down the loading of the controls.
-     */
-    this.subscriptions.add(
-      this.initialized$
-        .pipe(
-          filter((isInitialized) => isInitialized),
-          first()
-        )
-        .subscribe(async () => {
-          const {
-            componentState: { lastSavedInput },
-            explicitInput: { panels },
-          } = this.getState();
-          const filterOutput = await this.calculateFiltersFromSelections(
-            lastSavedInput?.panels ?? panels
-          );
-          this.dispatch.setLastSavedFilters(filterOutput);
-        })
-    );
-
-    /**
      * refresh control order cache and make all panels refreshInputFromParent whenever panel orders change
      */
     this.subscriptions.add(
@@ -252,10 +236,10 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.getInput$()
         .pipe(
-          skip(1),
           distinctUntilChanged(
             (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
-          )
+          ),
+          skip(1)
         )
         .subscribe(() => {
           const { filters, timeslice } = this.recalculateFilters();
@@ -289,11 +273,12 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  public setSavedState(lastSavedInput: PersistableControlGroupInput): void {
-    batch(() => {
-      this.dispatch.setLastSavedInput(lastSavedInput);
-      const { filters, timeslice } = this.getState().output;
-      this.dispatch.setLastSavedFilters({ filters, timeslice });
+  public setSavedState(lastSavedInput: PersistableControlGroupInput | undefined): void {
+    this.calculateFiltersFromSelections(lastSavedInput?.panels ?? {}).then((filterOutput) => {
+      batch(() => {
+        this.dispatch.setLastSavedInput(lastSavedInput);
+        this.dispatch.setLastSavedFilters(filterOutput);
+      });
     });
   }
 
@@ -393,7 +378,8 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters = (): ControlGroupFilterOutput => {
     const allFilters: Filter[] = [];
     let timeslice;
-    Object.values(this.children).map((child: ControlEmbeddable) => {
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
+    controlChildren.map((child: ControlEmbeddable) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
       if (childOutput.timeslice) {
@@ -408,8 +394,9 @@ export class ControlGroupContainer extends Container<
   ): Promise<ControlGroupFilterOutput> {
     let filtersArray: Filter[] = [];
     let timeslice;
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
     await Promise.all(
-      Object.values(this.children).map(async (child) => {
+      controlChildren.map(async (child) => {
         if (panels[child.id]) {
           const controlOutput =
             (await (child as ControlEmbeddable).selectionsToFilters?.(
@@ -467,7 +454,8 @@ export class ControlGroupContainer extends Container<
 
   private recalculateDataViews = () => {
     const allDataViewIds: Set<string> = new Set();
-    Object.values(this.children).map((child) => {
+    const controlChildren = Object.values(this.children$.value) as ControlEmbeddable[];
+    controlChildren.map((child) => {
       const dataViewId = (child.getOutput() as ControlOutput).dataViewId;
       if (dataViewId) allDataViewIds.add(dataViewId);
     });

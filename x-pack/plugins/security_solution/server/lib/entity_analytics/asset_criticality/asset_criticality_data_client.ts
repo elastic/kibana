@@ -172,9 +172,8 @@ export class AssetCriticalityDataClient {
       } else {
         if (item?.update?.result === 'created') {
           return { record: doc.doc, result: 'created' };
-        } else {
-          return { record: doc.doc, result: 'updated' };
         }
+        return { record: doc.doc, result: 'updated' };
       }
     });
   }
@@ -198,82 +197,82 @@ export class AssetCriticalityDataClient {
     recordsStream: NodeJS.ReadableStream;
     batchSize: number;
   }): Promise<AssetCriticalityCsvUploadResponse> => {
-    return new Promise((resolve, reject) => {
-      let index = 0;
-      let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
-      const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
-      const stats: AssetCriticalityCsvUploadResponse['stats'] = {
-        updated: 0,
-        created: 0,
-        errors: 0,
-        total: 0,
-      };
-      const batchPromises: Array<Promise<void>> = [];
+    const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
+    const stats: AssetCriticalityCsvUploadResponse['stats'] = {
+      updated: 0,
+      created: 0,
+      errors: 0,
+      total: 0,
+    };
 
-      const flushBatch = async (
-        batch: Array<{ record: AssetCriticalityUpsert; index: number }>
-      ) => {
-        if (batch.length === 0) {
-          return;
-        }
+    async function* recordsGenerator(): AsyncGenerator<
+      AssetCriticalityUpsert | Error,
+      void,
+      undefined
+    > {
+      for await (const record of recordsStream) {
+        yield record as unknown as AssetCriticalityUpsert | Error;
+      }
+    }
 
-        try {
-          const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
-          const startIndex = batch[0].index;
-          upsertResult.forEach((result, resultIndex) => {
-            stats.total++;
-            if ('error' in result) {
-              errors.push({
-                message: result.error,
-                index: startIndex + resultIndex,
-              });
-              stats.errors++;
-            } else {
-              stats[result.result]++;
-            }
-          });
-        } catch (error) {
-          // If there was an error upserting the batch, add all records in the batch to the errors array
-          // this maintains the order of records
-          batch.forEach((b) => {
+    const processBatch = async (
+      batch: Array<{ record: AssetCriticalityUpsert; index: number }>
+    ) => {
+      if (batch.length === 0) {
+        return;
+      }
+      try {
+        const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
+        const startIndex = batch[0].index;
+        upsertResult.forEach((result, resultIndex) => {
+          if ('error' in result) {
             errors.push({
-              message: error.message,
-              index: b.index,
+              message: result.error,
+              index: startIndex + resultIndex,
             });
-          });
-          stats.errors += batch.length;
-        }
-      };
-
-      const addToBatch = (record: AssetCriticalityUpsert | Error) => {
-        if (record instanceof Error) {
+            stats.errors++;
+          } else {
+            stats[result.result]++;
+          }
+        });
+      } catch (error) {
+        for (const b of batch) {
           errors.push({
-            message: record.message,
-            index,
+            message: error.message,
+            index: b.index,
           });
-          return;
+          stats.errors++;
         }
+      }
+    };
 
+    const gen = recordsGenerator();
+    let index = 0;
+    let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
+
+    for await (const record of gen) {
+      stats.total++;
+      if (record instanceof Error) {
+        stats.errors++;
+        errors.push({
+          message: record.message,
+          index,
+        });
+      } else {
         currentBatch.push({ record, index });
-
         if (currentBatch.length === batchSize) {
-          batchPromises.push(flushBatch(currentBatch));
+          await processBatch(currentBatch);
           currentBatch = [];
         }
-        index++;
-      };
+      }
+      index++;
+    }
 
-      const flushLastBatchAndResolve = async () => {
-        if (currentBatch.length > 0) {
-          batchPromises.push(flushBatch(currentBatch));
-        }
+    if (currentBatch.length > 0) {
+      await processBatch(currentBatch);
+    }
 
-        await Promise.all(batchPromises);
-        resolve({ errors, stats });
-      };
-
-      recordsStream.on('data', addToBatch).on('end', flushLastBatchAndResolve).on('error', reject);
-    });
+    return { errors, stats };
   };
 
   public async delete(idParts: AssetCriticalityIdParts) {

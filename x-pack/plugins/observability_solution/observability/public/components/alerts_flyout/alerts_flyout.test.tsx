@@ -8,11 +8,18 @@
 import React, { ComponentProps } from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
 import type { TopAlert } from '../../typings/alerts';
 
 const rawAlert = {} as ComponentProps<typeof AlertsFlyout>['rawAlert'];
+
+const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+jest.mock('../../utils/kibana_react', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+}));
 
 describe('AlertsFlyout', () => {
   jest
@@ -82,6 +89,26 @@ const activeAlert: TopAlert = {
     'kibana.space_ids': ['default'],
     'kibana.version': '8.0.0',
     'event.kind': 'signal',
+    'kibana.alert.rule.parameters': {
+      timeSize: 5,
+      timeUnit: 'm',
+      logView: {
+        type: 'log-view-reference',
+        logViewId: 'default',
+      },
+      count: {
+        value: 100.25,
+        comparator: 'more than',
+      },
+      criteria: [
+        {
+          field: 'host.name',
+          comparator: 'does not equal',
+          value: 'test',
+        },
+      ],
+      groupBy: ['host.name'],
+    },
     'kibana.alert.evaluation.threshold': 100.25,
   },
   active: true,
@@ -113,6 +140,25 @@ const recoveredAlert: TopAlert = {
     'kibana.version': '8.0.0',
     'event.kind': 'signal',
     'kibana.alert.end': '2021-09-02T13:08:45.729Z',
+    'kibana.alert.rule.parameters': {
+      nodeType: 'host',
+      criteria: [
+        {
+          metric: 'cpu',
+          comparator: '>',
+          threshold: [1],
+          timeSize: 1,
+          timeUnit: 'm',
+          customMetric: {
+            type: 'custom',
+            id: 'alert-custom-metric',
+            field: '',
+            aggregation: 'avg',
+          },
+        },
+      ],
+      sourceId: 'default',
+    },
   },
   active: false,
   start: 1630587936699,
