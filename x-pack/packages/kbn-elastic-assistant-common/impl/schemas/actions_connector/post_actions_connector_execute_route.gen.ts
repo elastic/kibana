@@ -33,6 +33,7 @@ export const ExecuteConnectorRequestBody = z.object({
   message: z.string().optional(),
   model: z.string().optional(),
   subAction: z.enum(['invokeAI', 'invokeStream']),
+  actionTypeId: z.string(),
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),
@@ -40,15 +41,16 @@ export const ExecuteConnectorRequestBody = z.object({
   isEnabledRAGAlerts: z.boolean().optional(),
   replacements: Replacements,
   size: z.number().optional(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 
 export type ExecuteConnectorResponse = z.infer<typeof ExecuteConnectorResponse>;
 export const ExecuteConnectorResponse = z.object({
-  data: z.string().optional(),
-  connector_id: z.string().optional(),
-  replacements: Replacements.optional(),
-  status: z.string().optional(),
+  data: z.string(),
+  connector_id: z.string(),
+  status: z.string(),
   /**
    * Trace Data
    */

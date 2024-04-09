@@ -18,24 +18,24 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('create a note', () => {
-      it('should return a timelineId, timelineVersion, noteId and version', async () => {
+      it('should return a timelineId, noteId and version', async () => {
         const myNote = 'world test';
         const response = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId: null,
             version: null,
-            note: { note: myNote, timelineId: null },
+            note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { note, noteId, timelineId, timelineVersion, version } =
+        const { note, noteId, timelineId, version } =
           response.body.data && response.body.data.persistNote.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
         expect(timelineId).to.not.be.empty();
-        expect(timelineVersion).to.not.be.empty();
         expect(version).to.not.be.empty();
       });
 
@@ -44,10 +44,11 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId: null,
             version: null,
-            note: { note: myNote, timelineId: null },
+            note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
         const { noteId, timelineId, version } =
@@ -57,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         const responseToTest = await supertest
           .patch('/api/note')
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send({
             noteId,
             version,

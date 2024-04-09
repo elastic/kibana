@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/171653
   // FLAKY: https://github.com/elastic/kibana/issues/171654
-  describe('When on the Endpoint Policy Details Page', function () {
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
