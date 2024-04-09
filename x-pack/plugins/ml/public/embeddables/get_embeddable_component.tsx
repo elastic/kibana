@@ -11,7 +11,7 @@ import type { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/
 import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import type { MlStartDependencies } from '../plugin';
-import type { MlEmbeddableTypes } from './constants';
+import type { AnomalyExplorerChartsEmbeddableType } from './constants';
 import type { MappedEmbeddableTypeOf } from './types';
 
 /**
@@ -20,7 +20,7 @@ import type { MappedEmbeddableTypeOf } from './types';
  * @param core
  * @param plugins
  */
-export function getEmbeddableComponent<EmbeddableType extends MlEmbeddableTypes>(
+export function getEmbeddableComponent<EmbeddableType extends AnomalyExplorerChartsEmbeddableType>(
   embeddableType: EmbeddableType,
   core: CoreStart,
   plugins: MlStartDependencies

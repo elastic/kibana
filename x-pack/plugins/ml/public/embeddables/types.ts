@@ -67,11 +67,9 @@ export interface AnomalySwimlaneEmbeddableUserInput {
   viewBy?: string;
 }
 
-export interface AnomalySwimlaneEmbeddableCustomInput {
+export interface AnomalySwimlaneEmbeddableCustomInput
+  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
   id?: string;
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
   perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
@@ -80,8 +78,6 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   refreshConfig?: RefreshInterval;
   timeRange: TimeRange | undefined;
 }
-
-export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
@@ -208,8 +204,6 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
 }
 
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
-  TEmbeddableType extends AnomalySwimLaneEmbeddableType
-    ? AnomalySwimlaneEmbeddableInput
-    : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
+  TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
     ? AnomalyChartsEmbeddableInput
     : unknown;
