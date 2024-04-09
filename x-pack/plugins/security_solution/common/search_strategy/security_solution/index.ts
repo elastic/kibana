@@ -22,6 +22,7 @@ import type {
   NetworkTopCountriesStrategyResponse,
   NetworkTopNFlowStrategyResponse,
   NetworkUsersStrategyResponse,
+  NetworkTopNFlowCountStrategyResponse,
 } from './network';
 import type {
   CtiEventEnrichmentStrategyResponse,
@@ -73,6 +74,8 @@ import type {
   NetworkTlsRequestOptionsInput,
   NetworkTopCountriesRequestOptions,
   NetworkTopCountriesRequestOptionsInput,
+  NetworkTopNFlowCountRequestOptions,
+  NetworkTopNFlowCountRequestOptionsInput,
   NetworkTopNFlowRequestOptions,
   NetworkTopNFlowRequestOptionsInput,
   NetworkUsersRequestOptions,
@@ -144,6 +147,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkTopCountriesStrategyResponse
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowStrategyResponse
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountStrategyResponse
   : T extends NetworkQueries.users
   ? NetworkUsersStrategyResponse
   : T extends CtiQueries.eventEnrichment
@@ -194,6 +199,8 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? NetworkTopCountriesRequestOptionsInput
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptionsInput
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountRequestOptionsInput
   : T extends NetworkQueries.users
   ? NetworkUsersRequestOptionsInput
   : T extends CtiQueries.eventEnrichment
@@ -244,6 +251,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkTopCountriesRequestOptions
   : T extends NetworkQueries.topNFlow
   ? NetworkTopNFlowRequestOptions
+  : T extends NetworkQueries.topNFlowCount
+  ? NetworkTopNFlowCountRequestOptions
   : T extends NetworkQueries.users
   ? NetworkUsersRequestOptions
   : T extends CtiQueries.eventEnrichment

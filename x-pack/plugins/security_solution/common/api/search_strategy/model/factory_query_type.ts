@@ -26,6 +26,7 @@ export enum NetworkQueries {
   overview = 'overviewNetwork',
   tls = 'tls',
   topCountries = 'topCountries',
+  topNFlowCount = 'topNFlowCount',
   topNFlow = 'topNFlow',
   users = 'users',
 }
