@@ -17,6 +17,7 @@ import { createConnector } from '../utils/create_connector';
 const mockRequest = {
   message: 'Do you know my name?',
   subAction: 'invokeAI',
+  actionTypeId: '.bedrock',
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
   replacements: {},
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should execute a chat completion', async () => {
         const response = await postActionsClientExecute(
           openaiActionId,
-          { ...mockRequest },
+          { ...mockRequest, actionTypeId: '.gen-ai' },
           supertest
         );
 

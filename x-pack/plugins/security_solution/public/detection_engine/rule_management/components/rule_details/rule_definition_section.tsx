@@ -49,7 +49,6 @@ import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_des
 import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
@@ -231,7 +230,7 @@ const getRuleTypeDescription = (ruleType: Type) => {
     case 'eql':
       return descriptionStepI18n.EQL_TYPE_DESCRIPTION;
     case 'esql':
-      return <TechnicalPreviewBadge label={descriptionStepI18n.ESQL_TYPE_DESCRIPTION} />;
+      return descriptionStepI18n.ESQL_TYPE_DESCRIPTION;
     case 'threat_match':
       return descriptionStepI18n.THREAT_MATCH_TYPE_DESCRIPTION;
     case 'new_terms':
@@ -646,6 +645,28 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="newTermsFieldsPropertyTitle">
+          {i18n.NEW_TERMS_FIELDS_FIELD_LABEL}
+        </span>
+      ),
+      description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
+    });
+  }
+
+  if ('history_window_start' in rule) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="newTermsWindowSizePropertyTitle">
+          {i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL}
+        </span>
+      ),
+      description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
+    });
+  }
+
   if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
@@ -681,28 +702,6 @@ const prepareDefinitionSectionListItems = (
         ),
       });
     }
-  }
-
-  if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="newTermsFieldsPropertyTitle">
-          {i18n.NEW_TERMS_FIELDS_FIELD_LABEL}
-        </span>
-      ),
-      description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
-    });
-  }
-
-  if ('history_window_start' in rule) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="newTermsWindowSizePropertyTitle">
-          {i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL}
-        </span>
-      ),
-      description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
-    });
   }
 
   return definitionSectionListItems;

@@ -108,6 +108,7 @@
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
