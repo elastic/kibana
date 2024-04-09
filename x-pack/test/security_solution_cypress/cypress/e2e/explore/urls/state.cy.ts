@@ -70,7 +70,7 @@ const ABSOLUTE_DATE = {
 
 const mockTimeline = getTimeline();
 
-describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
