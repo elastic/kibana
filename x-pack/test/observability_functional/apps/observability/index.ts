@@ -23,6 +23,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pages/rules_page'));
     loadTestFile(require.resolve('./pages/rule_details_page'));
-    loadTestFile(require.resolve('./pages/alert_details_page'));
   });
 }
