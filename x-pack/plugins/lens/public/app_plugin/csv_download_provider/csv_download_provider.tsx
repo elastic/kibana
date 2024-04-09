@@ -126,108 +126,82 @@ export const downloadCsvShareProvider = ({
       }
     );
 
-    const newVersionEnabled = atLeastGold
-      ? [
-          {
-            shareMenuItem: {
-              name: panelTitle,
-              icon: 'document',
-              disabled: !csvEnabled,
-              sortOrder: 1,
-            },
-            downloadCSVLens: async () => {
-              await downloadCSVs({
-                title,
-                formatFactory: formatFactoryFn(),
-                activeData,
-                uiSettings,
-                columnsSorting,
-              });
-              onClose?.();
-            },
-            label: 'CSV' as const,
-            reportType: 'csv',
-            helpText: (
-              <FormattedMessage
-                id="xpack.lens.share.helpText"
-                defaultMessage="Export a PDF, PNG, or CSV of this visualization."
-              />
-            ),
-            generateReportButton: (
-              <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
-            ),
-            renderLayoutOptionSwitch: false,
-            getJobParams: undefined,
-            showRadios: true,
-          },
-        ]
-      : [
-          {
-            shareMenuItem: {
-              name: panelTitle,
-              icon: 'document',
-              disabled: !csvEnabled,
-              sortOrder: 1,
-            },
-            showRadios: false,
-            helpText: (
-              <FormattedMessage
-                id="xpack.lens.application.csvPanelContent.generationDescription"
-                defaultMessage="Download the data displayed in the visualization."
-              />
-            ),
-            isDisabled: !csvEnabled,
-            warnings: getWarnings(activeData),
-            generateReportButton: (
-              <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
-            ),
-            downloadCSVLens: async () => {
-              await downloadCSVs({
-                title,
-                formatFactory: formatFactoryFn(),
-                activeData,
-                uiSettings,
-                columnsSorting,
-              });
-              onClose?.();
-            },
-            label: 'CSV' as const,
-            reportType: 'csv',
-          },
-        ];
+const menuItemMetadata = {
+      shareMenuItem: {
+        name: panelTitle,
+        icon: 'document',
+        disabled: !csvEnabled,
+        sortOrder: 1,
+      },
+    };
 
-    return isNewVersion
-      ? newVersionEnabled
-      : [
-          {
-            shareMenuItem: {
-              name: panelTitle,
-              icon: 'document',
-              disabled: !csvEnabled,
-              sortOrder: 1,
-            },
-            panel: {
-              id: 'csvDownloadPanel',
-              title: panelTitle,
-              content: (
-                <DownloadPanelContent
-                  isDisabled={!csvEnabled}
-                  warnings={getWarnings(activeData)}
-                  onClick={async () => {
-                    await downloadCSVs({
-                      title,
-                      formatFactory: formatFactoryFn(),
-                      activeData,
-                      uiSettings,
-                      columnsSorting,
-                    });
-                    onClose?.();
-                  }}
+    const onClick = async () => {
+      await downloadCSVs({
+        title,
+        formatFactory: formatFactoryFn(),
+        activeData,
+        uiSettings,
+        columnsSorting,
+      });
+      onClose?.();
+    };
+
+    if (!isNewVersion) {
+      return [
+        {
+          ...menuItemMetadata,
+          panel: {
+            id: 'csvDownloadPanel',
+            title: panelTitle,
+            content: (
+              <DownloadPanelContent
+                isDisabled={!csvEnabled}
+                warnings={getWarnings(activeData)}
+                onClick={onClick}
+              />
+            ),
+          },
+        },
+      ];
+    }
+
+    return [
+      {
+        ...menuItemMetadata,
+        downloadCSVLens: onClick,
+        label: 'CSV' as const,
+        reportType: 'csv',
+        ...(atLeastGold
+          ? {
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.share.helpText"
+                  defaultMessage="Export a PDF, PNG, or CSV of this visualization."
                 />
               ),
-            },
-          },
-        ];
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate Export" />
+              ),
+              renderLayoutOptionSwitch: false,
+              getJobParams: undefined,
+              showRadios: true,
+            }
+          : {
+              isDisabled: !csvEnabled,
+              warnings: getWarnings(activeData),
+              helpText: (
+                <FormattedMessage
+                  id="xpack.lens.application.csvPanelContent.generationDescription"
+                  defaultMessage="Download the data displayed in the visualization."
+                />
+              ),
+              generateReportButton: (
+                <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+              ),
+              showRadios: false,
+            }),
+      },
+    ];
   };
 
   return {

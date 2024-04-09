@@ -393,21 +393,22 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      const { getStartServices } = core;
-      const startServices$ = from(getStartServices());
-      startServices$.subscribe(([, { licensing }]) => {
-        licensing?.license$.subscribe((license) => {
-          const atLeastGold = license.hasAtLeast('gold');
-          return share.register(
-            downloadCsvShareProvider({
-              uiSettings: core.uiSettings,
-              formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-              atLeastGold,
-              isNewVersion: share.isNewVersion,
-            })
-          );
-        });
-      });
+      share.register(
+        downloadCsvShareProvider({
+          uiSettings: core.uiSettings,
+          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          atLeastGold: () => {
+            let isGold = false;
+            startServices()
+              .plugins.licensing?.license$.pipe(take(1))
+              .subscribe((license) => {
+                isGold = license.hasAtLeast('gold');
+              });
+            return isGold;
+          },
+          isNewVersion: share.isNewVersion,
+        })
+      );
     }
 
     visualizations.registerAlias(getLensAliasConfig());
