@@ -225,6 +225,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         user,
         authorizationHeader,
         force,
+        request,
       }),
     };
 

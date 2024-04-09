@@ -96,7 +96,9 @@ export interface UninstallTokenServiceInterface {
     policyNameSearchTerm?: string,
     page?: number,
     perPage?: number,
-    excludedPolicyIds?: string[]
+    excludedPolicyIds?: string[],
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -130,7 +132,12 @@ export interface UninstallTokenServiceInterface {
    * @param force generate a new token even if one already exists
    * @returns hashedToken
    */
-  generateTokenForPolicyId(policyId: string, force?: boolean): Promise<void>;
+  generateTokenForPolicyId(
+    policyId: string,
+    force?: boolean,
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<void>;
 
   /**
    * Generate uninstall tokens for given policy ids
@@ -215,7 +222,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     policyNameSearchTerm?: string,
     page = 1,
     perPage = 20,
-    excludedPolicyIds?: string[]
+    excludedPolicyIds?: string[],
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<GetUninstallTokensMetadataResponse> {
     const policyIdFilter = this.prepareSearchString(policyIdSearchTerm, '.*');
 
@@ -235,7 +244,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const tokenObjects = await this.getTokenObjectsByPolicyIdFilter(
       includeFilter,
-      excludedPolicyIds
+      excludedPolicyIds,
+      spaceId,
+      request
     );
     const tokenObjectsCurrentPage = tokenObjects.slice((page - 1) * perPage, page * perPage);
     const policyIds = tokenObjectsCurrentPage.map(
@@ -385,12 +396,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private async getTokenObjectsByPolicyIdFilter(
     include?: AggregationsTermsInclude,
-    exclude?: AggregationsTermsExclude
+    exclude?: AggregationsTermsExclude,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
 
     const query: SavedObjectsCreatePointInTimeFinderOptions = {
       type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+      ...(spaceId ? { namespaces: [spaceId] } : {}),
       perPage: 0,
       aggs: {
         by_policy_id: {
@@ -413,9 +427,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       },
     };
 
+    const soClient = request
+      ? appContextService.getSavedObjects().getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+        })
+      : this.soClient;
+
     // encrypted saved objects doesn't decrypt aggregation values so we get
     // the ids first from saved objects to use with encrypted saved objects
-    const idFinder = this.soClient.createPointInTimeFinder<
+    const idFinder = soClient.createPointInTimeFinder<
       UninstallTokenSOAttributes,
       UninstallTokenSOAggregation
     >(query);
@@ -461,13 +482,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return this.getHashedTokensForPolicyIds(policyIds);
   }
 
-  public generateTokenForPolicyId(policyId: string, force: boolean = false): Promise<void> {
-    return this.generateTokensForPolicyIds([policyId], force);
+  public generateTokenForPolicyId(
+    policyId: string,
+    force: boolean = false,
+    spaceId?: string,
+    request?: KibanaRequest
+  ): Promise<void> {
+    return this.generateTokensForPolicyIds([policyId], force, spaceId, request);
   }
 
   public async generateTokensForPolicyIds(
     policyIds: string[],
-    force: boolean = false
+    force: boolean = false,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const { agentTamperProtectionEnabled } = appContextService.getExperimentalFeatures();
 
@@ -493,7 +521,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         [policyId]: token,
       };
     }, {} as Record<string, string>);
-    await this.persistTokens(missingTokenPolicyIds, newTokensMap);
+    await this.persistTokens(missingTokenPolicyIds, newTokensMap, spaceId, request);
     if (force) {
       const config = appContextService.getConfig();
       const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
@@ -552,7 +580,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   private async persistTokens(
     policyIds: string[],
-    tokensMap: Record<string, string>
+    tokensMap: Record<string, string>,
+    spaceId?: string,
+    request?: KibanaRequest
   ): Promise<void> {
     if (!policyIds.length) {
       return;
@@ -561,10 +591,18 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const config = appContextService.getConfig();
     const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
 
+    const soClient = request
+      ? appContextService.getSavedObjects().getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+        })
+      : this.soClient;
+
     await asyncForEach(chunk(policyIds, batchSize), async (policyIdsBatch) => {
-      await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
+      await soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+          ...(spaceId ? { initialNamespaces: [spaceId] } : {}),
           attributes: this.isEncryptionAvailable
             ? {
                 policy_id: policyId,
