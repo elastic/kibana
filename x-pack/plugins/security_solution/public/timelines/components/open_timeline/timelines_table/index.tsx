@@ -230,7 +230,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       <BasicTable
         columns={columns}
         data-test-subj="timelines-table"
-        isExpandable={true}
         isSelectable={actionTimelineToShow.includes('selectable')}
         itemId="savedObjectId"
         itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}

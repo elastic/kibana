@@ -67,7 +67,6 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
       items={citations}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable
     />
   );
 };

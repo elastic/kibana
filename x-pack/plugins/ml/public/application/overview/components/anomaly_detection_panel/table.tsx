@@ -186,7 +186,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
       allowNeutralSort={false}
       className="mlAnomalyDetectionTable"
       columns={columns}
-      isExpandable={false}
       isSelectable={false}
       items={groupsList}
       itemId={AnomalyDetectionListColumns.id}

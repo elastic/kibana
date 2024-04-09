@@ -226,7 +226,6 @@ export const MonitorListComponent: ({
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
-        isExpandable={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}

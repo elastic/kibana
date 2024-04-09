@@ -393,7 +393,6 @@ export class JobsList extends Component {
         onChange={this.onTableChange}
         selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        isExpandable={true}
         sorting={sorting}
         rowProps={(item) => ({
           'data-test-subj': `mlJobListRow row-${item.id}`,

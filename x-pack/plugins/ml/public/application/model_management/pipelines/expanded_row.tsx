@@ -170,7 +170,6 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
     <EuiInMemoryTable<ProcessorStatsItem>
       allowNeutralSort={false}
       columns={columns}
-      isExpandable={false}
       isSelectable={false}
       items={items}
       itemId={'id'}

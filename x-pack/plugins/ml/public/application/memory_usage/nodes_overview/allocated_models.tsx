@@ -257,7 +257,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
     <EuiInMemoryTable<AllocatedModel>
       allowNeutralSort={false}
       columns={columns}
-      isExpandable={false}
       isSelectable={false}
       items={models}
       itemId={'key'}

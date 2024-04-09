@@ -324,7 +324,6 @@ export const CategoryTable: FC<Props> = ({
         pagination={pagination}
         sorting={sorting}
         data-test-subj="aiopsLogPatternsTable"
-        isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         rowProps={(category) => {
           return enableRowActions

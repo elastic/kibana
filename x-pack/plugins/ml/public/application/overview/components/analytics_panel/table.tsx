@@ -112,7 +112,6 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       allowNeutralSort={false}
       className="mlAnalyticsTable"
       columns={columns}
-      isExpandable={false}
       isSelectable={false}
       items={items}
       itemId={DataFrameAnalyticsListColumn.id}

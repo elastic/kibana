@@ -226,7 +226,6 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
       loading={loading}
       columns={columns}
       error={error?.message}
-      isExpandable={true}
       items={pings}
       itemId="docId"
       itemIdToExpandedRowMap={expandedRows}

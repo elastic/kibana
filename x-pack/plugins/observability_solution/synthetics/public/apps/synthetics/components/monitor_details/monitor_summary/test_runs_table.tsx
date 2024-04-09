@@ -293,7 +293,6 @@ export const TestRunsTable = ({
       />
       <EuiBasicTable
         itemId="docId"
-        isExpandable={true}
         itemIdToExpandedRowMap={expandedRows}
         css={{ overflowX: isTabletOrGreater ? 'auto' : undefined }}
         compressed={false}

@@ -280,7 +280,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <EuiInMemoryTable<DataFrameAnalyticsListRow>
           allowNeutralSort={false}
           columns={columns}
-          isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={analytics}

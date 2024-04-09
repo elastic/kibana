@@ -451,7 +451,6 @@ export const SearchApplicationSchema: React.FC = () => {
           loading={isLoadingSearchApplicationSchema}
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable
           responsiveBreakpoint={false}
         />
         {totalConflictsHiddenByTypeFilters > 0 && (

@@ -481,7 +481,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             columns={columns}
             pagination={pagination}
             sorting={sorting}
-            isExpandable={true}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             isSelectable={false}
             onTableChange={onTableChange}
