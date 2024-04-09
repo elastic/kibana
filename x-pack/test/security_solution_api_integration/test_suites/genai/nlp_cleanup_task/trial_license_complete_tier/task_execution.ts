@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
+  const logger = getService('log');
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
 
@@ -18,10 +19,11 @@ export default ({ getService }: FtrProviderContext) => {
     describe('New Complete Deployment', () => {
       it('registers, runs and immediately deletes NLP Cleanup Task', async () => {
         try {
-          await kibanaServer.savedObjects.get({
+          const task = await kibanaServer.savedObjects.get({
             type: 'task',
             id: TASK_ID,
           });
+          logger.error(`Task should not exist: \n${JSON.stringify(task, null, 2)}`);
         } catch (e) {
           // TODO: Better way to check if task doesn't exist? savedObjects.find() is paginated and returned tasks > pageSize...
           // Maybe query event log, or `.kibana_task_manager` index directly?
