@@ -19,33 +19,26 @@ import {
   ReportingSharingData,
 } from '.';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
-import { ReportingAPIClient } from '../../reporting_api_client';
 
-const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type: 'pngV2' | 'printablePdfV2'
-  ) =>
-  () => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
+const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
+  const {
+    objectType,
+    sharingData: { title, layout, locatorParams },
+  } = opts;
 
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    }
-    // single locator for PNG V2
-    return { ...baseParams, locatorParams };
+  const baseParams = {
+    objectType,
+    layout,
+    title,
   };
+
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams] };
+  }
+  // single locator for PNG V2
+  return { ...baseParams, locatorParams };
+};
 
 /**
  * This is used by Canvas
@@ -58,7 +51,6 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-  intl,
 }: ExportPanelShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -149,7 +141,7 @@ export const reportingScreenshotShareProvider = ({
             reportType={'pngV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, 'pngV2')}
+            getJobParams={getJobParams(jobProviderOptions, 'pngV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -183,7 +175,7 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')}
+            getJobParams={getJobParams(jobProviderOptions, 'printablePdfV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -279,7 +271,7 @@ export const reportingExportModalProvider = ({
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
+        ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
         layout: { id: 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
@@ -336,7 +328,7 @@ export const reportingExportModalProvider = ({
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
+        ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
         layout: { id: 'print', dimensions },
         objectType,
         title: sharingData.title,
@@ -381,10 +373,7 @@ export const reportingExportModalProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };
@@ -395,7 +384,7 @@ export const reportingExportModalProvider = ({
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'pngV2')(),
+        ...getJobParams(jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
@@ -440,10 +429,7 @@ export const reportingExportModalProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };

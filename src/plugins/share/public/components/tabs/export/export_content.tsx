@@ -28,17 +28,14 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { ShareMenuItem } from '../../../types';
 import { type IShareContext } from '../../context';
 
-type ExportProps = Pick<
-  IShareContext,
-  'isDirty' | 'objectId' | 'objectType' | 'onClose' | 'toasts'
-> & {
+type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
   aggregateReportTypes: ShareMenuItem[];
 };
 
 type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'lens_csv';
 
-const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: ExportProps) => {
+const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes }: ExportProps) => {
   // needed for CSV in Discover
   const firstRadio =
     (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
@@ -85,6 +82,9 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: 
       throw new Error('No content registered for this tab');
     }
     return aggregateReportTypes.map(({ reportType, label }) => {
+      if (reportType == null) {
+        throw new Error('expected reportType to be string!');
+      }
       return { id: reportType, label, 'data-test-subj': `${reportType}-radioOption` };
     });
   }, [aggregateReportTypes]);

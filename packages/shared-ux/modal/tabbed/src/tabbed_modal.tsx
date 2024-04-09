@@ -139,7 +139,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
               color={selectedTabState.isNotSaved ? 'warning' : 'primary'}
               data-share-url={state.url}
               onClick={() => {
-                // @ts-ignore state will not be null because of the modalActionBtn check
                 modalActionBtn.handler({ state: selectedTabState });
                 setIsTextVisible(true);
               }}
