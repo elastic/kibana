@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { UserProfileService } from './src/user_profile_service';
+export { CoreUserProfileRouteHandlerContext } from './src/user_profile_route_handler_context';
+export type {
+  InternalUserProfileServiceSetup,
+  InternalUserProfileServiceStart,
+} from './src/internal_contracts';

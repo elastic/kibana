@@ -54,6 +54,7 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
+import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -103,6 +104,7 @@ export class Server {
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -152,6 +154,7 @@ export class Server {
     this.customBranding = new CustomBrandingService(core);
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
+    this.userProfile = new UserProfileService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -272,6 +275,7 @@ export class Server {
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
+    const userProfileSetup = this.userProfile.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -369,6 +373,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
+      userProfile: userProfileSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -389,6 +394,7 @@ export class Server {
 
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
+    const userProfileStart = this.userProfile.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
@@ -441,6 +447,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
       security: securityStart,
+      userProfile: userProfileStart,
     };
 
     await this.plugins.start(this.coreStart);

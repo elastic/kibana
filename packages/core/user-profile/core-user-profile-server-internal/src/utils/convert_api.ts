@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UserProfileData,
-  UserProfileLabels,
-  UserProfileWithSecurity,
-  UserProfile,
-  UserProfileUserInfoWithSecurity,
-  UserProfileUserInfo,
-} from './src/user_profile';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
+import type { InternalUserProfileServiceStart } from '../internal_contracts';
+
+export const convertUserProfileAPI = (
+  delegate: CoreUserProfileDelegateContract
+): InternalUserProfileServiceStart => {
+  return delegate;
+};

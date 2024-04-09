@@ -44,7 +44,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
@@ -313,6 +313,11 @@ export class SecurityPlugin
     core.security.registerSecurityApi(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+      })
+    );
+    core.userProfile.registerUserProfileDelegate(
+      buildUserProfileApi({
+        getUserProfile: this.getUserProfileService.bind(this),
       })
     );
 

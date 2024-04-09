@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UserProfileData,
-  UserProfileLabels,
-  UserProfileWithSecurity,
-  UserProfile,
-  UserProfileUserInfoWithSecurity,
-  UserProfileUserInfo,
-} from './src/user_profile';
+import type {
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+  CoreUserProfileDelegateContract,
+} from '@kbn/core-user-profile-server';
+
+export type InternalUserProfileServiceSetup = UserProfileServiceSetup;
+export type InternalUserProfileServiceStart = UserProfileServiceStart &
+  Pick<CoreUserProfileDelegateContract, 'update'>;

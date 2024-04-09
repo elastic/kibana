@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type {
+import {
   UserProfileData,
   UserProfileLabels,
   UserProfileWithSecurity,
-  UserProfile,
-  UserProfileUserInfoWithSecurity,
-  UserProfileUserInfo,
-} from './src/user_profile';
+} from '@kbn/core-user-profile-common';
+
+export interface UserProfileRequestHandlerContext {
+  getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
+    dataPath?: string
+  ): Promise<UserProfileWithSecurity<D, L> | null>;
+}

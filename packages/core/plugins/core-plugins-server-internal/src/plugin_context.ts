@@ -287,6 +287,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
     },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
+    },
   };
 }
 
@@ -366,5 +370,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     security: {
       authc: deps.security.authc,
     },
+    userProfile: deps.userProfile,
   };
 }

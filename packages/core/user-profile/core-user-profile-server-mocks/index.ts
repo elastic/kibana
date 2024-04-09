@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { userProfileServiceMock } from './src/user_profile_service.mock';

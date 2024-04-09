@@ -6,11 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UserProfileData,
-  UserProfileLabels,
-  UserProfileWithSecurity,
-  UserProfile,
-  UserProfileUserInfoWithSecurity,
-  UserProfileUserInfo,
-} from './src/user_profile';
+export { convertUserProfileAPI } from './convert_api';
+export { getDefaultUserProfileImplementation } from './default_implementation';

@@ -6,8 +6,10 @@
  */
 
 import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
+import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
@@ -21,4 +23,12 @@ export const buildSecurityApi = ({
       },
     },
   };
+};
+
+export const buildUserProfileApi = ({
+  getUserProfile,
+}: {
+  getUserProfile: () => UserProfileServiceStartInternal;
+}): CoreUserProfileDelegateContract => {
+  return getUserProfile();
 };

@@ -27,6 +27,7 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {
@@ -51,6 +52,7 @@ export function createInternalCoreSetupMock() {
     customBranding: customBrandingServiceMock.createSetupContract(),
     userSettings: userSettingsServiceMock.createSetupContract(),
     security: securityServiceMock.createInternalSetup(),
+    userProfile: userProfileServiceMock.createInternalSetup(),
   };
   return setupDeps;
 }
