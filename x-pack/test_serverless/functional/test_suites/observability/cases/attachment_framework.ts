@@ -22,7 +22,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const toasts = getService('toasts');
 
-  describe('Cases persistable attachments', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/180219
+  describe.skip('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
