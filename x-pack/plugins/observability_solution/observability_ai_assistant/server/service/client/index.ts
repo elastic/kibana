@@ -25,6 +25,7 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
@@ -946,6 +947,7 @@ export class ObservabilityAIAssistantClient {
       (instruction): instruction is UserInstruction => typeof instruction !== 'string'
     );
     const overrideIds = overrides.map((instruction) => instruction.doc_id);
+
     const plainInstructions = requestInstructions
       .filter((instruction): instruction is string => typeof instruction === 'string')
       .map<UserInstruction>((instruction, index) => ({
@@ -961,8 +963,10 @@ export class ObservabilityAIAssistantClient {
       (instruction) => instruction.text
     );
 
+    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
+
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 
-    return `${instructionsPrompt}${instructions.join('\n\n')}`;
+    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
   };
 }
