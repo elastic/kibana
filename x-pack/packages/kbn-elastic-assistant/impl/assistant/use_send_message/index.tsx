@@ -38,6 +38,7 @@ export const useSendMessage = (): UseSendMessage => {
     defaultAllow,
     defaultAllowReplacement,
     knowledgeBase,
+    traceOptions,
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
@@ -60,19 +61,21 @@ export const useSendMessage = (): UseSendMessage => {
           replacements,
           signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
+          traceOptions,
         });
       } finally {
         setIsLoading(false);
       }
     },
     [
-      alertsIndexPattern,
-      assistantStreamingEnabled,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase.isEnabledRAGAlerts,
       knowledgeBase.isEnabledKnowledgeBase,
       knowledgeBase.latestAlerts,
+      alertsIndexPattern,
+      defaultAllow,
+      defaultAllowReplacement,
+      assistantStreamingEnabled,
+      traceOptions,
     ]
   );
 
