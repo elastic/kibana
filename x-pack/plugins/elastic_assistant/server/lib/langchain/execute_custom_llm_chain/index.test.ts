@@ -11,14 +11,17 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
-import { ResponseBody } from '../types';
 import { callAgentExecutor } from '.';
+import { Stream } from 'stream';
+import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 
-jest.mock('../llm/actions_client_llm');
+jest.mock('@kbn/elastic-assistant-common/impl/llm', () => ({
+  ActionsClientChatOpenAI: jest.fn(),
+  ActionsClientLlm: jest.fn(),
+}));
 
 const mockConversationChain = {
   call: jest.fn(),
@@ -30,10 +33,18 @@ jest.mock('langchain/chains', () => ({
   },
 }));
 
-const mockCall = jest.fn();
+const mockCall = jest.fn().mockImplementation(() =>
+  Promise.resolve({
+    output: mockActionResponse,
+  })
+);
+const mockInvoke = jest.fn().mockImplementation(() => Promise.resolve());
 jest.mock('langchain/agents', () => ({
-  initializeAgentExecutorWithOptions: jest.fn().mockImplementation(() => ({
-    call: mockCall.mockReturnValueOnce({ output: mockActionResponse.message }),
+  initializeAgentExecutorWithOptions: jest.fn().mockImplementation((_a, _b, { agentType }) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    call: (props: any) => mockCall({ ...props, agentType }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    invoke: (props: any) => mockInvoke({ ...props, agentType }),
   })),
 }));
 
@@ -47,7 +58,7 @@ jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
 const mockConnectorId = 'mock-connector-id';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaRequest<
+const mockRequest: KibanaRequest<unknown, unknown, any, any> = { body: {} } as KibanaRequest<
   unknown,
   unknown,
   any, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -63,6 +74,7 @@ const defaultProps = {
   isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
+  llmType: 'openai',
   langChainMessages,
   logger: mockLogger,
   onNewReplacements: jest.fn(),
@@ -76,54 +88,96 @@ describe('callAgentExecutor', () => {
     jest.clearAllMocks();
   });
 
-  it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
-    await callAgentExecutor(defaultProps);
-
-    expect(ActionsClientLlm).toHaveBeenCalledWith({
-      actions: mockActions,
-      connectorId: mockConnectorId,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-  });
-
-  it('kicks off the chain with (only) the last message', async () => {
-    await callAgentExecutor(defaultProps);
-
-    // We don't care about the `config` argument, so we use `expect.anything()`
-    expect(mockCall).toHaveBeenCalledWith(
-      {
-        input: '\n\nDo you know my name?',
-      },
-      expect.anything()
-    );
-  });
-
-  it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
-    const onlyOneMessage = [langChainMessages[0]];
-
-    await callAgentExecutor({
-      ...defaultProps,
-      langChainMessages: onlyOneMessage,
+  describe('callAgentExecutor', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
-    // We don't care about the `config` argument, so we use `expect.anything()`
-    expect(mockCall).toHaveBeenCalledWith(
-      {
-        input: 'What is my name?',
-      },
-      expect.anything()
-    );
+    it('kicks off the chain with (only) the last message', async () => {
+      await callAgentExecutor(defaultProps);
+
+      expect(mockCall.mock.calls[0][0].input).toEqual('\n\nDo you know my name?');
+    });
+
+    it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
+      const onlyOneMessage = [langChainMessages[0]];
+
+      await callAgentExecutor({
+        ...defaultProps,
+        langChainMessages: onlyOneMessage,
+      });
+      expect(mockCall.mock.calls[0][0].input).toEqual('What is my name?');
+    });
   });
+  describe('when the agent is not streaming', () => {
+    it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
+      await callAgentExecutor(defaultProps);
 
-  it('returns the expected response body', async () => {
-    const result: ResponseBody = await callAgentExecutor(defaultProps);
+      expect(ActionsClientLlm).toHaveBeenCalledWith({
+        actions: mockActions,
+        connectorId: mockConnectorId,
+        logger: mockLogger,
+        maxRetries: 0,
+        request: mockRequest,
+        streaming: false,
+        llmType: 'openai',
+      });
+    });
 
-    expect(result).toEqual({
-      connector_id: 'mock-connector-id',
-      data: mockActionResponse.message,
-      status: 'ok',
-      replacements: {},
+    it('uses the chat-conversational-react-description agent type', async () => {
+      await callAgentExecutor(defaultProps);
+
+      expect(mockCall.mock.calls[0][0].agentType).toEqual('chat-conversational-react-description');
+    });
+
+    it('returns the expected response', async () => {
+      const result = await callAgentExecutor(defaultProps);
+
+      expect(result).toEqual({
+        body: {
+          connector_id: 'mock-connector-id',
+          data: mockActionResponse,
+          status: 'ok',
+          replacements: {},
+          trace_data: undefined,
+        },
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    });
+  });
+  describe('when the agent is streaming', () => {
+    it('creates an instance of ActionsClientChatOpenAI with the expected context from the request', async () => {
+      await callAgentExecutor({ ...defaultProps, isStream: true });
+
+      expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
+        actions: mockActions,
+        connectorId: mockConnectorId,
+        logger: mockLogger,
+        maxRetries: 0,
+        request: mockRequest,
+        streaming: true,
+        llmType: 'openai',
+      });
+    });
+
+    it('uses the openai-functions agent type', async () => {
+      await callAgentExecutor({ ...defaultProps, isStream: true });
+
+      expect(mockInvoke.mock.calls[0][0].agentType).toEqual('openai-functions');
+    });
+
+    it('returns the expected response', async () => {
+      const result = await callAgentExecutor({ ...defaultProps, isStream: true });
+      expect(result.body).toBeInstanceOf(Stream.PassThrough);
+      expect(result.headers).toEqual({
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'Transfer-Encoding': 'chunked',
+        'X-Accel-Buffering': 'no',
+        'X-Content-Type-Options': 'nosniff',
+      });
     });
   });
 });
