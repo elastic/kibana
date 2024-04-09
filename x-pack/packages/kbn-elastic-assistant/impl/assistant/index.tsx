@@ -33,6 +33,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import deepEqual from 'fast-deep-equal';
 
 import { find, isEmpty } from 'lodash';
 import { useChatSend } from './chat_send/use_chat_send';
@@ -214,7 +215,7 @@ const AssistantComponent: React.FC<Props> = ({
               : WELCOME_CONVERSATION_TITLE,
           ]);
 
-        if (nextConversation?.id !== '' && prev?.id === nextConversation?.id) return prev;
+        if (deepEqual(prev, nextConversation)) return prev;
 
         return (
           (nextConversation &&

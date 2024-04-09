@@ -84,6 +84,14 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       http,
     });
 
+    const selectedConversationId = useMemo(
+      () =>
+        selectedConversation?.id === ''
+          ? selectedConversation.title
+          : (selectedConversation?.id as string),
+      [selectedConversation]
+    );
+
     // Conversation callbacks
     // When top level conversation selection changes
     const onConversationSelectionChange = useCallback(
@@ -250,7 +258,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [selectedConversation.id]: updatedConversation,
+            [selectedConversationId]: updatedConversation,
           });
           if (selectedConversation.id !== '') {
             setConversationsSettingsBulkActions({
@@ -291,6 +299,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         conversationSettings,
         conversationsSettingsBulkActions,
         selectedConversation,
+        selectedConversationId,
         setConversationSettings,
         setConversationsSettingsBulkActions,
       ]

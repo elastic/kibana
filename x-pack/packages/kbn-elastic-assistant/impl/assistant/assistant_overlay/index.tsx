@@ -136,6 +136,7 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
         ref={flyoutRef}
         css={css`
           max-inline-size: calc(100% - 20px);
+          min-inline-size: 400px;
           > div {
             height: 100%;
           }

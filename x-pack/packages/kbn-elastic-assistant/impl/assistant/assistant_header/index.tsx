@@ -79,6 +79,12 @@ export const AssistantHeader: React.FC<Props> = ({
     },
     [onConversationSelected]
   );
+  const selectedConversationId = useMemo(
+    () =>
+      !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title,
+    [currentConversation?.id, currentConversation?.title]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -108,7 +114,7 @@ export const AssistantHeader: React.FC<Props> = ({
         >
           <ConversationSelector
             defaultConnector={defaultConnector}
-            selectedConversationTitle={currentConversation?.title}
+            selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}
@@ -141,11 +147,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   defaultConnector={defaultConnector}
                   isDisabled={isDisabled}
                   isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversationId={
-                    !isEmpty(currentConversation?.id)
-                      ? currentConversation?.id
-                      : currentConversation?.title
-                  }
+                  selectedConversationId={selectedConversationId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}

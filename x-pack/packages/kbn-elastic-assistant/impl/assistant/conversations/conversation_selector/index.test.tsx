@@ -45,7 +45,7 @@ const onConversationDeleted = jest.fn();
 const defaultProps = {
   isDisabled: false,
   onConversationSelected,
-  selectedConversationTitle: 'Welcome',
+  selectedConversationId: 'Welcome',
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   conversations: mockConversations,
@@ -154,7 +154,7 @@ describe('Conversation selector', () => {
       <TestProviders>
         <ConversationSelector
           {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-          selectedConversationTitle={customConvo.title}
+          selectedConversationId={customConvo.title}
         />
       </TestProviders>
     );

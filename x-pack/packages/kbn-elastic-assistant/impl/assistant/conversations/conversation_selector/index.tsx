@@ -32,7 +32,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   defaultConnector?: AIConnector;
-  selectedConversationTitle: string | undefined;
+  selectedConversationId: string | undefined;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
@@ -40,22 +40,16 @@ interface Props {
   conversations: Record<string, Conversation>;
 }
 
-const getPreviousConversationTitle = (
-  conversationTitles: string[],
-  selectedConversationTitle: string
-) => {
-  return conversationTitles.indexOf(selectedConversationTitle) === 0
-    ? conversationTitles[conversationTitles.length - 1]
-    : conversationTitles[conversationTitles.indexOf(selectedConversationTitle) - 1];
+const getPreviousConversationId = (conversationIds: string[], selectedConversationId: string) => {
+  return conversationIds.indexOf(selectedConversationId) === 0
+    ? conversationIds[conversationIds.length - 1]
+    : conversationIds[conversationIds.indexOf(selectedConversationId) - 1];
 };
 
-const getNextConversationTitle = (
-  conversationTitles: string[],
-  selectedConversationTitle: string
-) => {
-  return conversationTitles.indexOf(selectedConversationTitle) + 1 >= conversationTitles.length
-    ? conversationTitles[0]
-    : conversationTitles[conversationTitles.indexOf(selectedConversationTitle) + 1];
+const getNextConversationId = (conversationIds: string[], selectedConversationId: string) => {
+  return conversationIds.indexOf(selectedConversationId) + 1 >= conversationIds.length
+    ? conversationIds[0]
+    : conversationIds[conversationIds.indexOf(selectedConversationId) + 1];
 };
 
 const getConvoId = (cId: string, cTitle: string): string => (cId === cTitle ? '' : cId);
@@ -66,7 +60,7 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
 
 export const ConversationSelector: React.FC<Props> = React.memo(
   ({
-    selectedConversationTitle = DEFAULT_CONVERSATION_TITLE,
+    selectedConversationId = DEFAULT_CONVERSATION_TITLE,
     defaultConnector,
     onConversationSelected,
     onConversationDeleted,
@@ -77,7 +71,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const { allSystemPrompts } = useAssistantContext();
 
     const { createConversation } = useConversation();
-    const conversationTitles = useMemo(() => Object.keys(conversations), [conversations]);
+    const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
@@ -87,7 +81,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     }, [conversations]);
 
     const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
-      return conversationOptions.filter((c) => c.label === selectedConversationTitle) ?? [];
+      return conversationOptions.filter((c) => c.label === selectedConversationId) ?? [];
     });
 
     // Callback for when user types to create a new system prompt
@@ -142,25 +136,25 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
-      (deletedTitle: string) => {
-        onConversationDeleted(deletedTitle);
-        if (selectedConversationTitle === deletedTitle) {
-          const prevConversationTitle = getPreviousConversationTitle(
-            conversationTitles,
-            selectedConversationTitle
+      (conversationId: string) => {
+        onConversationDeleted(conversationId);
+        if (selectedConversationId === conversationId) {
+          const prevConversationId = getPreviousConversationId(
+            conversationIds,
+            selectedConversationId
           );
 
           onConversationSelected({
-            cId: getConvoId(conversations[prevConversationTitle].id, prevConversationTitle),
-            cTitle: prevConversationTitle,
+            cId: getConvoId(conversations[prevConversationId].id, prevConversationId),
+            cTitle: prevConversationId,
           });
         }
       },
       [
-        selectedConversationTitle,
+        selectedConversationId,
         onConversationDeleted,
         onConversationSelected,
-        conversationTitles,
+        conversationIds,
         conversations,
       ]
     );
@@ -179,26 +173,26 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     );
 
     const onLeftArrowClick = useCallback(() => {
-      const prevTitle = getPreviousConversationTitle(conversationTitles, selectedConversationTitle);
+      const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
 
       onConversationSelected({
-        cId: getConvoId(conversations[prevTitle].id, prevTitle),
-        cTitle: prevTitle,
+        cId: prevId,
+        cTitle: conversations[prevId]?.title,
       });
-    }, [conversationTitles, selectedConversationTitle, onConversationSelected, conversations]);
+    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
     const onRightArrowClick = useCallback(() => {
-      const nextTitle = getNextConversationTitle(conversationTitles, selectedConversationTitle);
+      const nextTitle = getNextConversationId(conversationIds, selectedConversationId);
 
       onConversationSelected({
         cId: getConvoId(conversations[nextTitle].id, nextTitle),
         cTitle: nextTitle,
       });
-    }, [conversationTitles, selectedConversationTitle, onConversationSelected, conversations]);
+    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
       (event: KeyboardEvent) => {
-        if (isDisabled || conversationTitles.length <= 1) {
+        if (isDisabled || conversationIds.length <= 1) {
           return;
         }
 
@@ -220,7 +214,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         }
       },
       [
-        conversationTitles.length,
+        conversationIds.length,
         isDisabled,
         onLeftArrowClick,
         onRightArrowClick,
@@ -230,15 +224,15 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     useEvent('keydown', onKeyDown);
 
     useEffect(() => {
-      setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationTitle));
-    }, [conversationOptions, selectedConversationTitle]);
+      setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationId));
+    }, [conversationOptions, selectedConversationId]);
 
     const renderOption: (
       option: ConversationSelectorOption,
       searchValue: string,
       OPTION_CONTENT_CLASSNAME: string
     ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value } = option;
+      const { label, id, value } = option;
 
       return (
         <EuiFlexGroup
@@ -265,7 +259,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
               {label}
             </EuiHighlight>
           </EuiFlexItem>
-          {!value?.isDefault && (
+          {!value?.isDefault && id && (
             <EuiFlexItem grow={false} component={'span'}>
               <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
                 <EuiButtonIcon
@@ -274,7 +268,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                   color="danger"
                   onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    onDelete(label ?? '');
+                    onDelete(id);
                   }}
                   data-test-subj="delete-option"
                   css={css`
@@ -318,7 +312,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                 iconType="arrowLeft"
                 aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
                 onClick={onLeftArrowClick}
-                disabled={isDisabled || conversationTitles.length <= 1}
+                disabled={isDisabled || conversationIds.length <= 1}
               />
             </EuiToolTip>
           }
@@ -328,7 +322,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                 iconType="arrowRight"
                 aria-label={i18n.NEXT_CONVERSATION_TITLE}
                 onClick={onRightArrowClick}
-                disabled={isDisabled || conversationTitles.length <= 1}
+                disabled={isDisabled || conversationIds.length <= 1}
               />
             </EuiToolTip>
           }

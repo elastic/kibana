@@ -127,7 +127,7 @@ describe('ConversationSettings', () => {
     fireEvent.click(getByTestId('change-sp'));
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
-      [welcomeConvo.title]: {
+      [mockConvos[welcomeConvo.title].id]: {
         ...mockConvos[welcomeConvo.title],
         apiConfig: {
           ...welcomeConvo.apiConfig,
@@ -149,7 +149,7 @@ describe('ConversationSettings', () => {
     fireEvent.click(getByTestId('change-sp'));
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
-      [mockConvo.title]: {
+      'not-the-right-id': {
         ...mockConvo,
         id: 'not-the-right-id',
         apiConfig: {
@@ -226,7 +226,7 @@ describe('ConversationSettings', () => {
     fireEvent.click(getByTestId('change-connector'));
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
-      [welcomeConvo.title]: {
+      [mockConvos[welcomeConvo.title].id]: {
         ...mockConvos[welcomeConvo.title],
         apiConfig: {
           actionTypeId: mockConnector.actionTypeId,
@@ -238,7 +238,7 @@ describe('ConversationSettings', () => {
     });
     expect(setConversationsSettingsBulkActions).toHaveBeenLastCalledWith({
       update: {
-        [welcomeConvo.title]: {
+        [mockConvos[welcomeConvo.title].id]: {
           ...mockConvos[welcomeConvo.title],
           apiConfig: {
             actionTypeId: mockConnector.actionTypeId,
@@ -259,7 +259,7 @@ describe('ConversationSettings', () => {
     fireEvent.click(getByTestId('change-model'));
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
-      [welcomeConvo.title]: {
+      [mockConvos[welcomeConvo.title].id]: {
         ...mockConvos[welcomeConvo.title],
         apiConfig: {
           ...welcomeConvo.apiConfig,
@@ -269,7 +269,7 @@ describe('ConversationSettings', () => {
     });
     expect(setConversationsSettingsBulkActions).toHaveBeenLastCalledWith({
       update: {
-        [welcomeConvo.title]: {
+        [mockConvos[welcomeConvo.title].id]: {
           ...mockConvos[welcomeConvo.title],
           apiConfig: {
             ...welcomeConvo.apiConfig,
@@ -325,7 +325,7 @@ describe('ConversationSettings', () => {
     fireEvent.click(getByTestId('change-connector'));
     expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
-      [mockConvo.title]: {
+      'not-the-right-id': {
         ...mockConvo,
         id: 'not-the-right-id',
         apiConfig: {

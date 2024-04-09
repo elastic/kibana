@@ -47,7 +47,7 @@ const onConversationSelected = jest.fn();
 const testProps = {
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
-  selectedConversation: welcomeConvo,
+  selectedConversationId: welcomeConvo.title,
   onClose,
   onSave,
   isFlyoutMode: false,
@@ -93,7 +93,7 @@ describe('AssistantSettings', () => {
 
   it('saves changes and updates selected conversation when selected conversation has been deleted', async () => {
     const { getByTestId } = render(
-      <AssistantSettings {...testProps} selectedConversation={customConvo} />
+      <AssistantSettings {...testProps} selectedConversationId={customConvo.title} />
     );
     await act(async () => {
       fireEvent.click(getByTestId('save-button'));
