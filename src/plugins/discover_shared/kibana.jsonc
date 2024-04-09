@@ -9,6 +9,5 @@
     "browser": true,
     "requiredPlugins": [],
     "optionalPlugins": [],
-    "extraPublicDirs": ["common"]
   },
 }
