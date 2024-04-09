@@ -13,84 +13,70 @@
  */
 
 import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
-import React, { useReducer } from 'react';
-import type { ParseConfig } from 'papaparse';
-import Papa from 'papaparse';
+import React, { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useFormatBytes } from '../../../common/components/formatted_bytes';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
-import { validateFile, validateParsedContent } from './validations';
 import { reducer } from './reducer';
 import { getStepStatus } from './helpers';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
+import { useFileValidation } from './hooks';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, { isLoading: false, step: 1 });
-  const formatBytes = useFormatBytes();
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
-
-  const onFileChange = (fileList: FileList | null) => {
-    if (fileList?.length === 0) {
+  const onValidationComplete = useCallback(
+    ({
+      fileName,
+      validLinesAsText,
+      invalidLinesAsText,
+      invalidLinesErrors,
+      validLinesCount,
+      invalidLinesCount,
+    }) => {
       dispatch({
-        type: 'resetState',
+        type: 'fileValidated',
+        payload: {
+          fileName,
+          validLinesAsText,
+          invalidLinesAsText,
+          invalidLinesErrors,
+          validLinesCount,
+          invalidLinesCount,
+        },
       });
-    }
+    },
+    []
+  );
+  const onValidationError = useCallback((message, file) => {
+    dispatch({ type: 'fileError', payload: { message, file } });
+  }, []);
 
-    const file = fileList?.item(0);
-    if (file) {
+  const validateFile = useFileValidation({
+    onError: onValidationError,
+    onComplete: onValidationComplete,
+  });
+
+  const onFileChange = useCallback(
+    (fileList: FileList | null) => {
+      const file = fileList?.item(0);
+
+      if (!file) {
+        // file removed
+        dispatch({ type: 'resetState' });
+        return;
+      }
+
       dispatch({
         type: 'loadingFile',
         payload: { fileName: file.name },
       });
 
-      const fileValidation = validateFile(file, formatBytes);
-      if (!fileValidation.valid) {
-        dispatch({
-          type: 'fileError',
-          payload: {
-            file,
-            message: fileValidation.errorMessage,
-          },
-        });
-        return;
-      }
-
-      const parserConfig: ParseConfig = {
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        complete(parsedFile, returnedFile) {
-          if (parsedFile.data.length === 0) {
-            dispatch({ type: 'fileError', payload: { message: 'The file is empty', file } }); // TODO i18n
-            return;
-          }
-
-          const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
-
-          const validLinesAsText = Papa.unparse(valid);
-          const invalidLinesAsText = Papa.unparse(invalid);
-
-          dispatch({
-            type: 'fileValidated',
-            payload: {
-              fileName: returnedFile?.name ?? '',
-              validLinesAsText,
-              invalidLinesAsText,
-              invalidLinesErrors: errors,
-              validLinesCount: valid.length,
-              invalidLinesCount: invalid.length,
-            },
-          });
-        },
-        error(parserError) {
-          dispatch({ type: 'fileError', payload: { message: parserError.message, file } });
-        },
-      };
-
-      Papa.parse(file, parserConfig);
-    }
-  };
+      validateFile(file);
+    },
+    [validateFile]
+  );
 
   return (
     <div>
@@ -144,47 +130,43 @@ export const AssetCriticalityFileUploader: React.FC = () => {
           />
         )}
 
-        {state.step === 2 &&
-          state.validLinesCount !== undefined &&
-          state.invalidLinesCount !== undefined &&
-          state.validLinesAsText !== undefined &&
-          state.invalidLinesAsText !== undefined && (
-            <AssetCriticalityValidationStep
-              validLinesCount={state.validLinesCount}
-              invalidLinesCount={state.invalidLinesCount}
-              validLinesAsText={state.validLinesAsText}
-              invalidLinesAsText={state.invalidLinesAsText}
-              invalidLinesErrors={state.invalidLinesErrors ?? []}
-              fileName={state.fileName ?? ''}
-              onReturn={() => {
-                dispatch({ type: 'resetState' });
-              }}
-              onConfirm={async () => {
-                if (state.validLinesAsText) {
+        {state.step === 2 && (
+          <AssetCriticalityValidationStep
+            validLinesCount={state.validLinesCount ?? 0}
+            invalidLinesCount={state.invalidLinesCount ?? 0}
+            validLinesAsText={state.validLinesAsText}
+            invalidLinesAsText={state.invalidLinesAsText}
+            invalidLinesErrors={state.invalidLinesErrors ?? []}
+            fileName={state.fileName ?? ''}
+            onReturn={() => {
+              dispatch({ type: 'resetState' });
+            }}
+            onConfirm={async () => {
+              if (state.validLinesAsText) {
+                dispatch({
+                  type: 'uploadingFile',
+                });
+
+                try {
+                  const result = await uploadAssetCriticalityFile(
+                    state.validLinesAsText,
+                    state.fileName
+                  );
+
                   dispatch({
-                    type: 'uploadingFile',
+                    type: 'fileUploaded',
+                    payload: { response: result },
                   });
-
-                  try {
-                    const result = await uploadAssetCriticalityFile(
-                      state.validLinesAsText,
-                      state.fileName
-                    );
-
-                    dispatch({
-                      type: 'fileUploaded',
-                      payload: { response: result },
-                    });
-                  } catch (e) {
-                    dispatch({
-                      type: 'fileUploaded',
-                      payload: { errorMessage: e.message },
-                    });
-                  }
+                } catch (e) {
+                  dispatch({
+                    type: 'fileUploaded',
+                    payload: { errorMessage: e.message },
+                  });
                 }
-              }}
-            />
-          )}
+              }
+            }}
+          />
+        )}
 
         {state.step === 3 && (
           <AssetCriticalityResultStep

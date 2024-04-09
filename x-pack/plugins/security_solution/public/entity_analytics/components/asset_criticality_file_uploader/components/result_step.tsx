@@ -32,6 +32,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          data-test-subj="asset-criticality-result-step-error"
           title={
             <FormattedMessage
               defaultMessage="Asset criticality assignment failed."
@@ -52,6 +53,7 @@ export const AssetCriticalityResultStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          data-test-subj="asset-criticality-result-step-success"
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle',
             { defaultMessage: 'Great success' }
@@ -77,6 +79,7 @@ export const AssetCriticalityResultStep: React.FC<{
   return (
     <>
       <EuiCallOut
+        data-test-subj="asset-criticality-result-step-warning"
         title={
           <FormattedMessage
             defaultMessage="Some criticalities could not be assigned due to errors."
