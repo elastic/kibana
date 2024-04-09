@@ -492,7 +492,10 @@ export class KnowledgeBaseService {
     };
   };
 
-  getInstructions = async (): Promise<UserInstruction[]> => {
+  getInstructions = async (
+    user: { name: string },
+    namespace: string
+  ): Promise<UserInstruction[]> => {
     try {
       const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
@@ -507,6 +510,10 @@ export class KnowledgeBaseService {
                 },
               },
             ],
+            filter: getAccessQuery({
+              user,
+              namespace,
+            }),
           },
         },
         size: 500,

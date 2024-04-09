@@ -514,7 +514,11 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        this.resolveInstructions(requestInstructions)
+        this.resolveInstructions(
+          requestInstructions,
+          this.dependencies.user,
+          this.dependencies.namespace
+        )
           .then((instructions) => {
             return next(
               this.extendSystemMessage(messages, [
@@ -923,9 +927,15 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private resolveInstructions = async (requestInstructions: UserInstruction[]) => {
-    const knowledgeBaseInstructions =
-      await this.dependencies.knowledgeBaseService.getInstructions();
+  private resolveInstructions = async (
+    requestInstructions: UserInstruction[],
+    user: { name: string },
+    namespace: string
+  ) => {
+    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+      user,
+      namespace
+    );
 
     if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
       return '';
