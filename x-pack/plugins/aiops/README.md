@@ -16,7 +16,7 @@ The response stream factory acts as a wrapper to set up the stream itself, the s
 
 ### Analysis details
 
-Here are some more on the steps involved to do Log Rate Analysis:
+Here are some more details on the steps involved to do Log Rate Analysis:
 
 - **Index info**: This gathers information from the selected index to identify which type of analysis will be run and which fields will be used for analysis.
   - **Zero Docs Fallback**: If there are no docs in either `baseline` or `baseline`, the analysis will not identify statistically significant items but will just run regular `terms` aggregations and return the top items for the deviation time range.
