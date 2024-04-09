@@ -1,4 +1,5 @@
 - name: ensures usr/share/kibana dir exists
+  become: yes
   file:
     path: /usr/share/kibana
     state: directory
