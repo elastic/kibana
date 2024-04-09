@@ -113,7 +113,7 @@ export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
       buttonContent={accordionTitle}
       paddingSize="m"
       initialIsOpen={true}
-      data-test-subj={`logsExplorerFlyoutHeaderSection${contentLabel}`}
+      data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
       <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logsExplorerFlyoutDetail">
         {hasMessageField ? contentField : logLevelAndTimestamp}

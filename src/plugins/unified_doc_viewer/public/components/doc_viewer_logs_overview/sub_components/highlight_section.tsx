@@ -47,7 +47,7 @@ export function HighlightSection({ title, children, columns, ...props }: Highlig
 
   const showMoreButton = (
     <EuiButtonEmpty
-      data-test-subj="logsOverviewDocViewerHighlightSectionShowMoreButton"
+      data-test-subj="unifiedDocViewLogsOverviewHighlightSectionShowMoreButton"
       size="xs"
       flush="left"
       css={{ width: '80px' }}

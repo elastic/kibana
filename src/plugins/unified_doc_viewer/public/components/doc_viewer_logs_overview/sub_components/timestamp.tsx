@@ -17,7 +17,7 @@ export function Timestamp({ timestamp }: TimestampProps) {
   if (!timestamp) return null;
 
   return (
-    <EuiBadge color="hollow" data-test-subj="logsOverviewDocViewerLogTimestamp">
+    <EuiBadge color="hollow" data-test-subj="unifiedDocViewLogsOverviewTimestamp">
       {timestamp}
     </EuiBadge>
   );
