@@ -7,17 +7,16 @@
  */
 
 import {
-  BehaviorSubject,
   combineLatest,
-  combineLatestWith,
   debounceTime,
   delay,
   filter,
+  first,
   map,
   merge,
   Observable,
   of,
-  startWith,
+  skip,
   Subject,
   switchMap,
   takeUntil,
@@ -67,16 +66,44 @@ function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
 }
 
-function getDelayedObservables(api: unknown): Observable<unknown>[] {
-  const delayedObservables: Observable<unknown>[] = [];
+// Returns an observable that will emit once on subscribe and never again
+function getOnSubscribeObservable(api: unknown): Observable<unknown> {
+  const observables: Array<Observable<unknown>> = [];
 
   if (apiPublishesTimeRange(api)) {
-    delayedObservables.push(api.timeRange$.pipe(tap(() => console.log('timeRange$ emit'))));
+    observables.push(api.timeRange$);
   }
 
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    delayedObservables.push(
+    observables.push(api.parentApi.filters$);
+    observables.push(api.parentApi.query$);
+    observables.push(api.parentApi.timeRange$);
+    if (api.parentApi.timeslice$) {
+      observables.push(api.parentApi.timeslice$);
+    }
+  }
+
+  if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
+    observables.push(api.parentApi.searchSessionId$);
+  }
+
+  return combineLatest(observables).pipe(first());
+}
+
+// Returns observables that emit to changes after subscribe
+// 1. Observables are not guaranteed to have an initial value (can not be used in combineLatest)
+// 2. Observables will not emit on subscribe
+function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
+  const observables: Array<Observable<unknown>> = [];
+
+  if (apiPublishesTimeRange(api)) {
+    observables.push(api.timeRange$.pipe(skip(1)));
+  }
+
+  if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
+    observables.push(
       combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(
+        skip(1),
         filter(() => !hasSearchSession(api))
       )
     );
@@ -86,63 +113,63 @@ function getDelayedObservables(api: unknown): Observable<unknown>[] {
       if (api.parentApi.timeslice$) {
         timeObservables.push(api.parentApi.timeslice$);
       }
-      delayedObservables.push(
+      observables.push(
         combineLatest(timeObservables).pipe(
+          skip(1),
           filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
         )
       );
     }
   }
 
-  return delayedObservables;
+  return observables;
 }
 
-function getImmediateObservables(api: unknown): Observable<unknown>[] {
-  const immediateObservables: Observable<unknown>[] = [];
+// Returns observables that emit to changes after subscribe
+// 1. Observables are not guaranteed to have an initial value (can not be used in combineLatest)
+// 2. Observables will not emit on subscribe
+function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
+  const observables: Array<Observable<unknown>> = [];
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    immediateObservables.push(api.parentApi.searchSessionId$);
+    observables.push(api.parentApi.searchSessionId$.pipe(skip(1)));
   }
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
-    immediateObservables.push(
-      api.parentApi.reload$.pipe(
-        filter(() => !hasSearchSession(api)),
-      )
-    );
+    observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
   }
-  return immediateObservables;
+  return observables;
 }
 
 export function getFetch$(api: unknown): Observable<FetchContext> {
-  const delayedObservables = getDelayedObservables(api);
+  const onSubscribe$ = getOnSubscribeObservable(api);
+  const batchedObservables = getBatchedObservables(api);
   const immediateObservables = getImmediateObservables(api);
 
-  console.log('delayedObservables count', delayedObservables.length);
-
   if (immediateObservables.length === 0) {
-    return merge(...delayedObservables).pipe(
+    return merge(onSubscribe$, ...batchedObservables).pipe(
       debounceTime(0),
-      map(() => (getFetchContext(api, false)))
+      map(() => getFetchContext(api, false))
     );
   }
 
   const interrupt = new Subject<void>();
-  const cancellableChanges$ = merge(...delayedObservables).pipe(
-    tap(() => console.log('delayedObservables emit')),
+  const batchedChanges$ = merge(...batchedObservables).pipe(
     switchMap((value) =>
       of(value).pipe(
         delay(1),
         takeUntil(interrupt),
-        tap(() => console.log('cancellableChanges$ emit')),
-        map(() => (getFetchContext(api, false)))
+        map(() => getFetchContext(api, false))
       )
     )
   );
 
   const immediateChange$ = merge(...immediateObservables).pipe(
     tap(() => interrupt.next()),
-    tap(() => console.log('immediateChange$ emit')),
-    map(() => (getFetchContext(api, true)))
+    map(() => getFetchContext(api, true))
   );
 
-  return merge(immediateChange$, cancellableChanges$);*/
+  return merge(
+    onSubscribe$.pipe(map(() => getFetchContext(api, false))),
+    immediateChange$,
+    batchedChanges$
+  );
 }

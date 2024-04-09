@@ -29,7 +29,7 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
-export { onFetchContextChanged, type FetchContext } from './interfaces/fetch/get_fetch';
+export { getFetch$, type FetchContext } from './interfaces/fetch/get_fetch';
 export {
   apiPublishesPartialUnifiedSearch,
   apiPublishesTimeRange,
