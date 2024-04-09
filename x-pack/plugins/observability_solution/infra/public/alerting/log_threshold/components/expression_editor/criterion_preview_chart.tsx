@@ -61,7 +61,7 @@ interface Props {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
-  filterSeriesByGroupName?: string[];
+  filterSeriesByGroupName?: string;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -132,7 +132,7 @@ interface ChartProps {
   showThreshold: boolean;
   executionTimeRange?: ExecutionTimeRange;
   annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
-  filterSeriesByGroupName?: string[];
+  filterSeriesByGroupName?: string;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -192,7 +192,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
       return series;
     }
     if (filterSeriesByGroupName && filterSeriesByGroupName.length) {
-      return series.filter((item) => filterSeriesByGroupName.includes(item.id));
+      return series.filter((item) => filterSeriesByGroupName === item.id);
     }
     const sortedByMax = series.sort((a, b) => {
       const aMax = Math.max(...a.points.map((point) => point.value));

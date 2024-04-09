@@ -196,7 +196,7 @@ const LogsHistoryChart = ({
         chartCriterion={criteria as PartialCriterion}
         showThreshold={true}
         executionTimeRange={executionTimeRange}
-        filterSeriesByGroupName={groups?.map((group) => group.value).concat(',')}
+        filterSeriesByGroupName={groups?.map((group) => group.value).join(', ')}
       />
     </EuiPanel>
   );
