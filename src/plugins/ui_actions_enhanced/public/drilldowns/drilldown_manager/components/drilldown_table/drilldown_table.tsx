@@ -147,7 +147,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         items={drilldowns}
         itemId="id"
         columns={columns}
-        isSelectable={true}
         responsiveBreakpoint={false}
         selection={{
           onSelectionChange: (selection) => {

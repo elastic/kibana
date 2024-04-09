@@ -191,7 +191,6 @@ export class RolesGridPage extends Component<Props, State> {
                 'data-test-subj': `roleRow`,
               };
             }}
-            isSelectable
           />
         </ActionsEuiTableFormatting>
       </>

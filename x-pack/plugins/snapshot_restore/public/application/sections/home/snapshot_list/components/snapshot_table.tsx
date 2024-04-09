@@ -330,7 +330,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           });
         }}
         loading={isLoading}
-        isSelectable={true}
         selection={selection}
         pagination={pagination}
         rowProps={() => ({

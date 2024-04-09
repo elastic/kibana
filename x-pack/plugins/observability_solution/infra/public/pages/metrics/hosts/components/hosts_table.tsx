@@ -42,7 +42,6 @@ export const HostsTable = () => {
       <EuiBasicTable
         data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
         itemId="id"
-        isSelectable
         selection={selection}
         pagination={{
           pageIndex: pagination.pageIndex ?? 0,

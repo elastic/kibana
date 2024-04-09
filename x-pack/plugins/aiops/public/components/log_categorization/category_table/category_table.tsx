@@ -317,7 +317,6 @@ export const CategoryTable: FC<Props> = ({
         compressed
         items={categories}
         columns={columns}
-        isSelectable={true}
         selection={selectionValue}
         itemId="key"
         onTableChange={onTableChange}

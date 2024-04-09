@@ -194,7 +194,6 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         sorting
         selection={euiTableSelectionProps}
         onTableChange={onTableChange}
-        isSelectable
         itemId="_id"
       />
     </>

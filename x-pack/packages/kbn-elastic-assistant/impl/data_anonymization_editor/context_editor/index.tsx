@@ -118,7 +118,6 @@ const ContextEditorComponent: React.FC<Props> = ({
       columns={columns}
       compressed={true}
       data-test-subj="contextEditor"
-      isSelectable={true}
       itemId={FIELDS.FIELD}
       items={rows}
       pagination={pagination}

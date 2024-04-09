@@ -307,7 +307,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}
-        isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,

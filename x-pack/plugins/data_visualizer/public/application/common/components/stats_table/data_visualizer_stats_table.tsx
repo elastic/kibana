@@ -482,7 +482,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             pagination={pagination}
             sorting={sorting}
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isSelectable={false}
             onTableChange={onTableChange}
             data-test-subj={`dataVisualizerTable-${loading ? 'loading' : 'loaded'}`}
             rowProps={(item) => ({

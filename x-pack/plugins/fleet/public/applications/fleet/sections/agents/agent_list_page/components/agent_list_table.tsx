@@ -337,7 +337,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      isSelectable={true}
       selection={
         !authz.fleet.allAgents
           ? undefined

@@ -515,7 +515,6 @@ export const WatchListPage = () => {
             },
           }}
           selection={selectionConfig}
-          isSelectable={true}
           childrenBetween={
             queryError && (
               <>

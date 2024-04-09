@@ -114,7 +114,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
-    isSelectable: true,
     'data-test-subj': 'pipelinesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {

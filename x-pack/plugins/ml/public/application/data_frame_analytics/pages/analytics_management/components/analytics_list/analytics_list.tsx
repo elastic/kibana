@@ -281,7 +281,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
           items={analytics}
           itemId={DataFrameAnalyticsListColumn.id}
           loading={isLoading}

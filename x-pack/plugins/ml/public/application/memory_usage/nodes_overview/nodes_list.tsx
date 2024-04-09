@@ -221,7 +221,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
           items={items}
           itemId={'id'}
           loading={isLoading}

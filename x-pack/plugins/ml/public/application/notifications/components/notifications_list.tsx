@@ -397,7 +397,6 @@ export const NotificationsList: FC = () => {
 
       <EuiBasicTable<NotificationItem>
         columns={columns}
-        isSelectable={false}
         items={itemsPerPage}
         itemId={'id'}
         loading={isLoading}
