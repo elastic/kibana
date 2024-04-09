@@ -58,19 +58,28 @@ type CommandParameterType =
   | 'string'
   | 'boolean';
 
+type CommandParameterInnerType = 'string' | 'any' | 'policy';
+
 export interface CommandBaseDefinition {
   name: string;
   alias?: string;
   description: string;
   signature: {
     multipleParams: boolean;
-    // innerType here is useful to drill down the type in case of "column"
-    // i.e. column of type string
     params: Array<{
       name: string;
       type: CommandParameterType;
       optional?: boolean;
-      innerType?: string;
+      /**
+       * The inner type is the type of the 2nd argument.
+       *
+       * For example, the type of `A` in the following command statement:
+       * > mv_expand A
+       *
+       * innerType here is useful to drill down the type in case of "column"
+       * i.e. column of type string
+       */
+      innerType?: CommandParameterInnerType;
       values?: string[];
       valueDescriptions?: string[];
       literalOnly?: boolean;
