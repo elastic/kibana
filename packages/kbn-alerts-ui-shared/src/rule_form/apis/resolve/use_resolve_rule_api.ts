@@ -24,7 +24,7 @@ export const useResolveRuleApi = ({
 
   const { data, isSuccess, isLoading } = useQuery({
     enabled,
-    queryKey: ['resolveRule'],
+    queryKey: ['resolveRule', ruleId],
     queryFn: async () => {
       const result = await resolveRule({ ruleId, http });
       onSuccess(result);

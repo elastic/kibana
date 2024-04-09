@@ -18,12 +18,11 @@ const EditRuleProvider: React.FC<{
   ruleId: string;
   onLoadRuleSuccess: (ruleTypeId: string, ruleName: string) => void;
 }> = ({ ruleId, onLoadRuleSuccess, children }) => {
-  // TODO: Figure out how to reset this if the user edits the rule, saves it, and then clicks the back
-  // button. They currently need to refresh the page to reload the rule after changing it.
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const { rule, isSuccess, isLoading } = useResolveRuleApi({
     ruleId,
+    enabled: !hasLoaded,
     onSuccess: (rule: ResolvedRule) => {
       setHasLoaded(true);
       onLoadRuleSuccess(rule.ruleTypeId, rule.name);
