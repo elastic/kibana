@@ -8,7 +8,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
-import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import {
+  AGENTS_INDEX,
+  AGENT_POLICY_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common/constants';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -72,7 +77,7 @@ export default function (providerContext: FtrProviderContext) {
     const cleanupAgents = async () => {
       try {
         await es.deleteByQuery({
-          index: '.fleet-agents',
+          index: AGENTS_INDEX,
           refresh: true,
           body: {
             query: {
@@ -86,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
 
       try {
         await es.deleteByQuery({
-          index: '.fleet-enrollment-api-keys',
+          index: ENROLLMENT_API_KEYS_INDEX,
           refresh: true,
           body: {
             query: {
@@ -100,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
 
       try {
         await es.deleteByQuery({
-          index: '.fleet-policies',
+          index: AGENT_POLICY_INDEX,
           refresh: true,
           body: {
             query: {
