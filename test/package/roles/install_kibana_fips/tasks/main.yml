@@ -1,6 +1,6 @@
 - name: ensures usr/share/kibana dir exists
   file:
-    path: "usr/share/kibana"
+    path: usr/share/kibana
     state: directory
 
 - name: find kibana distribution
