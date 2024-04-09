@@ -15,7 +15,6 @@ export function MachineLearningExpandedJobDetailsProvider(
   jobTable: MlADJobTable
 ) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
   const find = getService('find');
 
   return {
@@ -106,10 +105,8 @@ export function MachineLearningExpandedJobDetailsProvider(
     },
 
     async openModelSnapshotTab(jobId: string) {
-      await retry.tryForTime(3_000, async () => {
-        await jobTable.ensureDetailsOpen(jobId);
-        await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-modelSnapshots'));
-      });
+      await jobTable.ensureDetailsOpen(jobId);
+      await testSubjects.click(jobTable.detailsSelector(jobId, 'mlJobListTab-modelSnapshots'));
     },
 
     async assertModelSnapshotManagement(jobId: string): Promise<void> {

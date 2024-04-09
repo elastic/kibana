@@ -31,6 +31,7 @@ import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
 import { MachineLearningJobTableProvider } from './job_table';
 import { MachineLearningExpandedJobDetailsProvider } from './expanded_job_details';
+import { MachineLearningJobStatsBarProvider } from './job_stats_bar';
 import { MachineLearningJobTypeSelectionProvider } from './job_type_selection';
 import { MachineLearningJobWizardAdvancedProvider } from './job_wizard_advanced';
 import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
@@ -124,6 +125,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
   const expandedJobDetails = MachineLearningExpandedJobDetailsProvider(context, jobTable);
+  const jobStatsBar = MachineLearningJobStatsBarProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
@@ -205,6 +207,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobSourceSelection,
     jobTable,
     expandedJobDetails,
+    jobStatsBar,
     jobTypeSelection,
     jobWizardAdvanced,
     jobWizardCategorization,
