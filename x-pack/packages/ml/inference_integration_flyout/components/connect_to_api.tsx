@@ -14,22 +14,25 @@ import { InferenceFlyout } from './flyout_layout';
 import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { CohereForm } from './service_forms/cohere_form';
 import { HuggingFaceForm } from './service_forms/huggingFace_form';
-import { OpenaiForm } from './service_forms/openAi_form';
+import { OpenaiForm } from './service_forms/openai_form';
 
 interface Props extends SaveMappingOnClick {
   description: string;
 }
 export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndpoint }) => {
+  const defaultOpenaiUrl = 'https://api.openai.com/v1/embeddings';
+  const defaultCohereModelId = 'embed-english-v2.0';
+
   const [selectedModelType, setSelectedModelType] = useState(connectToApiOptions[0].value);
 
   const [huggingFaceApiKey, setHuggingFaceApiKey] = useState('');
   const [huggingFaceModelUrl, setHuggingFaceModelUrl] = useState('');
 
   const [cohereApiKey, setCohereApiKey] = useState('');
-  const [cohereModelId, setCohereModelId] = useState('');
+  const [cohereModelId, setCohereModelId] = useState(defaultCohereModelId);
 
   const [openaiApiKey, setOpenaiApiKey] = useState('');
-  const [openaiEndpointlUrl, setOpenaiEndpointUrl] = useState('');
+  const [openaiEndpointlUrl, setOpenaiEndpointUrl] = useState(defaultOpenaiUrl);
   const [openaiOrganizationId, openaiSetOrganizationId] = useState('');
   const [openaiModelId, setOpenaiModelId] = useState('');
 
@@ -55,12 +58,12 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
 
       case Service.cohere:
         setCohereApiKey('');
-        setCohereModelId('');
+        setCohereModelId(defaultCohereModelId);
         break;
 
       case Service.openai:
         setOpenaiApiKey('');
-        setOpenaiEndpointUrl('');
+        setOpenaiEndpointUrl(defaultOpenaiUrl);
         openaiSetOrganizationId('');
         setOpenaiModelId('');
         break;
@@ -77,14 +80,14 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
     } else if (selectedModelType === Service.cohere) {
       return setModalConfigResponse(Service.cohere, {
         api_key: cohereApiKey,
-        model_id: cohereModelId,
+        model_id: isFieldEmpty(cohereModelId) ? defaultCohereModelId : cohereModelId,
       });
     } else {
       return setModalConfigResponse(Service.openai, {
         api_key: openaiApiKey,
-        model_id: openaiModelId,
-        organization_id: openaiOrganizationId,
-        url: openaiEndpointlUrl,
+        model_id: isFieldEmpty(openaiModelId) ? undefined : openaiModelId,
+        organization_id: isFieldEmpty(openaiOrganizationId) ? undefined : openaiOrganizationId,
+        url: isFieldEmpty(openaiEndpointlUrl) ? defaultOpenaiUrl : openaiEndpointlUrl,
       });
     }
   }, [

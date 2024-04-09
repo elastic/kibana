@@ -86,6 +86,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const state = useMappingsState();
   const dispatch = useDispatch();
+
   const indexName = index.name;
 
   const pendingFieldListId = useGeneratedHtmlId({

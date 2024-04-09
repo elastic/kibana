@@ -26,6 +26,7 @@ export const OpenaiForm: React.FC<OpenaiFormProps> = ({
   setApiKey,
   endpointUrl,
   setEndpointUrl,
+  modelId,
   setModelId,
 }) => {
   return (
@@ -68,7 +69,7 @@ export const OpenaiForm: React.FC<OpenaiFormProps> = ({
         )}
       >
         <EuiFieldText
-          data-test-subj={'openaiModelEndpointUrl'}
+          data-test-subj="openaiModelEndpointUrl"
           value={endpointUrl}
           onChange={(e) => setEndpointUrl(e.target.value)}
         />
@@ -81,7 +82,7 @@ export const OpenaiForm: React.FC<OpenaiFormProps> = ({
       >
         <EuiFieldText
           data-test-subj="openaiModel"
-          value={endpointUrl}
+          value={modelId}
           onChange={(e) => setModelId(e.target.value)}
         />
       </EuiFormRow>

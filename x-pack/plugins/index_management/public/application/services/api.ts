@@ -52,7 +52,6 @@ import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import { Fields } from '../components/mappings_editor/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
