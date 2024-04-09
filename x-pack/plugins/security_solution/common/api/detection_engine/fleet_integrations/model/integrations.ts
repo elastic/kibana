@@ -17,6 +17,7 @@
  *   package_title: 'AWS',
  *   integration_name: 'cloudtrail',
  *   integration_title: 'AWS CloudTrail',
+ *   latest_package_version: '1.2.3',
  *   is_installed: false
  *   is_enabled: false
  * }
@@ -25,9 +26,10 @@
  * {
  *   package_name: 'aws',
  *   package_title: 'AWS',
- *   installed_package_version: '1.16.1',
  *   integration_name: 'cloudtrail',
  *   integration_title: 'AWS CloudTrail',
+ *   latest_package_version: '1.16.1',
+ *   installed_package_version: '1.16.1',
  *   is_installed: true
  *   is_enabled: false
  * }
@@ -36,6 +38,7 @@
  * {
  *   package_name: 'system',
  *   package_title: 'System',
+ *   latest_package_version: '2.0.1',
  *   installed_package_version: '1.13.0',
  *   is_installed: true
  *   is_enabled: true
