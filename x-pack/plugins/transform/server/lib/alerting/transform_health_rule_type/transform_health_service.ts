@@ -240,7 +240,11 @@ export function transformHealthServiceProvider({
       const transformsStats = await getTransformStats(transformIds);
 
       return transformsStats
-        .filter((t) => t.health?.status !== TRANSFORM_HEALTH_STATUS.green)
+        .filter(
+          (t) =>
+            mapEsHealthStatus2TransformHealthStatus(t.health?.status) !==
+            TRANSFORM_HEALTH_STATUS.green
+        )
         .map(baseTransformAlertResponseFormatter);
     },
     /**

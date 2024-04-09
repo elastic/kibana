@@ -355,7 +355,7 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats?.health?.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return item.stats && item.stats.health ? (
+        return item.stats?.health ? (
           <TransformHealthColoredDot
             healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats.health.status)}
           />
