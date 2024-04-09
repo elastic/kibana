@@ -50,7 +50,7 @@ export const SecretFormRow: React.FC<{
   label,
 }) => {
   const hasInitialValue = !!initialValue;
-  const [editMode, setEditMode] = useState(!initialValue);
+  const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <EuiText size="s" color="subdued">
