@@ -31,7 +31,7 @@ export const RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL = i18n.translate(
 export const RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.relatedIntegrationVersionDependencyPlaceholder',
   {
-    defaultMessage: 'Semver dependency',
+    defaultMessage: 'Semver',
   }
 );
 
