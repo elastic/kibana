@@ -35,7 +35,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.expectedColumnsError',
+        'xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError',
         {
           defaultMessage: 'Expected 3 columns, got {rowLength}',
           values: { rowLength: row.length },
@@ -50,7 +50,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.missingEntityTypeError',
+        'xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError',
         {
           defaultMessage: 'Missing entity type',
         }
@@ -61,26 +61,19 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (!idValue) {
     return {
       valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.missingIdError',
-        {
-          defaultMessage: 'Missing ID',
-        }
-      ),
+      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingIdError', {
+        defaultMessage: 'Missing ID',
+      }),
     };
   }
 
   if (idValue.length > MAX_COLUMN_CHARS) {
     return {
       valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.idTooLongError',
-        {
-          defaultMessage:
-            'ID is too long, expected less than {maxChars} characters, got {idLength}',
-          values: { maxChars: MAX_COLUMN_CHARS, idLength: idValue.length },
-        }
-      ),
+      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.idTooLongError', {
+        defaultMessage: 'ID is too long, expected less than {maxChars} characters, got {idLength}',
+        values: { maxChars: MAX_COLUMN_CHARS, idLength: idValue.length },
+      }),
     };
   }
 
@@ -88,7 +81,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.missingCriticalityError',
+        'xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError',
         {
           defaultMessage: 'Missing criticality level',
         }
@@ -102,7 +95,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.invalidCriticalityError',
+        'xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError',
         {
           defaultMessage:
             'Invalid criticality level "{criticalityLevel}", expected one of {validLevels}',
@@ -119,7 +112,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate(
-        'xpack.securitySolution.api.assetCriticality.csvUpload.invalidEntityTypeError',
+        'xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError',
         {
           defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
           values: { entityType: trimColumn(entityType) },
