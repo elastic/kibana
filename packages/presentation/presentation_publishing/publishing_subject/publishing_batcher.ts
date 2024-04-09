@@ -25,7 +25,8 @@ const hasSubjectsArrayChanged = (
 
 /**
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
- * You should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay.
+ * Use when `subjects` may not be defined on initial component render.
+ * 
  * @param subjects Publishing subjects array.
  *   When 'subjects' is expected to change, 'subjects' must be part of component react state.
  */
@@ -98,7 +99,8 @@ export const useBatchedOptionalPublishingSubjects = <
 
 /**
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
- * You should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay.
+ * Use when `subjects` are static and do not change over the lifetime of the component.
+ * 
  * @param subjects Publishing subjects array.
  */
 export const useBatchedPublishingSubjects = <
