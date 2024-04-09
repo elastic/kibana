@@ -197,7 +197,9 @@ export interface UseChatHelpers {
 export interface LLMModel {
   name: string;
   value?: string;
+  showConnectorName?: boolean;
+  connectorId: string;
+  connectorName: string;
   icon: ComponentType;
   disabled: boolean;
-  connectorId?: string;
 }

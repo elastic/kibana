@@ -30,31 +30,57 @@ interface SummarizationModelProps {
   models: LLMModel[];
 }
 
+const getOptionValue = (model: LLMModel): string => model.connectorId + model.name;
+
 export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   selectedModel,
   models,
   onSelect,
 }) => {
   const managementLink = useManagementLink();
-  const onChange = (modelName: string) => {
-    const model = models.find(({ name }) => name === modelName);
+  const onChange = (modelValue: string) => {
+    const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
-    if (model) {
-      onSelect(model);
+    if (newSelectedModel) {
+      onSelect(newSelectedModel);
     }
   };
 
   const modelsOption: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>
-      models.map(({ name, disabled, icon, connectorId }) => ({
-        value: name,
-        disabled,
+      models.map((model) => ({
+        value: getOptionValue(model),
+        disabled: model.disabled,
         inputDisplay: (
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} />
+              <EuiIcon type={model.icon} />
             </EuiFlexItem>
-            <EuiFlexItem>{name}</EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiText size="s">{model.name}</EuiText>
+              {model.showConnectorName && model.connectorName && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    <span title={model.connectorName}>{model.connectorName}</span>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        ),
+        dropdownDisplay: (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={model.icon} />
+            </EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs" direction="column">
+              <EuiText size="s">{model.name}</EuiText>
+              {model.showConnectorName && model.connectorName && (
+                <EuiText size="xs" color="subdued">
+                  {model.connectorName}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           </EuiFlexGroup>
         ),
       })),
@@ -90,7 +116,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       <EuiSuperSelect
         data-test-subj="summarizationModelSelect"
         options={modelsOption}
-        valueOfSelected={selectedModel.name}
+        valueOfSelected={getOptionValue(selectedModel)}
         onChange={onChange}
       />
     </EuiFormRow>
