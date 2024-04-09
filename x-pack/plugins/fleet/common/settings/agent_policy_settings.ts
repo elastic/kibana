@@ -76,25 +76,4 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
     schema: z.string(),
   },
-  {
-    name: 'agent.logging.metrics.period',
-    api_field: {
-      name: 'agent_logging_metrics_period',
-    },
-    title: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodTitle',
-      {
-        defaultMessage: 'Agent logging metrics period',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription',
-      {
-        defaultMessage: 'The frequency of agent metrics logging',
-      }
-    ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
-    schema: zodStringWithDurationValidation.default('30s'),
-  },
 ];
