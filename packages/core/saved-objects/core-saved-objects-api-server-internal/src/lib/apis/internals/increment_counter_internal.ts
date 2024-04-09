@@ -163,9 +163,9 @@ export const incrementCounterInternal = async <T>(
     ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
     ...(originId && { originId }),
     updated_at: time,
-    references: body.get?._source.references ?? [],
+    references: body.get?._source?.references ?? [],
     version: encodeHitVersion(body),
-    attributes: body.get?._source[type],
+    attributes: body.get?._source?.[type],
     ...(managed && { managed }),
   };
 };
