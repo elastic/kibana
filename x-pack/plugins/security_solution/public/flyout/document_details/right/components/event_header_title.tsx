@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
+import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
@@ -29,17 +30,26 @@ export const EventHeaderTitle: FC = memo(() => {
   const eventCategory = getField(getFieldsData('event.category'));
 
   const title = useMemo(() => {
-    let eventTitle;
+    const defaultTitle = i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
+      defaultMessage: `Event details`,
+    });
+
     if (eventKind === 'event' && eventCategory) {
       const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
-      eventTitle = getField(getFieldsData(fieldName));
+      return getField(getFieldsData(fieldName)) ?? defaultTitle;
     }
-    return (
-      eventTitle ??
-      i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
-        defaultMessage: 'Event details',
-      })
-    );
+
+    if (eventKind === 'alert') {
+      return i18n.translate('xpack.securitySolution.flyout.right.title.alertEventTitle', {
+        defaultMessage: 'External alert details',
+      });
+    }
+
+    return eventKind
+      ? i18n.translate('xpack.securitySolution.flyout.right.title.otherEventTitle', {
+          defaultMessage: `${startCase(eventKind)} details`,
+        })
+      : defaultTitle;
   }, [eventKind, getFieldsData, eventCategory]);
 
   return (
