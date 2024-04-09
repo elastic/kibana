@@ -392,9 +392,9 @@ export class SavedSearchEmbeddable
   private getSort(
     sort: SortPair[] | undefined,
     dataView: DataView | undefined,
-    isTextBased: boolean
+    isTextBasedQueryMode: boolean
   ) {
-    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isTextBased);
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isTextBasedQueryMode);
   }
 
   private initializeSearchEmbeddableProps() {

@@ -19,7 +19,7 @@ export function getSortForEmbeddable(
   sort: SortInput | undefined,
   dataView: DataView | undefined,
   uiSettings: IUiSettingsClient | undefined,
-  isTextBased: boolean
+  isTextBasedQueryMode: boolean
 ): SortOrder[] {
   if (!sort || !sort.length || !dataView) {
     if (!uiSettings) {
@@ -27,7 +27,7 @@ export function getSortForEmbeddable(
     }
     const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
     const hidingTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isTextBased);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isTextBasedQueryMode);
   }
-  return getSortArray(sort, dataView, isTextBased);
+  return getSortArray(sort, dataView, isTextBasedQueryMode);
 }

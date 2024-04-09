@@ -18,15 +18,15 @@ export function getDefaultSort(
   dataView: DataView | undefined,
   defaultSortOrder: string = 'desc',
   hidingTimeColumn: boolean = false,
-  isTextBased: boolean
+  isTextBasedQueryMode: boolean
 ): SortOrder[] {
-  if (isTextBased) {
+  if (isTextBasedQueryMode) {
     return [];
   }
 
   if (
     dataView?.timeFieldName &&
-    isSortable(dataView.timeFieldName, dataView, isTextBased) &&
+    isSortable(dataView.timeFieldName, dataView, isTextBasedQueryMode) &&
     !hidingTimeColumn
   ) {
     return [[dataView.timeFieldName, defaultSortOrder]];
