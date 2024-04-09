@@ -13,7 +13,7 @@ import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
   SingleMetricViewerComponentApi,
   SingleMetricViewerEmbeddableState,
-  SingleMetricViewerEmbeddableInput,
+  SingleMetricViewerEmbeddableUserInput,
 } from '../types';
 
 export type AnomalySwimLaneControlsState = Pick<
@@ -32,7 +32,7 @@ export const initializeSingleMetricViewerControls = (
     rawState.selectedEntities
   );
 
-  const updateUserInput = (update: SingleMetricViewerEmbeddableInput) => {
+  const updateUserInput = (update: SingleMetricViewerEmbeddableUserInput) => {
     jobIds.next(update.jobIds);
     functionDescription.next(update.functionDescription);
     selectedDetectorIndex.next(update.selectedDetectorIndex);
@@ -66,5 +66,11 @@ export const initializeSingleMetricViewerControls = (
     } as unknown as SingleMetricViewerComponentApi,
     serializeSingleMetricViewerState,
     singleMetricViewerComparators,
+    onSingleMetricViewerDestroy: () => {
+      jobIds.complete();
+      selectedDetectorIndex.complete();
+      selectedEntities.complete();
+      functionDescription.complete();
+    },
   };
 };

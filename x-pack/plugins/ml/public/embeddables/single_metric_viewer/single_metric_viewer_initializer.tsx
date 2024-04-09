@@ -29,14 +29,14 @@ import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import type { SingleMetricViewerEmbeddableCustomInput, MlEntity } from '..';
+import type { SingleMetricViewerEmbeddableUserInput, MlEntity } from '..';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
   defaultTitle: string;
   initialInput?: Partial<SingleMetricViewerEmbeddableInput>;
   job: MlJob;
-  onCreate: (props: Partial<SingleMetricViewerEmbeddableCustomInput>) => void;
+  onCreate: (props: Partial<SingleMetricViewerEmbeddableUserInput>) => void;
   onCancel: () => void;
 }
 

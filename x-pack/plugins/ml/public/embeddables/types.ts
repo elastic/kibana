@@ -35,6 +35,8 @@ import type { MlJobService } from '../application/services/job_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlResultsService } from '../application/services/results_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
+import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
@@ -46,13 +48,9 @@ import type {
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
-    PublishesDataViews,
-    PublishesUnifiedSearch {
-  /**
-   * Result time range based on the parent and panel time range APIs
-   */
-  appliedTimeRange$: PublishingSubject<TimeRange>;
-}
+    PublishesUnifiedSearch {}
+
+export interface MlEmbeddableBaseApiWithDataViews extends MlEmbeddableBaseApi, PublishesDataViews {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -131,16 +129,22 @@ export interface AnomalyChartsEmbeddableCustomInput {
 
 export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
-export interface SingleMetricViewerEmbeddableCustomInput {
+/** Manual input by the user */
+export interface SingleMetricViewerEmbeddableUserInput {
   jobIds: JobId[];
   functionDescription?: string;
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
-  // Embeddable inputs which are not included in the default interface
-  filters: Filter[];
-  query: Query;
-  refreshConfig: RefreshInterval;
-  timeRange: TimeRange;
+  panelTitle?: string;
+}
+
+export interface SingleMetricViewerEmbeddableCustomInput
+  extends Omit<SingleMetricViewerEmbeddableUserInput, 'panelTitle'> {
+  id?: string;
+  filters?: Filter[];
+  query?: Query;
+  refreshConfig?: RefreshInterval;
+  timeRange: TimeRange | undefined;
 }
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
@@ -159,10 +163,10 @@ export type SingleMetricViewerEmbeddableApi =
     SingleMetricViewerComponentApi;
 
 export interface SingleMetricViewerComponentApi {
-  functionDescription?: PublishingSubject<string | undefined>;
+  functionDescription: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
   selectedDetectorIndex: PublishingSubject<number | undefined>;
-  selectedEntities?: PublishingSubject<MlEntity | undefined>;
+  selectedEntities: PublishingSubject<MlEntity | undefined>;
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
@@ -184,6 +188,8 @@ export interface SingleMetricViewerServices {
   mlJobService: MlJobService;
   mlResultsService: MlResultsService;
   mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
+  mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
+  toastNotificationService?: ToastNotificationService;
 }
 
 export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];

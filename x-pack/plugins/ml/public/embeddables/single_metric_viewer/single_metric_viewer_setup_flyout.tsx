@@ -9,19 +9,19 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDefaultSingleMetricViewerPanelTitle } from './single_metric_viewer_embeddable';
-import type { SingleMetricViewerEmbeddableInput } from '..';
+import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlStartDependencies } from '../../plugin';
 import type { MlApiServices } from '../../application/services/ml_api_service';
+import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies,
   mlApiServices: MlApiServices,
-  input?: SingleMetricViewerEmbeddableInput
-): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
+  input?: Partial<SingleMetricViewerEmbeddableInput>
+): Promise<Partial<SingleMetricViewerEmbeddableUserInput>> {
   const { overlays, theme, i18n } = coreStart;
   const timefilter = pluginStart.data.query.timefilter.timefilter;
 

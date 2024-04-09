@@ -12,23 +12,29 @@ import { pick } from 'lodash';
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { EuiResizeObserver } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState, Suspense } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
+import moment from 'moment';
 import {
   apiHasParentApi,
   apiPublishesTimeRange,
   initializeTimeRange,
   initializeTitles,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import React, { Suspense, useEffect } from 'react';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import usePrevious from 'react-use/lib/usePrevious';
 import type { Observable } from 'rxjs';
+import { throttle } from 'lodash';
 import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { EmbeddableSingleMetricViewerContainer } from './embeddable_single_metric_viewer_container_lazy';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import type {
   SingleMetricViewerEmbeddableServices,
@@ -36,6 +42,17 @@ import type {
   SingleMetricViewerEmbeddableState,
 } from '../types';
 import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
+import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
+import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
+import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import './_index.scss';
+
+const RESIZE_THROTTLE_TIME_MS = 500;
+const containerPadding = 10;
+interface AppStateZoom {
+  from?: string;
+  to?: string;
+}
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -48,6 +65,7 @@ export const getServices = async (
     { AnomalyDetectorService },
     { fieldFormatServiceFactory },
     { indexServiceFactory },
+    { timeSeriesExplorerServiceFactory },
     { mlApiServicesProvider },
     { mlJobServiceFactory },
     { mlResultsServiceProvider },
@@ -59,6 +77,7 @@ export const getServices = async (
     await import('../../application/services/anomaly_detector_service'),
     await import('../../application/services/field_format_service_factory'),
     await import('../../application/util/index_service'),
+    await import('../../application/util/time_series_explorer_service'),
     await import('../../application/services/ml_api_service'),
     await import('../../application/services/job_service'),
     await import('../../application/services/results_service'),
@@ -72,12 +91,15 @@ export const getServices = async (
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
   const mlApiServices = mlApiServicesProvider(httpService);
-  const mlJobService = mlJobServiceFactory(
-    toastNotificationServiceProvider(coreStart.notifications.toasts),
-    mlApiServices
-  );
+  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
+  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
   const mlResultsService = mlResultsServiceProvider(mlApiServices);
   const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
+  const mlTimeSeriesExplorerService = timeSeriesExplorerServiceFactory(
+    coreStart.uiSettings,
+    mlApiServices,
+    mlResultsService
+  );
   const mlCapabilities = new MlCapabilitiesService(mlApiServices);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     pluginsStart.data.query.timefilter.timefilter,
@@ -109,6 +131,8 @@ export const getServices = async (
       mlJobService,
       mlResultsService,
       mlTimeSeriesSearchService,
+      mlTimeSeriesExplorerService,
+      toastNotificationService,
     },
   ];
 };
@@ -139,9 +163,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
         singleMetricViewerControlsApi,
         serializeSingleMetricViewerState,
         singleMetricViewerComparators,
+        onSingleMetricViewerDestroy,
       } = initializeSingleMetricViewerControls(state, titlesApi);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading = new BehaviorSubject<boolean | undefined>(true);
+      const blockingError = new BehaviorSubject<Error | undefined>(undefined);
       const query$ =
         // @ts-ignore property does not exist on type 'PresentationContainer'
         (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
@@ -160,7 +186,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           ...singleMetricViewerControlsApi,
           query$,
           filters$,
-          dataLoading: dataLoading$,
+          dataLoading,
           serializeState: () => {
             return {
               rawState: {
@@ -203,19 +229,33 @@ export const getSingleMetricViewerEmbeddableFactory = (
         })
       ) as Observable<TimeRange | undefined>;
 
-      const onError = () => {
-        dataLoading$.next(false);
-      };
-
-      const onLoading = () => {
-        dataLoading$.next(true);
-      };
-
-      const onRenderComplete = () => {};
+      const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
+        api,
+        dataLoading,
+        blockingError,
+        appliedTimeRange$,
+        query$,
+        filters$,
+        refresh$,
+        services[1].data.query.timefilter.timefilter
+      );
 
       return {
         api,
         Component: () => {
+          const [chartWidth, setChartWidth] = useState<number>(0);
+          const [zoom, setZoom] = useState<AppStateZoom | undefined>();
+          const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
+          const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
+          const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
+          const [jobsLoaded, setJobsLoaded] = useState(false);
+
+          const {
+            mlApiServices,
+            mlJobService,
+            mlTimeSeriesExplorerService,
+            toastNotificationService,
+          } = services[2];
           const I18nContext = services[0].i18n.Context;
           const theme = services[0].theme;
           const datePickerDeps: DatePickerDependencies = {
@@ -225,11 +265,106 @@ export const getSingleMetricViewerEmbeddableFactory = (
             showFrozenDataTierChoice: false,
           };
 
+          const [singleMetricViewerData, , , , , bounds, lastRefresh] =
+            useStateFromPublishingSubject(singleMetricViewerData$);
+
+          useUnmount(() => {
+            onSingleMetricViewerDestroy();
+            onDestroy();
+            subscriptions.unsubscribe();
+          });
+
+          const selectedJobId = singleMetricViewerData?.jobIds[0];
+          // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
+          // otherwise anomaly table data will not be loaded.
+          const functionDescription =
+            (singleMetricViewerData?.functionDescription ?? '') === ''
+              ? undefined
+              : singleMetricViewerData.functionDescription;
+          const previousRefresh = usePrevious(lastRefresh ?? 0);
+
+          // Holds the container height for previously fetched data
+          const containerHeightRef = useRef<number>();
+
+          useEffect(function setUpJobsLoaded() {
+            async function loadJobs() {
+              await mlJobService.loadJobsWrapper();
+              setJobsLoaded(true);
+            }
+            loadJobs();
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+          }, []);
+
+          useEffect(
+            function setUpSelectedJob() {
+              async function fetchSelectedJob() {
+                if (mlApiServices && selectedJobId !== undefined) {
+                  const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
+                  const job = jobs[0];
+                  setSelectedJob(job);
+                }
+              }
+              fetchSelectedJob();
+            },
+            [selectedJobId, mlApiServices]
+          );
+
+          useEffect(
+            function setUpAutoZoom() {
+              let zoomDuration: number | undefined;
+              if (selectedJobId !== undefined && selectedJob !== undefined) {
+                zoomDuration = mlTimeSeriesExplorerService?.getAutoZoomDuration(selectedJob);
+                setAutoZoomDuration(zoomDuration);
+              }
+            },
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            [selectedJobId, selectedJob?.job_id, mlTimeSeriesExplorerService]
+          );
+
           useEffect(function onUnmount() {
             return () => {
               subscriptions.unsubscribe();
             };
           }, []);
+
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+          const resizeHandler = useCallback(
+            throttle((e: { width: number; height: number }) => {
+              // Keep previous container height so it doesn't change the page layout
+              containerHeightRef.current = e.height;
+
+              if (Math.abs(chartWidth - e.width) > 20) {
+                setChartWidth(e.width);
+              }
+            }, RESIZE_THROTTLE_TIME_MS),
+            [chartWidth]
+          );
+
+          const appStateHandler = useCallback(
+            (action: string, payload?: any) => {
+              /**
+               * Empty zoom indicates that chart hasn't been rendered yet,
+               * hence any updates prior that should replace the URL state.
+               */
+
+              switch (action) {
+                case APP_STATE_ACTION.SET_FORECAST_ID:
+                  setSelectedForecastId(payload);
+                  setZoom(undefined);
+                  break;
+
+                case APP_STATE_ACTION.SET_ZOOM:
+                  setZoom(payload);
+                  break;
+
+                case APP_STATE_ACTION.UNSET_ZOOM:
+                  setZoom(undefined);
+                  break;
+              }
+            },
+
+            [setZoom, setSelectedForecastId]
+          );
 
           return (
             <I18nContext>
@@ -245,15 +380,49 @@ export const getSingleMetricViewerEmbeddableFactory = (
                 >
                   <DatePickerContextProvider {...datePickerDeps}>
                     <Suspense fallback={<EmbeddableLoading />}>
-                      <EmbeddableSingleMetricViewerContainer
-                        api={api}
-                        id={api.uuid}
-                        services={services}
-                        refresh={refresh$}
-                        onRenderComplete={onRenderComplete}
-                        onLoading={onLoading}
-                        onError={onError}
-                      />
+                      <EuiResizeObserver onResize={resizeHandler}>
+                        {(resizeRef) => (
+                          <div
+                            id={`mlSingleMetricViewerEmbeddableWrapper-${api.uuid}`}
+                            style={{
+                              width: '100%',
+                              overflowY: 'auto',
+                              overflowX: 'hidden',
+                              padding: '8px',
+                            }}
+                            data-test-subj={`mlSingleMetricViewer_${api.uuid}`}
+                            ref={resizeRef}
+                            className="ml-time-series-explorer"
+                          >
+                            {singleMetricViewerData !== undefined &&
+                              autoZoomDuration !== undefined &&
+                              jobsLoaded && (
+                                <TimeSeriesExplorerEmbeddableChart
+                                  chartWidth={chartWidth - containerPadding}
+                                  dataViewsService={services[1].data.dataViews}
+                                  toastNotificationService={toastNotificationService}
+                                  appStateHandler={appStateHandler}
+                                  autoZoomDuration={autoZoomDuration}
+                                  bounds={bounds}
+                                  dateFormatTz={moment.tz.guess()}
+                                  lastRefresh={lastRefresh ?? 0}
+                                  previousRefresh={previousRefresh}
+                                  selectedJobId={selectedJobId}
+                                  selectedDetectorIndex={
+                                    singleMetricViewerData.selectedDetectorIndex
+                                  }
+                                  selectedEntities={singleMetricViewerData.selectedEntities}
+                                  selectedForecastId={selectedForecastId}
+                                  tableInterval="auto"
+                                  tableSeverity={0}
+                                  zoom={zoom}
+                                  functionDescription={functionDescription}
+                                  selectedJob={selectedJob}
+                                />
+                              )}
+                          </div>
+                        )}
+                      </EuiResizeObserver>
                     </Suspense>
                   </DatePickerContextProvider>
                 </KibanaContextProvider>
