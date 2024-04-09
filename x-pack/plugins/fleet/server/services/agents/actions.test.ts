@@ -519,16 +519,14 @@ describe('Agent actions', () => {
       ]);
     });
 
-    it('should throw if no actions were found', async () => {
+    it('should return an empty array if no actions were found', async () => {
       esClientMock.search.mockResolvedValue({
         hits: {
           hits: [],
         },
       } as any);
       const actionsIds = ['action1:1', 'action2'];
-      await expect(getAgentsByActionsIds(esClientMock, actionsIds)).rejects.toThrowError(
-        'No agent action found for ids action1:1,action2'
-      );
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual([]);
     });
   });
 });
