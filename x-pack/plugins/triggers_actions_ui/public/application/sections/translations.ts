@@ -103,7 +103,7 @@ const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
 );
 export const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
   i18n.translate('xpack.triggersActionsUI.sections.showRequestModal.subheadingTitle', {
-    defaultMessage: 'This elasticsearch request will {requestType} this rule.',
+    defaultMessage: 'This Kibana request will {requestType} this rule.',
     values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
   });
 

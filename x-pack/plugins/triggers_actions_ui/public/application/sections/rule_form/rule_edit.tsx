@@ -127,6 +127,7 @@ export const RuleEdit = <
     useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
   const [isShowRequestModalOpen, setIsShowRequestModalOpen] = useState<boolean>(false);
+  const [isRuleValid, setIsRuleValid] = useState<boolean>(false);
   const [ruleActionsErrors, setRuleActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
@@ -233,6 +234,10 @@ export const RuleEdit = <
     setIsSaving(false);
   }
 
+  useEffect(() => {
+    setIsRuleValid(isValidRule(rule, ruleErrors, ruleActionsErrors));
+  }, [rule, ruleErrors, ruleActionsErrors]);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -318,14 +323,14 @@ export const RuleEdit = <
                         fill
                         color="primary"
                         data-test-subj="showEditedRequestButton"
-                        isLoading={isSaving}
+                        isDisabled={!isRuleValid}
                         onClick={() => {
                           setIsShowRequestModalOpen(true);
                         }}
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.ruleEdit.showRequestButtonLabel"
-                          defaultMessage="Show request"
+                          defaultMessage="Show API request"
                         />
                       </EuiButton>
                     </EuiFlexItem>

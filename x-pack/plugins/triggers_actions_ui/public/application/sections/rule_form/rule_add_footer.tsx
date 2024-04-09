@@ -22,6 +22,7 @@ import { useHealthContext } from '../../context/health_context';
 interface RuleAddFooterProps {
   isSaving: boolean;
   isFormLoading: boolean;
+  isRuleValid: boolean;
   onSave: () => void;
   onCancel: () => void;
   onShowRequest: () => void;
@@ -33,6 +34,7 @@ export const RuleAddFooter = ({
   onCancel,
   onShowRequest,
   isFormLoading,
+  isRuleValid,
 }: RuleAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
@@ -61,13 +63,12 @@ export const RuleAddFooter = ({
                 fill
                 color="primary"
                 data-test-subj="showRequestButton"
-                isDisabled={loadingHealthCheck}
-                isLoading={isSaving}
+                isDisabled={loadingHealthCheck || !isRuleValid}
                 onClick={onShowRequest}
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.ruleAddFooter.showRequestButtonLabel"
-                  defaultMessage="Show request"
+                  defaultMessage="Show API request"
                 />
               </EuiButton>
             </EuiFlexItem>

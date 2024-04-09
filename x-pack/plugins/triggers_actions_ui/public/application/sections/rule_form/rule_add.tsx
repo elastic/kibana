@@ -106,6 +106,7 @@ const RuleAdd = <
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+  const [isRuleValid, setIsRuleValid] = useState<boolean>(false);
 
   const selectableConsumer = useMemo(
     () => rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId),
@@ -279,6 +280,10 @@ const RuleAdd = <
     }
   }
 
+  useEffect(() => {
+    setIsRuleValid(isValidRule(rule, ruleErrors, ruleActionsErrors));
+  }, [rule, ruleErrors, ruleActionsErrors]);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -331,6 +336,7 @@ const RuleAdd = <
             <RuleAddFooter
               isSaving={isSaving}
               isFormLoading={isLoading}
+              isRuleValid={isRuleValid}
               onSave={async () => {
                 setIsSaving(true);
                 if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
