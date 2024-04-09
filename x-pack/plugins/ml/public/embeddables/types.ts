@@ -44,6 +44,11 @@ import type {
   MlEmbeddableTypes,
 } from './constants';
 
+export type {
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimLaneEmbeddableApi,
+} from './anomaly_swimlane/types';
+
 /**
  * Common API for all ML embeddables
  */

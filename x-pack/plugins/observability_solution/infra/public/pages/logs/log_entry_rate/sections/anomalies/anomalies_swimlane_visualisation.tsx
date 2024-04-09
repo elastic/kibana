@@ -9,13 +9,13 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimLaneEmbeddableApi,
 } from '@kbn/ml-plugin/public';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { partitionField } from '../../../../../../common/infra_ml';
-import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { TimeRange } from '../../../../../../common/time/time_range';
 
 interface Props {
@@ -38,12 +38,8 @@ export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
 };
 
 export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
-  const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
-  const factory = embeddablePlugin?.getEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
-
-  const embeddableInput: AnomalySwimlaneEmbeddableInput = useMemo(() => {
+  const embeddableState: AnomalySwimLaneEmbeddableState = useMemo(() => {
     return {
-      id: 'LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE', // NOTE: This is the only embeddable on the anomalies page, a static string will do.
       jobIds,
       swimlaneType: 'viewBy',
       timeRange: {
@@ -62,9 +58,13 @@ export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selec
     };
   }, [jobIds, timeRange.startTime, timeRange.endTime, selectedDatasets]);
 
-  if (!factory) {
-    return <MissingEmbeddableFactoryCallout embeddableType={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE} />;
-  }
-
-  return <EmbeddableRenderer input={embeddableInput} factory={factory} />;
+  return (
+    <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+      maybeId={'LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE'}
+      type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
+      state={{
+        rawState: embeddableState,
+      }}
+    />
+  );
 };
