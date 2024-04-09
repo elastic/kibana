@@ -668,6 +668,7 @@ export type UseCellActions = (props: {
   dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
+  pageIndex: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
   getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];

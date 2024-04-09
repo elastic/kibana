@@ -3225,6 +3225,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-data-view@link:packages/kbn-apm-data-view":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-plugin@link:x-pack/plugins/apm":
   version "0.0.0"
   uid ""

@@ -210,7 +210,7 @@ export class ControlGroupContainer extends Container<
       componentState: { lastSavedInput },
     } = this.getState();
     if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
-      this.updateInput(lastSavedInput);
+      this.updateInput(lastSavedInput ?? {});
     }
   }
 

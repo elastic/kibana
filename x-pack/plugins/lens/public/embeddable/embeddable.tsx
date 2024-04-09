@@ -1489,7 +1489,9 @@ export class Embeddable
     const input = this.getInput();
 
     // if at least one indexPattern is time based, then the Lens embeddable requires the timeRange prop
+    // this is necessary for the dataview embeddable but not the ES|QL one
     if (
+      !Boolean(this.isTextBasedLanguage()) &&
       input.timeRange == null &&
       indexPatterns.some((indexPattern) => indexPattern.isTimeBased())
     ) {

@@ -118,12 +118,14 @@ export function UXAppRoot({
     lens,
   },
   isDev,
+  spaceId,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
+  spaceId: string;
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
@@ -167,6 +169,7 @@ export function UXAppRoot({
                 appMountParameters,
                 exploratoryView,
                 observabilityShared,
+                spaceId,
               }}
             >
               <i18nCore.Context>
@@ -206,12 +209,14 @@ export const renderApp = ({
   appMountParameters,
   corePlugins,
   isDev,
+  spaceId,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
+  spaceId: string;
 }) => {
   const { element } = appMountParameters;
 
@@ -230,6 +235,7 @@ export const renderApp = ({
       deps={deps}
       corePlugins={corePlugins}
       isDev={isDev}
+      spaceId={spaceId}
     />,
     element
   );

@@ -42,7 +42,9 @@
     "@kbn/shared-ux-router",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/config-schema",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/apm-data-view",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*",
