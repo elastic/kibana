@@ -200,10 +200,14 @@ describe('callAgentExecutor', () => {
       const onLlmResponse = jest.fn();
       await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
 
-      expect(onLlmResponse).toHaveBeenCalledWith('hello', {
-        traceId: undefined,
-        transactionId: undefined,
-      });
+      expect(onLlmResponse).toHaveBeenCalledWith(
+        'hello',
+        {
+          traceId: undefined,
+          transactionId: undefined,
+        },
+        false
+      );
     });
   });
 });
