@@ -92,7 +92,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
           <p>
             {i18n.translate('xpack.searchPlayground.chat.message.assistant.retrievalDoc.subtitle', {
               defaultMessage:
-                'The documents that were referenced in order to create an answer to your query. You can change the context field via edit context.',
+                'The documents that were referenced in order to create an answer to your query. You can change the context field using the Edit Context button.',
             })}
           </p>
         </EuiText>
