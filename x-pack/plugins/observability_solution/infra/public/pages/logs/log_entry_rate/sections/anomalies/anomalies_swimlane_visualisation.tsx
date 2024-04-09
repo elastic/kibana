@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import moment from 'moment';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimLaneEmbeddableApi,
-} from '@kbn/ml-plugin/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import React, { useMemo } from 'react';
 import { partitionField } from '../../../../../../common/infra_ml';
 import { TimeRange } from '../../../../../../common/time/time_range';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
 interface Props {
   timeRange: TimeRange;
@@ -38,33 +32,37 @@ export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
 };
 
 export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
-  const embeddableState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+  const {
+    ml: {
+      components: { AnomalySwimLane },
+    },
+  } = useKibanaContextForPlugin().services;
+
+  const formattedTimeRange = useMemo(() => {
     return {
-      jobIds,
-      swimlaneType: 'viewBy',
-      timeRange: {
-        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-      },
-      refreshConfig: REFRESH_CONFIG,
-      viewBy: partitionField,
-      filters: [],
-      query: {
-        language: 'kuery',
-        query: selectedDatasets
-          .map((dataset) => `${partitionField} : ${dataset !== '' ? dataset : '""'}`)
-          .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
-      },
+      from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
     };
-  }, [jobIds, timeRange.startTime, timeRange.endTime, selectedDatasets]);
+  }, [timeRange.startTime, timeRange.endTime]);
+
+  const query = useMemo(() => {
+    return {
+      language: 'kuery',
+      query: selectedDatasets
+        .map((dataset) => `${partitionField} : ${dataset !== '' ? dataset : '""'}`)
+        .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
+    };
+  }, [selectedDatasets]);
 
   return (
-    <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
-      maybeId={'LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE'}
-      type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-      state={{
-        rawState: embeddableState,
-      }}
+    <AnomalySwimLane
+      id="LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE"
+      jobIds={jobIds}
+      swimlaneType="viewBy"
+      viewBy={partitionField}
+      refreshConfig={REFRESH_CONFIG}
+      timeRange={formattedTimeRange}
+      query={query}
     />
   );
 };

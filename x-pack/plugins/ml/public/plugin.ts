@@ -71,6 +71,7 @@ import {
 import type { MlCapabilities } from './shared';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApiServices } from './application/services/ml_api_service';
+import { AnomalySwimLane } from './shared_components';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -295,6 +296,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     locator?: LocatorPublic<MlLocatorParams>;
     elasticModels?: ElasticModels;
     mlApi?: MlApiServices;
+    components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     setDependencyCache({
       docLinks: core.docLinks!,
@@ -306,6 +308,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
       mlApi: this.sharedMlServices?.mlApiServices,
+      components: {
+        AnomalySwimLane,
+      },
     };
   }
 
