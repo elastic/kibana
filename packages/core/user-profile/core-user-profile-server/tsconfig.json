@@ -15,7 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/core-user-profile-common",
-    "@kbn/core",
     "@kbn/security-plugin-types-common",
+    "@kbn/core-http-server",
   ]
 }

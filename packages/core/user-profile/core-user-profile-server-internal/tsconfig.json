@@ -19,5 +19,7 @@
     "@kbn/core-user-profile-common",
     "@kbn/logging",
     "@kbn/core-base-server-internal",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
   ]
 }
