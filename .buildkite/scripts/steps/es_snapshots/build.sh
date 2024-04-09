@@ -125,7 +125,7 @@ steps:
     async: true
     build:
       env:
-        TESTED_PIPELINE_PATH=".buildkite/pipelines/es_snapshots/verify.yml"
+        TESTED_PIPELINE_PATH: ".buildkite/pipelines/es_snapshots/verify.yml"
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
       branch: '$BUILDKITE_BRANCH'
 EOF
