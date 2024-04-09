@@ -33,14 +33,26 @@ const ParamsSchema = schema.object({
   message: schema.string({ minLength: 1 }),
 });
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+const ConnectorParamsSchema = schema.object({
+  connector: schema.string(),
+  message: schema.string({ minLength: 1 }),
+  rule: schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    ruleUrl: schema.nullable(schema.string()),
+  }),
+});
 
-export type ObsAIAssistantConnectorType = ConnectorType<{}, {}, ActionParamsType, unknown>;
+export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
+
+export type ObsAIAssistantConnectorType = ConnectorType<{}, {}, ConnectorParamsType, unknown>;
 
 export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   {},
   {},
-  ActionParamsType
+  ConnectorParamsType
 >;
 
 export function getObsAIAssistantConnectorType(
@@ -61,7 +73,7 @@ export function getObsAIAssistantConnectorType(
         customValidator: () => {},
       },
       params: {
-        schema: ParamsSchema,
+        schema: ConnectorParamsSchema,
       },
       secrets: {
         schema: schema.object({}),
@@ -76,12 +88,13 @@ export function getObsAIAssistantConnectorType(
 
 function renderParameterTemplates(
   logger: Logger,
-  params: ActionParamsType,
+  params: ConnectorParamsType,
   variables: Record<string, unknown>
-): ActionParamsType {
+): ConnectorParamsType {
   return {
     connector: params.connector,
-    message: renderMustacheString(logger, params.message, variables, 'slack'),
+    message: params.message,
+    rule: params.rule,
   };
 }
 
@@ -183,13 +196,17 @@ async function executor(
 
 export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   ActionParamsType,
-  ActionParamsType
+  ConnectorParamsType
 > => {
   return {
     connectorTypeId: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     ruleActionParamsSchema: ParamsSchema,
-    buildActionParams: ({ params }) => {
-      return { connector: params.connector, message: params.message };
+    buildActionParams: ({ params, rule, ruleUrl }) => {
+      return {
+        connector: params.connector,
+        message: params.message,
+        rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+      };
     },
   };
 };

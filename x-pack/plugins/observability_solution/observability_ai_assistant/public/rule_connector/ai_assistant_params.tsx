@@ -7,9 +7,8 @@
 
 import React, { useEffect } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
 import { useGenAIConnectorsWithoutContext } from '../hooks/use_genai_connectors';
@@ -23,7 +22,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
   useEffect(() => {
     editAction('connector', selectedConnector, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedConnector]);
 
   return (
     <>
@@ -51,22 +50,27 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
 
       <EuiSpacer size="m" />
 
-      <EuiFlexItem grow={false}>
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editAction}
-          messageVariables={messageVariables}
-          paramsProperty={'message'}
-          inputTargetValue={actionParams.message}
-          label={i18n.translate(
-            'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
-            {
-              defaultMessage: 'Message',
-            }
-          )}
-          errors={errors.message as string[]}
-        />
-      </EuiFlexItem>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+          {
+            defaultMessage: 'Message',
+          }
+        )}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTextArea
+            fullWidth
+            data-test-subj="observabilityAiAssistantAlertConnectorMessageTextArea"
+            value={actionParams.message}
+            onChange={(event) => {
+              editAction('message', event.target.value, index);
+            }}
+            isInvalid={errors.message.length > 0}
+          />
+        </EuiFlexItem>
+      </EuiFormRow>
     </>
   );
 };

@@ -180,6 +180,7 @@ export class ObservabilityAIAssistantPlugin
             };
           }),
           core: {
+            coreStart,
             elasticsearch: {
               client: coreStart.elasticsearch.client.asScoped(request),
             },
