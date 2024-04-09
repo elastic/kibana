@@ -1000,6 +1000,8 @@
       "@kbn/kibana-usage-collection-plugin/*": ["src/plugins/kibana_usage_collection/*"],
       "@kbn/kibana-utils-plugin": ["src/plugins/kibana_utils"],
       "@kbn/kibana-utils-plugin/*": ["src/plugins/kibana_utils/*"],
+      "@kbn/kubernetes-observability-plugin": ["x-pack/plugins/kubernetes_observability"],
+      "@kbn/kubernetes-observability-plugin/*": ["x-pack/plugins/kubernetes_observability/*"],
       "@kbn/kubernetes-security-plugin": ["x-pack/plugins/kubernetes_security"],
       "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/language-documentation-popover": ["packages/kbn-language-documentation-popover"],

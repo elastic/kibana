@@ -19,7 +19,7 @@ export class KubernetesObservabilityPlugin
   }
 
   public setup(core: CoreSetup) {
-    this.logger.debug('kubernetesObservability: Setup');
+    this.logger.info('kubernetesObservability: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -29,7 +29,7 @@ export class KubernetesObservabilityPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('kubernetesObservability: Started');
+    this.logger.info('kubernetesObservability: Started');
     return {};
   }
 

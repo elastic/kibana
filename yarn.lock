@@ -5052,6 +5052,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kubernetes-observability-plugin@link:x-pack/plugins/kubernetes_observability":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kubernetes-security-plugin@link:x-pack/plugins/kubernetes_security":
   version "0.0.0"
   uid ""

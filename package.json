@@ -530,6 +530,7 @@
     "@kbn/kibana-react-plugin": "link:src/plugins/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/plugins/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
+    "@kbn/kubernetes-observability-plugin": "link:x-pack/plugins/kubernetes_observability",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/language-documentation-popover": "link:packages/kbn-language-documentation-popover",
     "@kbn/lens-config-builder-example-plugin": "link:x-pack/examples/lens_config_builder_example",
