@@ -1519,6 +1519,7 @@
     "@types/vinyl-fs": "^3.0.2",
     "@types/watchpack": "^1.1.5",
     "@types/webpack": "^4.41.3",
+    "@types/webpack-bundle-analyzer": "^4.7.0",
     "@types/webpack-env": "^1.15.3",
     "@types/webpack-merge": "^4.1.5",
     "@types/webpack-sources": "^0.1.4",
