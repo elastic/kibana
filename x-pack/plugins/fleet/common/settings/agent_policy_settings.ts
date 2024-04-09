@@ -45,7 +45,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription',
       {
-        defaultMessage: 'Timeout in seconds for downloading the agent binary',
+        defaultMessage: 'Timeout for downloading the agent binary',
       }
     ),
     learnMoreLink:
@@ -53,7 +53,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_download_timeout',
     },
-    schema: zodStringWithDurationValidation.default('120s'),
+    schema: zodStringWithDurationValidation.default('2h'),
   },
   {
     name: 'agent.download.target_directory',
