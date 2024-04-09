@@ -216,6 +216,7 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
     diskType: agent.diskType,
     enableNestedVirtualization: agent.nestedVirtualization,
     localSsds: agent.localSsds,
+    localSsdInterface: !!agent.localSsds ? 'nvme' : undefined,
     machineType: agent.machineType,
     preemptible: agent.spot,
   });
