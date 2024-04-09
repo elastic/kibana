@@ -60,11 +60,6 @@ function termToCssSelector(term: string) {
  *      - DOM match example: <div> data-test-subj="foo bar" </div>
  */
 export function subj(selector: string) {
-  if (selector.match(/\w+[\*|~]/gm)) {
-    throw new Error(
-      `incorrect usage of '*' or '~' in selector: ${selector}, supported format '*foo' | '~foo'`
-    );
-  }
   return selectorToTerms(selector)
     .map((term) =>
       // split each term by joins/& and map to css selectors
