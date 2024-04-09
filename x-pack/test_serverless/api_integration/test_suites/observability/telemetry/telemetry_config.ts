@@ -31,7 +31,9 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
       expect(body).toMatchObject(baseConfig);
     });
 
-    it('GET should get updated labels after dynamically updating them', async () => {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/180348
+    it.skip('GET should get updated labels after dynamically updating them', async function () {
+      this.tags(['failsOnMKI']);
       await supertest
         .put('/internal/core/_settings')
         .set(svlCommonApi.getInternalRequestHeader())
