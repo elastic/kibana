@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverFeaturesService } from './services/discover_features';
-import { DiscoverSharedClientPlugin } from './types';
+import { FeaturesRegistry } from '@kbn/discover-utils';
+import { DiscoverFeature } from './types';
 
-export class DiscoverSharedPlugin implements DiscoverSharedClientPlugin {
-  private discoverFeaturesService: DiscoverFeaturesService = new DiscoverFeaturesService();
+export class DiscoverFeaturesService {
+  private registry: FeaturesRegistry<DiscoverFeature> = new FeaturesRegistry();
 
   public setup() {
     return {
-      features: this.discoverFeaturesService.setup(),
+      registry: this.registry,
     };
   }
 
   public start() {
     return {
-      features: this.discoverFeaturesService.start(),
+      registry: this.registry,
     };
   }
 }

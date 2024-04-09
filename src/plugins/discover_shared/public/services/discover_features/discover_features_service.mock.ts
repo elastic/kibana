@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverSharedPlugin } from './plugin';
+import { FeaturesRegistry } from '@kbn/discover-utils';
 
-export function plugin() {
-  return new DiscoverSharedPlugin();
-}
-
-export type { DiscoverSharedPluginSetup, DiscoverSharedPluginStart } from './types';
+export const createDiscoverFeaturesServiceStartMock = () => ({
+  registry: new FeaturesRegistry(),
+});

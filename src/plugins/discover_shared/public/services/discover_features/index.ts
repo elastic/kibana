@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverSharedPlugin } from './plugin';
-
-export function plugin() {
-  return new DiscoverSharedPlugin();
-}
-
-export type { DiscoverSharedPluginSetup, DiscoverSharedPluginStart } from './types';
+export * from './discover_features_service';
+export * from './types';

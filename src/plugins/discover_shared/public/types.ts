@@ -6,8 +6,28 @@
  * Side Public License, v 1.
  */
 
-export interface DiscoverSharedPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DiscoverSharedPluginStart {}
+import { Plugin } from '@kbn/core/public';
+import {
+  DiscoverFeaturesServiceSetup,
+  DiscoverFeaturesServiceStart,
+} from './services/discover_features';
 
-export interface AppPluginStartDependencies {}
+export interface DiscoverSharedClientSetupExports {
+  features: DiscoverFeaturesServiceSetup;
+}
+
+export interface DiscoverSharedClientStartExports {
+  features: DiscoverFeaturesServiceStart;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DiscoverSharedClientPluginSetupDeps {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DiscoverSharedClientPluginStartDeps {}
+
+export type DiscoverSharedClientPlugin = Plugin<
+  DiscoverSharedClientSetupExports,
+  DiscoverSharedClientStartExports,
+  DiscoverSharedClientPluginSetupDeps,
+  DiscoverSharedClientPluginStartDeps
+>;
