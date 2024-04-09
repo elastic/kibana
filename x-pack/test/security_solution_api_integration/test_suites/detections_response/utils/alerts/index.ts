@@ -7,6 +7,7 @@
 
 export * from './wait_for_alert_to_complete';
 export * from './wait_for_alert_to_complete';
+export * from './get_alerts';
 export * from './get_open_alerts';
 export * from './remove_random_valued_properties_from_alert';
 export * from './set_alert_status';
