@@ -14,15 +14,15 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { bulkChangeAnonymizationFields } from './use_bulk_anonymization_fields';
 
 const anonymizationField1 = {
-  id: 'conversation1',
+  id: 'field1',
   field: 'Anonymization field 1',
   anonymized: true,
   allowed: true,
 };
 const anonymizationField2 = {
   ...anonymizationField1,
-  id: 'conversation2',
-  field: 'Conversation 2',
+  id: 'field2',
+  field: 'field 2',
 };
 const toasts = {
   addError: jest.fn(),
@@ -58,7 +58,7 @@ describe('bulkChangeAnonymizationFields', () => {
     );
   });
 
-  it('should transform the anonymization field dictionary to an array of conversations to create', async () => {
+  it('should transform the anonymization field dictionary to an array of fields to create', async () => {
     const anonymizationFieldsActions = {
       create: [anonymizationField1, anonymizationField2],
       update: [],
@@ -81,7 +81,7 @@ describe('bulkChangeAnonymizationFields', () => {
     );
   });
 
-  it('should transform the anonymization field dictionary to an array of conversations to update', async () => {
+  it('should transform the anonymization field dictionary to an array of fields to update', async () => {
     const anonymizationFieldsActions = {
       update: [anonymizationField1, anonymizationField2],
       delete: { ids: [] },
@@ -110,7 +110,7 @@ describe('bulkChangeAnonymizationFields', () => {
           {
             statusCode: 400,
             message: 'Error updating anonymization field',
-            anonymizationFields: [{ id: anonymizationField1.id, name: anonymizationField1.field }],
+            anonymization_fields: [{ id: anonymizationField1.id, name: anonymizationField1.field }],
           },
         ],
       },
@@ -126,7 +126,9 @@ describe('bulkChangeAnonymizationFields', () => {
       toasts as unknown as IToasts
     );
     expect(toasts.addError.mock.calls[0][0]).toEqual(
-      new Error('Error message: Error updating anonymization field for conversation Conversation 1')
+      new Error(
+        'Error message: Error updating anonymization field for anonymization field Anonymization field 1'
+      )
     );
   });
 

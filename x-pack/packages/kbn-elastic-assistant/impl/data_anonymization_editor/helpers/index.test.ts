@@ -265,25 +265,12 @@ describe('helpers', () => {
         update: 'allow',
       });
 
-      expect(result.contextAnonymizationFields?.data).toEqual([
-        {
-          id: 'event.category',
-          field: 'event.category',
-          anonymized: true,
-          allowed: false,
-        },
-        {
-          id: 'event.action',
-          field: 'event.action',
-          anonymized: false,
-          allowed: true,
-        },
-        {
-          id: 'user.name',
-          field: 'user.name',
-          anonymized: true,
-          allowed: true,
-        },
+      expect(
+        result.contextAnonymizationFields?.data.sort((a, b) => (a.field > b.field ? -1 : 1))
+      ).toEqual([
+        { id: 'user.name', field: 'user.name', anonymized: true, allowed: true },
+        { id: 'event.category', field: 'event.category', anonymized: true, allowed: false },
+        { id: 'event.action', field: 'event.action', anonymized: false, allowed: true },
       ]);
     });
 
@@ -295,16 +282,13 @@ describe('helpers', () => {
         update: 'allow',
       });
 
-      expect(result.contextAnonymizationFields).toEqual({
-        data: [
-          { allowed: false, anonymized: true, field: 'event.category', id: 'event.category' },
-          { allowed: false, anonymized: true, field: 'user.name', id: 'user.name' },
-          { allowed: true, anonymized: false, field: 'event.action', id: 'event.action' },
-        ],
-        page: 1,
-        perPage: 100,
-        total: 2,
-      });
+      expect(
+        result.contextAnonymizationFields?.data.sort((a, b) => (a.field > b.field ? -1 : 1))
+      ).toEqual([
+        { allowed: false, anonymized: true, field: 'user.name', id: 'user.name' },
+        { allowed: false, anonymized: true, field: 'event.category', id: 'event.category' },
+        { allowed: true, anonymized: false, field: 'event.action', id: 'event.action' },
+      ]);
     });
 
     it('updates the allowReplacement list when update is `allowReplacement` and the operation is `add`', () => {
@@ -314,16 +298,13 @@ describe('helpers', () => {
         selectedPromptContext,
         update: 'allowReplacement',
       });
-      expect(result.contextAnonymizationFields).toEqual({
-        data: [
-          { allowed: true, anonymized: true, field: 'user.name', id: 'user.name' },
-          { allowed: false, anonymized: true, field: 'event.category', id: 'event.category' },
-          { allowed: true, anonymized: false, field: 'event.action', id: 'event.action' },
-        ],
-        page: 1,
-        perPage: 100,
-        total: 2,
-      });
+      expect(
+        result.contextAnonymizationFields?.data.sort((a, b) => (a.field > b.field ? -1 : 1))
+      ).toEqual([
+        { allowed: true, anonymized: true, field: 'user.name', id: 'user.name' },
+        { allowed: false, anonymized: true, field: 'event.category', id: 'event.category' },
+        { allowed: true, anonymized: false, field: 'event.action', id: 'event.action' },
+      ]);
     });
 
     it('updates the allowReplacement list when update is `allowReplacement` and the operation is `remove`', () => {

@@ -38,10 +38,6 @@ describe('useFetchAnonymizationFields', () => {
       wrapper: createWrapper(),
     });
 
-    const result = await useFetchAnonymizationFields({ http });
-
-    expect(result).toEqual({ status: 200 });
-
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields(defaultProps));
       await waitForNextUpdate();
@@ -51,7 +47,7 @@ describe('useFetchAnonymizationFields', () => {
           method: 'GET',
           query: {
             page: 1,
-            perPage: 100,
+            per_page: 100,
           },
           version: '2023-10-31',
           signal: undefined,

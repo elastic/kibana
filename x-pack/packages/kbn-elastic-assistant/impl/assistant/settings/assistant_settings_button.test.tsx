@@ -25,6 +25,8 @@ const testProps = {
   onConversationSelected,
   conversations: {},
   refetchConversationsState: jest.fn(),
+  anonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {
