@@ -319,7 +319,7 @@ export function QueryHistory({
             defaultMessage: 'Queries history table',
           }
         )}
-        responsive={false}
+        responsiveBreakpoint={false}
         items={historyItems}
         columns={columns}
         sorting={sorting}

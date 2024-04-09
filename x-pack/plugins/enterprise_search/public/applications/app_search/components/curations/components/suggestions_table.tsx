@@ -130,7 +130,6 @@ export const SuggestionsTable: React.FC = () => {
       <EuiBasicTable
         columns={columns}
         items={suggestions}
-        responsive
         hasActions
         loading={dataLoading}
         pagination={{

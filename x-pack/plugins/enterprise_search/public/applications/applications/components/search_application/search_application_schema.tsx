@@ -145,7 +145,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
           css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
           columns={columns}
           items={schemaField.indices}
-          responsive={false}
+          responsiveBreakpoint={false}
         />
       </EuiFlexGroup>
     </EuiPanel>
@@ -452,7 +452,7 @@ export const SearchApplicationSchema: React.FC = () => {
           itemId="name"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isExpandable
-          responsive={false}
+          responsiveBreakpoint={false}
         />
         {totalConflictsHiddenByTypeFilters > 0 && (
           <EuiCallOut

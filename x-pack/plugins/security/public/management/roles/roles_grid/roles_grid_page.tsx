@@ -143,7 +143,7 @@ export class RolesGridPage extends Component<Props, State> {
         <ActionsEuiTableFormatting>
           <EuiInMemoryTable
             itemId="name"
-            responsive={false}
+            responsiveBreakpoint={false}
             columns={this.getColumnConfig()}
             hasActions={true}
             selection={

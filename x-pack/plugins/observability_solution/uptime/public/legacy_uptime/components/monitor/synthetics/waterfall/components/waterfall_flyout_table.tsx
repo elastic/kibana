@@ -69,7 +69,7 @@ export const Table = (props: Props) => {
       <TableWithoutHeader
         tableLayout={'fixed'}
         compressed
-        responsive={false}
+        responsiveBreakpoint={false}
         columns={columns}
         items={rows}
       />

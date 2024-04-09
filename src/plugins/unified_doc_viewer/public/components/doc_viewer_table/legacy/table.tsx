@@ -117,7 +117,7 @@ export const DocViewerLegacyTable = ({
       columns={tableColumns}
       rowProps={onSetRowProps}
       pagination={false}
-      responsive={false}
+      responsiveBreakpoint={false}
     />
   );
 };

@@ -111,7 +111,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         items={items}
         columns={columns}
         isSelectable={!!onClone}
-        responsive={false}
+        responsiveBreakpoint={false}
         search={search}
         sorting={{
           sort: {

@@ -173,7 +173,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     <EuiInMemoryTable
       data-test-subj="infraAssetDetailsMetadataTable"
       tableLayout="fixed"
-      responsive={false}
+      responsiveBreakpoint={false}
       columns={columns}
       items={fieldsWithPins}
       rowProps={{ className: 'euiTableRow-hasActions' }}

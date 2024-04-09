@@ -175,7 +175,7 @@ export const JobsTableComponent = ({
       loading={isLoading}
       noItemsMessage={<NoItemsMessage basePath={basePath} />}
       pagination={pagination}
-      responsive={false}
+      responsiveBreakpoint={false}
       onChange={({ page }: { page: { index: number } }) => {
         setPageIndex(page.index);
       }}

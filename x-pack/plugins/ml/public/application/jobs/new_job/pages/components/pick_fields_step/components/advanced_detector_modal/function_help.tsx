@@ -243,7 +243,7 @@ export const FunctionHelpPopover: FC = memo(() => {
           items={items}
           compressed={true}
           columns={columns}
-          responsive={false}
+          responsiveBreakpoint={false}
         />
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">

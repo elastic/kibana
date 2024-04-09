@@ -124,7 +124,7 @@ export function JSErrors() {
               })
             : ''
         }
-        responsive={false}
+        responsiveBreakpoint={false}
         compressed={true}
         columns={cols}
         items={data?.items ?? []}
