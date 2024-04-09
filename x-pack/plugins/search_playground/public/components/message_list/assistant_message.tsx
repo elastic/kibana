@@ -54,7 +54,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
-                    defaultMessage="Grounding answer from"
+                    defaultMessage="Grounding answer based on"
                   />
                 </p>
               </EuiText>
@@ -65,7 +65,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
               >
                 <FormattedMessage
                   id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
-                  defaultMessage="{count} {count, plural, one {document} other {documents}} sources"
+                  defaultMessage="{count} document sources"
                   values={{ count: retrievalDocs.length }}
                 />
               </EuiButtonEmpty>

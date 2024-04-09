@@ -19,10 +19,12 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
   const toggleDetails = (citation: Doc) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-    if (itemIdToExpandedRowMapValues[citation.id]) {
-      delete itemIdToExpandedRowMapValues[citation.id];
+    if (itemIdToExpandedRowMapValues[citation.metadata._id]) {
+      delete itemIdToExpandedRowMapValues[citation.metadata._id];
     } else {
-      itemIdToExpandedRowMapValues[citation.id] = <EuiText size="s">{citation.content}</EuiText>;
+      itemIdToExpandedRowMapValues[citation.metadata._id] = (
+        <EuiText size="s">{citation.content}</EuiText>
+      );
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
