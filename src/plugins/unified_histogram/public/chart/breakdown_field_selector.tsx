@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
+import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import {
   ToolbarSelector,
   ToolbarSelectorProps,
