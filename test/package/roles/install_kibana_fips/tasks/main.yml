@@ -25,13 +25,13 @@
     dest: /usr/share/kibana/config/kibana.yml
   register: config
 
-- name: copy fips node.options
+- name: copy FIPS node.options
   become: yes
   template:
     src: templates/fips/node.options
     dest: /usr/share/kibana/config/node.options
 
-- name: copy fips openssl config
+- name: copy FIPS openssl config
   become: yes
   template:
     src: templates/fips/nodejs.cnf
@@ -52,6 +52,24 @@
     src: /usr/share/kibana/openssl-3.0.8.tar.gz
     dest: /usr/share/kibana
     remote_src: yes
+
+- name: configure OpenSSL for FIPS
+  become: yes
+  chdir: /usr/share/kibana/openssl-3.0.8
+  shell: |
+    ./Configure enable-fips
+
+- name: compile OpenSSL with FIPS
+  become: yes
+  jobs: "{{ ansible_processor_vcpus }}"
+  make:
+    chdir: /usr/share/kibana/openssl-3.0.8
+
+- name: install OpenSSL with FIPS
+  become: yes
+  make:
+    chdir: /usr/share/kibana/openssl-3.0.8
+    target: install
 # - name: start kibana
 #   become: yes
 #   docker_container:
