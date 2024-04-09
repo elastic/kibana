@@ -30,7 +30,7 @@ import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<
   IShareContext,
-  'isDirty' | 'objectId' | 'objectType' | 'onClose' | 'intl' | 'toasts'
+  'isDirty' | 'objectId' | 'objectType' | 'onClose' | 'toasts'
 > & {
   layoutOption?: 'print';
   aggregateReportTypes: ShareMenuItem[];
@@ -38,14 +38,7 @@ type ExportProps = Pick<
 
 type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
 
-const ExportContentUi = ({
-  isDirty,
-  objectId,
-  objectType,
-  aggregateReportTypes,
-  intl,
-  toasts,
-}: ExportProps) => {
+const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, toasts }: ExportProps) => {
   // needed for CSV in Discover
   const firstRadio =
     (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
@@ -206,12 +199,8 @@ const ExportContentUi = ({
     if (objectType === 'lens' && selectedRadio === 'csv') {
       return downloadCSVLens!();
     }
-    return usePrintLayout
-      ? generateReportForPrinting!({ intl, toasts })
-      : generateReport!({ intl, toasts });
+    return usePrintLayout ? generateReportForPrinting!() : generateReport!();
   }, [
-    intl,
-    toasts,
     downloadCSVLens,
     generateReport,
     generateReportForPrinting,

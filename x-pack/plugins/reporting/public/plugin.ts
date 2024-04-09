@@ -38,6 +38,7 @@ import {
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
@@ -47,6 +48,7 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  intl: InjectedIntl;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -247,6 +249,7 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               i18n: i18nStart,
+              intl: setupDeps.intl,
             })
           );
 
@@ -260,6 +263,7 @@ export class ReportingPublicPlugin
                 usesUiCapabilities,
                 theme: core.theme,
                 i18n: i18nStart,
+                intl: setupDeps.intl,
               })
             );
           }

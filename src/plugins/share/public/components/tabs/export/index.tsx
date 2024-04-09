@@ -16,7 +16,7 @@ import { useShareTabsContext } from '../../context';
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose, toasts, intl } = useShareTabsContext()!;
+  const { shareMenuItems, objectType, isDirty, onClose, toasts } = useShareTabsContext()!;
 
   const aggregateReportTypes: ShareMenuItem[] = [];
 
@@ -61,7 +61,6 @@ const ExportTabContent = () => {
         isDirty,
         onClose,
         toasts,
-        intl,
         aggregateReportTypes,
       }}
     />
