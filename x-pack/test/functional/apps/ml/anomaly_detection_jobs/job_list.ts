@@ -113,7 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('expanded row with annotations can be edited', async () => {
       await ml.testExecution.logTestStep('can edit annotations from expanded row');
-      await ml.expandedJobDetails.assertAnnotationsEdit(jobId);
+      await ml.expandedJobDetails.editAnnotation(jobId, 'appex qa rox');
     });
 
     it('expanded row with data feed flyout should display correctly', async () => {

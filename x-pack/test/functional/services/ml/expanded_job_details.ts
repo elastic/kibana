@@ -58,17 +58,21 @@ export function MachineLearningExpandedJobDetailsProvider(
       );
     },
 
-    async assertAnnotationsEdit(jobId: string): Promise<void> {
-      const newAnnotation = 'appex qa rox';
+    async editAnnotation(jobId: string, newAnnotationText: string): Promise<void> {
       await jobTable.withDetailsOpen(jobId, async () => {
         await jobTable.openAnnotationsTab(jobId);
-        if (await testSubjects.exists('clearSearchButton'))
+        if (await testSubjects.exists('clearSearchButton')) {
           await testSubjects.click('clearSearchButton');
+          await testSubjects.missingOrFail('clearSearchButton');
+        }
 
         await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
         await testSubjects.click('mlAnnotationsActionEdit');
+        await testSubjects.existOrFail('mlAnnotationFlyout', {
+          timeout: 3_000,
+        });
 
-        await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotation, {
+        await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotationText, {
           clearWithKeyboard: true,
         });
         await testSubjects.click('annotationFlyoutUpdateOrCreateButton');
@@ -81,7 +85,7 @@ export function MachineLearningExpandedJobDetailsProvider(
         const visibleText = await testSubjects.getVisibleText(
           jobTable.detailsSelector(jobId, 'mlAnnotationsColumnAnnotation')
         );
-        expect(visibleText).to.be(newAnnotation);
+        expect(visibleText).to.be(newAnnotationText);
       });
     },
 
