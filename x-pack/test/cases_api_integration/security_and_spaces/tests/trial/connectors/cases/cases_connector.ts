@@ -918,41 +918,6 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             });
           });
-
-          it('should not attach alerts that do not belong to any grouping', async () => {
-            const alerts = [
-              { _id: `alert-id-0`, _index: 'alert-index-0' },
-              { _id: `alert-id-1`, _index: 'alert-index-0', 'host.name': 'A' },
-            ];
-
-            await executeConnectorAndVerifyCorrectness({
-              supertest,
-              connectorId,
-              req: getRequest({
-                alerts,
-                groupingBy: req.params.subActionParams.groupingBy,
-              }),
-            });
-
-            const cases = await findCases({ supertest });
-
-            expect(cases.total).to.be(1);
-            const theCase = cases.cases[0];
-
-            const attachments = await getAllComments({
-              supertest,
-              caseId: theCase.id,
-            });
-
-            verifyAlertsAttachedToCase({
-              caseAttachments: attachments,
-              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1']),
-              rule: {
-                id: req.params.subActionParams.rule.id,
-                name: req.params.subActionParams.rule.name,
-              },
-            });
-          });
         });
 
         describe('Non grouped alerts', () => {
@@ -964,6 +929,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 alerts: [
                   { _id: 'alert-id-0', _index: 'alert-index-0', 'host.name': 'A' },
                   { _id: 'alert-id-1', _index: 'alert-index-1', 'dest.ip': '0.0.0.1' },
+                  { _id: `alert-id-2`, _index: 'alert-index-2' },
                 ],
                 groupingBy: ['host.name'],
               }),
@@ -1042,7 +1008,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
             verifyAlertsAttachedToCase({
               caseAttachments: secondCaseAttachments,
-              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1']),
+              expectedAlertIdsToBeAttachedToCase: new Set(['alert-id-1', 'alert-id-2']),
               rule: {
                 id: req.params.subActionParams.rule.id,
                 name: req.params.subActionParams.rule.name,
