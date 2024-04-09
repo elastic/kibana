@@ -18,6 +18,7 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React, { useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
@@ -38,7 +39,6 @@ import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 export function AlertDetailsAppSection({
   rule,
@@ -166,8 +166,9 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <AlertDetailContextualInsights alert={alert} />
-
+      {i18n.translate('xpack.apm.alertDetailsAppSection.foobarFlexGroupLabel', {
+        defaultMessage: 'foobar',
+      })}
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}

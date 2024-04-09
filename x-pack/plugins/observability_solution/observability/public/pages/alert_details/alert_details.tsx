@@ -43,6 +43,7 @@ import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enable
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -169,6 +170,9 @@ export function AlertDetails() {
     <>
       <EuiSpacer size="l" />
       <AlertSummary alertSummaryFields={summaryFields} />
+
+      <AlertDetailContextualInsights alert={alertDetail} />
+      <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && alertDetail?.formatted && (
         <AlertDetailsAppSection
           alert={alertDetail.formatted}
@@ -260,12 +264,11 @@ export function getScreenDescription(alertDetail: AlertData) {
 
   The alert details are:
   ${Object.entries(alertDetail.formatted.fields)
-    .map(([key, value]) => `${key}: ${value}`)
+    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  
 
   Do not repeat this information to the user, unless it is relevant for them to know. 
-  Please suggestion root causes if possilbe.
+  Please suggestion root causes if possible.
   Suggest next steps for the user to take.
-
   `);
 }
