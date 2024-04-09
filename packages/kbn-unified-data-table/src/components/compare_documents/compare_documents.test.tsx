@@ -13,7 +13,7 @@ import { render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import CompareDocuments from './compare_documents';
+import CompareDocuments, { CompareDocumentsProps } from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
@@ -53,7 +53,7 @@ const renderCompareDocuments = ({
   forceShowAllFields = false,
 }: { forceShowAllFields?: boolean } = {}) => {
   const setSelectedDocs = jest.fn();
-  render(
+  const getCompareDocuments = (props?: Partial<CompareDocumentsProps>) => (
     <CompareDocuments
       id="test"
       wrapper={document.body}
@@ -71,9 +71,14 @@ const renderCompareDocuments = ({
       getDocById={getDocById}
       setSelectedDocs={setSelectedDocs}
       setIsCompareActive={jest.fn()}
+      {...props}
     />
   );
-  return { setSelectedDocs };
+  const { rerender } = render(getCompareDocuments());
+  return {
+    setSelectedDocs,
+    rerender: (props?: Partial<CompareDocumentsProps>) => rerender(getCompareDocuments(props)),
+  };
 };
 
 describe('CompareDocuments', () => {
@@ -156,5 +161,13 @@ describe('CompareDocuments', () => {
     expect(useComparisonFields).toHaveBeenLastCalledWith(
       expect.objectContaining({ showAllFields: true })
     );
+  });
+
+  it('should retain comparison docs when getDocById loses access to them', () => {
+    const { rerender } = renderCompareDocuments();
+    const visibleColumns = ['fields_generated-id', '0', '1', '2'];
+    expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
+    rerender({ getDocById: () => undefined });
+    expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
   });
 });

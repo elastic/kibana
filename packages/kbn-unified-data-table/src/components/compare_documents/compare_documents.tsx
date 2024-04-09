@@ -20,7 +20,8 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { useMemo } from 'react';
+import { memoize } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
@@ -74,6 +75,9 @@ const CompareDocuments = ({
   setSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
+  // Memoize getDocById to ensure we don't lose access to the comparison docs if, for example,
+  // a time range change or auto refresh causes the previous docs to no longer be available
+  const [memoizedGetDocById] = useState(() => memoize(getDocById));
   const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
   const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
     getStorageKey(consumer, 'DiffMode'),
@@ -99,14 +103,14 @@ const CompareDocuments = ({
     selectedDocs,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
     showMatchingValues: Boolean(showMatchingValues),
-    getDocById,
+    getDocById: memoizedGetDocById,
   });
   const comparisonColumns = useComparisonColumns({
     wrapper,
     isPlainRecord,
     fieldColumnId,
     selectedDocs,
-    getDocById,
+    getDocById: memoizedGetDocById,
     setSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
@@ -179,7 +183,7 @@ const CompareDocuments = ({
     selectedDocs,
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
-    getDocById,
+    getDocById: memoizedGetDocById,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,
