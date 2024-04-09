@@ -19,7 +19,7 @@ interface ServiceDeps {
   darkMode: boolean;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
-  getAllEnrichPolicies: IndexManagementPluginSetup['apiService']['getAllEnrichPolicies'];
+  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -42,16 +42,13 @@ export const setKibanaServices = (
   indexManagement?: IndexManagementPluginSetup
 ) => {
   core = kibanaCore;
-  const getAllEnrichPolicies = indexManagement
-    ? indexManagement?.apiService.getAllEnrichPolicies
-    : async () => ({ data: null, error: null });
   core.theme.theme$.subscribe(({ darkMode }) => {
     servicesReady$.next({
       core,
       darkMode,
       dataViews,
       expressions,
-      getAllEnrichPolicies,
+      indexManagementApiService: indexManagement?.apiService,
     });
   });
 };
