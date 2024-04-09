@@ -42,7 +42,7 @@ import {
 import {
   executeSetupModuleRequest,
   forceStartDatafeeds,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBe(1);
       const alert = alerts.hits.hits[0];
 
