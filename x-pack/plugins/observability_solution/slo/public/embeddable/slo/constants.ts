@@ -8,3 +8,4 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
 export const SLO_ALERTS_TABLE_CONFIG_ID = `${AlertConsumers.SLO}-embeddable-alerts-table`;
+export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';

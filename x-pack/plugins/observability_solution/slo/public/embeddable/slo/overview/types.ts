@@ -7,12 +7,16 @@
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
 import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
+import { Filter } from '@kbn/es-query';
 
 export type OverviewMode = 'single' | 'groups';
-type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
+export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   groupBy: GroupBy;
   groups?: SLOGroupWithSummaryResponse[];
+  tagsFilter?: Filter;
+  filters?: Filter[];
+  kqlQuery?: string;
 }
 
 export type SingleSloProps = EmbeddableSloProps & {
@@ -32,3 +36,16 @@ export interface EmbeddableSloProps {
 }
 
 export type SloEmbeddableInput = EmbeddableInput & Partial<GroupSloProps> & Partial<SingleSloProps>;
+
+export interface HasSloOverviewConfig {
+  getSloOverviewConfig: () => SloEmbeddableInput;
+  updateSloOverviewConfig: (next: SloEmbeddableInput) => void;
+}
+
+export const apiHasSloAlertsConfig = (api: unknown | null): api is HasSloOverviewConfig => {
+  return Boolean(
+    api &&
+      typeof (api as HasSloOverviewConfig).getSloOverviewConfig === 'function' &&
+      typeof (api as HasSloOverviewConfig).updateSloOverviewConfig === 'function'
+  );
+};

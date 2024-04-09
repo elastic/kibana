@@ -6,6 +6,7 @@
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
 import React from 'react';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -20,12 +21,12 @@ interface Props {
   sloView: SLOView;
   sort?: string;
   direction?: SortDirection;
+  filters?: Filter[];
 }
 
-export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
+export function GroupView({ kqlQuery, sloView, sort, direction, groupBy, filters }: Props) {
   const { state, onStateChange } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
-
+  const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
     page: page + 1,

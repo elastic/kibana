@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { i18n } from '@kbn/i18n';
 import { Router } from '@kbn/shared-ux-router';
 import {
@@ -25,17 +24,22 @@ import {
   ApplicationStart,
   NotificationsStart,
 } from '@kbn/core/public';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createBrowserHistory } from 'history';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PluginContext } from '../../../context/plugin_context';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
-import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
+import { GroupSloView } from './group_view';
+// import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
 import type { SloEmbeddableInput } from './types';
 import { groupByOptions } from './slo_group_filters';
+import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
@@ -47,12 +51,15 @@ export interface SloEmbeddableDeps {
   application: ApplicationStart;
   notifications: NotificationsStart;
   observability: ObservabilityPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
   public readonly type = SLO_EMBEDDABLE;
   private node?: HTMLElement;
   private reloadSubject: Subject<boolean>;
+  private reloadGroupSubject: Subject<SloEmbeddableInput | undefined>;
+  private subscription: Subscription;
 
   constructor(
     private readonly deps: SloEmbeddableDeps,
@@ -61,6 +68,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   ) {
     super(initialInput, {}, parent);
     this.reloadSubject = new Subject<boolean>();
+    this.reloadGroupSubject = new Subject<SloEmbeddableInput | undefined>();
     if (initialInput.overviewMode === 'single') {
       this.setTitle(
         this.input.title ||
@@ -80,9 +88,14 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
           })
       );
     }
+
+    this.subscription = this.getInput$().subscribe((input) => {
+      this.reloadGroupSubject.next(input);
+    });
   }
 
   setTitle(title: string) {
+    this.setPanelTitle(title);
     this.updateInput({ title });
   }
 
@@ -100,14 +113,45 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     const queryClient = new QueryClient();
     const { observabilityRuleTypeRegistry } = this.deps.observability;
     const I18nContext = this.deps.i18n.Context;
-
     const renderOverview = () => {
       if (overviewMode === 'groups') {
         const groupBy = groupFilters?.groupBy ?? 'status';
+        const kqlQuery = groupFilters?.kqlQuery ?? '';
         return (
           <Wrapper>
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              wrap
+              css={`
+                margin-bottom: 20px;
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  onClick={() => {
+                    const trigger = this.deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
+                    this.deps.uiActions.getAction(EDIT_SLO_OVERVIEW_ACTION).execute({
+                      trigger,
+                      embeddable: this,
+                    } as ActionExecutionContext);
+                  }}
+                  data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+                >
+                  {i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
+                    defaultMessage: 'Open Search criteria',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <GroupView sloView="cardView" groupBy={groupBy} />
+              <GroupSloView
+                sloView="cardView"
+                groupBy={groupBy}
+                kqlQuery={kqlQuery}
+                filters={groupFilters?.filters}
+                reloadGroupSubject={this.reloadGroupSubject}
+                setTitle={this.setTitle.bind(this)}
+              />
             </EuiFlexItem>
           </Wrapper>
         );
@@ -147,12 +191,22 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     );
   }
 
+  public getSloOverviewConfig() {
+    return this.getInput();
+  }
+
+  public updateSloOverviewConfig(next: SloEmbeddableInput) {
+    this.updateInput(next);
+  }
+
   public reload() {
     this.reloadSubject.next(true);
+    this.reloadGroupSubject?.next(undefined);
   }
 
   public destroy() {
     super.destroy();
+    this.subscription.unsubscribe();
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }

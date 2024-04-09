@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import './slo_configuration.scss';
 
 import React, { useState } from 'react';
 import {
@@ -23,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
+
 import type {
   SingleSloProps,
   GroupSloProps,
@@ -34,7 +36,7 @@ import { SloGroupFilters } from './slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
-  initialInput?: Partial<SloEmbeddableInput>;
+  initialInput?: Partial<SloEmbeddableInput> | undefined;
   onCreate: (props: SingleSloProps | GroupSloProps) => void;
   onCancel: () => void;
 }
@@ -49,6 +51,7 @@ interface GroupConfigurationProps {
   onCreate: (props: GroupSloProps) => void;
   onCancel: () => void;
   overviewMode: OverviewMode;
+  initialInput?: GroupSloProps;
 }
 
 function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConfigurationProps) {
@@ -128,9 +131,16 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
   );
 }
 
-function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfigurationProps) {
+function GroupSloConfiguration({
+  overviewMode,
+  onCreate,
+  onCancel,
+  initialInput,
+}: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: 'status',
+    groupBy: initialInput?.groupFilters.groupBy ?? 'status',
+    filters: initialInput?.groupFilters.filters ?? [],
+    kqlQuery: initialInput?.groupFilters.kqlQuery ?? '',
   });
   const [hasError, setHasError] = useState(false);
 
@@ -148,6 +158,7 @@ function GroupSloConfiguration({ overviewMode, onCreate, onCancel }: GroupConfig
             <EuiFlexGroup>
               <EuiFlexItem>
                 <SloGroupFilters
+                  selectedFilters={selectedGroupFilters}
                   onSelected={(prop, value) => {
                     setHasError(value === undefined);
                     setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
@@ -206,6 +217,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
       </EuiModalHeader>
       {overviewMode === 'groups' ? (
         <GroupSloConfiguration
+          initialInput={initialInput as GroupSloProps}
           overviewMode={overviewMode}
           onCreate={onCreate}
           onCancel={onCancel}
