@@ -10,6 +10,8 @@ import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { css } from '@emotion/css';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -20,6 +22,8 @@ interface MaxSignalsFieldProps {
   isDisabled: boolean;
   placeholder?: string;
 }
+
+const MAX_SIGNALS_FIELD_WIDTH = 200;
 
 export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
   dataTestSubj,
@@ -52,12 +56,23 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
     [setValue]
   );
 
+  const helpText = useMemo(() => {
+    const defaultToNumber =
+      maxAlertsPerRun < DEFAULT_MAX_SIGNALS ? maxAlertsPerRun : DEFAULT_MAX_SIGNALS;
+    return i18n.MAX_SIGNALS_HELP_TEXT(defaultToNumber);
+  }, [maxAlertsPerRun]);
+
   return (
     <EuiFormRow
+      css={css`
+        .euiFormControlLayout {
+          width: ${MAX_SIGNALS_FIELD_WIDTH}px;
+        }
+      `}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       fullWidth
-      helpText={field.helpText}
+      helpText={helpText}
       label={field.label}
       labelAppend={field.labelAppend}
       isInvalid={isInvalid}
@@ -68,7 +83,6 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
         value={value as EuiFieldNumberProps['value']}
         onChange={handleMaxSignalsChange}
         isLoading={field.isValidating}
-        fullWidth
         data-test-subj="input"
         placeholder={placeholder}
         disabled={isDisabled}

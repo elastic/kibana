@@ -329,7 +329,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             </EuiFormRow>
             <EuiSpacer size="l" />
             <EuiFormRow fullWidth>
-              <CommonUseField
+              <UseField
                 path="maxSignals"
                 component={MaxSignals}
                 componentProps={{
@@ -339,7 +339,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 }}
               />
             </EuiFormRow>
-            <EuiSpacer size="l" />
             {isThreatMatchRuleValue && (
               <>
                 <CommonUseField

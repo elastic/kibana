@@ -85,7 +85,7 @@ export const createRuleRoute = (
             }
           }
 
-          validateMaxSignals({ maxSignals: request.body.max_signals, rulesClient });
+          validateMaxSignals(request.body.max_signals);
 
           const mlAuthz = buildMlAuthz({
             license: ctx.licensing.license,

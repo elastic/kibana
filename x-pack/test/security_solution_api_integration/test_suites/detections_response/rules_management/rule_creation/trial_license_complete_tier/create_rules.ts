@@ -523,19 +523,6 @@ export default ({ getService }: FtrProviderContext) => {
           '[request body]: max_signals: Number must be greater than or equal to 1'
         );
       });
-
-      it('does NOT create a rule when max_signals is greater than xpack.alerting.rules.run.alerts.max', async () => {
-        const { body } = await securitySolutionApi
-          .createRule({
-            body: {
-              ...getCustomQueryRuleParams(),
-              max_signals: 5000, // xpack.alerting.rules.run.alerts.max defaults to 1000
-            },
-          })
-          .expect(400);
-
-        expect(body.message).toBe('max_signals value cannot be higher than 1000');
-      });
     });
 
     describe('@brokenInServerless missing timestamps', () => {

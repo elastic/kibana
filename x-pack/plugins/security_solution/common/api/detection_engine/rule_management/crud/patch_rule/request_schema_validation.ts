@@ -16,6 +16,7 @@ export const validatePatchRuleRequestBody = (rule: PatchRuleRequestBody): string
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
     ...validateThreshold(rule),
+    ...validateMaxSignals(rule),
   ];
 };
 
@@ -74,6 +75,14 @@ const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
         errors.push('Number of fields must be 3 or less');
       }
     }
+  }
+  return errors;
+};
+
+const validateMaxSignals = (rule: PatchRuleRequestBody): string[] => {
+  const errors: string[] = [];
+  if (rule.max_signals !== undefined && rule.max_signals <= 0) {
+    errors.push('max_signals must be greater than 0');
   }
   return errors;
 };

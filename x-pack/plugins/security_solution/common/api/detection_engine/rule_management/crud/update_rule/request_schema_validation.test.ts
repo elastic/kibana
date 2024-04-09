@@ -69,4 +69,22 @@ describe('Update rule request schema, additional validation', () => {
     const errors = validateUpdateRuleProps(schema);
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
   });
+
+  test('does NOT validate when max_signals has a value less than 1', () => {
+    const schema: RuleUpdateProps = {
+      ...getUpdateRulesSchemaMock(),
+      max_signals: 0,
+    };
+    const errors = validateUpdateRuleProps(schema);
+    expect(errors).toEqual(['max_signals must be greater than 0']);
+  });
+
+  test('does validate when max_signals is undefiend', () => {
+    const schema: RuleUpdateProps = {
+      ...getUpdateRulesSchemaMock(),
+      max_signals: undefined,
+    };
+    const errors = validateUpdateRuleProps(schema);
+    expect(errors).toEqual([]);
+  });
 });

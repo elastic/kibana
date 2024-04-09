@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { transformValidate, transformValidateBulkError, validateMaxSignals } from './validate';
+import { transformValidate, transformValidateBulkError } from './validate';
 import type { BulkError } from '../../routes/utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { requestContextMock } from '../../routes/__mocks__';
-import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 export const ruleOutput = (): RuleResponse => ({
   actions: [],
@@ -84,7 +82,6 @@ export const ruleOutput = (): RuleResponse => ({
 });
 
 describe('validate', () => {
-  let { clients } = requestContextMock.createTools();
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
@@ -137,34 +134,6 @@ describe('validate', () => {
         rule_id: 'rule-1',
       };
       expect(validatedOrError).toEqual(expected);
-    });
-  });
-
-  describe('validateMaxSignals', () => {
-    beforeEach(() => {
-      ({ clients } = requestContextMock.createTools());
-      clients.rulesClient.getMaxAlertsPerRun.mockReturnValue(1000);
-    });
-
-    test('it should throw an error when max_signals has a value less than 1', () => {
-      const validation = () => {
-        validateMaxSignals({ maxSignals: 0, rulesClient: clients.rulesClient });
-      };
-      expect(validation).toThrow(CustomHttpRequestError);
-    });
-
-    test('it should throw an error when max_signals is greater than alerting defined max alerts', () => {
-      const validation = () => {
-        validateMaxSignals({ maxSignals: 1001, rulesClient: clients.rulesClient });
-      };
-      expect(validation).toThrow(CustomHttpRequestError);
-    });
-
-    test('it should not throw an error when max_signals is undefiend', () => {
-      const validation = () => {
-        validateMaxSignals({ maxSignals: undefined, rulesClient: clients.rulesClient });
-      };
-      expect(validation).not.toThrow(CustomHttpRequestError);
     });
   });
 });

@@ -68,7 +68,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           });
           throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
-          validateMaxSignals({ maxSignals: request.body.max_signals, rulesClient });
+          validateMaxSignals(request.body.max_signals);
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 

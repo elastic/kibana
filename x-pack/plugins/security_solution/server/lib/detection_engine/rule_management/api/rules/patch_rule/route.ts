@@ -68,7 +68,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             // reject an unauthorized "promotion" to ML
             throwAuthzError(await mlAuthz.validateRuleType(params.type));
           }
-          validateMaxSignals({ maxSignals: params.max_signals, rulesClient });
+          validateMaxSignals(params.max_signals);
 
           const existingRule = await readRules({
             rulesClient,

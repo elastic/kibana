@@ -773,13 +773,13 @@ describe('description_step', () => {
         test('returns default "max signals" description', () => {
           const result: ListItems[] = getDescriptionItem(
             'maxSignals',
-            'Max alerts',
+            'Max alerts per run',
             mockAboutStep,
             mockFilterManager,
             mockLicenseService
           );
 
-          expect(result[0].title).toEqual('Max alerts');
+          expect(result[0].title).toEqual('Max alerts per run');
           expect(result[0].description).toEqual(100);
         });
       });

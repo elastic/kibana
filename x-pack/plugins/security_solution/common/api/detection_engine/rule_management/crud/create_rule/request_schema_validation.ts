@@ -16,6 +16,7 @@ export const validateCreateRuleProps = (props: RuleCreateProps): string[] => {
     ...validateTimelineTitle(props),
     ...validateThreatMapping(props),
     ...validateThreshold(props),
+    ...validateMaxSignals(props),
   ];
 };
 
@@ -74,6 +75,14 @@ const validateThreshold = (props: RuleCreateProps): string[] => {
         errors.push('Number of fields must be 3 or less');
       }
     }
+  }
+  return errors;
+};
+
+const validateMaxSignals = (props: RuleCreateProps): string[] => {
+  const errors: string[] = [];
+  if (props.max_signals !== undefined && props.max_signals <= 0) {
+    errors.push('max_signals must be greater than 0');
   }
   return errors;
 };

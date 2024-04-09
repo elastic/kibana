@@ -709,26 +709,6 @@ export default ({ getService }: FtrProviderContext) => {
           '[request body]: max_signals: Number must be greater than or equal to 1'
         );
       });
-
-      it('does NOT create a rule when max_signals is greater than xpack.alerting.rules.run.alerts.max', async () => {
-        await createRule(supertest, log, {
-          ...getSimpleRule('rule-1'),
-          max_signals: 100,
-        });
-
-        const rulePatch = {
-          rule_id: 'rule-1',
-          max_signals: 5000, // xpack.alerting.rules.run.alerts.max defaults to 1000
-        };
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: rulePatch,
-          })
-          .expect(400);
-
-        expect(body.message).to.be('max_signals value cannot be higher than 1000');
-      });
     });
 
     describe('setup guide', () => {

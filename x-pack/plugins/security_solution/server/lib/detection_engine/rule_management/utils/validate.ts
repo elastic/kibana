@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
@@ -124,21 +124,8 @@ function isQueryRuleObject(rule?: RuleAlertType): rule is Rule<UnifiedQueryRuleP
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
 
-export const validateMaxSignals = ({
-  maxSignals,
-  rulesClient,
-}: {
-  maxSignals: number | undefined;
-  rulesClient: RulesClient;
-}) => {
-  if (maxSignals !== undefined) {
-    if (maxSignals > rulesClient.getMaxAlertsPerRun()) {
-      throw new CustomHttpRequestError(
-        `max_signals value cannot be higher than ${rulesClient.getMaxAlertsPerRun()}`,
-        400
-      );
-    } else if (maxSignals <= 0) {
-      throw new CustomHttpRequestError(`max_signals must be greater than 0`, 400);
-    }
+export const validateMaxSignals = (maxSignals?: number) => {
+  if (maxSignals !== undefined && maxSignals <= 0) {
+    throw new CustomHttpRequestError(`max_signals must be greater than 0`, 400);
   }
 };

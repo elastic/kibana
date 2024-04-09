@@ -22,3 +22,13 @@ export const LESS_THAN_ERROR = (maxNumber: number) =>
       defaultMessage: 'Max alerts must be less than {maxNumber}.',
     }
   );
+
+export const MAX_SIGNALS_HELP_TEXT = (defaultNumber: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMaxAlertsHelpText',
+    {
+      values: { defaultNumber },
+      defaultMessage:
+        'The maximum number of alerts the rule will create each time it runs. Default is {defaultNumber}.',
+    }
+  );

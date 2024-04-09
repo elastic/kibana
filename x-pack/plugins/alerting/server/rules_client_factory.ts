@@ -26,7 +26,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import { ActionsConfig, AlertingRulesConfig } from './config';
+import { AlertingConfig, AlertingRulesConfig } from './config';
 import { GetAlertIndicesAlias } from './lib';
 import { AlertsService } from './alerts_service/alerts_service';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
@@ -52,7 +52,7 @@ export interface RulesClientFactoryOpts {
   alertsService: AlertsService | null;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
-  maxAlertsPerRun: ActionsConfig['max'];
+  maxAlertsPerRun: AlertingConfig['rules']['run']['alerts']['max'];
 }
 
 export class RulesClientFactory {
@@ -77,7 +77,7 @@ export class RulesClientFactory {
   private alertsService!: AlertsService | null;
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
-  private maxAlertsPerRun!: ActionsConfig['max'];
+  private maxAlertsPerRun!: AlertingConfig['rules']['run']['alerts']['max'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {

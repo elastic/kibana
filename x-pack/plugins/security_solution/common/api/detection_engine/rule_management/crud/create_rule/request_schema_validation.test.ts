@@ -84,4 +84,22 @@ describe('Create rule request schema, additional validation', () => {
       'when "concurrent_searches" exists, "items_per_search" must also exist',
     ]);
   });
+
+  test('does NOT validate when max_signals has a value less than 1', () => {
+    const schema: RuleCreateProps = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: 0,
+    };
+    const errors = validateCreateRuleProps(schema);
+    expect(errors).toEqual(['max_signals must be greater than 0']);
+  });
+
+  test('does validate when max_signals is undefiend', () => {
+    const schema: RuleCreateProps = {
+      ...getCreateRulesSchemaMock(),
+      max_signals: undefined,
+    };
+    const errors = validateCreateRuleProps(schema);
+    expect(errors).toEqual([]);
+  });
 });
