@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { of } from 'rxjs';
-import type { IsAlertSuppressionActiveParams } from './is_alert_suppression_active';
-import { isAlertSuppressionActive } from './is_alert_suppression_active';
+import { getIsAlertSuppressionActive } from './get_is_alert_suppression_active';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
 jest.mock('@kbn/licensing-plugin/server', () => ({
@@ -14,25 +13,20 @@ jest.mock('@kbn/licensing-plugin/server', () => ({
 }));
 const licensingMock = {
   license$: of({ hasAtLeast: jest.fn() }), // Use 'of' to create an observable
-} as unknown as IsAlertSuppressionActiveParams['licensing'];
-
-const experimentalFeatureKey = 'alertSuppressionForNonSequenceEqlRuleEnabled';
-const experimentalFeaturesMock = {
-  [experimentalFeatureKey]: true,
-} as IsAlertSuppressionActiveParams['experimentalFeatures'];
+} as unknown as Parameters<typeof getIsAlertSuppressionActive>[0]['licensing'];
 
 const alertSuppressionMock = {
   groupBy: ['field1', 'field2'],
-} as IsAlertSuppressionActiveParams['alertSuppression'];
+} as Parameters<typeof getIsAlertSuppressionActive>[0]['alertSuppression'];
 
-describe('isAlertSuppressionActive', () => {
+describe('getIsAlertSuppressionActive', () => {
   it('should return true when groupBy field exists and platinum license is present', async () => {
     const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
     (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(true);
 
-    const result = await isAlertSuppressionActive({
+    const result = await getIsAlertSuppressionActive({
       licensing: licensingMock,
-      experimentalFeatures: experimentalFeaturesMock,
+      isFeatureDisabled: false,
       alertSuppression: alertSuppressionMock,
     });
 
@@ -40,9 +34,9 @@ describe('isAlertSuppressionActive', () => {
   });
 
   it('should return false when groupBy field does not exist', async () => {
-    const result = await isAlertSuppressionActive({
+    const result = await getIsAlertSuppressionActive({
       licensing: licensingMock,
-      experimentalFeatures: experimentalFeaturesMock,
+      isFeatureDisabled: false,
       alertSuppression: { groupBy: [] },
     });
 
@@ -53,47 +47,32 @@ describe('isAlertSuppressionActive', () => {
     const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
     (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(false);
 
-    const result = await isAlertSuppressionActive({
+    const result = await getIsAlertSuppressionActive({
       licensing: licensingMock,
-      experimentalFeatures: experimentalFeaturesMock,
+      isFeatureDisabled: false,
       alertSuppression: alertSuppressionMock,
     });
 
     expect(result).toBe(false);
   });
 
-  it('should return false when experimentalFeatureKey is provided but the feature is not enabled', async () => {
-    const result = await isAlertSuppressionActive({
+  it('should return false when the feature is not enabled', async () => {
+    const result = await getIsAlertSuppressionActive({
       licensing: licensingMock,
-      experimentalFeatures: {
-        [experimentalFeatureKey]: false,
-      } as IsAlertSuppressionActiveParams['experimentalFeatures'],
-      experimentalFeatureKey,
+      isFeatureDisabled: true,
       alertSuppression: alertSuppressionMock,
     });
 
     expect(result).toBe(false);
   });
 
-  it('should return true when experimentalFeatureKey is provided and the feature is enabled', async () => {
+  it('should return true when the feature is enabled', async () => {
     const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
     (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(true);
 
-    const result = await isAlertSuppressionActive({
+    const result = await getIsAlertSuppressionActive({
       licensing: licensingMock,
-      experimentalFeatures: experimentalFeaturesMock,
-      experimentalFeatureKey,
-      alertSuppression: alertSuppressionMock,
-    });
-
-    expect(result).toBe(true);
-  });
-  it('should return true when groupBy field exists and no experimentalFeature is provided', async () => {
-    const licenseValue = (await licensingMock.license$.toPromise()) as ILicense;
-    (licenseValue.hasAtLeast as jest.Mock).mockReturnValueOnce(true);
-
-    const result = await isAlertSuppressionActive({
-      licensing: licensingMock,
+      isFeatureDisabled: false,
       alertSuppression: alertSuppressionMock,
     });
 

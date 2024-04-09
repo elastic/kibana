@@ -15,7 +15,7 @@ import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../t
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
-import { isAlertSuppressionActive } from '../utils/is_alert_suppression_active';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -102,11 +102,10 @@ export const createEqlAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
         });
-      const isNonSeqAlertSuppressionActive = await isAlertSuppressionActive({
-        licensing,
-        experimentalFeatures,
-        experimentalFeatureKey: 'alertSuppressionForNonSequenceEqlRuleEnabled',
+      const isNonSeqAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: completeRule.ruleParams.alertSuppression,
+        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForNonSequenceEqlRuleEnabled,
+        licensing,
       });
       const result = await eqlExecutor({
         completeRule,
