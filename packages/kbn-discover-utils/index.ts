@@ -44,3 +44,4 @@ export {
 } from './src';
 
 export * from './src/types';
+export * from './src/services/features_registry';
