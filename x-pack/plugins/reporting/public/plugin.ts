@@ -239,7 +239,7 @@ export class ReportingPublicPlugin
             })
           );
         }
-        if (shareSetup.isNewVersion) {
+        if (shareSetup.isNewVersion()) {
           shareSetup.register(
             reportingCsvShareModalProvider({
               apiClient,
