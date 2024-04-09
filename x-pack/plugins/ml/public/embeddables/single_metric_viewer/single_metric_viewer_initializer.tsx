@@ -23,52 +23,60 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { SingleMetricViewerServices } from '..';
+import type { SingleMetricViewerEmbeddableInput } from '..';
 import { SeriesControls } from '../../application/timeseriesexplorer/components/series_controls';
 import {
   APP_STATE_ACTION,
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import type { SingleMetricViewerEmbeddableCustomInput, MlEntity } from '..';
 
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
   defaultTitle: string;
-  initialInput?: SingleMetricViewerServices;
+  initialInput?: Partial<SingleMetricViewerEmbeddableInput>;
   job: MlJob;
-  onCreate: (props: {
-    panelTitle: string;
-    functionDescription?: string;
-    selectedDetectorIndex: number;
-    selectedEntities: any;
-  }) => void;
+  onCreate: (props: Partial<SingleMetricViewerEmbeddableCustomInput>) => void;
   onCancel: () => void;
 }
 
 export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
-  bounds,
   defaultTitle,
+  bounds,
   initialInput,
   job,
   onCreate,
   onCancel,
 }) => {
+  const isNewJob = initialInput?.jobIds !== undefined && initialInput?.jobIds[0] !== job.job_id;
+
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
-  const [functionDescription, setFunctionDescription] = useState<string | undefined>();
-  const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(0);
-  const [selectedEntities, setSelectedEntities] = useState<any>();
+  const [functionDescription, setFunctionDescription] = useState<string | undefined>(
+    initialInput?.functionDescription
+  );
+  // Reset detector index and entities if the job has changed
+  const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(
+    !isNewJob && initialInput?.selectedDetectorIndex ? initialInput.selectedDetectorIndex : 0
+  );
+  const [selectedEntities, setSelectedEntities] = useState<MlEntity | undefined>(
+    !isNewJob && initialInput?.selectedEntities ? initialInput.selectedEntities : undefined
+  );
 
   const isPanelTitleValid = panelTitle.length > 0;
 
-  const handleStateUpdate = (action: TimeseriesexplorerActionType, payload: any) => {
+  const handleStateUpdate = (
+    action: TimeseriesexplorerActionType,
+    payload: string | number | MlEntity
+  ) => {
     switch (action) {
       case APP_STATE_ACTION.SET_ENTITIES:
-        setSelectedEntities(payload);
+        setSelectedEntities(payload as MlEntity);
         break;
       case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
-        setFunctionDescription(payload);
+        setFunctionDescription(payload as string);
         break;
       case APP_STATE_ACTION.SET_DETECTOR_INDEX:
-        setSelectedDetectorIndex(payload);
+        setSelectedDetectorIndex(payload as number);
         break;
       default:
         break;

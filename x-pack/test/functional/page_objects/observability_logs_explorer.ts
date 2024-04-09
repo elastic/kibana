@@ -296,12 +296,19 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('dataViewsContextMenu');
     },
 
-    getDataViewsContextMenuTitle(panelTitleNode: WebElementWrapper) {
-      return panelTitleNode.getVisibleText().then((title) => title.split('\n')[0]);
-    },
-
     getDataViewsTab() {
       return testSubjects.find('dataSourceSelectorDataViewsTab');
+    },
+
+    async changeDataViewTypeFilter(type: 'All' | 'Logs') {
+      const menuButton = await testSubjects.find(
+        'logsExplorerDataSourceSelectorDataViewTypeButton'
+      );
+      await menuButton.click();
+      const targetOption = await testSubjects.find(
+        `logsExplorerDataSourceSelectorDataViewType${type}`
+      );
+      await targetOption.click();
     },
 
     getPanelTitle(contextMenu: WebElementWrapper) {

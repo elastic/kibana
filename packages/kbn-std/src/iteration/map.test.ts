@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { mapTo } from 'rxjs';
 
 import { asyncMap, asyncMapWithLimit } from './map';
 import { list } from './test_helpers';

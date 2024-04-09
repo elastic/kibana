@@ -6,22 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiIsPresentationContainer,
-  PresentationContainer,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
-import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState } from '@kbn/presentation-containers';
+import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { combineLatest, debounceTime, skip } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import {
-  DefaultEmbeddableApi,
-  ReactEmbeddableApiRegistration,
-  ReactEmbeddableFactory,
-} from './types';
+import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
+
+const ON_STATE_CHANGE_DEBOUNCE = 100;
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -37,12 +32,28 @@ export const ReactEmbeddableRenderer = <
   state,
   parentApi,
   onApiAvailable,
+  panelProps,
+  onAnyStateChange,
 }: {
   maybeId?: string;
   type: string;
   state: SerializedPanelState<StateType>;
-  parentApi?: PresentationContainer;
+  parentApi?: unknown;
   onApiAvailable?: (api: ApiType) => void;
+  panelProps?: Pick<
+    PresentationPanelProps<ApiType>,
+    | 'showShadow'
+    | 'showBorder'
+    | 'showBadges'
+    | 'showNotifications'
+    | 'hideHeader'
+    | 'hideInspector'
+  >;
+  /**
+   * This `onAnyStateChange` callback allows the parent to keep track of the state of the embeddable
+   * as it changes. This is **not** expected to change over the lifetime of the component.
+   */
+  onAnyStateChange?: (state: SerializedPanelState<StateType>) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
 
@@ -50,10 +61,7 @@ export const ReactEmbeddableRenderer = <
     () =>
       (async () => {
         const uuid = maybeId ?? generateId();
-        const factory = getReactEmbeddableFactory(type) as ReactEmbeddableFactory<
-          StateType,
-          ApiType
-        >;
+        const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: StateComparators<StateType>
@@ -65,6 +73,21 @@ export const ReactEmbeddableRenderer = <
               comparators,
               factory.deserializeState
             );
+
+          if (onAnyStateChange) {
+            /**
+             * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
+             * an `onAnyStateChange` callback is provided
+             */
+            const comparatorDefinitions: Array<ComparatorDefinition<StateType, keyof StateType>> =
+              Object.values(comparators);
+            combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
+              .pipe(skip(1), debounceTime(ON_STATE_CHANGE_DEBOUNCE))
+              .subscribe(() => {
+                onAnyStateChange(apiRegistration.serializeState());
+              });
+          }
+
           const fullApi = {
             ...apiRegistration,
             uuid,
@@ -73,9 +96,6 @@ export const ReactEmbeddableRenderer = <
             resetUnsavedChanges,
             type: factory.type,
           } as unknown as ApiType;
-          if (parentApi && apiIsPresentationContainer(parentApi)) {
-            parentApi.registerPanelApi(uuid, fullApi);
-          }
           cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;
@@ -109,5 +129,5 @@ export const ReactEmbeddableRenderer = <
     };
   }, []);
 
-  return <PresentationPanel Component={componentPromise} />;
+  return <PresentationPanel {...panelProps} Component={componentPromise} />;
 };

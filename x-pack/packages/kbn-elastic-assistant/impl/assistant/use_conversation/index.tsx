@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
@@ -21,16 +21,16 @@ import {
 import { WELCOME_CONVERSATION } from './sample_conversations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: i18n.DEFAULT_CONVERSATION_TITLE,
+  id: '',
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
 interface CreateConversationProps {
   cTitle: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
 }
 
 interface SetApiConfigProps {
@@ -39,10 +39,10 @@ interface SetApiConfigProps {
 }
 
 interface UseConversation {
-  clearConversation: (conversationId: string) => Promise<void>;
+  clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
-  removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
+  removeLastMessage: (conversationId: string) => Promise<ClientMessage[] | undefined>;
   setApiConfig: ({
     conversation,
     apiConfig,
@@ -66,7 +66,7 @@ export const useConversation = (): UseConversation => {
    */
   const removeLastMessage = useCallback(
     async (conversationId: string) => {
-      let messages: Message[] = [];
+      let messages: ClientMessage[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId, toasts });
       if (prevConversation != null) {
         messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
@@ -83,21 +83,20 @@ export const useConversation = (): UseConversation => {
   );
 
   const clearConversation = useCallback(
-    async (conversationId: string) => {
-      const conversation = await getConversationById({ http, id: conversationId, toasts });
-      if (conversation && conversation.apiConfig) {
+    async (conversation: Conversation) => {
+      if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
           allSystemPrompts,
           conversation,
         })?.id;
 
-        await updateConversation({
+        return updateConversation({
           http,
           toasts,
-          conversationId,
+          conversationId: conversation.id,
           apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
-          replacements: [],
+          replacements: {},
         });
       }
     },

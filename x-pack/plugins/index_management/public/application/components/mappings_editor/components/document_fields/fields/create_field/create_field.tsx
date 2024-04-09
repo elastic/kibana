@@ -5,26 +5,35 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import classNames from 'classnames';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
   EuiSpacer,
 } from '@elastic/eui';
+import { FieldWithSemanticTextInfo } from '../../../../types';
 
-import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
-import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
-import { Field, NormalizedFields, MainType } from '../../../../types';
-import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
+import { useDispatch } from '../../../../mappings_state_context';
+import {
+  Form,
+  FormDataProvider,
+  FormHook,
+  UseField,
+  useForm,
+  useFormData,
+} from '../../../../shared_imports';
+import { MainType, NormalizedFields } from '../../../../types';
+import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
+import { InferenceIdSelects } from '../../field_parameters/inference_id_selects';
+import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
@@ -37,7 +46,24 @@ interface Props {
   paddingLeft?: number;
   isCancelable?: boolean;
   maxNestedDepth?: number;
+  onCancelAddingNewFields?: () => void;
+  isAddingFields?: boolean;
+  isSemanticTextEnabled?: boolean;
+  indexName?: string;
 }
+
+const useFieldEffect = (
+  form: FormHook,
+  fieldName: string,
+  setState: React.Dispatch<React.SetStateAction<string | undefined>>
+) => {
+  const fieldValue = form.getFields()?.[fieldName]?.value as string;
+  useEffect(() => {
+    if (fieldValue !== undefined) {
+      setState(fieldValue);
+    }
+  }, [form, fieldValue, setState]);
+};
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -46,13 +72,19 @@ export const CreateField = React.memo(function CreateFieldComponent({
   paddingLeft,
   isCancelable,
   maxNestedDepth,
+  onCancelAddingNewFields,
+  isAddingFields,
+  isSemanticTextEnabled,
+  indexName,
 }: Props) {
   const dispatch = useDispatch();
 
-  const { form } = useForm<Field>({
+  const { form } = useForm<FieldWithSemanticTextInfo>({
     serializer: fieldSerializer,
     options: { stripEmptyFields: false },
   });
+
+  useFormData({ form });
 
   const { subscribe } = form;
 
@@ -65,8 +97,31 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [dispatch, subscribe]);
 
   const cancel = () => {
-    dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    if (isAddingFields && onCancelAddingNewFields) {
+      onCancelAddingNewFields();
+    } else {
+      dispatch({ type: 'documentField.changeStatus', value: 'idle' });
+    }
   };
+
+  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
+  const [nameValue, setNameValue] = useState<string>();
+  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
+  const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
+
+  useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
+  useFieldEffect(form, 'inferenceId', setInferenceIdComboValue);
+  useFieldEffect(form, 'name', setNameValue);
+
+  const fieldTypeValue = form.getFields()?.type?.value as Array<{ value: string }>;
+  useEffect(() => {
+    if (fieldTypeValue === undefined || fieldTypeValue.length === 0) {
+      return;
+    }
+    setSemanticTextFieldType(
+      fieldTypeValue[0]?.value === 'semantic_text' ? fieldTypeValue[0].value : undefined
+    );
+  }, [form, fieldTypeValue]);
 
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
     if (e) {
@@ -77,7 +132,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (isValid) {
       form.reset();
-      dispatch({ type: 'field.add', value: data });
+      if (data.type === 'semantic_text') {
+        dispatch({ type: 'field.addSemanticText', value: data });
+      } else {
+        dispatch({ type: 'field.add', value: data });
+      }
 
       if (exitAfter) {
         cancel();
@@ -99,17 +158,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const renderFormFields = () => (
     <EuiFlexGroup gutterSize="s">
-      {/* Field name */}
-      <EuiFlexItem>
-        <NameParameter />
-      </EuiFlexItem>
-
       {/* Field type */}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <TypeParameter
           isRootLevelField={isRootLevelField}
           isMultiField={isMultiField}
           showDocLink
+          isSemanticTextEnabled={isSemanticTextEnabled}
         />
       </EuiFlexItem>
 
@@ -131,12 +186,28 @@ export const CreateField = React.memo(function CreateFieldComponent({
           );
         }}
       </FormDataProvider>
+
+      {/* Field reference_field for semantic_text field type */}
+      <ReferenceFieldCombo indexName={indexName} />
+
+      {/* Field name */}
+      <EuiFlexItem>
+        <NameParameter />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
+  const isAddFieldButtonDisabled = (): boolean => {
+    if (semanticFieldType) {
+      return !referenceFieldComboValue || !nameValue || !inferenceIdComboValue;
+    }
+
+    return false;
+  };
+
   const renderFormActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      {isCancelable !== false && (
+      {(isCancelable !== false || isAddingFields) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
@@ -152,6 +223,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onClick={submitForm}
           type="submit"
           data-test-subj="addButton"
+          isDisabled={isAddFieldButtonDisabled()}
         >
           {isMultiField
             ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
@@ -189,10 +261,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem className="mappingsEditor__createFieldContent__formFields">
-                {renderFormFields()}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
+              <EuiFlexItem>{renderFormFields()}</EuiFlexItem>
             </EuiFlexGroup>
 
             <FormDataProvider pathsToWatch={['type', 'subType']}>
@@ -222,9 +291,49 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 );
               }}
             </FormDataProvider>
+            {/* Field inference_id for semantic_text field type */}
+            <InferenceIdCombo />
+
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={true} />
+              <EuiFlexItem grow={false}>{renderFormActions()}</EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         </div>
       </Form>
     </EuiOutsideClickDetector>
   );
 });
+
+function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
+  const [{ type }] = useFormData({ watch: 'type' });
+
+  if (type === undefined || type[0]?.value !== 'semantic_text') {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <UseField path="referenceField">
+        {(field) => <ReferenceFieldSelects onChange={field.setValue} indexName={indexName} />}
+      </UseField>
+    </EuiFlexItem>
+  );
+}
+
+function InferenceIdCombo() {
+  const [{ type }] = useFormData({ watch: 'type' });
+
+  if (type === undefined || type[0]?.value !== 'semantic_text') {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer />
+      <UseField path="inferenceId">
+        {(field) => <InferenceIdSelects onChange={field.setValue} />}
+      </UseField>
+    </>
+  );
+}

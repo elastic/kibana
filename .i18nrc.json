@@ -2,7 +2,6 @@
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
     "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
-    "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
     "alertingTypes": "packages/kbn-alerting-types",
@@ -74,6 +73,7 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/plugins/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
+    "kbn-esql-validation-autocomplete": "packages/kbn-esql-validation-autocomplete/src",
     "kbnConfig": "packages/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
@@ -89,10 +89,7 @@
       "packages/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
-    "navigation": [
-      "src/plugins/navigation",
-      "packages/solution-nav"
-    ],
+    "navigation": ["src/plugins/navigation", "packages/solution-nav"],
     "links": "src/plugins/links",
     "newsfeed": "src/plugins/newsfeed",
     "presentationUtil": "src/plugins/presentation_util",
@@ -104,6 +101,7 @@
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "searchConnectors": "packages/kbn-search-connectors",
+    "searchConnectorsPlugin": "x-pack/plugins/search_connectors",
     "server": "src/legacy/server",
     "share": ["src/plugins/share", "packages/kbn-reporting-share"],
     "sharedUXPackages": "packages/shared-ux",

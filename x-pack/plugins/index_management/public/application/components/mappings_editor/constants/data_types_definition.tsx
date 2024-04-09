@@ -133,7 +133,17 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericSubtypeDescription', {
         defaultMessage: 'Numeric type',
       }),
-      types: ['byte', 'double', 'float', 'half_float', 'integer', 'long', 'scaled_float', 'short'],
+      types: [
+        'byte',
+        'double',
+        'float',
+        'half_float',
+        'integer',
+        'long',
+        'scaled_float',
+        'short',
+        'unsigned_long',
+      ],
     },
   },
   byte: {
@@ -187,6 +197,28 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
             maxValue: (
               <EuiCode>
                 2<sup className="eui-alignTop">31</sup>-1
+              </EuiCode>
+            ),
+          }}
+        />
+      </p>
+    ),
+  },
+  unsigned_long: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.unsignedLongDescription', {
+      defaultMessage: 'Unsigned long',
+    }),
+    value: 'unsigned_long',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.unsignedLongLongDescription"
+          defaultMessage="Unsigned long fields accept an unsigned 64-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: <EuiCode>0</EuiCode>,
+            maxValue: (
+              <EuiCode>
+                2<sup className="eui-alignTop">64</sup>-1
               </EuiCode>
             ),
           }}
@@ -868,6 +900,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  semantic_text: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.semanticTextDescription', {
+      defaultMessage: 'Semantic text',
+    }),
+    value: 'semantic_text',
+    documentation: {
+      main: 'semantic-text.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.semanticTextLongDescription"
+          defaultMessage="Semantic text fields enable semantic search using text embeddings."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
@@ -975,6 +1024,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'shape',
+  'semantic_text',
   'sparse_vector',
   'text',
   'token_count',

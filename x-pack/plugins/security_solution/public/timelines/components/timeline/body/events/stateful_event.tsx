@@ -9,6 +9,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/right';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -102,6 +107,14 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
+
+  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableTimelineFlyoutEnabled'
+  );
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
     timelineID: timelineId,
@@ -135,10 +148,11 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const activeTab = tabType ?? TimelineTabs.query;
   const activeExpandedDetail = expandedDetail[activeTab];
+  const eventId = event._id;
 
   const isDetailPanelExpanded: boolean =
     (activeExpandedDetail?.panelView === 'eventDetail' &&
-      activeExpandedDetail?.params?.eventId === event._id) ||
+      activeExpandedDetail?.params?.eventId === eventId) ||
     (activeExpandedDetail?.panelView === 'hostDetail' &&
       activeExpandedDetail?.params?.hostName === hostName) ||
     (activeExpandedDetail?.panelView === 'networkDetail' &&
@@ -148,7 +162,7 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);
-  const noteIds: string[] = eventIdToNoteIds[event._id] || emptyNotes;
+  const noteIds: string[] = eventIdToNoteIds[eventId] || emptyNotes;
 
   const notes: TimelineResultNote[] = useMemo(
     () =>
@@ -168,8 +182,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   const onToggleShowNotes = useCallback(() => {
-    const eventId = event._id;
-
     setShowNotes((prevShowNotes) => {
       if (prevShowNotes[eventId]) {
         // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
@@ -183,10 +195,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 
       return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
     });
-  }, [event]);
+  }, [eventId]);
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const eventId = event._id;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
@@ -199,23 +210,50 @@ const StatefulEventComponent: React.FC<Props> = ({
       },
     };
 
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        ...updatedExpandedDetail,
-        tabType,
-        id: timelineId,
-      })
-    );
-  }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
+    if (isSecurityFlyoutEnabled && expandableTimelineFlyoutEnabled) {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
+        },
+      });
+    } else {
+      // opens the panel when clicking on the table row action
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType,
+          id: timelineId,
+        })
+      );
+    }
+  }, [
+    dispatch,
+    eventId,
+    event._index,
+    expandableTimelineFlyoutEnabled,
+    isSecurityFlyoutEnabled,
+    openFlyout,
+    refetch,
+    tabType,
+    timelineId,
+  ]);
 
   const associateNote = useCallback(
     (noteId: string) => {
-      dispatch(timelineActions.addNoteToEvent({ eventId: event._id, id: timelineId, noteId }));
-      if (!isEventPinned) {
-        dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event._id }));
-      }
+      dispatch(
+        timelineActions.addNoteToEvent({
+          eventId,
+          id: timelineId,
+          noteId,
+        })
+      );
     },
-    [dispatch, event, isEventPinned, timelineId]
+    [dispatch, eventId, timelineId]
   );
 
   const setEventsLoading = useCallback<SetEventsLoading>(
@@ -246,7 +284,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         showLeftBorder={!isEventViewer}
       >
         <EventColumnView
-          id={event._id}
+          id={eventId}
           actionsColumnWidth={actionsColumnWidth}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
@@ -265,7 +303,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
-          showNotes={!!showNotes[event._id]}
+          showNotes={!!showNotes[eventId]}
           tabType={tabType}
           timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes}
@@ -286,7 +324,7 @@ const StatefulEventComponent: React.FC<Props> = ({
               associateNote={associateNote}
               data-test-subj="note-cards"
               notes={notes}
-              showAddNote={!!showNotes[event._id]}
+              showAddNote={!!showNotes[eventId]}
               toggleShowAddNote={onToggleShowNotes}
             />
           </EventsTrSupplement>

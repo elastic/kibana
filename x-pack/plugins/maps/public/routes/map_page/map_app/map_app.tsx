@@ -7,7 +7,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   AppLeaveAction,

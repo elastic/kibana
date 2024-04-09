@@ -55,12 +55,12 @@ export class ServerlessObservabilityPlugin
 
     const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
-    serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),
       {
-        aiAssistantManagementObservability: {
+        observabilityAiAssistantManagement: {
           category: appCategories.OTHER,
           title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
             defaultMessage: 'AI assistant for Observability settings',

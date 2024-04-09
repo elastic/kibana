@@ -11,9 +11,9 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
-  Replacement,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, Message } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -149,9 +149,9 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
   apiConfig?: ApiConfig;
-  replacements?: Replacement[];
+  replacements?: Replacements;
   excludeFromLastConversationStorage?: boolean;
   signal?: AbortSignal | undefined;
 }

@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -28,7 +27,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
@@ -91,7 +89,7 @@ const LinksEditor = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<Link[]>([]);
-  const [saveByReference, setSaveByReference] = useState(!initialLinks ? true : isByReference);
+  const [saveByReference, setSaveByReference] = useState(!initialLinks ? false : isByReference);
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -172,19 +170,6 @@ const LinksEditor = ({
                   : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
               </h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
-              {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge
-                color="hollow"
-                tabIndex={0}
-                title=""
-                aria-label={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}
-              >
-                {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
-              </EuiBadge>
-            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

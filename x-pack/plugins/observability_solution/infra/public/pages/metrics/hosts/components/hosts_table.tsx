@@ -12,10 +12,8 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { HostNodeRow, useHostsTableContext } from '../hooks/use_hosts_table';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { FlyoutWrapper } from './host_details_flyout/flyout_wrapper';
-import { DEFAULT_PAGE_SIZE } from '../constants';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
-
-const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 export const HostsTable = () => {
   const { loading } = useHostsViewContext();

@@ -17,7 +17,7 @@ import { useConnectorSetup } from '../connectorland/connector_setup';
 import { UseQueryResult } from '@tanstack/react-query';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
@@ -51,7 +51,7 @@ const mockData = {
     category: 'assistant',
     messages: [],
     apiConfig: { connectorId: '123' },
-    replacements: [],
+    replacements: {},
   },
   'electric sheep': {
     id: 'electric sheep id',
@@ -59,7 +59,7 @@ const mockData = {
     title: 'electric sheep',
     messages: [],
     apiConfig: { connectorId: '123' },
-    replacements: [],
+    replacements: {},
   },
 };
 const mockDeleteConvo = jest.fn();
@@ -108,15 +108,22 @@ describe('Assistant', () => {
   });
 
   let persistToLocalStorage: jest.Mock;
+  let persistToSessionStorage: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     persistToLocalStorage = jest.fn();
+    persistToSessionStorage = jest.fn();
 
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
+      >);
+    jest
+      .mocked(useSessionStorage)
+      .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
+        typeof useSessionStorage
       >);
   });
 
@@ -140,7 +147,7 @@ describe('Assistant', () => {
             id: 'Welcome Id',
             messages: [],
             title: 'Welcome',
-            replacements: [],
+            replacements: {},
           },
         })
       );
@@ -170,7 +177,7 @@ describe('Assistant', () => {
         expect.objectContaining({
           currentConversation: {
             apiConfig: { connectorId: '123' },
-            replacements: [],
+            replacements: {},
             category: 'assistant',
             id: 'Welcome Id',
             messages: [],
@@ -255,12 +262,12 @@ describe('Assistant', () => {
       expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
     });
     it('should fetch current conversation when id has value', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
+      const getConversation = jest
+        .fn()
+        .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' });
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
-        getConversation: jest
-          .fn()
-          .mockResolvedValue({ ...mockData['electric sheep'], title: 'updated title' }),
+        getConversation,
       });
       renderAssistant();
 
@@ -269,14 +276,7 @@ describe('Assistant', () => {
         fireEvent.click(previousConversationButton);
       });
 
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            ...mockData['electric sheep'],
-            title: 'updated title',
-          },
-        })
-      );
+      expect(getConversation).toHaveBeenCalledWith('electric sheep id');
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith('updated title');
     });
