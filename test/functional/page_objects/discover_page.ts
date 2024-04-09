@@ -243,6 +243,12 @@ export class DiscoverPageObject extends FtrService {
     await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
   }
 
+  public async getCurrentLensChart() {
+    return (
+      await this.comboBox.getComboBoxSelectedOptions('unifiedHistogramSuggestionSelector')
+    )?.[0];
+  }
+
   public async getHistogramLegendList() {
     const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
     const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
