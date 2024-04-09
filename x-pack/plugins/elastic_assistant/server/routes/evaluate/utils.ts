@@ -124,7 +124,7 @@ export const getLangSmithTracer = ({
       return [];
     }
     const lcTracer = new LangChainTracer({
-      projectName: projectName ?? getLangSmithDefaultProject(), // Shows as the 'test' run's 'name' in langsmith ui
+      projectName, // Shows as the 'test' run's 'name' in langsmith ui
       exampleId,
       client: new Client({ apiKey }),
     });
@@ -148,20 +148,5 @@ export const isLangSmithEnabled = (): boolean => {
     return config.apiKey != null;
   } catch (e) {
     return false;
-  }
-};
-
-/**
- * Returns the default LangSmith project as defined in env vars. This is LangSmith's default way of storing
- * configuration. See https://github.com/elastic/kibana/pull/180227 for storage of configuration in sessionStorage
- */
-export const getLangSmithDefaultProject = (): string => {
-  const defaultProject = 'default';
-  try {
-    return typeof process !== 'undefined'
-      ? process.env?.LANGCHAIN_PROJECT ?? defaultProject
-      : defaultProject;
-  } catch (e) {
-    return defaultProject;
   }
 };
