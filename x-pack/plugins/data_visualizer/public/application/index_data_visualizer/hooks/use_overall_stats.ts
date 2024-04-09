@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import type { Subscription } from 'rxjs';
+import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,

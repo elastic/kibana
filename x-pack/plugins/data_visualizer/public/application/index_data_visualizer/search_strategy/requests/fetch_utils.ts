@@ -4,9 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { of, from, type Observable, lastValueFrom } from 'rxjs';
-import { catchError, timeout } from 'rxjs/operators';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import {
+  catchError,
+  timeout,
+  mergeMap,
+  last,
+  map,
+  toArray,
+  of,
+  from,
+  type Observable,
+  lastValueFrom,
+} from 'rxjs';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 
 export const fetchDataWithTimeout = async <T extends Promise<unknown>>(
