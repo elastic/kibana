@@ -1363,8 +1363,8 @@ export const runActionTestSuite = ({
       const rightResponse = await readWithPitTask();
 
       if (Either.isLeft(rightResponse)) {
-        expect(`Expected a successful response but got ${JSON.stringify(rightResponse.left)}`).toBe(
-          false
+        throw new Error(
+          `Expected a successful response but got ${JSON.stringify(rightResponse.left)}`
         );
       }
 
