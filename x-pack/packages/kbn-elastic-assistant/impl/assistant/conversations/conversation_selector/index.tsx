@@ -181,11 +181,11 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
     const onRightArrowClick = useCallback(() => {
-      const nextTitle = getNextConversationId(conversationIds, selectedConversationId);
+      const nextId = getNextConversationId(conversationIds, selectedConversationId);
 
       onConversationSelected({
-        cId: getConvoId(conversations[nextTitle].id, nextTitle),
-        cTitle: nextTitle,
+        cId: nextId,
+        cTitle: conversations[nextId]?.title,
       });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
 

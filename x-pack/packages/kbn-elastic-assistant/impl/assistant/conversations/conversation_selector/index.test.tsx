@@ -185,7 +185,7 @@ describe('Conversation selector', () => {
       charCode: 27,
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: '',
+      cId: alertConvo.title,
       cTitle: alertConvo.title,
     });
   });
@@ -204,7 +204,7 @@ describe('Conversation selector', () => {
       charCode: 26,
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: '',
+      cId: customConvo.title,
       cTitle: customConvo.title,
     });
   });
