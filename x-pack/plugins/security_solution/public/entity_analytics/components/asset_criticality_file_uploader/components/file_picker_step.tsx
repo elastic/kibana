@@ -150,6 +150,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
 
       <EuiSpacer size="l" />
       <EuiFilePicker
+        data-test-subj="asset-criticality-file-picker"
         accept={SUPPORTED_FILE_TYPES.join(',')}
         fullWidth
         onChange={onFileChange}

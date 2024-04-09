@@ -8,15 +8,9 @@
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { RowValidationErrors } from './validations';
 
-interface ReducerState {
+export interface ReducerState {
   fileError?: string;
-  //   parserError?: Papa.ParseError; // Unexpected error that happens when parsing a file
-  //   unsupportedFileTypeError?: string;
-  //   fileValidationError?: string;
   isLoading: boolean;
-  // file?: File;
-  // validLines?: string[][];
-  // invalidLines?: string[][];
   step: number;
   fileUploadResponse?: AssetCriticalityCsvUploadResponse;
   fileUploadError?: string;
@@ -28,7 +22,7 @@ interface ReducerState {
   invalidLinesErrors?: RowValidationErrors[];
 }
 
-type ReducerAction =
+export type ReducerAction =
   | { type: 'uploadingFile' }
   | {
       type: 'fileUploaded';
@@ -63,8 +57,8 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
     case 'loadingFile':
       return {
         isLoading: true,
-        fileName: action.payload.fileName,
         step: 1,
+        fileName: action.payload.fileName,
       };
 
     case 'fileValidated':
@@ -89,7 +83,6 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
 
     case 'fileUploaded':
       return {
-        ...state,
         fileUploadResponse: action.payload.response,
         fileUploadError: action.payload.errorMessage,
         isLoading: false,

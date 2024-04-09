@@ -34,6 +34,7 @@ interface AssetCriticalityValidationStepProps {
 }
 
 const CODE_BLOCK_HEIGHT = 250;
+const INVALID_FILE_NAME = `invalid_asset_criticality.csv`;
 
 export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidationStepProps> = ({
   validLinesCount,
@@ -61,9 +62,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
         id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.fileNamePreviewText"
         values={{ fileName }}
       />
-
       <EuiSpacer size="m" />
-
       {validLinesCount > 0 && (
         <>
           <EuiFlexGroup alignItems="baseline">
@@ -93,9 +92,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-
           <EuiSpacer size="xs" />
-
           <EuiCodeBlock
             overflowHeight={CODE_BLOCK_HEIGHT}
             lineNumbers
@@ -141,7 +138,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   flush="right"
                   onClick={() => {
                     if (invalidLinesAsText.length > 0) {
-                      downloadBlob(new Blob([invalidLinesAsText]), `invalid_asset_criticality.csv`);
+                      downloadBlob(new Blob([invalidLinesAsText]), INVALID_FILE_NAME);
                     }
                   }}
                 >
@@ -153,6 +150,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+
           <EuiSpacer size="s" />
           <EuiCodeBlock
             overflowHeight={CODE_BLOCK_HEIGHT}
