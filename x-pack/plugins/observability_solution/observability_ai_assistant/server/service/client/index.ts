@@ -150,7 +150,7 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
-    instructions?: UserInstruction[];
+    instructions?: Array<string | UserInstruction>;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -928,7 +928,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   private resolveInstructions = async (
-    requestInstructions: UserInstruction[],
+    requestInstructions: Array<string | UserInstruction>,
     user: { name: string },
     namespace: string
   ) => {
@@ -949,7 +949,27 @@ export class ObservabilityAIAssistantClient {
       {}
     );
 
-    const instructionsById = requestInstructions.reduce(
+    const { use, overrides } = requestInstructions.reduce(
+      (acc, next) => {
+        if (typeof next === 'string') {
+          return {
+            ...acc,
+            use: [...acc.use, next],
+          };
+        } else {
+          return {
+            ...acc,
+            overrides: [...acc.overrides, next],
+          };
+        }
+      },
+      {
+        use: [] as string[],
+        overrides: [] as UserInstruction[],
+      }
+    );
+
+    const instructionsById = overrides.reduce(
       (acc, next) => ({
         ...acc,
         [next.doc_id]: next.text,
@@ -957,7 +977,7 @@ export class ObservabilityAIAssistantClient {
       knowledgeBaseInstructionsById
     );
 
-    const instructions = Object.values(instructionsById).join('\n\n');
+    const instructions = Object.values(instructionsById).concat(use).join('\n\n');
 
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 

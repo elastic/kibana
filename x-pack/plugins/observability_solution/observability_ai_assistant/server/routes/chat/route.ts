@@ -97,10 +97,13 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
         title: t.string,
         responseLanguage: t.string,
         instructions: t.array(
-          t.type({
-            doc_id: t.string,
-            text: t.string,
-          })
+          t.union([
+            t.string,
+            t.type({
+              doc_id: t.string,
+              text: t.string,
+            }),
+          ])
         ),
       }),
     ]),
