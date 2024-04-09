@@ -19,6 +19,7 @@ import {
   getAssistantFeature,
   getCasesFeature,
   getSecurityFeature,
+  getRuleManagementFeature,
 } from '@kbn/security-solution-features/product_features';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
@@ -31,6 +32,7 @@ export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private securityAssistantProductFeatures: ProductFeatures;
+  private ruleManagementProductFeatures: ProductFeatures;
   private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
@@ -67,12 +69,21 @@ export class ProductFeaturesService {
       assistantFeature.baseKibanaFeature,
       assistantFeature.baseKibanaSubFeatureIds
     );
+
+    const ruleManagementFeature = getRuleManagementFeature();
+    this.ruleManagementProductFeatures = new ProductFeatures(
+      this.logger,
+      ruleManagementFeature.subFeaturesMap,
+      ruleManagementFeature.baseKibanaFeature,
+      ruleManagementFeature.baseKibanaSubFeatureIds
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.securityProductFeatures.init(featuresSetup);
     this.casesProductFeatures.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
+    this.ruleManagementProductFeatures.init(featuresSetup);
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
@@ -85,11 +96,15 @@ export class ProductFeaturesService {
     const securityAssistantProductFeaturesConfig = configurator.securityAssistant();
     this.securityAssistantProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
 
+    const ruleManagementProductFeaturesConfig = configurator.ruleManagement();
+    this.ruleManagementProductFeatures.setConfig(securityAssistantProductFeaturesConfig);
+
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
         ...securityProductFeaturesConfig.keys(),
         ...casesProductFeaturesConfig.keys(),
         ...securityAssistantProductFeaturesConfig.keys(),
+        ...ruleManagementProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }

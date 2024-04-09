@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { RULE_MANAGEMENT_FEATURE_ID } from '@kbn/security-solution-features/src/constants';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
@@ -68,7 +69,7 @@ export const createQueryAlertType = (
     minimumLicenseRequired: 'basic',
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
-    producer: SERVER_APP_ID,
+    producer: RULE_MANAGEMENT_FEATURE_ID,
     async executor(execOptions) {
       const { runOpts, services, spaceId, state } = execOptions;
       return queryExecutor({

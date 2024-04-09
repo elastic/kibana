@@ -85,5 +85,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     }
   }, [detectionEnginePrivileges.result, hasKibanaCRUD, hasKibanaREAD]);
 
+  console.log(privileges);
+
   return { loading: detectionEnginePrivileges.loading, ...privileges };
 };

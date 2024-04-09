@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import type { ReadRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ReadRuleRequestQuery,
@@ -25,7 +26,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(

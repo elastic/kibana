@@ -11,6 +11,7 @@ export const SERVER_APP_ID = 'siem' as const;
 
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
+export const RULE_MANAGEMENT_FEATURE_ID = 'securitySolutionRuleManagement' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;
@@ -22,7 +23,10 @@ export const CLOUD_DEFEND_APP_ID = 'cloudDefend' as const;
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
+export const LEGACY_NOTIFICATIONS_ID = `${RULE_MANAGEMENT_FEATURE_ID}.notifications` as const;
 
-export const RULE_MANAGEMENT_API_READ = `${APP_ID}-ruleRead`;
-export const RULE_MANAGEMENT_API_WRITE = `${APP_ID}-ruleWrite`;
+export const RULE_MANAGEMENT_API_READ = `${RULE_MANAGEMENT_FEATURE_ID}-ruleRead`;
+export const RULE_MANAGEMENT_API_WRITE = `${RULE_MANAGEMENT_FEATURE_ID}-ruleWrite`;
+
+export const RULE_MANAGEMENT_UI_READ = `${RULE_MANAGEMENT_FEATURE_ID}-uiRead`;
+export const RULE_MANAGEMENT_UI_WRITE = `${RULE_MANAGEMENT_FEATURE_ID}-uiWrite`;

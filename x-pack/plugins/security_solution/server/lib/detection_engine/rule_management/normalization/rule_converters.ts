@@ -13,6 +13,7 @@ import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
+import { RULE_MANAGEMENT_FEATURE_ID } from '@kbn/security-solution-features/src/constants';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
@@ -502,7 +503,7 @@ export const convertCreateAPIToInternalSchema = (
     name: input.name,
     tags: input.tags ?? [],
     alertTypeId: ruleTypeMappings[input.type],
-    consumer: SERVER_APP_ID,
+    consumer: RULE_MANAGEMENT_FEATURE_ID,
     params: {
       author: input.author ?? [],
       buildingBlockType: input.building_block_type,

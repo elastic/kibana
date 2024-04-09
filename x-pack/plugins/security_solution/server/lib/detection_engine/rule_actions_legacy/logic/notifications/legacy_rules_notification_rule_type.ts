@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import { RULE_MANAGEMENT_FEATURE_ID } from '@kbn/security-solution-features/src/constants';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
@@ -43,7 +44,7 @@ export const legacyRulesNotificationRuleType = ({
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
   category: DEFAULT_APP_CATEGORIES.security.id,
-  producer: SERVER_APP_ID,
+  producer: RULE_MANAGEMENT_FEATURE_ID,
   validate: {
     params: legacyRulesNotificationParams,
   },

@@ -13,9 +13,8 @@ import {
   ProductFeaturesPrivileges,
 } from '../product_features_privileges';
 
-import { APP_ID, RULE_MANAGEMENT_API_READ, RULE_MANAGEMENT_API_WRITE } from '../constants';
+import { APP_ID } from '../constants';
 import { SecuritySubFeatureId } from '../product_features_keys';
-import { SECURITY_RULE_TYPES } from './kibana_features';
 import type { SecurityFeatureParams } from './types';
 
 const endpointListSubFeature: SubFeatureConfig = {
@@ -604,67 +603,6 @@ const endpointExceptionsSubFeature: SubFeatureConfig = {
   ],
 };
 
-const ruleManagementSubFeature: SubFeatureConfig = {
-  requireAllSpaces: false,
-  name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.ruleManagement',
-    {
-      defaultMessage: 'Rule Management',
-    }
-  ),
-  description: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.ruleManagement.description',
-    {
-      defaultMessage: 'TODO', // TODO
-    }
-  ),
-  privilegeGroups: [
-    {
-      groupType: 'mutually_exclusive',
-      privileges: [
-        {
-          api: [RULE_MANAGEMENT_API_READ, RULE_MANAGEMENT_API_WRITE],
-          id: 'rule_management_all',
-          includeIn: 'none',
-          name: 'All',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: SECURITY_RULE_TYPES,
-            },
-            alert: {
-              all: SECURITY_RULE_TYPES,
-            },
-          },
-          ui: [],
-        },
-        {
-          api: [RULE_MANAGEMENT_API_READ],
-          id: 'rule_management_read',
-          includeIn: 'none',
-          name: 'Read',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          alerting: {
-            rule: {
-              read: SECURITY_RULE_TYPES,
-            },
-            alert: {
-              all: SECURITY_RULE_TYPES,
-            },
-          },
-          ui: [],
-        },
-      ],
-    },
-  ],
-};
-
 /**
  * Sub-features that will always be available for Security
  * regardless of the product type.
@@ -691,6 +629,5 @@ export const securitySubFeaturesMap = Object.freeze(
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature],
     [SecuritySubFeatureId.executeAction, executeActionSubFeature],
-    [SecuritySubFeatureId.ruleManagement, ruleManagementSubFeature],
   ])
 );

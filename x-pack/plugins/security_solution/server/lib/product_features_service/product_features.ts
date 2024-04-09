@@ -50,7 +50,7 @@ export class ProductFeatures<T extends string = string, S extends string = strin
       Array.from(productFeatureConfig.values())
     );
 
-    this.logger.debug(JSON.stringify(completeProductFeatureConfig));
+    console.log(JSON.stringify(completeProductFeatureConfig, null, 2));
     this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
     this.addRegisteredActions(completeProductFeatureConfig);
   }
