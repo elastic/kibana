@@ -26,7 +26,7 @@ const AWS_SQS_QUEUE = 'aws.sqs.instance.id';
 
 const METRICS_DETAILS_PATH = '/app/metrics/detail';
 
-const infraSources = [
+export const infraSources = [
   HOST_NAME,
   CONTAINER_ID,
   KUBERNETES_POD_ID,
@@ -36,7 +36,7 @@ const infraSources = [
   AWS_SQS_QUEUE,
 ];
 
-const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
+export const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
 
 const infraSourceLinks: Record<string, string> = {
   [HOST_NAME]: `${METRICS_DETAILS_PATH}/host`,

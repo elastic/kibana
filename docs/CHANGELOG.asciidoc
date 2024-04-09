@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.13.2>>
 * <<release-notes-8.13.1>>
 * <<release-notes-8.13.0>>
 * <<release-notes-8.12.2>>
@@ -62,6 +63,35 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.13.2]]
+== {kib} 8.13.2
+
+The 8.13.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.13.2]]
+=== Bug Fixes
+Canvas::
+* Fixes text settings to be honored in Canvas markdown elements ({kibana-pull}179948[#179948]).
+Discover::
+* Fixes keyboard navigation for search input on the document viewer flyout ({kibana-pull}180022[#180022]).
+Elastic Security::
+For the Elastic Security 8.13.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes having to wait ten minutes after agent upgrade if agent cleared watching state ({kibana-pull}179917[#179917]).
+Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
+* Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
+Machine Learning::
+* Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
+* AIOps: Fixes text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
+Management::
+* Fixes the Response tab loading time to be faster ({kibana-pull}180035[#180035]).
+Maps::
+* Fixes APM data view ID ({kibana-pull}179257[#179257]).
+Monitoring::
+* Fixes a runtime error by adding a default value for source and target ({kibana-pull}180043[#180043]).
+Operations::
+* Fixes an issue with {kib} looking for a configuration file outside of the {kib} home directory, potentially preventing startup due to insufficient permissions ({kibana-pull}179847[#179847]).
 
 [[release-notes-8.13.1]]
 == {kib} 8.13.1
