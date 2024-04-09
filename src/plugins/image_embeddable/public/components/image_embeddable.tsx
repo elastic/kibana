@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
 import { FileImageMetadata, FilesClient, imageEmbeddableFileKind } from '../imports';
@@ -20,7 +21,6 @@ import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer/image_viewer_context';
 
 import './image_embeddable.scss';
-import { BehaviorSubject } from 'rxjs';
 
 interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
