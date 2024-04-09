@@ -666,7 +666,7 @@ const exceptionsAndValueListsSubFeature: SubFeatureConfig = {
   ),
   privilegeGroups: [
     {
-      groupType: 'mutually_exclusive',
+      groupType: 'independent',
       privileges: [
         {
           id: 'exceptions_and_value_lists_all',
@@ -677,16 +677,6 @@ const exceptionsAndValueListsSubFeature: SubFeatureConfig = {
             read: [],
           },
           ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.exceptionsAndValueLists].all,
-        },
-        {
-          id: 'exceptions_and_value_lists_read',
-          includeIn: 'read',
-          name: 'Read',
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.exceptionsAndValueLists].read,
         },
       ],
     },

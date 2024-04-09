@@ -33,9 +33,5 @@ export const ProductFeaturesPrivileges = {
       ui: ['showExceptionsAndValueLists', 'crudExceptionsAndValueLists'],
       api: [`${APP_ID}-showExceptionsAndValueLists`, `${APP_ID}-crudExceptionsAndValueLists`],
     },
-    read: {
-      ui: ['showExceptionsAndValueLists'],
-      api: [`${APP_ID}-showExceptionsAndValueLists`],
-    },
   },
 };
