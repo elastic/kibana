@@ -12,6 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { GetAllIntegrationsResponse } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { GET_ALL_INTEGRATIONS_URL } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { extractIntegrations } from './extract_integrations';
+import { sortPackagesBySecurityCategory } from './sort_packages_by_security_category';
 
 /**
  * Returns an array of Fleet integrations and their packages
@@ -45,6 +46,9 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
           const packagesWithoutPrebuiltSecurityRules = packages.filter(
             (x) => x.name !== 'security_detection_engine'
           );
+
+          sortPackagesBySecurityCategory(packagesWithoutPrebuiltSecurityRules);
+
           const integrations = extractIntegrations(
             packagesWithoutPrebuiltSecurityRules,
             packagePolicies.items
