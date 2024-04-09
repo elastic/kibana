@@ -59,6 +59,7 @@ export function useActionStatus(
     }
   }, [loadActions, refreshAgentActivity]);
 
+  // second useEffect is needed for fetching actions when nAction changes
   useEffect(() => {
     loadActions();
   }, [loadActions, nActions]);
