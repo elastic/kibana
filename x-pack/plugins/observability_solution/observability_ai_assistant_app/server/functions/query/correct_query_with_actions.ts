@@ -8,11 +8,11 @@ import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const fixedQueryByOneAction = async (queryString: string) => {
-  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors, {
-    ignoreOnMissingCallbacks: true,
-  });
+  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors);
 
-  const actions = await getActions(queryString, errors, getAstAndSyntaxErrors);
+  const actions = await getActions(queryString, errors, getAstAndSyntaxErrors, {
+    relaxOnMissingCallbacks: true,
+  });
 
   if (actions.length) {
     const [firstAction] = actions;
@@ -30,6 +30,16 @@ const fixedQueryByOneAction = async (queryString: string) => {
     shouldRunAgain: false,
   };
 };
+
+/**
+ * @param queryString
+ * @returns corrected queryString
+ * The cases that are handled are:
+ * - Query stats / eval functions have typos e.g. aveg instead of avg
+ * - Unquoted fields e.g. keep field-1 instead of keep `field-1`
+ * - Unquoted fields in stats or eval e.g. stats avg(field-1) instead of stats avg(`field-1`)
+ * - Combination of the above
+ */
 
 export const correctQueryWithActions = async (queryString: string) => {
   let shouldCorrectQuery = true;

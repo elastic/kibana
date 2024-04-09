@@ -157,7 +157,7 @@ function extractUnquotedFieldText(
       };
     }
   }
-  return { start: possibleStart + 1, name: query.substring(possibleStart, end).trimEnd() };
+  return { start: possibleStart + 1, name: query.substring(possibleStart, end - 1).trimEnd() };
 }
 
 async function getQuotableActionForColumns(
@@ -167,17 +167,20 @@ async function getQuotableActionForColumns(
   options: CodeActionOptions,
   { getFieldsByType }: Partial<Callbacks>
 ): Promise<CodeAction[]> {
-  const commandEndIndex = ast.find((command) => command.location.max > error.endColumn)?.location
-    .max;
-  // the error received is unknwonColumn here, but look around the column to see if there's more
-  // which broke the grammar and the validation code couldn't identify as unquoted column
-  const remainingCommandText = queryString.substring(
-    error.endColumn - 1,
-    commandEndIndex ? commandEndIndex + 1 : undefined
-  );
+  const commandEndIndex = ast.find(
+    (command) =>
+      error.startColumn > command.location.min && error.startColumn < command.location.max
+  )?.location.max;
+
+  const remainingCommandText = commandEndIndex
+    ? queryString.substring(error.endColumn - 1, commandEndIndex + 1)
+    : queryString.substring(error.startColumn, error.endColumn);
+
   const stopIndex = Math.max(
-    /,/.test(remainingCommandText)
-      ? remainingCommandText.indexOf(',')
+    /[()]/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(')')
+      : /,/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(',') - 1
       : /\s/.test(remainingCommandText)
       ? remainingCommandText.indexOf(' ')
       : remainingCommandText.length,
@@ -192,9 +195,13 @@ async function getQuotableActionForColumns(
     error.code || 'syntaxError',
     ast,
     error.startColumn - 1,
-    error.endColumn + possibleUnquotedText.length
+    error.endColumn + possibleUnquotedText.length - 1
   );
   const actions: CodeAction[] = [];
+  const textHasAlreadyQuotes = /`/.test(errorText);
+  if (textHasAlreadyQuotes) {
+    return [];
+  }
   if (shouldBeQuotedText(errorText)) {
     const solution = `\`${errorText.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``;
     if (!getFieldsByType) {
