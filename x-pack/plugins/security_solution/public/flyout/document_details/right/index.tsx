@@ -58,7 +58,17 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     const defaultTab = tabsDisplayed[0].id;
     const tabSavedInlocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
 
-    if (!path) return tabSavedInlocalStorage || defaultTab;
+    if (!path) {
+      if (
+        tabSavedInlocalStorage &&
+        tabsDisplayed.map((tab) => tab.id).includes(tabSavedInlocalStorage)
+      ) {
+        return tabSavedInlocalStorage;
+      } else {
+        return defaultTab;
+      }
+    }
+
     return (
       tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ??
       (tabSavedInlocalStorage || defaultTab)
