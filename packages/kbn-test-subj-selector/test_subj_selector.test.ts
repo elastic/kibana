@@ -19,4 +19,16 @@ describe('testSubjSelector()', function () {
     expect(subj('~ foo')).toEqual('[data-test-subj~="foo"]');
     expect(subj('~foo & ~ bar')).toEqual('[data-test-subj~="foo"][data-test-subj~="bar"]');
   });
+
+  it('throws error for incorrect subjectSelectors', function () {
+    expect(() => subj('bar*foo')).toThrow(
+      `incorrect usage of '*' or '~' in selector: bar*foo, supported format '*foo' | '~foo'`
+    );
+    expect(() => subj('bar*')).toThrow(
+      `incorrect usage of '*' or '~' in selector: bar*, supported format '*foo' | '~foo'`
+    );
+    expect(() => subj('bar~')).toThrow(
+      `incorrect usage of '*' or '~' in selector: bar~, supported format '*foo' | '~foo'`
+    );
+  });
 });
