@@ -117,7 +117,6 @@ const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDet
     };
   }
 
-  // We know that the integration is not installed
   if (!found) {
     const integrationTitle = getCapitalizedTitle(packageName, integrationName);
     const targetVersion = getMinimumConcreteVersionMatchingSemver(requiredVersion);
