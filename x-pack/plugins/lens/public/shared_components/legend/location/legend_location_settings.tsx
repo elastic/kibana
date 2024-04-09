@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
 
 export interface LegendLocationSettingsProps {
@@ -151,80 +151,78 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
     horizontalAlignment || HorizontalAlignment.Right
   }`;
   if (isDisabled) return null;
+
   return (
     <>
       {location && (
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.lens.shared.legendLocationLabel', {
-            defaultMessage: 'Location',
+          label={i18n.translate('xpack.lens.shared.legendPosition', {
+            defaultMessage: 'Legend position',
           })}
+          fullWidth
         >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.shared.legendLocationLabel', {
-              defaultMessage: 'Location',
-            })}
-            data-test-subj="lens-legend-location-btn"
-            name="legendLocation"
-            buttonSize="compressed"
-            options={locationOptions}
-            isDisabled={isDisabled}
-            idSelected={locationOptions.find(({ value }) => value === location)!.id}
-            onChange={(optionId) => {
-              const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
-              onLocationChange(newLocation);
-            }}
-          />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                isFullWidth
+                legend={i18n.translate('xpack.lens.shared.legendPosition', {
+                  defaultMessage: 'Legend position',
+                })}
+                data-test-subj="lens-legend-location-btn"
+                buttonSize="compressed"
+                options={locationOptions}
+                isDisabled={isDisabled}
+                idSelected={locationOptions.find(({ value }) => value === location)!.id}
+                onChange={(optionId) => {
+                  const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
+                  onLocationChange(newLocation);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <>
+                {(!location || location === 'outside') && (
+                  <EuiButtonGroup
+                    legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
+                      defaultMessage: 'Alignment',
+                    })}
+                    isDisabled={isDisabled}
+                    data-test-subj="lens-legend-position-btn"
+                    buttonSize="compressed"
+                    options={toggleButtonsIcons}
+                    idSelected={position || Position.Right}
+                    onChange={onPositionChange}
+                    isIconOnly
+                  />
+                )}
+                {location === 'inside' && (
+                  <EuiButtonGroup
+                    legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
+                      defaultMessage: 'Alignment',
+                    })}
+                    type="single"
+                    data-test-subj="lens-legend-inside-alignment-btn"
+                    buttonSize="compressed"
+                    isDisabled={isDisabled}
+                    options={locationAlignmentButtonsIcons}
+                    idSelected={
+                      locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
+                    }
+                    onChange={(optionId) => {
+                      const newAlignment = locationAlignmentButtonsIcons.find(
+                        ({ id }) => id === optionId
+                      )!.value;
+                      onAlignmentChange(newAlignment);
+                    }}
+                    isIconOnly
+                  />
+                )}
+              </>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
       )}
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.shared.legendInsideAlignmentLabel', {
-          defaultMessage: 'Alignment',
-        })}
-      >
-        <>
-          {(!location || location === 'outside') && (
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
-                defaultMessage: 'Alignment',
-              })}
-              isDisabled={isDisabled}
-              data-test-subj="lens-legend-position-btn"
-              name="legendPosition"
-              buttonSize="compressed"
-              options={toggleButtonsIcons}
-              idSelected={position || Position.Right}
-              onChange={onPositionChange}
-              isIconOnly
-            />
-          )}
-          {location === 'inside' && (
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
-                defaultMessage: 'Alignment',
-              })}
-              type="single"
-              data-test-subj="lens-legend-inside-alignment-btn"
-              name="legendInsideAlignment"
-              buttonSize="compressed"
-              isDisabled={isDisabled}
-              options={locationAlignmentButtonsIcons}
-              idSelected={
-                locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
-              }
-              onChange={(optionId) => {
-                const newAlignment = locationAlignmentButtonsIcons.find(
-                  ({ id }) => id === optionId
-                )!.value;
-                onAlignmentChange(newAlignment);
-              }}
-              isIconOnly
-            />
-          )}
-        </>
-      </EuiFormRow>
     </>
   );
 };
