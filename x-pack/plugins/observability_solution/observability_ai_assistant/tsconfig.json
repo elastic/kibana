@@ -48,7 +48,8 @@
     "@kbn/safer-lodash-set",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/stack-connectors-plugin"
   ],
   "exclude": ["target/**/*"]
 }
