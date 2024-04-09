@@ -343,6 +343,8 @@ export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
 /**
  * Checks if this argument is one of the possible options
  * if they are defined on the arg definition.
+ *
+ * TODO - Consider merging with isEqualType to create a unified arg validation function
  */
 export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignature) {
   return (
