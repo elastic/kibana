@@ -9,10 +9,11 @@ import type {
   AvailablePackagesHookType,
   IntegrationCardItem,
 } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiAutoSize,
-  EuiAutoSizer,
-  EuiPanel,
+  EuiButton,
+  EuiCallOut,
   EuiSearchBar,
   EuiSkeletonText,
 } from '@elastic/eui';
@@ -43,15 +44,7 @@ type WrapperProps = Props & {
   useAvailablePackages: AvailablePackagesHookType;
 };
 
-const Loading = () => (
-  <EuiAutoSizer>
-    {({ width, height }: EuiAutoSize) => (
-      <EuiPanel css={{ height, width }}>
-        <EuiSkeletonText isLoading={true} lines={10} />
-      </EuiPanel>
-    )}
-  </EuiAutoSizer>
-);
+const Loading = () => <EuiSkeletonText isLoading={true} lines={10} />;
 
 const PackageListGridWrapper = ({
   selectedCategory = 'observability',
@@ -67,13 +60,14 @@ const PackageListGridWrapper = ({
     prereleaseIntegrationsEnabled: false,
   });
   const { filteredCards } = availablePackages;
-
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
     featuredCardNames,
     generatedCards
   );
+  if (!isInitialHidden && availablePackages.isLoading) return <Loading />;
+
   const showPackageList =
     (showSearchBar && !isInitialHidden) || showSearchBar === false;
 
@@ -119,17 +113,61 @@ const PackageListGridWrapper = ({
 
 const WithAvailablePackages = (props: Props) => {
   const ref = useRef<AvailablePackagesHookType | null>(null);
+  const [reloadRetry, setReloadRetry] = useState(0);
+  const [errorLoading, setErrorLoading] = useState(false);
   const [loadingModule, setLoadingModule] = React.useState(true);
 
   useEffect(() => {
     async function load() {
-      ref.current = await fetchAvailablePackagesHook();
-      setLoadingModule(false);
+      setErrorLoading(false);
+      setLoadingModule(true);
+      try {
+        ref.current = await fetchAvailablePackagesHook();
+      } catch (e) {
+        setErrorLoading(true);
+      } finally {
+        setLoadingModule(false);
+      }
     }
     load();
-  }, []);
+  }, [reloadRetry]);
 
-  if (loadingModule || ref.current === null) return null;
+  if (errorLoading)
+    return (
+      <EuiCallOut
+        title={i18n.translate(
+          'xpack.observability_onboarding.asyncLoadFailureCallout.title',
+          {
+            defaultMessage: 'Loading failure',
+          }
+        )}
+        color="warning"
+        iconType="cross"
+        size="m"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.observability_onboarding.asyncLoadFailureCallout.copy"
+            defaultMessage="Some required elements failed to load."
+          />
+        </p>
+        <EuiButton
+          color="warning"
+          data-test-subj="xpack.observability_onboarding.asyncLoadFailureCallout.button"
+          onClick={() => {
+            if (!loadingModule) setReloadRetry(reloadRetry + 1);
+          }}
+        >
+          <FormattedMessage
+            id="xpack.observability_onboarding.asyncLoadFailureCallout.buttonContent"
+            defaultMessage="Retry"
+          />
+        </EuiButton>
+      </EuiCallOut>
+    );
+
+  if (loadingModule || ref.current === null) return <Loading />;
+
   return (
     <PackageListGridWrapper {...props} useAvailablePackages={ref.current} />
   );
