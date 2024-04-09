@@ -107,7 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return await chartElement.getAttribute('data-title');
   }
 
-  describe('discover lens vis', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/180404
+  describe.skip('discover lens vis', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
