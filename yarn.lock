@@ -4288,6 +4288,34 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-profile-browser-internal@link:packages/core/user-profile/core-user-profile-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-browser-mocks@link:packages/core/user-profile/core-user-profile-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-browser@link:packages/core/user-profile/core-user-profile-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-common@link:packages/core/user-profile/core-user-profile-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-server-internal@link:packages/core/user-profile/core-user-profile-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-server-mocks@link:packages/core/user-profile/core-user-profile-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-profile-server@link:packages/core/user-profile/core-user-profile-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-settings-server-internal@link:packages/core/user-settings/core-user-settings-server-internal":
   version "0.0.0"
   uid ""
