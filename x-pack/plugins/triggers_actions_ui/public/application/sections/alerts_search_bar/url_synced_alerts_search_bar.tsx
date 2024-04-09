@@ -155,14 +155,14 @@ export const UrlSyncedAlertsSearchBar = ({
           chainingSystem="HIERARCHICAL"
           controlsUrlState={filterControls}
           filters={controlFilters}
-          onFilterChange={onControlFiltersChange}
-          dependencies={{
+          onFiltersChange={onControlFiltersChange}
+          services={{
             http,
             notifications,
             dataViews,
+            storage: Storage,
           }}
           ControlGroupRenderer={ControlGroupRenderer}
-          Storage={Storage}
         />
       )}
     </>

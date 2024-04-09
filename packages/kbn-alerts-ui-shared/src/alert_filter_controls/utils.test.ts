@@ -14,10 +14,10 @@ import {
   getFilterControlsComparator,
 } from './utils';
 import { initialInputData } from './mocks/data';
-import type { FilterItemObj } from './types';
+import type { FilterControlConfig } from './types';
 import { isEqualWith } from 'lodash';
 
-const defaultControls: FilterItemObj[] = [
+const defaultControls: FilterControlConfig[] = [
   {
     fieldName: 'first',
     hideActionBar: true,
@@ -32,14 +32,14 @@ const defaultControls: FilterItemObj[] = [
   },
 ];
 
-const firstControlsSet: FilterItemObj[] = [
+const firstControlsSet: FilterControlConfig[] = [
   {
     fieldName: 'first',
     selectedOptions: ['firstVal'],
   },
 ];
 
-const secondControlsSet: FilterItemObj[] = [
+const secondControlsSet: FilterControlConfig[] = [
   {
     fieldName: 'first',
     selectedOptions: ['secondVal1', 'secondVal2'],
@@ -52,19 +52,19 @@ const secondControlsSet: FilterItemObj[] = [
   },
 ];
 
-const thirdControlsSet: FilterItemObj[] = [
+const thirdControlsSet: FilterControlConfig[] = [
   {
     fieldName: 'new',
     selectedOptions: [],
   },
 ];
 
-const emptyControlSet: FilterItemObj[] = [];
+const emptyControlSet: FilterControlConfig[] = [];
 
 const defaultControlsObj = defaultControls.reduce((prev, current) => {
   prev[current.fieldName] = current;
   return prev;
-}, {} as Record<string, FilterItemObj>);
+}, {} as Record<string, FilterControlConfig>);
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {
     it('should return ordered filterItem where passed in order', () => {
@@ -182,7 +182,7 @@ describe('utils', () => {
 
   describe('reorderControls', () => {
     it('should add persist controls in order if they are not available in the given controls', () => {
-      const newControlsSet: FilterItemObj[] = [
+      const newControlsSet: FilterControlConfig[] = [
         {
           fieldName: 'new',
         },
@@ -208,7 +208,7 @@ describe('utils', () => {
       expect(result).toMatchObject(expectedResult);
     });
     it('should change controls order if they are available in the given controls', () => {
-      const newControlsSet: FilterItemObj[] = [
+      const newControlsSet: FilterControlConfig[] = [
         {
           fieldName: 'new',
         },

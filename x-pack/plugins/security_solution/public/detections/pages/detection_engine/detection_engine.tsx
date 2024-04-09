@@ -37,10 +37,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '@kbn/alerts-ui-shared/src/alert_filter_controls/translations';
-import type {
-  FilterGroupHandler,
-  FilterItemObj,
-} from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type { FilterGroupHandler, FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -191,9 +188,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useSourcererDataView(SourcererScopeName.detections);
   const spaceId = useSpaceId();
 
-  const [filterControlsUrlState, setFilterControlsUrlState] = useState<FilterItemObj[]>();
+  const [filterControlsUrlState, setFilterControlsUrlState] = useState<FilterControlConfig[]>();
 
-  const onUrlParamInit = (param: FilterItemObj[] | null) => {
+  const onUrlParamInit = (param: FilterControlConfig[] | null) => {
     if (!param) {
       setFilterControlsUrlState([]);
       return;
@@ -429,7 +426,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           spaceId={spaceId}
           featureIds={[AlertConsumers.SIEM]}
           filters={topLevelFilters}
-          onFilterChange={pageFiltersUpdateHandler}
+          onFiltersChange={pageFiltersUpdateHandler}
           query={query}
           timeRange={{
             from,
@@ -440,13 +437,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           onInit={setDetectionPageFilterHandler}
           defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
           dataViewSpec={dataViewSpec}
-          dependencies={{
+          services={{
             http,
             notifications,
             dataViews,
+            storage: Storage,
           }}
           ControlGroupRenderer={ControlGroupRenderer}
-          Storage={Storage}
           maxControls={4}
         />
       ) : null,

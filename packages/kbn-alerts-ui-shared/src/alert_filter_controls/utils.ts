@@ -13,7 +13,7 @@ import type {
 } from '@kbn/controls-plugin/common';
 
 import { isEmpty, isEqual, pick } from 'lodash';
-import type { FilterItemObj } from './types';
+import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
   const panels = controlInput.panels;
@@ -47,8 +47,8 @@ interface MergableControlsArgs {
    * Final set of controls is merged with the defaulControls
    *
    */
-  controlsWithPriority: FilterItemObj[][];
-  defaultControlsObj: Record<string, FilterItemObj>;
+  controlsWithPriority: FilterControlConfig[][];
+  defaultControlsObj: Record<string, FilterControlConfig>;
 }
 
 /*
@@ -78,11 +78,11 @@ interface ReorderControlsArgs {
    * Ordered Controls
    *
    * */
-  controls: FilterItemObj[];
+  controls: FilterControlConfig[];
   /*
    * default controls in order
    * */
-  defaultControls: FilterItemObj[];
+  defaultControls: FilterControlConfig[];
 }
 
 /**
@@ -95,14 +95,14 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
   const controlsObject = controls.reduce((prev, current) => {
     prev[current.fieldName] = current;
     return prev;
-  }, {} as Record<string, FilterItemObj>);
+  }, {} as Record<string, FilterControlConfig>);
 
   const defaultControlsObj = defaultControls.reduce((prev, current) => {
     prev[current.fieldName] = current;
     return prev;
-  }, {} as Record<string, FilterItemObj>);
+  }, {} as Record<string, FilterControlConfig>);
 
-  const resultDefaultControls: FilterItemObj[] = defaultControls
+  const resultDefaultControls: FilterControlConfig[] = defaultControls
     .filter((defaultControl) => defaultControl.persist)
     .map((defaultControl) => {
       return {
@@ -133,8 +133,8 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
  *
  * */
 export const getFilterControlsComparator =
-  (...fieldsToCompare: Array<keyof FilterItemObj>) =>
-  (filterItemObject1: FilterItemObj[], filterItemObject2: FilterItemObj[]) => {
+  (...fieldsToCompare: Array<keyof FilterControlConfig>) =>
+  (filterItemObject1: FilterControlConfig[], filterItemObject2: FilterControlConfig[]) => {
     if (filterItemObject1.length !== filterItemObject2.length) return false;
     const filterItemObjectWithSelectedKeys1 = filterItemObject1.map((v) => {
       return pick(v, fieldsToCompare);

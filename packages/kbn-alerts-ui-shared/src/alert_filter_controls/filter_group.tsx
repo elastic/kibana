@@ -27,7 +27,7 @@ import type {
   FieldFilterPredicate,
 } from '@kbn/controls-plugin/public/control_group/types';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { FilterGroupProps, FilterItemObj } from './types';
+import type { FilterGroupProps, FilterControlConfig } from './types';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
@@ -80,7 +80,7 @@ export const convertToBuildEsQuery = ({
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
     dataViewId,
-    onFilterChange,
+    onFiltersChange,
     timeRange,
     filters,
     query,
@@ -209,10 +209,10 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       );
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (!haveAllEmbeddablesLoaded) return;
-      if (onFilterChange) onFilterChange(newFilters ?? []);
+      if (onFiltersChange) onFiltersChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
     },
-    [onFilterChange]
+    [onFiltersChange]
   );
 
   const debouncedFilterUpdates = useMemo(
@@ -294,7 +294,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    let controlsFromLocalStorage: FilterItemObj[] = [];
+    let controlsFromLocalStorage: FilterControlConfig[] = [];
     const storedControlGroupInput = getStoredControlInput();
     if (storedControlGroupInput) {
       controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);

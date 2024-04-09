@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 
-export const formatPageFilterSearchParam = (filters: FilterItemObj[]) => {
+export const formatPageFilterSearchParam = (filters: FilterControlConfig[]) => {
   return filters.map(
     ({ title, fieldName, selectedOptions = [], existsSelected = false, exclude = false }) => ({
       title: title ?? fieldName,

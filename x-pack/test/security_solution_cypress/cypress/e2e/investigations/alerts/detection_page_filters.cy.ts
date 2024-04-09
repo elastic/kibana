@@ -8,7 +8,7 @@ import { encode } from '@kbn/rison';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 
-import { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
@@ -84,7 +84,7 @@ const customFilters = [
   },
 ];
 const assertFilterControlsWithFilterObject = (
-  filterObject: FilterItemObj[] = DEFAULT_DETECTION_PAGE_FILTERS
+  filterObject: FilterControlConfig[] = DEFAULT_DETECTION_PAGE_FILTERS
 ) => {
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(filterObject.length);

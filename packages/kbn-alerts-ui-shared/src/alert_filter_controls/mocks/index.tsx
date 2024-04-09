@@ -63,16 +63,16 @@ import { getControlGroupMock } from './control_group';
  *
  */
 export const mockAlertFilterControls = (outputFilters?: Filter[]) => {
-  const Component: FC<AlertFilterControlsProps> = ({ onInit, onFilterChange }) => {
+  const Component: FC<AlertFilterControlsProps> = ({ onInit, onFiltersChange }) => {
     useEffect(() => {
       if (onInit) {
         onInit(getControlGroupMock() as unknown as ControlGroupContainer);
       }
 
-      if (onFilterChange) {
-        onFilterChange(outputFilters ?? []);
+      if (onFiltersChange) {
+        onFiltersChange(outputFilters ?? []);
       }
-    }, [onInit, onFilterChange]);
+    }, [onInit, onFiltersChange]);
 
     return <div data-test-subj={TEST_IDS.MOCKED_CONTROL} />;
   };

@@ -7,13 +7,15 @@
  */
 
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
-import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
+import { FilterControlConfig } from './types';
 
-export const DEFAULT_CONTROLS: Array<
-  Omit<AddOptionsListControlProps, 'dataViewId'> & { persist?: boolean }
-> = [
+export const DEFAULT_CONTROLS: FilterControlConfig[] = [
   {
-    title: 'Status',
+    title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.status', {
+      defaultMessage: 'Status',
+    }),
     fieldName: ALERT_STATUS,
     selectedOptions: ['active'],
     hideActionBar: true,
@@ -21,16 +23,23 @@ export const DEFAULT_CONTROLS: Array<
     hideExists: true,
   },
   {
-    title: 'Rule',
+    title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.rule', {
+      defaultMessage: 'Rule',
+    }),
     fieldName: ALERT_RULE_NAME,
+    hideExists: true,
   },
   {
-    title: 'Grouping name',
-    fieldName: 'error.grouping_name',
+    title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.group', {
+      defaultMessage: 'Group',
+    }),
+    fieldName: 'kibana.alert.group.value',
   },
   {
-    title: 'Duration',
-    fieldName: ALERT_DURATION,
+    title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.tags', {
+      defaultMessage: 'Tags',
+    }),
+    fieldName: 'tags',
   },
 ];
 

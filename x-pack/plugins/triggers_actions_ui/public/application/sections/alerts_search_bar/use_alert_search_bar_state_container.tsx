@@ -27,7 +27,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { datemathStringRt } from '@kbn/io-ts-utils';
 import { Filter } from '@kbn/es-query';
-import { FilterItemObj } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../common/lib/kibana';
 
 const ALERT_STATUS_ALL = 'all';
@@ -46,7 +46,7 @@ interface AlertSearchBarContainerState {
   filters: Filter[];
   controlFilters: Filter[];
   savedQueryId?: string;
-  filterControls: FilterItemObj[];
+  filterControls: FilterControlConfig[];
 }
 
 interface AlertSearchBarStateTransitions {
@@ -73,7 +73,7 @@ interface AlertSearchBarStateTransitions {
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
   setFilterControls: (
     state: AlertSearchBarContainerState
-  ) => (filterControls: FilterItemObj[]) => AlertSearchBarContainerState;
+  ) => (filterControls: FilterControlConfig[]) => AlertSearchBarContainerState;
 }
 
 const defaultState: AlertSearchBarContainerState = {
