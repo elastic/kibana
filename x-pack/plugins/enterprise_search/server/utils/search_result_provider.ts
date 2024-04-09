@@ -65,12 +65,9 @@ export function toSearchResult({
     }),
     url: {
       path:
-        url ??
-        `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/${
-          isCrawler
-            ? 'crawler'
-            : `connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`
-        }`,
+        url ?? isCrawler
+          ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
+          : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`,
       prependBasePath: true,
     },
   };
