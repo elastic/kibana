@@ -232,3 +232,32 @@ describe('#security', () => {
     });
   });
 });
+
+describe('#userProfile', () => {
+  describe('getCurrent', () => {
+    test('calls coreStart.userProfile.getCurrent with the correct parameters', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      context.userProfile?.getCurrent('/data-path');
+      expect(coreStart.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+      expect(coreStart.userProfile.getCurrent).toHaveBeenCalledWith({
+        request,
+        dataPath: '/data-path',
+      });
+    });
+
+    test('returns the result of coreStart.userProfile.getCurrent', () => {
+      const request = httpServerMock.createKibanaRequest();
+      const coreStart = createCoreRouteHandlerContextParamsMock();
+      const context = new CoreRouteHandlerContext(coreStart, request);
+
+      const stubProfile: any = Symbol.for('stubProfile');
+      coreStart.userProfile.getCurrent.mockReturnValue(stubProfile);
+
+      const profile = context.userProfile?.getCurrent();
+      expect(profile).toBe(stubProfile);
+    });
+  });
+});

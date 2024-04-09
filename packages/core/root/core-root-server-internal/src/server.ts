@@ -479,6 +479,7 @@ export class Server {
     this.node.stop();
     this.deprecations.stop();
     this.security.stop();
+    this.userProfile.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
