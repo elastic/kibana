@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,10 +46,13 @@ export function DashboardSelector({
     }
   }, [customDashboards, currentDashboardId, setCurrentDashboard]);
 
-  function onChange(newDashboardId?: string) {
-    setUrlState({ dashboardId: newDashboardId });
-    onRefresh();
-  }
+  const onChange = useCallback(
+    (newDashboardId?: string) => {
+      setUrlState({ dashboardId: newDashboardId });
+      onRefresh();
+    },
+    [onRefresh, setUrlState]
+  );
 
   return (
     <EuiComboBox

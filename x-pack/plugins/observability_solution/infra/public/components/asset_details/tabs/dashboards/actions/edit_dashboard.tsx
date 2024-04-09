@@ -6,7 +6,7 @@
  */
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
@@ -23,6 +23,8 @@ export function EditDashboard({
   assetType: InfraCustomDashboardAssetType;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const onClick = useCallback(() => setIsModalVisible(!isModalVisible), [isModalVisible]);
+
   return (
     <>
       <EuiButtonEmpty
@@ -30,7 +32,7 @@ export function EditDashboard({
         size="s"
         iconType="pencil"
         data-test-subj="infraEditCustomDashboardMenu"
-        onClick={() => setIsModalVisible(!isModalVisible)}
+        onClick={onClick}
       >
         {i18n.translate('xpack.infra.customDashboards.editEmptyButtonLabel', {
           defaultMessage: 'Edit dashboard link',
@@ -39,7 +41,7 @@ export function EditDashboard({
 
       {isModalVisible && (
         <SaveDashboardModal
-          onClose={() => setIsModalVisible(!isModalVisible)}
+          onClose={onClick}
           onRefresh={onRefresh}
           currentDashboard={currentDashboard}
           assetType={assetType}

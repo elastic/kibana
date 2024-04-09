@@ -84,7 +84,11 @@ export function SaveDashboardModal({
     [allAvailableDashboards, customDashboards]
   );
 
-  const onChange = () => setAssetNameFiltersEnabled(!assetNameEnabled);
+  const onChange = useCallback(
+    () => setAssetNameFiltersEnabled(!assetNameEnabled),
+    [assetNameEnabled]
+  );
+  const onSelect = useCallback((newSelection) => setSelectedDashboard(newSelection), []);
 
   const onClickSave = useCallback(
     async function () {
@@ -108,7 +112,7 @@ export function SaveDashboardModal({
               })
             : await createCustomDashboard(dashboardParams);
 
-        const getToastLabels = isEditMode ? getLinkSuccessToastLabels : getEditSuccessToastLabels;
+        const getToastLabels = isEditMode ? getEditSuccessToastLabels : getLinkSuccessToastLabels;
 
         if (result && !(isEditMode ? isUpdateLoading : isCreateLoading)) {
           notifications.toasts.success(getToastLabels(newDashboard.label));
@@ -172,7 +176,7 @@ export function SaveDashboardModal({
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedDashboard}
-            onChange={(newSelection) => setSelectedDashboard(newSelection)}
+            onChange={onSelect}
             isClearable
           />
 

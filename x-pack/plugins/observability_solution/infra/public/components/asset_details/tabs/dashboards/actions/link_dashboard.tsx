@@ -6,7 +6,7 @@
  */
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
@@ -26,8 +26,8 @@ export function LinkDashboard({
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const onClick = () => setIsModalVisible(true);
-  const onClose = () => setIsModalVisible(false);
+  const onClick = useCallback(() => setIsModalVisible(true), []);
+  const onClose = useCallback(() => setIsModalVisible(false), []);
 
   return (
     <>

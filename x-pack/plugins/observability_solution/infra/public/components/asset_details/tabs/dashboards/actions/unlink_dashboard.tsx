@@ -32,8 +32,9 @@ export function UnlinkDashboard({
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
   const { dashboards, loading } = useFetchCustomDashboards({ assetType });
 
-  const onClick = () => setIsModalVisible(true);
-  const onCancel = () => setIsModalVisible(false);
+  const onClick = useCallback(() => setIsModalVisible(true), []);
+  const onCancel = useCallback(() => setIsModalVisible(false), []);
+  const onError = useCallback(() => setIsModalVisible(!isModalVisible), [isModalVisible]);
 
   const onConfirm = useCallback(
     async function () {
@@ -66,10 +67,10 @@ export function UnlinkDashboard({
           body: error.body.message,
         });
       }
-      setIsModalVisible(!isModalVisible);
+      onError();
     },
     [
-      isModalVisible,
+      onError,
       dashboards,
       deleteCustomDashboard,
       assetType,
