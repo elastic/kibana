@@ -196,11 +196,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should return 500 if the advanced setting is disabled', async () => {
+    it('should return 403 if the advanced setting is disabled', async () => {
       await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
 
       await assetCriticalityRoutes.uploadCsv('host,host-1,low_impact', {
-        expectStatusCode: 500,
+        expectStatusCode: 403,
       });
     });
   });

@@ -8,6 +8,7 @@ import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { StartPlugins } from '../../../../plugin';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
@@ -111,9 +112,14 @@ export const assetCriticalityCSVUploadRoute = (
           telemetry.reportEvent(eventType, event);
 
           return response.ok({ body: resBody });
-        } catch (error) {
-          logger.error(`Error during asset criticality csv upload: ${error}`);
-          return siemResponse.error({ statusCode: 500 });
+        } catch (e) {
+          logger.error(`Error during asset criticality csv upload: ${e}`);
+          const error = transformError(e);
+
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: error.message,
+          });
         }
       }
     );
