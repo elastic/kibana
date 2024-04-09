@@ -656,5 +656,37 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('setup guide', () => {
+      beforeEach(async () => {
+        await createAlertsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should overwrite setup field on patch', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          setup: 'A setup guide',
+        });
+
+        const rulePatch = {
+          rule_id: 'rule-1',
+          setup: 'A different setup guide',
+        };
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(rulePatch)
+          .expect(200);
+
+        expect(body.setup).to.eql('A different setup guide');
+      });
+    });
   });
 };
