@@ -6,16 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  removeDropCommandsFromESQLQuery,
-  getIndexForESQLQuery,
-  getInitialESQLQuery,
-  getESQLWithSafeLimit,
-  TextBasedLanguages,
-} from './src';
-
-export { ESQL_LATEST_VERSION } from './constants';
+// we are expecting to retrieve this from an API instead
+// https://github.com/elastic/elasticsearch/issues/107069
+export const ESQL_LATEST_VERSION = '2024.04.01';
