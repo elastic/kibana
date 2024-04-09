@@ -73,9 +73,9 @@ export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublish
     if (definedSubjects.length === 0) return;
     const subscription = combineLatest(definedSubjects)
       .pipe(
-        debounceTime(0),
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
-        skip(1)
+        skip(1),
+        debounceTime(0)
       )
       .subscribe((values) => {
         setLatestPublishedValues((lastPublishedValues) => {
