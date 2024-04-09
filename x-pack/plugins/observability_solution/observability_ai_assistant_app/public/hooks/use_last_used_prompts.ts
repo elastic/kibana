@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { noop, uniq } from 'lodash';
 import { useKibana } from './use_kibana';
 
@@ -14,7 +14,10 @@ const AI_ASSISTANT_LAST_USED_PROMPT_STORAGE = 'kibana.ai-assistant.last-used-pro
 export function useLastUsedPrompts() {
   const { storage } = useKibana().services;
 
-  const lastUsedPrompts = (storage.get(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE) as string[]) ?? [];
+  const lastUsedPrompts = useMemo(
+    () => (storage.get(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE) as string[]) ?? [],
+    [storage]
+  );
 
   useEffect(() => {
     window.addEventListener('local-storage', noop);
@@ -24,9 +27,8 @@ export function useLastUsedPrompts() {
     };
   }, []);
 
-  return {
-    lastUsedPrompts,
-    addPrompt: (prompt: string) => {
+  const addPrompt = useCallback(
+    (prompt: string) => {
       storage.set(
         AI_ASSISTANT_LAST_USED_PROMPT_STORAGE,
         uniq([prompt, ...lastUsedPrompts]).slice(0, 5)
@@ -35,5 +37,11 @@ export function useLastUsedPrompts() {
         new StorageEvent('local-storage', { key: AI_ASSISTANT_LAST_USED_PROMPT_STORAGE })
       );
     },
+    [lastUsedPrompts, storage]
+  );
+
+  return {
+    lastUsedPrompts,
+    addPrompt,
   };
 }
