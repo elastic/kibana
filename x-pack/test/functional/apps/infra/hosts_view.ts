@@ -12,7 +12,6 @@ import {
   enableInfrastructureAssetCustomDashboards,
   enableInfrastructureHostsView,
 } from '@kbn/observability-plugin/common';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
