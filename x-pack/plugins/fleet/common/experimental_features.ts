@@ -28,6 +28,8 @@ export const allowedExperimentalValues = Object.freeze<Record<string, boolean>>(
   agentless: true,
   enableStrictKQLValidation: false,
   subfeaturePrivileges: false,
+  enablePackagesStateMachine: true,
+  advancedPolicySettings: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
