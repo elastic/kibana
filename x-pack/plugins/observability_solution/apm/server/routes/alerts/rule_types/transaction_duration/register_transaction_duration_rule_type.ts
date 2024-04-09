@@ -74,8 +74,8 @@ import {
 } from '../../register_apm_rule_types';
 import {
   getApmAlertSourceFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
@@ -234,7 +234,7 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getServiceGroupFieldsAgg(),
+                ...getApmAlertSourceFieldsAgg(),
               },
             },
           },
