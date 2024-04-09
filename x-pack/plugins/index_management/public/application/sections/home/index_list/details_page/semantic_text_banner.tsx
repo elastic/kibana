@@ -6,7 +6,7 @@
  */
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 interface SemanticTextBannerProps {
   isSemanticTextEnabled: boolean;
@@ -15,11 +15,6 @@ interface SemanticTextBannerProps {
 export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBannerProps) {
   const [isSemanticTextBannerDisplayable, setIsSemanticTextBannerDisplayable] =
     useState<boolean>(true);
-
-  const hideBanner = useCallback(() => {
-    setIsSemanticTextBannerDisplayable(false);
-  }, [setIsSemanticTextBannerDisplayable]);
-
   const bannerText = 'semantic_text field type is now available!';
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
@@ -39,7 +34,7 @@ export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBanner
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              onClick={hideBanner}
+              onClick={() => setIsSemanticTextBannerDisplayable(false)}
               data-test-subj="SemanticTextBannerDismissButton"
             >
               <FormattedMessage
