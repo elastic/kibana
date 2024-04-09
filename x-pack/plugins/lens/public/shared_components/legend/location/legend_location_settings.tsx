@@ -47,32 +47,32 @@ export interface LegendLocationSettingsProps {
 
 const toggleButtonsIcons = [
   {
-    id: Position.Top,
-    label: i18n.translate('xpack.lens.shared.legendPositionTop', {
-      defaultMessage: 'Top',
-    }),
-    iconType: 'arrowUp',
-  },
-  {
     id: Position.Right,
     label: i18n.translate('xpack.lens.shared.legendPositionRight', {
       defaultMessage: 'Right',
     }),
-    iconType: 'arrowRight',
-  },
-  {
-    id: Position.Bottom,
-    label: i18n.translate('xpack.lens.shared.legendPositionBottom', {
-      defaultMessage: 'Bottom',
-    }),
-    iconType: 'arrowDown',
+    iconType: 'sortRight',
   },
   {
     id: Position.Left,
     label: i18n.translate('xpack.lens.shared.legendPositionLeft', {
       defaultMessage: 'Left',
     }),
-    iconType: 'arrowLeft',
+    iconType: 'sortLeft',
+  },
+  {
+    id: Position.Top,
+    label: i18n.translate('xpack.lens.shared.legendPositionTop', {
+      defaultMessage: 'Top',
+    }),
+    iconType: 'sortUp',
+  },
+  {
+    id: Position.Bottom,
+    label: i18n.translate('xpack.lens.shared.legendPositionBottom', {
+      defaultMessage: 'Bottom',
+    }),
+    iconType: 'sortDown',
   },
 ];
 
