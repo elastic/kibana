@@ -7,7 +7,10 @@
  */
 
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsIncrementCounterField,
+} from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 import {
@@ -20,6 +23,7 @@ import {
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
+import { bufferWhen, exhaustMap, filter, map, merge, Subject, takeUntil, timer } from 'rxjs';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -76,17 +80,59 @@ const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
 /** @internal */
 export class CoreUsageStatsClient implements ICoreUsageStatsClient {
+  private readonly fieldsToIncrement$ = new Subject<string[]>();
+  private readonly flush$ = new Subject<void>();
+
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly basePath: IBasePath,
-    private readonly repositoryPromise: Promise<ISavedObjectsRepository>
-  ) {}
+    private readonly repositoryPromise: Promise<ISavedObjectsRepository>,
+    stop$: Subject<void>,
+    bufferTimeMs: number = 10_000
+  ) {
+    this.fieldsToIncrement$
+      .pipe(
+        takeUntil(stop$),
+        // Buffer until either the timer or a forced flush occur
+        bufferWhen(() => merge(timer(bufferTimeMs, bufferTimeMs), this.flush$)),
+        map((listOfFields) => {
+          const fieldsMap = listOfFields.flat().reduce((acc, fieldName) => {
+            const incrementCounterField: Required<SavedObjectsIncrementCounterField> = acc.get(
+              fieldName
+            ) ?? {
+              fieldName,
+              incrementBy: 0,
+            };
+            incrementCounterField.incrementBy++;
+            return acc.set(fieldName, incrementCounterField);
+          }, new Map<string, Required<SavedObjectsIncrementCounterField>>());
+          return [...fieldsMap.values()];
+        }),
+        filter((fields) => fields.length > 0),
+        exhaustMap(async (fields) => {
+          const options = { refresh: false };
+          try {
+            const repository = await this.repositoryPromise;
+            await repository.incrementCounter(
+              CORE_USAGE_STATS_TYPE,
+              CORE_USAGE_STATS_ID,
+              fields,
+              options
+            );
+          } catch (err) {
+            // do nothing
+          }
+        })
+      )
+      .subscribe();
+  }
 
   public async getUsageStats() {
     this.debugLogger('getUsageStats() called');
     let coreUsageStats: CoreUsageStats = {};
     try {
       const repository = await this.repositoryPromise;
+      this.flush$.next();
       const result = await repository.incrementCounter<CoreUsageStats>(
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
@@ -185,19 +231,8 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
     prefix: string,
     { request }: BaseIncrementOptions
   ) {
-    const options = { refresh: false };
-    try {
-      const repository = await this.repositoryPromise;
-      const fields = this.getFieldsToIncrement(counterFieldNames, prefix, request);
-      await repository.incrementCounter(
-        CORE_USAGE_STATS_TYPE,
-        CORE_USAGE_STATS_ID,
-        fields,
-        options
-      );
-    } catch (err) {
-      // do nothing
-    }
+    const fields = this.getFieldsToIncrement(counterFieldNames, prefix, request);
+    this.fieldsToIncrement$.next(fields);
   }
 
   private getIsDefaultNamespace(request: KibanaRequest) {
