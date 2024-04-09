@@ -942,46 +942,27 @@ export class ObservabilityAIAssistantClient {
       return '';
     }
 
-    const knowledgeBaseInstructionsById = knowledgeBaseInstructions.reduce(
-      (acc, next) => ({
-        ...acc,
-        [next.doc_id]: next.text,
-      }),
-      {}
+    const overrides = requestInstructions.filter(
+      (instruction): instruction is UserInstruction => typeof instruction !== 'string'
+    );
+    const overrideIds = overrides.map((instruction) => instruction.doc_id);
+    const plainInstructions = requestInstructions
+      .filter((instruction): instruction is string => typeof instruction === 'string')
+      .map<UserInstruction>((instruction, index) => ({
+        doc_id: `${index}-${instruction.substring(0, 10)}`, // This will be thrown away further down
+        text: instruction,
+      }));
+
+    const kept = knowledgeBaseInstructions.filter(
+      (instruction) => !overrideIds.includes(instruction.doc_id)
     );
 
-    const { use, overrides } = requestInstructions.reduce(
-      (acc, next) => {
-        if (typeof next === 'string') {
-          return {
-            ...acc,
-            use: [...acc.use, next],
-          };
-        } else {
-          return {
-            ...acc,
-            overrides: [...acc.overrides, next],
-          };
-        }
-      },
-      {
-        use: [] as string[],
-        overrides: [] as UserInstruction[],
-      }
+    const instructions = [...overrides, ...plainInstructions, ...kept].map(
+      (instruction) => instruction.text
     );
-
-    const instructionsById = overrides.reduce(
-      (acc, next) => ({
-        ...acc,
-        [next.doc_id]: next.text,
-      }),
-      knowledgeBaseInstructionsById
-    );
-
-    const instructions = Object.values(instructionsById).concat(use).join('\n\n');
 
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 
-    return `${instructionsPrompt}${instructions}`;
+    return `${instructionsPrompt}${instructions.join('\n\n')}`;
   };
 }
