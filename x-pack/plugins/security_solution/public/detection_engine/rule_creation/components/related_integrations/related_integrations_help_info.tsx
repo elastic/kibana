@@ -32,7 +32,7 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.fieldRelatedIntegrationsHelpText"
-          defaultMessage="Choose which {integrationsDocLink} this rule depends on. Using integrations is the best way to add data to the Elastic Stack. Pick an integration from the list and correct the version dependency if necessary. Version dependency represents {semverLink}. Only tilde, caret and plain versions are supported e.g. ~1.2.3, ^1.2.3 or 1.2.3."
+          defaultMessage="Choose the {integrationsDocLink} this rule depends on, and correct the version range if necessary. Version range represents {semverLink}. Only tilde, caret and plain versions are supported e.g. ~1.2.3, ^1.2.3 or 1.2.3."
           values={{
             integrationsDocLink: (
               <EuiLink href={docLinks.links.addData} target="_blank">
