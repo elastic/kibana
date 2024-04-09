@@ -5620,10 +5620,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
   version "0.0.0"
   uid ""
