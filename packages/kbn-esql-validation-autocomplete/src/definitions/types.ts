@@ -8,7 +8,7 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
-export type ParameterType =
+export type FunctionParameterType =
   | 'number'
   | 'date'
   | 'string'
@@ -36,7 +36,7 @@ export interface FunctionDefinition {
   signatures: Array<{
     params: Array<{
       name: string;
-      type: ParameterType;
+      type: FunctionParameterType;
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
@@ -49,6 +49,15 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
+type CommandParameterType =
+  | 'any'
+  | 'source'
+  | 'function'
+  | 'column'
+  | 'number'
+  | 'string'
+  | 'boolean';
+
 export interface CommandBaseDefinition {
   name: string;
   alias?: string;
@@ -59,7 +68,7 @@ export interface CommandBaseDefinition {
     // i.e. column of type string
     params: Array<{
       name: string;
-      type: string;
+      type: CommandParameterType;
       optional?: boolean;
       innerType?: string;
       values?: string[];
@@ -100,6 +109,7 @@ export interface Literals {
   description: string;
 }
 
+// TODO - think about separate types for functions and commands
 export type SignatureType =
   | FunctionDefinition['signatures'][number]
   | CommandOptionsDefinition['signature'];

@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, ParameterType } from './types';
+import type { FunctionDefinition, FunctionParameterType } from './types';
 
 function createMathDefinition(
   name: string,
-  types: Array<ParameterType | ParameterType[]>,
+  types: Array<FunctionParameterType | FunctionParameterType[]>,
   description: string,
   validate?: FunctionDefinition['validate']
 ): FunctionDefinition {

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition, ParameterType } from './types';
+import type { FunctionDefinition, FunctionParameterType } from './types';
 
 function createNumericAggDefinition({
   name,
@@ -16,7 +16,7 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: ParameterType; value: string; literalOnly?: boolean }>;
+  args?: Array<{ name: string; type: FunctionParameterType; value: string; literalOnly?: boolean }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {

@@ -35,6 +35,7 @@ import type {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
+  FunctionParameterType,
   SignatureArgType,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -233,8 +234,8 @@ export function isArrayType(type: string) {
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: string) {
-  return type.replace(ARRAY_REGEXP, '');
+export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
+  return type.replace(ARRAY_REGEXP, '') as FunctionParameterType; // TODO - think of how to make this safe
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
