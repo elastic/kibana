@@ -2,7 +2,6 @@
 
 ### Parameters for this job:
 # PUBLISH_DOCKER_TAG: if set to 1/true, passing runs will promote the tested ES Serverless tag to latest-verified.
-# PUBLISH_MANIFEST: if set to 1/true, passing runs will upload the manifest attesting what (kibana + es) combination was used in the test
 # SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
 # SKIP_CYPRESS: if set to 1/true, it will skip running the cypress tests
 # FTR_EXTRA_ARGS: a string argument, if passed, it will be forwarded verbatim to the FTR run script
@@ -40,7 +39,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: "Pick Test Group Run Order"
+      - label: "Pick Test Group Run Order (FTR + Integration)"
         command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
         agents:
           queue: kibana-default
@@ -48,9 +47,10 @@ steps:
         timeout_in_minutes: 10
         env:
           FTR_CONFIGS_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/ftr_configs.sh'
+          JEST_INTEGRATION_SCRIPT: 'TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh'
           FTR_CONFIG_PATTERNS: '**/test_serverless/**'
           FTR_EXTRA_ARGS: '$FTR_EXTRA_ARGS'
-          LIMIT_CONFIG_TYPE: 'functional'
+          LIMIT_CONFIG_TYPE: 'functional,integration'
         retry:
           automatic:
             - exit_status: '*'

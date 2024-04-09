@@ -10,6 +10,7 @@ import { keyBy, merge, values } from 'lodash';
 import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
+  DataStreamsEstimatedDataInBytes,
   DataStreamStat,
   DegradedDocs,
   Integration,
@@ -145,13 +146,18 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<{
-    estimatedDataInBytes: number;
-  }> {
-    const { context, params } = resources;
+  async handler(resources): Promise<DataStreamsEstimatedDataInBytes> {
+    const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const isServerless = (await getEsCapabilities()).serverless;
+
+    if (isServerless) {
+      return {
+        estimatedDataInBytes: null,
+      };
+    }
 
     const estimatedDataInBytes = await getEstimatedDataInBytes({
       esClient,

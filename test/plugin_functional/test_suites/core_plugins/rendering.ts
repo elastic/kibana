@@ -340,6 +340,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
         'share.new_version.enabled (boolean)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (alternatives)',
         /**
          * Rule form V2 feature flags
          */

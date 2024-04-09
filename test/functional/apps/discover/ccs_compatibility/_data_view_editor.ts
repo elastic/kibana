@@ -10,12 +10,18 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -33,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
-    await PageObjects.discover.clickCreateNewDataView();
+    await PageObjects.unifiedSearch.clickCreateNewDataView();
     await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
       clearWithKeyboard: true,
       typeCharByChar: true,
