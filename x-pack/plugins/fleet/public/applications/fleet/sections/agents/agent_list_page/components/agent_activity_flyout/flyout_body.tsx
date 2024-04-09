@@ -17,7 +17,7 @@ import styled from 'styled-components';
 
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
-import type { ActionStatus } from '../../../../../types';
+import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
 import { Loading } from '../../../components';
 
@@ -45,6 +45,7 @@ export const FlyoutBody: React.FunctionComponent<{
   onClickShowMore: () => void;
   dateFilter: moment.Moment | null;
   onChangeDateFilter: (date: moment.Moment | null) => void;
+  agentPolicies: AgentPolicy[];
 }> = ({
   isFirstLoading,
   currentActions,
@@ -54,6 +55,7 @@ export const FlyoutBody: React.FunctionComponent<{
   onClickShowMore,
   dateFilter,
   onChangeDateFilter,
+  agentPolicies,
 }) => {
   // Loading
   if (isFirstLoading) {
@@ -147,6 +149,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={inProgressActions}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                agentPolicies={agentPolicies}
               />
             ) : null}
             {todayActions.length > 0 ? (
@@ -160,6 +163,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={todayActions}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                agentPolicies={agentPolicies}
               />
             ) : null}
             {Object.keys(otherDays).map((day) => (
@@ -169,6 +173,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={otherDays[day]}
                 abortUpgrade={abortUpgrade}
                 onClickViewAgents={onClickViewAgents}
+                agentPolicies={agentPolicies}
               />
             ))}
           </EuiFlexGroup>

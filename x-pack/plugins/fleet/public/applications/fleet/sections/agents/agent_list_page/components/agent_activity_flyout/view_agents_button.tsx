@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import type { ActionStatus } from '../../../../../types';
+import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
 const MAX_VIEW_AGENTS_COUNT = 1000;
 
 export const ViewAgentsButton: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, onClickViewAgents }) => {
+  agentPolicies: AgentPolicy[];
+}> = ({ action, onClickViewAgents, agentPolicies }) => {
+  const isDisabled = useMemo(() => {
+    if (action.type !== 'POLICY_CHANGE') {
+      return action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT;
+    }
+
+    const actionPolicyId = action.actionId.split(':')[0];
+    return agentPolicies.find((agentPolicy) => agentPolicy.id === actionPolicyId)?.agents === 0;
+  }, [action, agentPolicies]);
+
   if (action.type === 'UPDATE_TAGS') {
     return null;
   }
@@ -27,7 +37,7 @@ export const ViewAgentsButton: React.FunctionComponent<{
       onClick={() => onClickViewAgents(action)}
       flush="left"
       data-test-subj="agentActivityFlyout.viewAgentsButton"
-      disabled={action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT}
+      disabled={isDisabled}
     >
       <FormattedMessage
         id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
@@ -36,7 +46,7 @@ export const ViewAgentsButton: React.FunctionComponent<{
     </EuiButtonEmpty>
   );
 
-  if (action.type !== 'POLICY_CHANGE' && action.nbAgentsActionCreated <= MAX_VIEW_AGENTS_COUNT) {
+  if (action.type !== 'POLICY_CHANGE' && !isDisabled) {
     return button;
   }
 

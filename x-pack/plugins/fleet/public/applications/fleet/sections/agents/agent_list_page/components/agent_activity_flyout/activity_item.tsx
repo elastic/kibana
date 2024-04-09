@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { ActionStatus } from '../../../../../types';
+import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
 import { ViewErrors } from '../view_errors';
 
@@ -34,7 +34,8 @@ import { ViewAgentsButton } from './view_agents_button';
 export const ActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, onClickViewAgents }) => {
+  agentPolicies: AgentPolicy[];
+}> = ({ action, onClickViewAgents, agentPolicies }) => {
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>
@@ -247,7 +248,11 @@ export const ActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+      <ViewAgentsButton
+        action={action}
+        onClickViewAgents={onClickViewAgents}
+        agentPolicies={agentPolicies}
+      />
     </EuiPanel>
   );
 };

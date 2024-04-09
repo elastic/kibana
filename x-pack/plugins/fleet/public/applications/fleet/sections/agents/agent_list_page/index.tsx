@@ -289,6 +289,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+            agentPolicies={agentPolicies}
           />
         </EuiPortal>
       ) : null}

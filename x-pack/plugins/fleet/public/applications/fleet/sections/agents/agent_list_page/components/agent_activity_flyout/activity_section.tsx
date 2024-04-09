@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiText, EuiPanel } from '@elastic/eui';
 
-import type { ActionStatus } from '../../../../../types';
+import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
@@ -19,7 +19,8 @@ export const ActivitySection: React.FunctionComponent<{
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ title, actions, abortUpgrade, onClickViewAgents }) => {
+  agentPolicies: AgentPolicy[];
+}> = ({ title, actions, abortUpgrade, onClickViewAgents, agentPolicies }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -40,6 +41,7 @@ export const ActivitySection: React.FunctionComponent<{
             action={currentAction}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
+            agentPolicies={agentPolicies}
           />
         )
       )}
