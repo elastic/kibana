@@ -54,10 +54,12 @@ export class ConfirmDelete extends Component<Props, State> {
   }
 
   public render() {
-    const { rolesToDelete } = this.props;
+    const { rolesToDelete, buildFlavor } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
     const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
-      defaultMessage: 'Delete role{value, plural, one {{roleName}} other {s}}',
+      defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}${
+        buildFlavor === 'serverless' ? '?' : ''
+      }`,
       values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
     });
 
@@ -73,25 +75,49 @@ export class ConfirmDelete extends Component<Props, State> {
           <EuiText>
             {moreThanOne ? (
               <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
-                    defaultMessage="You are about to delete these roles:"
-                  />
-                </p>
+                {buildFlavor === 'traditional' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.removingRolesDescription"
+                      defaultMessage="You are about to delete these roles:"
+                    />
+                  </p>
+                )}
+                {buildFlavor === 'serverless' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.serverless.removingRolesDescription"
+                      defaultMessage="Users with the following roles assigned will lose access to the project:"
+                    />
+                  </p>
+                )}
                 <ul>
                   {rolesToDelete.map((roleName) => (
                     <li key={roleName}>{roleName}</li>
                   ))}
                 </ul>
               </Fragment>
-            ) : null}
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.roles.deletingRolesWarningMessage"
-                defaultMessage="You can't undo this operation."
-              />
-            </p>
+            ) : (
+              <Fragment>
+                {buildFlavor === 'serverless' && (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.roles.confirmDelete.serverless.removingSingleRoleDescription"
+                      defaultMessage="Users with the {roleName} role assigned will lose access to the project."
+                      values={{ roleName: rolesToDelete[0] }}
+                    />
+                  </p>
+                )}
+              </Fragment>
+            )}
+            {buildFlavor === 'traditional' && (
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.roles.deletingRolesWarningMessage"
+                  defaultMessage="You can't undo this operation."
+                />
+              </p>
+            )}
           </EuiText>
         </EuiModalBody>
         <EuiModalFooter>

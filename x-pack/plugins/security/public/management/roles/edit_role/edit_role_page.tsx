@@ -727,7 +727,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-            defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+            defaultMessage="Set privileges on your Elasticsearch data and control access to your Project spaces."
           />
         </EuiText>
         {isRoleReserved && (
