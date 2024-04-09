@@ -24,7 +24,6 @@ const EditRuleProvider: React.FC<{
 
   const { rule, isSuccess, isLoading } = useResolveRuleApi({
     ruleId,
-    enabled: !hasLoaded,
     onSuccess: (rule: ResolvedRule) => {
       setHasLoaded(true);
       onLoadRuleSuccess(rule.ruleTypeId, rule.name);

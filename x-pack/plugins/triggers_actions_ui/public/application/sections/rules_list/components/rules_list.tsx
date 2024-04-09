@@ -42,6 +42,8 @@ import {
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import {
+  getCreateRuleRoute,
+  getEditRuleRoute,
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
@@ -317,8 +319,14 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    setEditFlyoutVisibility(true);
-    setCurrentRuleToEdit(ruleItem);
+    if (isRuleFormV2Enabled) {
+      history.push(getEditRuleRoute(ruleItem.id), {
+        referrer: window.location.href,
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+      setCurrentRuleToEdit(ruleItem);
+    }
   };
 
   const onRunRule = async (id: string) => {
@@ -1011,7 +1019,7 @@ export const RulesList = ({
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
               if (isRuleFormV2Enabled) {
-                history.push(`/rule/create/${ruleTypeId}`, {
+                history.push(getCreateRuleRoute(ruleTypeId), {
                   referrer: window.location.href,
                   consumer: initialSelectedConsumer,
                 });
