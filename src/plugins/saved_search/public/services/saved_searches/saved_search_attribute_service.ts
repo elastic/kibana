@@ -55,43 +55,45 @@ export function getSavedSearchAttributeService(
     embeddable: EmbeddableStart;
   }
 ): SavedSearchAttributeService {
-  return services.embeddable.getAttributeService<
-    SavedSearchByValueAttributes,
-    SearchByValueInput,
-    SearchByReferenceInput,
-    SavedSearchUnwrapMetaInfo
-  >(SEARCH_EMBEDDABLE_TYPE, {
-    saveMethod: async (attributes: SavedSearchByValueAttributes, savedObjectId?: string) => {
-      const { references, attributes: attrs } = splitReferences(attributes);
-      const id = await saveSearchSavedObject(
-        savedObjectId,
-        attrs,
-        references,
-        services.contentManagement
-      );
+  console.log('here!!!');
+  return;
+  // return services.embeddable.getAttributeService<
+  //   SavedSearchByValueAttributes,
+  //   SearchByValueInput,
+  //   SearchByReferenceInput,
+  //   SavedSearchUnwrapMetaInfo
+  // >(SEARCH_EMBEDDABLE_TYPE, {
+  //   saveMethod: async (attributes: SavedSearchByValueAttributes, savedObjectId?: string) => {
+  //     const { references, attributes: attrs } = splitReferences(attributes);
+  //     const id = await saveSearchSavedObject(
+  //       savedObjectId,
+  //       attrs,
+  //       references,
+  //       services.contentManagement
+  //     );
 
-      return { id };
-    },
-    unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
-      const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(services));
+  //     return { id };
+  //   },
+  //   unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
+  //     const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(services));
 
-      return {
-        attributes: savedObjectToEmbeddableAttributes(so.item),
-        metaInfo: {
-          sharingSavedObjectProps: so.meta,
-          managed: so.item.managed,
-        },
-      };
-    },
-    checkForDuplicateTitle: (props: OnSaveProps) => {
-      return checkForDuplicateTitle({
-        title: props.newTitle,
-        isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-        onTitleDuplicate: props.onTitleDuplicate,
-        contentManagement: services.contentManagement,
-      });
-    },
-  });
+  //     return {
+  //       attributes: savedObjectToEmbeddableAttributes(so.item),
+  //       metaInfo: {
+  //         sharingSavedObjectProps: so.meta,
+  //         managed: so.item.managed,
+  //       },
+  //     };
+  //   },
+  //   checkForDuplicateTitle: (props: OnSaveProps) => {
+  //     return checkForDuplicateTitle({
+  //       title: props.newTitle,
+  //       isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+  //       onTitleDuplicate: props.onTitleDuplicate,
+  //       contentManagement: services.contentManagement,
+  //     });
+  //   },
+  // });
 }
 
 export const toSavedSearch = async (

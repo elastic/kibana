@@ -10,6 +10,7 @@ import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddabl
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { SortOrder } from '../..';
 import type { SavedSearchAttributes } from '../../../common';
 import type { SavedSearch as SavedSearchCommon } from '../../../common';

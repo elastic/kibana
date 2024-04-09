@@ -17,7 +17,11 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+} from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
@@ -37,6 +41,7 @@ import {
   toSavedSearch,
 } from './services/saved_searches';
 import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 
 /**
  * Saved search plugin public Setup contract
@@ -131,6 +136,15 @@ export class SavedSearchPublicPlugin
       }
     );
 
+    embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+      // const startServices = await getStartServices();
+      const [{ getSearchEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./embeddable/get_search_embeddable_factory'),
+        getStartServices(),
+      ]);
+      return getSearchEmbeddableFactory({ services: depsStart });
+    });
+
     return {};
   }
 
@@ -155,7 +169,7 @@ export class SavedSearchPublicPlugin
         return service.save(savedSearch, options);
       },
       byValue: {
-        attributeService: getSavedSearchAttributeService(deps),
+        attributeService: getSavedSearchAttributeService(deps), // TODO: ???
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
           return toSavedSearch(id, result, deps);
         },

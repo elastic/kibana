@@ -19,7 +19,11 @@ import {
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerReactEmbeddableFactory,
+} from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -56,10 +60,10 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
-import { SearchEmbeddableFactory } from './embeddable';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
+import { SEARCH_EMBEDDABLE_TYPE } from './embeddable/constants';
 import {
   DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
@@ -82,6 +86,7 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import { SearchEmbeddableFactory } from './embeddable';
 
 /**
  * @public
@@ -463,20 +468,27 @@ export class DiscoverPlugin
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    const getStartServices = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-      return {
-        executeTriggerActions: deps.uiActions.executeTriggerActions,
-        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
-      };
-    };
-
-    const getDiscoverServicesInternal = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-      return this.getDiscoverServices(coreStart, deps);
-    };
-
-    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    // const getStartServices = async () => {
+    //   const [coreStart, deps] = await core.getStartServices();
+    //   return {
+    //     executeTriggerActions: deps.uiActions.executeTriggerActions,
+    //     isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+    //   };
+    // };
+    // const getDiscoverServicesInternal = async () => {
+    //   const [coreStart, deps] = await core.getStartServices();
+    //   return this.getDiscoverServices(coreStart, deps);
+    // };
+    // console.log('here');
+    // registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    //   // const startServices = await getStartServices();
+    //   const discoverServices = await getDiscoverServicesInternal();
+    //   const { getSearchEmbeddableFactory } = await import(
+    //     './embeddable/get_search_embeddable_factory'
+    //   );
+    //   return getSearchEmbeddableFactory({ discoverServices });
+    // });
+    // const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
+    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 }

@@ -17,13 +17,20 @@ import {
   ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  apiCanAccessViewMode,
+  apiHasType,
+  apiIsOfType,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasType,
+} from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { apiHasSavedSearch, HasSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -32,16 +39,6 @@ import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { getI18nStrings } from './strings';
-
-function isSavedSearchEmbeddable(
-  embeddable: IEmbeddable | ISearchEmbeddable
-): embeddable is ISearchEmbeddable {
-  return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
-}
-
-export interface ActionContext {
-  embeddable: ISearchEmbeddable;
-}
 
 export interface PanelActionDependencies {
   data: DataPublicPluginStart;
@@ -79,7 +76,18 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
+type GetCsvActionApi = HasType & HasSavedSearch & CanAccessViewMode;
+
+const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
+  return (
+    apiHasType(api) &&
+    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
+    apiHasSavedSearch(api) &&
+    apiCanAccessViewMode(api)
+  );
+};
+
+export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
@@ -118,10 +126,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
-  public isCompatible = async (context: ActionContext) => {
+  public isCompatible = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
-    if (embeddable.type !== 'search') {
+    if (!compatibilityCheck(embeddable)) {
       return false;
     }
 
@@ -138,7 +146,15 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
 
-    return embeddable.getInput().viewMode !== ViewMode.EDIT;
+    const savedSearch = embeddable.getSavedSearch();
+    const query = savedSearch?.searchSource.getField('query');
+
+    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
+    if (query && Boolean(query && 'sql' in query)) {
+      // hide exporting CSV for SQL
+      return false;
+    }
+    return getInheritedViewMode(embeddable) !== ViewMode.EDIT;
   };
 
   /**
@@ -240,10 +256,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       });
   };
 
-  public execute = async (context: ActionContext) => {
+  public execute = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
-    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
+    if (!compatibilityCheck(embeddable) || !(await this.isCompatible(context))) {
       throw new IncompatibleActionError();
     }
 
