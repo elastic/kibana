@@ -116,7 +116,12 @@ export const createLogsExplorerProfileCustomizations =
     });
 
     /**
-     * Hide flyout actions to prevent rendering hard-coded actions.
+     * Flyout customization.
+     * The latest changes moved the implementation of the flyout overview tab into the unified_doc_viewer presets.
+     * To keep control over the overview tab and enable it only on the Logs Explorer,
+     * the docViewsRegistry is updated to allow enable/disable of any doc view.
+     * In a close future, when the contextual awareness for Discover will be in place,
+     * this configuration will be moved into a flavored logs experience directly defined in Discover.
      */
     customizations.set({
       id: 'flyout',
