@@ -45,7 +45,7 @@ describe(
 
       it('should disable the suppression fields incase of eql sequence query', () => {
         cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
-        cy.get(TOOLTIP).contains('Suppression is not available for sequence based queries');
+        cy.get(TOOLTIP).contains('Suppression is not supported for EQL sequence queries.');
       });
     });
   }
