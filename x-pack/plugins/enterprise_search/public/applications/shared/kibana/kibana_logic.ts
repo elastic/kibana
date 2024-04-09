@@ -43,39 +43,39 @@ type RequiredFieldsOnly<T> = {
 export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
-  charts: ChartsPluginStart;
+  charts?: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
-  connectorTypes: ConnectorDefinition[];
+  connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
+  data?: DataPublicPluginStart;
   esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
-  indexMappingComponent: React.FC<IndexMappingProps>;
+  indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
-  lens: LensPublicStart;
-  ml: MlPluginStart;
+  lens?: LensPublicStart;
+  ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
-  searchPlayground: SearchPlaygroundPluginStart;
-  security: SecurityPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
+  security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  share: SharePluginStart;
-  uiSettings: IUiSettingsClient;
+  share?: SharePluginStart;
+  uiSettings?: IUiSettingsClient;
   user: AuthenticatedUser | null;
 }
 
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'console'> {
-  cloud: Partial<CloudSetup>;
-  consolePlugin: Partial<ConsolePluginStart>;
-  data: DataPublicPluginStart;
+  cloud?: Partial<CloudSetup>;
+  consolePlugin?: Partial<ConsolePluginStart>;
+  data?: DataPublicPluginStart;
   isCloud: boolean;
-  lens: LensPublicStart;
+  lens?: LensPublicStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -118,7 +118,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     user: [props.user, {}],
   }),
   selectors: ({ selectors }) => ({
-    isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],
+    isCloud: [
+      () => [selectors.cloud],
+      (cloud?: Partial<CloudSetup>) => Boolean(cloud?.isCloudEnabled),
+    ],
   }),
 });
 
