@@ -20,6 +20,7 @@ import { ImageViewer } from './image_viewer';
 import { ImageViewerContext } from './image_viewer/image_viewer_context';
 
 import './image_embeddable.scss';
+import { BehaviorSubject } from 'rxjs';
 
 interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
@@ -32,7 +33,7 @@ interface ImageEmbeddableProps {
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
   const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
     api.imageConfig$,
-    api.dynamicActionsState$
+    api.dynamicActionsState$ ?? new BehaviorSubject<undefined>(undefined)
   );
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
