@@ -63,8 +63,8 @@ import {
 } from '../../register_apm_rule_types';
 import {
   getApmAlertSourceFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
@@ -200,7 +200,7 @@ export function registerErrorCountRuleType({
                 size: 1000,
                 order: { _count: 'desc' as const },
               },
-              aggs: getServiceGroupFieldsAgg(),
+              aggs: getApmAlertSourceFieldsAgg(),
             },
           },
         },
