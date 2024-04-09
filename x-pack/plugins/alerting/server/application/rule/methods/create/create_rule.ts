@@ -8,6 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { getSystemActionKibanaPrivileges } from '../../../../lib/get_system_action_kibana_privileges';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -98,14 +99,22 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   try {
-    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
-      context.authorization.ensureAuthorized({
+    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, async () => {
+      const additionalPrivileges = await getSystemActionKibanaPrivileges({
+        actionsClient,
+        connectorAdapterRegistry: context.connectorAdapterRegistry,
+        systemActions: data.systemActions,
+        consumer: data.consumer,
+      });
+
+      return context.authorization.ensureAuthorized({
         ruleTypeId: data.alertTypeId,
         consumer: data.consumer,
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
-      })
-    );
+        additionalPrivileges,
+      });
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
