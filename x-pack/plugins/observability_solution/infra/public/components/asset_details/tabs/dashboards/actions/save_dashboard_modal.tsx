@@ -249,7 +249,7 @@ function getLinkSuccessToastLabels(dashboardName: string) {
       defaultMessage: 'Added "{dashboardName}" dashboard',
       values: { dashboardName },
     }),
-    text: i18n.translate('xpack.infra.customDashboards.linkSuccess.toast.text', {
+    body: i18n.translate('xpack.infra.customDashboards.linkSuccess.toast.text', {
       defaultMessage: 'Your dashboard is now visible in the asset details page.',
     }),
   };
@@ -261,7 +261,7 @@ function getEditSuccessToastLabels(dashboardName: string) {
       defaultMessage: 'Edited "{dashboardName}" dashboard',
       values: { dashboardName },
     }),
-    text: i18n.translate('xpack.infra.customDashboards.editSuccess.toast.text', {
+    body: i18n.translate('xpack.infra.customDashboards.editSuccess.toast.text', {
       defaultMessage: 'Your dashboard link has been updated',
     }),
   };
