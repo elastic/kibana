@@ -12,6 +12,7 @@ interface DataViewOptions {
   name: string;
   adHoc?: boolean;
   hasTimeField?: boolean;
+  changeTimestampField?: string;
 }
 
 export class DataViewsService extends FtrService {
@@ -21,7 +22,12 @@ export class DataViewsService extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly header = this.ctx.getPageObjects(['header']).header;
 
-  private async create({ name, adHoc = false, hasTimeField = false }: DataViewOptions) {
+  private async create({
+    name, // Data View title, * will be added automatically
+    adHoc = false, // pass 'true' to have temporary Data View
+    hasTimeField = false, // pass 'true' if Data View has timestamp field
+    changeTimestampField, // optionally override default timestamp field
+  }: DataViewOptions) {
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
     await this.testSubjects.setValue('createIndexPatternTitleInput', name, {
       clearWithKeyboard: true,
@@ -32,6 +38,10 @@ export class DataViewsService extends FtrService {
         const timestampField = await this.testSubjects.find('timestampField');
         return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
       });
+
+      if (changeTimestampField) {
+        await this.comboBox.set('timestampField', changeTimestampField);
+      }
     }
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -40,18 +50,28 @@ export class DataViewsService extends FtrService {
   /**
    * Create a new Data View from top search bar
    */
-  async createFromSearchBar({ name, adHoc = false, hasTimeField = false }: DataViewOptions) {
+  async createFromSearchBar({
+    name,
+    adHoc = false,
+    hasTimeField = false,
+    changeTimestampField,
+  }: DataViewOptions) {
     await this.testSubjects.click('*dataView-switch-link');
     await this.testSubjects.click('dataview-create-new');
-    await this.create({ name, adHoc, hasTimeField });
+    await this.create({ name, adHoc, hasTimeField, changeTimestampField });
   }
 
   /**
    * Create the first Data View from Prompt, e.g. on Dashboard
    */
-  async createFromPrompt({ name, adHoc = false, hasTimeField = false }: DataViewOptions) {
+  async createFromPrompt({
+    name,
+    adHoc = false,
+    hasTimeField = false,
+    changeTimestampField,
+  }: DataViewOptions) {
     await this.testSubjects.click('createDataViewButton');
-    await this.create({ name, adHoc, hasTimeField });
+    await this.create({ name, adHoc, hasTimeField, changeTimestampField });
   }
 
   /**
