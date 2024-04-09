@@ -38,7 +38,6 @@ export const createListsIndex = () => {
   rootRequest({
     method: 'POST',
     url: '/api/lists/index',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -46,7 +45,6 @@ export const createListsIndex = () => {
 export const waitForListsIndex = () => {
   rootRequest({
     url: '/api/lists/index',
-    headers: { 'x-elastic-internal-origin': 'security-solution' },
     retryOnStatusCodeFailure: true,
   }).then((response) => {
     if (response.status !== 200) {
@@ -110,7 +108,6 @@ const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unkno
   return rootRequest({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
-    headers: { 'kbn-xsrf': 'delete-lists', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -141,8 +138,6 @@ const uploadListItemData = (
     url: `api/lists/items/_import?type=${type}&refresh=true`,
     encoding: 'binary',
     headers: {
-      'kbn-xsrf': 'upload-value-lists',
-      'x-elastic-internal-origin': 'security-solution',
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
@@ -219,7 +214,7 @@ export const addListItem = (value: string) => {
 };
 
 export const selectValueListsItemsFile = (file: string) => {
-  return cy.get(VALUE_LIST_ITEMS_FILE_PICKER).attachFile(file).trigger('change', { force: true });
+  return cy.get(VALUE_LIST_ITEMS_FILE_PICKER).attachFile(file).trigger('change');
 };
 
 export const uploadValueListsItemsFile = () => {

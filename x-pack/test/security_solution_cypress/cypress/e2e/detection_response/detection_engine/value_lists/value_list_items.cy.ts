@@ -43,7 +43,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Value list items',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -55,11 +55,6 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      deleteValueLists([
-        KNOWN_VALUE_LIST_FILES.TEXT,
-        KNOWN_VALUE_LIST_FILES.IPs,
-        KNOWN_VALUE_LIST_FILES.CIDRs,
-      ]);
       createListsIndex();
       visit(RULES_MANAGEMENT_URL);
       waitForListsIndex();
