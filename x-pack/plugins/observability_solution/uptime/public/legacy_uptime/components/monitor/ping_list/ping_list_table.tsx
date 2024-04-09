@@ -239,7 +239,7 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
               defaultMessage: 'No history found',
             })
       }
-      tableLayout={'auto'}
+      tableLayout="auto"
       rowProps={getRowProps}
       onChange={onChange}
     />

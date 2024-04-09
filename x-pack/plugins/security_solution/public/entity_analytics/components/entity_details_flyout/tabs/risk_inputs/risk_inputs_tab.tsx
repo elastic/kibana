@@ -186,7 +186,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <RiskInputsUtilityBar pagination={pagination} selectedAlerts={selectedItems} />
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
-        compressed={true}
+        compressed
         loading={loadingRiskScore || loadingAlerts}
         items={alertsData ?? []}
         columns={alertsColumns}

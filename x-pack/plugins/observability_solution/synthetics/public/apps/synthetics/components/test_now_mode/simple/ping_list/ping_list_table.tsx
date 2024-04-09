@@ -127,7 +127,7 @@ export function PingListTable({ loading, error, pings, onChange }: Props) {
               defaultMessage: 'No history found',
             })
       }
-      tableLayout={'auto'}
+      tableLayout="auto"
       onChange={onChange}
     />
   );

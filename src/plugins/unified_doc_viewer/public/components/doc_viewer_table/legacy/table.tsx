@@ -116,7 +116,6 @@ export const DocViewerLegacyTable = ({
       items={items}
       columns={tableColumns}
       rowProps={onSetRowProps}
-      pagination={false}
       responsiveBreakpoint={false}
     />
   );

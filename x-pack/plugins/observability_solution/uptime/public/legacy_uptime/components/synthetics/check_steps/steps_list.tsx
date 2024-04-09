@@ -247,7 +247,7 @@ export const StepsList = ({
                 defaultMessage: 'No history found',
               })
         }
-        tableLayout={'auto'}
+        tableLayout="auto"
         rowProps={getRowProps}
       />
     </>

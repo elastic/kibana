@@ -11,8 +11,7 @@ import {
   EuiBasicTable,
   EuiTableSortingType,
   EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
+  EuiHorizontalRule,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +49,6 @@ export const MonitorList = ({
   loadPage,
   reloadPage,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] =
@@ -104,8 +102,7 @@ export const MonitorList = ({
     <>
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
         {recordRangeLabel}
-        <EuiSpacer size="s" />
-        <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />
+        <EuiHorizontalRule margin="s" />
         <EuiBasicTable
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',

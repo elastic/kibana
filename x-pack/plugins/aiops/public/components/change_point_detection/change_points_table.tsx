@@ -313,7 +313,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
-      itemId={'id'}
+      itemId="id"
       selection={selectionValue}
       loading={isLoading}
       data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}

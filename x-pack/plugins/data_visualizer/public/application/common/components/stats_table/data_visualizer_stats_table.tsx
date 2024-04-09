@@ -395,7 +395,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       backgroundColor: euiTheme.colors.emptyShade,
       boxShadow: `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`,
     },
-    '.euiTableRow > .euiTableRowCel': {
+    '.euiTableRow > .euiTableRowCell': {
       borderTop: 0,
     },
     [useEuiMinBreakpoint('s')]: {

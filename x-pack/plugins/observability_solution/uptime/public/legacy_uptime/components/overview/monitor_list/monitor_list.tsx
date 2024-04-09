@@ -233,7 +233,7 @@ export const MonitorListComponent: ({
           <NoItemsMessage loading={Boolean(loading || isPending)} filters={filters} />
         }
         columns={columns}
-        tableLayout={'auto'}
+        tableLayout="auto"
         rowProps={
           hideExtraColumns
             ? ({ monitor_id: monitorId }) => ({
