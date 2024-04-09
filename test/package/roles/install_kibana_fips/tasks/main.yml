@@ -36,6 +36,22 @@
   template:
     src: templates/fips/nodejs.cnf
     dest: /usr/share/kibana/config/nodejs.cnf
+
+- name: download FIPS certified OpenSSL
+  retries: 5
+  delay: 10
+  get_url:
+    url: https://www.openssl.org/source/openssl-3.0.8.tar.gz
+    dest: /usr/share/kibana/openssl-3.0.8.tar.gz
+    checksum: "sha256:https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256"
+    # checksum: "sha256:6c13d2bf38fdf31eac3ce2a347073673f5d63263398f1f69d0df4a41253e4b3e"
+
+- name: extract OpenSSL
+  become: yes
+  unarchive:
+    src: /usr/share/kibana/openssl-3.0.8.tar.gz
+    dest: /usr/share/kibana
+    remote_src: yes
 # - name: start kibana
 #   become: yes
 #   docker_container:
