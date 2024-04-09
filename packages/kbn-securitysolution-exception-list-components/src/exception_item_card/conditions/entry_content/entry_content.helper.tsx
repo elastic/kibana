@@ -7,18 +7,27 @@
  */
 
 import React, { ElementType } from 'react';
+import { css } from '@emotion/css';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
+const entryValueWrapStyle = css`
+  white-space: pre-wrap;
+`;
+
+const EntryValueWrap = ({ children }: { children: React.ReactNode }) => (
+  <span className={entryValueWrapStyle}>{children}</span>
+);
+
 const getEntryValue = (type: string, value: string | string[], showValueListModal: ElementType) => {
   const ShowValueListModal = showValueListModal;
   if (type === 'match_any' && Array.isArray(value)) {
     return value.map((currentValue, index) => (
       <EuiBadge key={index} data-test-subj={`matchAnyBadge${index}`} color="hollow">
-        {currentValue}
+        <EntryValueWrap>{currentValue}</EntryValueWrap>
       </EuiBadge>
     ));
   } else if (type === 'list' && value) {
@@ -28,7 +37,7 @@ const getEntryValue = (type: string, value: string | string[], showValueListModa
       </ShowValueListModal>
     );
   }
-  return value ?? '';
+  return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
 };
 
 export const getEntryOperator = (type: ListOperatorTypeEnum, operator: string) => {
