@@ -50,7 +50,7 @@ export function PromptEditor({
 
   const [hasFocus, setHasFocus] = useState(false);
 
-  const { previousPrompts, addLastUsed: addPrompt } = useLastUsedPrompts();
+  const { lastUsedPrompts, addPrompt } = useLastUsedPrompts();
 
   const initialInnerMessage = initialRole
     ? {
@@ -181,7 +181,7 @@ export function PromptEditor({
           <PromptEditorNaturalLanguage
             disabled={disabled}
             prompt={innerMessage?.content}
-            previousPrompts={previousPrompts}
+            lastUsedPrompts={lastUsedPrompts}
             onChange={handleChangeMessageInner}
             onChangeHeight={onChangeHeight}
             onFocus={() => setHasFocus(true)}

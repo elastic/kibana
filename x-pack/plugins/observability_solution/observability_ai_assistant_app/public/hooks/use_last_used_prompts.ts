@@ -14,7 +14,7 @@ const AI_ASSISTANT_LAST_USED_PROMPT_STORAGE = 'kibana.ai-assistant.last-used-pro
 export function useLastUsedPrompts() {
   const { storage } = useKibana().services;
 
-  const previousPrompts = (storage.get(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE) as string[]) ?? [];
+  const lastUsedPrompts = (storage.get(AI_ASSISTANT_LAST_USED_PROMPT_STORAGE) as string[]) ?? [];
 
   useEffect(() => {
     window.addEventListener('local-storage', noop);
@@ -25,11 +25,11 @@ export function useLastUsedPrompts() {
   }, []);
 
   return {
-    previousPrompts,
-    addLastUsed: (prompt: string) => {
+    lastUsedPrompts,
+    addPrompt: (prompt: string) => {
       storage.set(
         AI_ASSISTANT_LAST_USED_PROMPT_STORAGE,
-        uniq([prompt, ...previousPrompts]).slice(0, 5)
+        uniq([prompt, ...lastUsedPrompts]).slice(0, 5)
       );
       window.dispatchEvent(
         new StorageEvent('local-storage', { key: AI_ASSISTANT_LAST_USED_PROMPT_STORAGE })

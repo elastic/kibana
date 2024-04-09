@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export function safeJsonParse(jsonStr: string) {
+export function safeJsonParse(jsonStr: string, defaultValue?: any) {
   try {
     return JSON.parse(jsonStr);
   } catch (err) {
-    return jsonStr;
+    return defaultValue ?? jsonStr;
   }
 }

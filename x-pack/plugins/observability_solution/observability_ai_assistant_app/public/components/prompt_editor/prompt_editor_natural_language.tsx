@@ -14,7 +14,7 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 interface Props {
   disabled: boolean;
   prompt: string | undefined;
-  previousPrompts: string[];
+  lastUsedPrompts: string[];
   onChange: (message: Message['message']) => void;
   onChangeHeight: (height: number) => void;
   onFocus: () => void;
@@ -39,7 +39,7 @@ const selectableClassName = css`
 export function PromptEditorNaturalLanguage({
   disabled,
   prompt,
-  previousPrompts,
+  lastUsedPrompts,
   onChange,
   onChangeHeight,
   onFocus,
@@ -144,7 +144,7 @@ export function PromptEditorNaturalLanguage({
           { defaultMessage: 'Select an option' }
         )}
         className={selectableClassName}
-        options={previousPrompts.map((label) => ({ label }))}
+        options={lastUsedPrompts.map((label) => ({ label }))}
         searchable
         singleSelection
         onChange={handleSelectOption}
