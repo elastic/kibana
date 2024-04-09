@@ -117,8 +117,12 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         serialize: serializeTimeRange,
       } = initializeTimeRange(state);
 
-      const { swimLaneControlsApi, serializeSwimLaneState, swimLaneComparators } =
-        initializeSwimLaneControls(state, titlesApi);
+      const {
+        swimLaneControlsApi,
+        serializeSwimLaneState,
+        swimLaneComparators,
+        onSwimLaneDestroy,
+      } = initializeSwimLaneControls(state, titlesApi);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
@@ -207,6 +211,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           const timeBuckets = useTimeBuckets(uiSettings);
 
           useUnmount(() => {
+            onSwimLaneDestroy();
             onDestroy();
             subscriptions.unsubscribe();
           });

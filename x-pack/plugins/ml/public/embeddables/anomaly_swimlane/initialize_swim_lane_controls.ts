@@ -8,7 +8,7 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import type { TitlesApi } from '@kbn/presentation-publishing/interfaces/titles/titles_api';
 import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableUserInput } from '..';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -46,6 +46,10 @@ export const initializeSwimLaneControls = (
     }
   };
 
+  const subscription = combineLatest([jobIds, swimlaneType, viewBy]).subscribe(() => {
+    updatePagination({ fromPage: 1 });
+  });
+
   const serializeSwimLaneState = (): AnomalySwimLaneControlsState => {
     return {
       jobIds: jobIds.value,
@@ -74,5 +78,14 @@ export const initializeSwimLaneControls = (
     } as unknown as AnomalySwimLaneComponentApi,
     serializeSwimLaneState,
     swimLaneComparators,
+    onSwimLaneDestroy: () => {
+      subscription.unsubscribe();
+
+      jobIds.complete();
+      swimlaneType.complete();
+      viewBy.complete();
+      fromPage.complete();
+      perPage.complete();
+    },
   };
 };
