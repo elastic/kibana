@@ -35,7 +35,7 @@
   become: yes
   template:
     src: templates/fips/nodejs.cnf
-    dest: /usr/share/kibana/config/openssl-3.0.8/nodejs.cnf
+    dest: /usr/share/kibana/config/nodejs.cnf
 # - name: find docker image
 #   find:
 #     paths: /packages/
