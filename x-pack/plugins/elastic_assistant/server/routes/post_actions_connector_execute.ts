@@ -37,6 +37,7 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
+import { getLangSmithTracer } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -89,6 +90,8 @@ export const postActionsConnectorExecuteRoute = (
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
+          const langSmithProject = request.body.langSmithProject;
+          const langSmithApiKey = request.body.langSmithApiKey;
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
           if (request.body.message) {
@@ -266,6 +269,14 @@ export const postActionsConnectorExecuteRoute = (
               replacements: request.body.replacements,
               size: request.body.size,
               telemetry,
+              traceOptions: {
+                projectName: langSmithProject,
+                tracers: getLangSmithTracer({
+                  apiKey: langSmithApiKey,
+                  projectName: langSmithProject,
+                  logger,
+                }),
+              },
             });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
