@@ -24,8 +24,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
   download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 elif [[ "$TEST_PACKAGE" == "fips" ]]; then
-  download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "018e7704-de0c-4328-a028-b64889d6d3f8"
-  # download_artifact "kibana-ubi-fips-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-*-linux-x86_64.tar.gz" . --build "018e7d6c-f037-430f-87f7-fa915fd919dc"
   KIBANA_IP_ADDRESS="192.168.56.8"
 fi
 cd ..

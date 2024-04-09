@@ -1,32 +1,68 @@
-- name: find docker image
+- name: ensures usr/share/kibana dir exists
+  file:
+    path: "usr/share/kibana"
+    state: directory
+
+- name: find kibana distribution
   find:
     paths: /packages/
-    patterns: kibana-ubi-fips-[0-9]*-docker-image.tar.gz
-  register: kibana_fips
+    patterns: kibana-*-linux-x86_64.tar.gz
+  register: kibana_tar
 
-- name: set image tag
-  set_fact:
-    kibana_image_tag: "{{ kibana_fips.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}-7f16d8b7f7e0faca2ecc49980dbd19563e78ceeb"
-
-- name: load image
+- name: extract kibana distribution
   become: yes
-  docker_image:
-    name: "docker.elastic.co/kibana-ci/kibana-ubi-fips"
-    tag: "{{ kibana_image_tag }}"
-    load_path: '{{ kibana_fips.files[0].path }}'
-    timeout: 300
-    source: load
-    state: present
+  unarchive:
+    src: "{{ kibana_tar.files[0].path }}"
+    dest: /usr/share/kibana
+    remote_src: yes
+# - name: find docker image
+#   find:
+#     paths: /packages/
+#     patterns: kibana-ubi-fips-[0-9]*-docker-image.tar.gz
+#   register: kibana_fips
 
-- name: start kibana
-  become: yes
-  docker_container:
-    name: kibana
-    image: "docker.elastic.co/kibana-ci/kibana-ubi-fips:{{ kibana_image_tag }}"
-    network_mode: host
-    env:
-      SERVER_HOST: 0.0.0.0
-      ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
-      ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'
-      ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'
-      XPACK_REPORTING_CAPTURE_BROWSER_CHROMIUM_DISABLESANDBOX: 'true'
+# - name: set image tag
+#   set_fact:
+#     kibana_image_tag: "{{ kibana_fips.files[0].path | basename| regex_search('kibana-ubi-fips-(.*)-docker-image.tar.gz', '\\1') | first }}-7f16d8b7f7e0faca2ecc49980dbd19563e78ceeb"
+
+# - name: load image
+#   become: yes
+#   docker_image:
+#     name: "docker.elastic.co/kibana-ci/kibana-ubi-fips"
+#     tag: "{{ kibana_image_tag }}"
+#     load_path: '{{ kibana_fips.files[0].path }}'
+#     timeout: 300
+#     source: load
+#     state: present
+
+# - name: start kibana
+#   become: yes
+#   docker_container:
+#     name: kibana
+#     image: "docker.elastic.co/kibana-ci/kibana-ubi-fips:{{ kibana_image_tag }}"
+#     network_mode: host
+#     env:
+#       SERVER_HOST: 0.0.0.0
+#       ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
+#       ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'
+#       ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'
+#       XPACK_REPORTING_CAPTURE_BROWSER_CHROMIUM_DISABLESANDBOX: 'true'
+
+# - name: copy configuration
+#   become: yes
+#   template:
+#     src: templates/kibana.yml
+#     dest: /usr/share/kibana/kibana.yml
+#   register: config
+
+# - name: copy fips node.options
+#   become: yes
+#   template:
+#     src: templates/fips/node.options
+#     dest: /usr/share/kibana/node.options
+
+# - name: copy fips openssl config
+#   become: yes
+#   template:
+#     src: templates/fips/nodejs.cnf
+#     dest: /usr/share/kibana/openssl-3.0.8/nodejs.cnf

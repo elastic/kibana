@@ -1,7 +1,6 @@
 - name: test kibana fips docker package
   hosts: fips
   roles:
-    - install_docker
     - install_kibana_fips
     - assert_kibana_listening
     - assert_kibana_available
