@@ -23,6 +23,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   idAria: string;
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
+  includePlugins?: boolean;
 };
 /* eslint-enable react/no-unused-prop-types */
 
@@ -34,7 +35,7 @@ const BottomContentWrapper = styled(EuiFlexGroup)`
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ id, field, dataTestSubj, idAria, bottomRightContent }, ref) => {
+    ({ id, field, dataTestSubj, idAria, bottomRightContent, includePlugins }, ref) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
@@ -58,6 +59,7 @@ export const MarkdownEditorForm = React.memo(
               value={field.value as string}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
               setIsMarkdownInvalid={setIsMarkdownInvalid}
+              includePlugins={includePlugins}
             />
             {bottomRightContent && (
               <BottomContentWrapper justifyContent={'flexEnd'}>
