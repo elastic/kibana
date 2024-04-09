@@ -91,7 +91,12 @@ export function TrainedModelsDeploymentModal({
       </p>
       <ul style={{ listStyleType: 'none' }}>{pendingDeploymentsList}</ul>
       <EuiLink href={mlManagementPageUrl} target="_blank">
-        Go to Trained Model Management
+        {i18n.translate(
+          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textTrainedModelManagementLink',
+          {
+            defaultMessage: 'Go to Trained Model Management',
+          }
+        )}
       </EuiLink>
     </EuiConfirmModal>
   ) : null;
