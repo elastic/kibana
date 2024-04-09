@@ -17,32 +17,28 @@ import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client
 import { getApmServiceSummary } from '../get_apm_service_summary';
 import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogCategories } from '../get_log_categories';
-import {
-  ApmTimeseriesType,
-  getApmTimeseries,
-  TimeseriesChangePoint,
-} from '../get_apm_timeseries';
+import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 
-export const apmAlertDetailsContextRt = t.intersection([
+export const observabilityAlertDetailsContextRt = t.intersection([
   t.type({
-    'service.name': t.string,
     alert_started_at: t.string,
   }),
   t.partial({
+    // apm fields
+    'service.name': t.string,
     'service.environment': t.string,
     'transaction.type': t.string,
     'transaction.name': t.string,
 
-    // alert fields
+    // infrastructure fields
     'host.name': t.string,
     'container.id': t.string,
   }),
 ]);
 
-export async function getApmAlertDetailsContext({
+export async function getObservabilityAlertDetailsContext({
   coreContext,
-  alertStartedAt,
   annotationsClient,
   apmAlertsClient,
   apmEventClient,
@@ -54,37 +50,42 @@ export async function getApmAlertDetailsContext({
   coreContext: CoreRequestHandlerContext;
   annotationsClient?: ScopedAnnotationsClient;
   apmAlertsClient: ApmAlertsClient;
-  alertStartedAt: string;
   apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   mlClient?: MlClient;
-  query: t.TypeOf<typeof apmAlertDetailsContextRt>;
+  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
 }) {
-  const serviceSummaryPromise = getApmServiceSummary({
-    apmEventClient,
-    annotationsClient,
-    esClient,
-    apmAlertsClient,
-    mlClient,
-    logger,
-    arguments: {
-      'service.name': query['service.name'],
-      'service.environment': query['service.environment'],
-      start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-      end: alertStartedAt,
-    },
-  });
+  const alertStartedAt = query.alert_started_at;
 
-  const downstreamDependenciesPromise = getAssistantDownstreamDependencies({
-    apmEventClient,
-    arguments: {
-      'service.name': query['service.name'],
-      'service.environment': query['service.environment'],
-      start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-      end: alertStartedAt,
-    },
-  });
+  const serviceSummaryPromise = query['service.name']
+    ? getApmServiceSummary({
+        apmEventClient,
+        annotationsClient,
+        esClient,
+        apmAlertsClient,
+        mlClient,
+        logger,
+        arguments: {
+          'service.name': query['service.name'],
+          'service.environment': query['service.environment'],
+          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+          end: alertStartedAt,
+        },
+      })
+    : undefined;
+
+  const downstreamDependenciesPromise = query['service.name']
+    ? getAssistantDownstreamDependencies({
+        apmEventClient,
+        arguments: {
+          'service.name': query['service.name'],
+          'service.environment': query['service.environment'],
+          start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+          end: alertStartedAt,
+        },
+      })
+    : undefined;
 
   const logCategoriesPromise = getLogCategories({
     esClient,
@@ -98,7 +99,66 @@ export async function getApmAlertDetailsContext({
     },
   });
 
-  const serviceTimeseriesPromise = getApmTimeseries({
+  const serviceChangePointsPromise = getServiceChangePoints({
+    apmEventClient,
+    alertStartedAt,
+    query,
+  });
+
+  const exitSpanChangePointsPromise = getExitSpanChangePoints({
+    apmEventClient,
+    alertStartedAt,
+    query,
+  });
+
+  const anomaliesPromise = getAnomalies({
+    start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
+    end: moment(alertStartedAt).valueOf(),
+    environment: query['service.environment'],
+    mlClient,
+    logger,
+  });
+
+  const [
+    serviceSummary,
+    downstreamDependencies,
+    logCategories,
+    serviceChangePoints,
+    exitSpanChangePoints,
+    anomalies,
+  ] = await Promise.all([
+    serviceSummaryPromise,
+    downstreamDependenciesPromise,
+    logCategoriesPromise,
+    serviceChangePointsPromise,
+    exitSpanChangePointsPromise,
+    anomaliesPromise,
+  ]);
+
+  return {
+    serviceSummary,
+    downstreamDependencies,
+    logCategories,
+    serviceChangePoints,
+    exitSpanChangePoints,
+    anomalies,
+  };
+}
+
+async function getServiceChangePoints({
+  apmEventClient,
+  alertStartedAt,
+  query,
+}: {
+  apmEventClient: APMEventClient;
+  alertStartedAt: string;
+  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+}) {
+  if (!query['service.name']) {
+    return [];
+  }
+
+  const res = await getApmTimeseries({
     apmEventClient,
     arguments: {
       start: moment(alertStartedAt).subtract(12, 'hours').toISOString(),
@@ -147,7 +207,27 @@ export async function getApmAlertDetailsContext({
     },
   });
 
-  const exitSpanTimeseriesPromise = getApmTimeseries({
+  return res.map((timeseries) => ({
+    title: timeseries.stat.title,
+    grouping: timeseries.id,
+    changes: timeseries.changes,
+  }));
+}
+
+async function getExitSpanChangePoints({
+  apmEventClient,
+  alertStartedAt,
+  query,
+}: {
+  apmEventClient: APMEventClient;
+  alertStartedAt: string;
+  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+}) {
+  if (!query['service.name']) {
+    return [];
+  }
+
+  const res = await getApmTimeseries({
     apmEventClient,
     arguments: {
       start: moment(alertStartedAt).subtract(30, 'minute').toISOString(),
@@ -173,68 +253,11 @@ export async function getApmAlertDetailsContext({
     },
   });
 
-  const anomaliesPromise = getAnomalies({
-    start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
-    end: moment(alertStartedAt).valueOf(),
-    environment: query['service.environment'],
-    mlClient,
-    logger,
+  return res.map((timeseries) => {
+    return {
+      title: timeseries.stat.title,
+      grouping: timeseries.id,
+      changes: timeseries.changes,
+    };
   });
-
-  const [
-    serviceSummary,
-    downstreamDependencies,
-    logCategories,
-    serviceTimeseries,
-    exitSpanTimeseries,
-    anomalies,
-  ] = await Promise.all([
-    serviceSummaryPromise,
-    downstreamDependenciesPromise,
-    logCategoriesPromise,
-    serviceTimeseriesPromise,
-    exitSpanTimeseriesPromise,
-    anomaliesPromise,
-  ]);
-
-  const serviceChangePoints = serviceTimeseries.map(
-    (
-      timeseries
-    ): {
-      title: string;
-      grouping: string;
-      changes: TimeseriesChangePoint[];
-    } => {
-      return {
-        title: timeseries.stat.title,
-        grouping: timeseries.id,
-        changes: timeseries.changes,
-      };
-    }
-  );
-
-  const exitSpanChangePoints = exitSpanTimeseries.map(
-    (
-      timeseries
-    ): {
-      title: string;
-      grouping: string;
-      changes: TimeseriesChangePoint[];
-    } => {
-      return {
-        title: timeseries.stat.title,
-        grouping: timeseries.id,
-        changes: timeseries.changes,
-      };
-    }
-  );
-
-  return {
-    serviceSummary,
-    downstreamDependencies,
-    logCategories,
-    serviceChangePoints,
-    exitSpanChangePoints,
-    anomalies,
-  };
 }

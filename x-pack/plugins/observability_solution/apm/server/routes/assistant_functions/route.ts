@@ -12,9 +12,9 @@ import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
-  apmAlertDetailsContextRt,
-  getApmAlertDetailsContext,
-} from './get_apm_alert_details_context';
+  observabilityAlertDetailsContextRt,
+  getObservabilityAlertDetailsContext,
+} from './get_observability_alert_details_context';
 
 import {
   downstreamDependenciesRouteRt,
@@ -31,20 +31,20 @@ import {
 } from './get_apm_timeseries';
 import { LogCategories } from './get_log_categories';
 
-const getApmAlertDetailsContextRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assistant/get_apm_alert_details_context',
+const getObservabilityAlertDetailsContextRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
   options: {
     tags: ['access:apm', 'access:ai_assistant'],
   },
 
   params: t.type({
-    query: apmAlertDetailsContextRt,
+    query: observabilityAlertDetailsContextRt,
   }),
   handler: async (
     resources
   ): Promise<{
-    serviceSummary: ServiceSummary;
-    downstreamDependencies: APMDownstreamDependency[];
+    serviceSummary?: ServiceSummary;
+    downstreamDependencies?: APMDownstreamDependency[];
     logCategories: LogCategories;
     serviceChangePoints: Array<{
       title: string;
@@ -58,8 +58,6 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
   }> => {
     const { context, request, plugins, logger, params } = resources;
     const { query } = params;
-
-    const alertStartedAt = query.alert_started_at;
 
     const [
       apmEventClient,
@@ -81,9 +79,8 @@ const getApmAlertDetailsContextRoute = createApmServerRoute({
     ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return getApmAlertDetailsContext({
+    return getObservabilityAlertDetailsContext({
       coreContext,
-      alertStartedAt,
       annotationsClient,
       apmAlertsClient,
       apmEventClient,
