@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface PanelPackage {
-  panelType: string;
-  initialState?: object;
-}
+import { PanelPackage } from './presentation_container';
 
 /**
  * This API can add a new panel as a child.
