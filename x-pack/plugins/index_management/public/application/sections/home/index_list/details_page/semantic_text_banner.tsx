@@ -15,7 +15,6 @@ interface SemanticTextBannerProps {
 export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBannerProps) {
   const [isSemanticTextBannerDisplayable, setIsSemanticTextBannerDisplayable] =
     useState<boolean>(true);
-  const bannerText = 'semantic_text field type is now available!';
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
       <EuiPanel color="success" data-test-subj="indexDetailsMappingsSemanticTextBanner">
@@ -26,7 +25,7 @@ export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBanner
                 id="xpack.idxMgmt.indexDetails.mappings.semanticText.description"
                 defaultMessage="{label} Add a field to your mapping and choose 'semantic_text to get started.'"
                 values={{
-                  label: <strong>{bannerText}</strong>,
+                  label: <strong>semantic_text field type now available!</strong>,
                 }}
               />
             </EuiText>
