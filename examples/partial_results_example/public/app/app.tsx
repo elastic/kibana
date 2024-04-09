@@ -54,7 +54,6 @@ export function App() {
         <EuiSpacer size={'m'} />
         {datatable ? (
           <EuiBasicTable
-            textOnly={true}
             data-test-subj={'example-table'}
             columns={datatable.columns?.map(({ id: field, name }) => ({
               field,

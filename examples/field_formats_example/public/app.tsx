@@ -61,7 +61,6 @@ const UsingAnExistingFieldFormatExample: React.FC<{ deps: Deps }> = (props) => {
       <EuiBasicTable
         data-test-subj={'example1 sample table'}
         items={sample}
-        textOnly={true}
         columns={[
           {
             field: 'raw',
@@ -100,7 +99,6 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
       <EuiSpacer size={'s'} />
       <EuiBasicTable
         items={sample}
-        textOnly={true}
         data-test-subj={'example2 sample table'}
         columns={[
           {
