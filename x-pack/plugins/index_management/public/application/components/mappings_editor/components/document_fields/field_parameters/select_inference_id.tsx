@@ -15,6 +15,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
+  EuiSelectable,
   EuiSelectableOption,
   EuiSpacer,
   EuiText,
@@ -27,7 +28,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { Form, UseField, useForm, MultiSelectField } from '../../../shared_imports';
+import { Form, UseField, useForm } from '../../../shared_imports';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -69,6 +70,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       try {
         const { error } = await api.createInferenceEndpoint(inferenceId, taskType, modelConfig);
+
         if (!error) {
           setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
           await setInferenceModels();
@@ -176,27 +178,36 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
             </h3>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          <UseField path="main">
-            {(field) => (
+
+          <EuiSelectable
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+              {
+                defaultMessage: 'Search',
+              }
+            )}
+            data-test-subj={dataTestSubj}
+            searchable
+            singleSelection
+            searchProps={{
+              compressed: true,
+              placeholder: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
+                {
+                  defaultMessage: 'Search',
+                }
+              ),
+            }}
+            options={options}
+            onChange={(newOptions) => setOptions(newOptions)}
+          >
+            {(list, search) => (
               <>
-                <MultiSelectField
-                  field={field}
-                  euiFieldProps={{
-                    options: options,
-                    singleSelection: true,
-                    searchable: true,
-                    height: 100,
-                    onChange: setOptions,
-                    searchProps: {
-                      compressed: true,
-                      placeholder: 'Search',
-                    },
-                  }}
-                  data-test-subj={dataTestSubj}
-                />
+                {search}
+                {list}
               </>
             )}
-          </UseField>
+          </EuiSelectable>
         </EuiPanel>
       </EuiPopover>
     );
@@ -210,11 +221,6 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
             <InferenceFlyoutWrapper
               elserv2documentationUrl={docLinks.links.ml.nlpElser}
               e5documentationUrl={docLinks.links.ml.nlpE5}
-              onSaveInferenceEndpoint={onSaveInferenceCallback}
-              onFlyoutClose={setIsInferenceFlyoutVisible}
-              isInferenceFlyoutVisible={isInferenceFlyoutVisible}
-              supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
-              nlpImportModel={docLinks.links.ml.nlpImportModel}
               errorCallout={
                 inferenceAddError && (
                   <EuiFlexItem grow={false}>
@@ -241,6 +247,11 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
                   </EuiFlexItem>
                 )
               }
+              onSaveInferenceEndpoint={onSaveInferenceCallback}
+              onFlyoutClose={setIsInferenceFlyoutVisible}
+              isInferenceFlyoutVisible={isInferenceFlyoutVisible}
+              supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
+              nlpImportModel={docLinks.links.ml.nlpImportModel}
             />
           )}
         </EuiFlexItem>
