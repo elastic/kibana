@@ -122,5 +122,6 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-containers",
+    "@kbn/presentation-panel-plugin",
   ],
 }
