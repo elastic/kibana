@@ -16,7 +16,7 @@ const MAX_VIEW_AGENTS_COUNT = 1000;
 export const ViewAgentsButton: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-  agentPolicies: AgentPolicy[];
+  agentPolicies?: AgentPolicy[];
 }> = ({ action, onClickViewAgents, agentPolicies }) => {
   const isDisabled = useMemo(() => {
     if (action.type !== 'POLICY_CHANGE') {
@@ -24,7 +24,7 @@ export const ViewAgentsButton: React.FunctionComponent<{
     }
 
     const actionPolicyId = action.actionId.split(':')[0];
-    return agentPolicies.find((agentPolicy) => agentPolicy.id === actionPolicyId)?.agents === 0;
+    return agentPolicies?.find((agentPolicy) => agentPolicy.id === actionPolicyId)?.agents === 0;
   }, [action, agentPolicies]);
 
   if (action.type === 'UPDATE_TAGS') {
