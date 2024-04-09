@@ -26,7 +26,7 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
 );
 
 export const ASSET_CRITICALITY = i18n.translate(
-  'xpack.securitySolution.navigation.entityRiskScore',
+  'xpack.securitySolution.navigation.assetCriticality',
   {
     defaultMessage: 'Asset criticality',
   }

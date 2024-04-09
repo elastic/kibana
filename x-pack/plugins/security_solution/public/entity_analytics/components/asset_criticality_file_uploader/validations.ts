@@ -82,7 +82,7 @@ export const validateFile = (
     return {
       valid: false,
       errorMessage: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.emptyFileErrorMessage',
+        'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileSizeExceedsLimitErrorMessage',
         {
           defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
           values: {
