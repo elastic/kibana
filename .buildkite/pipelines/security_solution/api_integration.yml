@@ -133,12 +133,23 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: Running rule_execution_logic:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:qa:serverless
         key: rule_execution_logic:qa:serverless
+        agents:
+          queue: n2-4-spot
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
+              limit: 2
+
+      - label: Running rule_execution_logic:essentials:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:essentials:qa:serverless
+        key: rule_execution_logic:essentials:qa:serverless
         agents:
           queue: n2-4-spot
         timeout_in_minutes: 120
@@ -289,7 +300,6 @@ steps:
           automatic:
             - exit_status: '1'
               limit: 2
-
 
       - label: Running rule_management:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless

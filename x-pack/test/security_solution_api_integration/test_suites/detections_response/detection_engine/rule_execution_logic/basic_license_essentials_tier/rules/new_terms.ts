@@ -51,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+
   /**
    * indexes 2 sets of documents:
    * - documents in historical window
@@ -80,8 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/180236
-  describe.skip('@ess @serverless New terms type rules', () => {
+  describe('@ess @serverless New terms type rules', () => {
     before(async () => {
       await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
@@ -94,12 +94,13 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
+    // Failing: See https://github.com/elastic/kibana/issues/180236
     // First test creates a real rule - remaining tests use preview API
 
     // This test also tests that alerts are NOT created for terms that are not new: the host name
     // suricata-sensor-san-francisco appears in a document at 2019-02-19T20:42:08.230Z, but also appears
     // in earlier documents so is not new. An alert should not be generated for that term.
-    it('should generate 1 alert with 1 selected field', async () => {
+    it.skip('should generate 1 alert with 1 selected field', async () => {
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],

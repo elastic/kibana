@@ -134,6 +134,12 @@
     "rule_execution_logic:server:ess": "npm run initialize-server:de rule_execution_logic ess",
     "rule_execution_logic:runner:ess": "npm run run-tests:de rule_execution_logic ess essEnv",
 
+    "rule_execution_logic:essentials:server:serverless": "npm run initialize-server:de:basic_essentials rule_execution_logic serverless",
+    "rule_execution_logic:essentials:runner:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic serverless serverlessEnv",
+    "rule_execution_logic:essentials:qa:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic serverless qaEnv",
+    "rule_execution_logic:basic:server:ess": "npm run initialize-server:de:basic_essentials rule_execution_logic ess",
+    "rule_execution_logic:basic:runner:ess": "npm run run-tests:de:basic_essentials rule_execution_logic ess essEnv",
+
     "rule_creation:server:serverless": "npm run initialize-server:rm rule_creation serverless",
     "rule_creation:runner:serverless": "npm run run-tests:rm rule_creation serverless serverlessEnv",
     "rule_creation:qa:serverless": "npm run run-tests:rm rule_creation serverless qaEnv",

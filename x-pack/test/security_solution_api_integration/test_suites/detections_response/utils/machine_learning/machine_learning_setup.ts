@@ -20,6 +20,7 @@ export const executeSetupModuleRequest = async ({
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
     .set(getCommonRequestHeader('1'))
+    .set('x-elastic-internal-origin', 'Kibana')
     .send({
       prefix: '',
       groups: ['auditbeat'],
@@ -44,6 +45,7 @@ export const forceStartDatafeeds = async ({
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/jobs/force_start_datafeeds`)
+    .set('x-elastic-internal-origin', 'Kibana')
     .set(getCommonRequestHeader('1'))
     .send({
       datafeedIds: [`datafeed-${jobId}`],
