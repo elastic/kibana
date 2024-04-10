@@ -51,6 +51,19 @@ export const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
+          link: 'visualize',
+          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+            defaultMessage: 'Visualizations',
+          }),
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+              pathNameSerialized.startsWith(prepend('/app/lens')) ||
+              pathNameSerialized.startsWith(prepend('/app/maps'))
+            );
+          },
+        },
+        {
           link: 'management:triggersActions',
           title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
             defaultMessage: 'Alerts',
