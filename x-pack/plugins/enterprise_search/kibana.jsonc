@@ -32,13 +32,13 @@
       "embeddable",
       "discover",
       "charts",
-      "logsShared",
       "cloud",
       "lens",
       "share",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "logsShared"
     ]
   }
 }
