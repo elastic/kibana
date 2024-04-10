@@ -17,8 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import React, { useCallback, useState } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { IShareContext } from '../../context';
 
@@ -50,7 +49,6 @@ export const LinkContent = ({
   shareableUrlLocatorParams,
   allowShortUrl,
 }: LinkProps) => {
-  const isMounted = useMountedState();
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
@@ -154,17 +152,13 @@ export const LinkContent = ({
 
     if (objectType === 'dashboard' || objectType === 'search') {
       tempUrl = getSnapshotUrl();
-    } else if ('lens') {
+    } else if (objectType === 'lens') {
       tempUrl = getSavedObjectUrl() as string;
     }
     const urlToCopy = allowShortUrl ? await createShortUrl() : tempUrl;
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl]);
-
-  useEffect(() => {
-    isMounted();
-  }, [objectType, isDirty, isMounted, setUrlHelper]);
 
   const renderSaveState =
     objectType === 'lens' && isNotSaved() ? (
