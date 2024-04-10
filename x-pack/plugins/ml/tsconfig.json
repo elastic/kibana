@@ -123,6 +123,5 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
-    "@kbn/shared-ux-utility",
   ],
 }
