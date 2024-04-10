@@ -16,19 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const dataViews = getService('dataViews');
 
   const esArchiver = getService('esArchiver');
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
-
-  const createDataView = async (dataViewName: string) => {
-    await PageObjects.discover.clickIndexPatternActions();
-    await PageObjects.discover.clickCreateNewDataView();
-    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await testSubjects.click('exploreIndexPatternButton');
-  };
 
   describe('discover search CCS timeout', () => {
     before(async () => {
@@ -51,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('timeout on single shard shows warning and results', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await createDataView('ftr-remote:logstash-*,logstash-*');
+      await dataViews.createFromSearchBar({ name: 'ftr-remote:logstash-*,logstash-*' });
 
       // Add a stall time to the remote indices
       await filterBar.addDslFilter(`
