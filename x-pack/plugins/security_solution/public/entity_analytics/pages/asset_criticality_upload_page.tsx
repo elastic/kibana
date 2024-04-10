@@ -67,7 +67,7 @@ export const AssetCriticalityUploadPage = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.title"
-                  defaultMessage="What is asset criticality??"
+                  defaultMessage="What is asset criticality?"
                 />
               </h3>
             </EuiTitle>
