@@ -61,7 +61,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   expressionPlugins,
   docLinks,
   canShowConsumerSelection = false,
-  validConsumers = [],
+  validConsumers,
 }) => {
   const [metadata, setMetadata] = useState();
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
@@ -79,7 +79,6 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   const { euiTheme } = useEuiTheme();
   const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);
 
-  // TODO: Hide this in edit mode
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
       return false;
@@ -117,18 +116,22 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
         style={{ borderBottom: `1px solid ${euiTheme.colors.lightShade}` }}
       >
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">
             <EuiText size="xs">
               <strong>{ruleTypeModel.name}</strong>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeDescription">
             <EuiText size="xs">{ruleTypeModel.description}</EuiText>
           </EuiFlexItem>
           {docsUrl && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <EuiLink href={docsUrl} target="_blank">
+                <EuiLink
+                  href={docsUrl}
+                  target="_blank"
+                  data-test-subj="ruleDefinitionHeaderDocsLink"
+                >
                   {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.documentationLink', {
                     defaultMessage: 'View documentation',
                   })}
@@ -166,6 +169,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                   color="danger"
                   iconType="warning"
                   title={ruleParamsErrorList.join(' ')}
+                  data-test-subj="ruleParamsErrorCallout"
                 />
               )}
               <EuiErrorBoundary>
@@ -173,7 +177,6 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                   id={ruleId}
                   ruleParams={ruleParams}
                   ruleInterval={ruleInterval}
-                  ruleThrottle={''}
                   errors={ruleParamsErrors}
                   setRuleParams={(key, value) => dispatch(setParam([key, value]))}
                   setRuleProperty={(_, value) => {

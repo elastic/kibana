@@ -85,6 +85,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
                   validConsumers={validConsumers}
                 />
               ),
+              'data-test-subj': 'ruleDefinitionStep',
             },
             {
               title: 'Actions',
@@ -100,6 +101,7 @@ export const RuleFormPage: React.FC<RuleFormPageProps> = ({
               title: 'Rule details',
               children: <RuleDetails />,
               status: stepStatuses.ruleDetails,
+              'data-test-subj': 'ruleDetailsStep',
             },
           ]}
         />

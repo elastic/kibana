@@ -34,6 +34,7 @@ const EditRuleProvider: React.FC<{
   if (isLoading) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="ruleFormLoadingPrompt"
         icon={<EuiLoadingLogo size="xl" />}
         title={
           <h2>

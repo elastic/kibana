@@ -44,9 +44,9 @@ export const ReduxStoreProvider: React.FC<ReduxStoreProviderProps> = ({
         ? initialRuleToInitialState(initialRule)
         : {
             ruleDetails: { name: `${ruleTypeModel.name} rule`, tags: [] },
-            ruleDefinition: { consumer },
+            ruleDefinition: { consumer, params: ruleTypeModel.defaultRuleParams ?? {} },
           },
-    [ruleTypeModel.name, consumer, initialRule]
+    [ruleTypeModel, consumer, initialRule]
   );
 
   const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);

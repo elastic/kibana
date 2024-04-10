@@ -19,6 +19,7 @@ export const useAuthorizedConsumers = (
     if (!ruleTypeModel.authorizedConsumers) {
       return [];
     }
+
     return Object.entries(ruleTypeModel.authorizedConsumers).reduce<RuleCreationValidConsumer[]>(
       (result, [authorizedConsumer, privilege]) => {
         if (

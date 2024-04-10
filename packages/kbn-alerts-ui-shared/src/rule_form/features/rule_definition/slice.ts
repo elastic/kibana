@@ -21,7 +21,7 @@ import {
 import { useRuleFormSelector } from '../../hooks';
 import { DEFAULT_VALID_CONSUMERS, hydrateState } from '../../common/constants';
 
-const initialState: {
+export const initialState: {
   id: string;
   params: Record<string, unknown>;
   schedule: {

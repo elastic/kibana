@@ -10,7 +10,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { IErrorObject } from '../../types';
+import { RuleFormValidationErrorObject } from '../../types';
 import { useRuleFormSelector, useRuleFormDispatch } from '../../hooks';
 import { setConsumer } from './slice';
 
@@ -69,7 +69,7 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 
 export interface RuleFormConsumerSelectionProps {
   validConsumers: RuleCreationValidConsumer[];
-  errors?: IErrorObject;
+  errors?: RuleFormValidationErrorObject;
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -79,7 +79,7 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
   const selectedConsumer = useRuleFormSelector((state) => state.ruleDefinition.consumer);
   const dispatch = useRuleFormDispatch();
 
-  const isInvalid: IErrorObject = (errors?.consumer?.length ?? 0) > 0;
+  const isInvalid = (errors?.consumer?.length ?? 0) > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {

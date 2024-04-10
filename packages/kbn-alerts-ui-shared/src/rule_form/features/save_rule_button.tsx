@@ -54,13 +54,19 @@ export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
     <EuiFlexGroup alignItems="center">
       {!isOverallValid && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={errorList}>
-            <EuiIcon type="alert" color="subdued" />
+          <EuiToolTip data-test-subj="saveRuleErrorTooltip" content={errorList}>
+            <EuiIcon data-test-subj="saveRuleErrorIcon" type="alert" color="subdued" />
           </EuiToolTip>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButton isDisabled={!isOverallValid} isLoading={isSaving} onClick={onClickSave} fill>
+        <EuiButton
+          data-test-subj="saveRuleButton"
+          isDisabled={!isOverallValid}
+          isLoading={isSaving}
+          onClick={onClickSave}
+          fill
+        >
           {isEdit ? saveRuleButtonLabel : createRuleButtonLabel}
         </EuiButton>
       </EuiFlexItem>

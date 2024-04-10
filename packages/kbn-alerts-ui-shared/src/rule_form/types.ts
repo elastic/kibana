@@ -33,7 +33,7 @@ export interface RuleFormKibanaServices {
   toasts: ToastsStart;
 }
 
-type RuleTypeParams = Record<string, unknown>;
+export type RuleTypeParams = Record<string, unknown>;
 
 // Just declare plugin names here. Actual types are defined in the plugins, and we
 // can't import them here because of circular dependencies.
@@ -57,7 +57,6 @@ export interface RuleTypeParamsExpressionProps<
   id?: string;
   ruleParams: Params;
   ruleInterval: string;
-  ruleThrottle: string;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   /**
    * @deprecated Use setRuleParams instead
@@ -87,9 +86,13 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
   defaultSummaryMessage?: string;
+  defaultRuleParams?: Params;
 }
 
-export type RuleTypeModelFromRegistry = Omit<RuleTypeModel, 'name' | 'authorizedConsumers'>;
+export type RuleTypeModelFromRegistry<Params extends RuleTypeParams = RuleTypeParams> = Omit<
+  RuleTypeModel<Params>,
+  'name' | 'authorizedConsumers'
+>;
 
 export interface RuleFormConfig {
   isUsingSecurity: boolean;

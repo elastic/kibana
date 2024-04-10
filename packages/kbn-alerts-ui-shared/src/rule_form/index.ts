@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { RuleFormPageComponent as RuleFormPage } from './page';
+export { RuleFormPageAppComponent as RuleFormPage } from './page';
 export { InvalidError, IncompleteError } from './common/validation_error';
 export type {
   RuleFormValidationError,

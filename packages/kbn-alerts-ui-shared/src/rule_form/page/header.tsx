@@ -66,7 +66,9 @@ export const RuleFormPageHeader: React.FC<RuleFormPageHeaderProps> = ({
        * convenience for mouse users
        */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <span onClick={onClickEdit}>{ruleName}</span>{' '}
+      <span onClick={onClickEdit} data-test-subj="ruleFormTitle">
+        {ruleName}
+      </span>{' '}
       <EuiButtonIcon iconType="pencil" onClick={onClickEdit} aria-label="Edit rule name" />
     </>
   );

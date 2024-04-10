@@ -12,10 +12,10 @@ import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ruleDetailsSlice, ruleDefinitionSlice, initializeAndValidateConsumer } from '../features';
 import { metaSlice } from './meta_slice';
 
-const initializeStore = (
-  partialInitialState: {
-    [K in keyof RuleFormRootState]?: Partial<RuleFormRootState[K]>;
-  },
+export type PreloadedState = { [K in keyof RuleFormRootState]?: Partial<RuleFormRootState[K]> };
+
+export const initializeStore = (
+  partialInitialState: PreloadedState,
   authorizedConsumers?: RuleCreationValidConsumer[]
 ) => {
   // Call combineReducers inside this function to avoid Webpack import order problems
@@ -55,4 +55,5 @@ export interface RuleFormRootState {
   ruleDetails: ReturnType<typeof ruleDetailsSlice.reducer>;
   meta: ReturnType<typeof metaSlice.reducer>;
 }
+export type RuleFormStore = ReturnType<typeof initializeStore>;
 export type RuleFormDispatch = ReturnType<typeof initializeStore>['dispatch'];

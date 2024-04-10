@@ -38,6 +38,7 @@ export const RuleTypeProvider: React.FC<{
   if (ruleTypesState.isLoading || isRuleTypeModelPending) {
     return (
       <EuiEmptyPrompt
+        data-test-subj="ruleFormLoadingPrompt"
         icon={<EuiLoadingLogo size="xl" />}
         title={
           <h2>
