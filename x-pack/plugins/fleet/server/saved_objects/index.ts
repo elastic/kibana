@@ -157,6 +157,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
         keep_monitoring_alive: { type: 'boolean' },
+        advanced_settings: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -165,6 +166,18 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
       '8.9.0': migrateAgentPolicyToV890,
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              advanced_settings: { type: 'flattened', index: false },
+            },
+          },
+        ],
+      },
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
