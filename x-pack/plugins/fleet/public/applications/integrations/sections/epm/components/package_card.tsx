@@ -7,7 +7,15 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
@@ -53,6 +61,7 @@ export function PackageCard({
   extraLabelsBadges,
   isQuickstart = false,
   onCardClick: onClickProp = undefined,
+  isCollectionCard = false,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -121,6 +130,24 @@ export function PackageCard({
     );
   }
 
+  let collectionButton: React.ReactNode | null = null;
+
+  if (isCollectionCard) {
+    collectionButton = (
+      <EuiFlexItem>
+        <EuiButton
+          color="text"
+          data-test-subj="xpack.fleet.packageCard.collectionButton"
+          iconType="package"
+        >
+          {i18n.translate('xpack.fleet.packageCard.collectionButton.copy', {
+            defaultMessage: 'View collection',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    );
+  }
+
   const { application } = useStartServices();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
@@ -172,6 +199,7 @@ export function PackageCard({
             {updateAvailableBadge}
             {releaseBadge}
             {hasDeferredInstallationsBadge}
+            {collectionButton}
           </EuiFlexGroup>
         </Card>
       </TrackApplicationView>
