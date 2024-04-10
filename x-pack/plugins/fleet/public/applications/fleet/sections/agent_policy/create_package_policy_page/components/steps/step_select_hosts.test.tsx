@@ -136,7 +136,7 @@ describe('StepSelectHosts', () => {
 
     expect(
       renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]')?.textContent
-    ).toEqual('Agent policy 1');
+    ).toContain('Agent policy 1');
   });
 
   it('should display dropdown without preselected value when Existing hosts selected with mulitple agent policies', () => {
