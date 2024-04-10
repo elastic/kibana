@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   async function openLensEditFlyout() {
-    await browser.pressKeys(browser.keys.ESCAPE); // cancel any tooltips
+    await testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
     await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
     await retry.waitFor('flyout', async () => {
       return await testSubjects.exists('lnsChartSwitchPopover');
