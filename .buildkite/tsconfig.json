@@ -13,7 +13,8 @@
     "pipelines/**/*",
     "scripts/**/*",
     "pipelines/flaky_tests/groups.json",
-    "pull_requests.json"
+    "pull_requests.json",
+    "pipeline-resource-definitions/**/*.ts"
   ],
   "exclude": [
     "target/**/*",

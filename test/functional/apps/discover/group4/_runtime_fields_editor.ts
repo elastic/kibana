@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -30,18 +31,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createRuntimeField = async (fieldName: string) => {
-    await PageObjects.discover.clickIndexPatternActions();
-    await PageObjects.discover.clickAddNewField();
+    await dataViews.clickAddFieldFromSearchBar();
     await fieldEditor.setName(fieldName);
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");
     await fieldEditor.save();
+    await fieldEditor.waitUntilClosed();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/179297
-  // FLAKY: https://github.com/elastic/kibana/issues/179310
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -54,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('allows adding custom label to existing fields', async function () {
@@ -63,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.enableCustomLabel();
       await fieldEditor.setCustomLabel(customLabel);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.unifiedFieldList.getAllFieldNames()).includes(customLabel)).to.be(
         true
@@ -72,38 +72,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows adding custom description to existing fields', async function () {
-      const customDescription = 'custom bytes description here';
+      const customDescription = 'custom agent description here';
       const customDescription2 = `${customDescription} updated`;
       // set a custom description
-      await PageObjects.discover.editField('bytes');
+      await PageObjects.discover.editField('agent');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription);
       await fieldEditor.save();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItem('agent');
       await retry.waitFor('field popover text', async () => {
-        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription;
+        return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription;
       });
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('agent');
 
-      // edit the custom description
-      await PageObjects.discover.editField('bytes');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // edit the custom description again
+      await PageObjects.discover.editField('agent');
       await fieldEditor.enableCustomDescription();
       await fieldEditor.setCustomDescription(customDescription2);
       await fieldEditor.save();
       await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItem('agent');
       await retry.waitFor('field popover text', async () => {
-        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription2;
+        return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription2;
       });
-      await PageObjects.unifiedFieldList.clickFieldListItemToggle('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemToggle('agent');
 
       // check it in the doc viewer too
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      await testSubjects.click('fieldDescriptionPopoverButton-bytes');
+      await testSubjects.click('fieldDescriptionPopoverButton-agent');
       await retry.waitFor('doc viewer popover text', async () => {
-        return (await testSubjects.getVisibleText('fieldDescription-bytes')) === customDescription2;
+        return (await testSubjects.getVisibleText('fieldDescription-agent')) === customDescription2;
       });
 
       await dataGrid.closeFlyout();
@@ -125,7 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('allows creation of a new field', async function () {
       const field = '_runtimefield';
       await createRuntimeField(field);
-      await retry.waitForWithTimeout('fieldNames to include runtimefield', 5000, async () => {
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+      await retry.waitFor('fieldNames to include runtimefield', async () => {
         const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         return fieldNames.includes(field);
       });
@@ -139,8 +148,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await fieldEditor.setName(newFieldName, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
+      await fieldEditor.waitUntilClosed();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
       await retry.waitForWithTimeout('fieldNames to include edits', 5000, async () => {
         const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();

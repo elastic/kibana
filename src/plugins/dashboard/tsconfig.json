@@ -53,7 +53,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
-    "@kbn/saved-objects-finder-plugin",
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
@@ -69,7 +68,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
-    "@kbn/presentation-library",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
@@ -77,6 +75,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/managed-content-badge",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": ["target/**/*"]
 }

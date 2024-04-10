@@ -8,7 +8,7 @@
 import { pick } from '@kbn/std';
 import * as rt from 'io-ts';
 import { combineLatest, concat, defer, forkJoin, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs';
 import type {
   IEsSearchRequest,
   IKibanaSearchRequest,

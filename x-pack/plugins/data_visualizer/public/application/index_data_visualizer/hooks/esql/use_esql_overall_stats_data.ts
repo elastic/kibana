@@ -14,7 +14,7 @@ import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancell
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { getESQLWithSafeLimit } from '@kbn/esql-utils';
+import { getESQLWithSafeLimit, ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
   DataStatsFetchProgress,
@@ -83,6 +83,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: esqlBaseQuery + aggQuery,
         ...(filter ? { filter } : {}),
+        version: ESQL_LATEST_VERSION,
       },
     };
     try {
@@ -128,6 +129,7 @@ const getESQLDocumentCountStats = async (
       params: {
         query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
         ...(filter ? { filter } : {}),
+        version: ESQL_LATEST_VERSION,
       },
     };
     try {
@@ -251,6 +253,7 @@ export const useESQLOverallStatsData = (
               // Doing this to match with the default limit
               query: getESQLWithSafeLimit(esqlBaseQuery, 1000),
               ...(filter ? { filter } : {}),
+              version: ESQL_LATEST_VERSION,
               dropNullColumns: true,
             },
           },

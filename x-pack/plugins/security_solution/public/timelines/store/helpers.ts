@@ -1531,3 +1531,30 @@ export const applyDeltaToTableColumnWidth = ({
     },
   };
 };
+
+export const updateTimelineColumnWidth = ({
+  columnId,
+  id,
+  timelineById,
+  width,
+}: {
+  columnId: string;
+  id: string;
+  timelineById: TimelineById;
+  width: number;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.map((x) => ({
+    ...x,
+    initialWidth: x.id === columnId ? width : x.initialWidth,
+  }));
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};

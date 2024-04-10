@@ -7,16 +7,18 @@
 
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { BaseMessage } from 'langchain/schema';
+import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
-import type { LangChainTracer } from 'langchain/callbacks';
+import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { ExecuteConnectorRequestBody, Replacement } from '@kbn/elastic-assistant-common';
+import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
-export interface AgentExecutorParams {
+export interface AgentExecutorParams<T extends boolean> {
+  abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actions: ActionsPluginStart;
   allow?: string[];
@@ -29,8 +31,14 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  onNewReplacements?: (newReplacements: Replacement[]) => void;
-  replacements: Replacement[];
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements: Replacements;
+  isStream?: T;
+  onLlmResponse?: (
+    content: string,
+    traceData?: Message['traceData'],
+    isError?: boolean
+  ) => Promise<void>;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;
@@ -38,14 +46,22 @@ export interface AgentExecutorParams {
   telemetry: AnalyticsServiceSetup;
 }
 
-export type AgentExecutorResponse = Promise<ResponseBody>;
+export interface StaticReturnType {
+  body: ResponseBody;
+  headers: ResponseHeaders;
+}
+export type AgentExecutorResponse<T extends boolean> = T extends true
+  ? StreamFactoryReturnType['responseWithHeaders']
+  : StaticReturnType;
 
-export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
+export type AgentExecutor<T extends boolean> = (
+  params: AgentExecutorParams<T>
+) => Promise<AgentExecutorResponse<T>>;
 
 export type AgentExecutorEvaluator = (
   langChainMessages: BaseMessage[],
   exampleId?: string
-) => AgentExecutorResponse;
+) => Promise<ResponseBody>;
 
 export interface AgentExecutorEvaluatorWithMetadata {
   agentEvaluator: AgentExecutorEvaluator;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 
@@ -42,10 +42,10 @@ export const WELCOME_CONVERSATION: Conversation = {
       },
     },
   ],
-  replacements: [],
+  replacements: {},
 };
 
-export const enterpriseMessaging: Message[] = [
+export const enterpriseMessaging: ClientMessage[] = [
   {
     role: 'assistant',
     content: i18n.ENTERPRISE,

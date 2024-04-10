@@ -27,14 +27,14 @@ import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock<Promise<FleetAuthz>>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.Mock;
 const mockGetAgentById = getAgentById as jest.Mock;
 const mockGetAgentStatusById = getAgentStatusById as jest.Mock;
 const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as jest.Mock;
-const mockGetLatestAvailableVersion = getLatestAvailableVersion as jest.Mock;
+const mockgetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as jest.Mock;
 
 describe('AgentService', () => {
   beforeEach(() => {
@@ -187,11 +187,11 @@ function expectApisToCallServicesSuccessfully(
     );
   });
 
-  test('client.getLatestAgentAvailableVersion calls getLatestAvailableVersion and returns results', async () => {
-    mockGetLatestAvailableVersion.mockResolvedValue('getLatestAvailableVersion success');
+  test('client.getLatestAgentAvailableVersion calls getLatestAvailableAgentVersion and returns results', async () => {
+    mockgetLatestAvailableAgentVersion.mockResolvedValue('getLatestAvailableAgentVersion success');
     await expect(agentClient.getLatestAgentAvailableVersion()).resolves.toEqual(
-      'getLatestAvailableVersion success'
+      'getLatestAvailableAgentVersion success'
     );
-    expect(mockGetLatestAvailableVersion).toHaveBeenCalledTimes(1);
+    expect(mockgetLatestAvailableAgentVersion).toHaveBeenCalledTimes(1);
   });
 }

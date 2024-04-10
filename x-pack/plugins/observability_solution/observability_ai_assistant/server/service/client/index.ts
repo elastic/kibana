@@ -25,6 +25,8 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { withTokenBudget } from '../../../common/utils/with_token_budget';
+import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -43,6 +45,7 @@ import {
 } from '../../../common/functions/types';
 import {
   MessageRole,
+  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -61,7 +64,7 @@ import {
 import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { rejectTokenCountEvents } from '../util/reject_token_count_events';
-import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
@@ -149,6 +152,7 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    instructions?: Array<string | UserInstruction>;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -157,6 +161,7 @@ export class ObservabilityAIAssistantClient {
         const conversationId = params.conversationId || '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
+        const requestInstructions = params.instructions || [];
 
         const tokenCountResult = {
           prompt: 0,
@@ -244,7 +249,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
               await chatWithTokenCountIncrement(
@@ -436,7 +441,7 @@ export class ObservabilityAIAssistantClient {
             `Token count for conversation: ${JSON.stringify(tokenCountResult)}`
           );
 
-          apm.addLabels({
+          apm.currentTransaction?.addLabels({
             tokenCountPrompt: tokenCountResult.prompt,
             tokenCountCompletion: tokenCountResult.completion,
             tokenCountTotal: tokenCountResult.total,
@@ -511,12 +516,21 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
-          if (!signal.aborted) {
-            this.dependencies.logger.error(error);
-          }
-          subscriber.error(error);
-        });
+        this.resolveInstructions(requestInstructions)
+          .then((instructions) => {
+            return next(
+              extendSystemMessage(messages, [
+                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
+                instructions,
+              ])
+            );
+          })
+          .catch((error) => {
+            if (!signal.aborted) {
+              this.dependencies.logger.error(error);
+            }
+            subscriber.error(error);
+          });
 
         const titlePromise =
           !conversationId && !title && persist
@@ -632,28 +646,37 @@ export class ObservabilityAIAssistantClient {
       signal.addEventListener('abort', () => response.destroy());
 
       const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
         .subscribe({
           error: (error) => {
             this.dependencies.logger.debug('Error in chat response');
             this.dependencies.logger.debug(error);
+            span?.setOutcome('failure');
+            span?.end();
           },
           next: (message) => {
             this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
           },
+          complete: () => {
+            span?.setOutcome('success');
+            span?.end();
+          },
         });
 
-      lastValueFrom(response$)
-        .then(() => {
-          span?.setOutcome('success');
-        })
-        .catch(() => {
-          span?.setOutcome('failure');
-        })
-        .finally(() => {
-          span?.end();
-        });
+      response$.subscribe({
+        next: (event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        },
+        error: () => {},
+      });
 
       return response$;
     } catch (error) {
@@ -764,6 +787,7 @@ export class ObservabilityAIAssistantClient {
           },
         },
       ],
+      functionCall: 'title_conversation',
       connectorId,
       signal,
     });
@@ -902,17 +926,28 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
-    const [systemMessage, ...rest] = messages;
+  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
+    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+      this.dependencies.user,
+      this.dependencies.namespace
+    );
 
-    const extendedSystemMessage: Message = {
-      ...systemMessage,
-      message: {
-        ...systemMessage.message,
-        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
-      },
-    };
+    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
+      return '';
+    }
 
-    return [extendedSystemMessage].concat(rest);
+    const priorityInstructions = requestInstructions.map((instruction) =>
+      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
+    );
+    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
+    const instructions = priorityInstructions.concat(
+      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
+    );
+
+    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
+
+    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
+
+    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
   };
 }

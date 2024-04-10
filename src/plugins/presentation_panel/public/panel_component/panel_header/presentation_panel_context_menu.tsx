@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  getViewModeSubject,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
 import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
@@ -43,7 +46,7 @@ export const PresentationPanelContextMenu = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean | undefined>(undefined);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
-  const [title, parentViewMode] = useBatchedPublishingSubjects(
+  const [title, parentViewMode] = useBatchedOptionalPublishingSubjects(
     api.panelTitle,
 
     /**
@@ -84,13 +87,14 @@ export const PresentationPanelContextMenu = ({
           (action) => disabledActions.indexOf(action.id) === -1
         );
       }
-      compatibleActions.sort(
-        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
-      );
 
       if (actionPredicate) {
         compatibleActions = compatibleActions.filter(({ id }) => actionPredicate(id));
       }
+
+      compatibleActions.sort(
+        ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
+      );
 
       /**
        * Build context menu panel from actions

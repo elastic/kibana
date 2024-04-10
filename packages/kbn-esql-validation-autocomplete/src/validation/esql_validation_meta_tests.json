@@ -469,7 +469,7 @@
     {
       "query": "row",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -577,7 +577,7 @@
     {
       "query": "row var = 1 in (",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [in] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
@@ -650,6 +650,46 @@
       "error": [
         "Argument of [not_in] must be [number[]], found value [(1, 2, 3, \"a\")] type [(number, number, number, string)]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true and false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true and null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null and false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null and null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true or false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = true or null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null or false",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row bool_var = null or null",
+      "error": [],
       "warning": []
     },
     {
@@ -1331,6 +1371,16 @@
       "warning": []
     },
     {
+      "query": "row var = mv_sort(\"a\", \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_sort(\"a\", \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sum(5)",
       "error": [],
       "warning": []
@@ -1966,21 +2016,6 @@
       "warning": []
     },
     {
-      "query": "row var = to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_ver(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = trim(\"a\")",
       "error": [],
       "warning": []
@@ -2291,6 +2326,23 @@
       "error": [
         "Argument of [not_rlike] must be [string], found value [5] type [number]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
       "warning": []
     },
     {
@@ -3920,21 +3972,21 @@
     {
       "query": "from a_index | dissect",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect stringField",
       "error": [
-        "SyntaxError: missing STRING at '<EOF>'"
+        "SyntaxError: missing QUOTED_STRING at '<EOF>'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect stringField 2",
       "error": [
-        "SyntaxError: mismatched input '2' expecting STRING"
+        "SyntaxError: mismatched input '2' expecting QUOTED_STRING"
       ],
       "warning": []
     },
@@ -3949,7 +4001,7 @@
     {
       "query": "from a_index | dissect stringField %a",
       "error": [
-        "SyntaxError: mismatched input '%' expecting STRING",
+        "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
         "SyntaxError: mismatched input '<EOF>' expecting '='"
       ],
       "warning": []
@@ -3976,7 +4028,7 @@
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" option = ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', OPENING_BRACKET}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', OPENING_BRACKET}",
         "Invalid option for DISSECT: [option]"
       ],
       "warning": []
@@ -4015,21 +4067,21 @@
     {
       "query": "from a_index | grok",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok stringField",
       "error": [
-        "SyntaxError: missing STRING at '<EOF>'"
+        "SyntaxError: missing QUOTED_STRING at '<EOF>'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | grok stringField 2",
       "error": [
-        "SyntaxError: mismatched input '2' expecting STRING"
+        "SyntaxError: mismatched input '2' expecting QUOTED_STRING"
       ],
       "warning": []
     },
@@ -4044,7 +4096,7 @@
     {
       "query": "from a_index | grok stringField %a",
       "error": [
-        "SyntaxError: mismatched input '%' expecting STRING"
+        "SyntaxError: mismatched input '%' expecting QUOTED_STRING"
       ],
       "warning": []
     },
@@ -4665,21 +4717,21 @@
     {
       "query": "from a_index | where *+ numberField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where /+ numberField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | where %+ numberField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5115,6 +5167,11 @@
     },
     {
       "query": "from a_index | where geoPointField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField == \"a\" or null",
       "error": [],
       "warning": []
     },
@@ -5707,6 +5764,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | where length(to_version(stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(to_version(numberField)) > 0",
+      "error": [
+        "Argument of [to_version] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where length(trim(stringField)) > 0",
       "error": [],
       "warning": []
@@ -5721,7 +5790,7 @@
     {
       "query": "from a_index | eval ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -5764,7 +5833,7 @@
     {
       "query": "from a_index | eval a=b, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Unknown column [b]"
       ],
       "warning": []
@@ -5791,7 +5860,7 @@
     {
       "query": "from a_index | eval a=round(numberField), ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6512,21 +6581,21 @@
     {
       "query": "from a_index | eval *+ numberField",
       "error": [
-        "SyntaxError: extraneous input '*' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '*' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval /+ numberField",
       "error": [
-        "SyntaxError: extraneous input '/' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '/' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval %+ numberField",
       "error": [
-        "SyntaxError: extraneous input '%' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: extraneous input '%' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6835,6 +6904,34 @@
       "query": "from a_index | eval st_centroid(geoPointField) > 0",
       "error": [
         "EVAL does not support function st_centroid"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
       ],
       "warning": []
     },
@@ -7827,6 +7924,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_sort(stringField, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort(stringField, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = mv_sum(numberField)",
       "error": [],
       "warning": []
@@ -8777,28 +8884,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_ver(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_version(*)",
-      "error": [
-        "Using wildcards (*) in to_version is not allowed"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = trim(stringField)",
       "error": [],
       "warning": []
@@ -9332,7 +9417,7 @@
     {
       "query": "from a_index | eval not",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
         "Error: [not] function expects exactly one argument, got 0."
       ],
       "warning": []
@@ -9340,7 +9425,7 @@
     {
       "query": "from a_index | eval in",
       "error": [
-        "SyntaxError: mismatched input 'in' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input 'in' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -9366,6 +9451,23 @@
         "SyntaxError: missing '(' at 'stringField'",
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
       "warning": []
     },
     {
@@ -10524,7 +10626,7 @@
     {
       "query": "from a_index | stats by ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -10538,14 +10640,14 @@
     {
       "query": "from a_index | stats numberField=",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
     {
       "query": "from a_index | stats numberField=5 by ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -10584,6 +10686,11 @@
     },
     {
       "query": "from a_index | stats count(`numberField`)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count(stringField == \"a\" or null)",
       "error": [],
       "warning": []
     },
@@ -12126,6 +12233,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = values(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "FROM index\n    | EVAL numberField * 3.281\n    | STATS avg_numberField = AVG(`numberField * 3.281`)",
       "error": [],
       "warning": []
@@ -12138,7 +12255,7 @@
     {
       "query": "from a_index | sort ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -12157,7 +12274,7 @@
     {
       "query": "from a_index | sort numberField, ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
