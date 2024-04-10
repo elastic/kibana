@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/server';
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -37,7 +38,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
   test('calls "savedObjectsClient.find" with the expected "hasReferences"', async () => {
     await legacyGetBulkRuleActionsSavedObject({ alertIds: ['123'], savedObjectsClient, logger });
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      hasReference: [{ id: '123', type: 'alert' }],
+      hasReference: [{ id: '123', type: RULE_SAVED_OBJECT_TYPE }],
       perPage: 10000,
       type: legacyRuleActionsSavedObjectType,
     });
@@ -70,7 +71,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -134,7 +135,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -163,7 +164,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-456',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -244,7 +245,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -330,7 +331,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -401,7 +402,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',
@@ -468,7 +469,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
         id: '123',
         type: legacyRuleActionsSavedObjectType,
         references: [
-          // Missing the "alert_0" of  { name: 'alert_0', id: 'alert-123', type: 'alert', },
+          // Missing the "alert_0" of  { name: 'alert_0', id: 'alert-123', type: RULE_SAVED_OBJECT_TYPE, },
           {
             name: 'action_0',
             id: 'action-123',
@@ -539,7 +540,7 @@ describe('formatLegacyActions', () => {
           {
             name: 'alert_0',
             id: 'alert-123',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
           },
           {
             name: 'action_0',

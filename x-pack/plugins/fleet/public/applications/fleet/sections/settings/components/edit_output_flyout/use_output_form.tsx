@@ -10,6 +10,8 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+
 import type {
   KafkaOutput,
   NewElasticsearchOutput,
@@ -42,7 +44,7 @@ import {
   useRadioInput,
   sendPutOutput,
   useKeyValueInput,
-  useTopicsInput,
+  useAuthz,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -55,6 +57,7 @@ import {
   validateYamlConfig,
   validateCATrustedFingerPrint,
   validateServiceToken,
+  validateServiceTokenSecret,
   validateSSLCertificate,
   validateSSLKey,
   validateSSLKeySecret,
@@ -63,7 +66,6 @@ import {
   validateKafkaPasswordSecret,
   validateKafkaHeaders,
   validateKafkaDefaultTopic,
-  validateKafkaTopics,
   validateKafkaClientId,
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
@@ -83,11 +85,13 @@ export interface OutputFormInputsType {
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
+  presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
   defaultOutputInput: ReturnType<typeof useSwitchInput>;
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
   serviceTokenInput: ReturnType<typeof useInput>;
+  serviceTokenSecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -113,7 +117,6 @@ export interface OutputFormInputsType {
   kafkaHeadersInput: ReturnType<typeof useKeyValueInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
   kafkaDefaultTopicInput: ReturnType<typeof useInput>;
-  kafkaTopicsInput: ReturnType<typeof useTopicsInput>;
   kafkaCompressionInput: ReturnType<typeof useSwitchInput>;
   kafkaCompressionLevelInput: ReturnType<typeof useInput>;
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
@@ -151,8 +154,9 @@ function extractKafkaOutputSecrets(
   return Object.keys(secrets).length ? secrets : null;
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
   const fleetStatus = useFleetStatus();
+  const authz = useAuthz();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
@@ -161,7 +165,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const [isLoading, setIsloading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const { confirm } = useConfirmModal();
 
   // preconfigured output do not allow edition
@@ -171,9 +175,14 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   function isDisabled(
     field: keyof Output | keyof KafkaOutput | keyof NewRemoteElasticsearchOutput
   ) {
+    if (!authz.fleet.allSettings) {
+      return true;
+    }
+
     if (!isPreconfigured) {
       return false;
     }
+
     return !allowEdit.includes(field);
   }
 
@@ -202,17 +211,35 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateCATrustedFingerPrint,
     isDisabled('ca_trusted_fingerprint')
   );
+  // ES output's host URL is restricted to default in serverless
+  const isServerless = cloud?.isServerlessEnabled;
+  // Set the hosts to default for new ES output in serverless.
+  const elasticsearchUrlDefaultValue =
+    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+  const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
-    output?.hosts ?? [],
+    elasticsearchUrlDefaultValue,
     validateESHosts,
-    isDisabled('hosts')
+    elasticsearchUrlDisabled
+  );
+
+  const presetInput = useInput(
+    output?.preset ?? getDefaultPresetForEsOutput(output?.config_yaml ?? '', safeLoad),
+    () => undefined,
+    isDisabled('preset')
   );
 
   // Remtote ES inputs
   const serviceTokenInput = useInput(
     (output as NewRemoteElasticsearchOutput)?.service_token ?? '',
     validateServiceToken,
+    isDisabled('service_token')
+  );
+
+  const serviceTokenSecretInput = useSecretInput(
+    (output as NewRemoteElasticsearchOutput)?.secrets?.service_token ?? '',
+    validateServiceTokenSecret,
     isDisabled('service_token')
   );
   /*
@@ -293,7 +320,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
 
   const sslKeySecretInput = useSecretInput(
-    output?.secrets?.ssl?.key,
+    (output as NewLogstashOutput)?.secrets?.ssl?.key,
     validateSSLKeySecret,
     isSSLEditable
   );
@@ -313,14 +340,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
     const lastTopic = topics[topics.length - 1].topic;
     return lastTopic || '';
-  };
-
-  const extractKafkaTopics = (topics?: Array<{ topic: string }>) => {
-    if (!topics || topics.length <= 1) {
-      return [];
-    }
-
-    return topics.slice(0, -1);
   };
 
   const kafkaVersionInput = useInput(
@@ -381,7 +400,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaSslKeySecretInput = useSecretInput(
-    kafkaOutput?.ssl?.certificate,
+    kafkaOutput?.secrets?.ssl?.key,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
@@ -425,12 +444,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const kafkaDefaultTopicInput = useInput(
     extractDefaultKafkaTopic(kafkaOutput?.topics),
     validateKafkaDefaultTopic,
-    isDisabled('topics')
-  );
-  const kafkaTopicsInput = useTopicsInput(
-    'kafkaTopicsComboBox',
-    extractKafkaTopics(kafkaOutput?.topics),
-    validateKafkaTopics,
     isDisabled('topics')
   );
   const kafkaHeadersInput = useKeyValueInput(
@@ -498,11 +511,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueCompressionEnabled,
     compressionLevelInput,
     logstashHostsInput,
+    presetInput,
     additionalYamlConfigInput,
     defaultOutputInput,
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -539,7 +554,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -556,12 +570,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaSslKeyPlainValid = kafkaSslKeyInput.validate();
     const kafkaSslKeySecretValid = kafkaSslKeySecretInput.validate();
     const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
-    const kafkaTopicsValid = kafkaTopicsInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
+    const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -598,7 +612,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaPasswordValid &&
         kafkaHeadersValid &&
         kafkaDefaultTopicValid &&
-        kafkaTopicsValid &&
         additionalYamlConfigValid &&
         kafkaClientIDValid &&
         partitioningRandomGroupEventsValid &&
@@ -607,7 +620,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     }
     if (isRemoteElasticsearch) {
       return (
-        elasticsearchUrlsValid && additionalYamlConfigValid && nameInputValid && serviceTokenValid
+        elasticsearchUrlsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        ((serviceTokenInput.value && serviceTokenValid) ||
+          (serviceTokenSecretInput.value && serviceTokenSecretValid))
       );
     } else {
       // validate ES
@@ -631,12 +648,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaSslKeyInput,
     kafkaSslKeySecretInput,
     kafkaDefaultTopicInput,
-    kafkaTopicsInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -807,7 +824,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              topics: [...kafkaTopicsInput.value, { topic: kafkaDefaultTopicInput.value }],
+              topics: [{ topic: kafkaDefaultTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -848,10 +865,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
               hosts: elasticsearchUrlInput.value,
-              is_default: false,
+              is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              service_token: serviceTokenInput.value,
+              service_token: serviceTokenInput.value || undefined,
+              ...(!serviceTokenInput.value &&
+                serviceTokenSecretInput.value && {
+                  secrets: {
+                    service_token: serviceTokenSecretInput.value,
+                  },
+                }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewRemoteElasticsearchOutput;
@@ -863,6 +887,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               hosts: elasticsearchUrlInput.value,
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
+              preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
@@ -919,32 +944,31 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     loadBalanceEnabledInput.value,
     typeInput.value,
     kafkaSslCertificateAuthoritiesInput.value,
-    kafkaCompressionInput.value,
+    kafkaSslKeyInput,
+    kafkaSslKeySecretInput,
+    kafkaAuthPasswordInput,
+    kafkaAuthPasswordSecretInput,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,
     defaultMonitoringOutputInput.value,
     additionalYamlConfigInput.value,
+    kafkaConnectionTypeInput.value,
     kafkaAuthMethodInput.value,
     kafkaSslCertificateInput.value,
-    kafkaSslKeyInput,
-    kafkaSslKeySecretInput,
     kafkaVerificationModeInput.value,
     kafkaClientIdInput.value,
     kafkaVersionInput.value,
     kafkaKeyInput.value,
+    kafkaCompressionInput.value,
     kafkaCompressionCodecInput.value,
     kafkaCompressionLevelInput.value,
-    kafkaConnectionTypeInput.value,
     kafkaAuthUsernameInput.value,
-    kafkaAuthPasswordInput,
-    kafkaAuthPasswordSecretInput,
     kafkaSaslMechanismInput.value,
     kafkaPartitionTypeInput.value,
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
-    kafkaTopicsInput.value,
     kafkaDefaultTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,
@@ -953,11 +977,13 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
-    sslKeySecretInput.value,
     sslCertificateAuthoritiesInput.value,
+    sslKeySecretInput.value,
     elasticsearchUrlInput.value,
-    caTrustedFingerprintInput.value,
     serviceTokenInput.value,
+    serviceTokenSecretInput.value,
+    presetInput.value,
+    caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,
   ]);

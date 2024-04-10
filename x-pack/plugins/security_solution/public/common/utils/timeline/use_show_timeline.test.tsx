@@ -83,7 +83,7 @@ describe('use show timeline', () => {
   });
 
   it('hides timeline for blacklist routes', async () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/rules/create' });
+    mockUseLocation.mockReturnValueOnce({ pathname: '/rules/add_rules' });
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useShowTimeline());
       await waitForNextUpdate();

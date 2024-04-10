@@ -210,6 +210,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -423,6 +445,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -605,6 +638,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.filewrite_sync',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
+      {
+        defaultMessage:
+          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.network',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -678,6 +722,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.process_handle',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process_handle',
+      {
+        defaultMessage: 'Capture process and thread handle events. Default: true.',
       }
     ),
   },
@@ -901,7 +955,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
       {
-        defaultMessage: 'Enable collection of ETW events. Default: true',
+        defaultMessage: 'Deprecated.',
       }
     ),
   },
@@ -1057,6 +1111,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.fanotify.seccomp_restricted',
+    first_supported_version: '8.13.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
+      {
+        defaultMessage:
+          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.context_manipulation_detection',
     first_supported_version: '8.4',
     documentation: i18n.translate(
@@ -1159,6 +1224,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
       {
         defaultMessage: 'Collect callstacks during registry events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.timeout_microseconds',
+    first_supported_version: '8.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.timeout_microseconds',
+      {
+        defaultMessage:
+          'Maximum runtime of inline callstack collection/enrichment.  Default: 100000',
       }
     ),
   },
@@ -1455,6 +1531,160 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma delimited set of key=value pairs of values to add into all Endpoint documents. Each key must begin with Custom. An example is Custom.key=value1,Custom.key2=value2',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.file_cache.file_object_cache_size',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.file_cache.file_object_cache_size',
+      {
+        defaultMessage:
+          'Maximum size of the file cache.  Larger values can improve performance but increase memory usage. Default: 250',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.utilization_limits.resident_memory_target_mb',
+    first_supported_version: '8.12.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.resident_memory_target_mb',
+      {
+        defaultMessage:
+          'How much memory (in MB) should Endpoint aim to keep resident in RAM? This setting affects Private Working Set on Windows. It does not affect the amount of virtual memory that Endpoint requests from the OS (Private Bytes aka Commit Charge). If plenty of unused RAM is available, Windows may give Endpoint more RAM than requested to reduce unnecessary paging and improve performance. If the current Defend configuration requires regularly touching more than the requested amount of memory, then the Private Working Set will be higher than requested here. Default 200. This value cannot be decreased below 50.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Windows alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_image_load_suppression_cache',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_image_load_suppression_cache',
+      {
+        defaultMessage:
+          'The image load suppression cache improves system performance by enabling Endpoint to tell its kernel driver about DLLs which are un-interesting and will never be evented upon. This feature improves system reponsiveness and reduces Endpoint CPU usage.  Use this setting only for troubleshooting if image load events are not being generated as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_registry_write_suppression',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_registry_write_suppression',
+      {
+        defaultMessage:
+          'Registry write suppression improves system performance by enabling Endpoint to tell its driver that certain types of registry operations are uninteresting. Once deemed uninteresting, the driver can quickly drop these events, improving system responsiveness and reducing Endpoint CPU usage. Use this setting only for troubleshooting if registry events are not functioning as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.process.creation_flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.creation_flags',
+      {
+        defaultMessage:
+          'Enables an additional enrichment for process events. Use this setting only for troubleshooting if process events are not functioning as expected. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.flags',
+    first_supported_version: '8.13.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.flags',
+      {
+        defaultMessage:
+          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },

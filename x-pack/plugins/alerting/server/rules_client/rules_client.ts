@@ -103,6 +103,7 @@ export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParam
   'revision',
   'running',
   'snoozeSchedule',
+  'systemActions',
   'updatedBy',
   'updatedAt',
 ]);
@@ -160,7 +161,7 @@ export class RulesClient {
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 
   public enable = (options: { id: string }) => enable(this.context, options);
-  public disable = (options: { id: string }) => disable(this.context, options);
+  public disable = (options: { id: string; untrack?: boolean }) => disable(this.context, options);
 
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);

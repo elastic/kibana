@@ -38,12 +38,14 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/actions-types",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/security-plugin-types-server"
   ],
   "exclude": [
     "target/**/*",

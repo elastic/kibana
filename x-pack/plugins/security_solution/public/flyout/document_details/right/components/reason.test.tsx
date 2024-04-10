@@ -7,18 +7,25 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { REASON_DETAILS_PREVIEW_BUTTON_TEST_ID, REASON_TITLE_TEST_ID } from './test_ids';
 import { Reason } from './reason';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { TestProviders } from '../../../../common/mock';
+import { i18n } from '@kbn/i18n';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
+} as unknown as ExpandableFlyoutApi;
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
 
 const panelContextValue = {
   eventId: 'event id',
@@ -30,18 +37,22 @@ const panelContextValue = {
 
 const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
   render(
-    <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+    <TestProviders>
+      <IntlProvider locale="en">
         <RightPanelContext.Provider value={panelContext}>
           <Reason />
         </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
-    </IntlProvider>
+      </IntlProvider>
+    </TestProviders>
   );
 
 const NO_DATA_MESSAGE = "There's no source event information for this alert.";
 
 describe('<Reason />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render the component for alert', () => {
     const { getByTestId } = renderReason();
     expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
@@ -89,11 +100,11 @@ describe('<Reason />', () => {
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
-              defaultMessage="Preview alert reason"
-            />
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+            {
+              defaultMessage: 'Preview alert reason',
+            }
           ),
           backgroundColor: 'warning',
           textColor: 'warning',

@@ -253,6 +253,11 @@ const RESTRICTED_IMPORTS = [
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
+  {
+    name: 'rxjs/operators',
+    message:
+      'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
+  },
 ];
 
 module.exports = {
@@ -591,7 +596,7 @@ module.exports = {
         '**/*.test.js',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
-        'x-pack/plugins/apm/**/*.js',
+        'x-pack/plugins/observability_solution/apm/**/*.js',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/*.config.ts',
@@ -671,7 +676,7 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -871,10 +876,11 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -894,9 +900,10 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/apm/**/*.stories.*',
-        'x-pack/plugins/observability/**/*.stories.*',
-        'x-pack/plugins/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/apm/**/*.stories.*',
+        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
+        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [
@@ -911,16 +918,8 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
-        'x-pack/plugins/apm/**/*.tsx',
-        'x-pack/plugins/exploratory_view/**/*.tsx',
-        'x-pack/plugins/infra/**/*.tsx',
-        'x-pack/plugins/observability/**/*.tsx',
-        'x-pack/plugins/observability_ai_assistant/**/*.tsx',
-        'x-pack/plugins/observability_onboarding/**/*.tsx',
-        'x-pack/plugins/observability_shared/**/*.tsx',
-        'x-pack/plugins/profiling/**/*.tsx',
-        'x-pack/plugins/synthetics/**/*.tsx',
-        'x-pack/plugins/ux/**/*.tsx',
+        'x-pack/plugins/observability_solution/**/*.tsx',
+        'src/plugins/ai_assistant_management/**/*.tsx',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -928,25 +927,18 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/exploratory_view/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_ai_assistant/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_onboarding/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/synthetics/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/plugins/ux/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
+        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
       },
     },
     {
       // require explicit return types in route handlers for performance reasons
-      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      files: ['x-pack/plugins/observability_solution/apm/server/**/route.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -958,7 +950,7 @@ module.exports = {
     },
     // Profiling
     {
-      files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/plugins/observability_solution/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': [
@@ -969,7 +961,9 @@ module.exports = {
     },
     {
       // disable imports from legacy uptime plugin
-      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -998,6 +992,22 @@ module.exports = {
     },
 
     /**
+     * ML overrides
+     */
+    {
+      files: [
+        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+
+    /**
      * Security Solution overrides. These rules below are maintained and owned by
      * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
@@ -1011,6 +1021,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
@@ -1044,6 +1055,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1055,6 +1067,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1072,6 +1085,7 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/security-solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
@@ -1108,12 +1122,14 @@ module.exports = {
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/elastic_assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1211,6 +1227,8 @@ module.exports = {
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+            'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
@@ -1504,6 +1522,8 @@ module.exports = {
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
         ],
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
       },
     },
     /**

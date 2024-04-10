@@ -27,33 +27,19 @@ export const performBulkResolve = async <T>(
   { objects, options }: PerformCreateParams<T>,
   apiExecutionContext: ApiExecutionContext
 ): Promise<SavedObjectsBulkResolveResponse<T>> => {
-  const {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    extensions = {},
-  } = apiExecutionContext;
-  const { common: commonHelper } = helpers;
-  const { securityExtension, encryptionExtension } = extensions;
+  const { common: commonHelper } = apiExecutionContext.helpers;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
-  const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
-    registry,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-    incrementCounterInternal: (type, id, counterFields, opts = {}) =>
-      incrementCounterInternal({ type, id, counterFields, options: opts }, apiExecutionContext),
-    encryptionExtension,
-    securityExtension,
-    objects,
-    options: { ...options, namespace },
-  });
+  const { resolved_objects: bulkResults } = await internalBulkResolve<T>(
+    {
+      objects,
+      options: { ...options, namespace },
+      incrementCounterInternal: (type, id, counterFields, opts = {}) =>
+        incrementCounterInternal({ type, id, counterFields, options: opts }, apiExecutionContext),
+    },
+    apiExecutionContext
+  );
+
   const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
     // extract payloads from saved object errors
     if (isBulkResolveError(result)) {

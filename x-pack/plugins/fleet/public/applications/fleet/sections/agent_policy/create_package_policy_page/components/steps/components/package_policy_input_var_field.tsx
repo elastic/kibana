@@ -24,12 +24,11 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { useStartServices } from '../../../../../../../../hooks';
 
@@ -184,6 +183,7 @@ function getInputComponent({
   if (multi) {
     return (
       <MultiTextInput
+        fieldLabel={fieldLabel}
         value={value ?? []}
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
@@ -338,21 +338,21 @@ const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
 const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow={true} aria-label={fieldLabel}>
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="xs">
+        <EuiFlexItem grow={false} aria-label={fieldLabel}>
           {fieldLabel}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
+            type="iInCircle"
+            position="top"
             content={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
                 defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again."
               />
             }
-          >
-            <EuiIcon aria-label="Secret value" type="questionInCircle" color="subdued" />
-          </EuiToolTip>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -376,12 +376,37 @@ function SecretInputField({
   setIsDirty,
   isDirty,
 }: InputComponentProps) {
-  const [editMode, setEditMode] = useState(isEditPage && !value);
+  const [isReplacing, setIsReplacing] = useState(isEditPage && !value);
   const valueOnFirstRender = useRef(value);
 
+  const hasExistingValue = !!valueOnFirstRender.current;
   const lowercaseTitle = varDef.title?.toLowerCase();
+  const showInactiveReplaceUi = isEditPage && !isReplacing && hasExistingValue;
+  const valueIsSecretRef = value && value?.isSecretRef;
 
-  if (isEditPage && !editMode) {
+  const inputComponent = getInputComponent({
+    varDef,
+    value: isReplacing && valueIsSecretRef ? '' : value,
+    onChange,
+    frozen,
+    packageName,
+    packageType,
+    datastreams,
+    isEditPage,
+    isInvalid,
+    fieldLabel,
+    fieldTestSelector,
+    isDirty,
+    setIsDirty,
+  });
+
+  // If there's no value for this secret, display the input as its "brand new" creation state
+  // instead of the "replace" state
+  if (!hasExistingValue) {
+    return inputComponent;
+  }
+
+  if (showInactiveReplaceUi) {
     return (
       <>
         <EuiText size="s" color="subdued">
@@ -395,7 +420,7 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setEditMode(true)}
+          onClick={() => setIsReplacing(true)}
           color="primary"
           iconType="refresh"
           iconSide="left"
@@ -413,28 +438,11 @@ function SecretInputField({
     );
   }
 
-  const valueIsSecretRef = value && value?.isSecretRef;
-  const field = getInputComponent({
-    varDef,
-    value: editMode && valueIsSecretRef ? '' : value,
-    onChange,
-    frozen,
-    packageName,
-    packageType,
-    datastreams,
-    isEditPage,
-    isInvalid,
-    fieldLabel,
-    fieldTestSelector,
-    isDirty,
-    setIsDirty,
-  });
-
-  if (editMode) {
+  if (isReplacing) {
     const cancelButton = (
       <EuiButtonEmpty
         onClick={() => {
-          setEditMode(false);
+          setIsReplacing(false);
           setIsDirty(false);
           onChange(valueOnFirstRender.current);
         }}
@@ -455,12 +463,12 @@ function SecretInputField({
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
-          {field}
+          {inputComponent}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  return field;
+  return inputComponent;
 }

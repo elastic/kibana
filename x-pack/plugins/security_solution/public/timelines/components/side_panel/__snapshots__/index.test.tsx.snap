@@ -50,7 +50,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -122,16 +122,24 @@ Array [
       />
     </span>
   </div>,
-  <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+  .c0 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
+<div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>,
 ]
@@ -164,6 +172,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   padding: 0 12px 12px;
 }
 
+.c2 .side-panel-flyout-footer {
+  background-color: transparent;
+}
+
 <div
   data-eui="EuiFlyout"
   data-test-subj="timeline:details-panel:flyout"
@@ -187,7 +199,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+          class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-column"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -204,7 +216,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     class="euiFlyoutBody c1 emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
       tabindex="0"
     >
       <div
@@ -255,15 +267,19 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
     </div>
   </div>
   <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-    data-test-subj="side-panel-flyout-footer"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c2 emotion-euiPanel-grow-none-m-plain"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      class="euiFlyoutFooter side-panel-flyout-footer emotion-euiFlyoutFooter"
+      data-test-subj="side-panel-flyout-footer"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
-      />
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -271,7 +287,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -326,6 +342,11 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   opacity: 0;
   -webkit-transition: opacity 250ms ease;
   transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .c0:hover .inspectButtonComponent {
@@ -615,7 +636,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
-  color: #535966;
+  color: #98a2b3;
 }
 
 .c2 {
@@ -670,6 +691,11 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   opacity: 0;
   -webkit-transition: opacity 250ms ease;
   transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
 }
 
 .c0:hover .inspectButtonComponent {
@@ -839,13 +865,13 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
             >
               iana.org
               <span
-                class="emotion-euiLink__externalIcon"
+                class="emotion-EuiExternalLinkIcon"
                 data-euiicon-type="popout"
               >
                 External link
               </span>
               <span
-                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                class="emotion-euiScreenReaderOnly"
               >
                 (opens in a new tab or window)
               </span>

@@ -1387,6 +1387,74 @@ describe('Response factory', () => {
         });
     });
 
+    it('@kbn/config-schema validation in request.body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      const runtimeValidation = schema.object({
+        bar: schema.string(),
+        baz: schema.number(),
+      });
+
+      router.post(
+        {
+          path: '/',
+          validate: {
+            request: {
+              body: runtimeValidation,
+            },
+            response: {
+              200: {
+                body: runtimeValidation,
+              },
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then((res) => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
+    });
+
     it('401 Unauthorized', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
@@ -2058,7 +2126,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
@@ -2093,7 +2163,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });

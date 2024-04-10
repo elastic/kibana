@@ -9,29 +9,37 @@ import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
+import { NO_DATA_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Custom Threshold rule - AVG - PCT - NoData', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
+    const DATA_VIEW_NAME = 'no-data-pattern-name';
     const DATA_VIEW_ID = 'data-view-id-no-data';
+    const DATA_VIEW_TITLE = 'no-data-pattern-title';
     let actionId: string;
     let ruleId: string;
+    let alertId: string;
 
     before(async () => {
       await dataViewApi.create({
-        name: 'no-data-pattern',
+        name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
-        title: 'no-data-pattern',
+        title: DATA_VIEW_TITLE,
       });
     });
 
@@ -57,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
+      await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
 
     describe('Rule creation', () => {
@@ -95,12 +104,16 @@ export default function ({ getService }: FtrProviderContext) {
           },
           actions: [
             {
-              group: FIRED_ACTIONS_ID,
+              group: NO_DATA_ACTIONS_ID,
               id: actionId,
               params: {
                 documents: [
                   {
                     ruleType: '{{rule.type}}',
+                    alertDetailsUrl: '{{context.alertDetailsUrl}}',
+                    reason: '{{context.reason}}',
+                    value: '{{context.value}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -135,10 +148,11 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
+        alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -182,6 +196,35 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
             },
           });
+      });
+
+      it('should set correct action variables', async () => {
+        const resp = await alertingApi.waitForDocumentInIndex<ActionDocument>({
+          indexName: ALERT_ACTION_INDEX,
+          docCountTarget: 1,
+        });
+
+        expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
+        expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
+          `http://localhost:5620/app/observability/alerts/${alertId}`
+        );
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          'Average system.cpu.user.pct reported no data in the last 5m'
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('[NO DATA]');
+
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

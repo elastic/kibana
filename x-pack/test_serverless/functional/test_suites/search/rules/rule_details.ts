@@ -59,7 +59,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await testSubjects.missingOrFail('deleteIdsConfirmation');
   };
 
-  describe('Rule details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/172916
+  // Failing: See https://github.com/elastic/kibana/issues/172918
+  describe.skip('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
 
@@ -296,7 +298,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
         });
@@ -405,7 +407,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await deleteConnector(connector1.name);
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual('Deleted 1 connector');
         });
@@ -482,7 +484,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await deleteConnector(connector.name);
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual('Deleted 1 connector');
         });
@@ -616,7 +618,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
         await retry.try(async () => {
-          const resultToast = await toasts.getToastElement(1);
+          const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
           expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
         });

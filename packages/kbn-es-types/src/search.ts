@@ -421,6 +421,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string[];
+            key_as_string: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
@@ -563,6 +564,16 @@ export type AggregateOf<
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
+      categorize_text: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string | number;
+            regex?: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
+      };
       top_hits: {
         hits: {
           total: {
@@ -593,7 +604,7 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? AggregateOf<Required<TAggregationMap>[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -645,11 +656,30 @@ export type InferSearchResponseOf<
       };
   };
 
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
-  took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
+export interface ESQLColumn {
+  name: string;
+  type: string;
+}
+
+export type ESQLRow = unknown[];
+
+export interface ESQLSearchReponse {
+  columns: ESQLColumn[];
+  // In case of ?drop_null_columns in the query, then
+  // all_columns will have available and empty fields
+  // while columns only the available ones (non nulls)
+  all_columns?: ESQLColumn[];
+  values: ESQLRow[];
+}
+
+export interface ESQLSearchParams {
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
+  query: string;
+  version: string;
+  filter?: unknown;
+  locale?: string;
+  dropNullColumns?: boolean;
 }

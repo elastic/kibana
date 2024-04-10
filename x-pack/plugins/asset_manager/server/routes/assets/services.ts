@@ -14,29 +14,39 @@ import {
 import { debug } from '../../../common/debug_log';
 import { SetupRouteOptions } from '../types';
 import * as routePaths from '../../../common/constants_routes';
-import { getClientsFromContext } from '../utils';
+import { getClientsFromContext, validateStringAssetFilters } from '../utils';
 import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function servicesRoutes<T extends RequestHandlerContext>({
   router,
   assetClient,
 }: SetupRouteOptions<T>) {
+  const validate = createRouteValidationFunction(getServiceAssetsQueryOptionsRT);
   // GET /assets/services
   router.get<unknown, GetServiceAssetsQueryOptions, unknown>(
     {
       path: routePaths.GET_SERVICES,
       validate: {
-        query: createRouteValidationFunction(getServiceAssetsQueryOptionsRT),
+        query: (q, res) => {
+          const [invalidResponse, validatedFilters] = validateStringAssetFilters(q, res);
+          if (invalidResponse) {
+            return invalidResponse;
+          }
+          if (validatedFilters) {
+            q.filters = validatedFilters;
+          }
+          return validate(q, res);
+        },
       },
     },
     async (context, req, res) => {
-      const { from = 'now-24h', to = 'now', parent } = req.query || {};
+      const { from = 'now-24h', to = 'now', filters } = req.query || {};
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
       try {
         const response = await assetClient.getServices({
           from,
           to,
-          parent,
+          filters,
           elasticsearchClient,
           savedObjectsClient,
         });

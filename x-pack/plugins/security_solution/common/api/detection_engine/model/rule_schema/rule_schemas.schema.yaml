@@ -7,6 +7,7 @@ components:
   x-codegen-enabled: true
   schemas:
     BaseRequiredFields:
+      x-inline: true
       type: object
       properties:
         name:
@@ -24,6 +25,7 @@ components:
         - severity
 
     BaseOptionalFields:
+      x-inline: true
       type: object
       properties:
         # Field overrides
@@ -73,6 +75,7 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleActionThrottle'
 
     BaseDefaultableFields:
+      x-inline: true
       type: object
       properties:
         # Main attributes
@@ -125,14 +128,18 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
         threat:
           $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
+        setup:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
 
     BaseCreateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
         - $ref: '#/components/schemas/BaseOptionalFields'
         - $ref: '#/components/schemas/BaseDefaultableFields'
 
     BasePatchProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
           x-modify: partial
@@ -140,13 +147,14 @@ components:
         - $ref: '#/components/schemas/BaseDefaultableFields'
 
     BaseResponseProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseRequiredFields'
         - $ref: '#/components/schemas/BaseOptionalFields'
         - $ref: '#/components/schemas/BaseDefaultableFields'
           x-modify: required
 
-    ResponseRequiredFields:
+    ResponseFields:
       type: object
       properties:
         id:
@@ -168,7 +176,7 @@ components:
         revision:
           type: integer
           minimum: 0
-        # NOTE: For now, Related Integrations, Required Fields and Setup Guide are
+        # NOTE: For now, Related Integrations and Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would
         # become a part of the request schema as optional fields. This is why we add them
@@ -177,8 +185,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
         required_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
-        setup:
-          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
+        execution_summary:
+          $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
       required:
         - id
         - rule_id
@@ -190,15 +198,9 @@ components:
         - revision
         - related_integrations
         - required_fields
-        - setup
-
-    ResponseOptionalFields:
-      type: object
-      properties:
-        execution_summary:
-          $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
 
     SharedCreateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseCreateProps'
         - type: object
@@ -207,6 +209,7 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedUpdateProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseCreateProps'
         - type: object
@@ -217,6 +220,7 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedPatchProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BasePatchProps'
         - type: object
@@ -227,10 +231,10 @@ components:
               $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
 
     SharedResponseProps:
+      x-inline: true
       allOf:
         - $ref: '#/components/schemas/BaseResponseProps'
-        - $ref: '#/components/schemas/ResponseRequiredFields'
-        - $ref: '#/components/schemas/ResponseOptionalFields'
+        - $ref: '#/components/schemas/ResponseFields'
 
     ############
     # EQL Rule #
@@ -341,7 +345,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     QueryRuleDefaultableFields:
       type: object
@@ -422,7 +426,7 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
 
@@ -503,6 +507,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
         saved_id:
           $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+        alert_suppression:
+          $ref: './specific_attributes/threshold_attributes.schema.yaml#/components/schemas/ThresholdAlertSuppression'
 
     ThresholdRuleDefaultableFields:
       type: object
@@ -597,6 +603,8 @@ components:
           $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ConcurrentSearches'
         items_per_search:
           $ref: './specific_attributes/threat_match_attributes.schema.yaml#/components/schemas/ItemsPerSearch'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     ThreatMatchRuleDefaultableFields:
       type: object
@@ -729,6 +737,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     NewTermsRuleDefaultableFields:
       type: object
@@ -841,6 +851,8 @@ components:
     ##########################
 
     TypeSpecificCreateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleCreateFields'
         - $ref: '#/components/schemas/QueryRuleCreateFields'
@@ -863,6 +875,8 @@ components:
         - $ref: '#/components/schemas/EsqlRulePatchFields'
 
     TypeSpecificResponse:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleResponseFields'
         - $ref: '#/components/schemas/QueryRuleResponseFields'
@@ -874,6 +888,8 @@ components:
         - $ref: '#/components/schemas/EsqlRuleResponseFields'
 
     RuleCreateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleCreateProps'
         - $ref: '#/components/schemas/QueryRuleCreateProps'
@@ -885,6 +901,8 @@ components:
         - $ref: '#/components/schemas/EsqlRuleCreateProps'
 
     RuleUpdateProps:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRuleUpdateProps'
         - $ref: '#/components/schemas/QueryRuleUpdateProps'
@@ -907,6 +925,8 @@ components:
         - $ref: '#/components/schemas/EsqlRulePatchProps'
 
     RuleResponse:
+      discriminator:
+        propertyName: type
       anyOf:
         - $ref: '#/components/schemas/EqlRule'
         - $ref: '#/components/schemas/QueryRule'

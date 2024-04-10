@@ -13,7 +13,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  ChartSizeEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
@@ -47,6 +51,15 @@ export const gaugeRenderer: (
         case GaugeShapes.VERTICAL_BULLET:
           type = `${EXPRESSION_GAUGE_NAME}_vertical`;
           break;
+        case GaugeShapes.SEMI_CIRCLE:
+          type = `${EXPRESSION_GAUGE_NAME}_semi_circle`;
+          break;
+        case GaugeShapes.ARC:
+          type = `${EXPRESSION_GAUGE_NAME}_arc`;
+          break;
+        case GaugeShapes.CIRCLE:
+          type = `${EXPRESSION_GAUGE_NAME}_circle`;
+          break;
         default:
           type = EXPRESSION_GAUGE_NAME;
       }
@@ -66,12 +79,22 @@ export const gaugeRenderer: (
       handlers.done();
     };
 
+    const setChartSize = (chartSizeSpec: ChartSizeEvent['data']) => {
+      const event: ChartSizeEvent = {
+        name: 'chartSize',
+        data: chartSizeSpec,
+      };
+
+      handlers.event(event);
+    };
+
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
         <div className="gauge-container" data-test-subj="gaugeChart">
           <GaugeComponent
             {...config}
+            setChartSize={setChartSize}
             formatFactory={getFormatService().deserialize}
             chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}

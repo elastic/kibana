@@ -19,13 +19,14 @@ import { BASE_PATH } from '../../../../../../../common';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 
-const testBedConfig: AsyncTestBedConfig = {
+const getTestBedConfig = (props?: any): AsyncTestBedConfig => ({
   memoryRouter: {
     initialEntries: [`${BASE_PATH}component_templates`],
     componentRoutePath: `${BASE_PATH}component_templates`,
   },
   doMountAsync: true,
-};
+  defaultProps: props,
+});
 
 export type ComponentTemplateListTestBed = TestBed<ComponentTemplateTestSubjects> & {
   actions: ReturnType<typeof createActions>;
@@ -73,18 +74,26 @@ const createActions = (testBed: TestBed) => {
     deleteButton.simulate('click');
   };
 
+  const getSearchValue = () => {
+    return find('componentTemplatesSearch').prop('defaultValue');
+  };
+
   return {
     clickReloadButton,
     clickComponentTemplateAt,
     clickDeleteActionAt,
     clickTableColumnSortButton,
+    getSearchValue,
   };
 };
 
-export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateListTestBed> => {
+export const setup = async (
+  httpSetup: HttpSetup,
+  props?: any
+): Promise<ComponentTemplateListTestBed> => {
   const initTestBed = registerTestBed(
     WithAppDependencies(ComponentTemplateList, httpSetup),
-    testBedConfig
+    getTestBedConfig(props)
   );
   const testBed = await initTestBed();
 
@@ -104,4 +113,8 @@ export type ComponentTemplateTestSubjects =
   | 'sectionLoading'
   | 'componentTemplatesLoadError'
   | 'deleteComponentTemplateButton'
-  | 'reloadButton';
+  | 'reloadButton'
+  | 'componentTemplatesSearch'
+  | 'deprecatedComponentTemplateBadge'
+  | 'componentTemplatesFiltersButton'
+  | 'componentTemplates--deprecatedFilter';

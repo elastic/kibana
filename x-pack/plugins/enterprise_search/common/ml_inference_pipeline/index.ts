@@ -18,6 +18,8 @@ import {
   BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
 
+import { MlModel } from '../types/ml';
+
 import {
   MlInferencePipeline,
   CreateMLInferencePipeline,
@@ -33,7 +35,7 @@ export interface MlInferencePipelineParams {
   description?: string;
   fieldMappings: FieldMapping[];
   inferenceConfig?: InferencePipelineInferenceConfig;
-  model: MlTrainedModelConfig;
+  model: MlModel;
   pipelineName: string;
 }
 
@@ -90,7 +92,7 @@ export const generateMlInferencePipelineBody = ({
             model_version: model.version,
             pipeline: pipelineName,
             processed_timestamp: '{{{ _ingest.timestamp }}}',
-            types: getMlModelTypesForModelConfig(model),
+            types: model.types,
           },
         ],
       },
@@ -104,19 +106,19 @@ export const getInferenceProcessor = (
   sourceField: string,
   targetField: string,
   inferenceConfig: InferencePipelineInferenceConfig | undefined,
-  model: MlTrainedModelConfig,
+  model: MlModel,
   pipelineName: string
 ): IngestInferenceProcessor => {
   // If model returned no input field, insert a placeholder
   const modelInputField =
-    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
+    model.inputFieldNames.length > 0 ? model.inputFieldNames[0] : 'MODEL_INPUT_FIELD';
 
   return {
     field_map: {
       [sourceField]: modelInputField,
     },
     inference_config: inferenceConfig,
-    model_id: model.model_id,
+    model_id: model.modelId,
     on_failure: [
       {
         append: {
@@ -202,10 +204,18 @@ export const parseModelStateFromStats = (
     modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)
   )
     return TrainedModelState.Started;
-  switch (model?.deployment_stats?.state) {
+
+  return parseModelState(model?.deployment_stats?.state);
+};
+
+export const parseModelState = (state?: string) => {
+  switch (state) {
     case 'started':
+    case 'fully_allocated':
       return TrainedModelState.Started;
     case 'starting':
+    case 'downloading':
+    case 'downloaded':
       return TrainedModelState.Starting;
     case 'stopping':
       return TrainedModelState.Stopping;

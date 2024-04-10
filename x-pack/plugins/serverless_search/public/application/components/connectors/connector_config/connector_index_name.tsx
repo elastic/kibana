@@ -16,7 +16,6 @@ import { useConnector } from '../../../hooks/api/use_connector';
 import { useKibanaServices } from '../../../hooks/use_kibana';
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
-import { useShowErrorToast } from '../../../hooks/use_error_toast';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 
 interface ConnectorIndexNameProps {
@@ -27,9 +26,10 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
-  const showErrorToast = useShowErrorToast();
-  const { data, isLoading, isSuccess, mutate } = useMutation({
+  const [showSyncCallOut, setShowSyncCallOut] = useState(false);
+  const { data, isLoading, mutate } = useMutation({
     mutationFn: async ({ inputName, sync }: { inputName: string | null; sync?: boolean }) => {
+      setShowSyncCallOut(false);
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
         await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
@@ -38,16 +38,10 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       }
       if (sync) {
         await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+        setShowSyncCallOut(true);
       }
       return inputName;
     },
-    onError: (error) =>
-      showErrorToast(
-        error,
-        i18n.translate('xpack.serverlessSearch.connectors.config.connectorIndexNameError', {
-          defaultMessage: 'Error updating index name',
-        })
-      ),
     onSuccess: () => {
       queryClient.setQueryData(queryKey, { connector: { ...connector, index_name: data } });
       queryClient.invalidateQueries(queryKey);
@@ -124,7 +118,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isSuccess && (
+      {showSyncCallOut && (
         <>
           <EuiSpacer />
           <SyncScheduledCallOut />

@@ -8,8 +8,9 @@
 import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
-import { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-server';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
@@ -206,11 +207,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-
-        // Using `wait_for` helps avoid users seeing recently-deleted reports temporarily flashing back in the
-        // job listing.
-        const query = { id, index: deleteIndex, refresh: 'wait_for' as const };
-
+        const query = { id, index: deleteIndex };
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {
         throw new Error(

@@ -370,8 +370,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
+        {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
           onChange={setExceptionItemMeta}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertTags } from '../../../../../common/api/detection_engine';
+import type { AlertTags, AlertAssignees } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 
 export const validateAlertTagsArrays = (tags: AlertTags, ids: string[]) => {
@@ -17,6 +17,16 @@ export const validateAlertTagsArrays = (tags: AlertTags, ids: string[]) => {
   const duplicates = tagsToAdd.filter((tag) => tagsToRemove.includes(tag));
   if (duplicates.length) {
     validationErrors.push(i18n.ALERT_TAGS_VALIDATION_ERROR(JSON.stringify(duplicates)));
+  }
+  return validationErrors;
+};
+
+export const validateAlertAssigneesArrays = (assignees: AlertAssignees) => {
+  const validationErrors = [];
+  const { add: assigneesToAdd, remove: assigneesToRemove } = assignees;
+  const duplicates = assigneesToAdd.filter((assignee) => assigneesToRemove.includes(assignee));
+  if (duplicates.length) {
+    validationErrors.push(i18n.ALERT_ASSIGNEES_VALIDATION_ERROR(JSON.stringify(duplicates)));
   }
   return validationErrors;
 };

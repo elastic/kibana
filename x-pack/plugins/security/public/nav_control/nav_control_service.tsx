@@ -10,19 +10,21 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type {
+  AuthenticationServiceSetup,
+  SecurityNavControlServiceStart,
+  UserMenuLink,
+} from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
+import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 
@@ -35,18 +37,6 @@ interface SetupDeps {
 interface StartDeps {
   core: CoreStart;
   authc: AuthenticationServiceSetup;
-}
-
-export interface SecurityNavControlServiceStart {
-  /**
-   * Returns an Observable of the array of user menu links (the links that show up under the user's Avatar in the UI) registered by other plugins
-   */
-  getUserMenuLinks$: () => Observable<UserMenuLink[]>;
-
-  /**
-   * Registers the provided user menu links to be displayed in the user menu (the links that show up under the user's Avatar in the UI).
-   */
-  addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
 
 export class SecurityNavControlService {

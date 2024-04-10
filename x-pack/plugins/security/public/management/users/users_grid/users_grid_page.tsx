@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role, User } from '../../../../common/model';
+import type { Role, User } from '../../../../common';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import type { RolesAPIClient } from '../../roles';

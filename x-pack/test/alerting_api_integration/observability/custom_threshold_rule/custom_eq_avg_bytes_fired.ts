@@ -4,15 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
-import moment from 'moment';
-import { cleanup, generate } from '@kbn/infra-forge';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
@@ -36,27 +29,54 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    // DATE_VIEW should match the index template:
-    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    // DATA_VIEW should match the index template:
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
-    let infraDataIndex: string;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
-      infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
+      dataForgeConfig = {
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-15m',
+            end: 'now+10m',
+            metrics: [
+              { name: 'system.network.in.bytes', method: 'linear', start: 5, end: 5 },
+              { name: 'system.network.out.bytes', method: 'linear', start: 5, end: 5 },
+            ],
+          },
+        ],
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 60000,
+          alignEventsToInterval: true,
+        },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await waitForDocumentInIndex({
+        esClient,
+        indexName: DATA_VIEW,
+        docCountTarget: 75,
+        retryService,
+        logger,
+      });
       await createDataView({
         supertest,
-        name: DATE_VIEW,
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
+        logger,
       });
     });
 
@@ -74,9 +94,10 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
-      await cleanup({ esClient, logger });
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
     describe('Rule creation', () => {
@@ -85,10 +106,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -148,6 +172,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -157,13 +183,14 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -187,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.9]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -211,20 +238,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Custom equation is 1, above the threshold of 0.9. (duration: 1 min, data view: ${DATE_VIEW})`
+          `Custom equation is 1 B, above the threshold of 0.9 B. (duration: 1 min, data view: ${DATA_VIEW})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('1');
+        expect(resp.hits.hits[0]._source?.value).eql('1 B');
       });
     });
   });

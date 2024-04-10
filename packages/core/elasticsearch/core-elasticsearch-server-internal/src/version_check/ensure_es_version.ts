@@ -11,8 +11,17 @@
  * that defined in Kibana's package.json.
  */
 
-import { timer, of, from, Observable } from 'rxjs';
-import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
+import { interval, of, from, Observable, BehaviorSubject } from 'rxjs';
+import {
+  map,
+  distinctUntilChanged,
+  catchError,
+  exhaustMap,
+  switchMap,
+  tap,
+  startWith,
+  shareReplay,
+} from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -26,7 +35,8 @@ export interface PollEsNodesVersionOptions {
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
-  esVersionCheckInterval: number;
+  healthCheckInterval: number;
+  healthCheckStartupInterval?: number;
 }
 
 /** @public */
@@ -149,10 +159,26 @@ export const pollEsNodesVersion = ({
   log,
   kibanaVersion,
   ignoreVersionMismatch,
-  esVersionCheckInterval: healthCheckInterval,
+  healthCheckInterval,
+  healthCheckStartupInterval,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
-  return timer(0, healthCheckInterval).pipe(
+
+  const hasStartupInterval =
+    healthCheckStartupInterval !== undefined && healthCheckStartupInterval !== healthCheckInterval;
+
+  const isStartup$ = new BehaviorSubject(hasStartupInterval);
+
+  const checkInterval$ = isStartup$.pipe(
+    distinctUntilChanged(),
+    map((useStartupInterval) =>
+      useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
+    )
+  );
+
+  return checkInterval$.pipe(
+    switchMap((checkInterval) => interval(checkInterval)),
+    startWith(0),
     exhaustMap(() => {
       return from(
         internalClient.nodes.info({
@@ -164,9 +190,16 @@ export const pollEsNodesVersion = ({
         })
       );
     }),
-    map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) =>
-      mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch)
-    ),
-    distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions or if we return an error and that error changes
+    map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) => {
+      return mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch);
+    }),
+    // Only emit if there are new nodes or versions or if we return an error and that error changes
+    distinctUntilChanged(compareNodes),
+    tap((nodesVersionCompatibility) => {
+      if (nodesVersionCompatibility.isCompatible) {
+        isStartup$.next(false);
+      }
+    }),
+    shareReplay({ refCount: true, bufferSize: 1 })
   );
 };

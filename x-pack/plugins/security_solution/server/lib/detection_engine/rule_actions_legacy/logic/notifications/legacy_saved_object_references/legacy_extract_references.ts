@@ -30,7 +30,7 @@ import { legacyExtractRuleId } from './legacy_extract_rule_id';
  * Optionally you can remove any parameters you do not want to store within the Saved Object here:
  * const paramsWithoutSavedObjectReferences = { removeParam, ...otherParams };
  *
- * If you do remove params, then update the types in: security_solution/server/lib/detection_engine/notifications/legacy_rules_notification_alert_type.ts
+ * If you do remove params, then update the types in: security_solution/server/lib/detection_engine/notifications/legacy_rules_notification_rule_type.ts
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  * @param logger Kibana injected logger
  * @param params The params of the base rule(s).

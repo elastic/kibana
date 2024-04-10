@@ -12,8 +12,10 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PersistenceAPI } from '../types';
+import { DataViewLazy } from './data_view_lazy';
+import { DEFAULT_DATA_VIEW_ID } from '../constants';
+import { AbstractDataView } from './abstract_data_views';
 
-import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
 import {
@@ -163,15 +165,10 @@ export interface DataViewsServicePublicMethods {
   ) => Promise<DataView>;
   /**
    * Save data view
-   * @param dataView - Data view instance to save.
+   * @param dataView - Data view  or data view lazy instance to save.
    * @param override - If true, save over existing data view
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  createSavedObject: (
-    indexPattern: DataView,
-    overwrite?: boolean,
-    displayErrors?: boolean
-  ) => Promise<DataView>;
+  createSavedObject: (indexPattern: AbstractDataView, overwrite?: boolean) => Promise<void>;
   /**
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
@@ -261,7 +258,11 @@ export interface DataViewsServicePublicMethods {
    * Refresh fields for data view instance
    * @params dataView - Data view instance
    */
-  refreshFields: (indexPattern: DataView, displayErrors?: boolean) => Promise<void>;
+  refreshFields: (
+    indexPattern: DataView,
+    displayErrors?: boolean,
+    forceRefresh?: boolean
+  ) => Promise<void>;
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
@@ -285,12 +286,29 @@ export interface DataViewsServicePublicMethods {
     saveAttempts?: number,
     ignoreErrors?: boolean,
     displayErrors?: boolean
-  ) => Promise<DataView | void | Error>;
+  ) => Promise<void>;
 
   /**
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
+
+  getMetaFields: () => Promise<string[] | undefined>;
+  getShortDotsEnable: () => Promise<boolean | undefined>;
+
+  toDataView: (toDataView: DataViewLazy) => Promise<DataView>;
+
+  toDataViewLazy: (dataView: DataView) => Promise<DataViewLazy>;
+
+  getAllDataViewLazy: () => Promise<DataViewLazy[]>;
+
+  getDataViewLazy: (id: string) => Promise<DataViewLazy>;
+
+  createDataViewLazy: (spec: DataViewSpec) => Promise<DataViewLazy>;
+
+  createAndSaveDataViewLazy: (spec: DataViewSpec, override?: boolean) => Promise<DataViewLazy>;
+
+  getDefaultDataViewLazy: () => Promise<DataViewLazy | null>;
 }
 
 /**
@@ -315,7 +333,10 @@ export class DataViewsService {
    * @param key used to indicate uniqueness of the error
    */
   private onError: OnError;
-  private dataViewCache: ReturnType<typeof createDataViewCache>;
+
+  private dataViewCache: Map<string, Promise<DataView>>;
+  private dataViewLazyCache: Map<string, Promise<DataViewLazy>>;
+
   /**
    * Can the user save advanced settings?
    */
@@ -351,7 +372,8 @@ export class DataViewsService {
     this.getCanSave = getCanSave;
     this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
-    this.dataViewCache = createDataViewCache();
+    this.dataViewCache = new Map();
+    this.dataViewLazyCache = new Map();
     this.scriptedFieldsEnabled = scriptedFieldsEnabled;
   }
 
@@ -434,6 +456,19 @@ export class DataViewsService {
     }));
   };
 
+  getAllDataViewLazy = async (refresh: boolean = false) => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+
+    return await Promise.all(
+      this.savedObjectsCache.map(async (so) => (await this.getDataViewLazy(so.id)) as DataViewLazy)
+    );
+  };
+
   /**
    * Clear index pattern saved objects cache.
    */
@@ -446,9 +481,9 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     } else {
-      this.dataViewCache.clearAll();
+      this.dataViewCache.clear();
     }
   };
 
@@ -480,7 +515,7 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>('defaultIndex');
+    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
     return defaultIndexPatternId ?? null;
   };
 
@@ -490,8 +525,8 @@ export class DataViewsService {
    * @param force set default data view even if there's an existing default
    */
   setDefault = async (id: string | null, force = false) => {
-    if (force || !(await this.config.get('defaultIndex'))) {
-      await this.config.set('defaultIndex', id);
+    if (force || !(await this.getDefaultId())) {
+      await this.config.set(DEFAULT_DATA_VIEW_ID, id);
     }
   };
 
@@ -502,13 +537,18 @@ export class DataViewsService {
     return this.apiClient.hasUserDataView();
   }
 
+  getMetaFields = async () => await this.config.get<string[]>(META_FIELDS);
+
+  getShortDotsEnable = async () =>
+    await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+
   /**
    * Get field list by providing { pattern }.
    * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    const metaFields = await this.getMetaFields();
     const { fields } = await this.apiClient.getFieldsForWildcard({
       ...options,
       metaFields,
@@ -535,20 +575,24 @@ export class DataViewsService {
         (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
     });
 
-  private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+  private getFieldsAndIndicesForDataView = async (
+    dataView: DataView,
+    forceRefresh: boolean = false
+  ) => {
+    const metaFields = await this.getMetaFields();
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
-      allowHidden: dataView.getAllowHidden(),
+      forceRefresh,
+      allowHidden: dataView.getAllowHidden() || undefined,
     });
   };
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
-    const metaFields = await this.config.get<string[]>(META_FIELDS);
+    const metaFields = await this.getMetaFields();
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
@@ -560,8 +604,18 @@ export class DataViewsService {
     });
   };
 
-  private refreshFieldsFn = async (indexPattern: DataView) => {
-    const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
+  private refreshFieldsFn = async (indexPattern: DataView, forceRefresh: boolean = false) => {
+    const { fields, indices, etag } = await this.getFieldsAndIndicesForDataView(
+      indexPattern,
+      forceRefresh
+    );
+
+    if (indexPattern.getEtag() && etag === indexPattern.getEtag()) {
+      return;
+    } else {
+      indexPattern.setEtag(etag);
+    }
+
     fields.forEach((field) => (field.isMapped = true));
     const scripted = this.scriptedFieldsEnabled
       ? indexPattern.getScriptedFields().map((field) => field.spec)
@@ -587,13 +641,17 @@ export class DataViewsService {
    * @param dataView
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
-  refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
+  refreshFields = async (
+    dataView: DataView,
+    displayErrors: boolean = true,
+    forceRefresh: boolean = false
+  ) => {
     if (!displayErrors) {
-      return this.refreshFieldsFn(dataView);
+      return this.refreshFieldsFn(dataView, forceRefresh);
     }
 
     try {
-      await this.refreshFieldsFn(dataView);
+      await this.refreshFieldsFn(dataView, forceRefresh);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         // not considered an error, check dataView.matchedIndices.length to be 0
@@ -634,7 +692,11 @@ export class DataViewsService {
       : [];
     try {
       let updatedFieldList: FieldSpec[];
-      const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
+      const {
+        fields: newFields,
+        indices,
+        etag,
+      } = await this.getFieldsAndIndicesForWildcard(options);
       newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
@@ -645,7 +707,7 @@ export class DataViewsService {
         updatedFieldList = fieldsAsArr;
       }
 
-      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
+      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices, etag };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         // not considered an error, check dataView.matchedIndices.length to be 0
@@ -680,6 +742,7 @@ export class DataViewsService {
       collector[field.name] = {
         ...field,
         customLabel: fieldAttrs?.[field.name]?.customLabel,
+        customDescription: fieldAttrs?.[field.name]?.customDescription,
         count: fieldAttrs?.[field.name]?.count,
       };
       return collector;
@@ -759,13 +822,13 @@ export class DataViewsService {
     displayErrors?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
-    const { fields, indices } = await this.refreshFieldSpecMap(
+    const { fields, indices, etag } = await this.refreshFieldSpecMap(
       spec.fields || {},
       savedObjectId,
       spec.title as string,
       {
         pattern: title as string,
-        metaFields: await this.config.get(META_FIELDS),
+        metaFields: await this.getMetaFields(),
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
@@ -777,7 +840,7 @@ export class DataViewsService {
 
     const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
     // mapped fields overwrite runtime fields
-    return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [] };
+    return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [], etag };
   };
 
   private initFromSavedObject = async (
@@ -791,6 +854,7 @@ export class DataViewsService {
 
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];
+    let etag: string | undefined;
 
     if (!displayErrors) {
       const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
@@ -800,6 +864,7 @@ export class DataViewsService {
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
+      etag = fieldsAndIndices.etag;
     } else {
       try {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
@@ -809,6 +874,7 @@ export class DataViewsService {
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
+        etag = fieldsAndIndices.etag;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
           // not considered an error, check dataView.matchedIndices.length to be 0
@@ -833,6 +899,7 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
+    indexPattern.setEtag(etag);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
@@ -859,6 +926,7 @@ export class DataViewsService {
         searchable: true,
         readFromDocValues: false,
         customLabel: fieldAttrs?.[name]?.customLabel,
+        customDescription: fieldAttrs?.[name]?.customDescription,
         count: fieldAttrs?.[name]?.count,
       };
 
@@ -882,6 +950,40 @@ export class DataViewsService {
     return spec;
   };
 
+  getDataViewLazy = async (id: string) => {
+    const dataViewLazyFromCache = this.dataViewLazyCache.get(id);
+    if (dataViewLazyFromCache) {
+      return dataViewLazyFromCache;
+    } else {
+      const getDataViewLazyPromise = async () => {
+        const savedObject = await this.savedObjectsClient.get(id);
+
+        const spec = this.savedObjectToSpec(savedObject);
+
+        const shortDotsEnable = await this.getShortDotsEnable();
+        const metaFields = await this.getMetaFields();
+
+        return new DataViewLazy({
+          spec,
+          fieldFormats: this.fieldFormats,
+          shortDotsEnable,
+          metaFields,
+          apiClient: this.apiClient,
+          scriptedFieldsEnabled: this.scriptedFieldsEnabled,
+        });
+      };
+
+      const dataViewLazyPromise = getDataViewLazyPromise();
+
+      dataViewLazyPromise.catch(() => {
+        this.dataViewLazyCache.delete(id);
+      });
+
+      this.dataViewLazyCache.set(id, dataViewLazyPromise);
+      return dataViewLazyPromise;
+    }
+  };
+
   /**
    * Get an index pattern by id, cache optimized.
    * @param id
@@ -900,13 +1002,17 @@ export class DataViewsService {
       return dataView;
     });
 
-    const indexPatternPromise =
-      dataViewFromCache ||
-      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
+    let indexPatternPromise: Promise<DataView>;
+    if (dataViewFromCache) {
+      indexPatternPromise = dataViewFromCache;
+    } else {
+      indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors);
+      this.dataViewCache.set(id, indexPatternPromise);
+    }
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      this.dataViewCache.clear(id);
+      this.dataViewCache.delete(id);
     });
 
     return indexPatternPromise;
@@ -924,8 +1030,8 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ): Promise<DataView> {
-    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
-    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
 
     const spec = {
       id: id ?? uuidv4(),
@@ -969,11 +1075,87 @@ export class DataViewsService {
         return cachedDataView;
       }
 
-      return this.dataViewCache.set(spec.id, doCreate());
+      const dataViewPromise = doCreate();
+
+      this.dataViewCache.set(spec.id, dataViewPromise);
+
+      return dataViewPromise;
     }
 
     const dataView = await doCreate();
-    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    return dataView;
+  }
+
+  /**
+   * Create a new data view instance.
+   * @param spec data view spec
+   * @returns DataViewLazy
+   */
+  private async createFromSpecLazy({
+    id,
+    name,
+    title,
+    ...restOfSpec
+  }: DataViewSpec): Promise<DataViewLazy> {
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
+
+    const spec = {
+      id: id ?? uuidv4(),
+      title,
+      name: name || title,
+      ...restOfSpec,
+    };
+
+    return new DataViewLazy({
+      spec,
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+      apiClient: this.apiClient,
+      scriptedFieldsEnabled: this.scriptedFieldsEnabled,
+    });
+  }
+
+  /**
+   * Create data view lazy instance.
+   * @param spec data view spec
+   * @returns DataViewLazy
+   */
+  async createDataViewLazy(spec: DataViewSpec): Promise<DataViewLazy> {
+    const doCreate = () => this.createFromSpecLazy(spec);
+
+    if (spec.id) {
+      const cachedDataView = this.dataViewLazyCache.get(spec.id);
+
+      if (cachedDataView) {
+        return cachedDataView;
+      }
+
+      const dataViewPromise = doCreate();
+
+      this.dataViewLazyCache.set(spec.id, dataViewPromise);
+
+      return dataViewPromise;
+    }
+
+    const dataView = await doCreate();
+    this.dataViewLazyCache.set(dataView.id!, Promise.resolve(dataView));
+    return dataView;
+  }
+
+  /**
+   * Create a new data view lazy and save it right away.
+   * @param spec data view spec
+   * @param override Overwrite if existing index pattern exists.
+   */
+
+  async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
+    const dataViewLazy = await this.createFromSpecLazy(spec);
+    await this.createSavedObject(dataViewLazy, overwrite);
+    await this.setDefault(dataViewLazy.id!);
+    return dataViewLazy;
   }
 
   /**
@@ -990,24 +1172,19 @@ export class DataViewsService {
     skipFetchFields = false,
     displayErrors = true
   ) {
-    const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    const createdIndexPattern = await this.createSavedObject(
-      indexPattern,
-      overwrite,
-      displayErrors
-    );
-    await this.setDefault(createdIndexPattern.id!);
-    return createdIndexPattern!;
+    const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
+    await this.createSavedObject(dataView, overwrite);
+    await this.setDefault(dataView.id!);
+    return dataView;
   }
 
   /**
    * Save a new data view.
    * @param dataView data view instance
    * @param override Overwrite if existing index pattern exists
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: DataView, overwrite = false, displayErrors = true) {
+  async createSavedObject(dataView: AbstractDataView, overwrite = false) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
@@ -1029,11 +1206,11 @@ export class DataViewsService {
       overwrite,
     })) as SavedObject<DataViewAttributes>;
 
-    const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
       this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
     }
-    return createdIndexPattern;
+    dataView.version = response.version;
+    dataView.namespaces = response.namespaces || [];
   }
 
   /**
@@ -1045,11 +1222,11 @@ export class DataViewsService {
    */
 
   async updateSavedObject(
-    indexPattern: DataView,
+    indexPattern: AbstractDataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false,
     displayErrors: boolean = true
-  ): Promise<DataView | void | Error> {
+  ) {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
@@ -1068,18 +1245,17 @@ export class DataViewsService {
       }
     });
 
-    return this.savedObjectsClient
+    await this.savedObjectsClient
       .update(indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((response) => {
         indexPattern.id = response.id;
         indexPattern.version = response.version;
-        return indexPattern;
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = await this.get(indexPattern.id as string, displayErrors);
+          const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
 
@@ -1132,10 +1308,11 @@ export class DataViewsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          this.dataViewCache.clear(indexPattern.id!);
+          this.dataViewCache.delete(indexPattern.id!);
+          this.dataViewLazyCache.delete(indexPattern.id!);
 
           // Try the save again
-          return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
+          await this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors, displayErrors);
         }
         throw err;
       });
@@ -1149,27 +1326,28 @@ export class DataViewsService {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
-    this.dataViewCache.clear(indexPatternId);
+    this.dataViewCache.delete(indexPatternId);
+    this.dataViewLazyCache.delete(indexPatternId);
     return this.savedObjectsClient.delete(indexPatternId);
   }
 
   private async getDefaultDataViewId() {
     const patterns = await this.getIdsWithTitle();
-    let defaultId: string | undefined = await this.config.get('defaultIndex');
+    let defaultId: string | null = await this.getDefaultId();
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 
     if (defaultId && !exists) {
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove('defaultIndex');
+        await this.config.remove(DEFAULT_DATA_VIEW_ID);
       }
 
-      defaultId = undefined;
+      defaultId = null;
     }
 
     if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
       defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set('defaultIndex', defaultId);
+        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
       }
     }
 
@@ -1181,6 +1359,24 @@ export class DataViewsService {
    */
   async defaultDataViewExists() {
     return !!(await this.getDefaultDataViewId());
+  }
+
+  /**
+   * Returns the default data view as a DataViewLazy.
+   * If no default is found, or it is missing
+   * another data view is selected as default and returned.
+   * If no possible data view found to become a default returns null.
+   *
+   * @returns default data view lazy
+   */
+  async getDefaultDataViewLazy(): Promise<DataViewLazy | null> {
+    const defaultId = await this.getDefaultDataViewId();
+
+    if (defaultId) {
+      return this.getDataViewLazy(defaultId);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -1208,6 +1404,52 @@ export class DataViewsService {
     } else {
       return null;
     }
+  }
+
+  // unsaved DataViewLazy changes will not be reflected in the returned DataView
+  async toDataView(dataViewLazy: DataViewLazy) {
+    // if persisted
+    if (dataViewLazy.id) {
+      return this.get(dataViewLazy.id);
+    }
+
+    // if not persisted
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
+
+    const dataView = new DataView({
+      spec: await dataViewLazy.toSpec(),
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+    });
+
+    // necessary to load fields
+    await this.refreshFields(dataView, false);
+
+    return dataView;
+  }
+
+  // unsaved DataView changes will not be reflected in the returned DataViewLazy
+  async toDataViewLazy(dataView: DataView) {
+    // if persisted
+    if (dataView.id) {
+      const dataViewLazy = await this.getDataViewLazy(dataView.id);
+      return dataViewLazy!;
+    }
+
+    // if not persisted
+    const shortDotsEnable = await this.getShortDotsEnable();
+    const metaFields = await this.getMetaFields();
+
+    return new DataViewLazy({
+      spec: dataView.toSpec(),
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+      apiClient: this.apiClient,
+      scriptedFieldsEnabled: this.scriptedFieldsEnabled,
+    });
   }
 }
 

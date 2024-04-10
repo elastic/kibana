@@ -6,12 +6,14 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiAccordion } from '@elastic/eui';
 
-import { IMPORT_STATUS, Statuses } from '../import_progress';
+import type { Statuses } from '../import_progress';
+import { IMPORT_STATUS } from '../import_progress';
 
 interface ImportError {
   msg: string;

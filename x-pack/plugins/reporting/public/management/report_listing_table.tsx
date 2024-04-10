@@ -19,16 +19,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import { durationToNumber } from '@kbn/reporting-common';
+import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
+import { checkLicense, Job } from '@kbn/reporting-public';
+import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { Job } from '../lib/job';
-import { checkLicense } from '../lib/license_check';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
-import { ListingPropsInternal } from '.';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -397,12 +395,12 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     return (
       <Fragment>
         {this.state.selectedJobs.length > 0 && (
-          <Fragment>
+          <div>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
               <EuiFlexItem grow={false}>{this.renderDeleteButton()}</EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-          </Fragment>
+          </div>
         )}
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
@@ -430,6 +428,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
         />
         {!!this.state.selectedJob && (
           <ReportInfoFlyout
+            config={this.props.config}
             onClose={() => this.setState({ selectedJob: undefined })}
             job={this.state.selectedJob}
           />

@@ -19,3 +19,17 @@ export const getField = (field: unknown | unknown[], emptyValue?: string) => {
   }
   return emptyValue ?? null;
 };
+
+/**
+ * Helper function to retrieve a field's value in an array
+ * @param field type unknown or unknown[]
+ * @return the field's value in an array
+ */
+export const getFieldArray = (field: unknown | unknown[]) => {
+  if (typeof field === 'string') {
+    return [field];
+  } else if (Array.isArray(field) && field.length > 0) {
+    return field;
+  }
+  return [];
+};

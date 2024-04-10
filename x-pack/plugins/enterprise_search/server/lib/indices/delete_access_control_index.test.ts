@@ -32,7 +32,7 @@ describe('deleteAccessControlIndex lib function', () => {
         deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
       ).resolves.toEqual(true);
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
-        index: 'indexName',
+        index: '.search-acl-filter-indexName',
       });
     });
   });
@@ -58,7 +58,7 @@ describe('deleteAccessControlIndex lib function', () => {
         deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
       ).resolves.not.toThrowError();
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
-        index: 'indexName',
+        index: '.search-acl-filter-indexName',
       });
     });
   });
@@ -84,7 +84,7 @@ describe('deleteAccessControlIndex lib function', () => {
         deleteAccessControlIndex(mockClient as unknown as IScopedClusterClient, 'indexName')
       ).rejects.toEqual(mockErrorRejection);
       expect(mockClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
-        index: 'indexName',
+        index: '.search-acl-filter-indexName',
       });
     });
   });

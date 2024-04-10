@@ -24,17 +24,28 @@ import {
   emptyStackFrame,
   emptyStackTrace,
 } from '..';
+import { isErrorFrame } from './profiling';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
   FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
+  selfAnnualCO2kgs: number;
+  selfAnnualCostUSD: number;
+  totalAnnualCO2kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
-  'Frame' | 'CountExclusive' | 'CountInclusive'
+  | 'Frame'
+  | 'CountExclusive'
+  | 'CountInclusive'
+  | 'selfAnnualCO2kgs'
+  | 'selfAnnualCostUSD'
+  | 'totalAnnualCO2kgs'
+  | 'totalAnnualCostUSD'
 > & {
   Id: string;
   Rank: number;
@@ -46,6 +57,8 @@ export interface TopNFunctions {
   SamplingRate: number;
   selfCPU: number;
   totalCPU: number;
+  totalAnnualCO2Kgs: number;
+  totalAnnualCostUSD: number;
 }
 
 export function createTopNFunctions({
@@ -56,6 +69,7 @@ export function createTopNFunctions({
   stackFrames,
   stackTraces,
   startIndex,
+  showErrorFrames,
 }: {
   endIndex: number;
   events: Map<StackTraceID, number>;
@@ -64,6 +78,7 @@ export function createTopNFunctions({
   stackFrames: Map<StackFrameID, StackFrame>;
   stackTraces: Map<StackTraceID, StackTrace>;
   startIndex: number;
+  showErrorFrames: boolean;
 }): TopNFunctions {
   // The `count` associated with a frame provides the total number of
   // traces in which that node has appeared at least once. However, a
@@ -84,9 +99,16 @@ export function createTopNFunctions({
     // It is possible that we do not have a stacktrace for an event,
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
+    const selfAnnualCO2kgs = stackTrace.selfAnnualCO2Kgs;
+    const selfAnnualCostUSD = stackTrace.selfAnnualCostUSD;
+
     const lenStackTrace = stackTrace.FrameIDs.length;
 
-    for (let i = 0; i < lenStackTrace; i++) {
+    // Error frames only appear as first frame in a stacktrace.
+    const start =
+      !showErrorFrames && lenStackTrace > 0 && isErrorFrame(stackTrace.Types[0]) ? 1 : 0;
+
+    for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
       const fileID = stackTrace.FileIDs[i];
       const addressOrLine = stackTrace.AddressOrLines[i];
@@ -122,6 +144,10 @@ export function createTopNFunctions({
           FrameGroupID: frameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
+          selfAnnualCO2kgs: 0,
+          totalAnnualCO2kgs: 0,
+          selfAnnualCostUSD: 0,
+          totalAnnualCostUSD: 0,
         };
 
         topNFunctions.set(frameGroupID, topNFunction);
@@ -130,11 +156,15 @@ export function createTopNFunctions({
       if (!uniqueFrameGroupsPerEvent.has(frameGroupID)) {
         uniqueFrameGroupsPerEvent.add(frameGroupID);
         topNFunction.CountInclusive += scaledCount;
+        topNFunction.totalAnnualCO2kgs += selfAnnualCO2kgs;
+        topNFunction.totalAnnualCostUSD += selfAnnualCostUSD;
       }
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
         topNFunction.CountExclusive += scaledCount;
+        topNFunction.selfAnnualCO2kgs += selfAnnualCO2kgs;
+        topNFunction.selfAnnualCostUSD += selfAnnualCostUSD;
       }
     }
   }
@@ -161,21 +191,29 @@ export function createTopNFunctions({
     endIndex = topN.length;
   }
 
-  const framesAndCountsAndIds = topN.slice(startIndex, endIndex).map((frameAndCount, i) => {
-    const countExclusive = frameAndCount.CountExclusive;
-    const countInclusive = frameAndCount.CountInclusive;
+  const framesAndCountsAndIds = topN
+    .slice(startIndex, endIndex)
+    .map((frameAndCount, i): TopNFunction => {
+      const countExclusive = frameAndCount.CountExclusive;
+      const countInclusive = frameAndCount.CountInclusive;
 
-    return {
-      Rank: i + 1,
-      Frame: frameAndCount.Frame,
-      CountExclusive: countExclusive,
-      CountInclusive: countInclusive,
-      Id: frameAndCount.FrameGroupID,
-    };
-  });
+      return {
+        Rank: i + 1,
+        Frame: frameAndCount.Frame,
+        CountExclusive: countExclusive,
+        CountInclusive: countInclusive,
+        Id: frameAndCount.FrameGroupID,
+        selfAnnualCO2kgs: frameAndCount.selfAnnualCO2kgs,
+        selfAnnualCostUSD: frameAndCount.selfAnnualCostUSD,
+        totalAnnualCO2kgs: frameAndCount.totalAnnualCO2kgs,
+        totalAnnualCostUSD: frameAndCount.totalAnnualCostUSD,
+      };
+    });
 
   const sumSelfCPU = sumBy(framesAndCountsAndIds, 'CountExclusive');
   const sumTotalCPU = sumBy(framesAndCountsAndIds, 'CountInclusive');
+  const totalAnnualCO2Kgs = sumBy(framesAndCountsAndIds, 'selfAnnualCO2kgs');
+  const totalAnnualCostUSD = sumBy(framesAndCountsAndIds, 'selfAnnualCostUSD');
 
   return {
     TotalCount: totalCount,
@@ -183,6 +221,8 @@ export function createTopNFunctions({
     SamplingRate: samplingRate,
     selfCPU: sumSelfCPU,
     totalCPU: sumTotalCPU,
+    totalAnnualCO2Kgs,
+    totalAnnualCostUSD,
   };
 }
 

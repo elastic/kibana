@@ -12,7 +12,7 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { MappingInfoPanel } from './mapping_info_panel';
-import type { Role, RoleMapping } from '../../../../../common/model';
+import type { Role, RoleMapping } from '../../../../../common';
 import type { RolesAPIClient } from '../../../roles';
 import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 import { RoleSelector } from '../role_selector';

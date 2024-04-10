@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, type FC } from 'react';
-import {
-  ExpandableFlyout,
-  type ExpandableFlyoutProps,
-  ExpandableFlyoutProvider,
-} from '@kbn/expandable-flyout';
+import React, { memo } from 'react';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -23,17 +20,17 @@ import { RightPanelProvider } from './document_details/right/context';
 import type { LeftPanelProps } from './document_details/left';
 import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
 import { LeftPanelProvider } from './document_details/left/context';
-import {
-  SecuritySolutionFlyoutUrlSyncProvider,
-  useSecurityFlyoutUrlSync,
-} from './document_details/shared/context/url_sync';
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
-import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
-import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
+import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
+import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
+import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -77,49 +74,47 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
-    key: RiskInputsPanelKey,
+    key: UserDetailsPanelKey,
     component: (props) => (
-      <RiskInputsPanel {...(props as RiskInputsExpandableFlyoutProps).params} />
+      <UserDetailsPanel {...({ ...props.params, path: props.path } as UserDetailsPanelProps)} />
+    ),
+  },
+  {
+    key: HostPanelKey,
+    component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: HostDetailsPanelKey,
+    component: (props) => (
+      <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
     ),
   },
 ];
 
-const OuterProviders: FC = ({ children }) => {
-  return <SecuritySolutionFlyoutUrlSyncProvider>{children}</SecuritySolutionFlyoutUrlSyncProvider>;
-};
+/**
+ * Flyout used for the Security Solution application
+ * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ */
+export const SecuritySolutionFlyout = memo(() => (
+  <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
+));
 
-const InnerProviders: FC = ({ children }) => {
-  const [flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
+SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
-  return (
-    <ExpandableFlyoutProvider
-      onChanges={handleFlyoutChangedOrClosed}
-      onClosePanels={handleFlyoutChangedOrClosed}
-      ref={flyoutRef}
-    >
-      {children}
-    </ExpandableFlyoutProvider>
-  );
-};
-
-export const SecuritySolutionFlyoutContextProvider: FC = ({ children }) => (
-  <OuterProviders>
-    <InnerProviders>{children}</InnerProviders>
-  </OuterProviders>
-);
-
-SecuritySolutionFlyoutContextProvider.displayName = 'SecuritySolutionFlyoutContextProvider';
-
-export const SecuritySolutionFlyout = memo(() => {
-  const [_flyoutRef, handleFlyoutChangedOrClosed] = useSecurityFlyoutUrlSync();
+/**
+ * Flyout used in Timeline
+ * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ */
+export const TimelineFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
 
   return (
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
-      handleOnFlyoutClosed={handleFlyoutChangedOrClosed}
       paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
     />
   );
 });
 
-SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
+TimelineFlyout.displayName = 'TimelineFlyout';

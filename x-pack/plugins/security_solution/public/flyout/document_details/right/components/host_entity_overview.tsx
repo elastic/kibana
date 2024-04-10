@@ -18,7 +18,8 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import {
@@ -27,14 +28,14 @@ import {
 } from '../../../../common/components/first_last_seen/first_last_seen';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { getField } from '../../shared/utils';
+import { CellActions } from './cell_actions';
 import {
   FAMILY,
   LAST_SEEN,
@@ -53,7 +54,6 @@ import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 
 const HOST_ICON = 'storage';
-const CONTEXT_ID = `flyout-host-entity-overview`;
 
 export interface HostEntityOverviewProps {
   /**
@@ -67,7 +67,7 @@ export interface HostEntityOverviewProps {
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
@@ -114,21 +114,24 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     endDate: to,
   });
 
+  const hostOSFamilyValue = useMemo(
+    () => getField(getOr([], 'host.os.family', hostDetails)),
+    [hostDetails]
+  );
   const hostOSFamily: DescriptionList[] = useMemo(
     () => [
       {
         title: FAMILY,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'host.os.family', hostDetails)}
-            attrName={'host.os.family'}
-            idPrefix={CONTEXT_ID}
-            isDraggable={false}
-          />
+        description: hostOSFamilyValue ? (
+          <CellActions field={'host.os.family'} value={hostOSFamilyValue}>
+            {hostOSFamilyValue}
+          </CellActions>
+        ) : (
+          getEmptyTagValue()
         ),
       },
     ],
-    [hostDetails]
+    [hostOSFamilyValue]
   );
 
   const hostLastSeen: DescriptionList[] = useMemo(

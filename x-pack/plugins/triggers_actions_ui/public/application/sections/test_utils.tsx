@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { of } from 'rxjs';
+import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -27,9 +27,11 @@ export interface AppMockRenderer {
   AppWrapper: React.FC<{ children: React.ReactElement }>;
 }
 
-export const createAppMockRenderer = (): AppMockRenderer => {
+export const createAppMockRenderer = (
+  queryClientContext?: QueryClientProviderProps['context']
+): AppMockRenderer => {
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
+  const core = coreMock.createStart();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -51,8 +53,10 @@ export const createAppMockRenderer = (): AppMockRenderer => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <KibanaThemeProvider theme={core.theme}>
+          <QueryClientProvider client={queryClient} context={queryClientContext}>
+            {children}
+          </QueryClientProvider>
         </KibanaThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>

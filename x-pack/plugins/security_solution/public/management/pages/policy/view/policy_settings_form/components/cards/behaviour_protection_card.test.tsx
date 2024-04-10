@@ -55,7 +55,6 @@ describe('Policy Behaviour Protection Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(getByTestId(testSubj.rulesCallout));
     expect(queryByTestId(testSubj.reputationServiceCheckbox)).not.toBeInTheDocument();
   });
 
@@ -115,7 +114,7 @@ describe('Policy Behaviour Protection Card', () => {
         'Malicious behavior',
         'Operating system',
         'Windows, Mac, Linux ',
-        `Malicious behavior protections ${config.enabled ? 'enabled' : 'disabled'}`,
+        'Malicious behavior protections',
       ];
 
       return (
@@ -125,19 +124,13 @@ describe('Policy Behaviour Protection Card', () => {
               'Protection level',
               'Prevent',
               ...(config.reputationServices
-                ? ['Reputation serviceInfo', "Don't use reputation service"]
+                ? ['Reputation serviceInfo', 'Reputation service']
                 : []),
               'User notification',
               'Agent version 7.15+',
               ...(config.notifyUser
                 ? ['Notify user', 'Notification message', '—']
                 : ['Notify user']),
-              ...(config.prebuiltRules
-                ? [
-                    'View related detection rules. ',
-                    'Prebuilt rules are tagged “Elastic” on the Detection Rules page.',
-                  ]
-                : ['View related detection rules.']),
             ]
           : baseText
       ).join('');
@@ -149,32 +142,45 @@ describe('Policy Behaviour Protection Card', () => {
 
     it('should display correctly when overall card is enabled', () => {
       const { getByTestId } = render();
+
       expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent());
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
+      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
     });
 
     it('should display correctly when overall card is enabled for cloud user', () => {
       startServices.cloud!.isCloudEnabled = true;
+
       const { getByTestId } = render();
+
       expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(
         cardTextContent({ reputationServices: true })
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
+      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
+      expect(getByTestId(testSubj.reputationServiceCheckbox)).not.toHaveAttribute('checked');
     });
 
     it('should display correctly when overall card is disabled', () => {
       set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+
       const { getByTestId } = render();
+
       expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(
         cardTextContent({ enabled: false, prebuiltRules: true })
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
     });
 
     it('should display correctly when overall card is disabled for cloud user', () => {
       startServices.cloud!.isCloudEnabled = true;
       set(formProps.policy, 'windows.behavior_protection.mode', ProtectionModes.off);
+
       const { getByTestId } = render();
+
       expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(
         cardTextContent({
@@ -183,13 +189,18 @@ describe('Policy Behaviour Protection Card', () => {
           prebuiltRules: true,
         })
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
     });
 
     it('should display user notification disabled', () => {
       set(formProps.policy, 'windows.popup.behavior_protection.enabled', false);
+
       const { getByTestId } = render();
+
       expectIsViewOnly(getByTestId(testSubj.card));
       expect(getByTestId(testSubj.card)).toHaveTextContent(cardTextContent({ notifyUser: false }));
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
+      expect(getByTestId(testSubj.notifyUserCheckbox)).not.toHaveAttribute('checked');
     });
   });
 });

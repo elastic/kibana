@@ -12,7 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
-  exposeToBrowser: { poll: true, roles: true, export_types: true, statefulSettings: true },
+  exposeToBrowser: {
+    csv: {
+      enablePanelActionDownload: true,
+      scroll: true,
+    },
+    poll: true,
+    roles: true,
+    export_types: true,
+    statefulSettings: true,
+  },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8

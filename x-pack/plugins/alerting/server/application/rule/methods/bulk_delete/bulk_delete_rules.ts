@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -49,6 +50,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   }
 
   const { ids, filter } = options;
+  const actionsClient = await context.getActionsClient();
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -95,13 +97,17 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
 
     try {
       ruleDomainSchema.validate(ruleDomain);
@@ -136,7 +142,7 @@ const bulkDeleteWithOCC = async (
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
           filter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -168,7 +174,7 @@ const bulkDeleteWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.DELETE,
               outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
             })
           );
         }

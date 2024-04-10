@@ -81,7 +81,6 @@ const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton

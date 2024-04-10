@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { deleteConnectorById } from '@kbn/search-connectors';
+import { deleteConnectorById, deleteConnectorSecret } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
   fetchConnectors,
@@ -24,7 +24,11 @@ import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
-import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
+import type {
+  AttachMlInferencePipelineResponse,
+  MlInferenceError,
+  MlInferenceHistoryResponse,
+} from '../../../common/types/pipelines';
 
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
@@ -41,6 +45,7 @@ import { preparePipelineAndIndexForMlInference } from '../../lib/indices/pipelin
 import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { fetchMlModels } from '../../lib/ml/fetch_ml_models';
 import { getMlModelDeploymentStatus } from '../../lib/ml/get_ml_model_deployment_status';
 import { startMlModelDeployment } from '../../lib/ml/start_ml_model_deployment';
 import { startMlModelDownload } from '../../lib/ml/start_ml_model_download';
@@ -203,6 +208,12 @@ export function registerIndexRoutes({
 
         if (connector) {
           await deleteConnectorById(client.asCurrentUser, connector.id);
+          if (connector.api_key_id) {
+            await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
+          }
+          if (connector.api_key_secret_id) {
+            await deleteConnectorSecret(client.asCurrentUser, connector.api_key_secret_id);
+          }
         }
 
         await deleteIndexPipelines(client, indexName);
@@ -271,6 +282,9 @@ export function registerIndexRoutes({
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
       validate: {
+        body: schema.object({
+          is_native: schema.boolean(),
+        }),
         params: schema.object({
           indexName: schema.string(),
         }),
@@ -278,9 +292,11 @@ export function registerIndexRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
+      const { is_native: isNative } = request.body;
+
       const { client } = (await context.core).elasticsearch;
 
-      const apiKey = await generateApiKey(client, indexName);
+      const apiKey = await generateApiKey(client, indexName, isNative);
 
       return response.ok({
         body: apiKey,
@@ -762,8 +778,14 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
-
+      let errors: MlInferenceError[] = [];
+      try {
+        errors = await getMlInferenceErrors(indexName, client.asCurrentUser);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: {
           errors,
@@ -902,9 +924,14 @@ export function registerIndexRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
-
-      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
-
+      let history: MlInferenceHistoryResponse = { history: [] };
+      try {
+        history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+      } catch (error) {
+        if (!isIndexNotFoundException(error)) {
+          throw error;
+        }
+      }
       return response.ok({
         body: history,
         headers: { 'content-type': 'application/json' },
@@ -1097,6 +1124,28 @@ export function registerIndexRoutes({
         // otherwise, let the default handler wrap it
         throw error;
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/ml/models',
+      validate: {},
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const {
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const modelsResult = await fetchMlModels(trainedModelsProvider, log);
+
+      return response.ok({
+        body: modelsResult,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 

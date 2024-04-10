@@ -56,6 +56,13 @@ export const TITLE_REQUIRED = i18n.translate(
   }
 );
 
+export const CORRELATION_ID_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.requiredCorrelationIdTextField',
+  {
+    defaultMessage: 'Correlation id is required.',
+  }
+);
+
 export const INCIDENT = i18n.translate('xpack.stackConnectors.components.serviceNow.title', {
   defaultMessage: 'Incident',
 });
@@ -63,14 +70,14 @@ export const INCIDENT = i18n.translate('xpack.stackConnectors.components.service
 export const SECURITY_INCIDENT = i18n.translate(
   'xpack.stackConnectors.components.serviceNowSIR.title',
   {
-    defaultMessage: 'Security Incident',
+    defaultMessage: 'Security incident',
   }
 );
 
 export const SHORT_DESCRIPTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.titleFieldLabel',
   {
-    defaultMessage: 'Short description (required)',
+    defaultMessage: 'Short description',
   }
 );
 
@@ -202,14 +209,14 @@ export const UNKNOWN = i18n.translate('xpack.stackConnectors.components.serviceN
 export const CORRELATION_ID = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationID',
   {
-    defaultMessage: 'Correlation ID (optional)',
+    defaultMessage: 'Correlation ID',
   }
 );
 
 export const CORRELATION_DISPLAY = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationDisplay',
   {
-    defaultMessage: 'Correlation display (optional)',
+    defaultMessage: 'Correlation display',
   }
 );
 
@@ -276,13 +283,6 @@ export const SEVERITY_REQUIRED = i18n.translate(
   }
 );
 
-export const SEVERITY_REQUIRED_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.serviceNow.severityRequiredSelectFieldLabel',
-  {
-    defaultMessage: 'Severity (required)',
-  }
-);
-
 export const CLIENTID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.clientIdTextFieldLabel',
   {
@@ -293,35 +293,35 @@ export const CLIENTID_LABEL = i18n.translate(
 export const CLIENTSECRET_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.clientSecretTextFieldLabel',
   {
-    defaultMessage: 'Client Secret',
+    defaultMessage: 'Client secret',
   }
 );
 
 export const KEY_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.keyIdTextFieldLabel',
   {
-    defaultMessage: 'JWT Verifier Key ID',
+    defaultMessage: 'JWT verifier key ID',
   }
 );
 
 export const USER_IDENTIFIER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.userEmailTextFieldLabel',
   {
-    defaultMessage: 'User Identifier',
+    defaultMessage: 'User identifier',
   }
 );
 
 export const PRIVATE_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.privateKeyTextFieldLabel',
   {
-    defaultMessage: 'Private Key',
+    defaultMessage: 'Private key',
   }
 );
 
 export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.privateKeyPassTextFieldLabel',
   {
-    defaultMessage: 'Private Key Password',
+    defaultMessage: 'Private key password',
   }
 );
 
@@ -342,21 +342,21 @@ export const CLIENTID_REQUIRED = i18n.translate(
 export const PRIVATE_KEY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.requiredPrivateKeyTextField',
   {
-    defaultMessage: 'Private Key is required.',
+    defaultMessage: 'Private key is required.',
   }
 );
 
 export const KEYID_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.requiredKeyIdTextField',
   {
-    defaultMessage: 'JWT Verifier Key ID is required.',
+    defaultMessage: 'JWT verifier key ID is required.',
   }
 );
 
 export const USER_IDENTIFIER_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.requiredUserIdentifierTextField',
   {
-    defaultMessage: 'User Identifier is required.',
+    defaultMessage: 'User identifier is required.',
   }
 );
 
@@ -370,10 +370,45 @@ export const PASSWORD_REQUIRED = i18n.translate(
 export const CLIENTSECRET_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.requiredClientSecretTextField',
   {
-    defaultMessage: 'Client Secret is required.',
+    defaultMessage: 'Client secret is required.',
   }
 );
 
 export const IS_OAUTH = i18n.translate('xpack.stackConnectors.components.serviceNow.useOAuth', {
   defaultMessage: 'Use OAuth authentication',
 });
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const REQUIRED_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.requiredLabel',
+  {
+    defaultMessage: 'Required',
+  }
+);
+
+export const EVENT_ACTION_TRIGGER = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionTriggerOptionLabel',
+  {
+    defaultMessage: 'Trigger',
+  }
+);
+
+export const EVENT_ACTION_RESOLVE = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionResolveOptionLabel',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
+
+export const EVENT_ACTION_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITSM.eventActionFieldLabel',
+  {
+    defaultMessage: 'Event action',
+  }
+);

@@ -1,0 +1,20 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  dataset: "fake_hosts"
+  scenario: "custom_threshold_metric_avg_nodata"
+  eventsPerCycle: 50
+
+# Conditions: avg. system.cpu.user.pct < 1 in the last minute (will trigger no data after 2 min)
+schedule:
+  # Start with avg. system.cpu.user.pct = 2.5 
+  - template: "good"
+    start: "now-30m"
+    end: "now-1m"
+    randomness: 0.1
+  # Stop data

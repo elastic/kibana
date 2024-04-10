@@ -10,7 +10,11 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
-import { getRecentUpgradeInfoForAgent, isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+} from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -26,7 +30,7 @@ import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -57,6 +61,7 @@ export async function upgradeBatch(
     version: string;
     sourceUri?: string | undefined;
     force?: boolean;
+    skipRateLimitCheck?: boolean;
     upgradeDurationSeconds?: number;
     startTime?: string;
     total?: number;
@@ -73,7 +78,7 @@ export async function upgradeBatch(
       ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
-  const latestAgentVersion = await getLatestAvailableVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents that are:
@@ -83,10 +88,19 @@ export async function upgradeBatch(
       //  - currently upgrading
       //  - upgradeable b/c of version check
       const isNotAllowed =
-        getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
-        (!options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version));
+        (!options.skipRateLimitCheck &&
+          getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently) ||
+        (!options.force &&
+          !options.skipRateLimitCheck &&
+          !isAgentUpgradeableToVersion(agent, options.version));
       if (isNotAllowed) {
-        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
+        throw new FleetError(
+          `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(
+            agent,
+            latestAgentVersion,
+            options.version
+          )}`
+        );
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {

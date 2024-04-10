@@ -10,7 +10,6 @@ import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
-  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
@@ -40,6 +39,7 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   authorizeUpdateSpaces: jest.fn(),
   authorizeDisableLegacyUrlAliases: jest.fn(),
   auditObjectsForSpaceDeletion: jest.fn(),
+  getCurrentUser: jest.fn(),
 });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
@@ -47,7 +47,7 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => (
   getSearchableNamespaces: jest.fn(),
 });
 
-const create = (): jest.Mocked<SavedObjectsExtensions> => ({
+const create = () => ({
   encryptionExtension: createEncryptionExtension(),
   securityExtension: createSecurityExtension(),
   spacesExtension: createSpacesExtension(),

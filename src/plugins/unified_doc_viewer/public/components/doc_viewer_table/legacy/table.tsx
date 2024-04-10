@@ -18,7 +18,7 @@ import {
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
-import { useUnifiedDocViewerServices } from '../../../hooks';
+import { getUnifiedDocViewerServices } from '../../../plugin';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
 export const DocViewerLegacyTable = ({
@@ -30,7 +30,7 @@ export const DocViewerLegacyTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const { fieldFormats, uiSettings } = useUnifiedDocViewerServices();
+  const { fieldFormats, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS), [uiSettings]);
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);

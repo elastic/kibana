@@ -7,16 +7,19 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
-import type { AxiosError } from 'axios';
+import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
-  RunActionResponseSchema,
   InvokeAIActionParamsSchema,
   StreamingResponseSchema,
+  RunActionResponseSchema,
+  RunApiLatestResponseSchema,
 } from '../../../common/bedrock/schema';
-import type {
+import {
   Config,
   Secrets,
   RunActionParams,
@@ -24,9 +27,15 @@ import type {
   InvokeAIActionParams,
   InvokeAIActionResponse,
   StreamActionParams,
+  RunApiLatestResponse,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import { StreamingResponse } from '../../../common/bedrock/types';
+import {
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
+} from '../../../common/bedrock/types';
+import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 
 interface SignedRequest {
   host: string;
@@ -56,6 +65,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.DASHBOARD,
+      method: 'getDashboard',
+      schema: DashboardActionParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.TEST,
       method: 'runApi',
       schema: RunActionParamsSchema,
@@ -77,9 +92,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    if (
+      error.response.status === 400 &&
+      error.response?.data?.message === 'The requested operation is not recognized by the service.'
+    ) {
+      // Leave space in the string below, \n is not being rendered in the UI
+      return `API Error: ${error.response.data.message}
+
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`;
+    }
     if (error.response.status === 401) {
       return `Unauthorized API Error${
-        error.response?.data?.message ? ` - ${error.response.data.message}` : ''
+        error.response?.data?.message ? `: ${error.response.data.message}` : ''
       }`;
     }
     return `API Error: ${error.response?.statusText}${
@@ -120,24 +144,84 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
+  public async getDashboard({
+    dashboardId,
+  }: DashboardActionParams): Promise<DashboardActionResponse> {
+    const privilege = (await this.esClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: ['.kibana-event-log-*'],
+            allow_restricted_indices: true,
+            privileges: ['read'],
+          },
+        ],
+      },
+    })) as { has_all_requested: boolean };
+
+    if (!privilege?.has_all_requested) {
+      return { available: false };
+    }
+
+    const response = await initDashboard({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      dashboardId,
+      genAIProvider: 'Bedrock',
+    });
+
+    return { available: response.success };
+  }
+
+  private async runApiDeprecated(
+    params: SubActionRequestParams<RunActionResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+  ): Promise<RunActionResponse> {
+    const response = await this.request(params);
+    return response.data;
+  }
+
+  private async runApiLatest(
+    params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
+  ): Promise<RunActionResponse> {
+    const response = await this.request(params);
+    // keeping the response the same as claude 2 for our APIs
+    // adding the usage object for better token tracking
+    return {
+      completion: parseContent(response.data.content),
+      stop_reason: response.data.stop_reason,
+      usage: response.data.usage,
+    };
+  }
+
+  /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke`;
+    const currentModel = reqModel ?? this.model;
+    const path = `/model/${currentModel}/invoke`;
     const signed = this.signRequest(body, path, false);
-    const response = await this.request({
+    const requestArgs = {
       ...signed,
       url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: RunActionResponseSchema,
+      method: 'post' as Method,
       data: body,
       // give up to 2 minutes for response
       timeout: 120000,
-    });
-    return response.data;
+    };
+    // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
+    if (usesDeprecatedArguments(body)) {
+      return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
+    }
+    return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
   /**
@@ -176,47 +260,104 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<IncomingMessage> {
+  public async invokeStream({
+    messages,
+    model,
+    stopSequences,
+    system,
+    temperature,
+  }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages })),
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
     })) as unknown as IncomingMessage;
     return res;
   }
 
   /**
-   * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
-   * tracked here: https://github.com/elastic/security-team/issues/7363
-   * No token tracking implemented for this method
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @returns an object with the response string as a property called message
    */
   public async invokeAI({
     messages,
     model,
+    stopSequences,
+    system,
+    temperature,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({ body: JSON.stringify(formatBedrockBody({ messages })), model });
+    const res = await this.runApi({
+      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+      model,
+    });
     return { message: res.completion.trim() };
   }
 }
 
 const formatBedrockBody = ({
   messages,
+  stopSequences,
+  temperature = 0,
+  system,
 }: {
   messages: Array<{ role: string; content: string }>;
-}) => {
-  const combinedMessages = messages.reduce((acc: string, message) => {
-    const { role, content } = message;
-    // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
-    const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
-    return `${acc}${bedrockRole}${content}`;
-  }, '');
+  stopSequences?: string[];
+  temperature?: number;
+  // optional system message to be sent to the API
+  system?: string;
+}) => ({
+  anthropic_version: 'bedrock-2023-05-31',
+  ...ensureMessageFormat(messages, system),
+  max_tokens: DEFAULT_TOKEN_LIMIT,
+  stop_sequences: stopSequences,
+  temperature,
+});
 
-  return {
-    // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
-    prompt: `${combinedMessages} \n\nAssistant:`,
-    max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-    temperature: 0.5,
-    // prevent model from talking to itself
-    stop_sequences: ['\n\nHuman:'],
-  };
+/**
+ * Ensures that the messages are in the correct format for the Bedrock API
+ * Bedrock only accepts assistant and user roles.
+ * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
+ * We combine the messages into a single message to avoid this error
+ * @param messages
+ */
+const ensureMessageFormat = (
+  messages: Array<{ role: string; content: string }>,
+  systemPrompt?: string
+): { messages: Array<{ role: string; content: string }>; system?: string } => {
+  let system = systemPrompt ? systemPrompt : '';
+
+  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
+    const lastMessage = acc[acc.length - 1];
+    if (lastMessage && lastMessage.role === m.role) {
+      // Bedrock only accepts assistant and user roles.
+      // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
+      return [
+        ...acc.slice(0, -1),
+        { content: `${lastMessage.content}\n${m.content}`, role: m.role },
+      ];
+    }
+    if (m.role === 'system') {
+      system = `${system.length ? `${system}\n` : ''}${m.content}`;
+      return acc;
+    }
+
+    // force role outside of system to ensure it is either assistant or user
+    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+  }, []);
+  return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };
+
+function parseContent(content: Array<{ text?: string; type: string }>): string {
+  let parsedContent = '';
+  if (content.length === 1 && content[0].type === 'text' && content[0].text) {
+    parsedContent = content[0].text;
+  } else if (content.length > 1) {
+    parsedContent = content.reduce((acc, { text }) => (text ? `${acc}\n${text}` : acc), '');
+  }
+  return parsedContent;
+}
+
+const usesDeprecatedArguments = (body: string): boolean => JSON.parse(body)?.prompt != null;

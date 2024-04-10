@@ -15,6 +15,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
@@ -36,6 +37,7 @@ export interface LinksStartDependencies {
   dashboard: DashboardStart;
   presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class LinksPlugin
@@ -78,7 +80,7 @@ export class LinksPlugin
         title: APP_NAME,
         icon: APP_ICON,
         description: LinksStrings.getDescription(),
-        stage: 'experimental',
+        stage: 'production',
         appExtensions: {
           visualizations: {
             docTypes: [CONTENT_ID],
@@ -96,7 +98,7 @@ export class LinksPlugin
                 updatedAt,
                 icon: APP_ICON,
                 typeTitle: APP_NAME,
-                stage: 'experimental',
+                stage: 'production',
                 savedObjectType: type,
               };
             },

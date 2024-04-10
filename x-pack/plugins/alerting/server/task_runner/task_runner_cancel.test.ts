@@ -17,7 +17,6 @@ import {
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -58,6 +57,9 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { TaskRunnerContext } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -110,6 +112,7 @@ describe('Task Runner Cancel', () => {
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const dataPlugin = dataPluginMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -150,6 +153,7 @@ describe('Task Runner Cancel', () => {
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {
@@ -222,7 +226,7 @@ describe('Task Runner Cancel', () => {
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
     ).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         executionStatus: {
@@ -472,7 +476,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       8,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
   }
 
@@ -516,6 +520,7 @@ describe('Task Runner Cancel', () => {
         numberOfNewAlerts: newAlerts,
         numberOfRecoveredAlerts: recoveredAlerts,
         numberOfTriggeredActions: triggeredActions,
+        numberOfDelayedAlerts: 0,
         totalSearchDurationMs: 23423,
         hasReachedAlertLimit,
         triggeredActionsStatus: 'complete',

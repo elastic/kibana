@@ -34,7 +34,7 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
-import { decodeWithExcessOrThrow } from '../../common/api';
+import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   NO_ASSIGNEES_FILTERING_KEYWORD,
@@ -154,14 +154,29 @@ export const getAlertIds = (comment: AttachmentRequest): string[] => {
   return [];
 };
 
-const addStatusFilter = (status: CaseStatuses): KueryNode => {
+const addStatusFilter = (status: CaseStatuses | CaseStatuses[]): KueryNode | undefined => {
+  if (Array.isArray(status)) {
+    return buildFilter({
+      filters: status.map((_status) => `${STATUS_EXTERNAL_TO_ESMODEL[_status]}`),
+      field: 'status',
+      operator: 'or',
+    });
+  }
+
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.status`,
     `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
   );
 };
 
-const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
+const addSeverityFilter = (severity: CaseSeverity | CaseSeverity[]): KueryNode | undefined => {
+  if (Array.isArray(severity)) {
+    return buildFilter({
+      filters: severity.map((_severity) => `${SEVERITY_EXTERNAL_TO_ESMODEL[_severity]}`),
+      field: 'severity',
+      operator: 'or',
+    });
+  }
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.severity`,
     `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`

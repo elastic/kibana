@@ -4,19 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store/timeline';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
+import { timelineActions } from '../../../../store';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 
 const mockedTelemetry = createTelemetryServiceMock();
+const mockOpenRightPanel = jest.fn();
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({
+      openRightPanel: mockOpenRightPanel,
+    }),
+    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
+  };
+});
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -44,8 +57,8 @@ jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
-jest.mock('../../../../store/timeline', () => {
-  const original = jest.requireActual('../../../../store/timeline');
+jest.mock('../../../../store', () => {
+  const original = jest.requireActual('../../../../store');
   return {
     ...original,
     timelineActions: {
@@ -55,7 +68,22 @@ jest.mock('../../../../store/timeline', () => {
   };
 });
 
+jest.mock('@kbn/securitysolution-data-table', () => {
+  const original = jest.requireActual('@kbn/securitysolution-data-table');
+  return {
+    ...original,
+    dataTableActions: {
+      ...original.dataTableActions,
+      toggleDetailPanel: jest.fn(),
+    },
+  };
+});
+
 describe('HostName', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const props = {
     fieldName: 'host.name',
     contextId: 'test-context-id',
@@ -66,15 +94,6 @@ describe('HostName', () => {
     value: 'Mock Host',
   };
 
-  let toggleExpandedDetail: jest.SpyInstance;
-
-  beforeAll(() => {
-    toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
-  });
-
-  afterEach(() => {
-    toggleExpandedDetail.mockClear();
-  });
   test('should render host name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -101,7 +120,7 @@ describe('HostName', () => {
     expect(wrapper.find('[data-test-subj="DefaultDraggable"]').exists()).toEqual(true);
   });
 
-  test('if not enableHostDetailsFlyout, should go to hostdetails page', async () => {
+  test('should not open any flyout or panels if context in not defined', async () => {
     const wrapper = mount(
       <TestProviders>
         <HostName {...props} />
@@ -110,12 +129,99 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
     });
   });
 
-  test('if enableHostDetailsFlyout, should open HostDetailsSidePanel', async () => {
+  test('should not open any flyout or panels if enableHostDetailsFlyout is false', async () => {
+    const context = {
+      enableHostDetailsFlyout: false,
+      enableIpDetailsFlyout: true,
+      timelineID: TimelineId.active,
+      tabType: TimelineTabs.query,
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should not open any flyout or panels if timelineID is not defined', async () => {
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: '',
+      tabType: TimelineTabs.query,
+    };
+
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should open old flyout on table', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+      if (feature === 'newHostDetailsFlyout') return false;
+      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+    });
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: TableId.alertsOnAlertsPage,
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(dataTableActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
+        panelView: 'hostDetail',
+        params: {
+          hostName: props.value,
+        },
+        tabType: context.tabType,
+      });
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should open old flyout in timeline', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+      if (feature === 'newHostDetailsFlyout') return false;
+      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+    });
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -140,10 +246,51 @@ describe('HostName', () => {
         },
         tabType: context.tabType,
       });
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(mockOpenRightPanel).not.toHaveBeenCalled();
     });
   });
 
-  test('if enableHostDetailsFlyout and timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
+  test('should open expandable flyout on table', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+      if (feature === 'newHostDetailsFlyout') return true;
+      if (feature === 'expandableTimelineFlyoutEnabled') return false;
+    });
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: TableId.alertsOnAlertsPage,
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(mockOpenRightPanel).toHaveBeenCalledWith({
+        id: 'host-panel',
+        params: {
+          hostName: props.value,
+          contextID: props.contextId,
+          scopeId: TableId.alertsOnAlertsPage,
+          isDraggable: false,
+        },
+      });
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
+    });
+  });
+
+  test('should open expandable flyout in timeline', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
+      if (feature === 'newHostDetailsFlyout') return true;
+      if (feature === 'expandableTimelineFlyoutEnabled') return true;
+    });
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -160,41 +307,17 @@ describe('HostName', () => {
 
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'hostDetail',
+      expect(mockOpenRightPanel).toHaveBeenCalledWith({
+        id: 'host-panel',
         params: {
           hostName: props.value,
+          contextID: props.contextId,
+          scopeId: TableId.alertsOnAlertsPage,
+          isDraggable: false,
         },
       });
-    });
-  });
-
-  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.test,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <HostName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        id: context.timelineID,
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-        tabType: context.tabType,
-      });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
     });
   });
 });

@@ -22,12 +22,16 @@
       "esUiShared",
       "lens",
       "embeddable",
-      "share"
+      "share",
+      "console",
+      "searchConnectors",
+      "searchPlayground"
     ],
     "optionalPlugins": [
       "customIntegrations",
       "globalSearch",
       "home",
+      "indexManagement",
       "ml",
       "spaces",
       "usageCollection",

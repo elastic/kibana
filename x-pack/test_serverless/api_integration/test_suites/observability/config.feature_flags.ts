@@ -20,10 +20,7 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
   // add feature flags
-  kbnServerArgs: [
-    '--xpack.observability.unsafe.thresholdRule.enabled=true',
-    '--xpack.infra.enabled=true',
-  ],
+  kbnServerArgs: ['--xpack.infra.enabled=true', '--xpack.security.roleManagementEnabled=true'],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 

@@ -223,11 +223,8 @@ export default function (providerContext: FtrProviderContext) {
           },
           mapping: {
             total_fields: {
-              limit: '10000',
+              limit: '1000',
             },
-          },
-          query: {
-            default_field: ['logs_test_name', 'new_field_name'],
           },
         },
       });
@@ -259,34 +256,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'keyword',
           },
         },
-      });
-
-      const resUserSettings = await es.transport.request<any>(
-        {
-          method: 'GET',
-          path: `/_component_template/${logsTemplateName}@custom`,
-        },
-        { meta: true }
-      );
-      expect(resUserSettings.statusCode).equal(200);
-      expect(resUserSettings.body).eql({
-        component_templates: [
-          {
-            name: 'logs-all_assets.test_logs@custom',
-            component_template: {
-              _meta: {
-                managed: true,
-                managed_by: 'fleet',
-                package: {
-                  name: 'all_assets',
-                },
-              },
-              template: {
-                settings: {},
-              },
-            },
-          },
-        ],
       });
     });
     it('should have updated the metrics mapping component template', async function () {
@@ -516,6 +485,11 @@ export default function (providerContext: FtrProviderContext) {
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        latest_install_failed_attempts: [],
+        latest_executed_state: {
+          name: 'update_so',
+          started_at: res.attributes.latest_executed_state.started_at,
+        },
         verification_status: 'unknown',
         verification_key_id: null,
       });

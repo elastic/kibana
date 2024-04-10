@@ -6,26 +6,34 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { appIds } from '@kbn/management-cards-navigation';
-import { getObservabilitySideNavComponent } from './components/side_navigation';
+import { i18n } from '@kbn/i18n';
+import { appCategories, appIds } from '@kbn/management-cards-navigation';
+import { of } from 'rxjs';
+import { navigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
-  ServerlessObservabilityPluginSetup,
-  ServerlessObservabilityPluginStart,
-  ServerlessObservabilityPluginSetupDependencies,
-  ServerlessObservabilityPluginStartDependencies,
+  ServerlessObservabilityPublicSetup,
+  ServerlessObservabilityPublicStart,
+  ServerlessObservabilityPublicSetupDependencies,
+  ServerlessObservabilityPublicStartDependencies,
 } from './types';
 
 export class ServerlessObservabilityPlugin
-  implements Plugin<ServerlessObservabilityPluginSetup, ServerlessObservabilityPluginStart>
+  implements
+    Plugin<
+      ServerlessObservabilityPublicSetup,
+      ServerlessObservabilityPublicStart,
+      ServerlessObservabilityPublicSetupDependencies,
+      ServerlessObservabilityPublicStartDependencies
+    >
 {
   public setup(
     _core: CoreSetup<
-      ServerlessObservabilityPluginStartDependencies,
-      ServerlessObservabilityPluginStart
+      ServerlessObservabilityPublicStartDependencies,
+      ServerlessObservabilityPublicStart
     >,
-    setupDeps: ServerlessObservabilityPluginSetupDependencies
-  ): ServerlessObservabilityPluginSetup {
+    setupDeps: ServerlessObservabilityPublicSetupDependencies
+  ): ServerlessObservabilityPublicSetup {
     setupDeps.observability.dashboard.register(
       createObservabilityDashboardRegistration({
         search: _core
@@ -34,22 +42,45 @@ export class ServerlessObservabilityPlugin
       })
     );
 
+    setupDeps.discover.showInlineTopNav({ showLogsExplorerTabs: true });
+
     return {};
   }
 
   public start(
     core: CoreStart,
-    setupDeps: ServerlessObservabilityPluginStartDependencies
-  ): ServerlessObservabilityPluginStart {
-    const { observabilityShared, serverless, management, cloud } = setupDeps;
-    observabilityShared.setIsSidebarEnabled(false);
+    setupDeps: ServerlessObservabilityPublicStartDependencies
+  ): ServerlessObservabilityPublicStart {
+    const { serverless, management, security } = setupDeps;
+
+    const navigationTree$ = of(navigationTree);
     serverless.setProjectHome('/app/observability/landing');
-    serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless, cloud }));
-    management.setIsSidebarEnabled(false);
+    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+
+    const extendCardNavDefinitions = serverless.getNavigationCards(
+      security.authz.isRoleManagementEnabled(),
+      {
+        observabilityAiAssistantManagement: {
+          category: appCategories.OTHER,
+          title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
+            defaultMessage: 'AI assistant for Observability settings',
+          }),
+          description: i18n.translate(
+            'xpack.serverlessObservability.aiAssistantManagementDescription',
+            {
+              defaultMessage: 'Manage your AI assistant for Observability settings.',
+            }
+          ),
+          icon: 'sparkles',
+        },
+      }
+    );
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.RULES],
+      extendCardNavDefinitions,
     });
+
     return {};
   }
 

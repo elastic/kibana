@@ -33,8 +33,8 @@ import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
-import { timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 

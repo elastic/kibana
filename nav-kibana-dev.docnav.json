@@ -26,15 +26,6 @@
       ]
     },
     {
-      "label": "Operations",
-      "items": [
-        {
-          "id": "kibDevDocsOpsOverview",
-          "label": "Overview"
-        }
-      ]
-    },
-    {
       "label": "Contributing",
       "items": [
         {
@@ -150,9 +141,6 @@
           "id": "kibDevTutorialExpressions"
         },
         {
-          "id": "kibDevDocsKPTTutorial"
-        },
-        {
           "id": "kibDevTutorialDataSearchAndSessions",
           "label": "data.search"
         },
@@ -178,15 +166,21 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
+        }
+      ]
+    },
+    {
+      "label": "Serverless",
+      "pageId": "ktServerlessReleaseOverview",
+      "items": [
+        {
+          "id": "ktServerlessReleaseOverview"
         },
         {
-          "id": "kibDevSharePluginReadme"
+          "id": "ktServerlessEmergencyReleases"
         },
         {
-          "id": "kibDevTutorialScreenshotting"
-        },
-        {
-          "id": "kibDevTutorialsContentManagementOnboarding"
+          "id": "ktCustomServerlessImage"
         },
         {
           "id": "kibDevTutorialsServerlessProjectNavigation"
@@ -194,13 +188,114 @@
       ]
     },
     {
-      "label": "Serverless",
+      "label": "Operations",
       "items": [
         {
-          "id": "ktServerlessReleaseOverview"
+          "id": "kibDevDocsOpsOverview",
+          "label": "Overview"
+        }
+      ]
+    },
+    {
+      "label": "Shared UX",
+      "pageId": "kibDevDocsSharedUxOverview",
+      "items": [
+        {
+          "label": "Serverless Project Navigation",
+          "id": "kibDevTutorialsServerlessProjectNavigation"
         },
         {
-          "id": "ktCustomServerlessImage"
+          "id": "kibDevTutorialFileService",
+          "label": "File service"
+        },
+        {
+          "id": "kibDevSharePluginReadme",
+          "label": "Sharing"
+        },
+        {
+          "label": "Content Management",
+          "id": "kibContentManagement",
+          "items": [
+            {
+              "id": "kibDevTutorialsContentManagementOnboarding"
+            }
+          ]
+        },
+        {
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting"
+        },
+        {
+          "id": "kibDevTutorialAdvancedSettings",
+          "label": "Advanced Settings"
+        },
+        {
+          "id": "kibDevDocsKPTTutorial",
+          "label": "Kibana Page Template"
+        },
+        {
+          "id": "kibDevReactKibanaContext",
+          "label": "Kibana React Contexts"
+        }
+      ]
+    },
+    {
+      "label": "Lens",
+      "pageId": "kibDevLensOverview",
+      "items": [
+        {
+          "label": "Lens Config API",
+          "id": "kibDevLensConfigAPI",
+          "items": [
+            {
+              "label": "Introduction",
+              "id": "kibDevLensConfigAPI"
+            },
+            {
+              "label": "Examples",
+              "id": "kibDevLensConfigAPIExamples"
+            },
+            {
+              "label": "Metric Chart",
+              "id": "kibDevLensConfigAPIMetric"
+            },
+            {
+              "label": "Gauge Chart",
+              "id": "kibDevLensConfigAPIGauge"
+            },
+            {
+              "label": "Pie Chart",
+              "id": "kibDevLensConfigAPIPie"
+            },
+            {
+              "label": "Mosaic Chart",
+              "id": "kibDevLensConfigAPIMosaic"
+            },
+            {
+              "label": "TreeMap Chart",
+              "id": "kibDevLensConfigAPITreeMap"
+            },
+            {
+              "label": "TagCloud Chart",
+              "id": "kibDevLensConfigAPITagCloud"
+            },
+            {
+              "label": "RegionMap Chart",
+              "id": "kibDevLensConfigAPIRegionMap"
+            },
+            {
+              "label": "Table Chart",
+              "id": "kibDevLensConfigAPITable"
+            },
+            {
+              "label": "Heatmap Chart",
+              "id": "kibDevLensConfigAPIHeatmap"
+            },
+            {
+              "label": "XY Chart",
+              "id": "kibDevLensConfigAPIXY"
+            }
+          ]
         }
       ]
     },
@@ -424,6 +519,9 @@
         },
         {
           "id": "kibNewsfeedPluginApi"
+        },
+        {
+          "id": "kibNotificationsPluginApi"
         },
         {
           "id": "kibObservabilityPluginApi"

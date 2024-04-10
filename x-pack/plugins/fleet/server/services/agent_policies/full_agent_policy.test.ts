@@ -7,12 +7,15 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { AgentPolicy, Output, DownloadSource } from '../../types';
+import omit from 'lodash/omit';
+
+import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
 import { createAppContextStartContractMock } from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 import { appContextService } from '../app_context';
+import { getPackageInfo } from '../epm/packages';
 
 import {
   generateFleetConfig,
@@ -21,12 +24,15 @@ import {
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
+jest.mock('../epm/packages');
+
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
   ReturnType<typeof getMonitoringPermissions>
 >;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 const soClientMock = savedObjectsClientMock.create();
+const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {
   mockedAgentPolicyService.get.mockResolvedValue({
@@ -85,6 +91,15 @@ jest.mock('../output', () => {
       name: 'default',
       // @ts-ignore
       type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+    },
+    'test-remote-id': {
+      id: 'test-remote-id',
+      is_default: true,
+      is_default_monitoring: true,
+      name: 'default',
+      // @ts-ignore
+      type: 'remote_elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
   };
@@ -369,6 +384,23 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
 
+  it('should use output id as the default policy id when remote elasticsearch', async () => {
+    mockAgentPolicy({
+      id: 'policy',
+      status: 'active',
+      package_policies: [],
+      is_managed: false,
+      namespace: 'default',
+      revision: 1,
+      data_output_id: 'test-remote-id',
+      monitoring_output_id: 'test-remote-id',
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.outputs['test-remote-id']).toBeDefined();
+  });
+
   it('should return the sourceURI from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',
@@ -467,6 +499,237 @@ describe('getFullAgentPolicy', () => {
       signature: 'thisisasignature',
     });
   });
+
+  it('should compile full policy with correct namespaces', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      data_streams: [
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.metricbeat',
+        },
+        {
+          type: 'logs',
+          dataset: 'elastic_agent.filebeat',
+        },
+        {
+          type: 'metrics',
+          dataset: 'elastic_agent.filebeat',
+        },
+      ],
+    } as PackageInfo);
+    mockAgentPolicy({
+      id: 'agent-policy',
+      status: 'active',
+      package_policies: [
+        {
+          id: 'package-policy-uuid-test-123',
+          name: 'test-policy-1',
+          namespace: 'policyspace',
+          enabled: true,
+          package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+        },
+        {
+          id: 'package-policy-uuid-test-123',
+          name: 'test-policy-2',
+          namespace: '',
+          enabled: true,
+          package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+          inputs: [
+            {
+              type: 'test-logs',
+              enabled: true,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'some-logs' },
+                },
+              ],
+            },
+            {
+              type: 'test-metrics',
+              enabled: false,
+              streams: [
+                {
+                  id: 'test-logs',
+                  enabled: false,
+                  data_stream: { type: 'metrics', dataset: 'some-metrics' },
+                },
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+        },
+      ],
+      is_managed: false,
+      namespace: 'defaultspace',
+      revision: 1,
+      name: 'Policy',
+      updated_at: '2020-01-01',
+      updated_by: 'qwerty',
+      is_protected: false,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(omit(agentPolicy, 'signed', 'secret_references', 'agent.protection')).toEqual({
+      agent: {
+        download: {
+          sourceURI: 'http://default-registry.co',
+        },
+        features: {},
+        monitoring: {
+          enabled: false,
+          logs: false,
+          metrics: false,
+        },
+      },
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      id: 'agent-policy',
+      inputs: [
+        {
+          data_stream: {
+            namespace: 'policyspace',
+          },
+          id: 'test-logs-package-policy-uuid-test-123',
+          meta: {
+            package: {
+              name: 'test_package',
+              version: '0.0.0',
+            },
+          },
+          name: 'test-policy-1',
+          package_policy_id: 'package-policy-uuid-test-123',
+          revision: 1,
+          streams: [
+            {
+              data_stream: {
+                dataset: 'some-logs',
+                type: 'logs',
+              },
+              id: 'test-logs',
+            },
+          ],
+          type: 'test-logs',
+          use_output: 'default',
+        },
+        {
+          data_stream: {
+            namespace: 'defaultspace',
+          },
+          id: 'test-logs-package-policy-uuid-test-123',
+          meta: {
+            package: {
+              name: 'test_package',
+              version: '0.0.0',
+            },
+          },
+          name: 'test-policy-2',
+          package_policy_id: 'package-policy-uuid-test-123',
+          revision: 1,
+          streams: [
+            {
+              data_stream: {
+                dataset: 'some-logs',
+                type: 'logs',
+              },
+              id: 'test-logs',
+            },
+          ],
+          type: 'test-logs',
+          use_output: 'default',
+        },
+      ],
+      output_permissions: {
+        default: {
+          _elastic_agent_checks: {
+            cluster: ['monitor'],
+          },
+          _elastic_agent_monitoring: {
+            indices: [
+              {
+                names: [],
+                privileges: [],
+              },
+            ],
+          },
+          'package-policy-uuid-test-123': {
+            indices: [
+              {
+                names: ['logs-some-logs-defaultspace'],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
+          },
+        },
+      },
+      outputs: {
+        default: {
+          hosts: ['http://127.0.0.1:9201'],
+          preset: 'balanced',
+          type: 'elasticsearch',
+        },
+      },
+      revision: 1,
+    });
+  });
+
+  it('should return a policy with advanced settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_limits_go_max_procs: 2,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        limits: { go_max_procs: 2 },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {
@@ -485,6 +748,7 @@ describe('transformOutputToFullPolicyOutput', () => {
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "type": "elasticsearch",
       }
     `);
@@ -509,6 +773,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "ssl.ca_trusted_fingerprint": "fingerprint123",
         "ssl.test": 123,
         "test": 1234,
@@ -541,6 +806,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "proxy_url": "https://proxy1.fr",
         "type": "elasticsearch",
       }
@@ -567,6 +833,7 @@ ssl.test: 123
           "http://host.fr",
         ],
         "password": "\${ES_PASSWORD}",
+        "preset": "balanced",
         "type": "elasticsearch",
         "username": "\${ES_USERNAME}",
       }
@@ -593,6 +860,69 @@ ssl.test: 123
           "host.fr:3332",
         ],
         "type": "logstash",
+      }
+    `);
+  });
+
+  it('should work with kafka output', () => {
+    const policyOutput = transformOutputToFullPolicyOutput({
+      id: 'id123',
+      hosts: ['test:9999'],
+      topics: [
+        {
+          topic: 'test',
+        },
+        // Deprecated conditionnal topic
+        {
+          topic: 'deprecated',
+          when: { condition: 'test:100', type: 'equals' },
+        },
+      ],
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test output',
+      type: 'kafka',
+      config_yaml: '',
+      client_id: 'Elastic',
+      version: '1.0.0',
+      compression: 'none',
+      auth_type: 'none',
+      connection_type: 'plaintext',
+      partition: 'random',
+      random: {
+        group_events: 1,
+      },
+      headers: [
+        {
+          key: '',
+          value: '',
+        },
+      ],
+      timeout: 30,
+      broker_timeout: 30,
+      required_acks: 1,
+    });
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "broker_timeout": 30,
+        "client_id": "Elastic",
+        "compression": "none",
+        "headers": Array [],
+        "hosts": Array [
+          "test:9999",
+        ],
+        "key": undefined,
+        "partition": Object {
+          "random": Object {
+            "group_events": 1,
+          },
+        },
+        "required_acks": 1,
+        "timeout": 30,
+        "topic": "test",
+        "type": "kafka",
+        "version": "1.0.0",
       }
     `);
   });

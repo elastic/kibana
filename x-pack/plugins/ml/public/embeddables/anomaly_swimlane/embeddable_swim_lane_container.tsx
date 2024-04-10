@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
-import { SwimlaneType } from '../../application/explorer/explorer_constants';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { MlDependencies } from '../../application/app';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import type { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
@@ -108,6 +109,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   );
 
   if (error) {
+    onRenderComplete();
     return (
       <EuiCallOut
         title={

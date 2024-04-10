@@ -105,12 +105,12 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         await es.ingest.putPipeline({
-          id: `logs-log@custom`,
+          id: `logs-log.integration@custom`,
           processors: [
             {
               append: {
                 field: 'test',
-                value: ['logs-log'],
+                value: ['logs-log.integration'],
               },
             },
           ],
@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'logs@custom',
           }),
           es.ingest.deletePipeline({
-            id: 'logs-log@custom',
+            id: 'logs-log.integration@custom',
           }),
           es.ingest.deletePipeline({
             id: CUSTOM_PIPELINE,
@@ -158,7 +158,12 @@ export default function (providerContext: FtrProviderContext) {
           id: res._id,
           index: res._index,
         });
-        expect(doc._source?.test).be.eql(['global', 'logs', 'logs-log', 'logs-log.log']);
+        expect(doc._source?.test).be.eql([
+          'global',
+          'logs',
+          'logs-log.integration',
+          'logs-log.log',
+        ]);
       });
     });
   });

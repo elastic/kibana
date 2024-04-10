@@ -27,7 +27,7 @@
         "label": "createConfigService",
         "description": [],
         "signature": [
-          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -35,7 +35,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
           {
             "pluginId": "@kbn/core-http-common",
             "scope": "common",
@@ -64,7 +64,7 @@
             "label": "{\n  server,\n  externalUrl,\n  csp,\n}",
             "description": [],
             "signature": [
-              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -72,7 +72,7 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
               {
                 "pluginId": "@kbn/core-http-common",
                 "scope": "common",
@@ -292,7 +292,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -300,7 +300,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -575,7 +575,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -583,7 +583,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -673,7 +673,13 @@
         "description": [],
         "signature": [
           "{ staticAssets: ",
-          "InternalStaticAssets",
+          {
+            "pluginId": "@kbn/core-http-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerInternalPluginApi",
+            "section": "def-common.InternalStaticAssets",
+            "text": "InternalStaticAssets"
+          },
           "; isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
           {
             "pluginId": "@kbn/core-http-server",
@@ -933,8 +939,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "ResponseObject",
-                  "> | ",
+                  "Boom",
+                  "<any>> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -943,8 +949,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "Boom",
-                  "<any>> | undefined; readonly preResponses?: ",
+                  "ResponseObject",
+                  "> | undefined; readonly preResponses?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1777,7 +1783,7 @@
             "label": "createFactory",
             "description": [],
             "signature": [
-              "<T>() => DeepMocked<",
+              "<T extends object>() => DeepMocked<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -20,6 +21,9 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { getBeforeSetup } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -51,8 +55,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -64,7 +71,7 @@ describe('getAlertState()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -121,7 +128,7 @@ describe('getAlertState()', () => {
 
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -172,11 +179,75 @@ describe('getAlertState()', () => {
     expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
   });
 
+  test('logs a warning if the task not found', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+
+    const scheduledTaskId = 'task-123';
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [],
+        enabled: true,
+        scheduledTaskId,
+        mutedInstanceIds: [],
+        muteAll: true,
+      },
+      references: [],
+    });
+
+    taskManager.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+    await rulesClient.getAlertState({ id: '1' });
+
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith('Task (task-123) not found');
+  });
+
+  test('logs a warning if the taskManager throws an error', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+
+    const scheduledTaskId = 'task-123';
+
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [],
+        enabled: true,
+        scheduledTaskId,
+        mutedInstanceIds: [],
+        muteAll: true,
+      },
+      references: [],
+    });
+
+    taskManager.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createBadRequestError());
+
+    await rulesClient.getAlertState({ id: '1' });
+
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledTimes(1);
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      'An error occurred when getting the task state for (task-123): Bad Request'
+    );
+  });
+
   describe('authorization', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: 'myType',
           consumer: 'myApp',

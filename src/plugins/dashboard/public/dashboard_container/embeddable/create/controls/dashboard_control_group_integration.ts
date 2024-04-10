@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
-import { Observable } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { distinctUntilChanged, skip } from 'rxjs/operators';
-
-import {
-  ControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-
-import { DashboardContainer } from '../../dashboard_container';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import { apiPublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
+import deepEqual from 'fast-deep-equal';
+import { isEqual } from 'lodash';
+import { combineLatest, distinctUntilChanged, map, Observable, skip, switchMap } from 'rxjs';
 import { DashboardContainerInput } from '../../../../../common';
+import { DashboardContainer } from '../../dashboard_container';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -37,40 +32,6 @@ type DashboardControlGroupCommonKeys = keyof Pick<
 
 export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
-  const isControlGroupInputEqual = () =>
-    persistableControlGroupInputIsEqual(
-      this.controlGroup!.getInput(),
-      this.getInput().controlGroupInput
-    );
-
-  // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
-  const controlGroupDiff: DiffChecks = {
-    panels: deepEqual,
-    controlStyle: deepEqual,
-    chainingSystem: deepEqual,
-    ignoreParentSettings: deepEqual,
-  };
-  this.integrationSubscriptions.add(
-    this.controlGroup
-      .getInput$()
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          distinctUntilDiffCheck<ControlGroupInput>(a, b, controlGroupDiff)
-        )
-      )
-      .subscribe(() => {
-        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
-          this.controlGroup!.getInput();
-        if (!isControlGroupInputEqual()) {
-          this.dispatch.setControlGroupState({
-            panels,
-            controlStyle,
-            chainingSystem,
-            ignoreParentSettings,
-          });
-        }
-      })
-  );
 
   const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
     compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);
@@ -135,20 +96,23 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
 
   // the Control Group needs to know when any dashboard children are loading in order to know when to move on to the next time slice when playing.
   this.integrationSubscriptions.add(
-    this.getAnyChildOutputChange$().subscribe(() => {
-      if (!this.controlGroup) {
-        return;
-      }
-
-      for (const child of Object.values(this.children)) {
-        const isLoading = child.getOutput().loading;
-        if (isLoading) {
-          this.controlGroup.anyControlOutputConsumerLoading$.next(true);
-          return;
-        }
-      }
-      this.controlGroup.anyControlOutputConsumerLoading$.next(false);
-    })
+    this.children$
+      .pipe(
+        switchMap((children) => {
+          const definedDataLoadingSubjects: Array<PublishingSubject<boolean | undefined>> = [];
+          for (const child of Object.values(children)) {
+            if (apiPublishesDataLoading(child)) {
+              definedDataLoadingSubjects.push(child.dataLoading);
+            }
+          }
+          return combineLatest(definedDataLoadingSubjects).pipe(
+            map((values) => values.some(Boolean))
+          );
+        })
+      )
+      .subscribe((anyChildLoading) =>
+        this.controlGroup?.anyControlOutputConsumerLoading$.next(anyChildLoading)
+      )
   );
 }
 

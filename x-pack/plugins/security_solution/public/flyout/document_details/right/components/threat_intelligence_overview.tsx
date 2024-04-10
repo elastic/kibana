@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
@@ -25,7 +25,7 @@ import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelli
  */
 export const ThreatIntelligenceOverview: FC = () => {
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToThreatIntelligenceTab = useCallback(() => {
     openLeftPanel({

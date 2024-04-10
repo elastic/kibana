@@ -33,6 +33,7 @@ import {
   ALERT_SUPPRESSION_VALUE,
   ALERT_SYSTEM_STATUS,
   ALERT_WORKFLOW_REASON,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
   ECS_VERSION,
 } from '@kbn/rule-data-utils';
@@ -170,6 +171,11 @@ export const legacyAlertFieldMap = {
   },
   [ALERT_WORKFLOW_USER]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
+    type: 'date',
     array: false,
     required: false,
   },

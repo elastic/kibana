@@ -7,13 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
 import type { ElasticsearchRole } from '../../../../authorization';
-import {
-  elasticsearchRoleSchema,
-  getKibanaRoleSchema,
-  transformPrivilegesToElasticsearchPrivileges,
-} from '../../../../lib';
+import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 
 export const transformPutPayloadToElasticsearchRole = (
   rolePayload: RolePayloadSchemaType,

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { PostActionsConnectorExecuteBodyInputs } from '../../schemas/post_actions_connector_execute';
+import { ExecuteConnectorResponse } from '@kbn/elastic-assistant-common';
 
-export type RequestBody = PostActionsConnectorExecuteBodyInputs;
-
-export interface ResponseBody {
-  status: string;
-  data: string;
-  connector_id: string;
-}
+export type ResponseBody = ExecuteConnectorResponse;

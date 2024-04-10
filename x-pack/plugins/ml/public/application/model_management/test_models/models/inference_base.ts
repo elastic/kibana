@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable, combineLatest, Subscription } from 'rxjs';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
-import { map } from 'rxjs/operators';
-import { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import { map } from 'rxjs';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';
-import { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
 
 export type InferenceType =
@@ -31,7 +32,7 @@ export type InferenceOptions =
   | estypes.MlTextEmbeddingInferenceOptions
   | estypes.MlQuestionAnsweringInferenceUpdateOptions;
 
-const DEFAULT_INPUT_FIELD = 'text_field';
+export const DEFAULT_INPUT_FIELD = 'text_field';
 export const DEFAULT_INFERENCE_TIME_OUT = '30s';
 
 export type FormattedNerResponse = Array<{
@@ -72,8 +73,10 @@ export abstract class InferenceBase<TInferResponse> {
   private isValid$ = new BehaviorSubject<boolean>(false);
   private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
   private supportedFieldTypes: ES_FIELD_TYPES[] = [ES_FIELD_TYPES.TEXT];
+  private selectedDataViewId: string | undefined;
 
   protected readonly info: string[] = [];
+  public switchToCreationMode?: () => void;
 
   private subscriptions$: Subscription = new Subscription();
 
@@ -87,8 +90,13 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputField$.next(this.modelInputField);
   }
 
+  public setSwitchtoCreationMode(callback: () => void) {
+    this.switchToCreationMode = callback;
+  }
+
   public destroy() {
     this.subscriptions$.unsubscribe();
+    this.pipeline$.unsubscribe();
   }
 
   protected initialize(
@@ -160,6 +168,15 @@ export abstract class InferenceBase<TInferResponse> {
     this.inferenceResult$.next(null);
     this.inferenceError$.next(null);
     this.runningState$.next(RUNNING_STATE.STOPPED);
+  }
+
+  public setSelectedDataViewId(dataViewId: string) {
+    // Data view selected for testing
+    this.selectedDataViewId = dataViewId;
+  }
+
+  public getSelectedDataViewId() {
+    return this.selectedDataViewId;
   }
 
   public setInputField(field: string | undefined) {

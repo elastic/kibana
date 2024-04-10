@@ -18,17 +18,16 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
-import {
-  isNumericChartData,
-  isOrdinalChartData,
+import type {
   ChartData,
   ChartDataItem,
   NumericDataItem,
   OrdinalDataItem,
 } from '../lib/field_histograms';
+import { isNumericChartData, isOrdinalChartData } from '../lib/field_histograms';
 
 import { NON_AGGREGATABLE } from '../lib/common';
-import { DataGridItem } from '../lib/types';
+import type { DataGridItem } from '../lib/types';
 
 const cssHistogramLegendBoolean = css({
   width: '100%',

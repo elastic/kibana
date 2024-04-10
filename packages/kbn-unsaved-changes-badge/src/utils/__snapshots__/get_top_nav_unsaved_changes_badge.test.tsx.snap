@@ -3,34 +3,30 @@
 exports[`getTopNavUnsavedChangesBadge() should work correctly 1`] = `
 <div>
   <div
-    class="euiPopover emotion-euiPopover"
+    class="euiPopover emotion-euiPopover-inline-block"
     id="unsavedChangesPopover_generated-id"
   >
-    <div
-      class="euiPopover__anchor css-16vtueo-render"
+    <button
+      aria-label="View available actions"
+      class="euiBadge emotion-euiBadge-warning-clickable"
+      data-test-subj="unsavedChangesBadge"
+      title="Unsaved changes"
     >
-      <button
-        aria-label="View available actions"
-        class="euiBadge emotion-euiBadge-warning-clickable"
-        data-test-subj="unsavedChangesBadge"
-        title="Unsaved changes"
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
       >
         <span
-          class="euiBadge__content emotion-euiBadge__content"
+          class="euiBadge__text emotion-euiBadge__text-clickable"
         >
-          <span
-            class="euiBadge__text emotion-euiBadge__text-clickable"
-          >
-            Unsaved changes
-          </span>
-          <span
-            class="euiBadge__icon emotion-euiBadge__icon-right"
-            color="inherit"
-            data-euiicon-type="arrowDown"
-          />
+          Unsaved changes
         </span>
-      </button>
-    </div>
+        <span
+          class="euiBadge__icon emotion-euiBadge__icon-right"
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+      </span>
+    </button>
   </div>
 </div>
 `;

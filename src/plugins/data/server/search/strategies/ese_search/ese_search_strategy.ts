@@ -8,12 +8,12 @@
 
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
+import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -21,7 +21,7 @@ import type {
   IEsSearchResponse,
   ISearchOptions,
 } from '../../../../common';
-import { pollSearch } from '../../../../common';
+import { DataViewType, pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
@@ -170,14 +170,11 @@ export const enhancedEsSearchStrategyProvider = (
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup') {
-        throw new KbnSearchError('Unknown indexType', 400);
-      }
 
-      if (request.indexType === undefined || !deps.rollupsEnabled) {
-        return asyncSearch(request, options, deps);
-      } else {
+      if (request.indexType === DataViewType.ROLLUP && deps.rollupsEnabled) {
         return from(rollupSearch(request, options, deps));
+      } else {
+        return asyncSearch(request, options, deps);
       }
     },
     /**

@@ -43,13 +43,18 @@
     "@kbn/crypto-browser",
     "@kbn/config",
     "@kbn/config-schema",
-    "@kbn/core-application-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/data-service",
     "@kbn/react-kibana-context-render",
+    "@kbn/search-errors",
     "@kbn/search-response-warnings",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/bfetch-error",
+    "@kbn/es-types",
+    "@kbn/code-editor",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

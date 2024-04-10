@@ -12,9 +12,12 @@ import React from 'react';
 import { ContextEditor } from '.';
 
 describe('ContextEditor', () => {
-  const allow = ['field1', 'field2'];
+  const allow = Array.from({ length: 20 }, (_, i) => `field${i + 1}`);
   const allowReplacement = ['field1'];
-  const rawData = { field1: ['value1'], field2: ['value2'] };
+  const rawData = allow.reduce(
+    (acc, field, index) => ({ ...acc, [field]: [`value${index + 1}`] }),
+    {}
+  );
 
   const onListUpdated = jest.fn();
 
@@ -36,13 +39,17 @@ describe('ContextEditor', () => {
   });
 
   it('renders the select all fields button with the expected count', () => {
-    expect(screen.getByTestId('selectAllFields')).toHaveTextContent('Select all 2 fields');
+    expect(screen.getByTestId('selectAllFields')).toHaveTextContent('Select all 20 fields');
   });
 
   it('updates the table selection when "Select all n fields" is clicked', () => {
-    userEvent.click(screen.getByTestId('selectAllFields'));
+    // The table select all checkbox should only select the number of rows visible on the page
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 10 fields');
 
-    expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 2 fields');
+    // The select all button should select all rows regardless of visibility
+    userEvent.click(screen.getByTestId('selectAllFields'));
+    expect(screen.getByTestId('selectedFields')).toHaveTextContent('Selected 20 fields');
   });
 
   it('calls onListUpdated with the expected values when the update button is clicked', () => {

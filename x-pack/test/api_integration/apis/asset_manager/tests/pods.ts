@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.have.property('pods');
       expect(response.body.pods.length).to.equal(6);
 
-      const ids = response.body.pods.map((result: Asset) => result['asset.id'][0]);
+      const ids = response.body.pods.map((result: Asset) => result['asset.id']);
 
       expect(ids).to.eql([
         'pod-uid-1',

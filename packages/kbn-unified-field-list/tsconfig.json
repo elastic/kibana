@@ -32,6 +32,8 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/field-utils",
     "@kbn/ml-ui-actions",
+    "@kbn/visualization-utils",
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }

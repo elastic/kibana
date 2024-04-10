@@ -1,0 +1,22 @@
+format_version: 1.0.0
+name: error_handling
+title: Error handling
+description: tests error handling and rollback
+version: 0.3.0
+categories: []
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/fleet
+
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+
+icons:
+  - src: '/img/logo_overrides_64_color.svg'
+    size: '16x16'
+    type: 'image/svg+xml'

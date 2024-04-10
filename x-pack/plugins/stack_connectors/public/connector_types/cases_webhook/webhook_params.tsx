@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
@@ -114,8 +114,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
           incident.title !== undefined
         }
         label={i18n.translate('xpack.stackConnectors.components.casesWebhook.titleFieldLabel', {
-          defaultMessage: 'Summary (required)',
+          defaultMessage: 'Summary',
         })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            Required
+          </EuiText>
+        }
       >
         <TextFieldWithMessageVariables
           index={index}

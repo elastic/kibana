@@ -5,6 +5,42 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-ui-components",
+        "id": "def-public.ChartSwitchTrigger",
+        "type": "Function",
+        "tags": [],
+        "label": "ChartSwitchTrigger",
+        "description": [],
+        "signature": [
+          "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
+          "IconType",
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-ui-components",
+            "id": "def-public.ChartSwitchTrigger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ label: string; icon?: ",
+              "IconType",
+              " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }"
+            ],
+            "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-ui-components",
         "id": "def-public.ColorPicker",
         "type": "Function",
         "tags": [],
@@ -219,31 +255,32 @@
         "label": "DimensionButton",
         "description": [],
         "signature": [
-          "({\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}: ",
+          "React.NamedExoticComponent<",
           "DimensionButtonProps",
-          ") => JSX.Element"
+          "> & { readonly type: ({ groupLabel, children, onClick, onRemoveClick, accessorConfig, label, message, ...otherProps }: ",
+          "DimensionButtonProps",
+          ") => JSX.Element; }"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/visualization-ui-components",
             "id": "def-public.DimensionButton.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "DimensionButtonProps"
+              "P"
             ],
-            "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -404,7 +441,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined; }) => JSX.Element"
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined; }) => JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -516,7 +553,7 @@
                 "label": "bgColor",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+                  "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
@@ -716,7 +753,7 @@
         "label": "FieldPicker",
         "description": [],
         "signature": [
-          "({\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}: ",
+          "(props: ",
           "FieldPickerProps",
           "<T>) => JSX.Element"
         ],
@@ -729,7 +766,7 @@
             "id": "def-public.FieldPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  selectedOptions,\n  options,\n  onChoose,\n  onDelete,\n  fieldIsInvalid,\n  ['data-test-subj']: dataTestSub,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "FieldPickerProps",
@@ -1940,39 +1977,6 @@
                 "returnComment": []
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/visualization-ui-components",
-        "id": "def-public.TooltipWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "TooltipWrapper",
-        "description": [],
-        "signature": [
-          "({ children, condition, tooltipContent, ...tooltipProps }: React.PropsWithChildren<TooltipWrapperProps>) => JSX.Element"
-        ],
-        "path": "packages/kbn-visualization-ui-components/components/tooltip_wrapper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/visualization-ui-components",
-            "id": "def-public.TooltipWrapper.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  condition,\n  tooltipContent,\n  ...tooltipProps\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<TooltipWrapperProps>"
-            ],
-            "path": "packages/kbn-visualization-ui-components/components/tooltip_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],

@@ -106,7 +106,7 @@ export const executeUpdate = async <T>(
     preflightDocResult,
   });
 
-  const existingNamespaces = preflightDocNSResult?.savedObjectNamespaces ?? [];
+  const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: { type, id, existingNamespaces },
@@ -248,7 +248,7 @@ export const executeUpdate = async <T>(
 
     const updatedAttributes = mergeForUpdate({
       targetAttributes: {
-        ...migrated!.attributes,
+        ...(migrated!.attributes as Record<string, unknown>),
       },
       updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
         type,

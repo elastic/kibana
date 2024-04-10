@@ -140,6 +140,20 @@
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-public.SavedSearchUnwrapMetaInfo.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -710,7 +724,7 @@
             "section": "def-common.ISearchSource",
             "text": "ISearchSource"
           },
-          ") => ",
+          ", managed: boolean) => ",
           {
             "pluginId": "savedSearch",
             "scope": "common",
@@ -783,6 +797,21 @@
                 "section": "def-common.ISearchSource",
                 "text": "ISearchSource"
               }
+            ],
+            "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.fromSavedSearchAttributes.$5",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
@@ -928,6 +957,23 @@
         "tags": [],
         "label": "DiscoverGridSettings",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettings",
+            "text": "DiscoverGridSettings"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
         "path": "src/plugins/saved_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -964,6 +1010,23 @@
         "tags": [],
         "label": "DiscoverGridSettingsColumn",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.DiscoverGridSettingsColumn",
+            "text": "DiscoverGridSettingsColumn"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
         "path": "src/plugins/saved_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1012,7 +1075,9 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; fetch: (options?: ",
+              "; history: ",
+              "SearchRequest",
+              "[]; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1024,9 +1089,7 @@
               "SearchResponse",
               "<unknown, Record<string, ",
               "AggregationsAggregate",
-              ">>>; history: ",
-              "SearchRequest",
-              "[]; setField: <K extends keyof ",
+              ">>>; setField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1331,15 +1394,14 @@
             "label": "grid",
             "description": [],
             "signature": [
-              "{ columns?: Record<string, ",
               {
                 "pluginId": "savedSearch",
                 "scope": "common",
                 "docId": "kibSavedSearchPluginApi",
-                "section": "def-common.DiscoverGridSettingsColumn",
-                "text": "DiscoverGridSettingsColumn"
+                "section": "def-common.DiscoverGridSettings",
+                "text": "DiscoverGridSettings"
               },
-              "> | undefined; } | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
@@ -1400,6 +1462,20 @@
             "type": "number",
             "tags": [],
             "label": "rowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
             "description": [],
             "signature": [
               "number | undefined"
@@ -1530,6 +1606,32 @@
             "signature": [
               "string | undefined"
             ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.visContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "VisContextUnmapped",
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

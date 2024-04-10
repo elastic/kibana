@@ -9,12 +9,15 @@
 import { createLogger } from '../../lib/utils/create_logger';
 import { getApmEsClient } from './get_apm_es_client';
 import { getLogsEsClient } from './get_logs_es_client';
+import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
+
+  let version = runOptions['assume-package-version'];
 
   const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
 
@@ -23,9 +26,14 @@ export async function bootstrap(runOptions: RunOptions) {
     logger,
   });
 
-  const latestPackageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  if (!version) {
+    version = await kibanaClient.fetchLatestApmPackageVersion();
+    await kibanaClient.installApmPackage(version);
+  } else if (version === 'latest') {
+    version = await kibanaClient.fetchLatestApmPackageVersion();
+  }
 
-  const version = runOptions.versionOverride || latestPackageVersion;
+  logger.info(`Using package version: ${version}`);
 
   const apmEsClient = getApmEsClient({
     target: esUrl,
@@ -40,17 +48,23 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
-  await kibanaClient.installApmPackage(latestPackageVersion);
+  const infraEsClient = getInfraEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
 
   if (runOptions.clean) {
     await apmEsClient.clean();
     await logsEsClient.clean();
+    await infraEsClient.clean();
   }
 
   return {
     logger,
     apmEsClient,
     logsEsClient,
+    infraEsClient,
     version,
     kibanaUrl,
     esUrl,

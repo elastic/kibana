@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
 
@@ -27,17 +26,10 @@ export const LogRateAnalysisPage: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.logRateAnalysis.pageHeader"
-              defaultMessage="Log rate analysis"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TechnicalPreviewBadge />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FormattedMessage
+          id="xpack.ml.logRateAnalysis.pageHeader"
+          defaultMessage="Log rate analysis"
+        />
       </MlPageHeader>
       {dataView && (
         <LogRateAnalysis
@@ -47,6 +39,7 @@ export const LogRateAnalysisPage: FC = () => {
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

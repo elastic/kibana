@@ -23,7 +23,6 @@ import type { PatchRuleRequestBody } from '../../../../../common/api/detection_e
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-  SetupGuide,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -139,6 +138,7 @@ export const typeSpecificSnakeToCamel = (
         threatIndicatorPath: params.threat_indicator_path ?? DEFAULT_INDICATOR_SOURCE_PATH,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'query': {
@@ -177,6 +177,9 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         threshold: normalizeThresholdObject(params.threshold),
+        alertSuppression: params.alert_suppression?.duration
+          ? { duration: params.alert_suppression.duration }
+          : undefined,
       };
     }
     case 'machine_learning': {
@@ -196,6 +199,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         language: params.language ?? 'kuery',
         dataViewId: params.data_view_id,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     default: {
@@ -252,6 +256,8 @@ const patchThreatMatchParams = (
     threatIndicatorPath: params.threat_indicator_path ?? existingRule.threatIndicatorPath,
     concurrentSearches: params.concurrent_searches ?? existingRule.concurrentSearches,
     itemsPerSearch: params.items_per_search ?? existingRule.itemsPerSearch,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -310,6 +316,7 @@ const patchThresholdParams = (
     threshold: params.threshold
       ? normalizeThresholdObject(params.threshold)
       : existingRule.threshold,
+    alertSuppression: params.alert_suppression ?? existingRule.alertSuppression,
   };
 };
 
@@ -339,6 +346,8 @@ const patchNewTermsParams = (
     filters: params.filters ?? existingRule.filters,
     newTermsFields: params.new_terms_fields ?? existingRule.newTermsFields,
     historyWindowStart: params.history_window_start ?? existingRule.historyWindowStart,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -419,7 +428,6 @@ export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
@@ -480,7 +488,6 @@ export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
   },
   immutable = false,
   defaultEnabled = true
@@ -578,6 +585,7 @@ export const typeSpecificCamelToSnake = (
         threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'query': {
@@ -616,6 +624,9 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         threshold: params.threshold,
+        alert_suppression: params.alertSuppression?.duration
+          ? { duration: params.alertSuppression?.duration }
+          : undefined,
       };
     }
     case 'machine_learning': {
@@ -635,6 +646,7 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         language: params.language,
         data_view_id: params.dataViewId,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     default: {
@@ -738,6 +750,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     related_integrations: [],
     required_fields: [],
     setup: '',
+    note: '',
     references: [],
     threat: [],
     tags: [],

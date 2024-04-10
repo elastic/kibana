@@ -16,9 +16,26 @@ import {
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
-import { initDashboard } from './create_dashboard';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
-jest.mock('./create_dashboard');
+jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
+const mockTee = jest.fn();
+
+const mockCreate = jest.fn().mockImplementation(() => ({
+  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
+}));
+
+jest.mock('openai', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    api_key: '123',
+    chat: {
+      completions: {
+        create: mockCreate,
+      },
+    },
+  })),
+}));
 
 describe('OpenAIConnector', () => {
   let mockRequest: jest.Mock;
@@ -63,6 +80,10 @@ describe('OpenAIConnector', () => {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
         apiProvider: OpenAiProviderType.OpenAi,
         defaultModel: DEFAULT_OPENAI_MODEL,
+        headers: {
+          'X-My-Custom-Header': 'foo',
+          Authorization: 'override',
+        },
       },
       secrets: { apiKey: '123' },
       logger: loggingSystemMock.createLogger(),
@@ -96,6 +117,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -114,6 +136,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...requestBody, stream: false }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -131,6 +154,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -165,6 +189,7 @@ describe('OpenAIConnector', () => {
           }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -195,6 +220,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -215,6 +241,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -253,6 +280,7 @@ describe('OpenAIConnector', () => {
           }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -302,6 +330,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -334,6 +363,7 @@ describe('OpenAIConnector', () => {
           data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
           headers: {
             Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
             'content-type': 'application/json',
           },
         });
@@ -346,6 +376,30 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
 
         await expect(connector.invokeAI(sampleOpenAiBody)).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeAsyncIterator', () => {
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.invokeAsyncIterator(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockCreate).toHaveBeenCalledWith(
+          {
+            ...sampleOpenAiBody,
+            stream: true,
+            model: DEFAULT_OPENAI_MODEL,
+          },
+          { signal: undefined }
+        );
+        expect(mockTee).toBeCalledTimes(1);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        mockCreate.mockImplementationOnce(() => {
+          throw new Error('API Error');
+        });
+
+        await expect(connector.invokeAsyncIterator(sampleOpenAiBody)).rejects.toThrow('API Error');
       });
     });
     describe('getResponseErrorMessage', () => {
@@ -400,6 +454,55 @@ describe('OpenAIConnector', () => {
         expect(connector.getResponseErrorMessage(err)).toEqual(
           `Unauthorized API Error - The api key was invalid.`
         );
+      });
+    });
+  });
+
+  describe('OpenAI without headers', () => {
+    const connector = new OpenAIConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+      config: {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.OpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+      },
+      secrets: { apiKey: '123' },
+      logger: loggingSystemMock.createLogger(),
+      services: actionsMock.createServices(),
+    });
+
+    const sampleOpenAiBody = {
+      messages: [
+        {
+          role: 'user',
+          content: 'Hello world',
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      // @ts-ignore
+      connector.request = mockRequest;
+      jest.clearAllMocks();
+    });
+
+    describe('runApi', () => {
+      it('uses the default model if none is supplied', async () => {
+        const response = await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) });
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+        expect(response).toEqual(mockResponse.data);
       });
     });
   });

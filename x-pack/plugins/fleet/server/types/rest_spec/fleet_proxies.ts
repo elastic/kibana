@@ -7,10 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { PROXY_URL_REGEX } from '../../../common/constants';
+
+function validateUrl(value: string) {
+  if (!value.match(PROXY_URL_REGEX)) {
+    return 'Invalid URL';
+  }
+}
+
 export const PostFleetProxyRequestSchema = {
   body: schema.object({
     id: schema.maybe(schema.string()),
-    url: schema.string(),
+    url: schema.string({
+      validate: validateUrl,
+    }),
     name: schema.string(),
     proxy_headers: schema.maybe(
       schema.recordOf(
@@ -28,7 +38,7 @@ export const PutFleetProxyRequestSchema = {
   params: schema.object({ itemId: schema.string() }),
   body: schema.object({
     name: schema.maybe(schema.string()),
-    url: schema.maybe(schema.string()),
+    url: schema.maybe(schema.string({ validate: validateUrl })),
     proxy_headers: schema.nullable(
       schema.recordOf(
         schema.string(),

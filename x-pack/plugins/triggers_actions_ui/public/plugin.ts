@@ -28,6 +28,11 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
+import type { AlertActionsProps, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -58,6 +63,8 @@ import type {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
+  RuleTypeParams,
+  RuleTypeMetaData,
   AlertsTableProps,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
@@ -75,8 +82,7 @@ import type {
   RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -103,7 +109,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   getActionForm: (
-    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
+    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+      setActions: (actions: RuleAction[]) => void;
+    }
   ) => ReactElement<ActionAccordionFormProps>;
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
@@ -111,13 +119,22 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: (
-    props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleAddProps>;
-  getEditRuleFlyout: (
-    props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps>;
+  getAddRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleAddProps<Params, MetaData>>;
+  getEditRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleEditProps<Params, MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
+    props: P
+  ) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: (
     props: AlertsTableStateProps & LazyLoadProps
   ) => ReactElement<AlertsTableStateProps>;
@@ -167,6 +184,8 @@ interface PluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
+  fieldFormats: FieldFormatsRegistry;
+  lens: LensPublicStart;
 }
 
 export class Plugin
@@ -212,6 +231,18 @@ export class Plugin
         defaultMessage: 'Detect conditions using rules.',
       }
     );
+    const alertsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayName',
+      {
+        defaultMessage: 'Alerts',
+      }
+    );
+    const alertsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.alerts.displayDescription',
+      {
+        defaultMessage: 'Monitor all of your alerts in one place',
+      }
+    );
     const connectorsFeatureTitle = i18n.translate(
       'xpack.triggersActionsUI.managementSection.connectors.displayName',
       {
@@ -249,7 +280,7 @@ export class Plugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: PLUGIN_ID,
       title: featureTitle,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
@@ -282,7 +313,7 @@ export class Plugin
           unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
-          theme$: params.theme$,
+          theme: params.theme,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
@@ -293,6 +324,8 @@ export class Plugin
           licensing: pluginsStart.licensing,
           expressions: pluginsStart.expressions,
           isServerless: !!pluginsStart.serverless,
+          fieldFormats: pluginsStart.fieldFormats,
+          lens: pluginsStart.lens,
         });
       },
     });
@@ -345,10 +378,66 @@ export class Plugin
       },
     });
 
-    if (this.experimentalFeatures.internalAlertsTable) {
-      registerAlertsTableConfiguration({
-        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+    if (this.experimentalFeatures.globalAlertsPage) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: ALERTS_PLUGIN_ID,
+        title: alertsFeatureTitle,
+        capabilitiesId: PLUGIN_ID,
+        order: 0,
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/alerts_app');
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
+
+          return renderApp({
+            ...coreStart,
+            actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme: params.theme,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            alertsTableConfigurationRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless: !!pluginsStart.serverless,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+          });
+        },
       });
+      if (plugins.home) {
+        plugins.home.featureCatalogue.register({
+          id: ALERTS_PLUGIN_ID,
+          title: alertsFeatureTitle,
+          description: alertsFeatureDescription,
+          icon: 'watchesApp',
+          path: triggersActionsRoute,
+          showOnHomePage: false,
+          category: 'admin',
+        });
+      }
     }
 
     return {
@@ -358,14 +447,29 @@ export class Plugin
     };
   }
 
-  public start(): TriggersAndActionsUIPublicPluginStart {
+  public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    import('./application/sections/alerts_table/configuration').then(
+      ({ createGenericAlertsTableConfigurations }) => {
+        createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
+          this.alertsTableConfigurationRegistry.register(c)
+        );
+      }
+    );
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
-      getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+      getActionForm: (
+        props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+          setActions: (actions: RuleAction[]) => void;
+        }
+      ) => {
+        const { setActions, ...restProps } = props;
         return getActionFormLazy({
-          ...props,
+          ...restProps,
+          // TODO remove this cast when every solution is ready to use system actions
+          setActions: setActions as (actions: RuleUiAction[]) => void,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
         });
@@ -384,7 +488,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      getAddRuleFlyout: (props) => {
         return getAddRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
@@ -392,9 +496,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getEditRuleFlyout: (
-        props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-      ) => {
+      getEditRuleFlyout: (props) => {
         return getEditRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
@@ -410,6 +512,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+        return getAlertsTableDefaultAlertActionsLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldBrowserLazy(props);

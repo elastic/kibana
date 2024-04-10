@@ -26,6 +26,8 @@ export function LayerConfiguration({
   framePublicAPI,
   hasPadding,
   setIsInlineFlyoutVisible,
+  getUserMessages,
+  onlyAllowSwitchToSubtypes,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -56,21 +58,32 @@ export function LayerConfiguration({
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
+    // TODO: remove this prop once we display the chart switch in Discover
+    onlyAllowSwitchToSubtypes,
     indexPatternService,
     setIsInlineFlyoutVisible,
+    getUserMessages,
   };
   return (
     <div
       css={css`
-        padding: ${hasPadding ? euiTheme.size.s : 0};
+        padding-left: ${euiTheme.size.base};
+        padding-right: ${euiTheme.size.base};
       `}
     >
-      <VisualizationToolbar
-        activeVisualization={activeVisualization}
-        framePublicAPI={framePublicAPI}
-      />
-      <EuiSpacer size="m" />
-      <ConfigPanelWrapper {...layerPanelsProps} />
+      <div
+        css={css`
+          padding: ${hasPadding ? euiTheme.size.s : 0};
+        `}
+      >
+        <EuiSpacer size="xs" />
+        <VisualizationToolbar
+          activeVisualization={activeVisualization}
+          framePublicAPI={framePublicAPI}
+        />
+        <EuiSpacer size="m" />
+        <ConfigPanelWrapper {...layerPanelsProps} />
+      </div>
     </div>
   );
 }

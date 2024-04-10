@@ -26,7 +26,7 @@ export function validateLogstashHost(val: string) {
   try {
     const url = new URL(`http://${val}`);
 
-    if (url.host !== val) {
+    if (url.host !== val.toLowerCase()) {
       return 'Invalid host';
     }
   } catch (err) {
@@ -65,6 +65,7 @@ const BaseSchema = {
   name: schema.string(),
   is_default: schema.boolean({ defaultValue: false }),
   is_default_monitoring: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
   ca_sha256: schema.maybe(schema.string()),
   ca_trusted_fingerprint: schema.maybe(schema.string()),
   config_yaml: schema.maybe(schema.string()),
@@ -115,12 +116,30 @@ export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
 };
 
 /**
@@ -130,13 +149,23 @@ const ElasticSearchUpdateSchema = {
 export const RemoteElasticSearchSchema = {
   ...ElasticSearchSchema,
   type: schema.literal(outputType.RemoteElasticsearch),
-  service_token: schema.string(),
+  service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
 };
 
 const RemoteElasticSearchUpdateSchema = {
   ...ElasticSearchUpdateSchema,
   type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
   service_token: schema.maybe(schema.string()),
+  secrets: schema.maybe(
+    schema.object({
+      service_token: schema.maybe(secretRefSchema),
+    })
+  ),
 };
 
 /**
@@ -266,7 +295,8 @@ export const KafkaSchema = {
   hash: schema.maybe(
     schema.object({ hash: schema.maybe(schema.string()), random: schema.maybe(schema.boolean()) })
   ),
-  topics: KafkaTopicsSchema,
+  topic: schema.maybe(schema.string()),
+  topics: schema.maybe(KafkaTopicsSchema),
   headers: schema.maybe(
     schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }))
   ),

@@ -20,6 +20,7 @@ export const LATEST_FINDINGS_CONTAINER = 'latest_findings_container';
 export const LATEST_FINDINGS_TABLE = 'latest_findings_table';
 
 export const FINDINGS_GROUP_BY_SELECTOR = 'findings_group_by_selector';
+export const FINDINGS_GROUPING_COUNTER = 'findings_grouping_counter';
 
 export const getFindingsTableRowTestId = (id: string) => `findings_table_row_${id}`;
 export const getFindingsTableCellTestId = (columnId: string, rowId: string) =>

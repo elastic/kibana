@@ -46,7 +46,8 @@ export const isDataViewSelection = (dataView: string) => {
   return cy.get(SOURCERER.selectActiveOption).should('contain', dataView);
 };
 
-export const openDataViewSelection = () => cy.get(SOURCERER.selectActiveOption).click();
+export const openDataViewSelection = () =>
+  cy.get(SOURCERER.selectActiveOption).click({ force: true });
 export const isKibanaDataViewOption = (dataViews: string[]) => {
   return dataViews.every((dataView) => {
     return cy.get(SOURCERER.selectListOption).should(`contain`, dataView);
@@ -96,7 +97,7 @@ export const resetSourcerer = () => {
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
 export const addIndexToDefault = (index: string) => {
-  visitWithTimeRange(`/app/management/kibana/settings?query=category:(securitySolution)`);
+  visitWithTimeRange(`/app/management/kibana/settings?query=categories:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)
     .invoke('val')
     .then((patterns) => {
@@ -107,8 +108,8 @@ export const addIndexToDefault = (index: string) => {
         }
       });
 
-      cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
-      cy.get('button[data-test-subj="windowReloadButton"]').click();
+      cy.get('button[data-test-subj="settings-save-button"]').click();
+      cy.get('button[data-test-subj="pageReloadButton"]').click();
       visitWithTimeRange(hostsUrl('allHosts'));
     });
 };

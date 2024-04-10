@@ -16,8 +16,8 @@ import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
 // use this for nicer type suggestions, but allow any string anyway
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
@@ -161,6 +161,30 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         await collapseBtn.click();
         await this.expectSectionClosed(sectionId);
       },
+      async isCollapsed() {
+        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+        return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
+      },
+      async isExpanded() {
+        return !(await this.isCollapsed());
+      },
+      /**
+       * Toggles collapsed state of sidenav
+       */
+      async toggle(collapsed?: boolean) {
+        const currentlyCollapsed = await this.isCollapsed();
+        const shouldBeCollapsed = collapsed ?? !currentlyCollapsed;
+
+        if (currentlyCollapsed !== shouldBeCollapsed) {
+          log.debug(
+            'ServerlessCommonNavigation.sidenav.toggle',
+            shouldBeCollapsed ? 'Collapsing' : 'Expanding'
+          );
+
+          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+          await collapseNavBtn.click();
+        }
+      },
     },
     breadcrumbs: {
       async expectExists() {
@@ -270,6 +294,22 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         );
         expect(noReload).to.be(true);
       };
+    },
+
+    // embedded dev console
+    devConsole: {
+      async expectEmbeddedConsoleControlBarExists() {
+        await testSubjects.existOrFail('consoleEmbeddedSection');
+      },
+      async expectEmbeddedConsoleToBeOpen() {
+        await testSubjects.existOrFail('consoleEmbeddedBody');
+      },
+      async expectEmbeddedConsoleToBeClosed() {
+        await testSubjects.missingOrFail('consoleEmbeddedBody');
+      },
+      async clickEmbeddedConsoleControlBar() {
+        await testSubjects.click('consoleEmbeddedControlBar');
+      },
     },
   };
 }

@@ -17,6 +17,7 @@ import {
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
+import { FilterStateStore } from '@kbn/es-query';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 
@@ -223,6 +224,7 @@ describe('MaintenanceWindowClient - update', () => {
       } as MaintenanceWindow['rRule'],
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+      categoryIds: ['observability'],
     });
 
     savedObjectsClient.get.mockResolvedValue({
@@ -259,7 +261,7 @@ describe('MaintenanceWindowClient - update', () => {
                 type: 'phrase',
               },
               $state: {
-                store: 'appState',
+                store: FilterStateStore.APP_STATE,
               },
               query: {
                 match_phrase: {
@@ -367,10 +369,60 @@ describe('MaintenanceWindowClient - update', () => {
         },
       });
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      "Error validating update maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
       invalid: 
       ---------^"
     `);
+  });
+
+  it('should throw if trying to update a MW with a scoped query with other than 1 category ID', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+      categoryIds: ['observability', 'securitySolution'],
+    } as unknown as SavedObject);
+
+    await expect(async () => {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: {
+          scopedQuery: {
+            kql: "_id: '1234'",
+            filters: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  key: 'kibana.alert.action_group',
+                  field: 'kibana.alert.action_group',
+                  params: {
+                    query: 'test',
+                  },
+                  type: 'phrase',
+                },
+                $state: {
+                  store: FilterStateStore.APP_STATE,
+                },
+                query: {
+                  match_phrase: {
+                    'kibana.alert.action_group': 'test',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows: Cannot edit archived maintenance windows"`
+    );
   });
 
   it('should throw if updating a maintenance window that has expired', async () => {

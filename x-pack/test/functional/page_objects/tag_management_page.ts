@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 interface FillTagFormFields {
@@ -349,10 +349,9 @@ export class TagManagementPageObject extends FtrService {
         firstRow
       );
       await actionButton.click();
-      await this.testSubjects.click(`tagsTableAction-${action}`);
-    } else {
-      await this.testSubjects.click(`tagsTableAction-${action}`);
     }
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**
@@ -425,6 +424,16 @@ export class TagManagementPageObject extends FtrService {
   async selectTagByName(tagName: string) {
     const tagRow = await this.getRowByName(tagName);
     const checkbox = await tagRow.findByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
+    await checkbox.click();
+  }
+
+  /**
+   * Select all checkboxes
+   */
+  async selectAllTagRows() {
+    const checkbox = await this.testSubjects.find(
+      'tagsManagementTable table-is-ready > checkboxSelectAll'
+    );
     await checkbox.click();
   }
 

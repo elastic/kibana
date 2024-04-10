@@ -137,4 +137,4 @@ To track what Cypress is doing while running tests, you can pass in `--config vi
 
 See [our functional test runner README](../../test/functional_enterprise_search).
 
-Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/enterprise_search.ts).
+Our automated accessibility tests can be found in [x-pack/test/accessibility/apps](../../test/accessibility/apps/group3/enterprise_search.ts).

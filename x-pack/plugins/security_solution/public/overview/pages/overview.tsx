@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiShowFor,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -31,7 +38,7 @@ import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -69,6 +76,10 @@ const OverviewComponent = () => {
 
   return (
     <>
+      <EuiScreenReaderOnly>
+        <h1>{OVERVIEW}</h1>
+      </EuiScreenReaderOnly>
+
       {indicesExist ? (
         <>
           <FiltersGlobal>
@@ -144,7 +155,7 @@ const OverviewComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.overview} />

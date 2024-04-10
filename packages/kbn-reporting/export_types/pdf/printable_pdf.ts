@@ -8,7 +8,7 @@
 
 import apm from 'elastic-apm-node';
 import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
-import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
@@ -19,20 +19,19 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import { TaskRunResult } from '@kbn/reporting-common/types';
+import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPDFDeprecated,
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, decryptJobHeaders } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE, decryptJobHeaders } from '@kbn/reporting-server';
 
-import { generatePdfObservable } from './generate_pdf';
-import { validateUrls } from './validate_urls';
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
+import { getTracker } from './pdf_tracker';
+import { validateUrls } from './validate_urls';
 
 /**
  * @deprecated
@@ -73,18 +72,19 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   public runTask = async (
     jobId: string,
     job: TaskPayloadPDF,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const jobLogger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, jobLogger)),
+      mergeMap(() => decryptJobHeaders(this.config.encryptionKey, job.headers, logger)),
       mergeMap(async (headers) => {
-        const fakeRequest = this.getFakeRequest(headers, job.spaceId, jobLogger);
+        const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
         return getCustomLogo(uiSettingsClient, headers);
       }),
@@ -96,18 +96,11 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-        return generatePdfObservable(
-          () =>
-            this.startDeps.screenshotting!.getScreenshots({
-              format: 'pdf',
-              title,
-              logo,
-              urls,
-              browserTimezone,
-              headers,
-              layout,
-            }),
-          {
+        const tracker = getTracker();
+        tracker.startScreenshots();
+
+        return this.startDeps
+          .screenshotting!.getScreenshots({
             format: 'pdf',
             title,
             logo,
@@ -115,8 +108,37 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             browserTimezone,
             headers,
             layout,
-          }
-        );
+            taskInstanceFields,
+            logger,
+          })
+          .pipe(
+            tap(({ metrics }) => {
+              if (metrics.cpu) {
+                tracker.setCpuUsage(metrics.cpu);
+              }
+              if (metrics.memory) {
+                tracker.setMemoryUsage(metrics.memory);
+              }
+            }),
+            mergeMap(async ({ data: buffer, errors, metrics, renderErrors }) => {
+              tracker.endScreenshots();
+              const warnings: string[] = [];
+              if (errors) {
+                warnings.push(...errors.map((error) => error.message));
+              }
+              if (renderErrors) {
+                warnings.push(...renderErrors);
+              }
+
+              tracker.end();
+
+              return {
+                buffer,
+                metrics,
+                warnings,
+              };
+            })
+          );
       }),
       tap(({ buffer }) => {
         apmGeneratePdf?.end();
@@ -130,7 +152,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         warnings,
       })),
       catchError((err: any) => {
-        jobLogger.error(err);
+        logger.error(err);
         return throwError(err);
       })
     );

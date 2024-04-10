@@ -9,7 +9,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { useKibana, type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -21,7 +21,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -34,7 +34,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
-  cases?: CasesUiStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;

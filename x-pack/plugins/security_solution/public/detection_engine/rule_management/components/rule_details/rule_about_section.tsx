@@ -25,14 +25,15 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
-import { ThreatEuiFlexGroup } from '../../../../detections/components/rules/description_step/threat_description';
+import { ThreatEuiFlexGroup } from '../../../rule_creation_ui/components/description_step/threat_description';
 
 import { BadgeList } from './badge_list';
-import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 const OverrideColumn = styled(EuiFlexItem)`
@@ -333,7 +334,9 @@ const prepareAboutSectionListItems = (
               ) : (
                 ''
               ),
-            description: <RiskScoreMappingItem riskScoreMappingItem={riskScoreMappingItem} />,
+            description: (
+              <RiskScoreMappingItem riskScoreMappingItem={requiredOptional(riskScoreMappingItem)} />
+            ),
           };
         })
     );
@@ -423,12 +426,14 @@ const prepareAboutSectionListItems = (
 
 export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {
   rule: Partial<RuleResponse>;
+  columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
 }
 
 export const RuleAboutSection = ({
   rule,
+  columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
   ...descriptionListProps
@@ -442,7 +447,7 @@ export const RuleAboutSection = ({
         type={descriptionListProps.type ?? 'column'}
         rowGutterSize={descriptionListProps.rowGutterSize ?? 'm'}
         listItems={aboutSectionListItems}
-        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        columnWidths={columnWidths}
         data-test-subj="listItemColumnStepRuleDescription"
         {...descriptionListProps}
       />

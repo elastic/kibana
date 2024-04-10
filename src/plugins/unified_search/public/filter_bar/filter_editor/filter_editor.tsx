@@ -21,10 +21,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiBadge,
   withEuiTheme,
   EuiTextColor,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -43,8 +43,8 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
 import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -142,42 +142,81 @@ export interface FilterEditorComponentProps {
   mode?: 'edit' | 'add';
   suggestionsAbstraction?: SuggestionsAbstraction;
   docLinks: DocLinksStart;
+  filtersCount?: number;
+  dataViews?: DataViewsContract;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
 
 interface State {
+  indexPatterns: DataView[];
   selectedDataView?: DataView;
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
   localFilter: Filter;
+  isLoadingDataView?: boolean;
 }
 
 class FilterEditorComponent extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
-    const dataView = this.getIndexPatternFromFilter();
+    const dataView = getIndexPatternFromFilter(props.filter, props.indexPatterns);
     this.state = {
+      indexPatterns: props.indexPatterns,
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
-      queryDsl: this.parseFilterToQueryDsl(props.filter),
+      queryDsl: this.parseFilterToQueryDsl(props.filter, props.indexPatterns),
       isCustomEditorOpen: this.isUnknownFilterType() || !!this.props.filter?.meta.isMultiIndex,
       localFilter: dataView ? merge({}, props.filter) : buildEmptyFilter(false),
+      isLoadingDataView: !Boolean(dataView),
     };
   }
 
   componentDidMount() {
-    const { localFilter, queryDsl, customLabel } = this.state;
+    const { localFilter, queryDsl, customLabel, selectedDataView } = this.state;
     this.props.onLocalFilterCreate?.({
       filter: localFilter,
       queryDslFilter: { queryDsl, customLabel },
     });
     this.props.onLocalFilterUpdate?.(localFilter);
+    if (!selectedDataView) {
+      const dataViewId = this.props.filter.meta.index;
+      if (!dataViewId || !this.props.dataViews) {
+        this.setState({ isLoadingDataView: false });
+      } else {
+        this.loadDataView(dataViewId, this.props.dataViews);
+      }
+    }
   }
 
-  private parseFilterToQueryDsl(filter: Filter) {
-    const dsl = filterToQueryDsl(filter, this.props.indexPatterns);
+  /**
+   * Helper function to load the data view from the index pattern id
+   * E.g. in Discover there's just one active data view, so filters with different data view id
+   * Than the currently selected data view need to load the data view from the id to display the filter
+   * correctly
+   * @param dataViewId
+   * @private
+   */
+  private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
+    try {
+      const dataView = await dataViews.get(dataViewId, false);
+      this.setState({
+        selectedDataView: dataView,
+        isLoadingDataView: false,
+        indexPatterns: [dataView, ...this.props.indexPatterns],
+        localFilter: merge({}, this.props.filter),
+        queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
+      });
+    } catch (e) {
+      this.setState({
+        isLoadingDataView: false,
+      });
+    }
+  }
+
+  private parseFilterToQueryDsl(filter: Filter, indexPatterns: DataView[]) {
+    const dsl = filterToQueryDsl(filter, indexPatterns);
     return JSON.stringify(dsl, null, 2);
   }
 
@@ -203,74 +242,75 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
               {this.props.mode === 'add' ? strings.getPanelTitleAdd() : strings.getPanelTitleEdit()}
-              <EuiBadge color="hollow">
-                {i18n.translate('unifiedSearch.filter.filterEditor.experimentalLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-              </EuiBadge>
-            </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             {toggleEditorFlexItem}
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        <EuiForm>
+        {this.state.isLoadingDataView ? (
           <div className="globalFilterItem__editorForm">
-            {this.renderIndexPatternInput()}
-
-            {this.state.isCustomEditorOpen
-              ? this.renderCustomEditor()
-              : this.renderFiltersBuilderEditor()}
-
-            <EuiSpacer size="l" />
-            <EuiFormRow label={strings.getCustomLabel()} fullWidth>
-              <EuiFieldText
-                value={`${this.state.customLabel}`}
-                onChange={this.onCustomLabelChange}
-                placeholder={strings.getAddCustomLabel()}
-                fullWidth
-              />
-            </EuiFormRow>
+            <EuiLoadingSpinner />
           </div>
+        ) : (
+          <EuiForm>
+            <div className="globalFilterItem__editorForm">
+              {this.renderIndexPatternInput()}
 
-          <EuiPopoverFooter paddingSize="s">
-            {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
-            <EuiFlexGroup
-              direction="rowReverse"
-              alignItems="center"
-              style={{ isolation: 'isolate' }}
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={this.onSubmit}
-                  isDisabled={!this.isFilterValid()}
-                  data-test-subj="saveFilter"
-                >
-                  {this.props.mode === 'add'
-                    ? strings.getAddButtonLabel()
-                    : strings.getUpdateButtonLabel()}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="right"
-                  onClick={this.props.onCancel}
-                  data-test-subj="cancelSaveFilter"
-                >
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem />
-            </EuiFlexGroup>
-          </EuiPopoverFooter>
-        </EuiForm>
+              {this.state.isCustomEditorOpen
+                ? this.renderCustomEditor()
+                : this.renderFiltersBuilderEditor()}
+
+              <EuiSpacer size="l" />
+              <EuiFormRow label={strings.getCustomLabel()} fullWidth>
+                <EuiFieldText
+                  value={`${this.state.customLabel}`}
+                  onChange={this.onCustomLabelChange}
+                  placeholder={strings.getAddCustomLabel()}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </div>
+
+            <EuiPopoverFooter paddingSize="s">
+              {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+              <EuiFlexGroup
+                direction="rowReverse"
+                alignItems="center"
+                style={{ isolation: 'isolate' }}
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    onClick={this.onSubmit}
+                    isDisabled={!this.isFilterValid()}
+                    data-test-subj="saveFilter"
+                  >
+                    {this.props.mode === 'add'
+                      ? strings.getAddButtonLabel()
+                      : strings.getUpdateButtonLabel()}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    flush="right"
+                    onClick={this.props.onCancel}
+                    data-test-subj="cancelSaveFilter"
+                  >
+                    <FormattedMessage
+                      id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem />
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          </EuiForm>
+        )}
       </div>
     );
   }
@@ -282,8 +322,8 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     }
 
     if (
-      this.props.indexPatterns.length <= 1 &&
-      this.props.indexPatterns.find(
+      this.state.indexPatterns.length <= 1 &&
+      this.state.indexPatterns.find(
         (indexPattern) => indexPattern === this.getIndexPatternFromFilter()
       )
     ) {
@@ -295,15 +335,16 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return null;
     }
     const { selectedDataView } = this.state;
+
     return (
       <>
         <EuiFormRow fullWidth label={strings.getDataView()}>
           <GenericComboBox
             fullWidth
             placeholder={strings.getSelectDataView()}
-            options={this.props.indexPatterns}
+            options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) => indexPattern.getName()}
+            getLabel={(indexPattern) => indexPattern?.getName()}
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
@@ -355,6 +396,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               onChange={this.onLocalFilterChange}
               disabled={!selectedDataView}
               suggestionsAbstraction={this.props.suggestionsAbstraction}
+              filtersCount={this.props.filtersCount}
             />
           </EuiToolTip>
         </div>
@@ -379,7 +421,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <EuiText size="xs" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
               <FilterBadgeGroup
                 filters={[localFilter]}
-                dataViews={this.props.indexPatterns}
+                dataViews={this.state.indexPatterns}
                 booleanRelation={BooleanRelation.AND}
                 shouldShowBrackets={false}
               />
@@ -445,7 +487,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   }
 
   private getIndexPatternFromFilter() {
-    return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
+    return getIndexPatternFromFilter(this.props.filter, this.state.indexPatterns);
   }
 
   private isQueryDslValid = (queryDsl: string) => {
@@ -524,7 +566,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return;
     }
 
-    const newIndex = index || this.props.indexPatterns[0].id!;
+    const newIndex = index || this.state.indexPatterns[0].id!;
     try {
       const body = JSON.parse(queryDsl);
       return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);
@@ -590,7 +632,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       const filter =
         this.props.filter?.meta.type === FILTERS.CUSTOM ||
         // only convert non-custom filters to custom when DSL changes
-        queryDsl !== this.parseFilterToQueryDsl(this.props.filter)
+        queryDsl !== this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns)
           ? this.getFilterFromQueryDsl(queryDsl)
           : {
               ...this.props.filter,

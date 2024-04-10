@@ -47,6 +47,7 @@ export function getStateDefaults({
   const dataView = searchSource.getField('index');
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+  const isTextBasedQueryMode = isTextBasedQuery(query);
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
@@ -61,7 +62,7 @@ export function getStateDefaults({
         )
       : sort,
     columns,
-    index: dataView?.id,
+    index: isTextBasedQueryMode ? undefined : dataView?.id,
     interval: 'auto',
     filters: cloneDeep(searchSource.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
@@ -69,11 +70,13 @@ export function getStateDefaults({
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
+    headerRowHeight: undefined,
     rowsPerPage: undefined,
     sampleSize: undefined,
     grid: undefined,
     breakdownField: undefined,
   };
+
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
@@ -83,10 +86,13 @@ export function getStateDefaults({
   if (savedSearch.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
+  if (savedSearch.headerRowHeight !== undefined) {
+    defaultState.headerRowHeight = savedSearch.headerRowHeight;
+  }
   if (savedSearch.viewMode) {
     defaultState.viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
-      isTextBasedQueryMode: isTextBasedQuery(query),
+      isTextBasedQueryMode,
     });
   }
   if (savedSearch.hideAggregatedPreview) {

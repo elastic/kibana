@@ -1179,6 +1179,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
         "type": "string",
         "tags": [],
@@ -1186,6 +1201,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableServiceMetrics\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableTableSearchBar\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1299,6 +1329,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureAssetCustomDashboards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
         "type": "string",
         "tags": [],
@@ -1321,6 +1366,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:logsExplorer:allowedDataViews\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1539,6 +1599,23 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature"
+        ],
+        "signature": [
+          "\"securitySolution:enableAssetCriticality\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
         "type": "string",
         "tags": [],
@@ -1593,6 +1670,23 @@
         "description": [],
         "signature": [
           "\"securitySolution:enableNewsFeed\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer"
+        ],
+        "signature": [
+          "\"securitySolution:excludeColdAndFrozenTiersInAnalyzer\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

@@ -8,15 +8,20 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
-import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
-import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
-import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
-
+import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-test-utils/artificial_logs/significant_log_patterns';
+import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups_textfield';
+import { topTerms } from '@kbn/aiops-test-utils/artificial_logs/top_terms';
+import { topTermsGroups } from '@kbn/aiops-test-utils/artificial_logs/top_terms_groups';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import {
+  frequentItemSetsLargeArraysGroups,
+  frequentItemSetsLargeArraysSignificantItems,
+} from '@kbn/aiops-test-utils/frequent_item_sets_large_arrays';
 
 import type { TestData } from './types';
 
@@ -33,16 +38,12 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       deviationMin: 1561986810992,
       end: 2147483647000,
       index: 'ft_ecommerce',
-      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
+      searchQuery: '{"match_all":{}}',
       start: 0,
       timeFieldName: 'order_date',
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      chunksLength: 35,
-      chunksLengthGroupOnly: 5,
-      actionsLength: 34,
-      actionsLengthGroupOnly: 4,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [
@@ -78,14 +79,14 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
     },
   },
   {
-    testName: 'artificial_logs_with_spike_notextfield',
-    dataGenerator: 'artificial_logs_with_spike_notextfield',
+    testName: 'artificial_logs_with_spike',
+    dataGenerator: 'artificial_logs_with_spike',
     requestBody: {
       start: 1668760018793,
       end: 1668931954793,
       searchQuery: '{"match_all":{}}',
       timeFieldName: '@timestamp',
-      index: 'artificial_logs_with_spike_notextfield',
+      index: 'artificial_logs_with_spike',
       baselineMin: 1668769200000,
       baselineMax: 1668837600000,
       deviationMin: 1668855600000,
@@ -93,14 +94,56 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      chunksLength: 27,
-      chunksLengthGroupOnly: 11,
-      actionsLength: 26,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
+      histogramLength: 20,
+    },
+  },
+  {
+    testName: 'artificial_logs_with_spike_zerodocsfallback',
+    dataGenerator: 'artificial_logs_with_spike_zerodocsfallback',
+    requestBody: {
+      start: 1668760018793,
+      end: 1668931954793,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'artificial_logs_with_spike_zerodocsfallback',
+      baselineMin: 0,
+      baselineMax: 10,
+      deviationMin: 1668855600000,
+      deviationMax: 1668924000000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      significantItems: topTerms,
+      groups: topTermsGroups,
+      histogramLength: 20,
+    },
+  },
+  {
+    testName: 'artificial_logs_with_dip_zerodocsfallback',
+    dataGenerator: 'artificial_logs_with_dip_zerodocsfallback',
+    requestBody: {
+      start: 0,
+      end: 1768855600010,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'artificial_logs_with_dip_zerodocsfallback',
+      baselineMin: 1768855600000,
+      baselineMax: 1768855600010,
+      deviationMin: 1668855600000,
+      deviationMax: 1668924000000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      significantItems: topTerms,
+      groups: topTermsGroups,
       histogramLength: 20,
     },
   },
@@ -120,10 +163,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      chunksLength: 30,
-      chunksLengthGroupOnly: 11,
-      actionsLength: 29,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
@@ -132,14 +171,14 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
     },
   },
   {
-    testName: 'artificial_logs_with_dip_notextfield',
-    dataGenerator: 'artificial_logs_with_dip_notextfield',
+    testName: 'artificial_logs_with_dip',
+    dataGenerator: 'artificial_logs_with_dip',
     requestBody: {
       start: 1668760018793,
       end: 1668931954793,
       searchQuery: '{"match_all":{}}',
       timeFieldName: '@timestamp',
-      index: 'artificial_logs_with_dip_notextfield',
+      index: 'artificial_logs_with_dip',
       baselineMin: 1668855600000,
       baselineMax: 1668924000000,
       deviationMin: 1668769200000,
@@ -147,10 +186,6 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      chunksLength: 27,
-      chunksLengthGroupOnly: 11,
-      actionsLength: 26,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
@@ -174,15 +209,34 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       grouping: true,
     } as AiopsLogRateAnalysisSchema<T>,
     expected: {
-      chunksLength: 30,
-      chunksLengthGroupOnly: 11,
-      actionsLength: 29,
-      actionsLengthGroupOnly: 10,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
+    },
+  },
+  {
+    testName: 'large_arrays',
+    dataGenerator: 'large_arrays',
+    requestBody: {
+      start: 1561995338700,
+      end: 1562427338700,
+      searchQuery: '{"match_all":{}}',
+      timeFieldName: '@timestamp',
+      index: 'large_arrays',
+      baselineMax: 1562184000000,
+      baselineMin: 1562061600000,
+      deviationMax: 1562277600000,
+      deviationMin: 1562227200000,
+      grouping: true,
+    } as AiopsLogRateAnalysisSchema<T>,
+    expected: {
+      noIndexChunksLength: 4,
+      noIndexActionsLength: 3,
+      groups: frequentItemSetsLargeArraysGroups,
+      significantItems: frequentItemSetsLargeArraysSignificantItems,
+      histogramLength: 1,
     },
   },
 ];

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -19,15 +20,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { KibanaObjectUi } from '../page';
+import type { KibanaObjectUi } from '../page';
 
 export interface KibanaObjectItemProps {
   objectType: string;
-  kibanaObjects: KibanaObjectUi[];
+  kibanaObjects: KibanaObjectUi[] | undefined;
   isSaving: boolean;
 }
 
-export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
+export const KibanaObjectList: FC<KibanaObjectItemProps> = memo(
   ({ objectType, kibanaObjects, isSaving }) => {
     const kibanaObjectLabels: Record<string, string> = {
       dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
@@ -41,6 +42,10 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
       }),
     };
 
+    if (kibanaObjects === undefined) {
+      return null;
+    }
+
     return (
       <>
         <EuiTitle size="s">
@@ -53,7 +58,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       <EuiText size="s" color={exists ? 'subdued' : 'success'}>
                         {title}
                       </EuiText>

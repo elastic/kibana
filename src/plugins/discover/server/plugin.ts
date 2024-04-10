@@ -14,13 +14,13 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { PluginInitializerContext } from '@kbn/core/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
-import { DiscoverAppLocatorDefinition } from '../common/locator';
+import { DiscoverAppLocatorDefinition } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
 import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
-import { ConfigSchema } from './config';
+import { ConfigSchema } from '../common/config';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>

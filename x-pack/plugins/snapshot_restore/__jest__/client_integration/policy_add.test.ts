@@ -8,7 +8,6 @@
 // import helpers first, this also sets up the mocks
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
-import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
@@ -20,15 +19,6 @@ import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 const { setup } = pageHelpers.policyAdd;
-
-// mock for EuiSelectable's virtualization
-jest.mock('react-virtualized-auto-sizer', () => {
-  return ({
-    children,
-  }: {
-    children: (dimensions: { width: number; height: number }) => ReactElement;
-  }) => children({ width: 100, height: 500 });
-});
 
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';

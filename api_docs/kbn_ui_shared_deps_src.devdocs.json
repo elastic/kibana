@@ -357,17 +357,6 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.rxjsoperators",
-            "type": "string",
-            "tags": [],
-            "label": "'rxjs/operators'",
-            "description": [],
-            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.numeral",
             "type": "string",
             "tags": [],
@@ -548,6 +537,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnsearcherrors",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/search-errors'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnstd",
             "type": "string",
             "tags": [],
@@ -629,6 +629,17 @@
             "type": "string",
             "tags": [],
             "label": "'@tanstack/react-query-devtools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbncodeeditor",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/code-editor'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

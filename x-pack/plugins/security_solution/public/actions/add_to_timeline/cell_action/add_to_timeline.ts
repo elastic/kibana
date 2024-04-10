@@ -15,7 +15,7 @@ import {
 } from '@kbn/cell-actions/src/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 import { TimelineId } from '../../../../common/types';
 import type { SecurityAppStore } from '../../../common/store';
 import { fieldHasCellActions } from '../../utils';

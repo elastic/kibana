@@ -15,7 +15,7 @@ import {
   tap,
   BehaviorSubject,
 } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, takeUntil, debounceTime } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
@@ -179,7 +179,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     if (!this.pluginsStatus || !this.overall$) {
       throw new Error(`StatusService#setup must be called before #start`);
     }
-    this.pluginsStatus.blockNewRegistrations();
+    this.pluginsStatus.start();
     this.logStatusChanges();
   }
 

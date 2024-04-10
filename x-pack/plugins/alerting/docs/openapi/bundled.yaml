@@ -43,6 +43,8 @@ paths:
                 $ref: '#/components/examples/create_es_query_kql_rule_request'
               createIndexThresholdRuleRequest:
                 $ref: '#/components/examples/create_index_threshold_rule_request'
+              createTrackingContainmentRuleRequest:
+                $ref: '#/components/examples/create_tracking_containment_rule_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -59,6 +61,8 @@ paths:
                   $ref: '#/components/examples/create_es_query_kql_rule_response'
                 createIndexThresholdRuleResponse:
                   $ref: '#/components/examples/create_index_threshold_rule_response'
+                createTrackingContainmentRuleResponse:
+                  $ref: '#/components/examples/create_tracking_containment_rule_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -305,7 +309,7 @@ paths:
             type: string
             default: OR
             examples:
-              - OR
+              - AND
         - name: fields
           in: query
           description: The fields to return in the `attributes` key of the response.
@@ -350,12 +354,16 @@ paths:
           description: An Elasticsearch simple_query_string query that filters the objects in the response.
           schema:
             type: string
+            examples:
+              - threshold +-test*
         - name: search_fields
           in: query
           description: The fields to perform the simple_query_string parsed query against.
           schema:
             oneOf:
               - type: string
+                examples:
+                  - name
               - type: array
                 items:
                   type: string
@@ -565,6 +573,61 @@ paths:
                                 type: string
                     alerts:
                       type: object
+                      description: |
+                        Details for writing alerts as data documents for this rule type.
+                      properties:
+                        context:
+                          type: string
+                          description: |
+                            The namespace for this rule type.
+                          enum:
+                            - ml.anomaly-detection
+                            - observability.apm
+                            - observability.logs
+                            - observability.metrics
+                            - observability.slo
+                            - observability.threshold
+                            - observability.uptime
+                            - security
+                            - stack
+                        dynamic:
+                          type: string
+                          description: Indicates whether new fields are added dynamically.
+                          enum:
+                            - 'false'
+                            - runtime
+                            - strict
+                            - 'true'
+                        isSpaceAware:
+                          type: boolean
+                          description: |
+                            Indicates whether the alerts are space-aware. If true, space-specific alert indices are used.
+                        mappings:
+                          type: object
+                          properties:
+                            fieldMap:
+                              type: object
+                              description: |
+                                Mapping information for each field supported in alerts as data documents for this rule type. For more information about mapping parameters, refer to the Elasticsearch documentation.
+                              additionalProperties:
+                                $ref: '#/components/schemas/fieldmap_properties'
+                        secondaryAlias:
+                          type: string
+                          description: |
+                            A secondary alias. It is typically used to support the signals alias for detection rules.
+                        shouldWrite:
+                          type: boolean
+                          description: |
+                            Indicates whether the rule should write out alerts as data.
+                        useEcs:
+                          type: boolean
+                          description: |
+                            Indicates whether to include the ECS component template for the alerts.
+                        useLegacyAlerts:
+                          type: boolean
+                          default: false
+                          description: |
+                            Indicates whether to include the legacy component template for the alerts.
                     authorized_consumers:
                       description: The list of the plugins IDs that have access to the rule type.
                       type: object
@@ -664,6 +727,7 @@ paths:
                       type: boolean
                     has_alerts_mappings:
                       type: boolean
+                      description: Indicates whether the rule type has custom mappings for the alert data.
                     has_fields_for_a_a_d:
                       type: boolean
                     id:
@@ -1617,194 +1681,6 @@ components:
         examples:
           - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   schemas:
-    filter:
-      type: object
-      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
-      properties:
-        meta:
-          type: object
-          properties:
-            alias:
-              type:
-                - string
-                - 'null'
-            controlledBy:
-              type: string
-            disabled:
-              type: boolean
-            field:
-              type: string
-            group:
-              type: string
-            index:
-              type: string
-            isMultiIndex:
-              type: boolean
-            key:
-              type: string
-            negate:
-              type: boolean
-            params:
-              type: object
-            type:
-              type: string
-            value:
-              type: string
-        query:
-          type: object
-        $state:
-          type: object
-    notify_when:
-      type: string
-      description: |
-        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
-      enum:
-        - onActionGroupChange
-        - onActiveAlert
-        - onThrottleInterval
-      examples:
-        - onActiveAlert
-    throttle:
-      type:
-        - string
-        - 'null'
-      description: |
-        The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
-      default: null
-      examples:
-        - 10m
-    actions:
-      type:
-        - array
-        - 'null'
-      default: []
-      items:
-        type: object
-        required:
-          - group
-          - id
-          - params
-        description: |
-          An action that runs under defined conditions.
-        properties:
-          alerts_filter:
-            type: object
-            description: |
-              Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.
-            properties:
-              query:
-                type: object
-                description: Defines a query filter that determines whether the action runs.
-                properties:
-                  kql:
-                    type: string
-                    description: A filter written in Kibana Query Language (KQL).
-                  filters:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/filter'
-              timeframe:
-                type: object
-                description: Defines a period that limits whether the action runs.
-                properties:
-                  days:
-                    type: array
-                    description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
-                    items:
-                      type: integer
-                    examples:
-                      - - 1
-                        - 2
-                        - 3
-                        - 4
-                        - 5
-                  hours:
-                    type: object
-                    description: |
-                      Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.
-                    properties:
-                      end:
-                        type: string
-                        description: The end of the time frame in 24-hour notation (`hh:mm`).
-                        examples:
-                          - '17:00'
-                      start:
-                        type: string
-                        description: The start of the time frame in 24-hour notation (`hh:mm`).
-                        examples:
-                          - '08:00'
-                  timezone:
-                    type: string
-                    description: |
-                      The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
-                    examples:
-                      - Europe/Madrid
-          connector_type_id:
-            type: string
-            description: The type of connector. This property appears in responses but cannot be set in requests.
-            examples:
-              - .server-log
-            readOnly: true
-          frequency:
-            type: object
-            description: |
-              The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
-            required:
-              - notify_when
-              - summary
-            properties:
-              notify_when:
-                $ref: '#/components/schemas/notify_when'
-              summary:
-                type: boolean
-                description: Indicates whether the action is a summary.
-              throttle:
-                $ref: '#/components/schemas/throttle'
-          group:
-            type: string
-            description: |
-              The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
-            examples:
-              - default
-          id:
-            type: string
-            description: The identifier for the connector saved object.
-            examples:
-              - 9dca3e00-74f5-11ed-9801-35303b735aef
-          params:
-            type: object
-            description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
-            additionalProperties: true
-          uuid:
-            type: string
-            description: A universally unique identifier (UUID) for the action.
-            examples:
-              - 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
-    consumer:
-      type: string
-      description: |
-        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
-    enabled_rule:
-      type: boolean
-      description: Indicates whether you want to run the rule on an interval basis after it is created.
-    name_rule:
-      type: string
-      description: |
-        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
-    schedule:
-      type: object
-      description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
-      properties:
-        interval:
-          type: string
-          examples:
-            - 1m
-    tags:
-      type: array
-      description: The tags for the rule.
-      items:
-        type: string
-      default: []
     create_anomaly_detection_alert_rule_request:
       title: Create anomaly detection rule request
       description: |
@@ -1819,6 +1695,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1856,6 +1734,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1879,41 +1759,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_anomaly:
-      required:
-        - windowSize
-        - windowUnit
-        - environment
-        - anomalySeverityType
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        windowSize:
-          type: number
-          example: 6
-          description: The window size
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        anomalySeverityType:
-          type: string
-          description: The anomaly threshold value
-          enum:
-            - critical
-            - major
-            - minor
-            - warning
     create_apm_anomaly_rule_request:
       title: Create APM anomaly rule rule request
       description: A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.
@@ -1927,6 +1772,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -1948,48 +1795,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_error_count:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        threshold:
-          type: number
-          description: The error count threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.name
-              - error.grouping_key
-        errorGroupingKey:
-          type: string
     create_apm_error_count_rule_request:
       title: Create APM error count rule request
       description: A rule that detects when the number of errors in a service exceeds a defined threshold.
@@ -2003,6 +1808,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2024,59 +1831,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_transaction_duration:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-        - aggregationType
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        transactionName:
-          type: string
-          description: The transaction name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: ç
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-        threshold:
-          type: number
-          description: The latency threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-            - transaction.type
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.type
-              - transaction.name
-        aggregationType:
-          type: string
-          enum:
-            - avg
-            - 95th
-            - 99th
     create_apm_transaction_duration_rule_request:
       title: Create latency threshold rule request
       description: A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.
@@ -2090,6 +1844,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2111,53 +1867,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_apm_transaction_error_rate:
-      required:
-        - windowSize
-        - windowUnit
-        - threshold
-        - environment
-      properties:
-        serviceName:
-          type: string
-          description: The service name from APM
-        transactionType:
-          type: string
-          description: The transaction type from APM
-        transactionName:
-          type: string
-          description: The transaction name from APM
-        windowSize:
-          type: number
-          description: The window size
-          example: 6
-        windowUnit:
-          type: string
-          description: The window size unit
-          enum:
-            - m
-            - h
-            - d
-        environment:
-          type: string
-          description: The environment from APM
-        threshold:
-          type: number
-          description: The error rate threshold value
-        groupBy:
-          type: array
-          default:
-            - service.name
-            - service.environment
-            - transaction.type
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-              - service.name
-              - service.environment
-              - transaction.type
-              - transaction.name
     create_apm_transaction_error_rate_rule_request:
       title: Create APM transaction error rate rule request
       description: A rule that sends notifications when the rate of transaction errors in a service exceeds a threshold.
@@ -2171,6 +1880,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2192,275 +1903,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    aggfield:
-      description: |
-        The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
-      type: string
-    aggtype:
-      description: The type of aggregation to perform.
-      type: string
-      enum:
-        - avg
-        - count
-        - max
-        - min
-        - sum
-      default: count
-    excludehitsfrompreviousrun:
-      description: |
-        Indicates whether to exclude matches from previous runs. If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.
-      type: boolean
-    groupby:
-      description: |
-        Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
-      type: string
-      enum:
-        - all
-        - top
-      default: all
-    termsize:
-      description: |
-        This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
-      type: integer
-    timefield:
-      description: The field that is used to calculate the time window.
-      type: string
-    timewindowsize:
-      description: |
-        The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
-      type: integer
-      examples:
-        - 5
-    timewindowunit:
-      description: |
-        The type of units for the time window: seconds, minutes, hours, or days.
-      type: string
-      enum:
-        - s
-        - m
-        - h
-        - d
-      examples:
-        - m
-    size:
-      description: |
-        The number of documents to pass to the configured actions when the threshold condition is met.
-      type: integer
-    termfield:
-      description: |
-        The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.
-      oneOf:
-        - type: string
-        - type: array
-          items:
-            type: string
-          maxItems: 4
-    threshold:
-      description: |
-        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
-      type: array
-      items:
-        type: integer
-        examples:
-          - 4000
-    thresholdcomparator:
-      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
-      type: string
-      enum:
-        - '>'
-        - '>='
-        - <
-        - <=
-        - between
-        - notBetween
-      examples:
-        - '>'
-    params_es_query_rule:
-      oneOf:
-        - type: object
-          x-technical-preview: true
-          description: |
-            The parameters for an Elasticsearch query rule that uses ES|QL to define the query. This functionality is in technical pre view and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-          required:
-            - esqlQuery
-            - searchType
-            - size
-            - threshold
-            - thresholdComparator
-            - timeWindowSize
-            - timeWindowUnit
-          properties:
-            aggField:
-              $ref: '#/components/schemas/aggfield'
-            aggType:
-              $ref: '#/components/schemas/aggtype'
-            esqlQuery:
-              type: object
-              required:
-                - esql
-              properties:
-                esql:
-                  description: The query definition, which uses Elasticsearch Query Language.
-                  type: string
-            excludeHitsFromPreviousRun:
-              $ref: '#/components/schemas/excludehitsfrompreviousrun'
-            groupBy:
-              $ref: '#/components/schemas/groupby'
-            searchType:
-              description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
-              type: string
-              enum:
-                - esqlQuery
-              examples:
-                - esqlQuery
-            size:
-              type: integer
-              description: |
-                When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
-              examples:
-                - 0
-            termSize:
-              $ref: '#/components/schemas/termsize'
-            threshold:
-              type: array
-              items:
-                type: integer
-                minimum: 0
-                maximum: 0
-              description: |
-                The threshold value that is used with the `thresholdComparator`. When `searchType` is `esqlQuery`, this property is required and must be set to zero.
-            thresholdComparator:
-              type: string
-              description: |
-                The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to ">". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
-              enum:
-                - '>'
-              examples:
-                - '>'
-            timeField:
-              $ref: '#/components/schemas/timefield'
-            timeWindowSize:
-              $ref: '#/components/schemas/timewindowsize'
-            timeWindowUnit:
-              $ref: '#/components/schemas/timewindowunit'
-        - type: object
-          description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
-          required:
-            - searchType
-            - size
-            - threshold
-            - thresholdComparator
-            - timeWindowSize
-            - timeWindowUnit
-          properties:
-            aggField:
-              $ref: '#/components/schemas/aggfield'
-            aggType:
-              $ref: '#/components/schemas/aggtype'
-            excludeHitsFromPreviousRun:
-              $ref: '#/components/schemas/excludehitsfrompreviousrun'
-            groupBy:
-              $ref: '#/components/schemas/groupby'
-            searchConfiguration:
-              description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
-              type: object
-              properties:
-                filter:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/filter'
-                index:
-                  description: The indices to query.
-                  oneOf:
-                    - type: string
-                    - type: array
-                      items:
-                        type: string
-                query:
-                  type: object
-                  properties:
-                    language:
-                      type: string
-                      examples:
-                        - kuery
-                    query:
-                      type: string
-            searchType:
-              description: The type of query, in this case a text-based query that uses KQL or Lucene.
-              type: string
-              enum:
-                - searchSource
-              examples:
-                - searchSource
-            size:
-              $ref: '#/components/schemas/size'
-            termField:
-              $ref: '#/components/schemas/termfield'
-            termSize:
-              $ref: '#/components/schemas/termsize'
-            threshold:
-              $ref: '#/components/schemas/threshold'
-            thresholdComparator:
-              $ref: '#/components/schemas/thresholdcomparator'
-            timeField:
-              $ref: '#/components/schemas/timefield'
-            timeWindowSize:
-              $ref: '#/components/schemas/timewindowsize'
-            timeWindowUnit:
-              $ref: '#/components/schemas/timewindowunit'
-        - type: object
-          description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
-          required:
-            - esQuery
-            - index
-            - threshold
-            - thresholdComparator
-            - timeField
-            - timeWindowSize
-            - timeWindowUnit
-          properties:
-            aggField:
-              $ref: '#/components/schemas/aggfield'
-            aggType:
-              $ref: '#/components/schemas/aggtype'
-            esQuery:
-              description: The query definition, which uses Elasticsearch Query DSL.
-              type: string
-            excludeHitsFromPreviousRun:
-              $ref: '#/components/schemas/excludehitsfrompreviousrun'
-            groupBy:
-              $ref: '#/components/schemas/groupby'
-            index:
-              description: The indices to query.
-              oneOf:
-                - type: array
-                  items:
-                    type: string
-                - type: string
-            searchType:
-              description: The type of query, in this case a query that uses Elasticsearch Query DSL.
-              type: string
-              enum:
-                - esQuery
-              default: esQuery
-              examples:
-                - esQuery
-            size:
-              $ref: '#/components/schemas/size'
-            termField:
-              $ref: '#/components/schemas/termfield'
-            termSize:
-              $ref: '#/components/schemas/termsize'
-            threshold:
-              $ref: '#/components/schemas/threshold'
-            thresholdComparator:
-              $ref: '#/components/schemas/thresholdcomparator'
-            timeField:
-              $ref: '#/components/schemas/timefield'
-            timeWindowSize:
-              $ref: '#/components/schemas/timewindowsize'
-            timeWindowUnit:
-              $ref: '#/components/schemas/timewindowunit'
     create_es_query_rule_request:
       title: Create Elasticsearch query rule request
       description: |
@@ -2475,6 +1917,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2497,7 +1941,7 @@ components:
         throttle:
           $ref: '#/components/schemas/throttle'
     create_geo_containment_rule_request:
-      title: Create traacking containment rule request
+      title: Create tracking containment rule request
       description: |
         A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
       type: object
@@ -2510,6 +1954,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2533,45 +1979,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_index_threshold_rule:
-      type: object
-      description: The parameters for an index threshold rule.
-      required:
-        - index
-        - threshold
-        - thresholdComparator
-        - timeField
-        - timeWindowSize
-        - timeWindowUnit
-      properties:
-        aggField:
-          $ref: '#/components/schemas/aggfield'
-        aggType:
-          $ref: '#/components/schemas/aggtype'
-        filterKuery:
-          description: A KQL expression thats limits the scope of alerts.
-          type: string
-        groupBy:
-          $ref: '#/components/schemas/groupby'
-        index:
-          description: The indices to query.
-          type: array
-          items:
-            type: string
-        termField:
-          $ref: '#/components/schemas/termfield'
-        termSize:
-          $ref: '#/components/schemas/termsize'
-        threshold:
-          $ref: '#/components/schemas/threshold'
-        thresholdComparator:
-          $ref: '#/components/schemas/thresholdcomparator'
-        timeField:
-          $ref: '#/components/schemas/timefield'
-        timeWindowSize:
-          $ref: '#/components/schemas/timewindowsize'
-        timeWindowUnit:
-          $ref: '#/components/schemas/timewindowunit'
     create_index_threshold_rule_request:
       title: Create index threshold rule request
       description: A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.
@@ -2585,6 +1992,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2606,117 +2015,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_infra_inventory:
-      properties:
-        criteria:
-          type: array
-          items:
-            type: object
-            properties:
-              metric:
-                type: string
-                enum:
-                  - count
-                  - cpu
-                  - diskLatency
-                  - load
-                  - memory
-                  - memoryTotal
-                  - tx
-                  - rx
-                  - logRate
-                  - diskIOReadBytes
-                  - diskIOWriteBytes
-                  - s3TotalRequests
-                  - s3NumberOfObjects
-                  - s3BucketSize
-                  - s3DownloadBytes
-                  - s3UploadBytes
-                  - rdsConnections
-                  - rdsQueriesExecuted
-                  - rdsActiveTransactions
-                  - rdsLatency
-                  - sqsMessagesVisible
-                  - sqsMessagesDelayed
-                  - sqsMessagesSent
-                  - sqsMessagesEmpty
-                  - sqsOldestMessage
-                  - custom
-              timeSize:
-                type: number
-              timeUnit:
-                type: string
-                enum:
-                  - s
-                  - m
-                  - h
-                  - d
-              sourceId:
-                type: string
-              threshold:
-                type: array
-                items:
-                  type: number
-              comparator:
-                type: string
-                enum:
-                  - <
-                  - <=
-                  - '>'
-                  - '>='
-                  - between
-                  - outside
-              customMetric:
-                type: object
-                properties:
-                  type:
-                    type: string
-                    enum:
-                      - custom
-                  field:
-                    type: string
-                  aggregation:
-                    type: string
-                    enum:
-                      - avg
-                      - max
-                      - min
-                      - rate
-                  id:
-                    type: string
-                  label:
-                    type: string
-              warningThreshold:
-                type: array
-                items:
-                  type: number
-              warningComparator:
-                type: string
-                enum:
-                  - <
-                  - <=
-                  - '>'
-                  - '>='
-                  - between
-                  - outside
-        filterQuery:
-          type: string
-        filterQueryText:
-          type: string
-        nodeType:
-          type: string
-          enum:
-            - host
-            - pod
-            - container
-            - awsEC2
-            - awsS3
-            - awsSQS
-            - awsRDS
-        sourceId:
-          type: string
-        alertOnNoData:
-          type: boolean
     create_infra_inventory_rule_request:
       title: Create infra inventory rule request
       description: |
@@ -2731,6 +2029,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2764,6 +2064,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -2787,180 +2089,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_infra_metric_threshold:
-      properties:
-        criteria:
-          type: array
-          items:
-            oneOf:
-              - title: non count criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  metric:
-                    type: string
-                  aggType:
-                    type: string
-                    enum:
-                      - avg
-                      - max
-                      - min
-                      - cardinality
-                      - rate
-                      - count
-                      - sum
-                      - p95
-                      - p99
-                      - custom
-              - title: count criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  aggType:
-                    type: string
-                    enum:
-                      - count
-              - title: custom criterion
-                type: object
-                properties:
-                  threshold:
-                    type: array
-                    items:
-                      type: number
-                  comparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  timeUnit:
-                    type: string
-                  timeSize:
-                    type: number
-                  warningThreshold:
-                    type: array
-                    items:
-                      type: number
-                  warningComparator:
-                    type: string
-                    enum:
-                      - <
-                      - <=
-                      - '>'
-                      - '>='
-                      - between
-                      - outside
-                  aggType:
-                    type: string
-                    enum:
-                      - custom
-                  customMetric:
-                    type: array
-                    items:
-                      oneOf:
-                        - type: object
-                          properties:
-                            name:
-                              type: string
-                            aggType:
-                              type: string
-                              enum:
-                                - avg
-                                - sum
-                                - max
-                                - min
-                                - cardinality
-                            field:
-                              type: string
-                        - type: object
-                          properties:
-                            name:
-                              type: string
-                            aggType:
-                              type: string
-                              enum:
-                                - count
-                            filter:
-                              type: string
-                  equation:
-                    type: string
-                  label:
-                    type: string
-        groupBy:
-          oneOf:
-            - type: string
-            - type: array
-              items:
-                type: string
-        filterQuery:
-          type: string
-        sourceId:
-          type: string
-        alertOnNoData:
-          type: boolean
-        alertOnGroupDisappear:
-          type: boolean
     create_infra_metric_threshold_rule_request:
       title: Create infra metric threshold rule request
       description: |
@@ -2975,6 +2103,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3032,168 +2162,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_log_threshold:
-      oneOf:
-        - title: Count
-          type: object
-          required:
-            - count
-            - timeSize
-            - timeUnit
-            - logView
-          properties:
-            criteria:
-              type: array
-              items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                    example: my.field
-                  comparator:
-                    type: string
-                    enum:
-                      - more than
-                      - more than or equals
-                      - less than
-                      - less than or equals
-                      - equals
-                      - does not equal
-                      - matches
-                      - does not match
-                      - matches phrase
-                      - does not match phrase
-                  value:
-                    oneOf:
-                      - type: number
-                        example: 42
-                      - type: string
-                        example: value
-            count:
-              type: object
-              properties:
-                comparator:
-                  type: string
-                  enum:
-                    - more than
-                    - more than or equals
-                    - less than
-                    - less than or equals
-                    - equals
-                    - does not equal
-                    - matches
-                    - does not match
-                    - matches phrase
-                    - does not match phrase
-                value:
-                  type: number
-                  example: 100
-            timeSize:
-              type: number
-              example: 6
-            timeUnit:
-              type: string
-              enum:
-                - s
-                - m
-                - h
-                - d
-            logView:
-              type: object
-              properties:
-                logViewId:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - log-view-reference
-                  example: log-view-reference
-            groupBy:
-              type: array
-              items:
-                type: string
-        - title: Ratio
-          type: object
-          required:
-            - count
-            - timeSize
-            - timeUnit
-            - logView
-          properties:
-            criteria:
-              type: array
-              items:
-                minItems: 2
-                maxItems: 2
-                type: array
-                items:
-                  type: object
-                  properties:
-                    field:
-                      type: string
-                      example: my.field
-                    comparator:
-                      type: string
-                      enum:
-                        - more than
-                        - more than or equals
-                        - less than
-                        - less than or equals
-                        - equals
-                        - does not equal
-                        - matches
-                        - does not match
-                        - matches phrase
-                        - does not match phrase
-                    value:
-                      oneOf:
-                        - type: number
-                          example: 42
-                        - type: string
-                          example: value
-            count:
-              type: object
-              properties:
-                comparator:
-                  type: string
-                  enum:
-                    - more than
-                    - more than or equals
-                    - less than
-                    - less than or equals
-                    - equals
-                    - does not equal
-                    - matches
-                    - does not match
-                    - matches phrase
-                    - does not match phrase
-                value:
-                  type: number
-                  example: 100
-            timeSize:
-              type: number
-              example: 6
-            timeUnit:
-              type: string
-              enum:
-                - s
-                - m
-                - h
-                - d
-            logView:
-              type: object
-              properties:
-                logViewId:
-                  type: string
-                type:
-                  type: string
-                  enum:
-                    - log-view-reference
-                  example: log-view-reference
-            groupBy:
-              type: array
-              items:
-                type: string
     create_log_threshold_rule_request:
       title: Create log threshold rule request
       description: A rule that detects when a log aggregation exceeds a threshold.
@@ -3207,6 +2175,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -3989,44 +2959,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_slo_burn_rate:
-      properties:
-        sloId:
-          description: The SLO identifier used by the rule
-          type: string
-          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-        burnRateThreshold:
-          description: The burn rate threshold used to trigger the alert
-          type: number
-          example: 14.4
-        maxBurnRateThreshold:
-          description: The maximum burn rate threshold value defined by the SLO error budget
-          type: number
-          example: 168
-        longWindow:
-          description: The duration of the long window used to compute the burn rate
-          type: object
-          properties:
-            value:
-              description: The duration value
-              type: number
-              example: 6
-            unit:
-              description: The duration unit
-              type: string
-              example: h
-        shortWindow:
-          description: The duration of the short window used to compute the burn rate
-          type: object
-          properties:
-            value:
-              description: The duration value
-              type: number
-              example: 30
-            unit:
-              description: The duration unit
-              type: string
-              example: m
     create_slo_burn_rate_rule_request:
       title: Create slo burn rate rule request
       description: |
@@ -4041,6 +2973,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -4075,6 +3009,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -4112,6 +3048,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -4135,14 +3073,6 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
-    params_property_synthetics_uptime_tls:
-      properties:
-        search:
-          type: string
-        certExpirationThreshold:
-          type: number
-        certAgeThreshold:
-          type: number
     create_synthetics_uptime_tls_rule_request:
       title: Create synthetics uptime TLS rule request
       type: object
@@ -4190,6 +3120,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -4227,6 +3159,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         consumer:
           $ref: '#/components/schemas/consumer'
         enabled:
@@ -4250,6 +3184,1239 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    create_uptime_monitor_status_rule_request:
+      title: Create uptime monitor status rule request
+      description: A rule that detects monitor errors and outages.
+      type: object
+      required:
+        - consumer
+        - name
+        - params
+        - rule_type_id
+        - schedule
+      properties:
+        actions:
+          $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
+        consumer:
+          $ref: '#/components/schemas/consumer'
+        enabled:
+          $ref: '#/components/schemas/enabled_rule'
+        name:
+          $ref: '#/components/schemas/name_rule'
+        notify_when:
+          $ref: '#/components/schemas/notify_when'
+        params:
+          $ref: '#/components/schemas/params_property_synthetics_monitor_status'
+        rule_type_id:
+          type: string
+          description: The ID of the rule type that you want to call when the rule is scheduled to run.
+          enum:
+            - xpack.uptime.alerts.monitorStatus
+        schedule:
+          $ref: '#/components/schemas/schedule'
+        tags:
+          $ref: '#/components/schemas/tags'
+        throttle:
+          $ref: '#/components/schemas/throttle'
+    filter:
+      type: object
+      description: A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.
+      properties:
+        meta:
+          type: object
+          properties:
+            alias:
+              type:
+                - string
+                - 'null'
+            controlledBy:
+              type: string
+            disabled:
+              type: boolean
+            field:
+              type: string
+            group:
+              type: string
+            index:
+              type: string
+            isMultiIndex:
+              type: boolean
+            key:
+              type: string
+            negate:
+              type: boolean
+            params:
+              type: object
+            type:
+              type: string
+            value:
+              type: string
+        query:
+          type: object
+        $state:
+          type: object
+    notify_when_action:
+      type: string
+      description: |
+        Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+      examples:
+        - onActiveAlert
+    throttle_action:
+      type:
+        - string
+        - 'null'
+      description: |
+        The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      default: null
+      examples:
+        - 10m
+    actions:
+      type:
+        - array
+        - 'null'
+      default: []
+      items:
+        type: object
+        required:
+          - group
+          - id
+          - params
+        description: |
+          An action that runs under defined conditions.
+        properties:
+          alerts_filter:
+            type: object
+            description: |
+              Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.
+            properties:
+              query:
+                type: object
+                description: Defines a query filter that determines whether the action runs.
+                properties:
+                  kql:
+                    type: string
+                    description: A filter written in Kibana Query Language (KQL).
+                  filters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/filter'
+              timeframe:
+                type: object
+                description: Defines a period that limits whether the action runs.
+                properties:
+                  days:
+                    type: array
+                    description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
+                    items:
+                      type: integer
+                    examples:
+                      - - 1
+                        - 2
+                        - 3
+                        - 4
+                        - 5
+                  hours:
+                    type: object
+                    description: |
+                      Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.
+                    properties:
+                      end:
+                        type: string
+                        description: The end of the time frame in 24-hour notation (`hh:mm`).
+                        examples:
+                          - '17:00'
+                      start:
+                        type: string
+                        description: The start of the time frame in 24-hour notation (`hh:mm`).
+                        examples:
+                          - '08:00'
+                  timezone:
+                    type: string
+                    description: |
+                      The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
+                    examples:
+                      - Europe/Madrid
+          connector_type_id:
+            type: string
+            description: The type of connector. This property appears in responses but cannot be set in requests.
+            examples:
+              - .server-log
+            readOnly: true
+          frequency:
+            type: object
+            description: |
+              The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+            required:
+              - notify_when
+              - summary
+            properties:
+              notify_when:
+                $ref: '#/components/schemas/notify_when_action'
+              summary:
+                type: boolean
+                description: Indicates whether the action is a summary.
+              throttle:
+                $ref: '#/components/schemas/throttle_action'
+          group:
+            type: string
+            description: |
+              The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
+            examples:
+              - default
+          id:
+            type: string
+            description: The identifier for the connector saved object.
+            examples:
+              - 9dca3e00-74f5-11ed-9801-35303b735aef
+          params:
+            type: object
+            description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
+            additionalProperties: true
+          uuid:
+            type: string
+            description: A universally unique identifier (UUID) for the action.
+            examples:
+              - 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+    alert_delay:
+      type: object
+      description: Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.
+      required:
+        - active
+      properties:
+        active:
+          type: number
+          description: The number of consecutive runs that must meet the rule conditions.
+          example: 3
+    consumer:
+      type: string
+      description: |
+        The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    enabled_rule:
+      type: boolean
+      description: Indicates whether you want to run the rule on an interval basis after it is created.
+    name_rule:
+      type: string
+      description: |
+        The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.
+    notify_when:
+      type: string
+      description: |
+        Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      enum:
+        - onActionGroupChange
+        - onActiveAlert
+        - onThrottleInterval
+      deprecated: true
+      examples:
+        - onActiveAlert
+    schedule:
+      type: object
+      description: The check interval, which specifies how frequently the rule conditions are checked. The interval is specified in seconds, minutes, hours, or days.
+      properties:
+        interval:
+          type: string
+          examples:
+            - 1m
+    tags:
+      type: array
+      description: The tags for the rule.
+      items:
+        type: string
+      default: []
+    throttle:
+      type:
+        - string
+        - 'null'
+      description: |
+        Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
+      default: null
+      deprecated: true
+      examples:
+        - 10m
+    params_property_apm_anomaly:
+      required:
+        - windowSize
+        - windowUnit
+        - environment
+        - anomalySeverityType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        windowSize:
+          type: number
+          example: 6
+          description: The window size
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        anomalySeverityType:
+          type: string
+          description: The anomaly threshold value
+          enum:
+            - critical
+            - major
+            - minor
+            - warning
+    params_property_apm_error_count:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error count threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.name
+              - error.grouping_key
+        errorGroupingKey:
+          type: string
+    params_property_apm_transaction_duration:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+        - aggregationType
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: ç
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+        threshold:
+          type: number
+          description: The latency threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+        aggregationType:
+          type: string
+          enum:
+            - avg
+            - 95th
+            - 99th
+    params_property_apm_transaction_error_rate:
+      required:
+        - windowSize
+        - windowUnit
+        - threshold
+        - environment
+      properties:
+        serviceName:
+          type: string
+          description: The service name from APM
+        transactionType:
+          type: string
+          description: The transaction type from APM
+        transactionName:
+          type: string
+          description: The transaction name from APM
+        windowSize:
+          type: number
+          description: The window size
+          example: 6
+        windowUnit:
+          type: string
+          description: The window size unit
+          enum:
+            - m
+            - h
+            - d
+        environment:
+          type: string
+          description: The environment from APM
+        threshold:
+          type: number
+          description: The error rate threshold value
+        groupBy:
+          type: array
+          default:
+            - service.name
+            - service.environment
+            - transaction.type
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - service.name
+              - service.environment
+              - transaction.type
+              - transaction.name
+    aggfield:
+      description: |
+        The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
+      type: string
+    aggtype:
+      description: The type of aggregation to perform.
+      type: string
+      enum:
+        - avg
+        - count
+        - max
+        - min
+        - sum
+      default: count
+    excludehitsfrompreviousrun:
+      description: |
+        Indicates whether to exclude matches from previous runs. If `true`, you can avoid alert duplication by excluding documents that have already been detected by the previous rule run. This option is not available when a grouping field is specified.
+      type: boolean
+    groupby:
+      description: |
+        Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.
+      type: string
+      enum:
+        - all
+        - top
+      default: all
+    termsize:
+      description: |
+        This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+      type: integer
+    timefield:
+      description: The field that is used to calculate the time window.
+      type: string
+    timewindowsize:
+      description: |
+        The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+      type: integer
+      examples:
+        - 5
+    timewindowunit:
+      description: |
+        The type of units for the time window: seconds, minutes, hours, or days.
+      type: string
+      enum:
+        - s
+        - m
+        - h
+        - d
+      examples:
+        - m
+    size:
+      description: |
+        The number of documents to pass to the configured actions when the threshold condition is met.
+      type: integer
+    termfield:
+      description: |
+        The names of up to four fields that are used for grouping the aggregation. This property is required when `groupBy` is `top`.
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+          maxItems: 4
+    threshold:
+      description: |
+        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+      type: array
+      items:
+        type: integer
+        examples:
+          - 4000
+    thresholdcomparator:
+      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+      type: string
+      enum:
+        - '>'
+        - '>='
+        - <
+        - <=
+        - between
+        - notBetween
+      examples:
+        - '>'
+    params_es_query_rule:
+      oneOf:
+        - type: object
+          x-technical-preview: true
+          description: |
+            The parameters for an Elasticsearch query rule that uses ES|QL to define the query. This functionality is in technical pre view and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+          required:
+            - esqlQuery
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esqlQuery:
+              type: object
+              required:
+                - esql
+              properties:
+                esql:
+                  description: The query definition, which uses Elasticsearch Query Language.
+                  type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
+              type: string
+              enum:
+                - esqlQuery
+              examples:
+                - esqlQuery
+            size:
+              type: integer
+              description: |
+                When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
+              examples:
+                - 0
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              type: array
+              items:
+                type: integer
+                minimum: 0
+                maximum: 0
+              description: |
+                The threshold value that is used with the `thresholdComparator`. When `searchType` is `esqlQuery`, this property is required and must be set to zero.
+            thresholdComparator:
+              type: string
+              description: |
+                The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to ">". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
+              enum:
+                - '>'
+              examples:
+                - '>'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
+          required:
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchConfiguration:
+              description: The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.
+              type: object
+              properties:
+                filter:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/filter'
+                index:
+                  description: The indices to query.
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                query:
+                  type: object
+                  properties:
+                    language:
+                      type: string
+                      examples:
+                        - kuery
+                    query:
+                      type: string
+            searchType:
+              description: The type of query, in this case a text-based query that uses KQL or Lucene.
+              type: string
+              enum:
+                - searchSource
+              examples:
+                - searchSource
+            size:
+              $ref: '#/components/schemas/size'
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+        - type: object
+          description: The parameters for an Elasticsearch query rule that uses Elasticsearch Query DSL to define the query.
+          required:
+            - esQuery
+            - index
+            - threshold
+            - thresholdComparator
+            - timeField
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esQuery:
+              description: The query definition, which uses Elasticsearch Query DSL.
+              type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            index:
+              description: The indices to query.
+              oneOf:
+                - type: array
+                  items:
+                    type: string
+                - type: string
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query DSL.
+              type: string
+              enum:
+                - esQuery
+              default: esQuery
+              examples:
+                - esQuery
+            size:
+              $ref: '#/components/schemas/size'
+            termField:
+              $ref: '#/components/schemas/termfield'
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              $ref: '#/components/schemas/threshold'
+            thresholdComparator:
+              $ref: '#/components/schemas/thresholdcomparator'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
+    params_index_threshold_rule:
+      type: object
+      description: The parameters for an index threshold rule.
+      required:
+        - index
+        - threshold
+        - thresholdComparator
+        - timeField
+        - timeWindowSize
+        - timeWindowUnit
+      properties:
+        aggField:
+          $ref: '#/components/schemas/aggfield'
+        aggType:
+          $ref: '#/components/schemas/aggtype'
+        filterKuery:
+          description: A KQL expression thats limits the scope of alerts.
+          type: string
+        groupBy:
+          $ref: '#/components/schemas/groupby'
+        index:
+          description: The indices to query.
+          type: array
+          items:
+            type: string
+        termField:
+          $ref: '#/components/schemas/termfield'
+        termSize:
+          $ref: '#/components/schemas/termsize'
+        threshold:
+          $ref: '#/components/schemas/threshold'
+        thresholdComparator:
+          $ref: '#/components/schemas/thresholdcomparator'
+        timeField:
+          $ref: '#/components/schemas/timefield'
+        timeWindowSize:
+          $ref: '#/components/schemas/timewindowsize'
+        timeWindowUnit:
+          $ref: '#/components/schemas/timewindowunit'
+    params_property_infra_inventory:
+      properties:
+        criteria:
+          type: array
+          items:
+            type: object
+            properties:
+              metric:
+                type: string
+                enum:
+                  - count
+                  - cpu
+                  - diskLatency
+                  - load
+                  - memory
+                  - memoryTotal
+                  - tx
+                  - rx
+                  - logRate
+                  - diskIOReadBytes
+                  - diskIOWriteBytes
+                  - s3TotalRequests
+                  - s3NumberOfObjects
+                  - s3BucketSize
+                  - s3DownloadBytes
+                  - s3UploadBytes
+                  - rdsConnections
+                  - rdsQueriesExecuted
+                  - rdsActiveTransactions
+                  - rdsLatency
+                  - sqsMessagesVisible
+                  - sqsMessagesDelayed
+                  - sqsMessagesSent
+                  - sqsMessagesEmpty
+                  - sqsOldestMessage
+                  - custom
+              timeSize:
+                type: number
+              timeUnit:
+                type: string
+                enum:
+                  - s
+                  - m
+                  - h
+                  - d
+              sourceId:
+                type: string
+              threshold:
+                type: array
+                items:
+                  type: number
+              comparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+              customMetric:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - custom
+                  field:
+                    type: string
+                  aggregation:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - rate
+                  id:
+                    type: string
+                  label:
+                    type: string
+              warningThreshold:
+                type: array
+                items:
+                  type: number
+              warningComparator:
+                type: string
+                enum:
+                  - <
+                  - <=
+                  - '>'
+                  - '>='
+                  - between
+                  - outside
+        filterQuery:
+          type: string
+        filterQueryText:
+          type: string
+        nodeType:
+          type: string
+          enum:
+            - host
+            - pod
+            - container
+            - awsEC2
+            - awsS3
+            - awsSQS
+            - awsRDS
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+    params_property_infra_metric_threshold:
+      properties:
+        criteria:
+          type: array
+          items:
+            oneOf:
+              - title: non count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  metric:
+                    type: string
+                  aggType:
+                    type: string
+                    enum:
+                      - avg
+                      - max
+                      - min
+                      - cardinality
+                      - rate
+                      - count
+                      - sum
+                      - p95
+                      - p99
+                      - custom
+              - title: count criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - count
+              - title: custom criterion
+                type: object
+                properties:
+                  threshold:
+                    type: array
+                    items:
+                      type: number
+                  comparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  timeUnit:
+                    type: string
+                  timeSize:
+                    type: number
+                  warningThreshold:
+                    type: array
+                    items:
+                      type: number
+                  warningComparator:
+                    type: string
+                    enum:
+                      - <
+                      - <=
+                      - '>'
+                      - '>='
+                      - between
+                      - outside
+                  aggType:
+                    type: string
+                    enum:
+                      - custom
+                  customMetric:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - avg
+                                - sum
+                                - max
+                                - min
+                                - cardinality
+                            field:
+                              type: string
+                        - type: object
+                          properties:
+                            name:
+                              type: string
+                            aggType:
+                              type: string
+                              enum:
+                                - count
+                            filter:
+                              type: string
+                  equation:
+                    type: string
+                  label:
+                    type: string
+        groupBy:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        filterQuery:
+          type: string
+        sourceId:
+          type: string
+        alertOnNoData:
+          type: boolean
+        alertOnGroupDisappear:
+          type: boolean
+    params_property_log_threshold:
+      oneOf:
+        - title: Count
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: my.field
+                  comparator:
+                    type: string
+                    enum:
+                      - more than
+                      - more than or equals
+                      - less than
+                      - less than or equals
+                      - equals
+                      - does not equal
+                      - matches
+                      - does not match
+                      - matches phrase
+                      - does not match phrase
+                  value:
+                    oneOf:
+                      - type: number
+                        example: 42
+                      - type: string
+                        example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+        - title: Ratio
+          type: object
+          required:
+            - count
+            - timeSize
+            - timeUnit
+            - logView
+          properties:
+            criteria:
+              type: array
+              items:
+                minItems: 2
+                maxItems: 2
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: my.field
+                    comparator:
+                      type: string
+                      enum:
+                        - more than
+                        - more than or equals
+                        - less than
+                        - less than or equals
+                        - equals
+                        - does not equal
+                        - matches
+                        - does not match
+                        - matches phrase
+                        - does not match phrase
+                    value:
+                      oneOf:
+                        - type: number
+                          example: 42
+                        - type: string
+                          example: value
+            count:
+              type: object
+              properties:
+                comparator:
+                  type: string
+                  enum:
+                    - more than
+                    - more than or equals
+                    - less than
+                    - less than or equals
+                    - equals
+                    - does not equal
+                    - matches
+                    - does not match
+                    - matches phrase
+                    - does not match phrase
+                value:
+                  type: number
+                  example: 100
+            timeSize:
+              type: number
+              example: 6
+            timeUnit:
+              type: string
+              enum:
+                - s
+                - m
+                - h
+                - d
+            logView:
+              type: object
+              properties:
+                logViewId:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - log-view-reference
+                  example: log-view-reference
+            groupBy:
+              type: array
+              items:
+                type: string
+    params_property_slo_burn_rate:
+      properties:
+        sloId:
+          description: The SLO identifier used by the rule
+          type: string
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+        burnRateThreshold:
+          description: The burn rate threshold used to trigger the alert
+          type: number
+          example: 14.4
+        maxBurnRateThreshold:
+          description: The maximum burn rate threshold value defined by the SLO error budget
+          type: number
+          example: 168
+        longWindow:
+          description: The duration of the long window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 6
+            unit:
+              description: The duration unit
+              type: string
+              example: h
+        shortWindow:
+          description: The duration of the short window used to compute the burn rate
+          type: object
+          properties:
+            value:
+              description: The duration value
+              type: number
+              example: 30
+            unit:
+              description: The duration unit
+              type: string
+              example: m
+    params_property_synthetics_uptime_tls:
+      properties:
+        search:
+          type: string
+        certExpirationThreshold:
+          type: number
+        certAgeThreshold:
+          type: number
     params_property_synthetics_monitor_status:
       required:
         - numTimes
@@ -4316,40 +4483,6 @@ components:
           type: number
         isAutoGenerated:
           type: boolean
-    create_uptime_monitor_status_rule_request:
-      title: Create uptime monitor status rule request
-      description: A rule that detects monitor errors and outages.
-      type: object
-      required:
-        - consumer
-        - name
-        - params
-        - rule_type_id
-        - schedule
-      properties:
-        actions:
-          $ref: '#/components/schemas/actions'
-        consumer:
-          $ref: '#/components/schemas/consumer'
-        enabled:
-          $ref: '#/components/schemas/enabled_rule'
-        name:
-          $ref: '#/components/schemas/name_rule'
-        notify_when:
-          $ref: '#/components/schemas/notify_when'
-        params:
-          $ref: '#/components/schemas/params_property_synthetics_monitor_status'
-        rule_type_id:
-          type: string
-          description: The ID of the rule type that you want to call when the rule is scheduled to run.
-          enum:
-            - xpack.uptime.alerts.monitorStatus
-        schedule:
-          $ref: '#/components/schemas/schedule'
-        tags:
-          $ref: '#/components/schemas/tags'
-        throttle:
-          $ref: '#/components/schemas/throttle'
     create_rule_request:
       title: Create rule request body properties
       description: The properties vary depending on the rule type.
@@ -4398,6 +4531,49 @@ components:
         - $ref: '#/components/schemas/create_uptime_monitor_status_rule_request'
       discriminator:
         propertyName: rule_type_id
+        mapping:
+          xpack.ml.anomaly_detection_alert: '#/components/schemas/create_anomaly_detection_alert_rule_request'
+          xpack.ml.anomaly_detection_jobs_health: '#/components/schemas/create_anomaly_detection_jobs_health_rule_request'
+          apm.anomaly: '#/components/schemas/create_apm_anomaly_rule_request'
+          apm.error_rate: '#/components/schemas/create_apm_error_count_rule_request'
+          apm.transaction_duration: '#/components/schemas/create_apm_transaction_duration_rule_request'
+          apm.transaction_error_rate: '#/components/schemas/create_apm_transaction_error_rate_rule_request'
+          .es-query: '#/components/schemas/create_es_query_rule_request'
+          .geo-containment: '#/components/schemas/create_geo_containment_rule_request'
+          .index-threshold: '#/components/schemas/create_index_threshold_rule_request'
+          metrics.alert.inventory.threshold: '#/components/schemas/create_infra_inventory_rule_request'
+          metrics.alert.anomaly: '#/components/schemas/create_infra_metric_anomaly_rule_request'
+          metrics.alert.threshold: '#/components/schemas/create_infra_metric_threshold_rule_request'
+          monitoring_alert_jvm_memory_usage: '#/components/schemas/create_monitoring_jvm_memory_usage_rule_request'
+          logs.alert.document.count: '#/components/schemas/create_log_threshold_rule_request'
+          monitoring_ccr_read_exceptions: '#/components/schemas/create_monitoring_ccr_exceptions_rule_request'
+          monitoring_alert_cluster_health: '#/components/schemas/create_monitoring_cluster_health_rule_request'
+          monitoring_alert_cpu_usage: '#/components/schemas/create_monitoring_cpu_usage_rule_request'
+          monitoring_alert_disk_usage: '#/components/schemas/create_monitoring_disk_usage_rule_request'
+          monitoring_alert_elasticsearch_version_mismatch: '#/components/schemas/create_monitoring_elasticsearch_version_mismatch_rule_request'
+          monitoring_alert_license_expiration: '#/components/schemas/create_monitoring_license_expiration_rule_request'
+          monitoring_alert_kibana_version_mismatch: '#/components/schemas/create_monitoring_kibana_version_mismatch_rule_request'
+          monitoring_alert_logstash_version_mismatch: '#/components/schemas/create_monitoring_logstash_version_mismatch_rule_request'
+          monitoring_alert_missing_monitoring_data: '#/components/schemas/create_monitoring_missing_data_rule_request'
+          monitoring_alert_nodes_changed: '#/components/schemas/create_monitoring_nodes_changed_rule_request'
+          monitoring_shard_size: '#/components/schemas/create_monitoring_shard_size_rule_request'
+          monitoring_alert_thread_pool_search_rejections: '#/components/schemas/create_monitoring_thread_pool_search_rejections_rule_request'
+          monitoring_alert_thread_pool_write_rejections: '#/components/schemas/create_monitoring_thread_pool_write_rejections_rule_request'
+          siem.eqlRule: '#/components/schemas/create_siem_eql_rule_request'
+          siem.indicatorRule: '#/components/schemas/create_siem_indicator_rule_request'
+          siem.mlRule: '#/components/schemas/create_siem_ml_rule_request'
+          siem.newTermsRule: '#/components/schemas/create_siem_new_terms_rule_request'
+          siem.notifications: '#/components/schemas/create_siem_notifications_rule_request'
+          siem.queryRule: '#/components/schemas/create_siem_query_rule_request'
+          siem.savedQueryRule: '#/components/schemas/create_siem_saved_query_rule_request'
+          siem.thresholdRule: '#/components/schemas/create_siem_threshold_rule_request'
+          slo.rules.burnRate: '#/components/schemas/create_slo_burn_rate_rule_request'
+          xpack.synthetics.alerts.monitorStatus: '#/components/schemas/create_synthetics_monitor_status_rule_request'
+          xpack.uptime.alerts.durationAnomaly: '#/components/schemas/create_synthetics_uptime_duration_anomaly_rule_request'
+          xpack.uptime.alerts.tls: '#/components/schemas/create_synthetics_uptime_tls_rule_request'
+          xpack.uptime.alerts.tlsCertificate: '#/components/schemas/create_synthetics_uptime_tls_certificate_rule_request'
+          transform_health: '#/components/schemas/create_transform_health_rule_request'
+          xpack.uptime.alerts.monitorStatus: '#/components/schemas/create_uptime_monitor_status_rule_request'
     rule_response_properties:
       title: Rule response properties
       type: object
@@ -4423,6 +4599,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         api_key_created_by_user:
           type: boolean
           description: Indicates whether the API key that is associated with the rule was created by the user.
@@ -4626,6 +4804,8 @@ components:
       properties:
         actions:
           $ref: '#/components/schemas/actions'
+        alert_delay:
+          $ref: '#/components/schemas/alert_delay'
         name:
           type: string
           description: The name of the rule.
@@ -4643,6 +4823,50 @@ components:
           $ref: '#/components/schemas/tags'
         throttle:
           $ref: '#/components/schemas/throttle'
+    fieldmap_properties:
+      title: Field map objects in the get rule types response
+      type: object
+      properties:
+        array:
+          type: boolean
+          description: Indicates whether the field is an array.
+        dynamic:
+          type: boolean
+          description: Indicates whether it is a dynamic field mapping.
+        format:
+          type: string
+          description: |
+            Indicates the format of the field. For example, if the `type` is `date_range`, the `format` can be `epoch_millis||strict_date_optional_time`.
+        ignore_above:
+          type: integer
+          description: Specifies the maximum length of a string field. Longer strings are not indexed or stored.
+        index:
+          type: boolean
+          description: Indicates whether field values are indexed.
+        path:
+          type: string
+          description: TBD
+        properties:
+          type: object
+          description: |
+            Details about the object properties. This property is applicable when `type` is `object`.
+          additionalProperties:
+            type: object
+            properties:
+              type:
+                type: string
+                description: The data type for each object property.
+        required:
+          type: boolean
+          description: Indicates whether the field is required.
+        scaling_factor:
+          type: integer
+          description: |
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
+        type:
+          type: string
+          description: Specifies the data type for the field.
+          example: scaled_float
     400_response:
       title: Bad request
       type: object
@@ -4871,6 +5095,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         consumer: alerts
         name: my rule
         params:
@@ -4892,6 +5118,25 @@ components:
           interval: 1m
         tags:
           - cpu
+    create_tracking_containment_rule_request:
+      summary: Create a tracking containment rule.
+      value:
+        consumer: alerts
+        name: my tracking rule
+        params:
+          index: kibana_sample_data_logs
+          dateField": '@timestamp'
+          geoField: geo.coordinates
+          entity: agent.keyword
+          boundaryType: entireIndex
+          boundaryIndexTitle: boundary*
+          boundaryGeoField: location
+          boundaryNameField: name
+          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+        rule_type_id: .geo-containment
+        schedule:
+          interval: 1h
     create_es_query_esql_rule_response:
       summary: The create rule API returns a JSON object that contains details about the rule.
       value:
@@ -5076,6 +5321,8 @@ components:
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
+        alert_delay:
+          active: 3
         api_key_created_by_user: false
         api_key_owner: elastic
         consumer: alerts
@@ -5115,6 +5362,57 @@ components:
         throttle: null
         updated_at: '2022-06-08T17:20:31.632Z'
         updated_by: elastic
+    create_tracking_containment_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: b6883f9d-5f70-4758-a66e-369d7c26012f
+        name: my tracking rule
+        tags: []
+        enabled: true
+        consumer: alerts
+        throttle: null
+        revision: 1
+        running: false
+        schedule:
+          interval: 1h
+        params:
+          index: kibana_sample_data_logs
+          dateField: '@timestamp'
+          geoField: geo.coordinates
+          entity: agent.keyword
+          boundaryType: entireIndex
+          boundaryIndexTitle: boundary*
+          boundaryGeoField: location
+          boundaryNameField: name
+          indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+          boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+        rule_type_id: .geo-containment
+        created_by: elastic
+        updated_by: elastic
+        created_at: '2024-02-14T19:52:55.920Z'
+        updated_at: '2024-02-15T03:24:32.574Z'
+        api_key_owner: elastic
+        notify_when: null
+        mute_all: false
+        muted_alert_ids: []
+        scheduled_task_id: b6883f9d-5f70-4758-a66e-369d7c26012f
+        execution_status:
+          status: ok
+          last_execution_date: '2024-02-15T03:25:38.125Z'
+          last_duration: 74
+        actions: []
+        last_run:
+          alerts_count:
+            active: 0
+            new: 0
+            recovered: 0
+            ignored: 0
+          outcome_msg: null
+          outcome_order: 0
+          outcome: succeeded
+          warning: null
+        next_run: '2024-02-15T03:26:38.033Z'
+        api_key_created_by_user: false
     get_rule_response:
       summary: The get rule API returns a JSON object that contains details about the rule.
       value:
@@ -5206,7 +5504,7 @@ components:
           aggField: sheet.version
           aggType: avg
           index:
-            - .test-index
+            - .updated-index
           groupBy: top
           termField: name.keyword
           termSize: 6
@@ -5220,7 +5518,6 @@ components:
         schedule:
           interval: 1m
         tags: []
-        throttle: null
     update_rule_response:
       summary: The update rule API returns a JSON object that contains details about the rule.
       value:
@@ -5233,7 +5530,7 @@ components:
         revision: 1
         running: false
         schedule:
-          interval: 10m
+          interval: 1m
         params:
           index:
             - .updated-index
@@ -5253,13 +5550,13 @@ components:
         updated_by: elastic
         rule_type_id: .index-threshold
         scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
-        created_at: '2023-01-31T23:03:33.127Z'
-        updated_at: '2023-01-31T23:55:27.314Z'
+        created_at: '2024-03-26T23:13:20.985Z'
+        updated_at: '2024-03-26T23:22:59.949Z'
         mute_all: false
         muted_alert_ids: []
         execution_status:
           status: ok
-          last_execution_date: '2023-01-31T23:48:42.499Z'
+          last_execution_date: '2024-03-26T23:22:51.390Z'
           last_duration: 52
         actions:
           - group: threshold met
@@ -5287,7 +5584,7 @@ components:
           outcome_msg: null
           warning: null
           outcome: succeeded
-        next_run: '2023-01-31T23:49:42.432Z'
+        next_run: '2024-03-26T23:23:51.316Z'
         api_key_created_by_user: false
     find_rules_response:
       summary: Retrieve information about a rule.

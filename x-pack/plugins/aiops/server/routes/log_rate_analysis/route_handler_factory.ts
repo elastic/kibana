@@ -15,17 +15,14 @@ import type {
 import type { Logger } from '@kbn/logging';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+import { AIOPS_TELEMETRY_ID, AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../common/api/log_rate_analysis/schema';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import { PLUGIN_ID } from '../../../common';
-
-import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
@@ -62,7 +59,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
     }
 
     const client = (await context.core).elasticsearch.client.asCurrentUser;
-    const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
+    const executionContext = createExecutionContext(coreStart, AIOPS_PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
@@ -92,7 +89,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
           }
 
           // Step 2: Significant categories and terms
-          const significantItemsObj = await analysis.significantItemsHandler(indexInfo);
+          const significantItemsObj = indexInfo.zeroDocsFallback
+            ? await analysis.topItemsHandler(indexInfo)
+            : await analysis.significantItemsHandler(indexInfo);
 
           if (!significantItemsObj) {
             return;

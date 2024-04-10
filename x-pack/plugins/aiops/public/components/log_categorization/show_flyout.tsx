@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
@@ -18,9 +18,10 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { AiopsPluginStartDeps } from '../../types';
-import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -31,9 +32,11 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
+  additionalFilter?: CategorizationAdditionalFilter,
   fieldValue?: string
 ): Promise<void> {
-  const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
+  const { analytics, http, theme, overlays, application, notifications, uiSettings, i18n } =
+    coreStart;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -43,6 +46,7 @@ export async function showCategorizeFlyout(
       };
 
       const appDependencies: AiopsAppDependencies = {
+        analytics,
         notifications,
         uiSettings,
         http,
@@ -74,6 +78,7 @@ export async function showCategorizeFlyout(
                     onClose={onFlyoutClose}
                     fieldValue={fieldValue}
                     embeddingOrigin={originatingApp}
+                    additionalFilter={additionalFilter}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>

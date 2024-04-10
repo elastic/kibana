@@ -8,38 +8,41 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Histogram } from './histogram';
 import React from 'react';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
-import { getLensAttributes } from './utils/get_lens_attributes';
 import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './utils/build_bucket_interval';
 import * as useTimeRange from './hooks/use_time_range';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
-import { Subject } from 'rxjs';
 import { getLensProps } from './hooks/use_lens_props';
 
 const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: false };
 jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);
 jest.spyOn(useTimeRange, 'useTimeRange');
 
-const getMockLensAttributes = () =>
-  getLensAttributes({
-    title: 'test',
-    filters: [],
-    query: {
-      language: 'kuery',
-      query: '',
-    },
-    dataView: dataViewWithTimefieldMock,
-    timeInterval: 'auto',
-    breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-    suggestion: undefined,
-  });
+const getMockLensAttributes = async () => {
+  const query = {
+    language: 'kuery',
+    query: '',
+  };
+  return (
+    await getLensVisMock({
+      filters: [],
+      query,
+      columns: [],
+      isPlainRecord: false,
+      dataView: dataViewWithTimefieldMock,
+      timeInterval: 'auto',
+      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+    })
+  ).visContext;
+};
 
-function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
+async function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -69,7 +72,7 @@ function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
       to: '2020-05-14T11:20:13.590',
     }),
     refetch$,
-    lensAttributesContext: getMockLensAttributes(),
+    visContext: (await getMockLensAttributes())!,
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
     withDefaultActions: undefined,
@@ -82,20 +85,20 @@ function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
 }
 
 describe('Histogram', () => {
-  it('renders correctly', () => {
-    const { component } = mountComponent();
+  it('renders correctly', async () => {
+    const { component } = await mountComponent();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBe(true);
   });
 
   it('should only update lens.EmbeddableComponent props when refetch$ is triggered', async () => {
-    const { component, props } = mountComponent();
+    const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     expect(component.find(embeddable).exists()).toBe(true);
     let lensProps = component.find(embeddable).props();
     const originalProps = getLensProps({
       searchSessionId: props.request.searchSessionId,
       getTimeRange: props.getTimeRange,
-      attributes: getMockLensAttributes().attributes,
+      attributes: (await getMockLensAttributes())!.attributes,
       onLoad: lensProps.onLoad,
     });
     expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
@@ -113,7 +116,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly', async () => {
-    const { component, props } = mountComponent();
+    const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
@@ -193,7 +196,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly when the request has a failure status', async () => {
-    const { component, props } = mountComponent();
+    const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
@@ -209,7 +212,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly when the response has shard failures', async () => {
-    const { component, props } = mountComponent();
+    const { component, props } = await mountComponent();
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
@@ -242,7 +245,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
-    const { component, props } = mountComponent(true, false);
+    const { component, props } = await mountComponent(true, false);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
@@ -250,8 +253,8 @@ describe('Histogram', () => {
       meta: { type: 'es_ql' },
       columns: [
         {
-          id: 'rows',
-          name: 'rows',
+          id: 'results',
+          name: 'results',
           meta: {
             type: 'number',
             dimensionName: 'Vertical axis',
@@ -260,10 +263,10 @@ describe('Histogram', () => {
       ],
       rows: [
         {
-          rows: 16,
+          results: 16,
         },
         {
-          rows: 4,
+          results: 4,
         },
       ],
     } as any;
@@ -278,7 +281,7 @@ describe('Histogram', () => {
   });
 
   it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
-    const { component, props } = mountComponent(true, true);
+    const { component, props } = await mountComponent(true, true);
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();

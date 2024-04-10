@@ -24,7 +24,7 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
-} from '@kbn/mock-idp-plugin/common';
+} from '@kbn/mock-idp-utils';
 
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -37,6 +37,7 @@ import {
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
+  SERVERLESS_ROLES_ROOT_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -58,6 +59,13 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
+  return serverlessProjectTypes.has(value);
+};
+
+export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -65,10 +73,14 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
+  /**  Serverless project type */
+  projectType: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
-  /** Path to the directory where the ES cluster will store data */
+  /** Full path where the ES cluster will store data */
   basePath: string;
+  /** Directory in basePath where the ES cluster will store data */
+  dataPath?: string;
   /** If this process exits, leave the ES cluster running in the background */
   skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
@@ -157,9 +169,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
   '--env',
   'stateless.object_store.type=fs',
-
-  '--env',
-  'stateless.object_store.bucket=stateless',
 ];
 
 // only allow certain ES args to be overwrote by options
@@ -508,11 +517,11 @@ export function resolveEsArgs(
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
-      MOCK_IDP_ATTRIBUTE_EMAIL
+      MOCK_IDP_ATTRIBUTE_NAME
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
-      MOCK_IDP_ATTRIBUTE_NAME
+      MOCK_IDP_ATTRIBUTE_EMAIL
     );
   }
 
@@ -536,18 +545,34 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, kibanaUrl, files, resources } = options;
-  const objectStorePath = resolve(basePath, 'stateless');
+  const {
+    basePath,
+    clean,
+    ssl,
+    kibanaUrl,
+    files,
+    resources,
+    projectType,
+    dataPath = 'stateless',
+  } = options;
+  const objectStorePath = resolve(basePath, dataPath);
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  if (clean && fs.existsSync(objectStorePath)) {
+  let exists = null;
+  try {
+    await Fsp.access(objectStorePath);
+    exists = true;
+  } catch (e) {
+    exists = false;
+  }
+  if (clean && exists) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !fs.existsSync(objectStorePath)) {
+  if (clean || !exists) {
     await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
@@ -562,7 +587,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   log.indent(-4);
 
-  const volumeCmds = ['--volume', `${basePath}:/objectstore:z`];
+  const volumeCmds = [
+    '--volume',
+    `${basePath}:/objectstore:z`,
+    '--env',
+    `stateless.object_store.bucket=${dataPath}`,
+  ];
 
   if (files) {
     const _files = typeof files === 'string' ? [files] : files;
@@ -582,7 +612,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  // Read roles for the specified projectType
+  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+
+  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
+
+  const serverlessResources = resourcesPaths.reduce<string[]>((acc, path) => {
     const fileName = basename(path);
     let localFilePath = path;
 
@@ -601,9 +636,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     throw new Error(
       `Unsupported ES serverless --resources value(s):\n  ${Object.values(
         resourceFileOverrides
-      ).join('  \n')}\n\nValid resources: ${SERVERLESS_RESOURCES_PATHS.map((filePath) =>
-        basename(filePath)
-      ).join(' | ')}`
+      ).join('  \n')}\n\nValid resources: ${resourcesPaths
+        .map((filePath) => basename(filePath))
+        .join(' | ')}`
     );
   }
 

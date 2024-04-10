@@ -63,6 +63,7 @@ const mockLayer = {
 
 const defaultProps = {
   depth: 0,
+  inspectorAdapters: {},
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},

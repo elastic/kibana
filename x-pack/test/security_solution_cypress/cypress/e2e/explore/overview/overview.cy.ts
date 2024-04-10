@@ -16,6 +16,8 @@ import { OVERVIEW_URL } from '../../../urls/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
+const mockTimeline = getTimeline();
+
 describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'overview' });
@@ -27,7 +29,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'overview');
+    cy.task('esArchiverUnload', { archiveName: 'overview' });
   });
 
   it('Host stats render with correct values', () => {
@@ -46,16 +48,17 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Favorite Timelines', () => {
+  // https://github.com/elastic/kibana/issues/173168
+  describe('Favorite Timelines', { tags: ['@skipInServerless'] }, () => {
     it('should appear on overview page', () => {
-      createTimeline(getTimeline())
+      createTimeline()
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
             visitWithTimeRange(OVERVIEW_URL);
             cy.get('[data-test-subj="overview-recent-timelines"]').should(
               'contain',
-              getTimeline().title
+              mockTimeline.title
             );
           });
         });
@@ -63,7 +66,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
+describe('Overview page with no data', { tags: '@skipInServerless' }, () => {
   it('Splash screen should be here', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);

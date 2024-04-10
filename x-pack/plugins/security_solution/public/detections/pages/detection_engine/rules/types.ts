@@ -20,9 +20,9 @@ import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
-import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
+import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
 import type {
   BuildingBlockType,
   RelatedIntegrationArray,
@@ -35,6 +35,8 @@ import type {
   AlertSuppressionMissingFieldsStrategy,
   InvestigationFields,
   RuleAction,
+  AlertSuppression,
+  ThresholdAlertSuppression,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -99,6 +101,7 @@ export interface AboutStepRule {
   threatIndicatorPath?: string;
   threat: Threats;
   note: string;
+  setup: SetupGuide;
 }
 
 export interface AboutStepRuleDetails {
@@ -158,6 +161,7 @@ export interface DefineStepRule {
   groupByRadioSelection: GroupByOptions;
   groupByDuration: Duration;
   suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
+  enableThresholdSuppression: boolean;
 }
 
 export interface QueryDefineStep {
@@ -174,7 +178,7 @@ export interface QueryDefineStep {
 
 export interface Duration {
   value: number;
-  unit: string;
+  unit: 's' | 'm' | 'h';
 }
 
 export interface ScheduleStepRule {
@@ -218,6 +222,7 @@ export interface DefineStepRuleJson {
   timestamp_field?: string;
   event_category_override?: string;
   tiebreaker_field?: string;
+  alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
 }
 
 export interface AboutStepRuleJson {
@@ -236,6 +241,7 @@ export interface AboutStepRuleJson {
   rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: Threats;
+  setup: string;
   threat_indicator_path?: string;
   timestamp_override?: TimestampOverride;
   timestamp_override_fallback_disabled?: boolean;

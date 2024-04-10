@@ -13,7 +13,7 @@ import {
   ACTION_CATEGORIZE_FIELD_VALUE,
   type CategorizeFieldContext,
 } from '@kbn/ml-ui-actions';
-import { AiopsPluginStartDeps } from '../../types';
+import type { AiopsPluginStartDeps } from '../../types';
 import { showCategorizeFlyout } from './show_flyout';
 import { showCategorizeValuePopover } from './show_popover';
 
@@ -30,7 +30,15 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
     },
     execute: async (context: CategorizeFieldContext) => {
       const { field, dataView, fieldValue, originatingApp } = context;
-      showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, fieldValue);
+      showCategorizeFlyout(
+        field,
+        dataView,
+        coreStart,
+        plugins,
+        originatingApp,
+        undefined,
+        fieldValue
+      );
     },
   });
 
@@ -57,5 +65,7 @@ export const categorizeFieldValueAction = (coreStart: CoreStart, plugins: AiopsP
         setPopoverContents,
         onClose
       );
+      // const { field, dataView, originatingApp, additionalFilter } = context;
+      // showCategorizeFlyout(field, dataView, coreStart, plugins, originatingApp, additionalFilter);
     },
   });

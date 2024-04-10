@@ -45,6 +45,20 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+        optional: false,
+      },
+    },
+    isEnabledRAGAlerts: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is RAG on Alerts enabled',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -63,6 +77,33 @@ export const assistantQuickPrompt: TelemetryEvent = {
       _meta: {
         description: 'Title of the quick prompt',
         optional: false,
+      },
+    },
+  },
+};
+
+export const assistantSettingToggledEvent: TelemetryEvent = {
+  eventType: TelemetryEventTypes.AssistantSettingToggled,
+  schema: {
+    isEnabledKnowledgeBase: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is knowledge base enabled',
+        optional: true,
+      },
+    },
+    isEnabledRAGAlerts: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is RAG on Alerts enabled',
+        optional: true,
+      },
+    },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
+        optional: true,
       },
     },
   },

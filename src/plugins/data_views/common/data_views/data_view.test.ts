@@ -136,10 +136,6 @@ describe('IndexPattern', () => {
       expect(indexPattern.getComputedFields).toBeInstanceOf(Function);
     });
 
-    test('should request all stored fields', () => {
-      expect(indexPattern.getComputedFields().storedFields).toContain('*');
-    });
-
     test('should request date fields as docvalue_fields', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
       const docValueFieldNames = docvalueFields.map((field) => field.field);
@@ -577,9 +573,13 @@ describe('IndexPattern', () => {
             },
             test2: {
               customLabel: 'test12',
+              customDescription: 'test12 description',
             },
             test3: {
               count: 30,
+            },
+            test4: {
+              customDescription: 'test14 description',
             },
           },
         }).toMinimalSpec().fieldAttrs
@@ -589,10 +589,116 @@ describe('IndexPattern', () => {
             "customLabel": "test11",
           },
           "test2": Object {
+            "customDescription": "test12 description",
+            "customLabel": "test12",
+          },
+          "test4": Object {
+            "customDescription": "test14 description",
+          },
+        }
+      `);
+    });
+
+    test('can customize what attributes to keep', () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test4: {
+          name: 'test4',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+
+      const spec = {
+        id: 'test',
+        title: 'test*',
+        fields: fieldsMap,
+        fieldAttrs: {
+          test1: {
+            count: 11,
+            customLabel: 'test11',
+          },
+          test2: {
+            customLabel: 'test12',
+            customDescription: 'test12 description',
+          },
+          test3: {
+            count: 30,
+          },
+          test4: {
+            customDescription: 'test14 description',
+          },
+        },
+      };
+
+      expect(create('test', spec).toMinimalSpec({ keepFieldAttrs: ['customLabel'] }).fieldAttrs)
+        .toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
             "customLabel": "test12",
           },
         }
       `);
+
+      expect(
+        create('test', spec).toMinimalSpec({ keepFieldAttrs: ['customDescription'] }).fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test2": Object {
+            "customDescription": "test12 description",
+          },
+          "test4": Object {
+            "customDescription": "test14 description",
+          },
+        }
+      `);
+
+      expect(
+        create('test', spec).toMinimalSpec({ keepFieldAttrs: ['customLabel', 'customDescription'] })
+          .fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
+            "customDescription": "test12 description",
+            "customLabel": "test12",
+          },
+          "test4": Object {
+            "customDescription": "test14 description",
+          },
+        }
+      `);
+
+      expect(
+        create('test', spec).toMinimalSpec({ keepFieldAttrs: [] }).fieldAttrs
+      ).toMatchInlineSnapshot(`undefined`);
     });
   });
 });

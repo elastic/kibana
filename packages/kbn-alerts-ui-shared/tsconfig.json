@@ -20,9 +20,16 @@
     "@kbn/rule-data-utils",
     "@kbn/core",
     "@kbn/i18n-react",
-    "@kbn/alerting-plugin",
     "@kbn/rrule",
-    "@kbn/actions-plugin",
-    "@kbn/core-application-common"
+    "@kbn/core-application-common",
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/alerting-types",
+    "@kbn/actions-types",
+    "@kbn/data-views-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/ui-theme",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
   ]
 }

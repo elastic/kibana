@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
@@ -21,14 +21,14 @@ import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import {
   APP_ID,
   CASES_PATH,
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   SecurityPageName,
 } from '../../../common/constants';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../../timelines/store';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
@@ -54,14 +54,14 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases } = useKibana().services;
+  const { cases, telemetry } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
-  const { openFlyout } = useExpandableFlyoutContext();
+  const { openFlyout } = useExpandableFlyoutApi();
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   const getDetectionsRuleDetailsHref = useCallback(
@@ -82,6 +82,10 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
         });
+        telemetry.reportDetailsFlyoutOpened({
+          tableId: TimelineId.casePage,
+          panel: 'right',
+        });
       }
       // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
       // support of old flyout in cases page
@@ -98,7 +102,7 @@ const CaseContainerComponent: React.FC = () => {
         );
       }
     },
-    [dispatch, isSecurityFlyoutEnabled, openFlyout]
+    [dispatch, isSecurityFlyoutEnabled, openFlyout, telemetry]
   );
 
   const endpointDetailsHref = (endpointId: string) =>
@@ -108,19 +112,6 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        dataViewId: null,
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
 
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
   const { activeStep, endTourStep, isTourShown } = useTourContext();
@@ -133,6 +124,20 @@ const CaseContainerComponent: React.FC = () => {
   useEffect(() => {
     if (isTourActive) endTourStep(SecurityStepId.alertsCases);
   }, [endTourStep, isTourActive]);
+
+  useEffect(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -151,7 +156,6 @@ const CaseContainerComponent: React.FC = () => {
             alerts: { isExperimental: false },
           },
           refreshRef,
-          onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
             onClick: (endpointId: string, e) => {

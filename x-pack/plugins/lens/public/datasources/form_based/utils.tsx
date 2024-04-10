@@ -338,20 +338,24 @@ export function getUnsupportedOperationsWarningMessage(
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries
         .filter(([_, column]) => {
-          if (!hasField(column)) {
+          const operation = operationDefinitionMap[column.operationType] as Extract<
+            GenericOperationDefinition,
+            { input: 'field' }
+          >;
+
+          // this check for getPossibleOperationForField is needed as long as
+          // https://github.com/elastic/kibana/issues/168561 is unresolved
+          if (!operation.getPossibleOperationForField || !hasField(column)) {
             return false;
           }
+
           const field = dataView.getFieldByName(column.sourceField);
           if (!field) {
             return false;
           }
           return (
-            !(
-              operationDefinitionMap[column.operationType] as Extract<
-                GenericOperationDefinition,
-                { input: 'field' }
-              >
-            ).getPossibleOperationForField(field) && field?.timeSeriesMetric === 'counter'
+            !operation.getPossibleOperationForField?.(field) &&
+            field?.timeSeriesMetric === 'counter'
           );
         })
         .map(

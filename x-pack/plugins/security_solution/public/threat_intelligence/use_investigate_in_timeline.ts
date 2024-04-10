@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { timelineDefaults } from '../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../timelines/store/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
 import { TimelineId } from '../../common/types/timeline';
 import { TimelineType } from '../../common/api/timeline';
-import { useDeepEqualSelector } from '../common/hooks/use_selector';
-import { useKibana } from '../common/lib/kibana';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
-import { timelineActions, timelineSelectors } from '../timelines/store/timeline';
-import { useCreateTimeline } from '../timelines/components/timeline/properties/use_create_timeline';
+import { timelineActions } from '../timelines/store';
+import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
-import { dispatchUpdateTimeline } from '../timelines/components/open_timeline/helpers';
+import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
 
 interface UseInvestigateInTimelineActionProps {
   /**
@@ -48,21 +46,8 @@ export const useInvestigateInTimeline = ({
   from,
   to,
 }: UseInvestigateInTimelineActionProps) => {
-  const {
-    data: { query },
-  } = useKibana().services;
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
-
-  const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, TimelineId.active ?? '')
-  );
-  const filterManager = useMemo(
-    () => activeFilterManager ?? filterManagerBackup,
-    [activeFilterManager, filterManagerBackup]
-  );
 
   const updateTimelineIsLoading = useCallback(
     (payload) => dispatch(timelineActions.updateIsLoading(payload)),
@@ -74,31 +59,32 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
+  const updateTimeline = useUpdateTimeline();
+
   const createTimeline = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      clearActiveTimeline();
+    async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      await clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
-      dispatchUpdateTimeline(dispatch)({
+      updateTimeline({
         duplicate: true,
         from: fromTimeline,
         id: TimelineId.active,
         notes: [],
         timeline: {
           ...timeline,
-          filterManager,
           indexNames: timeline.indexNames ?? [],
           show: true,
         },
         to: toTimeline,
         ruleNote,
-      })();
+      });
     },
-    [dispatch, filterManager, updateTimelineIsLoading, clearActiveTimeline]
+    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
   );
 
   const investigateInTimelineClick = useCallback(async () => {
     startTransaction({ name: `${APP_UI_ID} threat indicator investigateInTimeline` });
-    await createTimeline({
+    createTimeline({
       from,
       notes: null,
       timeline: {

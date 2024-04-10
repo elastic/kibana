@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiCode,
   EuiIcon,
   EuiIconTip,
   EuiText,
-  EuiTableSortingType,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
@@ -51,7 +51,9 @@ const NOT_AVAILABLE = '--';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK = 'doc_count';
 const DEFAULT_SORT_DIRECTION = 'asc';
+const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
 
 const TRUNCATE_TEXT_LINES = 3;
 
@@ -66,6 +68,7 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -77,6 +80,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   timeRangeMs,
   barColorOverride,
   barHighlightColorOverride,
+  zeroDocsFallback = false,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -93,8 +97,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof SignificantItem>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
+  const [sortField, setSortField] = useState<keyof SignificantItem>(
+    zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
+  );
 
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -128,6 +136,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
                   key,
                   count,
                   examples: [],
+                  regex: '',
                 },
               ]);
         return (
@@ -236,7 +245,10 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       sortable: true,
       valign: 'middle',
     },
-    {
+  ];
+
+  if (!zeroDocsFallback) {
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -260,8 +272,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
       valign: 'middle',
-    },
-    {
+    });
+
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -291,21 +304,22 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       },
       sortable: true,
       valign: 'middle',
-    },
-    {
-      'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
-        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
-        copyToClipBoardAction,
-      ],
-      width: ACTIONS_COLUMN_WIDTH,
-      valign: 'middle',
-    },
-  ];
+    });
+  }
+
+  columns.push({
+    'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
+    name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+      ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+      copyToClipBoardAction,
+    ],
+    width: ACTIONS_COLUMN_WIDTH,
+    valign: 'middle',
+  });
 
   if (isExpandedRow === true) {
     columns.unshift({

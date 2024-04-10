@@ -11,11 +11,7 @@ import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  KibanaServices,
-  useKibana,
-  useGetUserCasesPermissions,
-} from '../../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
 import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -26,6 +22,7 @@ import {
   DEFAULT_PREVIEW_INDEX,
   ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -64,7 +61,7 @@ jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
   () => {
     return {
-      useHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',
@@ -72,6 +69,18 @@ jest.mock(
     };
   }
 );
+
+jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+  return {
+    useBulkGetUserProfiles: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
+
+jest.mock('../../../../common/components/user_profiles/use_suggest_users', () => {
+  return {
+    useSuggestUsers: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -107,7 +116,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../explore/containers/risk_score', () => {
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,
@@ -116,6 +125,7 @@ jest.mock('../../../../explore/containers/risk_score', () => {
     }),
   };
 });
+jest.mock('../../../../common/hooks/use_upselling');
 
 const defaultProps = {
   scopeId: TimelineId.test,
@@ -156,6 +166,9 @@ describe('event details panel component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+          cases: {
+            helpers: { canUseCases: jest.fn().mockReturnValue(allCasesPermissions()) },
+          },
         },
         timelines: {
           getHoverActions: jest.fn().mockReturnValue({
@@ -168,11 +181,13 @@ describe('event details panel component', () => {
         },
       },
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   test('it renders the take action dropdown in the timeline version', () => {
     const wrapper = render(
       <TestProviders>

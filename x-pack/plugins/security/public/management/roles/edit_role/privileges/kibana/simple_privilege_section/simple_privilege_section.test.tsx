@@ -13,7 +13,7 @@ import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
@@ -197,7 +197,7 @@ describe('<SimplePrivilegeForm>', () => {
 
     const featurePrivilegeToggles = wrapper.find(EuiButtonGroup);
     expect(featurePrivilegeToggles).toHaveLength(1);
-    expect(featurePrivilegeToggles.find('input')).toHaveLength(3);
+    expect(featurePrivilegeToggles.find('button')).toHaveLength(3);
 
     (featurePrivilegeToggles.props() as EuiButtonGroupProps).onChange('feature1_all', null);
 

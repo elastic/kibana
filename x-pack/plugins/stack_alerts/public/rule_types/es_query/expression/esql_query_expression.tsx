@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { get } from 'lodash';
+import { debounce, get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldNumber,
@@ -15,19 +15,22 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
+  FieldOption,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { SourceFields } from '../../components/source_fields_select';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -38,8 +41,8 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
+  const { expressions, http, fieldFormats } = useTriggerUiActionServices();
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -57,10 +60,13 @@ export const EsqlQueryExpression: React.FC<
     groupBy: DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
+    sourceFields: sourceFields ?? DEFAULT_VALUES.SOURCE_FIELDS,
   });
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectTimestamp, setDetectTimestamp] = useState<boolean>(false);
+  const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -79,6 +85,7 @@ export const EsqlQueryExpression: React.FC<
     if (esqlQuery && 'esql' in esqlQuery) {
       if (esqlQuery.esql) {
         refreshTimeFields(esqlQuery);
+        refreshEsFields(esqlQuery, false);
       }
     }
     if (timeField) {
@@ -103,13 +110,25 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table = await fetchFieldsFromESQL(esqlQuery, expressions, {
-      from: new Date(now - timeWindow).toISOString(),
-      to: new Date(now).toISOString(),
-    });
+    setIsLoading(true);
+    const table = await fetchFieldsFromESQL(
+      esqlQuery,
+      expressions,
+      {
+        from: new Date(now - timeWindow).toISOString(),
+        to: new Date(now).toISOString(),
+      },
+      undefined,
+      // create a data view with the timefield to pass into the query
+      new DataView({
+        spec: { timeFieldName: timeField },
+        fieldFormats,
+      })
+    );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
       const hits = toEsQueryHits(esqlTable);
+      setIsLoading(false);
       return {
         testResults: parseAggregationResults({
           isCountAgg: true,
@@ -126,18 +145,28 @@ export const EsqlQueryExpression: React.FC<
         rawResults: {
           cols: esqlTable.columns.map((col) => ({
             id: col.name,
+            actions: false,
           })),
           rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
         },
       };
     }
     return emptyResult;
-  }, [timeWindowSize, timeWindowUnit, currentRuleParams, esqlQuery, expressions]);
+  }, [
+    timeWindowSize,
+    timeWindowUnit,
+    currentRuleParams,
+    esqlQuery,
+    expressions,
+    fieldFormats,
+    timeField,
+  ]);
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
     const indexPattern: string = getIndexPatternFromESQLQuery(get(q, 'esql'));
     const currentEsFields = await getFields(http, [indexPattern]);
+
     const timeFields = getTimeFieldOptions(currentEsFields);
     setTimeFieldOptions([firstFieldOption, ...timeFields]);
 
@@ -149,48 +178,79 @@ export const EsqlQueryExpression: React.FC<
     setDetectTimestamp(hasTimestamp);
   };
 
+  const refreshEsFields = async (q: AggregateQuery, resetSourceFields: boolean = true) => {
+    let fields: FieldOption[] = [];
+    try {
+      const table = await fetchFieldsFromESQL({ esql: `${get(q, 'esql')} | limit 0` }, expressions);
+      if (table) {
+        fields = table.columns.map((c) => ({
+          name: c.id,
+          type: c.meta.type,
+          normalizedType: c.meta.type,
+          searchable: true,
+          aggregatable: true,
+        }));
+      }
+    } catch (error) {
+      /** ignore error */
+    }
+
+    if (resetSourceFields) {
+      setParam('sourceFields', undefined);
+    }
+    setEsFields(fields);
+  };
+
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        id="queryEditor"
+        data-test-subj="queryEsqlEditor"
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
             defaultMessage="Define your query using ES|QL"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
+        }
+      >
         <TextBasedLangEditor
           query={query}
-          onTextLangQueryChange={(q: AggregateQuery) => {
+          onTextLangQueryChange={debounce((q: AggregateQuery) => {
             setQuery(q);
             setParam('esqlQuery', q);
             refreshTimeFields(q);
-          }}
+            refreshEsFields(q);
+          }, 1000)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
-          onTextLangQuerySubmit={() => {}}
+          onTextLangQuerySubmit={async () => {}}
           detectTimestamp={detectTimestamp}
           hideMinimizeButton={true}
           hideRunQueryText={true}
+          isLoading={isLoading}
         />
       </EuiFormRow>
+      <SourceFields
+        onChangeSourceFields={(selectedSourceFields) =>
+          setParam('sourceFields', selectedSourceFields)
+        }
+        esFields={esFields}
+        sourceFields={sourceFields}
+        errors={errors.sourceFields}
+      />
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
-            defaultMessage="Select a time field"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiFormRow
         id="timeField"
         fullWidth
         isInvalid={errors.timeField.length > 0 && timeField !== undefined}
         error={errors.timeField}
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
+            defaultMessage="Select a time field"
+          />
+        }
       >
         <EuiSelect
           options={timeFieldOptions}
@@ -205,21 +265,18 @@ export const EsqlQueryExpression: React.FC<
         />
       </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
-            defaultMessage="Set the time window"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
             isInvalid={errors.timeWindowSize.length > 0}
             error={errors.timeWindowSize}
+            label={
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
+                defaultMessage="Set the time window"
+              />
+            }
           >
             <EuiFieldNumber
               name="timeWindowSize"

@@ -38,10 +38,14 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
+import {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+  getTextBasedColumnIconType,
+} from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
-import { useUnifiedDocViewerServices } from '../../hooks';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 
@@ -106,7 +110,7 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
-  columnTypes,
+  columnsMeta,
   hit,
   dataView,
   hideActionsColumn,
@@ -116,7 +120,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
-  const { fieldFormats, storage, uiSettings, uiActions } = useUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, uiActions } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -167,8 +171,10 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = columnTypes
-        ? columnTypes[field] // for text-based results types come separately
+      const columnMeta = columnsMeta?.[field];
+      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const fieldType = columnIconType
+        ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
@@ -212,7 +218,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
-      columnTypes,
+      columnsMeta,
       flattened,
       pinnedFields,
       onTogglePinned,
@@ -287,7 +293,7 @@ export const DocViewerTable = ({
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
-        width={showActionsInsideTableCell ? 170 : 62}
+        width={showActionsInsideTableCell && filter ? 170 : 62}
         isSorted={false}
       >
         <EuiText size="xs">

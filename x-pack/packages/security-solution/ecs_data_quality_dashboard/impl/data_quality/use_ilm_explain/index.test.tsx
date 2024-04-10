@@ -12,6 +12,7 @@ import { DataQualityProvider } from '../data_quality_panel/data_quality_context'
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
 import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
 import { useIlmExplain, UseIlmExplain } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -20,6 +21,7 @@ const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
+const { toasts } = notificationServiceMock.createSetupContract();
 const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
   children,
   isILMAvailable = true,
@@ -28,6 +30,7 @@ const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: bool
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={isILMAvailable}
+    toasts={toasts}
   >
     {children}
   </DataQualityProvider>
@@ -76,6 +79,7 @@ describe('useIlmExplain', () => {
             httpFetch={mockHttpFetch}
             telemetryEvents={mockTelemetryEvents}
             isILMAvailable={false}
+            toasts={toasts}
           >
             {children}
           </DataQualityProvider>

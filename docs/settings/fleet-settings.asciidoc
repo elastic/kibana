@@ -13,7 +13,10 @@ In {ecloud}, {fleet} flags are already configured.
 You can configure `xpack.fleet` settings in your `kibana.yml`.
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
-See the {fleet-guide}/index.html[{fleet}] docs for more information.
+Many {fleet} settings can also be configured directly through the {fleet} UI.
+See {fleet-guide}/fleet-settings.html[Fleet UI settings] for details.
+
+See the {fleet-guide}/index.html[{fleet}] docs for more information about {fleet}.
 
 [[general-fleet-settings-kb]]
 ==== General {fleet} settings
@@ -21,6 +24,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 `xpack.fleet.agents.enabled` {ess-icon}::
 Set to `true` (default) to enable {fleet}.
 
+`xpack.fleet.isAirGapped`::
+Set to `true` to indicate {fleet} is running in an air-gapped environment. Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
 [[fleet-data-visualizer-settings]]
 
@@ -132,7 +137,7 @@ List of agent policies that are configured when the {fleet} app starts.
   `namespace`:::: 
     String identifying this policy's namespace.
   `inputs`:::: 
-    Array that overrides any default input settings for this integration. Follows the same schema as integration inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
+    Map of input for the integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
 =======
 =====
 +
@@ -146,33 +151,33 @@ xpack.fleet.packages:
 
 xpack.fleet.agentPolicies:
   - name: Preconfigured Policy
-    id: 1
+    id: preconfigured-policy
     namespace: test
     package_policies:
       - package:
           name: system
         name: System Integration
+        namespace: test
         id: preconfigured-system
         inputs:
-          - type: system/metrics
+          system-system/metrics:
             enabled: true
             vars:
-              - name: system.hostfs
-                value: home/test
+              '[system.hostfs]': home/test
             streams:
-              - data_stream:
-                  dataset: system.core
+              '[system.core]':
                 enabled: true
                 vars:
-                  - name: period
-                    value: 20s
-          - type: winlog
+                  period: 20s
+          system-winlog:
             enabled: false
 ----
 
 
 `xpack.fleet.outputs`::
 List of outputs that are configured when the {fleet} app starts.
++
+Certain types of outputs have additional required and optional settings. Refer to {fleet-guide}/fleet-settings.html#output-settings[Output settings] in the {fleet} and {agent} Guide for the full list of settings for each output type.
 +
 If configured in your `kibana.yml`, output settings are grayed out and
 unavailable in the {fleet} UI. To make these settings editable in the UI, do not
@@ -188,13 +193,9 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
   `name`::: 
     Output name.
   `type`::: 
-    Type of Output. Currently we support "elasticsearch", "logstash", "kafka".
+    Type of Output. Currently we support "elasticsearch", "logstash", "kafka", and "remote_elasticsearch".
   `hosts`::: 
     Array that contains the list of host for that output.
-  `config`::: 
-    Extra config for that output.
-  `proxy_id`:::
-    Unique ID of a proxy to access the output.
 =====
 +
 .Optional properties of `xpack.fleet.outputs`
@@ -204,7 +205,48 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
     If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent data unless there is another one configured specifically for the agent policy.
   `is_default_monitoring`::: 
     If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent monitoring data unless there is another one configured specifically for the agent policy.
+  `is_internal`:::
+    If `true`, the output specified in `xpack.fleet.outputs` will not appear in the UI, and can only be managed via `kibana.yml` or the Fleet API.
+  `config`::: 
+    Extra config for that output.
+  `proxy_id`:::
+    Unique ID of a proxy to access the output.
+  `ssl`:::
+    Set to enable authentication using the Secure Sockets Layer (SSL) protocol.
++
+.Properties of `ssl`
+[%collapsible%open]
+=======
+  `certificate`:::: 
+    The SSL certificate that {agents} use to authenticate with the output. Include the full contents of the certificate here.
+=======
+
+  `secrets`::: 
+    Include here any values for preconfigured outputs that should be stored as secrets. A secret value is replaced in the `kibana.yml` settings file with a reference, with the original value stored externally as a secure hash. Note that this type of secret storage requires all configured {fleet-server}s to be on version 8.12.0 or later.
++
+.Properties of `secrets`
+[%collapsible%open]
+=======
+  `key`:::::
+    The private certificate key that {agents} use to authenticate with the output.
+=======
 =====
++
+Example `xpack.fleet.outputs` configuration:
++
+[source,yaml]
+----
+xpack.fleet.outputs:
+  - id: my-logstash-output-with-a-secret
+    name: preconfigured logstash output with a secret
+    type:  logstash
+    hosts: ["localhost:9999"]
+    ssl:
+      certificate: xxxxxxxxxx
+    secrets:
+      ssl:
+        key: securekey
+----
 
 `xpack.fleet.fleetServerHosts`::
 List of {fleet-server} hosts that are configured when the {fleet} app starts.
@@ -225,6 +267,8 @@ List of {fleet-server} hosts that are configured when the {fleet} app starts.
 =====
   `is_default`:::
     Whether or not this host should be the default to use for {fleet-server}.
+  `is_internal`:::
+    If `true` the host will not appear in the UI, and can only be managed through `kibana.yml` or the {fleet} API.
   `proxy_id`::: 
     Unique ID of the proxy to access the {fleet-server} host.
 =====

@@ -21,10 +21,10 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
-import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { useNavigation } from './navigation';
 import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
+import type { NavigateToUrlFn } from '../../types';
+import { useNavigation } from '../navigation';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -184,8 +184,8 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, path, title, href, icon, renderAs, spaceBefore: _spaceBefore } = navNode;
-  const isExternal = Boolean(href) && isAbsoluteLink(href!);
+  const { id, path, href, renderAs } = navNode;
+  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded =
@@ -194,8 +194,8 @@ const nodeToEuiCollapsibleNavProps = (
 
   const dataTestSubj = getTestSubj(navNode, isSelected);
 
-  let spaceBefore = _spaceBefore;
-  if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
+  let spaceBefore = navNode.spaceBefore;
+  if (spaceBefore === undefined && treeDepth === 1 && hasChildren && !isItem) {
     // For groups at level 1 that don't have a space specified we default to add a "m"
     // space. For all other groups, unless specified, there is no vertical space.
     spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS;
@@ -290,17 +290,18 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
+    // @ts-ignore - TODO
     {
       id,
       path,
-      title,
       isSelected,
       linkProps,
       onClick,
       href,
+      icon: navNode.icon,
+      title: navNode.title,
       items: subItems,
       ['data-test-subj']: dataTestSubj,
-      icon,
       iconProps: { size: treeDepth === 0 ? 'm' : 's' },
     },
   ];
@@ -308,7 +309,7 @@ const nodeToEuiCollapsibleNavProps = (
   const hasVisibleChildren = (items?.length ?? 0) > 0;
   const isVisible = isItem || hasVisibleChildren;
 
-  if (isVisible && spaceBefore) {
+  if (isVisible && Boolean(spaceBefore)) {
     items.unshift({
       renderItem: () => <EuiSpacer size={spaceBefore!} />,
     });
@@ -519,6 +520,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
         if (item.renderItem) {
           return item;
         }
+        // @ts-ignore - TODO
         const parsed: EuiCollapsibleNavSubItemProps = {
           ...item,
           items: serializeAccordionItems(item.items),
@@ -539,6 +541,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }
 
   return (
+    // @ts-ignore - TODO
     <EuiCollapsibleNavItem
       {...props}
       className={className}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -21,6 +21,11 @@ const { emptyField, urlField } = fieldValidators;
 
 const getApiURLConfig = (): FieldConfig => ({
   label: i18n.API_URL_LABEL,
+  labelAppend: (
+    <EuiText size="xs" color="subdued">
+      {i18n.OPTIONAL_LABEL}
+    </EuiText>
+  ),
   validations: [
     {
       validator: (args) => {

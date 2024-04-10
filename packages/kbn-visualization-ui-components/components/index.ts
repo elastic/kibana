@@ -14,8 +14,6 @@ export * from './debounced_input';
 
 export * from './debounced_value';
 
-export * from './tooltip_wrapper';
-
 export * from './color_picker';
 
 export * from './icon_select';
@@ -31,6 +29,8 @@ export * from './dimension_buttons';
 export * from './line_style_settings';
 
 export * from './text_decoration_setting';
+
+export * from './chart_switch_trigger';
 
 export type { AccessorConfig } from './dimension_buttons';
 

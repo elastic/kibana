@@ -64,7 +64,7 @@ describe('EditConnectorFlyout', () => {
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true },
+      actions: { save: true, show: true, execute: true },
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
@@ -311,7 +311,7 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('preconfiguredBadge')).toBeInTheDocument();
     });
 
-    it('does not show beta badge when isExperimental is false', async () => {
+    it('does not show `tech preview` badge when isExperimental is false', async () => {
       const { queryByText } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -324,7 +324,35 @@ describe('EditConnectorFlyout', () => {
       expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
     });
 
-    it('shows beta badge when isExperimental is true', async () => {
+    it('shows `tech preview` badge when isExperimental is true', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
+      const { getByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByText(betaBadgeProps.label)).toBeInTheDocument();
+    });
+
+    it('does not show `Technical Preview` badge when `isExperimental` is `false`', async () => {
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
+      const { queryByText } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={{ ...connector, isPreconfigured: true }}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByText(betaBadgeProps.label)).not.toBeInTheDocument();
+    });
+
+    it('shows `Technical Preview` badge when `isExperimental` is `true`', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
       const { getByText } = appMockRenderer.render(
         <EditConnectorFlyout

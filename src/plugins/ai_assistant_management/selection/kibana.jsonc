@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-assistant-management-plugin",
+  "owner": "@elastic/obs-knowledge-team",
+  "plugin": {
+    "id": "aiAssistantManagementSelection",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["management"],
+    "optionalPlugins": ["home", "serverless"],
+    "requiredBundles": ["kibanaReact"],
+    "configPath": [
+      "aiAssistantManagementSelection"
+    ],
+  },
+}

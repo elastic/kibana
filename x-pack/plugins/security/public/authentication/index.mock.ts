@@ -8,7 +8,9 @@
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
-} from './authentication_service';
+  AuthorizationServiceSetup,
+  AuthorizationServiceStart,
+} from '@kbn/security-plugin-types-public';
 
 export const authenticationMock = {
   createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({
@@ -18,5 +20,14 @@ export const authenticationMock = {
   createStart: (): jest.Mocked<AuthenticationServiceStart> => ({
     getCurrentUser: jest.fn(),
     areAPIKeysEnabled: jest.fn(),
+  }),
+};
+
+export const authorizationMock = {
+  createSetup: (): jest.Mocked<AuthorizationServiceSetup> => ({
+    isRoleManagementEnabled: jest.fn(),
+  }),
+  createStart: (): jest.Mocked<AuthorizationServiceStart> => ({
+    isRoleManagementEnabled: jest.fn(),
   }),
 };

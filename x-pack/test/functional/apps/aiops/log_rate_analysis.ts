@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
+  const retry = getService('retry');
 
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -68,8 +69,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await aiops.logRateAnalysisPage.assertSearchPanelExists();
 
-      await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      await ml.testExecution.logTestStep('displays prompt');
+      if (testData.expected.prompt === 'empty') {
+        await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      } else if (testData.expected.prompt === 'change-point') {
+        await aiops.logRateAnalysisPage.assertChangePointDetectedPromptExists();
+      } else {
+        throw new Error('Invalid prompt');
+      }
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
@@ -149,38 +156,73 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       }
 
       // Wait for the analysis to finish
-      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(
+        testData.analysisType,
+        testData.dataGenerator
+      );
 
       // At this stage the baseline and deviation brush position should be stored in
       // the url state and a full browser refresh should restore the analysis.
       await browser.refresh();
-      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(
+        testData.analysisType,
+        testData.dataGenerator
+      );
+
+      await aiops.logRateAnalysisPage.assertUrlState(
+        testData.expected.globalState,
+        testData.expected.appState
+      );
 
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+          // Enabled grouping
+          await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
+
+          await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
+          await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
+
+          const analysisGroupsTable =
+            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+
+          const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
+          const expectedAnalysisGroupsTable = orderBy(
+            testData.expected.analysisGroupsTable,
+            'group'
+          );
+
+          expect(actualAnalysisGroupsTable).to.be.eql(
+            expectedAnalysisGroupsTable,
+            `Expected analysis groups table to be ${JSON.stringify(
+              expectedAnalysisGroupsTable
+            )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
+          );
+        }
+      });
+
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-        // Enabled grouping
-        await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
-
-        await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
-
-        const analysisGroupsTable =
-          await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-        expect(orderBy(analysisGroupsTable, 'group')).to.be.eql(
-          orderBy(testData.expected.analysisGroupsTable, 'group')
-        );
-
         await ml.testExecution.logTestStep('expand table row');
         await aiops.logRateAnalysisResultsGroupsTable.assertExpandRowButtonExists();
         await aiops.logRateAnalysisResultsGroupsTable.expandRow();
+        await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
-        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-          const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
-          expect(orderBy(analysisTable, ['fieldName', 'fieldValue'])).to.be.eql(
-            orderBy(testData.expected.analysisTable, ['fieldName', 'fieldValue'])
-          );
-        }
+        const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
+
+        const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
+        const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
+          'fieldName',
+          'fieldValue',
+        ]);
+
+        expect(actualAnalysisTable).to.be.eql(
+          expectedAnalysisTable,
+          `Expected analysis table results to be ${JSON.stringify(
+            expectedAnalysisTable
+          )}, got ${JSON.stringify(actualAnalysisTable)}`
+        );
 
         await ml.testExecution.logTestStep('open the field filter');
         await aiops.logRateAnalysisPage.assertFieldFilterPopoverButtonExists(false);
@@ -203,13 +245,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('regroup results');
           await aiops.logRateAnalysisPage.clickFieldFilterApplyButton();
 
-          if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-            const filteredAnalysisGroupsTable =
-              await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-            expect(orderBy(filteredAnalysisGroupsTable, 'group')).to.be.eql(
-              orderBy(testData.expected.filteredAnalysisGroupsTable, 'group')
-            );
-          }
+          const filteredAnalysisGroupsTable =
+            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+
+          const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
+          const expectedFilteredAnalysisGroupsTable = orderBy(
+            testData.expected.filteredAnalysisGroupsTable,
+            'group'
+          );
+
+          expect(actualFilteredAnalysisGroupsTable).to.be.eql(
+            expectedFilteredAnalysisGroupsTable,
+            `Expected filtered analysis groups table to be ${JSON.stringify(
+              expectedFilteredAnalysisGroupsTable
+            )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
+          );
         }
 
         if (testData.action !== undefined) {
@@ -241,34 +291,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 
+          await ml.testResources.setKibanaTimeZoneToUTC();
+
+          await ml.securityUI.loginAsMlPowerUser();
           await ml.testResources.createDataViewIfNeeded(
             testData.sourceIndexOrSavedSearch,
             '@timestamp'
           );
-
-          await ml.testResources.setKibanaTimeZoneToUTC();
-
-          if (testData.dataGenerator === 'kibana_sample_data_logs') {
-            await PageObjects.security.login('elastic', 'changeme', {
-              expectSuccess: true,
-            });
-
-            await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-              useActualUrl: true,
-            });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.addSampleDataSet('logs');
-            await PageObjects.header.waitUntilLoadingHasFinished();
-          } else {
-            await ml.securityUI.loginAsMlPowerUser();
-          }
         });
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
-          if (testData.dataGenerator !== 'kibana_sample_data_logs') {
-            await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
-          }
+          await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

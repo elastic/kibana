@@ -18,7 +18,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/lib/kibana';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -30,14 +30,17 @@ import {
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import {
-  isAlertFromEndpointEvent,
   isAlertFromEndpointAlert,
+  isAlertFromEndpointEvent,
 } from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
-import { ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE } from '../../../common/components/toolbar/bulk_actions/translations';
+import {
+  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+} from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -46,7 +49,6 @@ jest.mock('../user_info', () => ({
 }));
 
 jest.mock('../../../common/lib/kibana');
-(useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -57,6 +59,10 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
     addError: jest.fn(),
   }),
+}));
+
+jest.mock('../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
@@ -82,7 +88,7 @@ jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
 
 jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
   return {
-    useHostIsolationStatus: jest.fn().mockReturnValue({
+    useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
       loading: false,
       isIsolated: false,
       agentStatus: 'healthy',
@@ -119,7 +125,13 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
-          cases: mockCasesContract(),
+          cases: {
+            ...mockCasesContract(),
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
+              getRuleIdFromEvent: () => null,
+            },
+          },
           osquery: {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
@@ -247,6 +259,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
         ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
+      });
+    });
+    test('should render "Assign alert"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
+        ).toEqual(ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE);
       });
     });
   });

@@ -12,6 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 import useObservable from 'react-use/lib/useObservable';
 
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
@@ -21,8 +22,15 @@ import {
   DashboardDrilldownOptions,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 
-import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import {
+  DASHBOARD_LINK_TYPE,
+  Link,
+  LinksLayoutType,
+  LINKS_VERTICAL_LAYOUT,
+} from '../../../common/content_management';
+import { trackUiMetric } from '../../services/kibana_services';
 import { useLinks } from '../links_hooks';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { fetchDashboard } from './dashboard_link_tools';
@@ -97,9 +105,9 @@ export const DashboardLinkComponent = ({
   /**
    * Dashboard-to-dashboard navigation
    */
-  const { loading: loadingOnClickProps, value: onClickProps } = useAsync(async () => {
+  const onClickProps = useMemo(() => {
     /** If the link points to the current dashboard, then there should be no `onClick` or `href` prop */
-    if (link.destination === parentDashboardId) return;
+    if (!link.destination || link.destination === parentDashboardId) return;
 
     const linkOptions = {
       ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
@@ -108,7 +116,12 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
+      ...getDashboardLocatorParamsFromEmbeddable(
+        linksEmbeddable as Partial<
+          PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>
+        >,
+        linkOptions
+      ),
     };
 
     const locator = dashboardContainer.locator;
@@ -118,6 +131,8 @@ export const DashboardLinkComponent = ({
     return {
       href,
       onClick: async (event: React.MouseEvent) => {
+        trackUiMetric?.(METRIC_TYPE.CLICK, `${DASHBOARD_LINK_TYPE}:click`);
+
         /**
          * If the link is being opened via a modified click, then we should use the default `href` navigation behaviour
          * by passing all the dashboard state via the URL - this will keep behaviour consistent across all browsers.
@@ -132,26 +147,19 @@ export const DashboardLinkComponent = ({
         if (linkOptions.openInNewTab) {
           window.open(href, '_blank');
         } else {
-          locator.navigate(params);
+          await locator.navigate(params);
         }
       },
     };
-  }, [link]);
+  }, [link, dashboardContainer.locator, linksEmbeddable, parentDashboardId]);
 
   useEffect(() => {
-    if (loadingDestinationDashboard || loadingOnClickProps) {
+    if (loadingDestinationDashboard) {
       onLoading();
     } else {
       onRender();
     }
-  }, [
-    link,
-    linksEmbeddable,
-    loadingDestinationDashboard,
-    loadingOnClickProps,
-    onLoading,
-    onRender,
-  ]);
+  }, [link, linksEmbeddable, loadingDestinationDashboard, onLoading, onRender]);
 
   const id = `dashboardLink--${link.id}`;
 
@@ -178,14 +186,16 @@ export const DashboardLinkComponent = ({
       }}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
-      isDisabled={Boolean(error) || loadingOnClickProps}
+      isDisabled={Boolean(error)}
       className={classNames('linksPanelLink', {
         linkCurrent: link.destination === parentDashboardId,
         dashboardLinkError: Boolean(error),
         'dashboardLinkError--noLabel': !link.label,
       })}
       label={linkLabel}
+      external={link.options?.openInNewTab}
       data-test-subj={error ? `${id}--error` : `${id}`}
+      aria-current={link.destination === parentDashboardId}
     />
   );
 };

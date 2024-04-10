@@ -32,13 +32,18 @@
     }
   ],
   "paths": {
-    "/api/data_views": {
+    "/s/{spaceId}/api/data_views": {
       "get": {
         "summary": "Retrieves a list of all data views.",
         "operationId": "getAllDataViews",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
         ],
         "responses": {
           "200": {
@@ -97,7 +102,7 @@
         }
       }
     },
-    "/api/data_views/data_view": {
+    "/s/{spaceId}/api/data_views/data_view": {
       "post": {
         "summary": "Creates a data view.",
         "operationId": "createDataView",
@@ -108,6 +113,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -149,7 +157,7 @@
         }
       }
     },
-    "/api/data_views/data_view/{viewId}": {
+    "/s/{spaceId}/api/data_views/data_view/{viewId}": {
       "get": {
         "summary": "Retrieves a single data view by identifier.",
         "operationId": "getDataView",
@@ -160,6 +168,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -199,7 +210,13 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
             "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
           }
         ],
         "responses": {
@@ -231,6 +248,9 @@
           },
           {
             "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -272,357 +292,18 @@
         }
       }
     },
-    "/api/data_views/data_view/{viewId}/fields": {
-      "post": {
-        "summary": "Update fields presentation metadata such as count, customLabel and format.",
-        "operationId": "updateFieldsMetadata",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "fields"
-                ],
-                "properties": {
-                  "fields": {
-                    "description": "The field object.",
-                    "type": "object"
-                  }
-                }
-              },
-              "examples": {
-                "updateFieldsMetadataRequest": {
-                  "$ref": "#/components/examples/update_field_metadata_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "acknowledged": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_views/data_view/{viewId}/runtime_field": {
-      "post": {
-        "summary": "Creates a runtime field.",
-        "operationId": "createRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "runtimeField"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name for a runtime field.\n"
-                  },
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n"
-                  }
-                }
-              },
-              "examples": {
-                "createRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/create_runtime_field_request"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Create or update an existing runtime field.",
-        "operationId": "createUpdateRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          },
-          {
-            "name": "viewId",
-            "in": "path",
-            "description": "The ID of the data view fields you want to update.\n",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "runtimeField"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name for a runtime field.\n"
-                  },
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n"
-                  }
-                }
-              },
-              "examples": {
-                "updateRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/create_runtime_field_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view": {
-                      "type": "object"
-                    },
-                    "fields": {
-                      "type": "array"
-                    }
-                  }
-                },
-                "examples": {
-                  "createRuntimeFieldResponse": {
-                    "$ref": "#/components/examples/create_runtime_field_response"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
-      "get": {
-        "summary": "Retrieves a runtime field.",
-        "operationId": "getRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data_view": {
-                      "type": "object"
-                    },
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "getRuntimeFieldResponse": {
-                    "$ref": "#/components/examples/get_runtime_field_response"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a runtime field from a data view.",
-        "operationId": "deleteRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          },
-          "404": {
-            "description": "Object is not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/404_response"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Update an existing runtime field.",
-        "operationId": "updateRuntimeField",
-        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": [
-          "data views"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/field_name"
-          },
-          {
-            "$ref": "#/components/parameters/view_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "runtimeField"
-                ],
-                "properties": {
-                  "runtimeField": {
-                    "type": "object",
-                    "description": "The runtime field definition object.\n\nYou can update following fields:\n\n- `type`\n- `script`\n"
-                  }
-                }
-              },
-              "examples": {
-                "updateRuntimeFieldRequest": {
-                  "$ref": "#/components/examples/update_runtime_field_request"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call."
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/400_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data_views/default": {
+    "/s/{spaceId}/api/data_views/default": {
       "get": {
         "summary": "Retrieves the default data view identifier.",
         "operationId": "getDefaultDataView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "tags": [
           "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
         ],
         "responses": {
           "200": {
@@ -667,6 +348,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
           }
         ],
         "requestBody": {
@@ -729,6 +413,371 @@
           }
         }
       }
+    },
+    "/s/{spaceId}/api/data_views/data_view/{viewId}/fields": {
+      "post": {
+        "summary": "Update fields presentation metadata such as count, customLabel and format.",
+        "operationId": "updateFieldsMetadata",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fields"
+                ],
+                "properties": {
+                  "fields": {
+                    "description": "The field object.",
+                    "type": "object"
+                  }
+                }
+              },
+              "examples": {
+                "updateFieldsMetadataRequest": {
+                  "$ref": "#/components/examples/update_field_metadata_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "acknowledged": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field": {
+      "post": {
+        "summary": "Creates a runtime field.",
+        "operationId": "createRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name for a runtime field.\n"
+                  },
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n"
+                  }
+                }
+              },
+              "examples": {
+                "createRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/create_runtime_field_request"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Create or update an existing runtime field.",
+        "operationId": "createUpdateRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "viewId",
+            "in": "path",
+            "description": "The ID of the data view fields you want to update.\n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name for a runtime field.\n"
+                  },
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n"
+                  }
+                }
+              },
+              "examples": {
+                "updateRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/create_runtime_field_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data_view": {
+                      "type": "object"
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "createRuntimeFieldResponse": {
+                    "$ref": "#/components/examples/create_runtime_field_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}": {
+      "get": {
+        "summary": "Retrieves a runtime field.",
+        "operationId": "getRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_name"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data_view": {
+                      "type": "object"
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getRuntimeFieldResponse": {
+                    "$ref": "#/components/examples/get_runtime_field_response"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a runtime field from a data view.",
+        "operationId": "deleteRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_name"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "404": {
+            "description": "Object is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Update an existing runtime field.",
+        "operationId": "updateRuntimeField",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "tags": [
+          "data views"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/field_name"
+          },
+          {
+            "$ref": "#/components/parameters/view_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "runtimeField"
+                ],
+                "properties": {
+                  "runtimeField": {
+                    "type": "object",
+                    "description": "The runtime field definition object.\n\nYou can update following fields:\n\n- `type`\n- `script`\n"
+                  }
+                }
+              },
+              "examples": {
+                "updateRuntimeFieldRequest": {
+                  "$ref": "#/components/examples/update_runtime_field_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -742,6 +791,49 @@
         "in": "header",
         "name": "Authorization",
         "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+      }
+    },
+    "parameters": {
+      "space_id": {
+        "in": "path",
+        "name": "spaceId",
+        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "examples": [
+            "default"
+          ]
+        }
+      },
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "description": "Cross-site request forgery protection",
+        "required": true
+      },
+      "view_id": {
+        "in": "path",
+        "name": "viewId",
+        "description": "An identifier for the data view.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+        }
+      },
+      "field_name": {
+        "in": "path",
+        "name": "fieldName",
+        "description": "The name of the runtime field.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "hour_of_day"
+        }
       }
     },
     "examples": {
@@ -1963,6 +2055,19 @@
           "refresh_fields": true
         }
       },
+      "get_default_data_view_response": {
+        "summary": "The get default data view API returns the default data view identifier.",
+        "value": {
+          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+        }
+      },
+      "set_default_data_view_request": {
+        "summary": "Set the default data view identifier.",
+        "value": {
+          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "force": true
+        }
+      },
       "update_field_metadata_request": {
         "summary": "Set popularity count for field foo.",
         "value": {
@@ -2623,19 +2728,6 @@
             }
           }
         }
-      },
-      "get_default_data_view_response": {
-        "summary": "The get default data view API returns the default data view identifier.",
-        "value": {
-          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
-        }
-      },
-      "set_default_data_view_request": {
-        "summary": "Set the default data view identifier.",
-        "value": {
-          "data_view_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
-          "force": true
-        }
       }
     },
     "schemas": {
@@ -2687,7 +2779,18 @@
       },
       "sourcefilters": {
         "type": "array",
-        "description": "The array of field names you want to filter out in Discover."
+        "description": "The array of field names you want to filter out in Discover.",
+        "items": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "string"
+            }
+          }
+        }
       },
       "timefieldname": {
         "type": "string",
@@ -2895,37 +2998,6 @@
             "description": "Reloads the data view fields after the data view is updated.",
             "default": false
           }
-        }
-      }
-    },
-    "parameters": {
-      "kbn_xsrf": {
-        "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "description": "Cross-site request forgery protection",
-        "required": true
-      },
-      "view_id": {
-        "in": "path",
-        "name": "viewId",
-        "description": "An identifier for the data view.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
-        }
-      },
-      "field_name": {
-        "in": "path",
-        "name": "fieldName",
-        "description": "The name of the runtime field.",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "example": "hour_of_day"
         }
       }
     }

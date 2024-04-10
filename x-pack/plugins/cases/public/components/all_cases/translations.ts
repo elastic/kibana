@@ -9,6 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 export * from '../user_profiles/translations';
+export {
+  OPEN as STATUS_OPEN,
+  IN_PROGRESS as STATUS_IN_PROGRESS,
+  CLOSED as STATUS_CLOSED,
+} from '@kbn/cases-components/src/status/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
   defaultMessage: 'No cases to display',
@@ -134,12 +139,9 @@ export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const CLEAR_FILTERS = i18n.translate(
-  'xpack.cases.allCasesView.filterAssignees.clearFilters',
-  {
-    defaultMessage: 'Clear filters',
-  }
-);
+export const CLEAR_FILTERS = i18n.translate('xpack.cases.allCasesView.clearFilters', {
+  defaultMessage: 'Clear filters',
+});
 
 export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
   i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
@@ -202,4 +204,21 @@ export const SEARCH_COLUMNS = i18n.translate(
 
 export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelectionDragHandle', {
   defaultMessage: 'Drag Handle',
+});
+
+export const EMPTY_FILTER_MESSAGE = i18n.translate(
+  'xpack.cases.tableFilters.useFilters.emptyMessage',
+  {
+    defaultMessage: 'No options',
+  }
+);
+
+export const OPTIONS = (totalCount: number) =>
+  i18n.translate('xpack.cases.tableFilters.useFilters.options', {
+    defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
+    values: { totalCount },
+  });
+
+export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
+  defaultMessage: 'More',
 });

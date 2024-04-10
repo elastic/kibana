@@ -11,10 +11,10 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
-import type { CustomizationCallback } from '../../customizations';
-import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
 
 export interface DiscoverContainerInternalProps {
@@ -28,7 +28,7 @@ export interface DiscoverContainerInternalProps {
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
-  isDev: boolean;
+  stateStorageContainer?: IKbnUrlStateStorage;
   isLoading?: boolean;
 }
 
@@ -43,33 +43,39 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'embedded',
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
+};
+
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
   customizationCallbacks,
-  isDev,
   getDiscoverServices,
+  stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
-  const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
-  const [initialized, setInitialized] = useState(false);
+  const [discoverServices, setDiscoverServices] = useState<DiscoverServices>();
 
   useEffect(() => {
-    getDiscoverServices().then((svcs) => setDiscoverServices(svcs));
+    getDiscoverServices().then(setDiscoverServices);
   }, [getDiscoverServices]);
 
-  useEffect(() => {
-    setScopedHistory(scopedHistory);
-    setHeaderActionMenuMounter(() => {});
-    setInitialized(true);
-  }, [scopedHistory]);
+  const services = useMemo<DiscoverServices | undefined>(() => {
+    return discoverServices
+      ? {
+          ...discoverServices,
+          ...overrideServices,
+          getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
+        }
+      : undefined;
+  }, [discoverServices, overrideServices, scopedHistory]);
 
-  const services = useMemo(() => {
-    if (!discoverServices) return;
-    return { ...discoverServices, ...overrideServices };
-  }, [discoverServices, overrideServices]);
-
-  if (!initialized || !services || isLoading) {
+  if (!services || isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />
@@ -90,8 +96,8 @@ export const DiscoverContainerInternal = ({
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
-            mode="embedded"
-            isDev={isDev}
+            customizationContext={customizationContext}
+            stateStorageContainer={stateStorageContainer}
           />
         </KibanaContextProvider>
       </EuiFlexItem>

@@ -15,7 +15,7 @@ import {
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
   SentinelOneGetRemoteScriptsStatusParams,
-  SentinelOneIsolateAgentParamsSchema,
+  SentinelOneIsolateHostParamsSchema,
   SentinelOneKillProcessParamsSchema,
   SentinelOneSecretsSchema,
   SentinelOneActionParamsSchema,
@@ -26,7 +26,7 @@ export type SentinelOneSecrets = TypeOf<typeof SentinelOneSecretsSchema>;
 
 export type SentinelOneBaseApiResponse = TypeOf<typeof SentinelOneBaseApiResponseSchema>;
 
-export type SentinelOneGetAgentsParams = TypeOf<typeof SentinelOneGetAgentsParamsSchema>;
+export type SentinelOneGetAgentsParams = Partial<TypeOf<typeof SentinelOneGetAgentsParamsSchema>>;
 export type SentinelOneGetAgentsResponse = TypeOf<typeof SentinelOneGetAgentsResponseSchema>;
 
 export type SentinelOneKillProcessParams = TypeOf<typeof SentinelOneKillProcessParamsSchema>;
@@ -45,6 +45,6 @@ export type SentinelOneGetRemoteScriptsResponse = TypeOf<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
 
-export type SentinelOneIsolateAgentParams = TypeOf<typeof SentinelOneIsolateAgentParamsSchema>;
+export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
 
 export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;

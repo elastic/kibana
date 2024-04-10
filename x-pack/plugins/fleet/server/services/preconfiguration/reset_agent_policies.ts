@@ -22,6 +22,7 @@ import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
+import { AgentPolicyInvalidError } from '../../errors';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,
@@ -135,7 +136,7 @@ async function _deleteExistingData(
       throw err;
     });
     if (policy && !policy.is_preconfigured) {
-      throw new Error('Invalid policy');
+      throw new AgentPolicyInvalidError(`Invalid policy ${agentPolicyId}`);
     }
     if (policy) {
       existingPolicies = [policy];
@@ -190,7 +191,6 @@ async function _deleteExistingData(
     (policy) =>
       agentPolicyService.delete(soClient, esClient, policy.id, {
         force: true,
-        removeFleetServerDocuments: true,
       }),
     {
       concurrency: 20,

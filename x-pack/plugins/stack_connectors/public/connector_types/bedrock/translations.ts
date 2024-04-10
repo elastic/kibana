@@ -20,18 +20,10 @@ export const ACCESS_KEY_LABEL = i18n.translate(
     defaultMessage: 'Access Key',
   }
 );
-
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel',
   {
     defaultMessage: 'Default model',
-  }
-);
-
-export const REGION_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel',
-  {
-    defaultMessage: 'AWS Region',
   }
 );
 
@@ -97,3 +89,9 @@ export const BODY_DESCRIPTION = i18n.translate(
 export const MODEL = i18n.translate('xpack.stackConnectors.components.bedrock.model', {
   defaultMessage: 'Model',
 });
+
+export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string) =>
+  i18n.translate('xpack.stackConnectors.components.genAi.dashboardLink', {
+    values: { apiProvider, connectorName },
+    defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
+  });

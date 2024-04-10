@@ -18,18 +18,133 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.getQueryFromCsvJob",
+        "type": "Function",
+        "tags": [],
+        "label": "getQueryFromCsvJob",
+        "description": [
+          "\nA utility to get the query from a CSV reporting job to inspect or analyze"
+        ],
+        "signature": [
+          "(searchSource: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchSource",
+            "text": "ISearchSource"
+          },
+          ", { scroll: config }: CsvConfigType, pitId?: string | undefined) => ",
+          {
+            "pluginId": "@kbn/reporting-export-types-csv-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
+            "section": "def-common.QueryInspection",
+            "text": "QueryInspection"
+          }
+        ],
+        "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.getQueryFromCsvJob.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
+              }
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.getQueryFromCsvJob.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ scroll: config }",
+            "description": [],
+            "signature": [
+              "CsvConfigType"
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.getQueryFromCsvJob.$3",
+            "type": "string",
+            "tags": [],
+            "label": "pitId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.JobParamsDownloadCSV",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "JobParamsDownloadCSV",
         "description": [],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/reporting-export-types-csv-common",
@@ -161,6 +276,89 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.QueryInspection",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryInspection",
+        "description": [
+          "\nType to wrap the untyped object returned when\ngetting the query from SearchSource service"
+        ],
+        "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.QueryInspection.requestBody",
+            "type": "Object",
+            "tags": [],
+            "label": "requestBody",
+            "description": [],
+            "signature": [
+              "SearchRequest"
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.TaskPayloadCsvFromSavedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "TaskPayloadCsvFromSavedObject",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-export-types-csv-common",
+            "scope": "common",
+            "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
+            "section": "def-common.TaskPayloadCsvFromSavedObject",
+            "text": "TaskPayloadCsvFromSavedObject"
+          },
+          " extends CsvFromSavedObjectBase,",
+          "BasePayloadV2"
+        ],
+        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.TaskPayloadCsvFromSavedObject.objectType",
+            "type": "string",
+            "tags": [],
+            "label": "objectType",
+            "description": [],
+            "signature": [
+              "\"search\""
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-export-types-csv-common",
+            "id": "def-common.TaskPayloadCsvFromSavedObject.pagingStrategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pagingStrategy",
+            "description": [],
+            "signature": [
+              "\"scroll\" | \"pit\""
+            ],
+            "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -184,15 +382,43 @@
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.CSV_JOB_TYPE_DEPRECATED",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "CSV_JOB_TYPE_DEPRECATED",
         "description": [],
         "signature": [
           "\"csv\""
         ],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/common/constants.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/common/constants.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/common/job_utils.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/common/job_utils.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/common/jobs/get_document_payload.ts"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -227,21 +453,6 @@
       },
       {
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
-        "id": "def-common.CSV_REPORT_TYPE_DEPRECATED",
-        "type": "string",
-        "tags": [],
-        "label": "CSV_REPORT_TYPE_DEPRECATED",
-        "description": [],
-        "signature": [
-          "\"CSV\""
-        ],
-        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.CSV_REPORT_TYPE_V2",
         "type": "string",
         "tags": [],
@@ -263,7 +474,7 @@
         "label": "CSV_REPORTING_ACTION",
         "description": [],
         "signature": [
-          "\"downloadCsvReport\""
+          "\"generateCsvReport\""
         ],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
@@ -274,11 +485,80 @@
         "parentPluginId": "@kbn/reporting-export-types-csv-common",
         "id": "def-common.CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "CSV_SEARCHSOURCE_IMMEDIATE_TYPE",
         "description": [],
         "signature": [
           "\"csv_searchsource_immediate\""
+        ],
+        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "@kbn/reporting-export-types-csv",
+            "path": "packages/kbn-reporting/export_types/csv/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/routes/internal/generate/csv_searchsource_immediate.ts"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.JobAppParamsCSV",
+        "type": "Type",
+        "tags": [],
+        "label": "JobAppParamsCSV",
+        "description": [
+          "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
+        ],
+        "signature": [
+          "{ title: string; columns?: string[] | undefined; layout?: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; searchSource: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
+          },
+          "; pagingStrategy?: ",
+          "CsvPagingStrategy",
+          " | undefined; }"
         ],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
@@ -330,22 +610,6 @@
         "signature": [
           "BaseParamsCSV & ",
           "BasePayload"
-        ],
-        "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/reporting-export-types-csv-common",
-        "id": "def-common.TaskPayloadCsvFromSavedObject",
-        "type": "Type",
-        "tags": [],
-        "label": "TaskPayloadCsvFromSavedObject",
-        "description": [],
-        "signature": [
-          "CsvFromSavedObjectBase & ",
-          "BasePayloadV2"
         ],
         "path": "packages/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,

@@ -27,13 +27,14 @@ interface Props {
   onComplete?: () => void;
   isModalOpen: boolean;
   savedObjectIds: string[];
+  savedSearchIds?: string[];
   title: string | null;
 }
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
 export const DeleteTimelineModalOverlay = React.memo<Props>(
-  ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
+  ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete, savedSearchIds }) => {
     const { addSuccess } = useAppToasts();
     const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
 
@@ -43,9 +44,16 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
       }
     }, [onComplete]);
     const onDelete = useCallback(() => {
-      if (savedObjectIds.length > 0) {
+      if (savedObjectIds.length > 0 && savedSearchIds != null && savedSearchIds.length > 0) {
+        deleteTimelines(savedObjectIds, savedSearchIds);
+        addSuccess({
+          title:
+            timelineType === TimelineType.template
+              ? i18n.SUCCESSFULLY_DELETED_TIMELINE_TEMPLATES(savedObjectIds.length)
+              : i18n.SUCCESSFULLY_DELETED_TIMELINES(savedObjectIds.length),
+        });
+      } else if (savedObjectIds.length > 0) {
         deleteTimelines(savedObjectIds);
-
         addSuccess({
           title:
             timelineType === TimelineType.template
@@ -53,10 +61,11 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
               : i18n.SUCCESSFULLY_DELETED_TIMELINES(savedObjectIds.length),
         });
       }
+
       if (onComplete != null) {
         onComplete();
       }
-    }, [deleteTimelines, savedObjectIds, onComplete, addSuccess, timelineType]);
+    }, [deleteTimelines, savedObjectIds, onComplete, addSuccess, timelineType, savedSearchIds]);
     return (
       <>
         {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}

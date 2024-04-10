@@ -19,6 +19,10 @@ import type { Suggestion } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 
+const unfamiliarSuggestionTitle = i18n.translate('unifiedHistogram.lensUnfamiliarVisSubtypeTitle', {
+  defaultMessage: 'Customized',
+});
+
 export interface SuggestionSelectorProps {
   suggestions: Suggestion[];
   activeSuggestion?: Suggestion;
@@ -30,21 +34,37 @@ export const SuggestionSelector = ({
   activeSuggestion,
   onSuggestionChange,
 }: SuggestionSelectorProps) => {
-  const suggestionOptions = suggestions.map((sug) => {
+  const isUnfamiliarSuggestion = activeSuggestion && !activeSuggestion.previewIcon;
+  const activeSuggestionTitle = isUnfamiliarSuggestion
+    ? unfamiliarSuggestionTitle
+    : activeSuggestion?.title;
+
+  let suggestionOptions = suggestions.map((sug) => {
     return {
       label: sug.title,
       value: sug.title,
     };
   });
 
-  const selectedSuggestion = activeSuggestion
-    ? [
-        {
-          label: activeSuggestion.title,
-          value: activeSuggestion.title,
-        },
-      ]
-    : [];
+  const selectedSuggestion =
+    activeSuggestion && activeSuggestionTitle
+      ? [
+          {
+            label: activeSuggestionTitle,
+            value: activeSuggestionTitle,
+          },
+        ]
+      : [];
+
+  if (isUnfamiliarSuggestion && activeSuggestionTitle) {
+    suggestionOptions = [
+      ...suggestionOptions,
+      {
+        label: activeSuggestionTitle,
+        value: activeSuggestionTitle,
+      },
+    ];
+  }
 
   const onSelectionChange = useCallback(
     (newOptions) => {
@@ -75,10 +95,20 @@ export const SuggestionSelector = ({
       position="top"
       content={suggestionsPopoverDisabled ? undefined : activeSuggestion?.title}
       anchorProps={{ css: suggestionComboCss }}
+      display="block"
+      delay="long"
     >
       <EuiComboBox
         data-test-subj="unifiedHistogramSuggestionSelector"
-        prepend={<EuiIcon type={activeSuggestion?.previewIcon ?? 'empty'} />}
+        prepend={
+          <EuiIcon
+            type={getSuggestionIconWithFallback({
+              suggestion: undefined,
+              suggestions,
+              activeSuggestion,
+            })}
+          />
+        }
         placeholder={i18n.translate('unifiedHistogram.suggestionSelectorPlaceholder', {
           defaultMessage: 'Select visualization',
         })}
@@ -98,7 +128,13 @@ export const SuggestionSelector = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={null}>
-                <EuiIcon type={suggestion?.previewIcon ?? 'empty'} />
+                <EuiIcon
+                  type={getSuggestionIconWithFallback({
+                    suggestion,
+                    suggestions,
+                    activeSuggestion,
+                  })}
+                />
               </EuiFlexItem>
               <EuiFlexItem>{option.label}</EuiFlexItem>
             </EuiFlexGroup>
@@ -108,3 +144,25 @@ export const SuggestionSelector = ({
     </EuiToolTip>
   );
 };
+
+function getSuggestionIconWithFallback({
+  suggestion,
+  suggestions,
+  activeSuggestion,
+}: {
+  suggestion: Suggestion | undefined;
+  suggestions: Suggestion[];
+  activeSuggestion?: Suggestion;
+}) {
+  if (!suggestion) {
+    const similarKnownSuggestionWithIcon = suggestions.find(
+      (s) => s.title === activeSuggestion?.title && s.previewIcon
+    );
+
+    if (similarKnownSuggestionWithIcon?.previewIcon) {
+      return similarKnownSuggestionWithIcon.previewIcon;
+    }
+  }
+
+  return suggestion?.previewIcon ?? 'lensApp';
+}

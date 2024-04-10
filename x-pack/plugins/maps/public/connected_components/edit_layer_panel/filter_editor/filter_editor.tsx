@@ -25,10 +25,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../common/constants';
-import { getIndexPatternService, getData, getSearchBar } from '../../../kibana_services';
+import { getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
+import { hasESSourceMethod } from '../../../classes/sources/es_source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 
 export interface Props {
@@ -40,7 +41,7 @@ export interface Props {
 
 interface State {
   isPopoverOpen: boolean;
-  indexPatterns: DataView[];
+  dataView?: DataView;
   isSourceTimeAware: boolean;
 }
 
@@ -48,13 +49,12 @@ export class FilterEditor extends Component<Props, State> {
   private _isMounted = false;
   state: State = {
     isPopoverOpen: false,
-    indexPatterns: [],
     isSourceTimeAware: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadIndexPatterns();
+    this._loadDataView();
     this._loadSourceTimeAware();
   }
 
@@ -62,26 +62,19 @@ export class FilterEditor extends Component<Props, State> {
     this._isMounted = false;
   }
 
-  async _loadIndexPatterns() {
-    // Filter only effects source so only load source indices.
-    const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
-    const indexPatterns: DataView[] = [];
-    const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
-      try {
-        const indexPattern = await getIndexPatternService().get(indexPatternId);
-        indexPatterns.push(indexPattern);
-      } catch (err) {
-        // unable to fetch index pattern
-      }
-    });
+  async _loadDataView() {
+    const source = this.props.layer.getSource();
+    if (!hasESSourceMethod(source, 'getIndexPattern')) {
+      return;
+    }
 
-    await Promise.all(getIndexPatternPromises);
+    const dataView = await source.getIndexPattern();
 
     if (!this._isMounted) {
       return;
     }
 
-    this.setState({ indexPatterns });
+    this.setState({ dataView });
   }
 
   async _loadSourceTimeAware() {
@@ -142,7 +135,7 @@ export class FilterEditor extends Component<Props, State> {
             showQueryInput={true}
             query={layerQuery ? layerQuery : getData().query.queryString.getDefaultQuery()}
             onQuerySubmit={this._onQueryChange}
-            indexPatterns={this.state.indexPatterns}
+            indexPatterns={this.state.dataView ? [this.state.dataView] : []}
             customSubmitButton={
               <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
                 <FormattedMessage

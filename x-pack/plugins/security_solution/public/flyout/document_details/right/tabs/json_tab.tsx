@@ -11,7 +11,6 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 
@@ -23,7 +22,7 @@ const FLYOUT_FOOTER_HEIGHT = 72;
  * Json view displayed in the document details expandable flyout right section
  */
 export const JsonTab: FC = memo(() => {
-  const { searchHit } = useRightPanelContext();
+  const { searchHit, isPreview } = useRightPanelContext();
   const jsonValue = JSON.stringify(searchHit, null, 2);
 
   const flexGroupElement = useRef<HTMLDivElement>(null);
@@ -31,19 +30,20 @@ export const JsonTab: FC = memo(() => {
 
   useEffect(() => {
     const topPosition = flexGroupElement?.current?.getBoundingClientRect().top || 0;
+    const footerOffset = isPreview ? 0 : FLYOUT_FOOTER_HEIGHT;
     const height =
       window.innerHeight -
       topPosition -
       COPY_TO_CLIPBOARD_BUTTON_HEIGHT -
       FLYOUT_BODY_PADDING -
-      FLYOUT_FOOTER_HEIGHT;
+      footerOffset;
 
     if (height === 0) {
       return;
     }
 
     setEditorHeight(height);
-  }, [setEditorHeight]);
+  }, [setEditorHeight, isPreview]);
 
   return (
     <EuiFlexGroup
@@ -67,8 +67,8 @@ export const JsonTab: FC = memo(() => {
                     }
                   )}
                   data-test-subj={JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
-                  onClick={() => copyFunction(copy, jsonValue)}
-                  onKeyDown={() => copyFunction(copy, jsonValue)}
+                  onClick={copy}
+                  onKeyDown={copy}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel"

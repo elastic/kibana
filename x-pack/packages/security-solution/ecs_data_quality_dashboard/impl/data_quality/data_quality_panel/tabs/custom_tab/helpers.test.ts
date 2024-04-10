@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../index_properties/translations';

@@ -25,38 +25,38 @@ import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
+import type {
+  AuthorizationMode,
+  AuthorizationServiceSetup,
+  CheckPrivilegesDynamicallyWithRequest,
+  CheckSavedObjectsPrivilegesWithRequest,
+  CheckUserProfilesPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
 import { checkPrivilegesFactory } from './check_privileges';
-import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
-import type { CheckSavedObjectsPrivilegesWithRequest } from './check_saved_objects_privileges';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
-import type { AuthorizationMode } from './mode';
 import { authorizationModeFactory } from './mode';
 import type { PrivilegesService } from './privileges';
 import { privilegesFactory } from './privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { ResetSessionPage } from './reset_session_page';
-import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
+import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { APPLICATION_PREFIX } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
 import { canRedirectRequest } from '../authentication';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import type { SpacesService } from '../plugin';
 
 export { Actions } from './actions';
-export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
-  buildNumber: number;
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
   getClusterClient: () => Promise<IClusterClient>;
@@ -88,22 +88,6 @@ export interface AuthorizationServiceSetupInternal extends AuthorizationServiceS
   privileges: PrivilegesService;
 }
 
-/**
- * Authorization services available on the setup contract of the security plugin.
- */
-export interface AuthorizationServiceSetup {
-  /**
-   * Actions are used to create the "actions" that are associated with Elasticsearch's
-   * application privileges, and are used to perform the authorization checks implemented
-   * by the various `checkPrivilegesWithRequest` derivatives.
-   */
-  actions: Actions;
-  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
-  checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
-  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
-  mode: AuthorizationMode;
-}
-
 export class AuthorizationService {
   private logger!: Logger;
   private applicationName!: string;
@@ -115,7 +99,6 @@ export class AuthorizationService {
     http,
     capabilities,
     packageVersion,
-    buildNumber,
     getClusterClient,
     license,
     loggers,
@@ -187,24 +170,34 @@ export class AuthorizationService {
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: false,
-        });
-        const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-        const body = renderToString(
-          <ResetSessionPage
-            buildNumber={buildNumber}
-            basePath={http.basePath}
-            logoutUrl={http.basePath.prepend(
-              `/api/security/logout?${querystring.stringify({ next })}`
-            )}
-            customBranding={customBrandingValue}
-          />
-        );
+      if (preResponse.statusCode === 403) {
+        const user = getCurrentUser(request);
+        if (user?.roles.length === 0) {
+          this.logger.warn(
+            `A user authenticated with the "${user.authentication_realm.name}" (${user.authentication_realm.type}) realm doesn't have any roles and isn't authorized to perform request.`
+          );
+        }
 
-        return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+        if (canRedirectRequest(request)) {
+          const customBrandingValue = await customBranding.getBrandingFor(request, {
+            unauthenticated: false,
+          });
+          const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
+          const body = renderToString(
+            <ResetSessionPage
+              staticAssets={http.staticAssets}
+              basePath={http.basePath}
+              logoutUrl={http.basePath.prepend(
+                `/api/security/logout?${querystring.stringify({ next })}`
+              )}
+              customBranding={customBrandingValue}
+            />
+          );
+
+          return toolkit.render({ body, headers: { 'Content-Security-Policy': http.csp.header } });
+        }
       }
+
       return toolkit.next();
     });
 

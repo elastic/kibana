@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { type HttpSetup } from '@kbn/core/public';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
   ALERT_RULE_UUID,
@@ -13,10 +16,8 @@ import {
   ALERT_TIME_RANGE,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import { type HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface Props {
   http: HttpSetup | undefined;
@@ -26,6 +27,7 @@ export interface Props {
     from: string;
     to: string;
   };
+  queries?: QueryDslQueryContainer[];
 }
 
 interface FetchAlertsHistory {
@@ -45,7 +47,13 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
-export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props): UseAlertsHistory {
+export function useAlertsHistory({
+  featureIds,
+  ruleId,
+  dateRange,
+  http,
+  queries,
+}: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -58,6 +66,7 @@ export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props)
         ruleId,
         dateRange,
         signal,
+        queries,
       });
     },
     refetchOnWindowFocus: false,
@@ -87,12 +96,14 @@ interface AggsESResponse {
     };
   };
 }
+
 export async function fetchTriggeredAlertsHistory({
   featureIds,
   http,
   ruleId,
   dateRange,
   signal,
+  queries = [],
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
@@ -102,6 +113,7 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
+  queries?: QueryDslQueryContainer[];
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -117,6 +129,7 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
+              ...queries,
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,

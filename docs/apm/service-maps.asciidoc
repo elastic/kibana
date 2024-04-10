@@ -62,9 +62,8 @@ This can be useful if you have two or more services, in separate environments, b
 Use the environment drop-down to only see the data you're interested in, like `dev` or `production`.
 
 If there's a specific service that interests you, select that service to highlight its connections.
-Clicking **Focus map** will refocus the map on that specific service and lock the connection highlighting.
-From here, select **Service Details**, or click on the **Transaction** tab to jump to the Transaction overview
-for the selected service.
+Click **Focus map** to refocus the map on the selected service and lock the connection highlighting.
+From here, select **Service Details**, or click the **Transactions** tab to jump to the Transaction overview for the selected service.
 You can also use the tabs at the top of the page to easily jump to the **Errors** or **Metrics** overview.
 
 [role="screenshot"]
@@ -74,7 +73,7 @@ image::apm/images/service-maps-java.png[Example view of service maps in the APM 
 [[service-map-anomaly-detection]]
 === Anomaly detection with machine learning
 
-Machine learning jobs can be created to calculate anomaly scores on APM transaction durations within the selected service.
+You can create machine learning jobs to calculate anomaly scores on APM transaction durations within the selected service.
 When these jobs are active, service maps will display a color-coded anomaly indicator based on the detected anomaly score:
 
 [horizontal]
@@ -85,7 +84,7 @@ image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**.
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
 
-If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewer in the Machine learning app.
+If an anomaly has been detected, click *View anomalies* to view the anomaly detection metric viewer in the Machine learning app.
 This time series analysis will display additional details on the severity and time of the detected anomalies.
 
 To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.

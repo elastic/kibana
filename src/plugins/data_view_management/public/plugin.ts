@@ -6,23 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -61,7 +63,7 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management, urlForwarding }: IndexPatternManagementSetupDependencies
+    { management, urlForwarding, ...deps }: IndexPatternManagementSetupDependencies
   ) {
     const kibanaSection = management.sections.section.kibana;
 
@@ -87,7 +89,7 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(core.getStartServices, deps, params);
       },
     });
     return {};

@@ -13,16 +13,19 @@ import { EditLayerPanel } from './edit_layer_panel';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer, updateSourceProps } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
-import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../../classes/sources/source';
+import type { OnSourceChangeArgs } from '../../classes/sources/source';
+import { hasVectorSourceMethod } from '../../classes/sources/vector_source';
+import { isLayerGroup } from '../../classes/layers/layer_group';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   let key = 'none';
   if (selectedLayer) {
-    key = isVectorLayer(selectedLayer)
-      ? `${selectedLayer.getId()}${(selectedLayer as IVectorLayer).getSource().supportsJoins()}`
-      : selectedLayer.getId();
+    const source = !isLayerGroup(selectedLayer) && selectedLayer.getSource();
+    key =
+      source && hasVectorSourceMethod(source, 'supportsJoins')
+        ? `${selectedLayer.getId()}${source.supportsJoins()}`
+        : selectedLayer.getId();
   }
   return {
     key,

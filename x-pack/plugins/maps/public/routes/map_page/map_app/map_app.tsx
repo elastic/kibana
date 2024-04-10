@@ -7,7 +7,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { finalize, switchMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   AppLeaveAction,
@@ -32,6 +32,7 @@ import {
   withNotifyOnErrors,
   IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
   getExecutionContextService,
@@ -486,6 +487,17 @@ export class MapApp extends React.Component<Props, State> {
       <TopNavMenu
         setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
+        badges={
+          this.props.savedMap.isManaged()
+            ? [
+                getManagedContentBadge(
+                  i18n.translate('xpack.maps.mapController.managedMapDescriptionTooltip', {
+                    defaultMessage: 'Elastic manages this map. Save any changes to a new map.',
+                  })
+                ),
+              ]
+            : undefined
+        }
         config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
         filters={this.props.filters}

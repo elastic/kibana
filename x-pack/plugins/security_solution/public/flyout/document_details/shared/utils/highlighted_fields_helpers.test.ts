@@ -11,6 +11,7 @@ import {
 } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
+const isPreview = false;
 
 describe('convertHighlightedFieldsToTableRow', () => {
   it('should convert highlighted fields to a table row', () => {
@@ -19,32 +20,56 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name',
         description: {
           field: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
+          isPreview,
         },
       },
     ]);
   });
 
-  it('should convert take override name over default name', () => {
+  it('should convert take override name over default name and use original values if not present in the override', () => {
     const highlightedFields = {
       'host.name': {
-        overrideField: 'host.name-override',
+        overrideField: { field: 'host.name-override', values: [] },
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
           field: 'host.name-override',
+          originalField: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
+          isPreview,
+        },
+      },
+    ]);
+  });
+
+  it('should convert take override name over default name and use provided values', () => {
+    const highlightedFields = {
+      'host.name': {
+        overrideField: { field: 'host.name-override', values: ['value override!'] },
+        values: ['host-1'],
+      },
+    };
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
+      {
+        field: 'host.name-override',
+        description: {
+          field: 'host.name-override',
+          originalField: 'host.name',
+          values: ['value override!'],
+          scopeId: 'scopeId',
+          isPreview,
         },
       },
     ]);

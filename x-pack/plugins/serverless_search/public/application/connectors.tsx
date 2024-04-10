@@ -22,10 +22,11 @@ import { ServerlessSearchContext } from './hooks/use_kibana';
 export async function renderApp(
   element: HTMLElement,
   core: CoreStart,
-  services: ServerlessSearchContext
+  services: ServerlessSearchContext,
+  queryClient: QueryClient
 ) {
   const { ConnectorsRouter } = await import('./components/connectors_router');
-  const queryClient = new QueryClient();
+
   ReactDOM.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>

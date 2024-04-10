@@ -6,8 +6,8 @@
  */
 
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
-import type { AuthenticatedUser } from './authenticated_user';
 import {
   canUserChangeDetails,
   canUserChangePassword,

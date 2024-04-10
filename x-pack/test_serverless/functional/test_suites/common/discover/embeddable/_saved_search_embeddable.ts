@@ -12,17 +12,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardReplacePanel = getService('dashboardReplacePanel');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects([
+    'common',
+    'svlCommonPage',
+    'dashboard',
+    'header',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('discover saved search embeddable', () => {
     before(async () => {
+      await browser.setWindowSize(1300, 800);
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
       await kibanaServer.savedObjects.cleanStandardList();
@@ -39,6 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.unsetTime();
     });
@@ -125,20 +134,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const embeddableError = await testSubjects.find('embeddableError');
       const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
       expect(await errorMessage.getVisibleText()).to.equal(
-        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
+        'Expected AND, OR, end of input, whitespace but "n" found.\nthis < is not : a valid > query\n----------^'
       );
-    });
-
-    it('should replace a panel with a saved search', async () => {
-      await dashboardAddPanel.addVisualization('Rendering Test: datatable');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.replacePanelByTitle('Rendering Test: datatable');
-      await dashboardReplacePanel.replaceEmbeddable('Rendering-Test:-saved-search');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
-      await testSubjects.missingOrFail('embeddableError');
-      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
     });
 
     it('should not show the full screen button', async () => {

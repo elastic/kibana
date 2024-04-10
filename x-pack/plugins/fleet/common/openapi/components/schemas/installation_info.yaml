@@ -47,6 +47,47 @@ properties:
     type: string
   install_format_schema_version:
     type: string
+  latest_install_failed_attempts:
+    description: Latest failed install errors
+    type: array
+    items:
+      type: object
+      properties:
+        created_at:
+          type: string
+        target_version:
+          type: string
+        error:
+          type: object
+          properties:
+            name:
+              type: string
+            message:
+              type: string
+            stack:
+              type: string
+  latest_executed_state:
+    description: Latest successfully executed state in package install state machine
+    type: object
+    properties:
+      name:
+        type: string
+        enum:
+          - create_restart_installation
+          - install_kibana_assets
+          - install_ilm_policies
+          - install_ml_model
+          - install_index_template_pipelines
+          - remove_legacy_templates
+          - update_current_write_indices
+          - install_transforms
+          - delete_previous_pipelines
+          - save_archive_entries_from_assets_map
+          - update_so
+      started_at:
+        type: string
+      error:
+        type: string
   verification_status:
     type: string
     enum:
@@ -86,3 +127,4 @@ required:
   - install_started_at
   - install_source
   - verification_status
+  - latest_install_failed_attempts

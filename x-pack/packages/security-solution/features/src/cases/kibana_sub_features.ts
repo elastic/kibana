@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../app_features_keys';
+import { CasesSubFeatureId } from '../product_features_keys';
 import { APP_ID } from '../constants';
 import type { CasesFeatureParams } from './types';
 
@@ -17,6 +17,7 @@ import type { CasesFeatureParams } from './types';
  */
 export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
+  CasesSubFeatureId.casesSettings,
 ];
 
 /**
@@ -60,7 +61,42 @@ export const getCasesSubFeaturesMap = ({
     ],
   };
 
+  const casesSettingsCasesSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName',
+      {
+        defaultMessage: 'Case settings',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            id: 'cases_settings',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails',
+              {
+                defaultMessage: 'Edit case settings',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [...savedObjects.files],
+              read: [...savedObjects.files],
+            },
+            cases: {
+              settings: [APP_ID],
+            },
+            ui: uiCapabilities.settings,
+          },
+        ],
+      },
+    ],
+  };
+
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
+    [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
   ]);
 };

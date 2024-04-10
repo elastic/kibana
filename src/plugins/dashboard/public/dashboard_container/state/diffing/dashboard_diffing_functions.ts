@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import fastIsEqual from 'fast-deep-equal';
-
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+import {
+  reactEmbeddableRegistryHasKey,
+  shouldRefreshFilterCompareOptions,
+} from '@kbn/embeddable-plugin/public';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   isFilterPinned,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
-
-import { DashboardContainer } from '../../embeddable/dashboard_container';
+import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
 
@@ -83,7 +83,11 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
           const embeddableId = panel.explicitInput.id;
-          if (!embeddableId) reject();
+          if (!embeddableId || reactEmbeddableRegistryHasKey(panel.type)) {
+            // if this is a new style embeddable, it will handle its own diffing.
+            reject();
+            return;
+          }
           try {
             container.untilEmbeddableLoaded(embeddableId).then((embeddable) =>
               embeddable
@@ -131,9 +135,6 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     if (!currentInput.timeRestore) return true; // if time restore is set to false, refresh interval doesn't count as a change.
     return fastIsEqual(currentValue, lastValue);
   },
-
-  controlGroupInput: ({ currentValue, lastValue }) =>
-    persistableControlGroupInputIsEqual(currentValue, lastValue),
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
 };

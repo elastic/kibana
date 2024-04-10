@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 import {
   App,
@@ -34,7 +34,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -70,6 +69,7 @@ import {
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { addPanelMenuTrigger } from './triggers';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -95,7 +95,6 @@ export interface DashboardStartDependencies {
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjects: SavedObjectsStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
@@ -149,10 +148,27 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      contentManagement,
+      uiActions,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
+
+    // this trigger enables external consumers to register actions for
+    // adding items to the add panel menu
+    uiActions.registerTrigger(addPanelMenuTrigger);
+
+    core.analytics.registerEventType({
+      eventType: 'dashboard_loaded_with_data',
+      schema: {},
+    });
 
     if (share) {
       this.locator = share.url.locators.create(

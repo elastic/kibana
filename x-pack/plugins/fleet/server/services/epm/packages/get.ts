@@ -33,6 +33,7 @@ import type {
   PackageList,
   InstalledPackage,
   PackageSpecManifest,
+  AssetsMap,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -44,7 +45,6 @@ import type {
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
-  FleetError,
   PackageFailedVerificationError,
   PackageNotFoundError,
   RegistryResponseError,
@@ -54,7 +54,6 @@ import { appContextService } from '../..';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
-import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { auditLoggingService } from '../../audit_logging';
@@ -290,7 +289,7 @@ export async function getPackageSavedObjects(
   return result;
 }
 
-export async function getInstalledPackageSavedObjects(
+async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient'>
 ) {
@@ -543,18 +542,12 @@ export async function getPackageFromSource(options: {
   let res: GetPackageResponse;
 
   // If the package is installed
-  if (installedPkg && installedPkg.version === pkgVersion) {
+  if (
+    installedPkg &&
+    installedPkg.install_status === 'installed' &&
+    installedPkg.version === pkgVersion
+  ) {
     const { install_source: pkgInstallSource } = installedPkg;
-    // check cache
-    res = getArchivePackage({
-      name: pkgName,
-      version: pkgVersion,
-    });
-
-    if (res) {
-      logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from cache`);
-    }
-
     if (!res && installedPkg.package_assets) {
       res = await getEsPackage(
         pkgName,
@@ -575,6 +568,7 @@ export async function getPackageFromSource(options: {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
         if (error instanceof PackageFailedVerificationError) {
+          logger.error(`package ${pkgName}-${pkgVersion} failed verification`);
           throw error;
         }
         // treating this is a 404 as no status code returned
@@ -582,25 +576,19 @@ export async function getPackageFromSource(options: {
       }
     }
   } else {
-    res = getArchivePackage({ name: pkgName, version: pkgVersion });
-
-    if (res) {
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
-    } else {
-      try {
-        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
-      } catch (err) {
-        if (err instanceof RegistryResponseError && err.status === 404) {
-          res = await Registry.getBundledArchive(pkgName, pkgVersion);
-        } else {
-          throw err;
-        }
+    try {
+      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+    } catch (err) {
+      if (err instanceof RegistryResponseError && err.status === 404) {
+        res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      } else {
+        throw err;
       }
     }
   }
   if (!res) {
-    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,
@@ -634,7 +622,7 @@ export async function getInstallationObject(options: {
   return installation;
 }
 
-export async function getInstallationObjects(options: {
+async function getInstallationObjects(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgNames: string[];
 }) {
@@ -665,6 +653,37 @@ export async function getInstallation(options: {
   return savedObject?.attributes;
 }
 
+/**
+ * Return an installed package with his related assets
+ */
+export async function getInstalledPackageWithAssets(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  logger?: Logger;
+}) {
+  const installation = await getInstallation(options);
+  if (!installation) {
+    return;
+  }
+  const esPackage = await getEsPackage(
+    installation.name,
+    installation.version,
+    installation.package_assets ?? [],
+    options.savedObjectsClient
+  );
+
+  if (!esPackage) {
+    return;
+  }
+
+  return {
+    installation,
+    assetsMap: esPackage.assetsMap,
+    packageInfo: esPackage.packageInfo,
+    paths: esPackage.paths,
+  };
+}
+
 export async function getInstallationsByName(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgNames: string[];
@@ -681,4 +700,34 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+/**
+ * Return assets for an installed package from ES or from the registry otherwise
+ */
+export async function getPackageAssetsMap({
+  savedObjectsClient,
+  packageInfo,
+  logger,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  packageInfo: PackageInfo;
+  logger: Logger;
+}) {
+  const installedPackageWithAssets = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName: packageInfo.name,
+    logger,
+  });
+
+  let assetsMap: AssetsMap | undefined;
+  if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+    // Try to get from registry
+    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version);
+    assetsMap = pkg.assetsMap;
+  } else {
+    assetsMap = installedPackageWithAssets.assetsMap;
+  }
+
+  return assetsMap;
 }

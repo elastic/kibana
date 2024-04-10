@@ -8,7 +8,7 @@
 import { ALL_HOSTS_TABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
 
 export const openFirstHostDetails = () => {
-  cy.get(HOSTS_NAMES).first().click({ force: true });
+  cy.get(HOSTS_NAMES).first().click();
 };
 
 export const waitForAllHostsToBeLoaded = () => {

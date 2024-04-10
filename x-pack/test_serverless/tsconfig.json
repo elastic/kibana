@@ -2,8 +2,18 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [".", "../test"],
-    "types": ["node", "@kbn/ambient-ftr-types", "cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse"],
+    "rootDirs": [
+      ".",
+      "../test"
+    ],
+    "types": [
+      "node",
+      "@kbn/ambient-ftr-types",
+      "cypress",
+      "cypress-file-upload",
+      "cypress-real-events",
+      "cypress-recurse"
+    ],
   },
   "include": [
     "**/*",
@@ -17,7 +27,9 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    { "path": "../test/tsconfig.json" },
+    {
+      "path": "../test/tsconfig.json"
+    },
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
@@ -28,7 +40,7 @@
     "@kbn/telemetry-tools",
     "@kbn/infra-plugin",
     "@kbn/observability-plugin",
-    "@kbn/infra-forge",
+    "@kbn/data-forge",
     "@kbn/ftr-common-functional-services",
     "@kbn/apm-plugin",
     "@kbn/server-route-repository",
@@ -67,6 +79,24 @@
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
-    "@kbn/mock-idp-plugin",
+    "@kbn/mock-idp-utils",
+    "@kbn/io-ts-utils",
+    "@kbn/logs-explorer-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/transform-plugin",
+    "@kbn/slo-schema",
+    "@kbn/core",
+    "@kbn/alerting-plugin",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/es",
+    "@kbn/infra-forge",
+    "@kbn/reporting-common",
+    "@kbn/es-query",
+    "@kbn/slo-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/synthetics-plugin",
   ]
 }

@@ -9,9 +9,18 @@
 import React from 'react';
 import { batch } from 'react-redux';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
+import {
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '../../../common/control_group/control_group_constants';
+import { ControlInputTransform } from '../../../common/types';
+import { pluginServices } from '../../services';
+import { DataControlEditorChanges, IEditableControlFactory } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlGroupContainer,
   ControlGroupContainerContext,
@@ -22,16 +31,7 @@ import type {
   AddOptionsListControlProps,
   AddRangeSliderControlProps,
 } from '../external_api/control_group_input_builder';
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../../common/control_group/control_group_constants';
-import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
-import { DataControlEditorChanges, IEditableControlFactory } from '../../types';
-import { ControlInputTransform } from '../../../common/types';
-import { ControlGroupStrings } from '../control_group_strings';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
@@ -42,9 +42,9 @@ export function openAddDataControlFlyout(
 ) {
   const { controlInputTransform, onSave } = options || {};
   const {
+    core: { theme, i18n },
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
-    theme: { theme$ },
   } = pluginServices.getServices();
 
   const onCancel = (changes?: DataControlEditorChanges) => {
@@ -125,7 +125,7 @@ export function openAddDataControlFlyout(
           onCancel={onCancel}
         />
       </ControlGroupContainerContext.Provider>,
-      { theme$ }
+      { theme, i18n }
     ),
     {
       'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),

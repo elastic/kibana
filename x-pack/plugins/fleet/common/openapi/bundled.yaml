@@ -10,8 +10,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601/api/fleet
-    description: local
+  - url: http://KIBANA_HOST:5601/api/fleet
 paths:
   /health_check:
     post:
@@ -828,6 +827,72 @@ paths:
               properties:
                 force:
                   type: boolean
+  /epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
+    post:
+      summary: Authorize transforms
+      tags:
+        - Elastic Package Manager (EPM)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        transformId:
+                          type: string
+                        success:
+                          type: boolean
+                        error:
+                          type: string
+                      required:
+                        - transformId
+                        - error
+                required:
+                  - items
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: reauthorize-transforms
+      description: ''
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          name: pkgName
+          in: path
+          required: true
+        - schema:
+            type: string
+          name: pkgVersion
+          in: path
+          required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to include prerelease packages in categories count (e.g.
+            beta, rc, preview)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transforms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      transformId:
+                        type: string
   /epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       summary: Get package file
@@ -900,6 +965,8 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
       responses:
+        '200':
+          description: OK
         '400':
           $ref: '#/components/responses/error'
       operationId: get-inputs-template
@@ -924,6 +991,11 @@ paths:
             - yml
         name: format
         description: Format of response - json or yaml
+        in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
         in: query
   /agents/setup:
     get:
@@ -1857,6 +1929,19 @@ paths:
       summary: Request agent diagnostics
       tags:
         - Agents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
       responses:
         '200':
           description: OK
@@ -1908,6 +1993,13 @@ paths:
                       items:
                         type: string
                       description: list of agent IDs
+                additional_metrics:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                        enum:
+                          - CPU
               required:
                 - agents
             example:
@@ -2916,6 +3008,37 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /outputs/{outputId}/health:
+    get:
+      summary: Get latest output health
+      tags:
+        - Outputs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: state of output, HEALTHY or DEGRADED
+                  message:
+                    type: string
+                    description: long message if unhealthy
+                  timestamp:
+                    type: string
+                    description: timestamp of reported state
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-output-health
+    parameters:
+      - schema:
+          type: string
+        name: outputId
+        in: path
+        required: true
   /logstash_api_keys:
     post:
       summary: Generate Logstash API key
@@ -3135,6 +3258,8 @@ paths:
                   type: string
                 is_default:
                   type: boolean
+                is_internal:
+                  type: boolean
                 host_urls:
                   type: array
                   items:
@@ -3204,6 +3329,8 @@ paths:
                 name:
                   type: string
                 is_default:
+                  type: boolean
+                is_internal:
                   type: boolean
                 host_urls:
                   type: array
@@ -3824,6 +3951,47 @@ components:
           type: string
         install_format_schema_version:
           type: string
+        latest_install_failed_attempts:
+          description: Latest failed install errors
+          type: array
+          items:
+            type: object
+            properties:
+              created_at:
+                type: string
+              target_version:
+                type: string
+              error:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  message:
+                    type: string
+                  stack:
+                    type: string
+        latest_executed_state:
+          description: Latest successfully executed state in package install state machine
+          type: object
+          properties:
+            name:
+              type: string
+              enum:
+                - create_restart_installation
+                - install_kibana_assets
+                - install_ilm_policies
+                - install_ml_model
+                - install_index_template_pipelines
+                - remove_legacy_templates
+                - update_current_write_indices
+                - install_transforms
+                - delete_previous_pipelines
+                - save_archive_entries_from_assets_map
+                - update_so
+            started_at:
+              type: string
+            error:
+              type: string
         verification_status:
           type: string
           enum:
@@ -3863,6 +4031,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object
@@ -4325,6 +4494,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - agents
         - version
@@ -4366,6 +4538,9 @@ components:
         force:
           type: boolean
           description: Force upgrade, skipping validation (should be used with caution)
+        skipRateLimitCheck:
+          type: boolean
+          description: Skip rate limit check for upgrade
       required:
         - version
     agent_diagnostics:
@@ -4515,9 +4690,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         package_policies:
           description: >-
             This field is present only when retrieving a single agent policy, or
@@ -4559,6 +4734,12 @@ components:
             settings cannot be overridden. The override option should be used
             only in unusual circumstances and not as a routine procedure.
           nullable: true
+        advanced_settings:
+          type: object
+          description: >-
+            Advanced settings stored in the agent policy, e.g.
+            agent_limits_go_max_procs
+          nullable: true
       required:
         - id
         - status
@@ -4596,9 +4777,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4613,6 +4794,9 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
       required:
         - name
         - namespace
@@ -4646,9 +4830,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4663,6 +4847,9 @@ components:
               - enabled
         is_protected:
           type: boolean
+        force:
+          type: boolean
+          description: Force agent policy creation even if packages are not verified.
       required:
         - name
         - namespace
@@ -4876,8 +5063,10 @@ components:
           example: my description
         namespace:
           type: string
-          description: namespace by default "default"
-          example: default
+          description: >-
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
+          example: customnamespace
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added
@@ -5063,6 +5252,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5079,6 +5270,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5122,6 +5321,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5216,7 +5417,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5224,6 +5429,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5270,6 +5479,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5331,18 +5542,51 @@ components:
         - name
         - hosts
         - type
+    output_create_request_remote_elasticsearch:
+      title: remote_elasticsearch
+      type: object
+      properties:
+        id:
+          type: string
+        is_default:
+          type: boolean
+        is_default_monitoring:
+          type: boolean
+        is_internal:
+          type: boolean
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - remote_elasticsearch
+        hosts:
+          type: array
+          items:
+            type: string
+        service_token:
+          type: string
+        secrets:
+          type: object
+          properties:
+            service_token:
+              type: string
+      required:
+        - name
     output_create_request:
       title: Output
       oneOf:
         - $ref: '#/components/schemas/output_create_request_elasticsearch'
         - $ref: '#/components/schemas/output_create_request_kafka'
         - $ref: '#/components/schemas/output_create_request_logstash'
+        - $ref: '#/components/schemas/output_create_request_remote_elasticsearch'
       discriminator:
         propertyName: type
         mapping:
           elasticsearch: '#/components/schemas/output_create_request_elasticsearch'
           kafka: '#/components/schemas/output_create_request_kafka'
           logstash: '#/components/schemas/output_create_request_logstash'
+          remote_elasticsearch: '#/components/schemas/output_create_request_remote_elasticsearch'
     output_update_request_elasticsearch:
       title: elasticsearch
       type: object
@@ -5352,6 +5596,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5369,6 +5615,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5414,6 +5668,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5508,7 +5764,11 @@ components:
           properties:
             group_events:
               type: number
+        topic:
+          type: string
         topics:
+          deprecated: true
+          description: Use topic instead.
           type: array
           items:
             type: object
@@ -5516,6 +5776,10 @@ components:
               topic:
                 type: string
               when:
+                deprecated: true
+                description: >-
+                  Deprecated, kafka output do not support conditionnal topics
+                  anymore.
                 type: object
                 properties:
                   type:
@@ -5548,6 +5812,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5642,6 +5908,8 @@ components:
         name:
           type: string
         is_default:
+          type: boolean
+        is_internal:
           type: boolean
         is_preconfigured:
           type: boolean

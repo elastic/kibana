@@ -21,7 +21,9 @@ export default createTestConfig({
   kbnServerArgs: [
     '--xpack.infra.enabled=true',
     '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
-    '--xpack.observability.unsafe.thresholdRule.enabled=true',
+    '--xpack.security.roleManagementEnabled=true',
+    `--xpack.cloud.base_url='https://cloud.elastic.co'`,
+    `--xpack.cloud.organization_url='/account/members'`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],

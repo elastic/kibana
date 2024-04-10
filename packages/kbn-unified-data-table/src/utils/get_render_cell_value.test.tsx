@@ -13,10 +13,12 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { CodeEditorProps, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SourceDocument } from '../components/source_document';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -164,7 +166,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\" data-test-subj=\\"dataTableExpandCellActionPopover\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-1gd56qr-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -191,18 +193,20 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-9sj1hz-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\" data-test-subj=\\"dataTableExpandCellActionPopover\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-1gd56qr-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
   });
 
   it('renders _source column correctly', () => {
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
+    const rows = rowsSource.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsSource.map(build),
+      rows,
       useNewFieldsApi: false,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -218,66 +222,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": ".gz",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
@@ -302,66 +259,57 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": Object {
-                  "bytes": 100,
-                  "extension": ".gz",
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
-              }
-            }
-            width={370}
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": Object {
+                "bytes": 100,
+                "extension": ".gz",
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
   it('renders _source column correctly if on text based mode and have nulls', () => {
+    const rows = rowsSourceWithEmptyValues.map(build);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsSourceWithEmptyValues.map(build),
+      rows,
       useNewFieldsApi: false,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -378,61 +326,30 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 100,
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+      isPlainRecord: true,
+    });
   });
 
   it('renders fields-based column correctly', () => {
+    const rows = rowsFields.map(build);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFields.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -448,78 +365,29 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
-              ],
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          bytesDisplayName
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                100,
-              ],
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('limits amount of rendered items', () => {
+    const rows = rowsFields.map(build);
+    const showFieldHandler = (fieldName: string) => ['extension', 'bytes'].includes(fieldName);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFields.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
@@ -536,42 +404,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          extension
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
-              ],
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          and 3 more fields
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "",
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: '_source',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      useTopLevelObjectColumns: false,
+      maxEntries: 1,
+      shouldShowFieldHandler: showFieldHandler,
+      row: rows[0],
+    });
   });
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
@@ -579,7 +424,7 @@ describe('Unified data table cell rendering', function () {
       dataView: dataViewMock,
       rows: rowsFields.map(build),
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => false,
+      shouldShowFieldHandler: (fieldName: string) => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -596,72 +441,67 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": undefined,
-                "fields": Object {
-                  "bytes": Array [
-                    100,
-                  ],
-                  "extension": Array [
-                    ".gz",
-                  ],
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
-              }
-            }
-            width={370}
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "bytes": Array [
+                  100,
+                ],
+                "extension": Array [
+                  ".gz",
+                ],
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
   it('collect object fields and renders them like _source', () => {
+    const showFieldHandler = (fieldName: string) =>
+      ['object.value', 'extension', 'bytes'].includes(fieldName);
+    const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFieldsWithTopLevelObject.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) =>
-        ['object.value', 'extension', 'bytes'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -677,37 +517,31 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          object.value
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "100",
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: 'object',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      useTopLevelObjectColumns: true,
+      row: rows[0],
+    });
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    const showFieldHandler = (fieldName: string) =>
+      ['extension', 'bytes', 'object.value'].includes(fieldName);
+    const rows = rowsFieldsWithTopLevelObject.map(build);
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
-      rows: rowsFieldsWithTopLevelObject.map(build),
+      rows,
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) =>
-        ['extension', 'bytes', 'object.value'].includes(fieldName),
+      shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -723,27 +557,19 @@ describe('Unified data table cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component).toMatchInlineSnapshot(`
-      <EuiDescriptionList
-        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
-        compressed={true}
-        type="inline"
-      >
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          object.value
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "100",
-            }
-          }
-        />
-      </EuiDescriptionList>
-    `);
+
+    const sourceDocumentComponent = component.find(SourceDocument);
+    expect(sourceDocumentComponent.exists()).toBeTruthy();
+
+    expect(sourceDocumentComponent.props()).toEqual({
+      columnId: 'object',
+      dataView: dataViewMock,
+      fieldFormats: mockServices.fieldFormats,
+      maxEntries: 100,
+      shouldShowFieldHandler: showFieldHandler,
+      useTopLevelObjectColumns: true,
+      row: rows[0],
+    });
   });
 
   it('collect object fields and renders them as json in details', () => {
@@ -769,48 +595,55 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <EuiFlexGroup
-        className="unifiedDataTable__cellPopover"
-        direction="column"
-        gutterSize="none"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonIcon
-                aria-label="Close popover"
-                data-test-subj="docTableClosePopover"
-                iconSize="s"
-                iconType="cross"
-                onClick={[MockFunction]}
-                size="xs"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            height={200}
-            json={
-              Object {
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        }
+        columnId="object"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "extension": Array [
+                ".gz",
+              ],
+              "object.value": Array [
+                100,
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
+                "extension": Array [
+                  ".gz",
+                ],
                 "object.value": Array [
                   100,
                 ],
-              }
-            }
-            width={370}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
+              },
+            },
+          }
+        }
+        useTopLevelObjectColumns={true}
+      />
     `);
   });
 
@@ -949,7 +782,7 @@ describe('Unified data table cell rendering', function () {
       dataView: dataViewMock,
       rows: rowsFieldsUnmapped.map(build),
       useNewFieldsApi: true,
-      shouldShowFieldHandler: (fieldName) => ['unmapped'].includes(fieldName),
+      shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
@@ -991,21 +824,23 @@ describe('Unified data table cell rendering', function () {
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        data-test-subj="dataTableExpandCellActionPopover"
         direction="row"
         gutterSize="none"
         responsive={false}
       >
         <EuiFlexItem>
-          <span
-            className="unifiedDataTable__cellPopoverValue eui-textBreakWord"
-            dangerouslySetInnerHTML={
-              Object {
-                "__html": Array [
-                  ".gz",
-                ],
+          <DataTablePopoverCellValue>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": Array [
+                    ".gz",
+                  ],
+                }
               }
-            }
-          />
+            />
+          </DataTablePopoverCellValue>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}

@@ -6,18 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
-  RewriteRequestCase,
+  AsApiContract,
   handleDisabledApiKeysError,
-  rewriteActionsReq,
-  rewriteActionsRes,
   actionsSchema,
   rewriteRuleLastRun,
+  rewriteActionsReq,
+  rewriteSystemActionsReq,
 } from './lib';
 import {
   RuleTypeParams,
@@ -26,6 +26,14 @@ import {
   validateNotifyWhenType,
   PartialRule,
 } from '../types';
+import { transformRuleActions } from './rule/transforms';
+import { RuleResponse } from '../../common/routes/rule/response';
+import { validateRequiredGroupInDefaultActions } from './lib/validate_required_group_in_default_actions';
+
+export type UpdateRequestBody = TypeOf<typeof bodySchema>;
+interface RuleUpdateOptionsResult extends Omit<UpdateOptions<RuleTypeParams>, 'data'> {
+  data: UpdateRequestBody;
+}
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -52,21 +60,33 @@ const bodySchema = schema.object({
       )
     )
   ),
+  alert_delay: schema.maybe(
+    schema.object({
+      active: schema.number(),
+    })
+  ),
 });
 
-const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, actions, ...rest } = result.data;
+const rewriteBodyReq = (
+  result: RuleUpdateOptionsResult,
+  isSystemAction: (connectorId: string) => boolean
+): UpdateOptions<RuleTypeParams> => {
+  const { notify_when: notifyWhen, alert_delay: alertDelay, actions = [], ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
-      actions: rewriteActionsReq(actions),
+      actions: rewriteActionsReq(actions.filter((action) => !isSystemAction(action.id))),
+      systemActions: rewriteSystemActionsReq(actions.filter((action) => isSystemAction(action.id))),
+      alertDelay,
     },
   };
 };
-const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
+
+const rewriteBodyRes = ({
   actions,
+  systemActions,
   alertTypeId,
   scheduledTaskId,
   createdBy,
@@ -83,8 +103,12 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   isSnoozedUntil,
   lastRun,
   nextRun,
+  alertDelay,
   ...rest
-}) => ({
+}: PartialRule<RuleTypeParams>): Omit<
+  AsApiContract<PartialRule<RuleTypeParams> & { actions?: RuleResponse['actions'] }>,
+  'actions'
+> => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
@@ -109,12 +133,13 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: rewriteActionsRes(actions),
+        actions: transformRuleActions(actions, systemActions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export const updateRuleRoute = (
@@ -133,10 +158,23 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
+
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
+            /**
+             * Throws an error if the group is not defined in default actions
+             */
+            validateRequiredGroupInDefaultActions(rule.actions ?? [], (connectorId: string) =>
+              actionsClient.isSystemAction(connectorId)
+            );
+
+            const alertRes = await rulesClient.update(
+              rewriteBodyReq({ id, data: rule }, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              )
+            );
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

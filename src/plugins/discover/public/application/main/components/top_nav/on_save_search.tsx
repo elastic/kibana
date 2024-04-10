@@ -93,6 +93,9 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = state.internalState.getState().dataView;
+  const overriddenVisContextAfterInvalidation =
+    state.internalState.getState().overriddenVisContextAfterInvalidation;
+
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -116,6 +119,7 @@ export async function onSaveSearch({
     const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
     const currentTags = savedSearch.tags;
+    const currentVisContext = savedSearch.visContext;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
@@ -134,6 +138,11 @@ export async function onSaveSearch({
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
+
+    if (overriddenVisContextAfterInvalidation) {
+      savedSearch.visContext = overriddenVisContextAfterInvalidation;
+    }
+
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -159,10 +168,12 @@ export async function onSaveSearch({
       savedSearch.rowsPerPage = currentRowsPerPage;
       savedSearch.sampleSize = currentSampleSize;
       savedSearch.description = currentDescription;
+      savedSearch.visContext = currentVisContext;
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
     } else {
+      state.internalState.transitions.resetOnSavedSearchChange();
       state.appState.resetInitialState();
     }
     onSaveCb?.();
@@ -179,6 +190,7 @@ export async function onSaveSearch({
       description={savedSearch.description}
       timeRestore={savedSearch.timeRestore}
       tags={savedSearch.tags ?? []}
+      managed={savedSearch.managed}
       onSave={onSave}
       onClose={onClose ?? (() => {})}
     />
@@ -197,6 +209,7 @@ const SaveSearchObjectModal: React.FC<{
   tags: string[];
   onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
   onClose: () => void;
+  managed: boolean;
 }> = ({
   isTimeBased,
   services,
@@ -208,6 +221,7 @@ const SaveSearchObjectModal: React.FC<{
   timeRestore: savedTimeRestore,
   onSave,
   onClose,
+  managed,
 }) => {
   const { savedObjectsTagging } = services;
   const [timeRestore, setTimeRestore] = useState<boolean>(
@@ -277,6 +291,14 @@ const SaveSearchObjectModal: React.FC<{
       options={options}
       onSave={onModalSave}
       onClose={onClose}
+      mustCopyOnSaveMessage={
+        managed
+          ? i18n.translate('discover.localMenu.mustCopyOnSave', {
+              defaultMessage:
+                'Elastic manages this saved search. Save any changes to a new saved search.',
+            })
+          : undefined
+      }
     />
   );
 };

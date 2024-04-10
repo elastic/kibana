@@ -14,20 +14,19 @@ import {
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { ExpandableFlyoutContext } from '../context';
+import { TestProvider } from '../test/provider';
+import { State } from '../state';
 
 describe('PreviewSection', () => {
-  const context: ExpandableFlyoutContext = {
-    panels: {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
-        },
-      ],
-    },
-  } as unknown as ExpandableFlyoutContext;
+  const context = {
+    right: {},
+    left: {},
+    preview: [
+      {
+        id: 'key',
+      },
+    ],
+  } as unknown as State;
 
   const component = <div>{'component'}</div>;
   const left = 500;
@@ -36,9 +35,9 @@ describe('PreviewSection', () => {
     const showBackButton = false;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -48,9 +47,9 @@ describe('PreviewSection', () => {
     const showBackButton = true;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -66,14 +65,14 @@ describe('PreviewSection', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <PreviewSection
           component={component}
           leftPosition={left}
           showBackButton={showBackButton}
           banner={banner}
         />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerPanel`)).toHaveClass(

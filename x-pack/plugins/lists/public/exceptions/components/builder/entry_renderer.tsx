@@ -81,6 +81,7 @@ export interface EntryItemProps {
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
+  exceptionItemIndex: number;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
@@ -104,6 +105,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   operatorsList,
   allowCustomOptions = false,
   getExtendedFields,
+  exceptionItemIndex,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -209,6 +211,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           }
           indexPattern={filteredIndexPatterns}
           selectedField={entry.field}
+          aria-label={i18n.EXCEPTION_ITEM_ARIA_LABEL(
+            i18n.FIELD,
+            exceptionItemIndex,
+            entry.entryIndex
+          )}
           isClearable={false}
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
@@ -301,6 +308,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     [
       indexPattern,
       entry,
+      exceptionItemIndex,
       isDisabled,
       handleFieldChange,
       allowCustomOptions,
@@ -340,6 +348,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         isLoading={false}
         isClearable={false}
         onChange={handleOperatorChange}
+        aria-label={i18n.EXCEPTION_ITEM_ARIA_LABEL(
+          i18n.OPERATOR,
+          exceptionItemIndex,
+          entry.entryIndex
+        )}
         data-test-subj="exceptionBuilderEntryOperator"
       />
     );
@@ -360,7 +373,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   };
 
   // show this when wildcard with matches operator
-  const getWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
+  const getEventFilterWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
         {precedingWarning}{' '}
@@ -380,6 +393,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
+    const ariaLabel = i18n.EXCEPTION_ITEM_ARIA_LABEL(
+      i18n.VALUE,
+      exceptionItemIndex,
+      entry.entryIndex
+    );
+
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
@@ -398,6 +417,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onChange={handleFieldMatchValueChange}
             isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"
+            aria-label={ariaLabel}
           />
         );
       case OperatorTypeEnum.MATCH_ANY:
@@ -420,6 +440,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onError={handleError}
             onChange={handleFieldMatchAnyValueChange}
             isRequired
+            aria-label={ariaLabel}
             data-test-subj="exceptionBuilderEntryFieldMatchAny"
           />
         );
@@ -437,7 +458,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             value: wildcardValue,
           });
           actualWarning =
-            warning === WILDCARD_WARNING ? warning && getWildcardWarningInfo(warning) : warning;
+            warning === WILDCARD_WARNING && listType === 'endpoint_events'
+              ? getEventFilterWildcardWarningInfo(warning)
+              : warning;
         }
 
         return (
@@ -457,6 +480,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.correspondingKeywordField ?? entry.field}
             selectedValue={wildcardValue}
+            aria-label={ariaLabel}
           />
         );
       case OperatorTypeEnum.LIST:
@@ -474,6 +498,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             onChange={handleFieldListValueChange}
             data-test-subj="exceptionBuilderEntryFieldList"
             allowLargeValueLists={allowLargeValueLists}
+            aria-label={ariaLabel}
           />
         );
       case OperatorTypeEnum.EXISTS:
@@ -482,6 +507,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={getEmptyValue()}
             data-test-subj="exceptionBuilderEntryFieldExists"
+            aria-label={ariaLabel}
           />
         );
       default:

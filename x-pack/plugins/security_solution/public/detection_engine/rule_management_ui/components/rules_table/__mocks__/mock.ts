@@ -16,7 +16,7 @@ import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
@@ -81,7 +81,7 @@ export const mockRule = (id: string): SavedQueryRule => ({
   meta: { from: '0m' },
   related_integrations: [],
   required_fields: [],
-  setup: '',
+  setup: '# this is some setup documentation',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -149,7 +149,7 @@ export const mockRuleWithEverything = (id: string): RuleResponse => ({
   meta: { from: '0m' },
   related_integrations: [],
   required_fields: [],
-  setup: '',
+  setup: '# this is some setup documentation',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -197,6 +197,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
+  setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
 });
 
@@ -241,6 +242,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
     unit: 'm',
     value: 5,
   },
+  enableThresholdSuppression: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

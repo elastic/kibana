@@ -13,7 +13,7 @@ import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_
 import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
 
 interface EndpointActionFailureMessageProps {
-  action: MaybeImmutable<ActionDetails<{ code?: string }>>;
+  action: MaybeImmutable<ActionDetails>;
   'data-test-subj'?: string;
 }
 

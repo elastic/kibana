@@ -224,13 +224,13 @@ function getDataMapping(
   return dataStreamMapping;
 }
 
-function sumFirstNValues(n: number, bars: Array<{ y: number }>): number {
+function sumFirstNValues(n: number, bars: Array<{ y: number }> | undefined): number {
   const indexes = Array(n)
     .fill(1)
     .map((_, i) => i);
   let countSum = 0;
   for (const index of indexes) {
-    if (bars[index]) {
+    if (bars?.[index]) {
       countSum += bars[index].y;
     }
   }
@@ -816,29 +816,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const counterBars = data.bars![0].bars;
-            const countBars = data.bars![1].bars;
+            const counterBars = data?.bars![0].bars;
+            const countBars = data?.bars![1].bars;
 
             log.info('Check counter data before the upgrade');
             // check there's some data before the upgrade
-            expect(counterBars[0].y).to.eql(5000);
+            expect(counterBars?.[0].y).to.eql(5000);
             log.info('Check counter data after the upgrade');
             // check there's some data after the upgrade
-            expect(counterBars[counterBars.length - 1].y).to.eql(5000);
+            expect(counterBars?.[counterBars.length - 1].y).to.eql(5000);
 
             // due to the flaky nature of exact check here, we're going to relax it
             // as long as there's data before and after it is ok
             log.info('Check count before the upgrade');
-            const columnsToCheck = countBars.length / 2;
+            const columnsToCheck = countBars ? countBars.length / 2 : 0;
             // Before the upgrade the count is N times the indexes
             expect(sumFirstNValues(columnsToCheck, countBars)).to.be.greaterThan(
               indexes.length * TEST_DOC_COUNT - 1
             );
             log.info('Check count after the upgrade');
             // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...countBars].reverse())).to.be.greaterThan(
-              TEST_DOC_COUNT - 1
-            );
+            expect(
+              sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse())
+            ).to.be.greaterThan(TEST_DOC_COUNT - 1);
           });
         });
       });
@@ -911,8 +911,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const bars = data.bars![0].bars;
-            const columnsToCheck = bars.length / 2;
+            const bars = data?.bars![0].bars;
+            const columnsToCheck = bars ? bars.length / 2 : 0;
             // due to the flaky nature of exact check here, we're going to relax it
             // as long as there's data before and after it is ok
             log.info('Check count before the downgrade');
@@ -922,7 +922,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             log.info('Check count after the downgrade');
             // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...bars].reverse())).to.be.greaterThan(
+            expect(sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse())).to.be.greaterThan(
               TEST_DOC_COUNT - 1
             );
           });
@@ -952,8 +952,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const dataBefore = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const barsBefore = dataBefore.bars![0].bars;
-            expect(barsBefore.some(({ y }) => y)).to.eql(true);
+            const barsBefore = dataBefore?.bars![0].bars;
+            expect(barsBefore?.some(({ y }) => y)).to.eql(true);
 
             // check after the downgrade
             await PageObjects.lens.goToTimeRange(
@@ -969,8 +969,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await PageObjects.lens.waitForVisualization('xyVisChart');
             const dataAfter = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-            const barsAfter = dataAfter.bars![0].bars;
-            expect(barsAfter.some(({ y }) => y)).to.eql(true);
+            const barsAfter = dataAfter?.bars![0].bars;
+            expect(barsAfter?.some(({ y }) => y)).to.eql(true);
           });
         });
       });

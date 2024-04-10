@@ -40,13 +40,13 @@ import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 // Iusse tracked in: https://github.com/elastic/kibana/issues/167809
-describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Opening alerts', () => {
@@ -158,7 +158,8 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
         });
     });
   });
-  context('Closing alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/173597
+  context.skip('Closing alerts', () => {
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

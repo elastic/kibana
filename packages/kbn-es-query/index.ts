@@ -51,10 +51,9 @@ export {
   migrateFilter,
   fromCombinedFilter,
   isOfQueryType,
+  isOfEsqlQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
   getLanguageDisplayName,
 } from './src/es_query';
 
@@ -127,3 +126,5 @@ export {
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
 } from './src/utils';
+
+export type { ExecutionContextSearch } from './src/expressions/types';

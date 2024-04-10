@@ -50,6 +50,7 @@ import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_aler
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -143,11 +144,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
-  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  };
-
   const refetchAll = useCallback(() => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    };
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
     } else {
@@ -224,6 +224,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
+  const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -231,6 +237,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             ...addToCaseActionItems,
             ...statusActionItems,
             ...alertTagsItems,
+            ...alertAssigneesItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
           ]
@@ -250,6 +257,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       eventFilterActionItems,
       canCreateEndpointEventFilters,
       alertTagsItems,
+      alertAssigneesItems,
     ]
   );
 
@@ -260,8 +268,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ],
-    [alertTagsPanels, items]
+    [alertTagsPanels, alertAssigneesPanels, items]
   );
 
   const osqueryFlyout = useMemo(() => {

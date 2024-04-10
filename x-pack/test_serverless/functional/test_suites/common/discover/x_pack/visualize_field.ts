@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -18,13 +18,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
-    'error',
+    'svlCommonPage',
     'discover',
     'timePicker',
-    'unifiedSearch',
     'lens',
-    'security',
-    'spaceSelector',
     'header',
     'unifiedFieldList',
   ]);
@@ -36,11 +33,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   describe('discover field visualize button', () => {
-    beforeEach(async () => {
+    before(async () => {
+      // Security project requires admin role, search/oblt project passes with developer/editor.
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
       await setDiscoverTimeRange();
     });
@@ -50,6 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('shows "visualize" field button', async () => {
@@ -98,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');

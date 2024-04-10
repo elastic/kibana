@@ -38,7 +38,10 @@ function getParsedFile(flags: RunCliFlags) {
 }
 
 export function parseRunCliFlags(flags: RunCliFlags) {
-  const { logLevel } = flags;
+  const { logLevel, target } = flags;
+  if (target?.includes('.kb.')) {
+    throw new Error(`Target URL seems to be a Kibana URL, please provide Elasticsearch URL`);
+  }
   const parsedFile = getParsedFile(flags);
 
   let parsedLogLevel = LogLevel.info;
@@ -69,7 +72,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'kibana',
       'concurrency',
       'versionOverride',
-      'clean'
+      'clean',
+      'assume-package-version'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,

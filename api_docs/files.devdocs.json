@@ -524,10 +524,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "files",
-      "id": "def-public.FilesSetup",
+      "id": "def-public.FilesPublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "FilesSetup",
+      "label": "FilesPublicSetup",
       "description": [
         "\nPublic setup-phase contract"
       ],
@@ -537,7 +537,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-public.FilesSetup.filesClientFactory",
+          "id": "def-public.FilesPublicSetup.filesClientFactory",
           "type": "Object",
           "tags": [
             "track-adoption"
@@ -587,7 +587,11 @@
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/plugins/image_embeddable/public/plugin.ts"
+              "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+            },
+            {
+              "plugin": "imageEmbeddable",
+              "path": "src/plugins/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
             },
             {
               "plugin": "filesManagement",
@@ -597,7 +601,7 @@
         },
         {
           "parentPluginId": "files",
-          "id": "def-public.FilesSetup.registerFileKind",
+          "id": "def-public.FilesPublicSetup.registerFileKind",
           "type": "Function",
           "tags": [],
           "label": "registerFileKind",
@@ -621,7 +625,7 @@
           "children": [
             {
               "parentPluginId": "files",
-              "id": "def-public.FilesSetup.registerFileKind.$1",
+              "id": "def-public.FilesPublicSetup.registerFileKind.$1",
               "type": "Object",
               "tags": [],
               "label": "fileKind",
@@ -651,10 +655,10 @@
     },
     "start": {
       "parentPluginId": "files",
-      "id": "def-public.FilesStart",
+      "id": "def-public.FilesPublicStart",
       "type": "Type",
       "tags": [],
-      "label": "FilesStart",
+      "label": "FilesPublicStart",
       "description": [],
       "signature": [
         "Pick<",
@@ -662,8 +666,8 @@
           "pluginId": "files",
           "scope": "public",
           "docId": "kibFilesPluginApi",
-          "section": "def-public.FilesSetup",
-          "text": "FilesSetup"
+          "section": "def-public.FilesPublicSetup",
+          "text": "FilesPublicSetup"
         },
         ", \"filesClientFactory\"> & { getFileKindDefinition: (id: string) => ",
         {
@@ -839,7 +843,39 @@
               "\nAn elasticsearch client that will be used to interact with the cluster."
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -943,41 +979,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1180,6 +1184,8 @@
               ">; }; enrich: ",
               "default",
               "; eql: ",
+              "default",
+              "; esql: ",
               "default",
               "; exists: { (this: That, params: ",
               "ExistsRequest",
@@ -1432,6 +1438,8 @@
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; }; indices: ",
+              "default",
+              "; inference: ",
               "default",
               "; info: { (this: That, params?: ",
               "InfoRequest",
@@ -1687,7 +1695,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
-              ">; }; rankEval: { (this: That, params: ",
+              ">; }; queryRuleset: ",
+              "default",
+              "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
               "RankEvalRequest",
@@ -5317,10 +5327,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "files",
-      "id": "def-server.FilesSetup",
+      "id": "def-server.FilesServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "FilesSetup",
+      "label": "FilesServerSetup",
       "description": [
         "\nFiles plugin setup contract"
       ],
@@ -5330,7 +5340,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-server.FilesSetup.registerFileKind",
+          "id": "def-server.FilesServerSetup.registerFileKind",
           "type": "Function",
           "tags": [
             "track-adoption"
@@ -5398,7 +5408,7 @@
           "children": [
             {
               "parentPluginId": "files",
-              "id": "def-server.FilesSetup.registerFileKind.$1",
+              "id": "def-server.FilesServerSetup.registerFileKind.$1",
               "type": "Object",
               "tags": [],
               "label": "fileKind",
@@ -5428,10 +5438,10 @@
     },
     "start": {
       "parentPluginId": "files",
-      "id": "def-server.FilesStart",
+      "id": "def-server.FilesServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "FilesStart",
+      "label": "FilesServerStart",
       "description": [
         "\nFiles plugin start contract"
       ],
@@ -5441,7 +5451,7 @@
       "children": [
         {
           "parentPluginId": "files",
-          "id": "def-server.FilesStart.fileServiceFactory",
+          "id": "def-server.FilesServerStart.fileServiceFactory",
           "type": "Object",
           "tags": [
             "track-adoption"

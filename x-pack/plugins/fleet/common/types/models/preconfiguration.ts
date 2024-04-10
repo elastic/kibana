@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SimplifiedPackagePolicy } from '../../services/simplified_package_policy_helper';
+
 import type {
   PackagePolicyPackage,
   NewPackagePolicy,
@@ -24,16 +26,23 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
   id: string | number;
   namespace?: string;
   package_policies: Array<
-    Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {
-      id?: string | number;
-      name: string;
-      package: Partial<PackagePolicyPackage> & { name: string };
-      inputs?: InputsOverride[];
-    }
+    | (Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {
+        id?: string | number;
+        name: string;
+        package: Partial<PackagePolicyPackage> & { name: string };
+        inputs?: InputsOverride[];
+      })
+    | (Omit<SimplifiedPackagePolicy, 'policy_id'> & {
+        id: string;
+        package: { name: string };
+      })
   >;
 }
 
-export type PreconfiguredPackage = Omit<PackagePolicyPackage, 'title'>;
+export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'> {
+  prerelease?: boolean;
+  skipDataStreamRollover?: boolean;
+}
 
 export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
   config?: Record<string, unknown>;

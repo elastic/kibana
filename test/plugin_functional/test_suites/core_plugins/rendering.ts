@@ -18,7 +18,7 @@ declare global {
      * We use this global variable to track page history changes to ensure that
      * navigation is done without causing a full page reload.
      */
-    __RENDERING_SESSION__: string[];
+    __RENDERING_SESSION__?: string[];
   }
 }
 
@@ -42,7 +42,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         window.__RENDERING_SESSION__ = [];
       }
 
-      window.__RENDERING_SESSION__.push(window.location.pathname);
+      window.__RENDERING_SESSION__!.push(window.location.pathname);
     });
   };
 
@@ -101,7 +101,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // When plugin owners make a change that exposes additional config values, the changes will be reflected in this test assertion.
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
+        'console.dev.enableMonaco (boolean)',
         'console.ui.enabled (boolean)',
+        'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
         'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean)',
@@ -158,6 +160,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
+        'navigation.solutionNavigation.enabled (boolean)',
+        'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
@@ -170,6 +174,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',
@@ -213,6 +218,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
@@ -224,6 +230,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.deployments_url (string)',
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
@@ -239,7 +246,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
         'xpack.cloud_integrations.full_story.pageVarsDebounceTime (duration)',
-        'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
@@ -256,7 +262,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
-        'xpack.fleet.internal.disableProxies (boolean)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
@@ -283,7 +288,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logsUIEnabled (any)',
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
-        'xpack.infra.featureFlags.profilingEnabled (any)',
+        'xpack.infra.featureFlags.profilingEnabled (boolean)',
 
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
@@ -310,6 +315,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -330,7 +336,21 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
-        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'share.new_version.enabled (boolean)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (alternatives)',
+        /**
+         * Rule form V2 feature flags
+         */
+        'discover.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.infra.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.legacy_uptime.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.ml.experimental.ruleFormV2.enabled (boolean)',
+        'xpack.transform.experimental.ruleFormV2Enabled (boolean)',
+        'xpack.apm.featureFlags.ruleFormV2Enabled (boolean)',
+        'xpack.observability.unsafe.ruleFormV2.enabled (boolean)',
+        'xpack.slo.experimental.ruleFormV2.enabled (boolean)',
+        /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
@@ -373,6 +393,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.roleManagementEnabled (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
@@ -381,6 +402,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildId (string)',
         'telemetry.labels.ciBuildJobId (string)',
         'telemetry.labels.ciBuildNumber (number)',
+        'telemetry.labels.environment (string)',
         'telemetry.labels.ftrConfig (string)',
         'telemetry.labels.gitRev (string)',
         'telemetry.labels.isPr (boolean)',

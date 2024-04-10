@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useState, useCallback } from 'react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AGENT_LOG_LEVELS } from './constants';
@@ -22,15 +23,13 @@ export const LogLevelFilter: React.FunctionComponent<{
   const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
-  const filterSelect = LEVEL_VALUES.map((level) => (
-    <EuiFilterSelectItem
-      checked={selectedLevels.includes(level) ? 'on' : undefined}
-      key={level}
-      onClick={() => onToggleLevel(level)}
-    >
-      {level}
-    </EuiFilterSelectItem>
-  ));
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    LEVEL_VALUES.map((level) => ({
+      label: level,
+      checked: selectedLevels.includes(level) ? 'on' : undefined,
+      key: level,
+    }))
+  );
 
   return (
     <EuiPopover
@@ -53,7 +52,24 @@ export const LogLevelFilter: React.FunctionComponent<{
       closePopover={closePopover}
       panelPaddingSize="none"
     >
-      {filterSelect}
+      <EuiSelectable
+        options={options}
+        onChange={(newOptions) => {
+          setOptions(newOptions);
+          newOptions.forEach((option, index) => {
+            if (option.checked !== options[index].checked) {
+              onToggleLevel(option.label);
+              return;
+            }
+          });
+        }}
+        data-test-subj="agentList.logLevelFilterOptions"
+        listProps={{
+          paddingSize: 's',
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPopover>
   );
 });

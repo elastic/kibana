@@ -315,7 +315,14 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectDoc",
+                    "text": "SavedObjectDoc"
+                  },
+                  "<InputAttributes> & { references?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -675,10 +682,10 @@
           },
           {
             "parentPluginId": "encryptedSavedObjects",
-            "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToExcludeFromAAD",
+            "id": "def-server.EncryptedSavedObjectTypeRegistration.attributesToIncludeInAAD",
             "type": "Object",
             "tags": [],
-            "label": "attributesToExcludeFromAAD",
+            "label": "attributesToIncludeInAAD",
             "description": [],
             "signature": [
               "ReadonlySet<string> | undefined"
@@ -993,6 +1000,46 @@
                 "<InputAttributes, MigratedAttributes>"
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "encryptedSavedObjects",
+          "id": "def-server.EncryptedSavedObjectsPluginSetup.createModelVersion",
+          "type": "Function",
+          "tags": [],
+          "label": "createModelVersion",
+          "description": [],
+          "signature": [
+            "(opts: ",
+            "CreateEsoModelVersionFnOpts",
+            ") => ",
+            {
+              "pluginId": "@kbn/core-saved-objects-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+              "section": "def-common.SavedObjectsModelVersion",
+              "text": "SavedObjectsModelVersion"
+            }
+          ],
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.createModelVersion.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "opts",
+              "description": [],
+              "signature": [
+                "CreateEsoModelVersionFnOpts"
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/create_model_version.ts",
               "deprecated": false,
               "trackAdoption": false
             }

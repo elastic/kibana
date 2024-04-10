@@ -22,6 +22,7 @@ import {
   RANGE_SLIDER_CONTROL,
 } from '../../../common/range_slider/types';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
+import { RangeSliderEditorOptions } from '../components/range_slider_editor_options';
 
 export class RangeSliderEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<RangeSliderEmbeddableInput>
@@ -43,6 +44,8 @@ export class RangeSliderEmbeddableFactory
   public canCreateNew = () => false;
 
   public isEditable = () => Promise.resolve(true);
+
+  public controlEditorOptionsComponent = RangeSliderEditorOptions;
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();

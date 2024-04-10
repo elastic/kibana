@@ -43,6 +43,14 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
+          " | undefined, abortController: AbortController | undefined, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
           " | undefined) => Promise<",
           {
             "pluginId": "expressions",
@@ -121,6 +129,43 @@
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.fetchFieldsFromESQL.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.fetchFieldsFromESQL.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | undefined"
             ],
@@ -268,7 +313,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined) => void"
+              " | undefined, abortController?: AbortController | undefined) => Promise<void>"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
@@ -290,6 +335,21 @@
                     "text": "AggregateQuery"
                   },
                   " | undefined"
+                ],
+                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/text-based-editor",
+                "id": "def-public.TextBasedLanguagesEditorProps.onTextLangQuerySubmit.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abortController",
+                "description": [],
+                "signature": [
+                  "AbortController | undefined"
                 ],
                 "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
                 "deprecated": false,
@@ -389,6 +449,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [
+              "Disables the editor and displays loading icon in run button\nIt is also used for hiding the history component if it is not defined"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
@@ -496,6 +572,54 @@
             "label": "disableSubmitAction",
             "description": [
               "Disables the submit query action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.allowQueryCancellation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowQueryCancellation",
+            "description": [
+              "when set to true enables query cancellation"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideTimeFilterInfo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideTimeFilterInfo",
+            "description": [
+              "hide @timestamp info"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.hideQueryHistory",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideQueryHistory",
+            "description": [
+              "hide query history"
             ],
             "signature": [
               "boolean | undefined"

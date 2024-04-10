@@ -7,7 +7,8 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { SearchSource } from '@kbn/data-plugin/common';
+import { Query, SearchSource } from '@kbn/data-plugin/common';
+import { AggregateQuery, Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
 import { DiscoverAppLocatorParams } from '../../common';
@@ -27,6 +28,14 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
     .fn<Promise<string>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue('mock search title');
 
+  const queryFromLocatorMock = jest
+    .fn<Promise<Query | AggregateQuery | undefined>, [DiscoverAppLocatorParams]>()
+    .mockResolvedValue(undefined);
+
+  const filtersFromLocatorMock = jest
+    .fn<Promise<Filter[]>, [DiscoverAppLocatorParams]>()
+    .mockResolvedValue([]);
+
   return {
     asScopedClient: jest
       .fn<Promise<LocatorServiceScopedClient>, [req: KibanaRequest]>()
@@ -35,6 +44,8 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
           columnsFromLocator: columnsFromLocatorMock,
           searchSourceFromLocator: searchSourceFromLocatorMock,
           titleFromLocator: titleFromLocatorMock,
+          queryFromLocator: queryFromLocatorMock,
+          filtersFromLocator: filtersFromLocatorMock,
         } as LocatorServiceScopedClient);
       }),
   };

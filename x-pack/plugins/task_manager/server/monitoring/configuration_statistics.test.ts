@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs/operators';
+import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 
@@ -47,12 +47,11 @@ describe('Configuration Statistics Aggregator', () => {
         warn_threshold: 5000,
       },
       worker_utilization_running_average_window: 5,
-      requeue_invalid_tasks: {
-        enabled: false,
-        delay: 3000,
-        max_attempts: 20,
-      },
       metrics_reset_interval: 3000,
+      claim_strategy: 'default',
+      request_timeouts: {
+        update_by_query: 1000,
+      },
     };
 
     const managedConfig = {

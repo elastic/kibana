@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs/promises';
+
 import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
@@ -13,14 +14,13 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { MessageSigningError } from '../../common/errors';
+
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 
-import { SO_SEARCH_LIMIT } from '../constants';
-
 import { appContextService } from './app_context';
-import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import {
   ensurePreconfiguredOutputs,
@@ -33,7 +33,6 @@ import {
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
@@ -50,11 +49,17 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
+import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
+import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
-    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+    | PreconfigurationError
+    | DefaultPackagesInstallationError
+    | UpgradeManagedPackagePoliciesResult
+    | UninstallTokenInvalidError
+    | { error: MessageSigningError }
   >;
 }
 
@@ -117,11 +122,13 @@ async function createSetupSideEffects(
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
-
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
+
+  logger.debug('Backfilling output performance presets');
+  await outputService.backfillAllOutputPresets(soClient, esClient);
 
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
@@ -168,8 +175,6 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
   stepSpan?.end();
 
-  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
-
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
@@ -182,31 +187,36 @@ async function createSetupSideEffects(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
     );
   }
-  await appContextService.getMessageSigningService()?.generateKeyPair();
-
-  logger.debug('Generating Agent uninstall tokens');
-  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.warn(
-      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
-    );
-  }
-  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
-
-  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.debug('Checking for and encrypting plain text uninstall tokens');
-    await appContextService.getUninstallTokenService()?.encryptTokens();
+  let messageSigningServiceNonFatalError: { error: MessageSigningError } | undefined;
+  try {
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } catch (error) {
+    if (error instanceof MessageSigningError) {
+      messageSigningServiceNonFatalError = { error };
+    } else {
+      throw error;
+    }
   }
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
+
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
-  logger.debug('Setting up Fleet enrollment keys');
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  logger.debug(
+    'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
+  );
+  await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
+
+  const nonFatalErrors = [
+    ...preconfiguredPackagesNonFatalErrors,
+    ...packagePolicyUpgradeErrors,
+    ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+  ];
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
@@ -263,34 +273,6 @@ export async function ensureFleetGlobalEsAssets(
   }
 }
 
-async function ensureDefaultEnrollmentAPIKeysExists(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options?: { forceRecreate?: boolean }
-) {
-  const security = appContextService.getSecurity();
-  if (!security) {
-    return;
-  }
-
-  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
-    return;
-  }
-
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-  });
-
-  await pMap(
-    agentPolicies,
-    (agentPolicy) =>
-      ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
-    {
-      concurrency: 20,
-    }
-  );
-}
-
 /**
  * Maps the `nonFatalErrors` object returned by the setup process to a more readable
  * and predictable format suitable for logging output or UI presentation.
@@ -339,6 +321,7 @@ export async function ensureFleetDirectories() {
 
   try {
     await fs.stat(bundledPackageLocation);
+    logger.debug(`Bundled package directory ${bundledPackageLocation} exists`);
   } catch (error) {
     logger.warn(
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`

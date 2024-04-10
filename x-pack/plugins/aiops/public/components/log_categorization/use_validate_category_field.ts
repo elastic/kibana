@@ -10,11 +10,10 @@ import { useRef, useCallback } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
-
 import type { HttpFetchOptions } from '@kbn/core/public';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
-import { createCategorizeQuery } from '../../../common/api/log_categorization/create_categorize_query';
+import { createCategorizeQuery } from '@kbn/aiops-log-pattern-analysis/create_categorize_query';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -27,12 +26,11 @@ export function useValidateFieldRequest() {
       index: string,
       field: string,
       timeField: string,
-      start: number | undefined,
-      end: number | undefined,
+      timeRange: { from: number; to: number },
       queryIn: QueryDslQueryContainer,
       headers?: HttpFetchOptions['headers']
     ) => {
-      const query = createCategorizeQuery(queryIn, timeField, start, end);
+      const query = createCategorizeQuery(queryIn, timeField, timeRange);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
         {
@@ -42,8 +40,8 @@ export function useValidateFieldRequest() {
             size: 5,
             field,
             timeField,
-            start,
-            end,
+            start: timeRange.from,
+            end: timeRange.to,
             // only text fields are supported in pattern analysis,
             // and it is not possible to create a text runtime field
             // so runtimeMappings are not needed

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiTableSortingType,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -50,7 +51,9 @@ const MAX_GROUP_BADGES = 5;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
+const DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK = 'docCount';
 const DEFAULT_SORT_DIRECTION = 'asc';
+const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
 
 interface LogRateAnalysisResultsTableProps {
   significantItems: SignificantItem[];
@@ -63,6 +66,7 @@ interface LogRateAnalysisResultsTableProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
@@ -74,11 +78,16 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  zeroDocsFallback = false,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof GroupTableItem>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
+  const [sortField, setSortField] = useState<'docCount' | 'pValue'>(
+    zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    zeroDocsFallback ? DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK : DEFAULT_SORT_DIRECTION
+  );
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -195,7 +204,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <span key={`${fieldName}-id`}>
+            <span key={`${stringHash(`${fieldName}:${fieldValue}`)}-id`}>
               <EuiBadge
                 data-test-subj="aiopsLogRateAnalysisResultsTableColumnGroupBadge"
                 color="hollow"
@@ -297,7 +306,10 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       sortable: true,
       valign: 'top',
     },
-    {
+  ];
+
+  if (!zeroDocsFallback) {
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnPValue',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -324,8 +336,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
       valign: 'top',
-    },
-    {
+    });
+
+    columns.push({
       'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnImpact',
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
@@ -355,21 +368,22 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       },
       sortable: true,
       valign: 'top',
-    },
-    {
-      'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
-      name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions: [
-        ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
-        ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
-        copyToClipBoardAction,
-      ],
-      width: ACTIONS_COLUMN_WIDTH,
-      valign: 'top',
-    },
-  ];
+    });
+  }
+
+  columns.push({
+    'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnAction',
+    name: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.actionsColumnName', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      ...(viewInDiscoverAction ? [viewInDiscoverAction] : []),
+      ...(viewInLogPatternAnalysisAction ? [viewInLogPatternAnalysisAction] : []),
+      copyToClipBoardAction,
+    ],
+    width: ACTIONS_COLUMN_WIDTH,
+    valign: 'top',
+  });
 
   const onChange = useCallback((tableSettings) => {
     if (tableSettings.page) {

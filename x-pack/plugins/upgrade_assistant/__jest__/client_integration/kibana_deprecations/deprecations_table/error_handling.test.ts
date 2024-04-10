@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 
+import { APP_LOGS_COUNT_CLUSTER_PRIVILEGES } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
 import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
@@ -64,6 +65,13 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
             deprecations: deprecationService,
           },
         },
+        privileges: {
+          hasAllPrivileges: true,
+          missingPrivileges: {
+            cluster: [...APP_LOGS_COUNT_CLUSTER_PRIVILEGES],
+            index: [],
+          },
+        },
       });
     });
 
@@ -72,8 +80,13 @@ describe('Kibana deprecations - Deprecations table - Error handling', () => {
     component.update();
 
     expect(exists('kibanaDeprecationErrors')).toBe(true);
+    // Should contain error about failed deprecations
     expect(find('kibanaDeprecationErrors').text()).toContain(
       'Failed to get deprecation issues for these plugins: failed_plugin_id_1, failed_plugin_id_2.'
+    );
+    // Should contain error about missing privilege
+    expect(find('kibanaDeprecationErrors').text()).toContain(
+      'Certain issues might be missing due to missing cluster privilege for: manage_security'
     );
   });
 

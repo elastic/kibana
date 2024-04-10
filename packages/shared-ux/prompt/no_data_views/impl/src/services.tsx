@@ -7,10 +7,12 @@
  */
 
 import React, { FC, useContext } from 'react';
+
 import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptKibanaDependencies,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { useOnTryESQL } from './hooks';
 
 const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices | null>(null);
 
@@ -23,11 +25,18 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } = services;
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryESQL, esqlDocLink } =
+    services;
 
   return (
     <NoDataViewsPromptContext.Provider
-      value={{ canCreateNewDataView, dataViewsDocLink, openDataViewEditor }}
+      value={{
+        canCreateNewDataView,
+        dataViewsDocLink,
+        openDataViewEditor,
+        onTryESQL,
+        esqlDocLink,
+      }}
     >
       {children}
     </NoDataViewsPromptContext.Provider>
@@ -41,12 +50,22 @@ export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependen
   children,
   ...services
 }) => {
+  const {
+    share,
+    coreStart: {
+      application: { navigateToApp },
+    },
+  } = services;
+  const onTryESQL = useOnTryESQL({ locatorClient: share?.url.locators, navigateToApp });
+
   return (
     <NoDataViewsPromptContext.Provider
       value={{
         dataViewsDocLink: services.coreStart.docLinks.links.indexPatterns?.introduction,
         canCreateNewDataView: services.dataViewEditor.userPermissions.editDataView(),
         openDataViewEditor: services.dataViewEditor.openEditor,
+        esqlDocLink: services.coreStart.docLinks.links.query?.queryESQL,
+        onTryESQL,
       }}
     >
       {children}

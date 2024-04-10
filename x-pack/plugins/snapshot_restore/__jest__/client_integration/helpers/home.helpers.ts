@@ -12,7 +12,6 @@ import {
   findTestSubject,
   TestBed,
   AsyncTestBedConfig,
-  delay,
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
@@ -70,9 +69,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
-      await delay(10);
-      component.update();
     });
+    component.update();
   };
 
   const clickRepositoryActionAt = async (index: number, action: 'delete' | 'edit') => {
@@ -83,8 +81,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
 
     await act(async () => {
       button.simulate('click');
-      component.update();
     });
+    component.update();
   };
 
   const clickSnapshotAt = async (index: number) => {
@@ -94,9 +92,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
     await act(async () => {
       const { href } = snapshotLink.props();
       router.navigateTo(href!);
-      await delay(100);
-      component.update();
     });
+    component.update();
   };
 
   const selectTab = (tab: 'repositories' | 'snapshots') => {

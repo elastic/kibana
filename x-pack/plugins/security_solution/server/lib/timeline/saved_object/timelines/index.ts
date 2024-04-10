@@ -38,6 +38,7 @@ import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../comm
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -547,43 +548,96 @@ export const updatePartialSavedTimeline = async (
 
 export const resetTimeline = async (
   request: FrameworkRequest,
-  timelineIds: string[],
+  timelineId: string,
   timelineType: TimelineType
 ) => {
-  if (!timelineIds.length) {
-    return Promise.reject(new Error('timelineIds is empty'));
-  }
+  await Promise.all([
+    note.deleteNotesByTimelineId(request, timelineId),
+    pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+  ]);
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
-      Promise.all([
-        note.deleteNoteByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    )
-  );
-
-  const response = await Promise.all(
-    timelineIds.map((timelineId) =>
-      updatePartialSavedTimeline(request, timelineId, { ...draftTimelineDefaults, timelineType })
-    )
-  );
+  const response = await updatePartialSavedTimeline(request, timelineId, {
+    ...draftTimelineDefaults,
+    timelineType,
+  });
 
   return response;
 };
 
-export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const deleteTimeline = async (
+  request: FrameworkRequest,
+  timelineIds: string[],
+  searchIds?: string[]
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
+  await Promise.all([
+    ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNoteByTimelineId(request, timelineId),
+        note.deleteNotesByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
-    )
+    ),
+    deleteSearchByTimelineId(request, searchIds),
+  ]);
+};
+
+export const copyTimeline = async (
+  request: FrameworkRequest,
+  timeline: SavedTimeline,
+  timelineId: string
+): Promise<ResponseTimeline> => {
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  // Fetch all objects that need to be copied
+  const [notes, pinnedEvents] = await Promise.all([
+    note.getNotesByTimelineId(request, timelineId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
+  ]);
+
+  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
+
+  const timelineResponse = await createTimeline({
+    savedObjectsClient,
+    timeline,
+    timelineId: null,
+    userInfo,
+  });
+
+  const newTimelineId = timelineResponse.timeline.savedObjectId;
+
+  const copiedNotes = Promise.all(
+    notes.map((_note) => {
+      return note.persistNote({
+        request,
+        noteId: null,
+        note: {
+          ..._note,
+          timelineId: newTimelineId,
+        },
+        overrideOwner: false,
+      });
+    })
   );
+
+  const copiedPinnedEvents = pinnedEvents.map((_pinnedEvent) => {
+    return pinnedEvent.persistPinnedEventOnTimeline(
+      request,
+      null,
+      _pinnedEvent.eventId,
+      newTimelineId
+    );
+  });
+
+  await Promise.all([copiedNotes, copiedPinnedEvents]);
+
+  return {
+    code: 200,
+    message: 'success',
+    timeline: await getSavedTimeline(request, newTimelineId),
+  };
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {

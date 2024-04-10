@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { GetElserOptions, ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
+import type {
+  GetModelDownloadConfigOptions,
+  ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import { HttpService } from '../http_service';
+import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
   TrainedModelConfigResponse,
@@ -54,7 +57,7 @@ export interface InferenceStatsResponse {
 }
 
 /**
- * Service with APIs calls to perform inference operations.
+ * Service with APIs calls to perform operations with trained models.
  * @param httpService
  */
 export function trainedModelsApiProvider(httpService: HttpService) {
@@ -73,7 +76,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     /**
      * Gets ELSER config for download based on the cluster OS and CPU architecture.
      */
-    getElserConfig(options?: GetElserOptions) {
+    getElserConfig(options?: GetModelDownloadConfigOptions) {
       return httpService.http<ModelDefinitionResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
         method: 'GET',

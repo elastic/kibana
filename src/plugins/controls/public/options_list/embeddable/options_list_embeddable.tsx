@@ -6,41 +6,43 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
-import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
-import {
-  Filter,
-  compareFilters,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  COMPARE_ALL_OPTIONS,
-  buildExistsFilter,
-} from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
-  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
 } from '../..';
+import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
-import { IClearableControl } from '../../types';
-import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { IClearableControl } from '../../types';
+import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -83,6 +85,7 @@ export class OptionsListEmbeddable
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -113,6 +116,7 @@ export class OptionsListEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent);
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
     ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
@@ -130,7 +134,6 @@ export class OptionsListEmbeddable
       reducers: optionsListReducers,
       initialComponentState: getDefaultComponentState(),
     });
-
     this.select = reduxEmbeddableTools.select;
     this.getState = reduxEmbeddableTools.getState;
     this.dispatch = reduxEmbeddableTools.dispatch;
@@ -142,17 +145,24 @@ export class OptionsListEmbeddable
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
-    if (!initialSelectedOptions) this.setInitializationFinished();
+    if (initialSelectedOptions) {
+      const {
+        explicitInput: { existsSelected, exclude },
+      } = this.getState();
+      const { filters } = await this.selectionsToFilters({
+        existsSelected,
+        exclude,
+        selectedOptions: initialSelectedOptions,
+      });
+      this.dispatch.publishFilters(filters);
+    }
+    this.setInitializationFinished();
 
     this.dispatch.setAllowExpensiveQueries(
       await this.optionsListService.getAllowExpensiveQueries()
     );
 
     this.runOptionsListQuery().then(async () => {
-      if (initialSelectedOptions) {
-        await this.buildFilter();
-        this.setInitializationFinished();
-      }
       this.setupSubscriptions();
     });
   };
@@ -229,7 +239,7 @@ export class OptionsListEmbeddable
             }
           }),
           switchMap(async () => {
-            const newFilters = await this.buildFilter();
+            const { filters: newFilters } = await this.buildFilter();
             this.dispatch.publishFilters(newFilters);
           })
         )
@@ -324,6 +334,7 @@ export class OptionsListEmbeddable
         },
         this.abortController.signal
       );
+
       if (this.optionsListService.optionsListResponseWasFailure(response)) {
         if (response.error === 'aborted') {
           // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
@@ -347,6 +358,7 @@ export class OptionsListEmbeddable
           validSelections: selectedOptions,
           totalCardinality,
         });
+        this.reportInvalidSelections(false);
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -360,14 +372,12 @@ export class OptionsListEmbeddable
           validSelections: valid,
           totalCardinality,
         });
+        this.reportInvalidSelections(true);
       }
 
-      // publish filter
-      const newFilters = await this.buildFilter();
       batch(() => {
         this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
-        this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
@@ -380,37 +390,58 @@ export class OptionsListEmbeddable
     }
   };
 
-  private buildFilter = async () => {
-    const { validSelections } = this.getState().componentState ?? {};
-    const { existsSelected } = this.getState().explicitInput ?? {};
-    const { exclude } = this.getInput();
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
+  };
 
-    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
-      return [];
+  public selectionsToFilters = async (
+    input: Partial<OptionsListEmbeddableInput>
+  ): Promise<ControlFilterOutput> => {
+    const { existsSelected, exclude, selectedOptions } = input;
+
+    if ((!selectedOptions || isEmpty(selectedOptions)) && !existsSelected) {
+      return { filters: [] };
     }
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return;
+    if (!dataView || !field) return { filters: [] };
 
     let newFilter: Filter | undefined;
     if (existsSelected) {
       newFilter = buildExistsFilter(field, dataView);
-    } else if (validSelections) {
-      if (validSelections.length === 1) {
-        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+    } else if (selectedOptions) {
+      if (selectedOptions.length === 1) {
+        newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
       } else {
-        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+        newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
       }
     }
 
-    if (!newFilter) return [];
-
+    if (!newFilter) return { filters: [] };
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
-    return [newFilter];
+    return { filters: [newFilter] };
+  };
+
+  private buildFilter = async (): Promise<ControlFilterOutput> => {
+    const {
+      componentState: { validSelections },
+      explicitInput: { existsSelected, exclude },
+    } = this.getState();
+
+    return await this.selectionsToFilters({
+      existsSelected,
+      exclude,
+      selectedOptions: validSelections,
+    });
   };
 
   public clearSelections() {
     this.dispatch.clearSelections({});
+    this.reportInvalidSelections(false);
   }
 
   reload = () => {
@@ -434,7 +465,7 @@ export class OptionsListEmbeddable
     this.node = node;
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}

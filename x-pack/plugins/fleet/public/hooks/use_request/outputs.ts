@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { GetOutputHealthResponse } from '../../../common/types';
+
 import { outputRoutesService } from '../../services';
 import type {
   PutOutputRequest,
@@ -62,6 +64,14 @@ export function sendDeleteOutput(outputId: string) {
   return sendRequest({
     method: 'delete',
     path: outputRoutesService.getDeletePath(outputId),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendGetOutputHealth(outputId: string) {
+  return sendRequest<GetOutputHealthResponse>({
+    method: 'get',
+    path: outputRoutesService.getOutputHealthPath(outputId),
     version: API_VERSIONS.public.v1,
   });
 }

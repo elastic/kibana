@@ -11,22 +11,17 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { Query } from '@kbn/es-query';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
-
-setHeaderActionMenuMounter(jest.fn());
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: mockDiscoverService,
-  }),
+  useKibana: jest.fn(),
 }));
 
 const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
@@ -77,14 +72,13 @@ function getProps(
 
   return {
     stateContainer,
-    query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),
-    onOpenInspector: jest.fn(),
     onFieldEdited: jest.fn(),
-    isPlainRecord: false,
   };
 }
+
+const mockUseKibana = useKibana as jest.Mock;
 
 describe('Discover topnav component', () => {
   beforeEach(() => {
@@ -106,6 +100,10 @@ describe('Discover topnav component', () => {
         default:
           throw new Error(`Unknown customization id: ${id}`);
       }
+    });
+
+    mockUseKibana.mockReturnValue({
+      services: mockDiscoverService,
     });
   });
 
@@ -278,6 +276,35 @@ describe('Discover topnav component', () => {
 
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
+    });
+  });
+
+  describe('inline top nav', () => {
+    it('should render top nav when inline top nav is not enabled', () => {
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(searchBar.prop('badges')).toBeDefined();
+      expect(searchBar.prop('config')).toBeDefined();
+      expect(searchBar.prop('setMenuMountPoint')).toBeDefined();
+    });
+
+    it('should not render top nav when inline top nav is enabled', () => {
+      const props = getProps();
+      props.stateContainer.customizationContext.inlineTopNav.enabled = true;
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(searchBar.prop('badges')).toBeUndefined();
+      expect(searchBar.prop('config')).toBeUndefined();
+      expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
     });
   });
 });

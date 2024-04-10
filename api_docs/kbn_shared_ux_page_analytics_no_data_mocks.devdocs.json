@@ -316,17 +316,17 @@
           "<PropArguments, ServiceArguments> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           },
           " & ",
           {
             "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],

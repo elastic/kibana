@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
   type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -360,6 +362,7 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     metadataTransformStats,
+    isInitialized,
   } = useEndpointSelector(selector);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
@@ -550,15 +553,39 @@ export const EndpointList = () => {
   );
 
   const mutableListData = useMemo(() => [...listData], [listData]);
-
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (!isInitialized) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.securitySolution.endpoint.list.loadingEndpointManagement', {
+                  defaultMessage: 'Loading Endpoint Management',
+                })}
+              </h2>
+            }
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (listError) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={<h2>{listError.error}</h2>}
+            body={<p>{listError.message}</p>}
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
           items={mutableListData}
           columns={columns}
-          error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
@@ -597,31 +624,34 @@ export const EndpointList = () => {
       );
     }
   }, [
-    canAccessFleet,
-    canReadEndpointList,
-    columns,
+    isInitialized,
+    listError,
     endpointsExist,
-    endpointPrivilegesLoading,
-    handleCreatePolicyClick,
-    handleDeployEndpointsClick,
-    handleSelectableOnChange,
-    hasPolicyData,
-    listError?.message,
-    loading,
-    mutableListData,
-    onTableChange,
-    paginationSetup,
+    canReadEndpointList,
+    canAccessFleet,
     policyItemsLoading,
-    policyItems,
-    selectedPolicyId,
+    hasPolicyData,
+    mutableListData,
+    columns,
+    paginationSetup,
+    onTableChange,
+    loading,
     setTableRowProps,
     sorting,
+    endpointPrivilegesLoading,
+    policyItems,
+    handleDeployEndpointsClick,
+    selectedPolicyId,
+    handleSelectableOnChange,
+    handleCreatePolicyClick,
   ]);
+
+  const hideHeader = !(endpointsExist && isInitialized && !listError);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist}
+      hideHeader={hideHeader}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -637,34 +667,36 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      <>
-        <TransformFailedCallout
-          metadataTransformStats={metadataTransformStats}
-          hasNoPolicyData={!hasPolicyData}
-        />
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {shouldShowKQLBar && (
-            <EuiFlexItem>
-              <AdminSearchBar />
+      {isInitialized && !listError && (
+        <>
+          <TransformFailedCallout
+            metadataTransformStats={metadataTransformStats}
+            hasNoPolicyData={!hasPolicyData}
+          />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {shouldShowKQLBar && (
+              <EuiFlexItem>
+                <AdminSearchBar />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} style={refreshStyle}>
+              <StyledDatePicker>
+                <EuiSuperDatePicker
+                  className="endpointListDatePicker"
+                  onTimeChange={onTimeChange}
+                  isDisabled={hasSelectedEndpoint}
+                  onRefresh={onRefresh}
+                  isPaused={refreshIsPaused}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={onRefreshChange}
+                  isAutoRefreshOnly={true}
+                />
+              </StyledDatePicker>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false} style={refreshStyle}>
-            <StyledDatePicker>
-              <EuiSuperDatePicker
-                className="endpointListDatePicker"
-                onTimeChange={onTimeChange}
-                isDisabled={hasSelectedEndpoint}
-                onRefresh={onRefresh}
-                isPaused={refreshIsPaused}
-                refreshInterval={refreshInterval}
-                onRefreshChange={onRefreshChange}
-                isAutoRefreshOnly={true}
-              />
-            </StyledDatePicker>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

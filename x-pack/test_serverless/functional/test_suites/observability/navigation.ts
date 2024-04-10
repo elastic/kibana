@@ -41,15 +41,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // navigate to log explorer
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-log-explorer' });
+      // navigate to the logs explorer tab by default
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-logs-explorer' });
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-log-explorer',
+        deepLinkId: 'observability-logs-explorer',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'observability-log-explorer',
+        deepLinkId: 'observability-logs-explorer',
       });
-      await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
+      expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection

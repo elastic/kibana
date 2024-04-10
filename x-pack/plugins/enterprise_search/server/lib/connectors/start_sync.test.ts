@@ -345,7 +345,7 @@ describe('startSync lib function', () => {
           },
           filtering: null,
           id: 'connectorId',
-          index_name: `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}index_name`,
+          index_name: `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}search-index_name`,
           language: null,
           pipeline: null,
           service_type: null,

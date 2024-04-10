@@ -85,6 +85,17 @@ export function createTaskPoller<T, H>({
       return;
     }
     pollInterval$.subscribe((interval) => {
+      if (!Number.isSafeInteger(interval) || interval < 0) {
+        // TODO: Investigate why we sometimes get null / NaN, causing the setTimeout logic to always schedule
+        // the next polling cycle to run immediately. If we don't see occurrences of this message by December 2024,
+        // we can remove the TODO and/or check because we now have a cap to how much we increase the poll interval.
+        logger.error(
+          new Error(
+            `Expected the new interval to be a number > 0, received: ${interval} but poller will keep using: ${pollInterval}`
+          )
+        );
+        return;
+      }
       pollInterval = interval;
       logger.debug(`Task poller now using interval of ${interval}ms`);
     });

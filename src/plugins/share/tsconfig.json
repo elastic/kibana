@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/i18n",
@@ -17,6 +16,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-tabbed-modal",
   ],
   "exclude": [
     "target/**/*",

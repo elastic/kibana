@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiInputPopover, EuiFieldText } from '@elastic/eui';
+import type { EuiSelectableOption, EuiFieldTextProps } from '@elastic/eui';
+import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -56,6 +56,7 @@ interface SearchTimelineSuperSelectProps {
   timelineType?: TimelineTypeLiteral;
   placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  'aria-label'?: string;
 }
 
 const getBasicSelectableOptions = (timelineId: string) => [
@@ -77,6 +78,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   timelineType = TimelineType.template,
   onTimelineChange,
   placeholder,
+  'aria-label': ariaLabel,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -88,18 +90,37 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(true);
   }, []);
 
+  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+    if (event.key === keys.ENTER) {
+      setIsPopoverOpen(true);
+    }
+  }, []);
+
+  const popoverId = useMemo(() => htmlIdGenerator('searchTimelinePopover')(), []);
+
   const superSelect = useMemo(
     () => (
       <EuiFieldText
-        readOnly
         disabled={isDisabled}
-        onFocus={handleOpenPopover}
         onClick={handleOpenPopover}
+        onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
+        aria-label={ariaLabel}
+        aria-controls={popoverId}
+        aria-expanded={isPopoverOpen}
+        role="combobox"
       />
     ),
-    [handleOpenPopover, isDisabled, timelineTitle]
+    [
+      ariaLabel,
+      handleKeyboardOpen,
+      handleOpenPopover,
+      isDisabled,
+      isPopoverOpen,
+      popoverId,
+      timelineTitle,
+    ]
   );
 
   const handleGetSelectableOptions = useCallback(
@@ -129,11 +150,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   return (
     <StyledEuiInputPopover
-      id="searchTimelinePopover"
+      id={popoverId}
       input={superSelect}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
-      anchorClassName="rightArrowIcon"
+      className="rightArrowIcon"
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}

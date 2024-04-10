@@ -6,8 +6,9 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import { from, Subscription, Observable } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs/operators';
+import type { Subscription, Observable } from 'rxjs';
+import { from } from 'rxjs';
+import { mergeMap, last, map, toArray } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
@@ -15,27 +16,34 @@ import type {
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import {
+import type {
   AggregatableFieldOverallStats,
+  NonAggregatableFieldOverallStats,
+} from '../search_strategy/requests/overall_stats';
+import {
   checkAggregatableFieldsExistRequest,
   checkNonAggregatableFieldExistsRequest,
+  getSampleOfDocumentsForNonAggregatableFields,
   isAggregatableFieldOverallStats,
   isNonAggregatableFieldOverallStats,
-  NonAggregatableFieldOverallStats,
+  isNonAggregatableSampledDocs,
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
-import {
+import type {
   DataStatsFetchProgress,
-  isRandomSamplingOption,
   OverallStatsSearchStrategyParams,
 } from '../../../../common/types/field_stats';
+import { isRandomSamplingOption } from '../../../../common/types/field_stats';
 import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
-import { MAX_CONCURRENT_REQUESTS } from '../constants/index_data_visualizer_viewer';
+import {
+  getDefaultPageState,
+  MAX_CONCURRENT_REQUESTS,
+} from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
 
 /**
@@ -63,6 +71,7 @@ export function rateLimitingForkJoin<T>(
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+  esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
   probability?: number | null
@@ -128,6 +137,26 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         probability
       );
 
+      const nonAggregatableFieldsExamplesObs = data.search
+        .search<IKibanaSearchRequest, IKibanaSearchResponse>(
+          {
+            params: getSampleOfDocumentsForNonAggregatableFields(
+              nonAggregatableFields,
+              index,
+              searchQuery,
+              timeFieldName,
+              earliest,
+              latest,
+              runtimeFieldMap
+            ),
+          },
+          searchOptions
+        )
+        .pipe(
+          map((resp) => {
+            return resp as IKibanaSearchResponse;
+          })
+        );
       const nonAggregatableFieldsObs = nonAggregatableFields.map((fieldName: string) =>
         data.search
           .search<IKibanaSearchRequest, IKibanaSearchResponse>(
@@ -190,14 +219,29 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const sub = rateLimitingForkJoin<
         AggregatableFieldOverallStats | NonAggregatableFieldOverallStats | undefined
-      >([...aggregatableOverallStatsObs, ...nonAggregatableFieldsObs], MAX_CONCURRENT_REQUESTS);
+      >(
+        [
+          nonAggregatableFieldsExamplesObs,
+          ...aggregatableOverallStatsObs,
+          ...nonAggregatableFieldsObs,
+        ],
+        MAX_CONCURRENT_REQUESTS
+      );
 
       searchSubscription$.current = sub.subscribe({
         next: (value) => {
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
+          let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
+            if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
+              const docs = resp.rawResponse.hits.hits.map((d) =>
+                d.fields ? getProcessedFields(d.fields) : {}
+              );
+
+              sampledNonAggregatableFieldsExamples = docs;
+            }
             if (isAggregatableFieldOverallStats(resp)) {
               aggregatableOverallStatsResp.push(resp);
             }
@@ -214,9 +258,27 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             aggregatableFields
           );
 
+          const nonAggregatableFieldsCount: number[] = new Array(nonAggregatableFields.length).fill(
+            0
+          );
+          const nonAggregatableFieldsUniqueCount = nonAggregatableFields.map(
+            () => new Set<string>()
+          );
+          if (sampledNonAggregatableFieldsExamples) {
+            sampledNonAggregatableFieldsExamples.forEach((doc) => {
+              nonAggregatableFields.forEach((field, fieldIdx) => {
+                if (doc.hasOwnProperty(field)) {
+                  nonAggregatableFieldsCount[fieldIdx] += 1;
+                  nonAggregatableFieldsUniqueCount[fieldIdx].add(doc[field]!);
+                }
+              });
+            });
+          }
           const nonAggregatableOverallStats = processNonAggregatableFieldsExistResponse(
             nonAggregatableOverallStatsResp,
-            nonAggregatableFields
+            nonAggregatableFields,
+            nonAggregatableFieldsCount,
+            nonAggregatableFieldsUniqueCount
           );
 
           setOverallStats({

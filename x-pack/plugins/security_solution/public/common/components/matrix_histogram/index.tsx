@@ -82,10 +82,14 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = 150;
 
-const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
-  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
-    ({ buckets }) => buckets.length > 0
-  );
+const visualizationResponseHasData = (response: VisualizationResponse[]): boolean => {
+  if (response.length === 0) {
+    return false;
+  }
+  return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
+    response[0].aggregations ?? {}
+  ).some(({ buckets }) => buckets.length > 0);
+};
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -209,7 +213,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
     [title, selectedStackByOption]
   );
-  const visualizationResponse = useVisualizationResponse({ visualizationId });
+  const { responses } = useVisualizationResponse({ visualizationId });
   const subtitleWithCounts = useMemo(() => {
     if (isInitialLoading) {
       return null;
@@ -217,10 +221,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     if (typeof subtitle === 'function') {
       if (isChartEmbeddablesEnabled) {
-        if (!visualizationResponse || !visualizationResponseHasData(visualizationResponse[0])) {
+        if (!responses || !visualizationResponseHasData(responses)) {
           return subtitle(0);
         }
-        const visualizationCount = visualizationResponse[0].hits.total;
+        const visualizationCount = responses[0].hits.total;
         return visualizationCount >= 0 ? subtitle(visualizationCount) : null;
       } else {
         return totalCount >= 0 ? subtitle(totalCount) : null;
@@ -228,7 +232,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     }
 
     return subtitle;
-  }, [isChartEmbeddablesEnabled, isInitialLoading, subtitle, totalCount, visualizationResponse]);
+  }, [isChartEmbeddablesEnabled, isInitialLoading, responses, subtitle, totalCount]);
 
   const hideHistogram = useMemo(
     () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
@@ -337,6 +341,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}
                     value={selectedStackByOption?.value}
+                    aria-label={i18n.STACK_BY}
                   />
                 )}
               </EuiFlexItem>

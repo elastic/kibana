@@ -7,7 +7,6 @@
  */
 
 import { App, AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
@@ -19,7 +18,7 @@ export const createLegacyUrlForwardApp = (
   chromeless: true,
   title: 'Legacy URL migration',
   appRoute: '/app/kibana#/',
-  navLinkStatus: AppNavLinkStatus.hidden,
+  visibleIn: [],
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);
 

@@ -21,6 +21,7 @@ import {
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   DEFAULT_FLAPPING_SETTINGS,
   RulesSettingsFlappingProperties,
@@ -29,6 +30,8 @@ import {
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
+  ProcessAlertsOpts,
+  LogAlertsOpts,
   TrackedAlerts,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
@@ -134,14 +137,17 @@ export class LegacyAlertsClient<
     return this.alertFactory?.get(id);
   }
 
-  public processAndLogAlerts({
-    eventLogger,
-    ruleRunMetricsStore,
-    shouldLogAlerts,
-    flappingSettings,
+  public isTrackedAlert(id: string) {
+    return !!this.trackedAlerts.active[id];
+  }
+
+  public processAlerts({
     notifyOnActionGroupChange,
+    flappingSettings,
     maintenanceWindowIds,
-  }: ProcessAndLogAlertsOpts) {
+    alertDelay,
+    ruleRunMetricsStore,
+  }: ProcessAlertsOpts) {
     const {
       newAlerts: processedAlertsNew,
       activeAlerts: processedAlertsActive,
@@ -169,11 +175,14 @@ export class LegacyAlertsClient<
       flappingSettings,
       notifyOnActionGroupChange,
       this.options.ruleType.defaultActionGroupId,
+      alertDelay,
       processedAlertsNew,
       processedAlertsActive,
       trimmedAlertsRecovered,
-      processedAlertsRecoveredCurrent
+      processedAlertsRecoveredCurrent,
+      this.startedAtString
     );
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(alerts.delayedAlertsCount);
     alerts.currentRecoveredAlerts = merge(alerts.currentRecoveredAlerts, earlyRecoveredAlerts);
 
     this.processedAlerts.new = alerts.newAlerts;
@@ -181,17 +190,43 @@ export class LegacyAlertsClient<
     this.processedAlerts.activeCurrent = alerts.currentActiveAlerts;
     this.processedAlerts.recovered = alerts.recoveredAlerts;
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
+  }
 
+  public logAlerts({ eventLogger, ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
     logAlerts({
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
-      newAlerts: alerts.newAlerts,
-      activeAlerts: alerts.currentActiveAlerts,
-      recoveredAlerts: alerts.currentRecoveredAlerts,
+      newAlerts: this.processedAlerts.new,
+      activeAlerts: this.processedAlerts.activeCurrent,
+      recoveredAlerts: this.processedAlerts.recoveredCurrent,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
+    });
+  }
+
+  public processAndLogAlerts({
+    eventLogger,
+    ruleRunMetricsStore,
+    shouldLogAlerts,
+    flappingSettings,
+    notifyOnActionGroupChange,
+    maintenanceWindowIds,
+    alertDelay,
+  }: ProcessAndLogAlertsOpts) {
+    this.processAlerts({
+      notifyOnActionGroupChange,
+      flappingSettings,
+      maintenanceWindowIds,
+      alertDelay,
+      ruleRunMetricsStore,
+    });
+
+    this.logAlerts({
+      eventLogger,
+      ruleRunMetricsStore,
+      shouldLogAlerts,
     });
   }
 
@@ -235,7 +270,9 @@ export class LegacyAlertsClient<
     return null;
   }
 
-  public async persistAlerts() {}
+  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]) {
+    return null;
+  }
 
   public async setAlertStatusToUntracked() {
     return;

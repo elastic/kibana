@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../utils/kibana_react';
-import { loadRuleTypes } from '../services/alert_api';
+import { loadRuleTypes } from '../services/rule_api';
 
 export const useGetRuleTypes = () => {
   const {
@@ -32,6 +32,7 @@ export const useGetRuleTypes = () => {
     queryKey: ['useGetRuleTypes'],
     queryFn,
     onError,
+    refetchOnWindowFocus: false,
   });
 
   return {

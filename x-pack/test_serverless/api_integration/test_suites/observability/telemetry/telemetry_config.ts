@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('/api/telemetry/v2/config API Telemetry config', () => {
+  // failsOnMKI, see https://github.com/elastic/kibana/issues/180348
+  describe('/api/telemetry/v2/config API Telemetry config', function () {
+    this.tags(['failsOnMKI']);
     const baseConfig = {
       allowChangingOptInStatus: false,
       optIn: true,
@@ -23,10 +26,11 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     };
 
     it('GET should get the default config', async () => {
-      await supertest
+      const { body } = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
-        .expect(200, baseConfig);
+        .expect(200);
+      expect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {

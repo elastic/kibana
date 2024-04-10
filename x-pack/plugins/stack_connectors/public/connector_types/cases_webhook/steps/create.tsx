@@ -96,9 +96,9 @@ export const CreateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
           componentProps={{
             euiCodeEditorProps: {
               isReadOnly: readOnly,
-              'data-test-subj': 'webhookCreateIncidentJson',
               ['aria-label']: i18n.CODE_EDITOR,
             },
+            dataTestSubj: 'webhookCreateIncidentJson',
             messageVariables: casesVars,
             paramsProperty: 'createIncidentJson',
             buttonTitle: i18n.ADD_CASES_VARIABLE,

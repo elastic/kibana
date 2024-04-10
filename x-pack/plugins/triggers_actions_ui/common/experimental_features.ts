@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.
@@ -13,7 +13,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
-  internalAlertsTable: false,
+  globalAlertsPage: false,
   ruleTagFilter: true,
   ruleStatusFilter: true,
   rulesDetailLogs: true,
@@ -21,6 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
+  ruleFormV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -45,7 +46,6 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new TriggersActionsUIInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
-    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

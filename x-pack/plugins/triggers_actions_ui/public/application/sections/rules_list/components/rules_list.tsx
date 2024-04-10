@@ -11,8 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import React, {
   lazy,
   useEffect,
@@ -36,11 +37,15 @@ import { useHistory } from 'react-router-dom';
 
 import {
   RuleExecutionStatus,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  RuleCreationValidConsumer,
+  ruleDetailsRoute as commonRuleDetailsRoute,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
@@ -50,7 +55,6 @@ import {
   Pagination,
   Percentiles,
   SnoozeSchedule,
-  RulesListFilters,
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
@@ -103,6 +107,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
+import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
@@ -133,6 +138,7 @@ export interface RulesListProps {
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 export const percentileFields = {
@@ -173,6 +179,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -183,24 +190,17 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
+    i18n: i18nStart,
+    theme,
   } = kibanaServices;
+
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
 
-  const [filters, setFilters] = useState<RulesListFilters>({
-    actionTypes: [],
-    ruleExecutionStatuses: lastResponseFilter || [],
-    ruleLastRunOutcomes: lastRunOutcomeFilter || [],
-    ruleParams: ruleParamFilter || {},
-    ruleStatuses: statusFilter || [],
-    searchText: searchFilter || '',
-    tags: [],
-    types: typeFilter || [],
-    kueryNode: undefined,
-  });
-
+  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
+  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -252,6 +252,17 @@ export const RulesList = ({
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
+
+  const { filters, setFiltersStore, numberOfFiltersStore, resetFiltersStore } =
+    useRulesListFilterStore({
+      lastResponseFilter,
+      lastRunOutcomeFilter,
+      rulesListKey,
+      ruleParamFilter,
+      statusFilter,
+      searchFilter,
+      typeFilter,
+    });
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -357,8 +368,7 @@ export const RulesList = ({
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
-    ...filters,
-    typesFilter: rulesTypesFilter,
+    filters: { ...filters, types: rulesTypesFilter },
   });
 
   const handleUpdateFiltersEffect = useCallback(
@@ -400,14 +410,10 @@ export const RulesList = ({
 
   const updateFilters = useCallback(
     (updateFiltersProps: UpdateFiltersProps) => {
-      const { filter, value } = updateFiltersProps;
-      setFilters((prev) => ({
-        ...prev,
-        [filter]: value,
-      }));
+      setFiltersStore(updateFiltersProps);
       handleUpdateFiltersEffect(updateFiltersProps);
     },
-    [setFilters, handleUpdateFiltersEffect]
+    [setFiltersStore, handleUpdateFiltersEffect]
   );
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
@@ -553,8 +559,8 @@ export const RulesList = ({
   };
 
   const onDisableRule = useCallback(
-    (rule: RuleTableItem) => {
-      return bulkDisableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem, untrack: boolean) => {
+      return bulkDisableRules({ http, ids: [rule.id], untrack });
     },
     [bulkDisableRules]
   );
@@ -650,13 +656,13 @@ export const RulesList = ({
     }
   };
 
-  const openFlyout = useCallback(() => {
-    setRuleFlyoutVisibility(true);
+  const openRuleTypeModal = useCallback(() => {
+    setRuleTypeModalVisibility(true);
   }, []);
 
   useEffect(() => {
     setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openFlyout} />] : []),
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
       <RulesSettingsLink />,
       <RulesListDocLink />,
     ]);
@@ -688,7 +694,8 @@ export const RulesList = ({
       toasts.addDanger({
         title: parsedError.summary,
         text: toMountPoint(
-          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>
+          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
+          { theme, i18n: i18nStart }
         ),
       });
     } else {
@@ -699,12 +706,12 @@ export const RulesList = ({
     onClearSelection();
   };
 
-  const onDisable = async () => {
+  const onDisable = async (untrack: boolean) => {
     setIsDisablingRules(true);
 
     const { errors, total } = isAllSelected
-      ? await bulkDisableRules({ http, filter: getFilter() })
-      : await bulkDisableRules({ http, ids: selectedIds });
+      ? await bulkDisableRules({ http, filter: getFilter(), untrack })
+      : await bulkDisableRules({ http, ids: selectedIds, untrack });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
@@ -755,7 +762,7 @@ export const RulesList = ({
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
         showCreateRuleButtonInPrompt={showCreateRuleButtonInPrompt}
         showSpinner={showSpinner}
-        onCreateRulesClick={openFlyout}
+        onCreateRulesClick={openRuleTypeModal}
       />
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
@@ -976,6 +983,8 @@ export const RulesList = ({
               rulesListKey={rulesListKey}
               config={config}
               visibleColumns={visibleColumns}
+              numberOfFilters={numberOfFiltersStore}
+              resetFilters={resetFiltersStore}
             />
             {manageLicenseModalOpts && (
               <ManageLicenseModal
@@ -993,10 +1002,24 @@ export const RulesList = ({
             )}
           </>
         )}
+        {ruleTypeModalVisible && (
+          <RuleTypeModal
+            onClose={() => setRuleTypeModalVisibility(false)}
+            onSelectRuleType={(ruleTypeId) => {
+              setRuleTypeIdToCreate(ruleTypeId);
+              setRuleTypeModalVisibility(false);
+              setRuleFlyoutVisibility(true);
+            }}
+            http={http}
+            toasts={toasts}
+            registeredRuleTypes={ruleTypeRegistry.list()}
+            filteredRuleTypes={filteredRuleTypes}
+          />
+        )}
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd
-              consumer={ALERTS_FEATURE_ID}
+              consumer={ALERTING_FEATURE_ID}
               onClose={() => {
                 setRuleFlyoutVisibility(false);
               }}
@@ -1004,6 +1027,9 @@ export const RulesList = ({
               ruleTypeRegistry={ruleTypeRegistry}
               ruleTypeIndex={ruleTypesState.data}
               onSave={refreshRules}
+              initialSelectedConsumer={initialSelectedConsumer}
+              ruleTypeId={ruleTypeIdToCreate}
+              canChangeTrigger={false}
             />
           </Suspense>
         )}

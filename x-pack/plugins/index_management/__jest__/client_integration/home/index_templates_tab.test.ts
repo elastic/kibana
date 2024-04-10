@@ -78,6 +78,26 @@ describe('Index Templates tab', () => {
       expect(exists('templateTable')).toBe(true);
       expect(exists('legacyTemplateTable')).toBe(false);
     });
+
+    test('Components column renders a link to Component templates', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [
+          fixtures.getComposableTemplate({
+            name: 'Test',
+            composedOf: ['component1', 'component2'],
+          }),
+        ],
+        legacyTemplates: [],
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      const { exists, component } = testBed;
+      component.update();
+
+      expect(exists('componentTemplatesLink')).toBe(true);
+    });
   });
 
   describe('when there are index templates', () => {
@@ -111,6 +131,13 @@ describe('Index Templates tab', () => {
       type: 'system',
     });
 
+    const deprecatedTemplate = fixtures.getTemplate({
+      name: `.d${getRandomString()}`,
+      indexPatterns: ['template7Pattern1*'],
+      type: 'system',
+      deprecated: true,
+    });
+
     const template4 = fixtures.getTemplate({
       name: `a${getRandomString()}`,
       indexPatterns: ['template4Pattern1*', 'template4Pattern2'],
@@ -140,7 +167,7 @@ describe('Index Templates tab', () => {
       type: 'system',
     });
 
-    const templates = [template1, template2, template3];
+    const templates = [template1, template2, template3, deprecatedTemplate];
     const legacyTemplates = [template4, template5, template6];
 
     beforeEach(async () => {
@@ -161,19 +188,18 @@ describe('Index Templates tab', () => {
       // Test composable table content
       tableCellsValues.forEach((row, i) => {
         const indexTemplate = templates[i];
-        const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
+        const { name, indexPatterns, composedOf, template } = indexTemplate;
 
         const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
-        const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
-        const composedOfString = composedOf ? composedOf.join(',') : '';
+        const composedOfCount = `${composedOf ? composedOf.length : 0}`;
 
         try {
           expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
             '', // Checkbox to select row
             name,
             indexPatterns.join(', '),
-            ilmPolicyName,
-            composedOfString,
+            composedOfCount,
+            '', // data stream column
             hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
             'EditDelete', // Column of actions
           ]);
@@ -243,6 +269,35 @@ describe('Index Templates tab', () => {
 
       const { rows: updatedRows } = table.getMetaData('legacyTemplateTable');
       expect(updatedRows.length).toEqual(legacyTemplates.length);
+    });
+
+    test('should have a switch to view deprecated templates', async () => {
+      const { table, actions } = testBed;
+      const { tableCellsValues } = table.getMetaData('templateTable');
+
+      // None of the available templates should have the deprecated template
+      tableCellsValues.forEach((row) => {
+        expect(
+          removeWhiteSpaceOnArrayValues(row).every(
+            (cell) => !cell.includes(deprecatedTemplate.name)
+          )
+        ).toBeTruthy();
+      });
+
+      actions.toggleViewItem('system');
+      actions.toggleViewItem('deprecated');
+
+      // After when all the tempaltes are available should have the deprecated template
+      const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('templateTable');
+
+      // Find the row that has the deprecated template
+      const tableCellsWithDeprecatedTemplate = updatedTableCellsValues.filter((row) => {
+        return removeWhiteSpaceOnArrayValues(row).some((cell) =>
+          cell.includes(deprecatedTemplate.name)
+        );
+      });
+      // Assert that it has one row with the deprecated template
+      expect(tableCellsWithDeprecatedTemplate.length).toBe(1);
     });
 
     test('each row should have a link to the template details panel', async () => {

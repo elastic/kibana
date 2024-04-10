@@ -7,19 +7,31 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { EuiPanel } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { useUiSetting } from '../../../common/lib/kibana';
+
+const ContainerDiv = styled('div')`
+  .side-panel-flyout-footer {
+    padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
+  }
+`;
+
+interface PanelFooterProps {
+  /**
+   * Boolean that indicates whether flyout is in preview and action should be hidden
+   */
+  isPreview: boolean;
+}
 
 /**
  *
  */
-export const PanelFooter: FC = () => {
-  const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
+export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+  const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
     eventId,
     indexName,
@@ -28,8 +40,6 @@ export const PanelFooter: FC = () => {
     refetchFlyoutData,
     scopeId,
   } = useRightPanelContext();
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
-
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
   const showHostIsolationPanelCallback = useCallback(
@@ -48,14 +58,8 @@ export const PanelFooter: FC = () => {
     [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
   );
 
-  return (
-    <EuiPanel
-      hasShadow={false}
-      borderRadius="none"
-      style={{
-        backgroundColor: isDarkMode ? `rgb(37, 38, 46)` : `rgb(241, 244, 250)`,
-      }}
-    >
+  return !isPreview ? (
+    <ContainerDiv>
       <FlyoutFooter
         detailsData={dataFormattedForFieldBrowser}
         detailsEcsData={dataAsNestedObject}
@@ -67,6 +71,6 @@ export const PanelFooter: FC = () => {
         scopeId={scopeId}
         refetchFlyoutData={refetchFlyoutData}
       />
-    </EuiPanel>
-  );
+    </ContainerDiv>
+  ) : null;
 };

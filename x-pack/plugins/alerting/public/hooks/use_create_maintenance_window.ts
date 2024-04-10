@@ -7,19 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../utils/kibana_react';
-import { MaintenanceWindow } from '../pages/maintenance_windows/types';
-import { createMaintenanceWindow } from '../services/maintenance_windows_api/create';
+import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
 
-export function useCreateMaintenanceWindow() {
+interface UseCreateMaintenanceWindowProps {
+  onError?: (error: IHttpFetchError<KibanaServerError>) => void;
+}
+
+export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowProps) {
+  const { onError } = props || {};
+
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const mutationFn = (maintenanceWindow: MaintenanceWindow) => {
-    return createMaintenanceWindow({ http, maintenanceWindow });
+  const mutationFn = (createParams: CreateParams) => {
+    return createMaintenanceWindow({ http, createParams });
   };
 
   return useMutation(mutationFn, {
@@ -33,12 +40,13 @@ export function useCreateMaintenanceWindow() {
         })
       );
     },
-    onError: () => {
+    onError: (error: IHttpFetchError<KibanaServerError>) => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsCreateFailure', {
           defaultMessage: 'Failed to create maintenance window.',
         })
       );
+      onError?.(error);
     },
   });
 }

@@ -49,7 +49,6 @@ describe('Policy Memory Protections Card', () => {
     expect(getByTestId(testSubj.enableDisableSwitch));
     expect(getByTestId(testSubj.protectionPreventRadio));
     expect(getByTestId(testSubj.notifyUserCheckbox));
-    expect(getByTestId(testSubj.rulesCallout));
   });
 
   it('should show supported OS values', () => {
@@ -97,21 +96,22 @@ describe('Policy Memory Protections Card', () => {
             'Memory threat' +
             'Operating system' +
             'Windows, Mac, Linux ' +
-            'Memory threat protections enabled' +
+            'Memory threat protections' +
             'Protection level' +
             'Prevent' +
             'User notification' +
             'Agent version 7.15+' +
             'Notify user' +
             'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            '—'
         )
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
+      expect(getByTestId(testSubj.notifyUserCheckbox)).toHaveAttribute('checked');
     });
 
     it('should display correctly when overall card is disabled', () => {
-      set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
+      set(formProps.policy, 'windows.memory_protection.mode', ProtectionModes.off);
       const { getByTestId } = render();
 
       expectIsViewOnly(getByTestId(testSubj.card));
@@ -122,21 +122,14 @@ describe('Policy Memory Protections Card', () => {
             'Memory threat' +
             'Operating system' +
             'Windows, Mac, Linux ' +
-            'Memory threat protections enabled' +
-            'Protection level' +
-            'Prevent' +
-            'User notification' +
-            'Agent version 7.15+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            'Memory threat protections'
         )
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('false');
     });
 
     it('should display user notification disabled', () => {
-      set(formProps.policy, 'windows.popup.malware.enabled', false);
+      set(formProps.policy, 'windows.popup.memory_protection.enabled', false);
 
       const { getByTestId } = render();
 
@@ -148,17 +141,16 @@ describe('Policy Memory Protections Card', () => {
             'Memory threat' +
             'Operating system' +
             'Windows, Mac, Linux ' +
-            'Memory threat protections enabled' +
+            'Memory threat protections' +
             'Protection level' +
             'Prevent' +
             'User notification' +
             'Agent version 7.15+' +
-            'Notify user' +
-            'Notification message' +
-            '—' +
-            'View related detection rules. Prebuilt rules are tagged “Elastic” on the Detection Rules page.'
+            'Notify user'
         )
       );
+      expect(getByTestId(testSubj.enableDisableSwitch).getAttribute('aria-checked')).toBe('true');
+      expect(getByTestId(testSubj.notifyUserCheckbox)).not.toHaveAttribute('checked');
     });
   });
 });

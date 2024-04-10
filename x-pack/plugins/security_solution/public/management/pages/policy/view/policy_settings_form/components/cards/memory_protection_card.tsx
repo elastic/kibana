@@ -24,7 +24,6 @@ import type { MemoryProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { SettingCard } from '../setting_card';
-import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
 
 export const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
@@ -107,7 +106,6 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
         />
 
         <EuiSpacer size="m" />
-        <RelatedDetectionRulesCallout data-test-subj={getTestId('rulesCallout')} />
       </SettingCard>
     );
   }

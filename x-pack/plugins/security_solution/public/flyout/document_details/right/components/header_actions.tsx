@@ -9,9 +9,7 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NewChatById } from '@kbn/elastic-assistant';
-import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
-import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useAssistant } from '../hooks/use_assistant';
@@ -37,11 +35,6 @@ export const HeaderActions: VFC = memo(() => {
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
-  const modifier = (value: string) => {
-    const query = new URLSearchParams(window.location.search);
-    return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
-  };
-
   const { showAssistant, promptContextId } = useAssistant({
     dataFormattedForFieldBrowser,
     isAlert,
@@ -57,8 +50,10 @@ export const HeaderActions: VFC = memo(() => {
     >
       {showAssistant && (
         <EuiFlexItem grow={false}>
-          <NewChatById
-            conversationId={isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID}
+          <NewChatByTitle
+            conversationTitle={
+              isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+            }
             promptContextId={promptContextId}
             iconOnly
           />
@@ -82,8 +77,8 @@ export const HeaderActions: VFC = memo(() => {
                     { defaultMessage: 'Share alert' }
                   )}
                   data-test-subj={SHARE_BUTTON_TEST_ID}
-                  onClick={() => copyFunction(copy, alertDetailsLink, modifier)}
-                  onKeyDown={() => copyFunction(copy, alertDetailsLink, modifier)}
+                  onClick={copy}
+                  onKeyDown={copy}
                 />
               )}
             </EuiCopy>

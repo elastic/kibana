@@ -301,6 +301,7 @@ describe('restrictInternal post-auth handler', () => {
       name: 'my-server-name',
       restrictInternalApis: true,
     });
+
     it('returns a bad request if called without internal origin header for internal API', () => {
       const handler = createRestrictInternalRoutesPostAuthHandler(config as HttpConfig);
       const request = createForgeRequest('internal');
@@ -310,8 +311,8 @@ describe('restrictInternal post-auth handler', () => {
       const result = handler(request, responseFactory, toolkit);
 
       expect(toolkit.next).not.toHaveBeenCalled();
-      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatch(
-        /uri \[.*\/internal\/some-path\] with method \[get\] exists but is not available with the current configuration/
+      expect(responseFactory.badRequest.mock.calls[0][0]?.body).toMatchInlineSnapshot(
+        `"uri [/internal/some-path] with method [get] exists but is not available with the current configuration"`
       );
       expect(result).toBe('badRequest');
     });

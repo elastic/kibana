@@ -21,6 +21,7 @@ import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
   FLEET_COMPONENT_TEMPLATES,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
 } from '../../../../constants';
 
@@ -82,6 +83,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -101,6 +103,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'metrics@tsdb-settings',
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -125,6 +128,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
   });
@@ -143,6 +147,7 @@ describe('EPM template', () => {
     });
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -755,6 +760,84 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
+  it('tests processing object field with subobjects set to false (case B)', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: b.labels.*
+  type: object
+  object_type: keyword
+  subobjects: false
+  `;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'b.labels.*': {
+            path_match: 'b.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        b: {
+          type: 'object',
+          dynamic: true,
+          properties: {
+            labels: {
+              dynamic: true,
+              type: 'object',
+              subobjects: false,
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
+  it('tests processing object field with subobjects set to false (case D)', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: d.labels
+  type: object
+  object_type: keyword
+  subobjects: false
+  `;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'd.labels': {
+            path_match: 'd.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        d: {
+          type: 'object',
+          dynamic: true,
+          properties: {
+            labels: {
+              dynamic: true,
+              type: 'object',
+              subobjects: false,
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
   it('tests processing nested field with property', () => {
     const nestedYaml = `
   - name: a.b
@@ -1231,6 +1314,71 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing dimension fields on a dynamic template object', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template field', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
   it('tests processing scaled_float fields in a dynamic template', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: numeric_labels
@@ -1331,6 +1479,63 @@ describe('EPM template', () => {
             mapping: {
               type: 'object',
               dynamic: true,
+            },
+          },
+        },
+        {
+          'group.*': {
+            path_match: 'group.*',
+            match_mapping_type: 'object',
+            mapping: {
+              type: 'object',
+              dynamic: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dynamic templates priority of intermediate objects', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: group.*.value
+  type: object
+  object_type: double
+  object_type_mapping_type: "*"
+  metric_type: gauge
+- name: group.*.histogram
+  type: object
+  object_type: histogram
+  object_type_mapping_type: "*"
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        group: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'group.*.value': {
+            match_mapping_type: '*',
+            path_match: 'group.*.value',
+            mapping: {
+              time_series_metric: 'gauge',
+              type: 'double',
+            },
+          },
+        },
+        {
+          'group.*.histogram': {
+            path_match: 'group.*.histogram',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'histogram',
             },
           },
         },
@@ -1533,7 +1738,14 @@ describe('EPM template', () => {
         },
       ]);
 
-      expect(esClient.indices.rollover).toHaveBeenCalled();
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();

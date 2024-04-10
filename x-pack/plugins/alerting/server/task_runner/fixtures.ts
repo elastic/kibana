@@ -15,11 +15,13 @@ import {
   RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
   SanitizedRule,
+  SanitizedRuleAction,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { RawRule } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
   [key: string]: string | number | boolean | undefined | object[] | boolean[] | object;
@@ -81,7 +83,7 @@ export const generateSavedObjectParams = ({
   history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
 }) => [
-  'alert',
+  RULE_SAVED_OBJECT_TYPE,
   '1',
   {
     monitoring: {
@@ -213,7 +215,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
 
 export const mockedRawRuleSO: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   references: [],
   attributes: {
     legacyId: '1',
@@ -283,7 +285,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     return {
       ...action,
       id: action.uuid,
-    };
+    } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
 };
@@ -419,14 +421,14 @@ export const generateEnqueueFunctionInput = ({
       {
         id: '1',
         namespace: undefined,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: RULE_TYPE_ID,
       },
     ],
     source: {
       source: {
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       },
       type: 'SAVED_OBJECT',
     },
@@ -436,7 +438,7 @@ export const generateEnqueueFunctionInput = ({
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory, actions }: GeneratorParams = {
+  { id, duration, start, flappingHistory, actions, maintenanceWindowIds }: GeneratorParams = {
     id: 1,
     flappingHistory: [false],
   }
@@ -451,8 +453,9 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
-      maintenanceWindowIds: [],
+      maintenanceWindowIds: maintenanceWindowIds || [],
       pendingRecoveredCount: 0,
+      activeCount: 1,
     },
     state: {
       bar: false,

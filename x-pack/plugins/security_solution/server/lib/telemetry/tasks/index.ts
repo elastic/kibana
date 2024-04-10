@@ -12,6 +12,7 @@ import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 import { createTelemetryTimelineTaskConfig } from './timelines';
+import { createTelemetryDiagnosticTimelineTaskConfig } from './timelines_diagnostic';
 import { createTelemetryConfigurationTaskConfig } from './configuration';
 import { telemetryConfiguration } from '../configuration';
 import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
@@ -26,6 +27,7 @@ export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
     ),
     createTelemetryPrebuiltRuleAlertsTaskConfig(telemetryConfiguration.max_detection_alerts_batch),
     createTelemetryTimelineTaskConfig(),
+    createTelemetryDiagnosticTimelineTaskConfig(),
     createTelemetryConfigurationTaskConfig(),
     createTelemetryFilterListArtifactTaskConfig(),
   ];

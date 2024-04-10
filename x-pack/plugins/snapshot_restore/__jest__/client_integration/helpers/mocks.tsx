@@ -5,19 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-/*
- * Mocking AutoSizer of the react-virtualized because it does not render children in JS DOM.
- * This seems related to not being able to properly discover height and width.
- */
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+import '@kbn/code-editor-mock/jest_helper';

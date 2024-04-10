@@ -22,7 +22,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const toasts = getService('toasts');
 
-  describe('Cases persistable attachments', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/180219
+  describe.skip('Cases persistable attachments', function () {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
@@ -57,7 +58,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await testSubjects.click('cases-table-add-case-filter-bar');
 
         await testSubjects.existOrFail('create-case-flyout');
 
@@ -72,7 +74,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -100,13 +102,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
 
         // verify that solution filter is not visible
-        await testSubjects.missingOrFail('solution-filter-popover-button');
+        await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');

@@ -11,11 +11,17 @@ import { getI18nIdentifierFromFilePath } from './get_i18n_identifier_from_file_p
 const SYSTEMPATH = 'systemPath';
 
 const testMap = [
-  ['x-pack/plugins/observability/public/header_actions.tsx', 'xpack.observability'],
-  ['x-pack/plugins/apm/common/components/app/correlations/correlations_table.tsx', 'xpack.apm'],
+  [
+    'x-pack/plugins/observability_solution/observability/public/header_actions.tsx',
+    'xpack.observability',
+  ],
+  [
+    'x-pack/plugins/observability_solution/apm/common/components/app/correlations/correlations_table.tsx',
+    'xpack.apm',
+  ],
   ['x-pack/plugins/cases/server/components/foo.tsx', 'xpack.cases'],
   [
-    'x-pack/plugins/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
+    'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
     'xpack.synthetics',
   ],
   ['src/plugins/vis_types/gauge/public/editor/collections.ts', 'visTypeGauge'],

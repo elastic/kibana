@@ -20,6 +20,7 @@ jest.mock('./create_filter', () => ({
 
 const fieldName = 'user.name';
 const value = 'the value';
+const dataViewId = 'mockDataViewId';
 
 const mockWarningToast = jest.fn();
 
@@ -95,6 +96,7 @@ describe('createFilterOutAction', () => {
         key: fieldName,
         value: [value],
         negate: true,
+        dataViewId,
       });
     });
 
@@ -112,6 +114,7 @@ describe('createFilterOutAction', () => {
         key: fieldName,
         value: [value],
         negate: true,
+        dataViewId,
       });
     });
 
@@ -125,7 +128,12 @@ describe('createFilterOutAction', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: false });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: false,
+        dataViewId,
+      });
     });
 
     it('should create filter query with undefined value', async () => {
@@ -142,6 +150,7 @@ describe('createFilterOutAction', () => {
         key: fieldName,
         value: [],
         negate: false,
+        dataViewId,
       });
     });
 
@@ -155,7 +164,12 @@ describe('createFilterOutAction', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [''], negate: false });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [''],
+        negate: false,
+        dataViewId,
+      });
     });
 
     it('should create negate filter query with empty array value', async () => {
@@ -168,7 +182,12 @@ describe('createFilterOutAction', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: false });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [],
+        negate: false,
+        dataViewId,
+      });
     });
 
     it('should notify the user when value type is unsupported', async () => {

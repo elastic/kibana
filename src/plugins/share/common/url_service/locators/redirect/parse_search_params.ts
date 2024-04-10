@@ -22,7 +22,9 @@ import type { RedirectOptions } from './types';
  * @param urlSearch Search part of URL path.
  * @returns Parsed out locator ID, version, and locator params.
  */
-export function parseSearchParams(urlSearch: string): RedirectOptions {
+export function parseSearchParams<P extends SerializableRecord = unknown & SerializableRecord>(
+  urlSearch: string
+): RedirectOptions<P> {
   const search = new URLSearchParams(urlSearch);
 
   const id = search.get('l');
@@ -66,7 +68,7 @@ export function parseSearchParams(urlSearch: string): RedirectOptions {
     throw new Error(message);
   }
 
-  let params: unknown & SerializableRecord;
+  let params: P;
   try {
     params = JSON.parse(paramsJson);
   } catch {

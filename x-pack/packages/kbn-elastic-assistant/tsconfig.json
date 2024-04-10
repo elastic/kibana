@@ -16,6 +16,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/elastic-assistant-common",
     "@kbn/core-http-browser",
     "@kbn/i18n",
     "@kbn/stack-connectors-plugin",

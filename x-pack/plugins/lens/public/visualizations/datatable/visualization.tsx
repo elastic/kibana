@@ -14,6 +14,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -315,16 +316,20 @@ export const getDatatableVisualization = ({
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
               const stops = columnConfig?.palette?.params?.stops;
+              const isNumeric = Boolean(
+                accessor && isNumericFieldForDatatable(frame.activeData?.[state.layerId], accessor)
+              );
               const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
                 triggerIconType: columnConfig?.hidden
                   ? 'invisible'
-                  : hasColoring
+                  : hasColoring && isNumeric
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
+                palette:
+                  hasColoring && isNumeric && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -496,6 +501,7 @@ export const getDatatableVisualization = ({
               width: column.width,
               isTransposed: column.isTransposed,
               transposable: isTransposable,
+              alignment: column.alignment,
               colorMode: canColor && column.colorMode ? column.colorMode : 'none',
               palette: paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams),
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
@@ -628,6 +634,12 @@ export const getDatatableVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getSortedColumns(state, datasourceLayers) {
+    const { sortedColumns } =
+      getDataSourceAndSortedColumns(state, datasourceLayers || {}, state.layerId) || {};
+    return sortedColumns;
   },
 
   getVisualizationInfo(state) {

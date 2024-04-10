@@ -23,24 +23,38 @@ type RuleCreateBody = Omit<
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
+  alertDelay,
   ...res
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  actions: actions.map(
-    ({ group, id, params, frequency, alertsFilter, useAlertDataForTemplate }) => ({
-      group,
+  actions: actions.map((action) => {
+    const { id, params } = action;
+    return {
+      ...('group' in action && action.group ? { group: action.group } : {}),
       id,
       params,
-      frequency: {
-        notify_when: frequency!.notifyWhen,
-        throttle: frequency!.throttle,
-        summary: frequency!.summary,
-      },
-      alerts_filter: alertsFilter,
-      use_alert_data_for_template: useAlertDataForTemplate,
-    })
-  ),
+      ...('frequency' in action && action.frequency
+        ? {
+            frequency: {
+              notify_when: action.frequency!.notifyWhen,
+              throttle: action.frequency!.throttle,
+              summary: action.frequency!.summary,
+            },
+          }
+        : {}),
+      ...('alertsFilter' in action && action.alertsFilter
+        ? {
+            alerts_filter: action.alertsFilter,
+          }
+        : {}),
+      ...('useAlertDataForTemplate' in action &&
+      typeof action.useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: action.useAlertDataForTemplate }
+        : {}),
+    };
+  }),
+  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export async function createRule({

@@ -14,11 +14,11 @@ import {
 } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');
-jest.mock('../../../services/alert_api', () => ({
+jest.mock('../../../services/rule_api', () => ({
   loadRuleTypes: jest.fn(),
 }));
 
-const { loadRuleTypes } = jest.requireMock('../../../services/alert_api');
+const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
 const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_react');
 
 const formProps: CreateMaintenanceWindowFormProps = {
@@ -43,6 +43,11 @@ describe('CreateMaintenanceWindowForm', () => {
           toasts: {
             addSuccess: jest.fn(),
             addDanger: jest.fn(),
+          },
+        },
+        unifiedSearch: {
+          ui: {
+            SearchBar: <div />,
           },
         },
       },
@@ -126,7 +131,9 @@ describe('CreateMaintenanceWindowForm', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
-    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('input');
+    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
+      'comboBoxSearchInput'
+    );
 
     await waitFor(() => {
       expect(
@@ -136,13 +143,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
@@ -151,7 +158,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
     expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
     expect(recurringInput).toBeChecked();
-    expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
+    expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
   it('should initialize MWs without category ids properly', async () => {
@@ -176,13 +183,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();
@@ -213,13 +220,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(managementInput).toBeChecked();
@@ -237,13 +244,13 @@ describe('CreateMaintenanceWindowForm', () => {
 
     const observabilityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-observability');
+    ).getByTestId('option-observability');
     const securityInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-securitySolution');
+    ).getByTestId('option-securitySolution');
     const managementInput = within(
       result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('checkbox-management');
+    ).getByTestId('option-management');
 
     expect(observabilityInput).toBeChecked();
     expect(securityInput).toBeChecked();

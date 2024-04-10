@@ -705,6 +705,22 @@
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server",
+            "id": "def-common.OpsOsMetrics.cgroup_memory",
+            "type": "Object",
+            "tags": [],
+            "label": "cgroup_memory",
+            "description": [
+              "memory cgroup metrics, undefined when not running in cgroup v2"
+            ],
+            "signature": [
+              "{ current_in_bytes: number; swap_current_in_bytes: number; } | undefined"
+            ],
+            "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -745,7 +761,7 @@
               "process memory usage"
             ],
             "signature": [
-              "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; }"
+              "{ heap: { total_in_bytes: number; used_in_bytes: number; size_limit: number; }; resident_set_size_in_bytes: number; external_in_bytes: number; array_buffers_in_bytes: number; }"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,
@@ -758,7 +774,7 @@
             "tags": [],
             "label": "event_loop_delay",
             "description": [
-              "mean event loop delay since last collection"
+              "max event loop delay since last collection"
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,
@@ -892,7 +908,7 @@
           "\nProtocol(s) used by the Elasticsearch Client"
         ],
         "signature": [
-          "\"none\" | \"http\" | \"mixed\" | \"https\""
+          "\"none\" | \"mixed\" | \"http\" | \"https\""
         ],
         "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
         "deprecated": false,

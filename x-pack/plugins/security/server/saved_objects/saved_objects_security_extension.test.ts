@@ -19,6 +19,10 @@ import type {
   AuthorizeUpdateObject,
   BulkResolveError,
 } from '@kbn/core-saved-objects-server';
+import type {
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 import {
   AuditAction,
@@ -26,9 +30,7 @@ import {
   SecurityAction,
 } from './saved_objects_security_extension';
 import { auditLoggerMock } from '../audit/mocks';
-import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 
 const checkAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
@@ -48,6 +50,7 @@ const addAuditEventSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,
   'addAuditEvent'
 );
+const getCurrentUser = jest.fn();
 
 const obj1 = {
   type: 'a',
@@ -111,6 +114,7 @@ function setup() {
     auditLogger,
     errors,
     checkPrivileges,
+    getCurrentUser,
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }

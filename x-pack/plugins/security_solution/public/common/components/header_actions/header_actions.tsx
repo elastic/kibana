@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import type { EuiDataGridSorting } from '@elastic/eui';
+import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
 import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
@@ -16,7 +16,7 @@ import { TimelineTabs, TimelineId } from '../../../../common/types';
 import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { isActiveTimeline } from '../../../helpers';
 import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { useKibana } from '../../lib/kibana';
@@ -63,6 +63,10 @@ const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
 `;
+
+// Defined statically to reduce rerenders
+const emptySchema = {};
+const emptySchemaDetectors: EuiDataGridSchemaDetector[] = [];
 
 const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   width,
@@ -193,7 +197,13 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders, dispatch, timelineId, defaultColumns]
   );
 
-  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+  const ColumnSorting = useDataGridColumnSorting({
+    columns: myColumns,
+    sorting: sortedColumns,
+    schema: emptySchema,
+    schemaDetectors: emptySchemaDetectors,
+    displayValues,
+  });
 
   return (
     <ActionsContainer>

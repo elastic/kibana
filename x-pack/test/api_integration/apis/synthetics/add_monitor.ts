@@ -9,7 +9,11 @@ import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
-import { ConfigKey, DataStream, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  HTTPFields,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
@@ -17,7 +21,7 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
-import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
+import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -124,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.body).eql(
         omit(
           {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
@@ -213,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],
@@ -256,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
           expiration: '12d',
           kibana_role_descriptors: {
             uptime_save: {
-              elasticsearch: serviceApiKeyPrivileges,
+              elasticsearch: getServiceApiKeyPrivileges(false),
               kibana: [
                 {
                   base: [],

@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import z from 'zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -20,11 +21,13 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
+import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -60,6 +63,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  AlertDelay,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -84,6 +88,7 @@ export interface AlertingApiRequestHandlerContext {
  */
 export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
 }>;
 
 /**
@@ -179,6 +184,8 @@ export interface SummarizedAlertsChunk {
   data: AlertHit[];
 }
 
+export type ScopedQueryAlerts = Record<string, string[]>;
+
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
   ongoing: SummarizedAlertsChunk;
@@ -206,6 +213,12 @@ interface ComponentTemplateSpec {
 export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
+
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
@@ -277,6 +290,17 @@ export interface RuleType<
   name: string;
   validate: {
     params: RuleTypeParamsValidator<Params>;
+  };
+  schemas?: {
+    params?:
+      | {
+          type: 'zod';
+          schema: z.ZodObject<z.ZodRawShape> | z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>;
+        }
+      | {
+          type: 'config-schema';
+          schema: ObjectType;
+        };
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
@@ -390,7 +414,7 @@ export interface PublicMetricsSetters {
 }
 
 export interface PublicLastRunSetters {
-  addLastRunError: (outcome: string) => void;
+  addLastRunError: (message: string, userError?: boolean) => void;
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
@@ -413,7 +437,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
 
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
-  group: string;
+  group?: string;
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
@@ -423,6 +447,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
+  useAlertDataAsTemplate?: boolean;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial
@@ -477,6 +502,7 @@ export interface RawRule extends SavedObjectAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  alertDelay?: AlertDelay;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

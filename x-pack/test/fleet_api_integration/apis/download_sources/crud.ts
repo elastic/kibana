@@ -9,10 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
@@ -55,6 +58,40 @@ export default function (providerContext: FtrProviderContext) {
           is_default: true,
           host: 'https://artifacts.elastic.co/downloads/',
         });
+      });
+
+      it('should return a 200 if a user with the fleet all try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .expect(200);
+      });
+
+      it('should return a 200 if a user with the fleet read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(testUsers.fleet_read_only.username, testUsers.fleet_read_only.password)
+          .expect(200);
+      });
+
+      it('should return a 200 if a user with the fleet settings read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(
+            testUsers.fleet_settings_read_only.username,
+            testUsers.fleet_settings_read_only.password
+          )
+          .expect(200);
+      });
+
+      it('should return a 403 if a user without the fleet settings read try to access the list', async () => {
+        await supertestWithoutAuth
+          .get(`/api/fleet/agent_download_sources`)
+          .auth(
+            testUsers.fleet_minimal_all_only.username,
+            testUsers.fleet_minimal_all_only.password
+          )
+          .expect(403);
       });
     });
 

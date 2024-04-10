@@ -16,8 +16,8 @@ import {
 import type { Logger } from '@kbn/logging';
 
 import { APIKeys } from './api_keys';
+import type { SecurityLicense } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
-import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
@@ -259,7 +259,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('creates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('creates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -388,7 +388,7 @@ describe('API Keys', () => {
       });
     });
 
-    it('updates Cross-Cluster API key when type is `cross_cluster`', async () => {
+    it('updates cross-cluster API key when type is `cross_cluster`', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
 
       mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
@@ -532,6 +532,51 @@ describe('API Keys', () => {
           },
           grant_type: 'access_token',
           access_token: 'foo-access-token',
+        },
+      });
+    });
+
+    it('calls `grantApiKey` with proper parameters for the Bearer scheme with client authentication', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        encoded: 'utf8',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Bearer foo-access-token`,
+            'es-client-authentication': 'SharedSecret secret',
+          },
+        }),
+        {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
+        }
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        id: '123',
+        name: 'key-name',
+        encoded: 'utf8',
+      });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'secret',
+          },
         },
       });
     });

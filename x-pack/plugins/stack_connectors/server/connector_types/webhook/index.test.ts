@@ -676,7 +676,11 @@ describe('execute()', () => {
     const variables = {
       rogue,
     };
-    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let paramsObject: any;

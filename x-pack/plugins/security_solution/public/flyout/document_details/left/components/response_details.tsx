@@ -24,7 +24,7 @@ const ExtendedFlyoutWrapper = styled.div`
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
 export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject } = useLeftPanelContext();
+  const { searchHit, dataAsNestedObject, isPreview } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
@@ -40,19 +40,28 @@ export const ResponseDetails: React.FC = () => {
 
   return (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
-      <EuiTitle size="xxxs">
-        <h5>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.left.response.responseTitle"
-            defaultMessage="Responses"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {isPreview ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.response.previewMessage"
+          defaultMessage="Response is not available in alert preview."
+        />
+      ) : (
+        <>
+          <EuiTitle size="xxxs">
+            <h5>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.response.responseTitle"
+                defaultMessage="Responses"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
 
-      <ExtendedFlyoutWrapper>
-        {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
-      </ExtendedFlyoutWrapper>
+          <ExtendedFlyoutWrapper>
+            {endpointResponseActionsEnabled ? responseActionsView?.content : osqueryView?.content}
+          </ExtendedFlyoutWrapper>
+        </>
+      )}
     </div>
   );
 };

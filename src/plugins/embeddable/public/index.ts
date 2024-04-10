@@ -6,116 +6,111 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
+export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
+export { EmbeddablePanel } from './embeddable_panel';
+export {
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  Container,
+  contextMenuTrigger,
+  CONTEXT_MENU_TRIGGER,
+  defaultEmbeddableFactoryProvider,
+  Embeddable,
+  EmbeddableFactoryNotFoundError,
+  EmbeddableRenderer,
+  EmbeddableRoot,
+  EmbeddableStateTransfer,
+  ErrorEmbeddable,
+  genericEmbeddableInputIsEqual,
+  isContextMenuTriggerContext,
+  isEmbeddable,
+  isErrorEmbeddable,
+  isExplicitInputWithAttributes,
+  isFilterableEmbeddable,
+  isMultiValueClickTriggerContext,
+  isRangeSelectTriggerContext,
+  isReferenceOrValueEmbeddable,
+  isRowClickTriggerContext,
+  isSavedObjectEmbeddableInput,
+  isValueClickTriggerContext,
+  MULTI_VALUE_CLICK_TRIGGER,
+  omitGenericEmbeddableInput,
+  panelBadgeTrigger,
+  panelHoverTrigger,
+  PanelNotFoundError,
+  PanelIncompatibleError,
+  panelNotificationTrigger,
+  PANEL_BADGE_TRIGGER,
+  PANEL_HOVER_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
+  runEmbeddableFactoryMigrations,
+  SELECT_RANGE_TRIGGER,
+  shouldFetch$,
+  shouldRefreshFilterCompareOptions,
+  useEmbeddableFactory,
+  VALUE_CLICK_TRIGGER,
+  ViewMode,
+  withEmbeddableSubscription,
+} from './lib';
 export type {
   Adapters,
-  ReferenceOrValueEmbeddable,
-  SelfStyledEmbeddable,
-  FilterableEmbeddable,
+  CellValueContext,
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
+  EmbeddableAppContext,
+  EmbeddableContainerSettings,
   EmbeddableContext,
+  EmbeddableEditorState,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
-  ValueClickContext,
-  MultiValueClickContext,
-  CellValueContext,
-  RangeSelectContext,
+  EmbeddablePackageState,
+  EmbeddableRendererProps,
+  FilterableEmbeddable,
   IContainer,
   IEmbeddable,
+  MultiValueClickContext,
   OutputSpec,
   PanelState,
   PropertySpec,
+  RangeSelectContext,
+  ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-  EmbeddableEditorState,
-  EmbeddablePackageState,
-  EmbeddableRendererProps,
-  EmbeddableContainerSettings,
+  SelfStyledEmbeddable,
+  ValueClickContext,
 } from './lib';
-export {
-  isReferenceOrValueEmbeddable,
-  Container,
-  CONTEXT_MENU_TRIGGER,
-  contextMenuTrigger,
-  defaultEmbeddableFactoryProvider,
-  Embeddable,
-  EmbeddableFactoryNotFoundError,
-  EmbeddableRoot,
-  ErrorEmbeddable,
-  isEmbeddable,
-  isErrorEmbeddable,
-  PANEL_BADGE_TRIGGER,
-  panelBadgeTrigger,
-  PANEL_NOTIFICATION_TRIGGER,
-  panelNotificationTrigger,
-  PanelNotFoundError,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  MULTI_VALUE_CLICK_TRIGGER,
-  CELL_VALUE_TRIGGER,
-  cellValueTrigger,
-  ViewMode,
-  withEmbeddableSubscription,
-  genericEmbeddableInputIsEqual,
-  omitGenericEmbeddableInput,
-  isSavedObjectEmbeddableInput,
-  isRangeSelectTriggerContext,
-  isValueClickTriggerContext,
-  isMultiValueClickTriggerContext,
-  isRowClickTriggerContext,
-  isContextMenuTriggerContext,
-  EmbeddableStateTransfer,
-  EmbeddableRenderer,
-  useEmbeddableFactory,
-  isFilterableEmbeddable,
-  isExplicitInputWithAttributes,
-  shouldFetch$,
-  shouldRefreshFilterCompareOptions,
-  PANEL_HOVER_TRIGGER,
-  panelHoverTrigger,
-  runEmbeddableFactoryMigrations,
-} from './lib';
-
-export { EmbeddablePanel } from './embeddable_panel';
-export {
-  InspectPanelAction,
-  ACTION_INSPECT_PANEL,
-  CustomizePanelAction,
-  ACTION_CUSTOMIZE_PANEL,
-  EditPanelAction,
-  ACTION_EDIT_PANEL,
-  RemovePanelAction,
-  REMOVE_PANEL_ACTION,
-  tracksOverlays,
-} from './embeddable_panel/panel_actions';
-
-export type {
-  EmbeddablePhase,
-  EmbeddablePhaseEvent,
-  EmbeddableAppContext,
-} from './embeddable_panel/types';
-
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
-
+export type {
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStart,
+  EmbeddableStartDependencies,
+} from './plugin';
 export type { EnhancementRegistryDefinition } from './types';
+
+export {
+  ReactEmbeddableRenderer,
+  reactEmbeddableRegistryHasKey,
+  registerReactEmbeddableFactory,
+  type DefaultEmbeddableApi,
+  type ReactEmbeddableFactory,
+  type ReactEmbeddableRegistration,
+  startTrackingEmbeddableUnsavedChanges,
+} from './react_embeddable_system';
+
+export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
-
-export type {
-  EmbeddableSetup,
-  EmbeddableStart,
-  EmbeddableSetupDependencies,
-  EmbeddableStartDependencies,
-} from './plugin';
+export {
+  embeddableInputToSubject,
+  embeddableOutputToSubject,
+} from './lib/embeddables/compatibility/embeddable_compatibility_utils';

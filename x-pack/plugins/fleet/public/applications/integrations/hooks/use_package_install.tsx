@@ -11,6 +11,7 @@ import createContainer from 'constate';
 
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
@@ -37,7 +38,7 @@ interface PackageInstallItem {
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   isReinstall?: boolean;
-  fromUpdate?: boolean;
+  isUpgrade?: boolean;
   force?: boolean;
 };
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
@@ -77,25 +78,19 @@ function usePackageInstall({
   const optionallyForceInstall = async (
     installProps: InstallPackageProps,
     prevStatus: PackageInstallItem
-  ) => {
+  ): Promise<boolean> => {
     const forceInstall = await confirmForceInstall(installProps);
     if (forceInstall) {
-      installPackage({ ...installProps, force: true });
+      return installPackage({ ...installProps, force: true });
     } else {
       setPackageInstallStatus({ ...prevStatus, name: installProps.name });
+      return false;
     }
   };
 
   const installPackage = useCallback(
     async (props: InstallPackageProps) => {
-      const {
-        name,
-        version,
-        title,
-        fromUpdate = false,
-        isReinstall = false,
-        force = false,
-      } = props;
+      const { name, version, title, isReinstall = false, isUpgrade = false, force = false } = props;
       const prevStatus = getPackageInstallStatus(name);
       const newStatus = {
         ...prevStatus,
@@ -104,45 +99,13 @@ function usePackageInstall({
       };
       setPackageInstallStatus(newStatus);
 
-      const res = await sendInstallPackage(name, version, isReinstall || force);
-      if (res.error) {
-        if (isVerificationError(res.error)) {
-          return optionallyForceInstall(props, prevStatus);
-        }
-        if (fromUpdate) {
-          // if there is an error during update, set it back to the previous version
-          // as handling of bad update is not implemented yet
-          setPackageInstallStatus({ ...prevStatus, name });
-        } else {
-          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+      try {
+        const res = await sendInstallPackage(name, version, isReinstall || force);
+        if (res.error) {
+          throw res.error;
         }
 
-        notifications.toasts.addWarning({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallErrorTitle"
-              defaultMessage="Failed to install {title} package"
-              values={{ title }}
-            />,
-            { theme$ }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.fleet.integrations.packageInstallErrorDescription"
-              defaultMessage="Something went wrong while trying to install this package. Please try again later."
-            />,
-            { theme$ }
-          ),
-          iconType: 'error',
-        });
-      } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
-        if (fromUpdate) {
-          const settingsPath = getPath('integration_details_settings', {
-            pkgkey: `${name}-${version}`,
-          });
-          history.push(settingsPath);
-        }
 
         if (isReinstall) {
           notifications.toasts.addSuccess({
@@ -158,6 +121,25 @@ function usePackageInstall({
               <FormattedMessage
                 id="xpack.fleet.integrations.packageReinstallSuccessDescription"
                 defaultMessage="Successfully reinstalled {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        } else if (isUpgrade) {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageUpgradeSuccessTitle"
+                defaultMessage="Upgraded {title}"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageUpgradeSuccessDescription"
+                defaultMessage="Successfully upgraded {title}"
                 values={{ title }}
               />,
               { theme$ }
@@ -183,7 +165,31 @@ function usePackageInstall({
             ),
           });
         }
+      } catch (error) {
+        if (isVerificationError(error)) {
+          return optionallyForceInstall(props, prevStatus);
+        }
+        if (isUpgrade) {
+          // if there is an error during update, set it back to the previous version
+          // as handling of bad update is not implemented yet
+          setPackageInstallStatus({ ...prevStatus, name });
+        } else {
+          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        }
+
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.integrations.packageInstallErrorTitle', {
+            defaultMessage: 'Failed to install {title} package',
+            values: { title },
+          }),
+          toastMessage: i18n.translate('xpack.fleet.integrations.packageInstallErrorDescription', {
+            defaultMessage:
+              'Something went wrong while trying to install this package. Please try again later.',
+          }),
+        });
+        return false;
       }
+      return true;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

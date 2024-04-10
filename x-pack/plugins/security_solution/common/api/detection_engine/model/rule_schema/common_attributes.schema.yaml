@@ -6,19 +6,8 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    NonEmptyString:
-      type: string
-      pattern: ^(?! *$).+$
-      minLength: 1
-      description: A string that is not empty and does not contain only whitespace
-
-    UUID:
-      type: string
-      format: uuid
-      description: A universally unique identifier
-
     RuleObjectId:
-      $ref: '#/components/schemas/UUID'
+      $ref: '../../../model/primitives.schema.yaml#/components/schemas/UUID'
 
     RuleSignatureId:
       type: string
@@ -95,7 +84,6 @@ components:
           - field
           - operator
           - value
-        x-modify: requiredOptional
       description: Overrides generated alerts' risk_score with a value from the source event
 
     Severity:
@@ -290,9 +278,9 @@ components:
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         type:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         ecs:
           type: boolean
       required:
@@ -333,11 +321,11 @@ components:
       type: object
       properties:
         package:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         version:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       required:
         - package
         - version
@@ -355,7 +343,7 @@ components:
         field_names:
           type: array
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1
       required:
         - field_names
@@ -427,7 +415,7 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
         uuid:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         alerts_filter:
           $ref: '#/components/schemas/RuleActionAlertsFilter'
         frequency:
@@ -454,10 +442,10 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: ID of the exception container
         list_id:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: List ID of the exception container
         type:
           $ref: '#/components/schemas/ExceptionListType'
@@ -472,3 +460,60 @@ components:
         - list_id
         - type
         - namespace_type
+
+    AlertSuppressionDuration:
+      type: object
+      properties:
+        value:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum:
+            - s
+            - m
+            - h
+      required:
+        - value
+        - unit
+
+    AlertSuppressionMissingFieldsStrategy:
+      type: string
+      enum:
+        - doNotSuppress
+        - suppress
+      description: |-
+        Describes how alerts will be generated for documents with missing suppress by fields:
+        doNotSuppress - per each document a separate alert will be created
+        suppress - only alert will be created per suppress by bucket
+
+    AlertSuppressionGroupBy:
+      type: array
+      items:
+        type: string
+      minItems: 1
+      maxItems: 3
+
+    AlertSuppression:
+      type: object
+      properties:
+        group_by:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - group_by
+
+    AlertSuppressionCamel:
+      type: object
+      properties:
+        groupBy:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missingFieldsStrategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - groupBy

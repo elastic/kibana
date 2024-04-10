@@ -72,11 +72,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     progressDirection: {
       types: ['string'],
       options: [LayoutDirection.Vertical, LayoutDirection.Horizontal],
-      default: LayoutDirection.Vertical,
       help: i18n.translate('expressionMetricVis.function.progressDirection.help', {
-        defaultMessage: 'The direction the progress bar should grow.',
+        defaultMessage:
+          'The direction the progress bar should grow. Must be provided to render a progress bar.',
       }),
-      strict: true,
     },
     color: {
       types: ['string'],

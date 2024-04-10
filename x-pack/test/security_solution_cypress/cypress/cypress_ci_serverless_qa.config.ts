@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
+import { samlAuthentication } from './support/saml_auth';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -18,7 +19,7 @@ export default defineCypressConfig({
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-    grepTags: '@serverless --@brokenInServerless --@skipInServerless --@brokenInServerlessQA',
+    grepTags: '@serverless --@skipInServerless',
   },
   execTimeout: 300000,
   pageLoadTimeout: 300000,
@@ -41,6 +42,7 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
+      samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

@@ -31,7 +31,7 @@ import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useSessionView,
   useSessionViewNavigation,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -71,15 +71,18 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentWrapper {
+  div .euiDataGridRowCell {
     display: flex;
     align-items: center;
   }
-  div .euiDataGridRowCell__content {
+  div .euiDataGridRowCell > [data-focus-lock-disabled] {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     width: 100%;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
-    flex-grow: 0;
+  div .euiDataGridRowCell__content {
+    flex-grow: 1;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;

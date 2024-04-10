@@ -883,7 +883,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined>; attributes: ",
+          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -899,7 +899,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]>; namespaces: ",
+          "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]>; namespaces: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1329,7 +1329,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>; }"
+              "<object>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1455,7 +1455,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<object>; }"
+              "<object>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1756,7 +1756,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>; }"
+              "<Attributes>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1850,7 +1850,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<Attributes>; }"
+              "<Attributes>; meta?: undefined; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -3369,7 +3369,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[] | undefined>"
+              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3523,7 +3523,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]>"
+          "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]>"
         ],
         "path": "packages/kbn-content-management-utils/src/schema.ts",
         "deprecated": false,
@@ -3746,7 +3746,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }> | Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[] | undefined>"
+              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3788,7 +3788,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }> | Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[] | undefined>"
+              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }> | Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -3949,7 +3949,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[] | undefined>"
+              "<Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[] | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,
@@ -4021,7 +4021,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { id: string; type: string; references: Readonly<{ name?: string | undefined; } & { id: string; type: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

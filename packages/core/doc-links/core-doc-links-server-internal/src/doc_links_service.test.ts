@@ -41,6 +41,7 @@ describe('DocLinksService', () => {
       expect(getDocLinksMetaMock).toHaveBeenCalledTimes(1);
       expect(getDocLinksMetaMock).toHaveBeenCalledWith({
         kibanaBranch: coreContext.env.packageInfo.branch,
+        buildFlavor: coreContext.env.packageInfo.buildFlavor,
       });
     });
 
@@ -62,6 +63,7 @@ describe('DocLinksService', () => {
       expect(getDocLinksMock).toHaveBeenCalledTimes(1);
       expect(getDocLinksMock).toHaveBeenCalledWith({
         kibanaBranch: coreContext.env.packageInfo.branch,
+        buildFlavor: coreContext.env.packageInfo.buildFlavor,
       });
     });
 

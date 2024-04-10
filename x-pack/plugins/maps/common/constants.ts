@@ -69,6 +69,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_ML_ANOMALIES = 'ML_ANOMALIES',
+  ESQL = 'ESQL',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
@@ -327,6 +328,7 @@ export enum WIZARD_ID {
   POINT_2_POINT = 'point2Point',
   ES_DOCUMENT = 'esDocument',
   ES_TOP_HITS = 'esTopHits',
+  ESQL = 'ESQL',
   KIBANA_BASEMAP = 'kibanaBasemap',
   MVT_VECTOR = 'mvtVector',
   WMS_LAYER = 'wmsLayer',
@@ -342,3 +344,6 @@ export enum MASK_OPERATOR {
 // Maplibre does not provide any feedback when rendering is complete.
 // Workaround is hard-coded timeout period.
 export const RENDER_TIMEOUT = 1000;
+
+export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+export const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };

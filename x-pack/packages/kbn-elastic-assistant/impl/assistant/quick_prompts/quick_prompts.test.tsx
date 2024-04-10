@@ -26,7 +26,7 @@ const mockUseAssistantContext = {
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
   knowledgeBase: {
-    assistantLangChain: true,
+    isEnabledKnowledgeBase: true,
   },
 };
 

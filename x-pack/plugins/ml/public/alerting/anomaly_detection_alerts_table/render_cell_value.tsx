@@ -10,8 +10,9 @@ import React, { type ReactNode } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
-import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
 import {
   alertFieldNameMap,
@@ -74,7 +75,9 @@ export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRende
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: any): React.ReactElement => {
+  return (columnId: string, value: string | number | undefined): React.ReactElement => {
+    if (!isDefined(value)) return <>{'—'}</>;
+
     switch (columnId) {
       case ALERT_START:
       case ALERT_END:
@@ -90,9 +93,16 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
           </>
         );
       case ALERT_ANOMALY_SCORE:
+        let latestValue: number;
+        if (typeof value === 'number') {
+          latestValue = value;
+        } else {
+          const resultValue: number[] = value.split(',').map(Number);
+          latestValue = resultValue.at(-1) as number;
+        }
         return (
-          <EuiHealth textSize={'xs'} color={getSeverityColor(value)}>
-            {getFormatter(FIELD_FORMAT_IDS.NUMBER)(value)}
+          <EuiHealth textSize={'xs'} color={getSeverityColor(latestValue)}>
+            {getFormattedSeverityScore(latestValue)}
           </EuiHealth>
         );
       default:

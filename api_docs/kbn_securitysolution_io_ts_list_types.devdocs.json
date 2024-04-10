@@ -2870,7 +2870,7 @@
         "label": "CreateEndpointListItemSchema",
         "description": [],
         "signature": [
-          "{ description: string; entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
+          "{ description: string; entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_endpoint_list_item_schema/index.ts",
         "deprecated": false,
@@ -2885,7 +2885,7 @@
         "label": "CreateEndpointListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; comments: { comment: string; }[] | undefined; item_id: string | undefined; meta: object | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"item_id\" | \"os_types\"> & { comments: { comment: string; }[]; tags: string[]; item_id: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; os_types: (\"windows\" | \"linux\" | \"macos\")[]; }"
+          "Omit<{ description: string; entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; comments: { comment: string; }[] | undefined; item_id: string | undefined; meta: object | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"entries\" | \"tags\" | \"comments\" | \"item_id\" | \"os_types\"> & { comments: { comment: string; }[]; tags: string[]; item_id: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; os_types: (\"windows\" | \"linux\" | \"macos\")[]; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_endpoint_list_item_schema/index.ts",
         "deprecated": false,
@@ -3020,7 +3020,7 @@
         "label": "CreateListSchemaDecoded",
         "description": [],
         "signature": [
-          "{ type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; id: string | undefined; name: string; serializer: string | undefined; description: string; meta: object | undefined; deserializer: string | undefined; } & { version: number; }"
+          "{ id: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; name: string; serializer: string | undefined; meta: object | undefined; description: string; deserializer: string | undefined; } & { version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_schema/index.ts",
         "deprecated": false,
@@ -3365,7 +3365,7 @@
         "label": "EndpointEntriesArray",
         "description": [],
         "signature": [
-          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
+          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/endpoint/entries/index.ts",
         "deprecated": false,
@@ -4454,6 +4454,21 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.ListOperatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "ListOperatorType",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\" | \"nested\" | \"list\" | \"exists\" | \"match_any\""
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.ListSchema",
         "type": "Type",
         "tags": [],
@@ -4625,7 +4640,7 @@
         "label": "NonEmptyEndpointEntriesArray",
         "description": [],
         "signature": [
-          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
+          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/endpoint/entries/index.ts",
         "deprecated": false,
@@ -4640,7 +4655,7 @@
         "label": "NonEmptyEndpointEntriesArrayDecoded",
         "description": [],
         "signature": [
-          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
+          "({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/endpoint/entries/index.ts",
         "deprecated": false,
@@ -5893,7 +5908,7 @@
           "StringC",
           "; entries: ",
           "Type",
-          "<({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], unknown>; name: ",
+          "<({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], unknown>; name: ",
           "StringC",
           "; type: ",
           "KeyofC",
@@ -6617,8 +6632,12 @@
           "<{ field: ",
           "Type",
           "<string, string, unknown>; operator: ",
+          "UnionC",
+          "<[",
           "KeyofC",
-          "<{ included: null; }>; type: ",
+          "<{ included: null; }>, ",
+          "KeyofC",
+          "<{ excluded: null; }>]>; type: ",
           "KeyofC",
           "<{ wildcard: null; }>; value: ",
           "Type",
@@ -9981,6 +10000,22 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.listOperatorType",
+        "type": "Object",
+        "tags": [],
+        "label": "listOperatorType",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ nested: null; match: null; match_any: null; wildcard: null; exists: null; list: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.listSchema",
         "type": "Object",
         "tags": [],
@@ -10318,7 +10353,7 @@
         ],
         "signature": [
           "Type",
-          "<({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], unknown>"
+          "<({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"included\"; type: \"match_any\"; value: string[]; })[]; field: string; type: \"nested\"; })[], unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/endpoint/entries/index.ts",
         "deprecated": false,

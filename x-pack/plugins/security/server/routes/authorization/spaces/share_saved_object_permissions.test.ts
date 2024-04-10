@@ -8,11 +8,11 @@
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { CheckPrivileges } from '@kbn/security-plugin-types-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 import type { RouteDefinitionParams } from '../..';
-import type { CheckPrivileges } from '../../../authorization/types';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
 

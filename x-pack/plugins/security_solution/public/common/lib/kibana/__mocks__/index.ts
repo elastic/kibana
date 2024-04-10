@@ -85,6 +85,9 @@ export const useKibana = jest.fn().mockReturnValue({
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const useDarkMode = jest
+  .fn()
+  .mockImplementation((defaultValue?: boolean) => defaultValue ?? false);
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
@@ -95,7 +98,6 @@ export const useToasts = jest
 export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
-export const useGetUserCasesPermissions = jest.fn();
 export const useAppUrl = jest.fn().mockReturnValue({
   getAppUrl: jest
     .fn()
@@ -119,3 +121,7 @@ export const useCapabilities = jest.fn((featureId?: string) =>
     ? mockStartServicesMock.application.capabilities[featureId]
     : mockStartServicesMock.application.capabilities
 );
+
+export const useNavigation = jest
+  .fn()
+  .mockReturnValue({ getAppUrl: jest.fn(), navigateTo: jest.fn() });

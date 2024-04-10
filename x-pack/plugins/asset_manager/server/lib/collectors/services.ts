@@ -74,6 +74,9 @@ export async function collectServices({
           ],
         },
         aggs: {
+          last_seen: {
+            max: { field: '@timestamp' },
+          },
           container_and_hosts: {
             multi_terms: {
               terms: [
@@ -104,6 +107,7 @@ export async function collectServices({
     const {
       key: { serviceName, serviceEnvironment },
       container_and_hosts: containerHosts,
+      last_seen: lastSeen,
     } = bucket;
 
     if (!serviceName) {
@@ -111,7 +115,7 @@ export async function collectServices({
     }
 
     const service: Asset = {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': lastSeen.value_as_string,
       'asset.kind': 'service',
       'asset.id': serviceName,
       'asset.ean': `service:${serviceName}`,

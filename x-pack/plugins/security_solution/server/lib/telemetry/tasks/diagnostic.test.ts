@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 
 describe('diagnostics telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -29,18 +33,21 @@ describe('diagnostics telemetry task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver(testDiagnosticsAlerts);
     const telemetryDiagnoticsTaskConfig = createTelemetryDiagnosticsTaskConfig();
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryDiagnoticsTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
-    expect(mockTelemetryReceiver.fetchDiagnosticAlerts).toHaveBeenCalledWith(
+    expect(mockTelemetryReceiver.fetchDiagnosticAlertsBatch).toHaveBeenCalledWith(
       testTaskExecutionPeriod.last,
       testTaskExecutionPeriod.current
     );
-    expect(mockTelemetryEventsSender.sendOnDemand).toBeCalledTimes(2);
+    expect(mockTaskMetrics.start).toBeCalledTimes(1);
+    expect(mockTaskMetrics.end).toBeCalledTimes(1);
   });
 });

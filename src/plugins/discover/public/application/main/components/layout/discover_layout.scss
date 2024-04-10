@@ -11,6 +11,10 @@ discover-app {
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
+
+    &.dscPage--topNavInline {
+      @include kibanaFullBodyHeight($euiSize * 3);
+    }
   }
 
   flex-direction: column;
@@ -52,6 +56,10 @@ discover-app {
   margin-top: auto;
   margin-bottom: auto;
   flex-grow: 0;
+}
+
+.dscPageContent__panelsToggleWhenNoResults {
+  padding: $euiSizeS;
 }
 
 .dscTable {

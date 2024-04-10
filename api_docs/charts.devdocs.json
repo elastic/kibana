@@ -1283,12 +1283,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.Labels.rotate",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "rotate",
             "description": [],
             "signature": [
-              "number | undefined"
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.LabelRotation",
+                "text": "LabelRotation"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/charts/common/types.ts",
             "deprecated": false,
@@ -1609,7 +1616,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "number"
+          "0 | 90 | 75 | 270"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -1673,7 +1680,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
+          "{ readonly Horizontal: 0; readonly Vertical: 90; readonly Angled: 75; readonly VerticalRotation: 270; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -2239,19 +2246,9 @@
           "label": "theme",
           "description": [],
           "signature": [
-            "{ readonly chartsDefaultTheme: ",
-            "RecursivePartial",
-            "<",
+            "{ readonly chartsDefaultBaseTheme: ",
             "Theme",
-            ">; readonly chartsDefaultBaseTheme: ",
-            "Theme",
-            "; chartsTheme$: ",
-            "Observable",
-            "<",
-            "RecursivePartial",
-            "<",
-            "Theme",
-            ">>; chartsBaseTheme$: ",
+            "; chartsBaseTheme$: ",
             "Observable",
             "<",
             "Theme",
@@ -3135,12 +3132,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.Labels.rotate",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "rotate",
             "description": [],
             "signature": [
-              "number | undefined"
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.LabelRotation",
+                "text": "LabelRotation"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/charts/common/types.ts",
             "deprecated": false,
@@ -3354,7 +3358,7 @@
         "label": "AllowedChartOverrides",
         "description": [],
         "signature": [
-          "{ chart?: { description?: string | undefined; title?: string | undefined; } | undefined; }"
+          "{ chart?: { title?: string | undefined; description?: string | undefined; } | undefined; }"
         ],
         "path": "src/plugins/charts/common/static/overrides/settings.ts",
         "deprecated": false,
@@ -3393,17 +3397,17 @@
           "ExternalPointerEventsSettings",
           " | undefined>; pointBuffer?: ",
           "MarkBuffer",
-          " | undefined; resizeDebounce?: number | undefined; pointerUpdateTrigger?: ",
+          " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabel?: string | undefined; xDomain?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaDescription?: string | undefined; ariaLabel?: string | undefined; xDomain?: ",
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
+          " | undefined>; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
+          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; } | undefined; }"
         ],
         "path": "src/plugins/charts/common/static/overrides/settings.ts",
         "deprecated": false,
@@ -3497,7 +3501,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "number"
+          "0 | 90 | 75 | 270"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -3575,14 +3579,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/charts/common/expressions/palette/types.ts",
@@ -3615,7 +3611,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
+          "{ readonly Horizontal: 0; readonly Vertical: 90; readonly Angled: 75; readonly VerticalRotation: 270; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,

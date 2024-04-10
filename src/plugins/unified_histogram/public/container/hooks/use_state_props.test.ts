@@ -13,7 +13,6 @@ import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
@@ -33,7 +32,7 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -47,7 +46,7 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setTimeInterval');
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
-    jest.spyOn(stateService, 'setCurrentSuggestion');
+    jest.spyOn(stateService, 'setCurrentSuggestionContext');
     return stateService;
   };
 
@@ -122,7 +121,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionChange": [Function],
+        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -132,6 +131,7 @@ describe('useStateProps', () => {
             "_eventsCount": 0,
             "_maxListeners": undefined,
             "requests": Map {},
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "searchSessionId": "123",
@@ -202,7 +202,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionChange": [Function],
+        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -212,6 +212,7 @@ describe('useStateProps', () => {
             "_eventsCount": 0,
             "_maxListeners": undefined,
             "requests": Map {},
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "searchSessionId": "123",
@@ -224,7 +225,7 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestion: currentSuggestionMock,
+        currentSuggestionContext: undefined,
       },
     });
     const { result } = renderHook(() =>
@@ -303,7 +304,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionChange": [Function],
+        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -313,6 +314,7 @@ describe('useStateProps', () => {
             "_eventsCount": 0,
             "_maxListeners": undefined,
             "requests": Map {},
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "searchSessionId": "123",
@@ -380,7 +382,7 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionChange": [Function],
+        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -390,6 +392,7 @@ describe('useStateProps', () => {
             "_eventsCount": 0,
             "_maxListeners": undefined,
             "requests": Map {},
+            Symbol(shapeMode): false,
             Symbol(kCapture): false,
           },
           "searchSessionId": "123",
@@ -416,7 +419,7 @@ describe('useStateProps', () => {
       onChartHiddenChange,
       onChartLoad,
       onBreakdownFieldChange,
-      onSuggestionChange,
+      onSuggestionContextChange,
     } = result.current;
     act(() => {
       onTopPanelHeightChange(200);
@@ -448,9 +451,11 @@ describe('useStateProps', () => {
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
 
     act(() => {
-      onSuggestionChange({ title: 'Stacked Bar' } as Suggestion);
+      onSuggestionContextChange({ title: 'Stacked Bar' } as Suggestion);
     });
-    expect(stateService.setCurrentSuggestion).toHaveBeenLastCalledWith({ title: 'Stacked Bar' });
+    expect(stateService.setCurrentSuggestionContext).toHaveBeenLastCalledWith({
+      title: 'Stacked Bar',
+    });
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {

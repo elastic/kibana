@@ -28,7 +28,8 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
@@ -269,14 +270,13 @@ export function SuggestionPanel({
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
-  const initialAccordionStatusValue =
-    typeof isAccordionOpen !== 'undefined' ? !Boolean(isAccordionOpen) : false;
+  const initialAccordionStatusValue = isAccordionOpen != null ? !Boolean(isAccordionOpen) : false;
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
     LOCAL_STORAGE_SUGGESTIONS_PANEL,
     initialAccordionStatusValue
   );
   useEffect(() => {
-    if (typeof isAccordionOpen !== 'undefined') {
+    if (isAccordionOpen != null) {
       setHideSuggestions(!Boolean(isAccordionOpen));
     }
   }, [isAccordionOpen, setHideSuggestions]);
@@ -549,35 +549,37 @@ export function SuggestionPanel({
       forceState={hideSuggestions ? 'closed' : 'open'}
       onToggle={toggleSuggestions}
       extraAction={
-        !hideSuggestions && (
-          <>
-            {existsStagedPreview && (
-              <EuiToolTip
-                content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-                  defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-                })}
-              >
-                <EuiButtonEmpty
-                  data-test-subj="lensSubmitSuggestion"
-                  size="xs"
-                  iconType="refresh"
-                  onClick={() => {
-                    dispatchLens(submitSuggestion());
-                  }}
-                >
-                  {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                    defaultMessage: 'Refresh',
+        <>
+          {!hideSuggestions && (
+            <>
+              {existsStagedPreview && (
+                <EuiToolTip
+                  content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                    defaultMessage: 'Refresh the suggestions based on the selected visualization.',
                   })}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            )}
-            {wrapSuggestions && (
-              <EuiNotificationBadge size="m" color="subdued">
-                {suggestions.length + 1}
-              </EuiNotificationBadge>
-            )}
-          </>
-        )
+                >
+                  <EuiButtonEmpty
+                    data-test-subj="lensSubmitSuggestion"
+                    size="xs"
+                    iconType="refresh"
+                    onClick={() => {
+                      dispatchLens(submitSuggestion());
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                      defaultMessage: 'Refresh',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              )}
+            </>
+          )}
+          {wrapSuggestions && (
+            <EuiNotificationBadge size="m" color="subdued">
+              {suggestions.length + 1}
+            </EuiNotificationBadge>
+          )}
+        </>
       }
     >
       <div

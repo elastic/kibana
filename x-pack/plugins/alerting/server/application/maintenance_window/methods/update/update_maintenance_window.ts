@@ -9,6 +9,7 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { getScopedQueryErrorMessage } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
@@ -70,7 +71,11 @@ async function updateWithOCC(
       };
     }
   } catch (error) {
-    throw Boom.badRequest(`Error validating update maintenance scoped query - ${error.message}`);
+    throw Boom.badRequest(
+      `Error validating update maintenance window data - ${getScopedQueryErrorMessage(
+        error.message
+      )}`
+    );
   }
 
   try {
@@ -118,6 +123,14 @@ async function updateWithOCC(
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
       });
+
+    if (updateMaintenanceWindowAttributes.scopedQuery) {
+      if (updateMaintenanceWindowAttributes.categoryIds?.length !== 1) {
+        throw Boom.badRequest(
+          `Error validating update maintenance window data - scoped query must be accompanied by 1 category ID`
+        );
+      }
+    }
 
     // We are deleting and then creating rather than updating because SO.update
     // performs a partial update on the rRule, we would need to null out all of the fields

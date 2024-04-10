@@ -35,18 +35,12 @@ import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
+import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import {
-  KibanaServices,
-  useGetUserCasesPermissions,
-  useKibana,
-  useToasts,
-  useUiSetting$,
-} from '../../common/lib/kibana';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
@@ -141,22 +135,14 @@ const DataQualityComponent: React.FC = () => {
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
-  const {
-    services: { telemetry },
-  } = useKibana();
-  const addSuccessToast = useCallback(
-    (toast: { title: string }) => {
-      toasts.addSuccess(toast);
-    },
-    [toasts]
-  );
+
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const labelInputId = useGeneratedHtmlId({ prefix: 'labelInput' });
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { configSettings, cases } = useKibana().services;
+  const { configSettings, cases, telemetry } = useKibana().services;
   const isILMAvailable = configSettings.ILMEnabled;
 
   const [startDate, setStartTime] = useState<string>();
@@ -210,7 +196,7 @@ const DataQualityComponent: React.FC = () => {
     key: LOCAL_STORAGE_KEY,
   });
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canUserCreateAndReadCases = useCallback(
     () => userCasesPermissions.create && userCasesPermissions.read,
     [userCasesPermissions.create, userCasesPermissions.read]
@@ -288,7 +274,6 @@ const DataQualityComponent: React.FC = () => {
           </HeaderPage>
 
           <DataQualityPanel
-            addSuccessToast={addSuccessToast}
             baseTheme={baseTheme}
             canUserCreateAndReadCases={canUserCreateAndReadCases}
             defaultBytesFormat={defaultBytesFormat}
@@ -307,10 +292,11 @@ const DataQualityComponent: React.FC = () => {
             setLastChecked={setLastChecked}
             startDate={startDate}
             theme={theme}
+            toasts={toasts}
           />
         </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />

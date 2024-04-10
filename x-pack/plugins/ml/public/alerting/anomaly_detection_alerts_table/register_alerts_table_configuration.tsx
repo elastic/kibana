@@ -12,8 +12,8 @@ import type {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { EuiDataGridColumn } from '@elastic/eui';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
@@ -24,11 +24,14 @@ import {
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { getAlertFlyout } from './use_alerts_flyout';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
+  ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
 import { AlertActions } from './alert_actions';
@@ -73,7 +76,6 @@ export function registerAlertsTableConfiguration(
       }),
       initialWidth: 150,
       isSortable: true,
-      schema: 'numeric',
     },
     {
       id: ALERT_START,
@@ -119,28 +121,22 @@ export function registerAlertsTableConfiguration(
 
   const config: AlertsTableConfigurationRegistry = {
     id: ML_ALERTS_CONFIG_ID,
+    cases: {
+      appId: MANAGEMENT_APP_ID,
+      featureId: CASE_GENERAL_ID,
+      owner: [CASE_APP_ID],
+      syncAlerts: false,
+    },
     columns,
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
     getRenderCellValue: getRenderCellValue(fieldFormats),
     sort,
     useActionsColumn: () => ({
-      renderCustomActionsRow: ({
-        alert,
-        id,
-        setFlyoutAlert,
-        refresh,
-      }: RenderCustomActionsRowArgs) => {
-        return (
-          <AlertActions
-            alert={alert}
-            ecsData={{ _id: alert._id, _index: alert._index }}
-            id={id}
-            setFlyoutAlert={setFlyoutAlert}
-            refresh={refresh}
-          />
-        );
+      renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
+        return <AlertActions {...props} />;
       },
     }),
+    ruleTypeIds: [ML_ALERT_TYPES.ANOMALY_DETECTION],
   };
 
   triggersActionsUi.alertsTableConfigurationRegistry.register(config);

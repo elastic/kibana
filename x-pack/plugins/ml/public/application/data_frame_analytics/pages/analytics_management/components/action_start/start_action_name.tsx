@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 export const startActionNameText = i18n.translate(
   'xpack.ml.dataframe.analyticsList.startActionNameText',

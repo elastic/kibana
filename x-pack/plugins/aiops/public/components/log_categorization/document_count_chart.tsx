@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { DocumentCountChart as DocumentCountChartRoot } from '@kbn/aiops-components';
-
-import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { DocumentCountStats } from '../../get_document_stats';
+import type { DocumentCountStats } from '../../get_document_stats';
 
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 
@@ -24,13 +24,11 @@ interface Props {
   pinnedCategory: Category | null;
   selectedCategory: Category | null;
   eventRate: EventRate;
-  sparkLines: SparkLinesPerCategory;
   documentCountStats?: DocumentCountStats;
 }
 
 export const DocumentCountChart: FC<Props> = ({
   eventRate,
-  sparkLines,
   totalCount,
   pinnedCategory,
   selectedCategory,
@@ -48,29 +46,26 @@ export const DocumentCountChart: FC<Props> = ({
     const category = selectedCategory ?? pinnedCategory ?? null;
     return eventRate.map(({ key, docCount }) => {
       let value = docCount;
-      if (category && sparkLines[category.key] && sparkLines[category.key][key]) {
-        const val = sparkLines[category.key][key];
+      if (category && category.sparkline && category.sparkline[key]) {
+        const val = category.sparkline[key];
         value = val > docCount ? 0 : docCount - val;
       }
 
       return { time: key, value };
     });
-  }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
+  }, [eventRate, pinnedCategory, selectedCategory]);
 
   const chartPointsSplit = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return category !== null
       ? eventRate.map(({ key, docCount }) => {
-          const val =
-            sparkLines && sparkLines[category.key] && sparkLines[category.key][key]
-              ? sparkLines[category.key][key]
-              : 0;
+          const val = category.sparkline && category.sparkline[key] ? category.sparkline[key] : 0;
           const value = val > docCount ? docCount : val;
 
           return { time: key, value };
         })
       : undefined;
-  }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
+  }, [eventRate, pinnedCategory, selectedCategory]);
 
   if (documentCountStats?.interval === undefined) {
     return null;

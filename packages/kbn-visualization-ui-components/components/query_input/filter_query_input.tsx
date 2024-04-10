@@ -19,7 +19,6 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { useDebouncedValue } from '../debounced_value';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
 import './filter_query_input.scss';
@@ -56,10 +55,6 @@ export function FilterQueryInput({
   appName: string;
 }) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
-  const { inputValue: queryInput, handleInputChange: setQueryInput } = useDebouncedValue<Query>({
-    value: inputFilter ?? defaultFilter,
-    onChange,
-  });
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
     setFilterPopoverOpen(false);
@@ -67,7 +62,7 @@ export function FilterQueryInput({
 
   const { isValid: isInputFilterValid } = validateQuery(inputFilter, dataView);
   const { isValid: isQueryInputValid, error: queryInputError } = validateQuery(
-    queryInput,
+    inputFilter,
     dataView
   );
 
@@ -101,7 +96,7 @@ export function FilterQueryInput({
           <EuiPopover
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
-            anchorClassName="eui-fullWidth"
+            display="block"
             panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
@@ -150,8 +145,8 @@ export function FilterQueryInput({
                     : { type: 'title', value: dataView.title }
                 }
                 disableAutoFocus={true}
-                value={queryInput}
-                onChange={setQueryInput}
+                value={inputFilter ?? defaultFilter}
+                onChange={onChange}
                 isInvalid={!isQueryInputValid}
                 onSubmit={() => {}}
                 data-test-subj={dataTestSubj}

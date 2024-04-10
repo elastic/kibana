@@ -25,7 +25,7 @@ import type {
   RequestHandler,
   VersionedRouter,
 } from '@kbn/core-http-server';
-import { validBodyOutput } from '@kbn/core-http-server';
+import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -67,17 +67,15 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
+    const validation = getRequestValidation(route.validate);
+    Object.entries(validation).forEach(([key, schema]) => {
       if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });
-  }
-
-  if (route.validate) {
-    return RouteValidator.from(route.validate);
+    return RouteValidator.from(validation);
   }
 }
 
@@ -93,7 +91,7 @@ function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+  const shouldValidateBody = (validate && !!getRequestValidation(validate).body) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {
@@ -123,11 +121,14 @@ function validOptions(
 export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /**
-   * Which route resolution algo to use.
-   * @note default to "oldest", but when running in dev default to "none"
-   */
-  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
+
+  versionedRouterOptions?: {
+    /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
+    defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
+
+    /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
+    useVersionResolutionStrategyForInternalPaths?: string[];
+  };
 }
 
 /**
@@ -252,7 +253,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
+        ...this.options.versionedRouterOptions,
       });
     }
     return this.versionedRouter;

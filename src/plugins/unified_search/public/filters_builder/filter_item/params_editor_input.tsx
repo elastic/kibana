@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   PhraseValueInput,
   PhrasesValuesInput,
@@ -19,6 +20,8 @@ import {
 } from '../../filter_bar/filter_editor';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import { OPERATORS } from '../../filter_bar/filter_editor/lib/filter_operators';
+import { formatDateChange } from '../../filter_bar/filter_editor/range_value_input';
 
 export const strings = {
   getSelectFieldPlaceholderLabel: () =>
@@ -70,6 +73,7 @@ export function ParamsEditorInput({
   filtersForSuggestions,
   suggestionsAbstraction,
 }: ParamsEditorInputProps) {
+  const kibana = useKibana();
   switch (operator?.type) {
     case 'exists':
       return null;
@@ -106,16 +110,51 @@ export function ParamsEditorInput({
         />
       );
     case 'range':
-      return (
-        <RangeValueInput
-          compressed
-          field={field!}
-          value={isRangeParams(params) ? params : undefined}
-          onChange={onParamsChange}
-          fullWidth
-          disabled={disabled}
-        />
-      );
+      switch (operator.id) {
+        case OPERATORS.GREATER_OR_EQUAL:
+          return (
+            <PhraseValueInput
+              compressed
+              indexPattern={dataView}
+              onBlur={(value) => {
+                onParamsChange({ from: formatDateChange(value, kibana) });
+              }}
+              field={field!}
+              value={isRangeParams(params) && params.from ? `${params.from}` : undefined}
+              onChange={(value) => onParamsChange({ from: value })}
+              fullWidth
+              invalid={invalid}
+              disabled={disabled}
+            />
+          );
+        case OPERATORS.LESS:
+          return (
+            <PhraseValueInput
+              onBlur={(value) => {
+                onParamsChange({ to: formatDateChange(value, kibana) });
+              }}
+              compressed
+              indexPattern={dataView}
+              field={field!}
+              value={isRangeParams(params) && params.to ? `${params.to}` : undefined}
+              onChange={(value) => onParamsChange({ to: value })}
+              fullWidth
+              invalid={invalid}
+              disabled={disabled}
+            />
+          );
+        default:
+          return (
+            <RangeValueInput
+              compressed
+              field={field!}
+              value={isRangeParams(params) ? params : undefined}
+              onChange={onParamsChange}
+              fullWidth
+              disabled={disabled}
+            />
+          );
+      }
     default:
       const placeholderText = getPlaceholderText(Boolean(field), Boolean(operator?.type));
       return (

@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import { updateRuleRoute } from './update_rule';
+import { omit, pick } from 'lodash';
+import { UpdateRequestBody, updateRuleRoute } from './update_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { RuleNotifyWhen } from '../../common';
-import { AsApiContract } from './lib';
-import { PartialRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -58,34 +55,75 @@ describe('updateRuleRoute', () => {
         },
       },
     ],
+    systemActions: [
+      {
+        actionTypeId: '.test-system-action',
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
+      },
+    ],
     notifyWhen: RuleNotifyWhen.CHANGE,
+    alertDelay: {
+      active: 10,
+    },
   };
 
-  const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
+  const mockedAction0 = mockedAlert.actions[0];
+
+  const updateRequest: UpdateRequestBody = {
     ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
         uuid: '1234-5678',
-        group: mockedAlert.actions[0].group,
-        id: mockedAlert.actions[0].id,
-        params: mockedAlert.actions[0].params,
-        alerts_filter: mockedAlert.actions[0].alertsFilter,
+        group: mockedAction0.group,
+        id: mockedAction0.id,
+        params: mockedAction0.params,
+        alerts_filter: mockedAction0.alertsFilter,
+      },
+      {
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
       },
     ],
+    alert_delay: {
+      active: 10,
+    },
   };
 
-  const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
+  const updateResult = {
     ...updateRequest,
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
-      ...rest,
-      connector_type_id: actionTypeId,
-      alerts_filter: alertsFilter,
-    })),
+    actions: [
+      {
+        uuid: '1234-5678',
+        group: 'default',
+        id: '2',
+        connector_type_id: 'test',
+        params: {
+          baz: true,
+        },
+        alerts_filter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+            filters: [],
+          },
+        },
+      },
+      {
+        connector_type_id: '.test-system-action',
+        uuid: '1234-5678',
+        id: 'system_action-id',
+        params: {},
+      },
+    ],
+    alert_delay: mockedAlert.alertDelay,
   };
 
   it('updates a rule with proper parameters', async () => {
@@ -132,10 +170,12 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
-                "useAlertDataForTemplate": undefined,
                 "uuid": "1234-5678",
               },
             ],
+            "alertDelay": Object {
+              "active": 10,
+            },
             "name": "abc",
             "notifyWhen": "onActionGroupChange",
             "params": Object {
@@ -144,6 +184,13 @@ describe('updateRuleRoute', () => {
             "schedule": Object {
               "interval": "12s",
             },
+            "systemActions": Array [
+              Object {
+                "id": "system_action-id",
+                "params": Object {},
+                "uuid": "1234-5678",
+              },
+            ],
             "tags": Array [
               "foo",
             ],
@@ -231,5 +278,33 @@ describe('updateRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('throws an error if the default action does not specifies a group', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateRuleRoute(router, licenseState);
+
+    const [config, handler] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
+
+    rulesClient.update.mockResolvedValueOnce(mockedAlert);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: { ...updateRequest, actions: [omit(updateRequest.actions[0], 'group')] },
+      },
+      ['ok']
+    );
+
+    await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Group is not defined in action 2"`
+    );
   });
 });

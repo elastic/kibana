@@ -21,6 +21,7 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { requiredOptional } from '@kbn/zod-helpers';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -36,7 +37,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
-import { severityOptions } from '../../../components/rules/step_about_rule/data';
+import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 
@@ -155,7 +156,12 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: ('alert_suppression' in rule && rule.alert_suppression?.group_by) || [],
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
   groupByRadioSelection:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? GroupByOptions.PerTimePeriod
@@ -165,8 +171,14 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     unit: 'm',
   },
   suppressionMissingFields:
-    ('alert_suppression' in rule && rule.alert_suppression?.missing_fields_strategy) ||
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {
@@ -210,7 +222,7 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
 };
 
 export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
-  const { name, description, note } = determineDetailsValue(rule, detailsView);
+  const { name, description, note, setup } = determineDetailsValue(rule, detailsView);
   const {
     author,
     building_block_type: buildingBlockType,
@@ -253,13 +265,14 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     tags,
     riskScore: {
       value: riskScore,
-      mapping: riskScoreMapping,
+      mapping: requiredOptional(riskScoreMapping),
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
     investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
+    setup,
   };
 };
 
@@ -284,13 +297,13 @@ export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMa
 export const determineDetailsValue = (
   rule: RuleResponse,
   detailsView: boolean
-): Pick<RuleResponse, 'name' | 'description' | 'note'> => {
-  const { name, description, note } = rule;
+): Pick<RuleResponse, 'name' | 'description' | 'note' | 'setup'> => {
+  const { name, description, note, setup } = rule;
   if (detailsView) {
-    return { name: '', description: '', note: '' };
+    return { name: '', description: '', note: '', setup: '' };
   }
 
-  return { name, description, note: note ?? '' };
+  return { name, description, setup, note: note ?? '' };
 };
 
 export const getModifiedAboutDetailsData = (rule: RuleResponse): AboutStepRuleDetails => ({

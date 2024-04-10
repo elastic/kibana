@@ -579,9 +579,31 @@
           },
           {
             "parentPluginId": "management",
-            "id": "def-public.ManagementAppMountParams.theme$",
+            "id": "def-public.ManagementAppMountParams.theme",
             "type": "Object",
             "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "src/plugins/management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
+            "id": "def-public.ManagementAppMountParams.theme$",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
             "label": "theme$",
             "description": [],
             "signature": [
@@ -597,8 +619,90 @@
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/public/application/mount_management_section.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+              },
+              {
+                "plugin": "remoteClusters",
+                "path": "x-pack/plugins/remote_clusters/public/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/public/management/mount_management_section.tsx"
+              },
+              {
+                "plugin": "licenseManagement",
+                "path": "x-pack/plugins/license_management/public/plugin.ts"
+              },
+              {
+                "plugin": "crossClusterReplication",
+                "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
+              },
+              {
+                "plugin": "indexLifecycleManagement",
+                "path": "x-pack/plugins/index_lifecycle_management/public/plugin.tsx"
+              },
+              {
+                "plugin": "ingestPipelines",
+                "path": "x-pack/plugins/ingest_pipelines/public/application/mount_management_section.ts"
+              },
+              {
+                "plugin": "logstash",
+                "path": "x-pack/plugins/logstash/public/application/index.tsx"
+              },
+              {
+                "plugin": "rollup",
+                "path": "x-pack/plugins/rollup/public/application.tsx"
+              },
+              {
+                "plugin": "snapshotRestore",
+                "path": "x-pack/plugins/snapshot_restore/public/application/mount_management_section.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/public/plugin.ts"
+              },
+              {
+                "plugin": "watcher",
+                "path": "x-pack/plugins/watcher/public/plugin.ts"
+              },
+              {
+                "plugin": "cloudDataMigration",
+                "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -785,38 +889,6 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
-        {
-          "parentPluginId": "management",
-          "id": "def-public.ManagementStart.setIsSidebarEnabled",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsSidebarEnabled",
-          "description": [],
-          "signature": [
-            "(enabled: boolean) => void"
-          ],
-          "path": "src/plugins/management/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "management",
-              "id": "def-public.ManagementStart.setIsSidebarEnabled.$1",
-              "type": "boolean",
-              "tags": [],
-              "label": "enabled",
-              "description": [],
-              "signature": [
-                "boolean"
-              ],
-              "path": "src/plugins/management/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
         {
           "parentPluginId": "management",
           "id": "def-public.ManagementStart.setupCardsNavigation",

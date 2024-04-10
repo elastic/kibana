@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewChatById } from '@kbn/elastic-assistant';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -19,9 +19,14 @@ import {
   EuiSpacer,
   EuiCopy,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
@@ -34,6 +39,7 @@ import {
 } from '../../../../common/components/event_details/translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
+import { useRefetchByScope } from './flyout/use_refetch_by_scope';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -61,6 +67,9 @@ interface ExpandableEventTitleProps {
   ruleName?: string;
   timestamp: string;
   handleOnEventClosed?: HandleOnEventClosed;
+  scopeId: string;
+  refetchFlyoutData: () => Promise<void>;
+  getFieldsData: GetFieldsData;
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
@@ -89,6 +98,9 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     promptContextId,
     ruleName,
     timestamp,
+    scopeId,
+    refetchFlyoutData,
+    getFieldsData,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const alertDetailsLink = useGetAlertDetailsFlyoutLink({
@@ -96,6 +108,21 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       _index: eventIndex,
       timestamp,
     });
+    const urlModifier = (value: string) => {
+      // this is actually only needed for when users click on the Share Alert button and then enable the expandable flyout
+      // (for the old (non-expandable) flyout, we do not need to save anything in the url as we automatically open the flyout here: x-pack/plugins/security_solution/public/detections/pages/alerts/alert_details_redirect.tsx
+      return `${value}&${URL_PARAM_KEY.flyout}=(preview:!(),right:(id:document-details-right,params:(id:'${eventId}',indexName:${eventIndex},scopeId:${scopeId})))`;
+    };
+
+    const { refetch } = useRefetchByScope({ scopeId });
+    const alertAssignees = useMemo(
+      () => (getFieldsData(ALERT_WORKFLOW_ASSIGNEE_IDS) as string[]) ?? [],
+      [getFieldsData]
+    );
+    const onAssigneesUpdated = useCallback(() => {
+      refetch();
+      refetchFlyoutData();
+    }, [refetch, refetchFlyoutData]);
 
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
@@ -115,7 +142,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" alignItems="flexEnd">
+          <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="none">
             {handleOnEventClosed && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
@@ -129,8 +156,8 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
-                    <NewChatById
-                      conversationId={
+                    <NewChatByTitle
+                      conversationTitle={
                         isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
                       }
                       promptContextId={promptContextId}
@@ -139,7 +166,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
                 {isAlert && alertDetailsLink && (
                   <EuiFlexItem grow={false}>
-                    <EuiCopy textToCopy={alertDetailsLink}>
+                    <EuiCopy textToCopy={urlModifier(alertDetailsLink)}>
                       {(copy) => (
                         <EuiButtonEmpty
                           onClick={copy}
@@ -154,6 +181,15 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
+            {isAlert && scopeId !== TableId.rulePreview && (
+              <EuiFlexItem grow={false}>
+                <Assignees
+                  eventId={eventId}
+                  assignedUserIds={alertAssignees}
+                  onAssigneesUpdated={onAssigneesUpdated}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </StyledEuiFlexGroup>

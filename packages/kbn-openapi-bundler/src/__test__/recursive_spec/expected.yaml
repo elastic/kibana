@@ -1,0 +1,27 @@
+spec.schema.yaml:
+  openapi: 3.0.3
+  info:
+    title: Test endpoint
+    version: '2023-10-31'
+  paths:
+    /api/some_api:
+      get:
+        operationId: TestEndpointGet
+        responses:
+          '200':
+            description: Successful response
+            content:
+              application/json:
+                schema: &ref0
+                  type: object
+                  properties:
+                    - name: field1
+                      required: false
+                      schema: *ref0
+                    - field2:
+                      required: false
+                      schema:
+                        type: string
+
+shared_components.schema.yaml:
+  components: {}

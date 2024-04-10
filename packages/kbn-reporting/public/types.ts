@@ -7,8 +7,24 @@
  */
 
 export interface ClientConfigType {
-  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
+  csv: {
+    enablePanelActionDownload: boolean;
+    scroll: {
+      duration: string;
+      size: number;
+    };
+  };
+  poll: {
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
   roles: { enabled: boolean };
-  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
+  export_types: {
+    pdf: { enabled: boolean };
+    png: { enabled: boolean };
+    csv: { enabled: boolean };
+  };
   statefulSettings: { enabled: boolean };
 }

@@ -25,7 +25,7 @@ import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
+import type { IndexDetails } from '../../common/types_old';
 import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
@@ -33,7 +33,7 @@ import {
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { PostureTypes } from '../../common/types';
+import { PostureTypes } from '../../common/types_old';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -69,7 +69,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   return (
     <EuiEmptyPrompt
       data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
-      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+      icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="" role="presentation" />}
       title={
         <h2>
           <FormattedHTMLMessage

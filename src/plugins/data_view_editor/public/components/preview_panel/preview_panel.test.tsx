@@ -63,11 +63,7 @@ describe('DataViewEditor PreviewPanel', () => {
       'Matching sources'
     );
 
-    findTestSubject(component, 'allIndices').simulate('change', {
-      target: {
-        value: true,
-      },
-    });
+    findTestSubject(component, 'allIndices').simulate('click');
 
     await component.update();
 
@@ -109,11 +105,7 @@ describe('DataViewEditor PreviewPanel', () => {
 
     expect(component.find('.euiButtonGroupButton-isSelected').first().text()).toBe('All sources');
 
-    findTestSubject(component, 'onlyMatchingIndices').simulate('change', {
-      target: {
-        value: true,
-      },
-    });
+    findTestSubject(component, 'onlyMatchingIndices').simulate('click');
 
     await component.update();
 

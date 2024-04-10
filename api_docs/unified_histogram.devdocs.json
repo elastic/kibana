@@ -5,6 +5,39 @@
     "functions": [
       {
         "parentPluginId": "unifiedHistogram",
+        "id": "def-public.canImportVisContext",
+        "type": "Function",
+        "tags": [],
+        "label": "canImportVisContext",
+        "description": [],
+        "signature": [
+          "(visContext: unknown) => boolean"
+        ],
+        "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.canImportVisContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
         "id": "def-public.getBreakdownField",
         "type": "Function",
         "tags": [],
@@ -466,9 +499,25 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
+          },
+          " | undefined, externalVisContextStatus: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramExternalVisContextStatus",
+            "text": "UnifiedHistogramExternalVisContextStatus"
+          },
+          ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\"> & ",
+          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"table\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\"> & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -640,7 +689,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -690,7 +739,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -868,22 +925,16 @@
           },
           {
             "parentPluginId": "unifiedHistogram",
-            "id": "def-public.UnifiedHistogramState.currentSuggestion",
+            "id": "def-public.UnifiedHistogramState.currentSuggestionContext",
             "type": "Object",
             "tags": [],
-            "label": "currentSuggestion",
+            "label": "currentSuggestionContext",
             "description": [
               "\nThe current Lens suggestion"
             ],
             "signature": [
-              {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.Suggestion",
-                "text": "Suggestion"
-              },
-              "<unknown, unknown> | undefined"
+              "UnifiedHistogramSuggestionContext",
+              " | undefined"
             ],
             "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
@@ -1121,9 +1172,129 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramVisContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnifiedHistogramVisContext",
+        "description": [
+          "\nUnified Histogram type for recreating a stored Lens vis"
+        ],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.attributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.requestData",
+            "type": "Object",
+            "tags": [],
+            "label": "requestData",
+            "description": [],
+            "signature": [
+              "LensRequestData"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramVisContext.suggestionType",
+            "type": "Enum",
+            "tags": [],
+            "label": "suggestionType",
+            "description": [],
+            "signature": [
+              "UnifiedHistogramSuggestionType"
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "unifiedHistogram",
+        "id": "def-public.UnifiedHistogramExternalVisContextStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "UnifiedHistogramExternalVisContextStatus",
+        "description": [],
+        "path": "src/plugins/unified_histogram/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "unifiedHistogram",
         "id": "def-public.UnifiedHistogramFetchStatus",
@@ -1234,9 +1405,25 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; onVisContextChanged?: ((nextVisContext: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramVisContext",
+            "text": "UnifiedHistogramVisContext"
+          },
+          " | undefined, externalVisContextStatus: ",
+          {
+            "pluginId": "unifiedHistogram",
+            "scope": "public",
+            "docId": "kibUnifiedHistogramPluginApi",
+            "section": "def-public.UnifiedHistogramExternalVisContextStatus",
+            "text": "UnifiedHistogramExternalVisContextStatus"
+          },
+          ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"appendHitsCounter\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"table\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

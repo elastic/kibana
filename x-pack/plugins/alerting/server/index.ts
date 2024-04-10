@@ -28,11 +28,14 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   SummarizedAlertsChunk,
+  ScopedQueryAlerts,
   ExecutorType,
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
 } from './types';
+export { DEFAULT_AAD_CONFIG } from './types';
+export { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
@@ -67,7 +70,9 @@ export {
   isValidAlertIndexName,
   InstallShutdownError,
 } from './alerts_service';
+export { sanitizeBulkErrorResponse, AlertsClientError } from './alerts_client';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+export type { ConnectorAdapter } from './connector_adapters/types';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { AlertingPlugin } = await import('./plugin');

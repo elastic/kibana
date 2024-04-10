@@ -17,7 +17,7 @@ import {
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -96,7 +96,9 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -170,6 +172,7 @@ describe('Task Runner', () => {
     const mockLegacyAlertsClient = legacyAlertsClientMock.create();
     const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
     const maintenanceWindowClient = maintenanceWindowClientMock.create();
+    const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
     type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
       actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -210,6 +213,7 @@ describe('Task Runner', () => {
         .fn()
         .mockReturnValue(rulesSettingsClientMock.create()),
       getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      connectorAdapterRegistry,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -302,6 +306,7 @@ describe('Task Runner', () => {
           ruleType: ruleTypeWithAlerts,
           namespace: 'default',
           rule: {
+            alertDelay: 0,
             consumer: 'bar',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
@@ -424,20 +429,44 @@ describe('Task Runner', () => {
         expect(call.services.alertsClient?.setAlertData).toBeTruthy();
         expect(call.services.scopedClusterClient).toBeTruthy();
         expect(call.services).toBeTruthy();
-        expect(logger.debug).toHaveBeenCalledTimes(6);
-        expect(logger.debug).nthCalledWith(1, `Initializing resources for AlertsService`);
-        expect(logger.debug).nthCalledWith(2, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
+
+        let debugCall = 1;
+        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
         expect(logger.debug).nthCalledWith(
-          3,
+          debugCall++,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z'
+        );
+
+        if (!useDataStreamForAlerts) {
+          expect(logger.debug).nthCalledWith(
+            debugCall++,
+            'Installing ILM policy .alerts-ilm-policy'
+          );
+        }
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-framework-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-legacy-alert-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-ecs-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
         );
         expect(logger.debug).nthCalledWith(
-          4,
+          debugCall++,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
         );
         expect(logger.debug).nthCalledWith(
-          5,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+          debugCall++,
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(
           taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -529,6 +558,7 @@ describe('Task Runner', () => {
               [EVENT_ACTION]: 'open',
               [EVENT_KIND]: 'signal',
               [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
@@ -774,19 +804,26 @@ describe('Task Runner', () => {
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAndLogAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: true,
+      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
+        notifyOnActionGroupChange: false,
+        alertDelay: 0,
         flappingSettings: {
           enabled: true,
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
+        ruleRunMetricsStore,
       });
-      expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();
+
+      expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+
+      expect(alertsClientNotToUse.processAlerts).not.toHaveBeenCalled();
+      expect(alertsClientNotToUse.logAlerts).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
       expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();

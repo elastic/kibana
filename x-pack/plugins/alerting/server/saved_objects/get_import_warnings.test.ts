@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 
@@ -14,7 +15,7 @@ describe('getImportWarnings', () => {
     const savedObjectRules = [
       {
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           enabled: true,
           name: 'rule-name1',
@@ -43,7 +44,7 @@ describe('getImportWarnings', () => {
       },
       {
         id: '2',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           enabled: true,
           name: 'rule-name2',

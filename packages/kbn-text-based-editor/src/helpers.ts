@@ -11,15 +11,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { MapCache } from 'lodash';
 
-export interface MonacoError {
-  message: string;
-  startColumn: number;
-  startLineNumber: number;
-  endColumn: number;
-  endLineNumber: number;
-  severity: monaco.MarkerSeverity;
-}
+export type MonacoMessage = monaco.editor.IMarkerData;
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -45,7 +39,7 @@ export const useDebounceWithOptions = (
 
 const quotedWarningMessageRegexp = /"(.*?)"/g;
 
-export const parseWarning = (warning: string): MonacoError[] => {
+export const parseWarning = (warning: string): MonacoMessage[] => {
   if (quotedWarningMessageRegexp.test(warning)) {
     const matches = warning.match(quotedWarningMessageRegexp);
     if (matches) {
@@ -59,8 +53,10 @@ export const parseWarning = (warning: string): MonacoError[] => {
         // if there's line number encoded in the message use it as new positioning
         // and replace the actual message without it
         if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
-          warningMessage = innerMessage;
+          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+            warningMessage.split(':');
+          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+          warningMessage = additionalInfoMessage ?? innerMessage;
           if (!Number.isNaN(Number(encodedColumn))) {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
@@ -81,7 +77,7 @@ export const parseWarning = (warning: string): MonacoError[] => {
           startLineNumber,
           endColumn: startColumn + errorLength - 1,
           endLineNumber: startLineNumber,
-          severity: monaco.MarkerSeverity.Error,
+          severity: monaco.MarkerSeverity.Warning,
         };
       });
     }
@@ -94,14 +90,18 @@ export const parseWarning = (warning: string): MonacoError[] => {
       startLineNumber: 1,
       endColumn: 10,
       endLineNumber: 1,
-      severity: monaco.MarkerSeverity.Error,
+      severity: monaco.MarkerSeverity.Warning,
     },
   ];
 };
 
-export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
+export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.map((error) => {
-    if (error.message.includes('line')) {
+    if (
+      // Found while testing random commands (as inlinestats)
+      !error.message.includes('esql_illegal_argument_exception') &&
+      error.message.includes('line')
+    ) {
       const text = error.message.split('line')[1];
       const [lineNumber, startPosition, errorMessage] = text.split(':');
       // initialize the length to 10 in case no error word found
@@ -114,9 +114,20 @@ export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
         message: errorMessage,
         startColumn: Number(startPosition),
         startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
+        endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
+      };
+    } else if (error.message.includes('expression was aborted')) {
+      return {
+        message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aborted', {
+          defaultMessage: 'Request was aborted',
+        }),
+        startColumn: 1,
+        startLineNumber: 1,
+        endColumn: 10,
+        endLineNumber: 1,
+        severity: monaco.MarkerSeverity.Warning,
       };
     } else {
       // unknown error message
@@ -138,26 +149,6 @@ export const getDocumentationSections = async (language: string) => {
     description?: string;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
-  if (language === 'sql') {
-    const {
-      comparisonOperators,
-      logicalOperators,
-      mathOperators,
-      initialSection,
-      aggregateFunctions,
-    } = await import('./sql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.howItWorks', {
-        defaultMessage: 'How it works',
-      }),
-      items: [],
-    });
-    groups.push(comparisonOperators, logicalOperators, mathOperators, aggregateFunctions);
-    return {
-      groups,
-      initialSection,
-    };
-  }
   if (language === 'esql') {
     const {
       sourceCommands,
@@ -193,11 +184,23 @@ export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string 
   return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
 
-export const getIndicesForAutocomplete = async (dataViews: DataViewsPublicPluginStart) => {
+export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*',
     isRollupIndex: () => false,
   });
-  return indices.filter((index) => !index.name.startsWith('.')).map((i) => i.name);
+  return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
+};
+
+// refresh the esql cache entry after 10 minutes
+const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+
+export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
+  if (cache.has(esqlQuery)) {
+    const cacheEntry = cache.get(esqlQuery);
+    if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
+      cache.delete(esqlQuery);
+    }
+  }
 };

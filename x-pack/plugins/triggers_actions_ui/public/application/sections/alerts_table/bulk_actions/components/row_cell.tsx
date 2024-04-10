@@ -8,11 +8,13 @@
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { useContext } from 'react';
+import { AlertsTableContext } from '../../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../../types';
-import { BulkActionsContext } from '../context';
 
 const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
-  const [{ rowSelection }, updateSelectedRows] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [{ rowSelection }, updateSelectedRows],
+  } = useContext(AlertsTableContext);
   const isChecked = rowSelection.has(rowIndex);
   const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
 
@@ -20,9 +22,12 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
     return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
   }
 
+  // NOTE: id is prefixed here to avoid conflicts with labels in other sections in the app.
+  // see https://github.com/elastic/kibana/issues/162837
+
   return (
     <EuiCheckbox
-      id={rowIndex.toString()}
+      id={`bulk-actions-row-cell-${rowIndex}`}
       checked={isChecked}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {

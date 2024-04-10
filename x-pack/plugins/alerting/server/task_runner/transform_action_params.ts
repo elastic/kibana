@@ -37,6 +37,7 @@ export interface TransformActionParamsOptions {
   ruleUrl?: string;
   flapping: boolean;
   aadAlert?: AADAlert;
+  consecutiveMatches?: number;
 }
 
 interface SummarizedAlertsWithAll {
@@ -79,43 +80,43 @@ export function transformActionParams({
   ruleUrl,
   flapping,
   aadAlert,
+  consecutiveMatches,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
-  const variables =
-    aadAlert !== undefined
-      ? aadAlert
-      : {
-          alertId,
-          alertName,
-          spaceId,
-          tags,
-          alertInstanceId,
-          alertActionGroup,
-          alertActionGroupName,
-          context,
-          date: new Date().toISOString(),
-          state,
-          kibanaBaseUrl,
-          params: alertParams,
-          rule: {
-            params: alertParams,
-            id: alertId,
-            name: alertName,
-            type: alertType,
-            spaceId,
-            tags,
-            url: ruleUrl,
-          },
-          alert: {
-            id: alertInstanceId,
-            uuid: alertUuid,
-            actionGroup: alertActionGroup,
-            actionGroupName: alertActionGroupName,
-            flapping,
-          },
-        };
+  const variables = {
+    alertId,
+    alertName,
+    spaceId,
+    tags,
+    alertInstanceId,
+    alertActionGroup,
+    alertActionGroupName,
+    context,
+    date: new Date().toISOString(),
+    state,
+    kibanaBaseUrl,
+    params: alertParams,
+    rule: {
+      params: alertParams,
+      id: alertId,
+      name: alertName,
+      type: alertType,
+      spaceId,
+      tags,
+      url: ruleUrl,
+    },
+    alert: {
+      id: alertInstanceId,
+      uuid: alertUuid,
+      actionGroup: alertActionGroup,
+      actionGroupName: alertActionGroupName,
+      flapping,
+      consecutiveMatches,
+    },
+    ...(aadAlert ? { ...aadAlert } : {}),
+  };
 
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
@@ -163,6 +164,7 @@ export function transformSummaryActionParams({
       actionGroup: 'default',
       actionGroupName: 'Default',
       flapping: false,
+      consecutiveMatches: 0,
     },
     kibanaBaseUrl,
     date: new Date().toISOString(),

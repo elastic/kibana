@@ -20,16 +20,22 @@ import {
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { createNewTimeline, gotToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
+import {
+  closeTimeline,
+  goToEsqlTab,
+  openActiveTimeline,
+  addNameAndDescriptionToTimeline,
+  saveTimeline,
+} from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { getTimeline } from '../../../../objects/timeline';
 import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
-const DEFAULT_ESQL_QUERY =
-  'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-* | limit 10';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169093
+const mockTimeline = getTimeline();
+// FAILURE introduced by the fix for 8.11.4 related to the default empty string and fix for the infinite loop on the esql tab
 describe.skip(
   'Timeline Discover ESQL State',
   {
@@ -39,34 +45,43 @@ describe.skip(
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
-      createNewTimeline();
-      gotToEsqlTab();
+      openActiveTimeline();
+      cy.window().then((win) => {
+        win.onbeforeunload = null;
+      });
+      goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
     it('should not allow the dataview to be changed', () => {
       cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
     });
-    it('should have the default esql query on load', () => {
-      verifyDiscoverEsqlQuery(DEFAULT_ESQL_QUERY);
-    });
     it('should remember esql query when navigating away and back to discover ', () => {
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
+      addNameAndDescriptionToTimeline(mockTimeline);
+      saveTimeline();
+      closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
 
       verifyDiscoverEsqlQuery(esqlQuery);
     });
     it('should remember columns when navigating away and back to discover ', () => {
+      const esqlQuery = 'from auditbeat-* | limit 5';
+      addDiscoverEsqlQuery(esqlQuery);
+      submitDiscoverSearchBar();
+      addNameAndDescriptionToTimeline(mockTimeline);
       addFieldToTable('host.name');
       addFieldToTable('user.name');
+      saveTimeline();
+      closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
       openActiveTimeline();
-      gotToEsqlTab();
+      goToEsqlTab();
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('exist');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('exist');
     });

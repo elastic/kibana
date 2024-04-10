@@ -36,11 +36,13 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServerConfig = config.get('servers.kibana');
   const kibanaUrl = format(kibanaServerConfig);
   const supertest = getService('supertest');
+  const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule - AVG - US - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATE_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
+    const DATA_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
     const DATA_VIEW_ID = 'data-view-id';
     const DATA_VIEW_NAME = 'test-data-view-name';
 
@@ -48,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
     let actionId: string;
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
 
     before(async () => {
       synthtraceEsClient = await getSyntraceClient({ esClient, kibanaUrl });
@@ -57,7 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
+        logger,
       });
     });
 
@@ -77,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteDataView({
         supertest,
         id: DATA_VIEW_ID,
+        logger,
       });
     });
 
@@ -86,10 +89,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -148,6 +154,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -157,13 +165,14 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -187,7 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.evaluation.threshold')
+          .eql([7500000]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
@@ -208,15 +219,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`

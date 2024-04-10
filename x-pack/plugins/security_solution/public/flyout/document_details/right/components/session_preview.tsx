@@ -37,7 +37,7 @@ const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
 export const SessionPreview: FC = () => {
-  const { eventId, scopeId } = useRightPanelContext();
+  const { eventId, scopeId, isPreview } = useRightPanelContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();
   const { euiTheme } = useEuiTheme();
@@ -100,13 +100,13 @@ export const SessionPreview: FC = () => {
             fieldType={'string'}
             isAggregatable={false}
             isDraggable={false}
-            linkValue={ruleId}
+            linkValue={!isPreview ? ruleId : null}
             value={ruleName}
           />
         </ValueContainer>
       )
     );
-  }, [ruleName, ruleId, scopeId, eventId]);
+  }, [ruleName, ruleId, scopeId, eventId, isPreview]);
 
   const commandFragment = useMemo(() => {
     return (

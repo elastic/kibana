@@ -222,7 +222,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
             Object {
               "insert": [Function],
               "inserted": Object {
-                "1w7kmys-euiScreenReaderOnly": true,
+                "gb1zbv-euiScreenReaderOnly": true,
               },
               "key": "css",
               "nonce": undefined,
@@ -266,7 +266,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
           serialized={
             Object {
               "map": undefined,
-              "name": "1w7kmys-euiScreenReaderOnly",
+              "name": "gb1zbv-euiScreenReaderOnly",
               "next": undefined,
               "styles": ";
   /* Take the element out of the layout */
@@ -287,7 +287,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   overflow: hidden;
   /* Chrome requires the negative margin to not cause overflows of parent containers */
   margin: -1px;
-;label:euiScreenReaderOnly;;;;",
+;label:euiScreenReaderOnly;;;",
               "toString": [Function],
             }
           }
@@ -318,7 +318,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
 
 exports[`SkipToMainContent renders 1`] = `
 <button
-  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly"
+  class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
   tabindex="0"
   type="button"
 >

@@ -26,5 +26,8 @@
     "@kbn/reporting-common",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-csv-common",
+    "@kbn/es-query",
+    "@kbn/es-types",
+    "@kbn/esql-utils",
   ]
 }

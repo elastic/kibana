@@ -6,7 +6,8 @@
  */
 import '../_index.scss';
 import { pick } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
@@ -15,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -26,6 +27,7 @@ import {
   type Accessor,
   type Dictionary,
   type SetUrlState,
+  UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -33,6 +35,8 @@ import {
   type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
+import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
+
 import { useDataVisualizerKibana } from '../kibana_context';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
@@ -80,7 +84,15 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+const DataVisualizerESQLStateContextProvider = () => {
+  return (
+    <UrlStateProvider>
+      <IndexDataVisualizerESQL />
+    </UrlStateProvider>
+  );
+};
+
+const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
@@ -256,9 +268,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
         />
-      ) : (
-        <div />
-      )}
+      ) : null}
     </UrlStateContextProvider>
   );
 };
@@ -266,11 +276,13 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
 interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
+  esql?: boolean;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
+  esql,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -288,6 +300,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -300,7 +313,6 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -320,10 +332,14 @@ export const IndexDataVisualizer: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DatePickerContextProvider {...datePickerDeps}>
-            <DataVisualizerStateContextProvider
-              IndexDataVisualizerComponent={IndexDataVisualizerView}
-              getAdditionalLinks={getAdditionalLinks}
-            />
+            {!esql ? (
+              <DataVisualizerStateContextProvider
+                IndexDataVisualizerComponent={IndexDataVisualizerView}
+                getAdditionalLinks={getAdditionalLinks}
+              />
+            ) : (
+              <DataVisualizerESQLStateContextProvider />
+            )}
           </DatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>

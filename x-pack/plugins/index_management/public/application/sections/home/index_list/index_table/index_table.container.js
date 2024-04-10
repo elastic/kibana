@@ -24,7 +24,6 @@ import {
   pageSizeChanged,
   sortChanged,
   loadIndices,
-  reloadIndices,
   toggleChanged,
 } from '../../../../store/actions';
 
@@ -63,9 +62,6 @@ const mapDispatchToProps = (dispatch) => {
     },
     loadIndices: () => {
       dispatch(loadIndices());
-    },
-    reloadIndices: (indexNames, options) => {
-      dispatch(reloadIndices(indexNames, options));
     },
   };
 };

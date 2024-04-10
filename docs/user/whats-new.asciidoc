@@ -1,246 +1,253 @@
 [[whats-new]]
-== What's new in {minor-version}
+== What's new in 8.13
 
-Here are the highlights of what's new and improved in {minor-version}.
+Here are the highlights of what's new and improved in 8.13.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
 === Discover
 
 [discrete]
-==== {esql} in Discover
+==== Empty fields improvements in Discover, Lens & ES|QL 
 
-preview:[] In 8.11 we are introducing link:https://www.elastic.co/guide/en/elasticsearch/reference/master/esql.html[{es} Query Language ({esql})], Elastic’s new piped language for data exploration and investigation. {esql} transforms, enriches, and simplifies your data exploration process. 
+Navigating through extensive data can often lead users to encounter numerous *Empty fields* within their field lists, making it challenging to identify and access valuable data efficiently. To address this issue, we’ve focused our efforts on enhancing the *Empty fields* category. Our solution simplifies the process of finding and accessing fields that contain meaningful data, ensuring a more streamlined and productive data exploration experience for our users. 
 
-[role="screenshot"]
-image::images/esql-demo.gif[A short video demo of {esql}]
-
-Here is what you can expect: 
-
-* *Easy start:* To begin using {esql} in **Discover**, select **Try {esql}** from the data view menu.
-* *Efficient and easy query building:* {esql} in Discover offers auto-complete and in-app documentation, making it easy to craft powerful queries right from the query bar. 
-* *Comprehensive and powerful data exploration:* Conduct ad-hoc data exploration within **Discover**. Create aggregations, transform data, enrich datasets, and more directly from the query builder. Results are presented in a tabular format or as visualizations. It depends on the query you are executing. 
-* *Contextual visualizations:* When writing {esql} queries in **Discover**, you’ll receive visual representations powered by the **Lens** suggestion engine. Your query’s nature determines the type of visualization you get, such as a metric, histogram, heatmap, and so on. 
-* *Enrichment:* Use the enrich command to enhance your query dataset with fields from another dataset, complete with in-context suggestions for the selected policy, such as hinting the matching field and enriched columns.
-* *In-line visualization editing:* Edit {esql} visualizations directly within **Discover** and dashboards. No need to navigate to **Lens** for quick edits, so you can make changes seamlessly. 
-* *Dashboard integration:* Save your {esql} visualizations to a dashboard directly from **Discover** once you’re satisfied with the results. 
-* *Alerting:* Use {esql} for Observability and Security alerts, setting aggregated values as thresholds. Enhance detection accuracy and receive actionable notifications by emphasizing meaningful trends over isolated incidents, reducing false positives. 
-
-{esql} in **Discover** brings efficiency and power to your data investigations, streamlining your path to insights. 
-
-Learn more about {esql}’s capabilities in the link:{ref-bare}/master/esql.html[{es} {esql} documentation]. 
-
+In some cases this can have a huge impact on field lists that target indices with many fields, such as in the below example where the field list was reduced from 5,492 fields down to only 238.
 
 [role="screenshot"]
-image::images/obvs.png[An example of {esql}]
+image::images/empty-fields.png[An image of the available fields before the improvements.]
 
 [role="screenshot"]
-image::images/obv-use-case.png[An example using {esql} in an {observability} use case]
+image::images/empty-fields-results.png[An image of the improvements to the available fields.]
+
+[discrete]
+==== Discover enhancements
+
+Improving the experience in Discover when users are exploring their data helps them find insights quickly. In 8.13 we added the *Auto Interval* to the Histogram, which allows users to quickly select a *Time Interval*. We also enhanced the UI by moving the count of documents to the table and new panel toggle buttons for toggling fields sidebar and histogram.
+
+[role="screenshot"]
+image::images/auto-interval.png[An image of the new auto interval option, width=60%]
+
+[role="screenshot"]
+image::images/auto-interval-1.png[An image of the auto option.]
+
+[discrete]
+==== Cancellation of the {esql} long-running query
+
+You can now cancel a long-running {esql} query from the UI.
+
+[role="screenshot"]
+image::images/cancel-button.png[]
 
 
 [discrete]
-=== Dashboard 
+==== Better validation and autocomplete when writing ES|QL queries
 
-[discrete]
-==== Lens inline editing in dashboards
-
-You can now edit a **Lens** visualization without leaving the dashboard instead of navigating back and forth to the **Lens** editor. Open the panel menu and select **Edit visualization**. A flyout will be open in the dashboard where you can perform any edits to your **Lens** panels. Once happy with your edits, click **Apply and close**. This new editing experience is more convenient and will save you time since the dashboard will not need to reload when saving your changes. 
+Autocomplete and validation are important tools to ensure the user’s ES|QL is correct and can be executed without errors. With these improvements, we are speeding up their workflow and increasing the quality of the improvements.
 
 [role="screenshot"]
-image::images/lens-inline-editing.gif[An example of inline editing in Lens]
+image::images/esql-validation.png[An image of {esql} validation in action.]
 
 [discrete]
-==== Links panel
+==== Color all terms in new color mapping
 
-You can now easily navigate from one dashboard to another using the links panel. Better organize your dashboards and make them more performant by chunking them in multiple dashboards with fewer visualizations and linking them together. You can carry over your filters, query, and time range when navigating to other related dashboards. Display your links horizontally or vertically as it better suits your dashboard layout. You can also use the links panel to include external links in your dashboards, such as to your wiki page or other applications. Decide whether you want to open the links in the same browser tab or in a new one.
+In our latest update, based on early feedback, we've enhanced the user experience with our new color mapping feature introducing a more intuitive default option. Now users can either assign a single color or enable color looping for unassigned terms, providing greater flexibility and a cleaner interface for term assignments. Additionally we've eliminated the maximum limit on assignments, allowing for more comprehensive customization. It's important to note that looping colors or using more than 10 colors can be effective in certain scenarios. However, we recommend limiting the number of colors used to prevent potential misinterpretation of your charts. This update aims to make color mapping more user-friendly and adaptable to your needs.
 
 [role="screenshot"]
-image::images/links-panel.gif[An example of the new links panel]
+image::images/color-mapping-enhanced.png[An image of the color mapping feature applied to a vertical bar chart.]
 
 [role="screenshot"]
-image::images/edit-links-panel.png[An example of the edit links panel flyout]
+image::images/color-mapping-1.png[An image of the color palette options, width=60%]
+
+[discrete]
+==== Visualizing an {esql} query in Observability AI assistant
+
+The {observability} AI assistant in 8.13 comes with great improvements in query generation and performance. Users can now visualize the generated {esql} queries, edit them using the inline editing flyout, and embed them in a dashboard.
 
 [role="screenshot"]
-image::images/edit-links.png[An example of how to edit links using the panel flyout]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltd6737b8e5633e948/viz-esql.gif[A gif of an {esql} query in the AI assistant.]
 
 [discrete]
-==== Color mapping for enhanced data visualization
+==== Cross-cluster search support in {esql} and in {kib}
 
-Color is a fundamental visual element, alongside position and shape, that plays a crucial role in conveying information effectively. 
+Cross-cluster searches are now supported in {esql} and in {kib} the feature has been introduced for both validation and autocomplete. The autocomplete feature will show some documentation about the specific settings when navigating the suggestions.
 
 [role="screenshot"]
-image::images/color-mapping.png[An example of the new color mapping feature]
-
-Here’s what our new color mapping feature offers:
-
-* *Effortless categorization:* Easily assign one or more field categories to specific colors. This makes it simpler than ever to organize and understand your data. 
-* *Guided color selection:* Our intuitive color chooser provides you with predefined palettes that ensure your charts not only look great, but also align seamlessly with different {kib} themes. 
-* *Enhanced color palettes:* We’ve reintroduced a clear concept of color palettes, making it easier for you to select and apply gradients, improving the overall aesthetics of your visualizations. 
-
-Whether you’re working with cartesian, partition, or tag clouds charts, these enhancements are designed to help you make the most of your data. With this feature, you can expect an improved ability to categorize, differentiate, and emphasize data points on your charts, ultimately leading to better insights and more visually appealing dashboards.
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4b3db027b6c7951a/ccs-esql-queries.gif[A gif of an {esql} cross cluster query.]
 
 [discrete]
-==== {ccs-cap} ({ccs-init}) query inspector
+==== Quick fix to help users write {esql}
 
-Customers querying data from multiple clusters link:{ref}/modules-cross-cluster-search.html[({ccs-init} queries)] will get more information about each of the cluster's responses. For each of the visualizations in a dashboard as well as in **Discover**, you can look at response times per cluster and shard failures. This is especially important when one or more clusters are not able to provide all the data, so you know that you are looking at partial results and why they fail.
+Quick fix helps users when they have misspelled a field, index, or policy name (maybe pasting a query from somewhere else) in {esql} mode.
 
 [role="screenshot"]
-image::images/ccs-query-inspector.png[An example of the new {ccs} query inspector, width=50%]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt463edc257418dd71/esql-quickfix[A gif showing the quick fix feature in action.]
 
 [discrete]
-==== Individual annotation editing from the library
+==== Create {esql} charts directly from a dashboard
 
-We've introduced full annotation group editing in the **Visualize Library**. Now, you can easily edit shared annotation groups without leaving Lens. No more searching for consuming visualizations.
+Now you can create {esql} charts directly from a dashboard, without the need to go through Discover. Previously, to add a chart to your dashboard, you had to first create it in Discover using {esql} and then save it to the dashboard. This update streamlines the process, allowing you to instantly add {esql} charts right from your dashboard! 
 
 [role="screenshot"]
-image::images/annotation-editing.png[An example of annotation editing]
-
-[discrete]
-=== Machine Learning
- 
-[discrete]
-==== ELSER is improved and is now generally available
-
-In 8.8, we introduced Elastic Learned Sparse Encoder in technical preview. ELSER is Elastic’s text expansion language model for AI search. It offers superior relevance out of the box, without the need for retraining on in-domain data or any other ML or MLOps effort. Deploy it with a couple of clicks from Elastic’s UI and start leveraging the power of AI with your search. 
-
-In 8.11, we're releasing a generally available second version. ELSER model-2 comes in two versions:
-
-* The optimized model, which runs on the linux-x86_64 platform
-* The cross-platform model 
-
-Both ELSER model-2 versions, platform-optimized and cross-platform, show improved relevance compared to the original ELSER release, as measured against the BEIR benchmarks. Importantly, the optimized version also shows significantly improved performance (reduced inference latency). The {ecloud} supports the optimized version and so {ecloud} users will benefit from the materially improved performance of the optimized ELSER model-2.
+image::images/esql-charts-1.png[]
 
 [role="screenshot"]
-image::images/elser-model-2.png[An example of ELSER model 2, width=60%]
-
-NOTE: The original version of ELSER (the model available prior to 8.11) will remain in technical preview. 
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt517f402fdeddd49f/ESQLcharts.gif[A gif of editing an {esql} query in the dashboard.]
 
 [discrete]
-==== Inference APIs
+==== {esql} in Maps
 
-preview:[] We are working to introduce a unified inference API that abstracts away the complexity of performing inference on different models that are trained for different tasks. The API introduces a simple, intuitive syntax of the form:
-
-[source,bash]
-----
-POST /_inference/<task_type>/<model_id>
-----
-
-In 8.11, we're'releasing a contained first link:{ref}/inference-apis.html[MVP iteration of this framework], which initially only supports ELSER. This link:{ref}/semantic-search-elser.html#inference-ingest-pipeline[greatly simplifies the syntax] for creating an inference pipeline.
-
-More importantly, in the future the new inference API will support both internal and external models and will integrate with the LLM ecosystem for our users to have the most powerful AI effortlessly and seamlessly at their fingertips, through a unified, self-explanatory API.
-
-[discrete]
-==== AIOps: Log rate analysis supports text fields 
-
-preview:[] Continuing enhancing log analysis capabilities with smart AIOps tools for drastically shorter mean time to repair. We now support detection of log rate changes that are due to text fields, for example the common **message** log field. Previously log rate change was limited to detecting spikes and dips caused by keyword fields. By adding text fields, we've incorporated pattern analysis into log rate analysis. That has significantly reduced the time it takes to detect and diagnose events that used to go unnoticed for periods of time. 
+You can now create a new documents layer in map using our recently launched https://www.elastic.co/blog/esql-elasticsearch-piped-query-language[ElasticSearch Query Language (ES|QL)]. You can query your data directly from Elasticsearch and leverage the benefits that {esql} brings such as speed and flexible data transformations to your maps. 
 
 [role="screenshot"]
-image::images/text-field-support.png[An example of log rate analysis supporting text fields]
-
-[discrete]
-==== Data drift workflows
- 
-preview:[] In 8.10, we introduced the **Data comparison** view to help you detect data drift. In 8.11, we have renamed it to **Data drift** and we have enhanced it to include workflows that help you visualize changes in the model input data and detect potential model performance degradation over time.
+image::images/esql-maps.png[An image of the {esql} option for maps.]
 
 [role="screenshot"]
-image::images/data-drift.png[An example of data drift workflows]
+image::images/esql-maps-example.png[An image of {esql} applied to a map.]
 
 [discrete]
-==== Improvements in anomaly detection embeddability and data frame analytics pipelines
+==== Controls configuration
 
-We have improved the UX for attaching anomaly swim lanes and anomaly charts to dashboards. It is now more friendly and consistent with the same functionality from Lens. In addition, you can now attach these ML charts to new dashboards (previously this was only able to be done for existing ones). 
+We added some improvements to controls for you to easily filter and interact with your dashboards.
 
-In **Data Frame Analytics**, we previously added the ability to link directly to **Discover** and **Dashboards** from the results data grid filtering for the row’s field/values for all visible columns. For improved usability, you can now do this during the job creation as well. We have also made UX improvements for the deployment of trained models from Data Frame Analytics jobs, including an option to reindex your data at the end of the ingest pipeline creation.
+* You will be able to decide whether you want the global filters and time range to be applied to your controls narrowing down the available options or whether you prefer to display all possible values without considering them. You will find these options in the Controls settings.
+
+[role="screenshot"]
+image::images/controls-config.png[An image of the filtering control settings.]
+
+* If you have numeric fields displayed as range slider controls in your dashboard, you will now be able to decide what is the step that you want to be displayed between your values. 
+
+[role="screenshot"]
+image::images/controls-edit.png[An image of the range slider settings.]
 
 [discrete]
 === ResponseOps
 
 [discrete]
-==== New {esql} rule type
+==== Alert delay
 
-A new {esql} alerting rule type is now available under the existing {es} rule type. This rule type brings all the new functionalities that are available within the new and powerful language, {esql}, to {kib} Alerting to allow and unlock new alerting use cases.
-
-With the new type, users will be able to generate a single alert based on defined {esql} query and preview the query result before saving the rule. When the query returns an empty result no alerts will be generated.
+In order to reduce noise for alerting rules with low sensitivity and ensure created alerts will be actionable and reasonable, we want to allow users to define how many rule runs should match before creating the alert. For example, "Generate the alert after 3 threshold matches in a row".
 
 [role="screenshot"]
-image::images/esql-rule-type.gif[An example of creating a rule type using {esql}]
+image::images/alert-delay.png[]
 
 [discrete]
-==== {kib} cases custom field
+==== Slack action message templating using Slack Block Kit
 
-A new functionality is now available in {kib} cases. Users will be able to add custom fields to the case structure, so they can use it for better classification and case enrichment. As a first step, those fields will be available in the case view only. In the next step, we’re planning to have more field types, dedicated privileges, support filters, and search capabilities in the case table.
+By supporting the link:https://api.slack.com/reference/surfaces/formatting#rich-layouts[Slack Block Kit] with our {kibana-ref}/slack-action-type.html[Slack connector (Web API)], we unlock new message templates to allow users to enrich and format the messages that are sent to Slack channels. Read more about link:https://app.slack.com/block-kit-builder/T0CUZ52US#%7B%22blocks%22:%5B%7B%22type%22:%22section%22,%22text%22:%7B%22type%22:%22mrkdwn%22,%22text%22:%22You%20have%20a%20new%20request:%5Cn*%3Cgoogle.com%7CFred%20Enriquez%20-%20Time%20Off%20request%3E*%22%7D%7D,%7B%22type%22:%22section%22,%22text%22:%7B%22type%22:%22mrkdwn%22,%22text%22:%22*Type:*%5CnPaid%20time%20off%5Cn*When:*%5CnAug%2010-Aug%2013%5Cn*Hours:*%2016.0%20(2%20days)%5Cn*Remaining%20balance:*%2032.0%20hours%20(4%20days)%5Cn*Comments:*%20%5C%22Family%20in%20town,%20going%20camping!%5C%22%22%7D,%22accessory%22:%7B%22type%22:%22image%22,%22image_url%22:%22https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png%22,%22alt_text%22:%22computer%20thumbnail%22%7D%7D,%7B%22type%22:%22actions%22,%22elements%22:%5B%7B%22type%22:%22button%22,%22text%22:%7B%22type%22:%22plain_text%22,%22emoji%22:true,%22text%22:%22Approve%22%7D,%22style%22:%22primary%22,%22value%22:%22click_me_123%22%7D,%7B%22type%22:%22button%22,%22text%22:%7B%22type%22:%22plain_text%22,%22emoji%22:true,%22text%22:%22Deny%22%7D,%22style%22:%22danger%22,%22value%22:%22click_me_123%22%7D%5D%7D%5D%7D[templates options with Slack Block Kit].
 
 [role="screenshot"]
-image::images/custom-field.gif[An example of creating a custom case field in {kib}]
-
-[discrete]
-==== Supporting multi levels of term aggregations in {es} rule type 
-
-The existing {es} alerting rule is now supported by multiple selection when grouping by alert fields, which allows you to define multiple layers of term aggregations.
+image::images/slack-api.png[An image of the Slack web api connector, width =60%]
 
 [role="screenshot"]
-image::images/term-aggs.png[An example of creating multiple layers of term aggregations]
+image::images/slack-block.png[An image of the block kit builder.]
 
 [discrete]
-==== Slack connector - allow List
-
-The Slack connector supports a new allow list, so customers will be able to manage the available Slack channels within the alert actions. 
+=== Machine Learning 
 
 [discrete]
-=== {observability}
+==== Unified inference API now integrates Cohere embeddings
+
+We continue enhancing Elastic's unified inference API which supports both internal and external models for seamless easy integration with the LLM ecosystem.
+
+In 8.13 we add support for Cohere embeddings. This enhances our offering which supports OpenAI and HuggingFace embeddings since 8.12.
+
+The power of the inference API lies in its simple, unified syntax that abstracts away the underlying complexity of using different internal and external models. 
+
+So, in 8.13 we also added support for inference against the E5 multilingual embeddings that were offered through the Trained Models UI since 8.12.
+
+As a reminder, performing inference on the newly supported models and services is as simple as a call with the simple syntax introduced in 8.11:
+
+[source,bash]
+----
+PUT /_inference/<task_type>/<model_id>
+----
+
+To start using Cohere embeddings with your Elastic deployment using the new inference API, https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-search-inference.html[please see this tutorial]. This functionality is in Technical Preview in 8.13.
 
 [discrete]
-==== {es} alerting rule now available in {observability}
+==== {esql} support in the Data Visualizer
 
-The {es} alerting rule is now available in {observability}. Before this update, {observability} customers who leverage the {es} rule were required to move between **{stack-manage-app}** and **{observability}** to manage their alerts.
-To manage the {observability} roles properly, we added a new field to determine which role can maintain the created rule and its generated alerts. 
+preview:[] The Data Visualizer now supports {esql}, Elastic’s new piped query language that simplifies data investigation. Run your {esql} queries in the Data Visualizer to easily explore your datasets. Choose to explore and apply your query to the entire dataset or a subset of it for speed. In 8.13 this functionality is in Technical Preview and supports keyword, text, numeric, boolean, date, and ip fields.
 
 [role="screenshot"]
-image::images/alerting-rule.png[An example of creating an altering rule in {observability}]
+image::images/data-visualizer.png[An image of the new Data Visualizer for {esql}.]
 
 [discrete]
-=== Global Experience 
+==== Embed Anomaly Detection Single Metric Viewer in Dashboards
+
+You can now easily add single metric anomaly detection charts to dashboards. Under the *Add panel* option in Dashboard’s edit mode, select Machine Learning and then the *Single metric viewer* option from the menu.
+
+[role="screenshot"]
+image::images/embed-detection.png[An image of the single metric viewer.]
 
 [discrete]
-==== Create and manage {esql} enrichment index policies
+==== AIOps: Usability enhancements 
 
-In support of our new {esql} capabilities, we have added link:{ref}/ingest-enriching-data.html[enrich policies] to our **Index Management** experience. Users can now create their enrichment policies right from here and get started using it right away. Once configured, all enrich policies are available in the **Enrich Policies** tab.
-
-Example of an ES|QL Query using an enrich policy with enrich:
+We have enhanced Pattern Analysis in AIOps so that you can expand a row and see the tokens, the regex and a few examples that give you a better sense of the pattern. In addition the syntax highlighting (font color) reflects the detected pattern. When you choose to filter a pattern in Discover’s main view, the highlighting is now consistent between the Pattern Analysis feature and Discover. 
 
 [role="screenshot"]
-image::images/esql-enrich.png[An example of an {esql} query using an enrich policy]
+image::images/usability.png[An image of expanded rows.]
 
-Example of the enrich policies shown in the UI:
-
-[role="screenshot"]
-image::images/enrich-ui.png[An example of where to add an enrich policy in the UI]
+You can now run Log Rate Analysis from the Anomaly Explorer and the Single Metric Viewer. Click on the *Actions* cog and select *Run log rate analysis* from the menu. You will be directed to the Log Rate analysis UI in Machine Learning. 
 
 [role="screenshot"]
-image::images/enrich-index-management.png[An example of where an enrich policy lives in the UI]
+image::images/usability-1.png[An image of the actions menu with an arrow to run log rate analysis.]
 
+From 8.13, you can achieve the same from the anomaly markers in the Single Metric Viewer. Click on them and the actions menu will appear.
+
+[role="screenshot"]
+image::images/single-metric-viewer.png[An image of the single metric viewer.]
 
 [discrete]
-==== Start Discover {esql} from global search
+==== Grok highlighting in the File Data Visualizer
 
-**Discover** searches are powered by KQL by default. You can easily switch to {esql} mode within **Discover** and search your data with this new query language. You can also access {esql} in **Discover** from the global search bar within Elastic. With just a few keystrokes, simply type in “ESQL” and you can access **Discover** with {esql} enabled for you.
-
-[role="screenshot"]
-image::images/start-esql-in-discover.gif[An example of using ES|QL in Discover]
-
-[discrete]
-==== Access {es} connection details
-
-You can now view your {es} endpoint, link:https://www.elastic.co/guide/en/cloud/current/ec-cloud-id.html[Cloud ID], and even manage your API keys from many areas in Elastic such as integrations. You can also access the connection details on any page in Elastic using the help menu from the header bar.
+Uploading a file through the File Data Visualizer will display the first 5 lines with inline highlighting. Hovering the mouse over displays a tooltip with the field name and type. 
 
 [role="screenshot"]
-image::images/endpoints.png[An example of where to find the endpoints in the UI, width=40%]
+image::images/grok-highlighting.png[An image of grok highlighting.]
 
 [discrete]
-==== AWS CloudFormation template updates
+=== Security
 
-When subscribing to Elastic using the link:https://aws.amazon.com/marketplace/pp/prodview-voru33wi6xs7k[AWS Marketplace], users have the option to quickly get set up with an AWS CloudFormation Template. This step allows you to create an Elastic deployment in the AWS region of your choice. We’ve updated the AWS CloudFormation Template with bug fixes and stability improvements to better help you get started.
+[discrete]
+==== UI improvements for managing API keys
+
+We’ve made some improvements to the API keys management page. Going forward, you can now easily sort columns in the API keys table, making it easier for you to navigate through API keys, especially when volume is high.
+
+We’ve also made the API key name a required field. This reduces previous bugs on this page that resulted in errors or inconsistent API key names being displayed.
+
+[discrete]
+=== Global Experience
+
+[discrete]
+==== Discover using {esql} without data views
+
+You can now utilize {esql} without creating a data view. To expand, if you have ingested data but have not created a data view, when you navigate to *Discover* you will see a screen prompting you to create a data view, as before. Now an option is available on that screen to *Try ES|QL*. 
+
+[discrete]
+==== Improved UX for Setup Guides
+
+The setup guides you see in Kibana are now organized by solution, making it much easier to find the guide you’re looking for. Additionally, a new card was added to *Connect to the Elasticsearch API* so users with API use cases don’t have to dig through the navigation and documentation to find the connection info.
+
+[role="screenshot"]
+image::images/set-up-improvements.png[A screenshot of the home page cards.]
+
+[discrete]
+==== Live chat available from the Elastic Cloud console
+
+You will now find live chat functionality available in the top right corner in the Elastic Cloud console, completing seamlessly availability from all locations within both Elastic Cloud and Kibana experiences. 
+
+[discrete]
+==== Faster deployment creation times
+
+In particular regions, deployment of a new cluster is nearly instantaneous, saving you about 3-5 minutes of waiting time to get started. The number of regions that provide this performance boost has increased by 5x as we strive to make this the standard experience. 
+
+
+
+
+

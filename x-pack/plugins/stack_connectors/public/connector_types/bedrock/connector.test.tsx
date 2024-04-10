@@ -8,13 +8,24 @@
 import React from 'react';
 import BedrockConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+jest.mock('../lib/gen_ai/use_get_dashboard');
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as jest.Mock;
 const bedrockConnector = {
   actionTypeId: '.bedrock',
   name: 'bedrock',
@@ -36,6 +47,9 @@ describe('BedrockConnectorFields renders', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
+    mockDashboard.mockImplementation(({ connectorId }) => ({
+      dashboardUrl: `https://dashboardurl.com/${connectorId}`,
+    }));
   });
   test('Bedrock connector fields are rendered', async () => {
     const { getAllByTestId } = render(
@@ -56,6 +70,49 @@ describe('BedrockConnectorFields renders', () => {
     );
     expect(getAllByTestId('bedrock-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('bedrock-api-model-doc')[0]).toBeInTheDocument();
+  });
+
+  describe('Dashboard link', () => {
+    it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={bedrockConnector}>
+          <BedrockConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Does not render if isEdit is true and dashboardUrl is null', async () => {
+      mockDashboard.mockImplementation((id: string) => ({
+        dashboardUrl: null,
+      }));
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={bedrockConnector}>
+          <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Renders if isEdit is true and dashboardUrl is defined', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={bedrockConnector}>
+          <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
+    });
+    it('On click triggers redirect with correct saved object id', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={bedrockConnector}>
+          <BedrockConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+    });
   });
 
   describe('Validation', () => {

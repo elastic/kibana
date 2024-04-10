@@ -27,8 +27,8 @@ import { BetaBadge } from '../../../../../shared/beta/beta_badge';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { EditSyncRulesFlyout } from './edit_sync_rules_flyout';
@@ -36,7 +36,7 @@ import { SyncRulesStateCallouts } from './sync_rules_callouts';
 
 export const ConnectorSyncRules: React.FC = () => {
   const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
-    useValues(IndexViewLogic);
+    useValues(ConnectorViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
     useActions(ConnectorFilteringLogic);
   const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =
@@ -72,11 +72,11 @@ export const ConnectorSyncRules: React.FC = () => {
               <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h3>
+                    <h2>
                       {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
                         defaultMessage: 'Sync rules ',
                       })}
-                    </h3>
+                    </h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

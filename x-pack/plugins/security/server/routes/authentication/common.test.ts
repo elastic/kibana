@@ -8,11 +8,11 @@
 import { Type } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineCommonRoutes } from './common';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import {
@@ -38,11 +38,11 @@ describe('Common authentication routes', () => {
     authc = authenticationServiceMock.createStart();
     routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
-    mockContext = {
+    mockContext = coreMock.createCustomRequestHandlerContext({
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown as SecurityRequestHandlerContext;
+    }) as unknown as SecurityRequestHandlerContext;
 
     defineCommonRoutes(routeParamsMock);
   });
@@ -176,13 +176,14 @@ describe('Common authentication routes', () => {
 
     it('returns current user.', async () => {
       const mockUser = mockAuthenticatedUser();
-      authc.getCurrentUser.mockReturnValue(mockUser);
+      const coreContextMock = await mockContext.core;
+      (coreContextMock.security.authc.getCurrentUser as jest.Mock).mockReturnValue(mockUser);
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
       expect(response.payload).toEqual(mockUser);
-      expect(authc.getCurrentUser).toHaveBeenCalledWith(mockRequest);
+      expect(coreContextMock.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
     });
   });
 

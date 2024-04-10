@@ -56,6 +56,7 @@ describe('Screenshot Observable Pipeline', () => {
       branch: 'screenshot-test',
       buildNum: 567891011,
       buildSha: 'screenshot-dfdfed0a',
+      buildShaShort: 'scrn-dfdfed0a',
       dist: false,
       version: '5000.0.0',
       buildDate: new Date('2023-05-15T23:12:09.000Z'),
@@ -66,6 +67,7 @@ describe('Screenshot Observable Pipeline', () => {
       headers: {},
       layout: {},
       urls: ['/welcome/home/start/index.htm'],
+      taskInstanceFields: { startedAt: null, retryAt: null },
     };
     config = {
       enabled: true,

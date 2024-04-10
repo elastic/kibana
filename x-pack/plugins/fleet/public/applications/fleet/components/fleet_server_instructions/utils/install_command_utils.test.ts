@@ -231,6 +231,38 @@ describe('getInstallCommandForPlatform', () => {
     });
   });
 
+  describe('with policy id and downloadSource', () => {
+    it('should return the correct command if the the policyId is set for linux', () => {
+      const res = getInstallCommandForPlatform(
+        'linux',
+        'http://elasticsearch:9200',
+        'service-token-1',
+        'policy-1',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          id: 'test',
+          name: 'test',
+          is_default: false,
+          host: 'https://test.fr/8.12.0-test/',
+        }
+      );
+
+      expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://test.fr/8.12.0-test/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
+        cd elastic-agent--linux-x86_64
+        sudo ./elastic-agent install \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220"
+      `);
+    });
+  });
+
   describe('with policy id and fleet server host and production deployment', () => {
     it('should return the correct command if the the policyId is set for linux', () => {
       const res = getInstallCommandForPlatform(

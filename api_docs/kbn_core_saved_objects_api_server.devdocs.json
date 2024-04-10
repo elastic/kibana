@@ -2153,7 +2153,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -2183,6 +2183,22 @@
             "label": "created_at",
             "description": [
               "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObject.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "The ID of the user who created this object."
             ],
             "signature": [
               "string | undefined"
@@ -2688,6 +2704,10 @@
           },
           {
             "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
           },
           {
@@ -2716,43 +2736,43 @@
           },
           {
             "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
+          },
+          {
+            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "savedSearch",
@@ -3897,6 +3917,22 @@
                 "text": "MutatingOperationRefreshSetting"
               },
               " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObjectsBulkUpdateOptions.migrationVersionCompatibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrationVersionCompatibility",
+            "description": [
+              "{@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility}"
+            ],
+            "signature": [
+              "\"raw\" | \"compatible\" | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/bulk_update.ts",
             "deprecated": false,
@@ -5063,7 +5099,7 @@
             "tags": [],
             "label": "bulkUpdate",
             "description": [
-              "\nBulk Updates multiple SavedObject at once\n"
+              "\nBulk Updates multiple SavedObject at once\n\nThe savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.\nThese update operations are done in-memory, and cause memory constraint issues when\nupdating many objects with large `json` blobs stored in some fields. As such, we recommend against using\n`bulkUpdate` for savedObjects that:\n- use arrays (as these tend to be large objects)\n- store large `json` blobs in some fields\n"
             ],
             "signature": [
               "<T = unknown>(objects: ",
@@ -6019,15 +6055,15 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/create.test.ts"
               }
             ]
           },
@@ -7191,7 +7227,7 @@
               },
               {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
-                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/repository.test.ts"
+                "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/increment_counter.test.ts"
               }
             ]
           },

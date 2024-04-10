@@ -7,25 +7,27 @@
 
 import type { Subscription } from 'rxjs';
 
+import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities, FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import type {
   ManagementApp,
   ManagementSection,
   ManagementSetup,
 } from '@kbn/management-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticationServiceSetup } from '../authentication';
+import type { SecurityLicense } from '../../common';
+import type { ConfigType } from '../config';
 import type { PluginStartDependencies } from '../plugin';
 
 export interface ManagementAppConfigType {
-  userManagementEnabled: boolean;
-  roleManagementEnabled: boolean;
-  roleMappingManagementEnabled: boolean;
+  userManagementEnabled?: boolean;
+  roleManagementEnabled?: boolean;
+  roleMappingManagementEnabled?: boolean;
 }
 
 interface SetupParams {
@@ -34,38 +36,49 @@ interface SetupParams {
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
-  uiConfig?: ManagementAppConfigType;
+  buildFlavor: BuildFlavor;
 }
 
 interface StartParams {
   capabilities: Capabilities;
-  uiConfig?: ManagementAppConfigType;
 }
 
 export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
   private securitySection?: ManagementSection;
+  private readonly userManagementEnabled: boolean;
+  private readonly roleManagementEnabled: boolean;
+  private readonly roleMappingManagementEnabled: boolean;
 
-  setup({ getStartServices, management, authc, license, fatalErrors, uiConfig }: SetupParams) {
+  constructor(config: ConfigType) {
+    this.userManagementEnabled = config.ui?.userManagementEnabled !== false;
+    this.roleManagementEnabled = config.roleManagementEnabled !== false;
+    this.roleMappingManagementEnabled = config.ui?.roleMappingManagementEnabled !== false;
+  }
+
+  setup({ getStartServices, management, authc, license, fatalErrors, buildFlavor }: SetupParams) {
     this.license = license;
     this.securitySection = management.sections.section.security;
 
-    if (!uiConfig || uiConfig.userManagementEnabled) {
+    if (this.userManagementEnabled) {
       this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     }
-    if (!uiConfig || uiConfig.roleManagementEnabled) {
+
+    if (this.roleManagementEnabled) {
       this.securitySection.registerApp(
-        rolesManagementApp.create({ fatalErrors, license, getStartServices })
+        rolesManagementApp.create({ fatalErrors, license, getStartServices, buildFlavor })
       );
     }
+
     this.securitySection.registerApp(apiKeysManagementApp.create({ authc, getStartServices }));
-    if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+
+    if (this.roleMappingManagementEnabled) {
       this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
     }
   }
 
-  start({ capabilities, uiConfig }: StartParams) {
+  start({ capabilities }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe((features) => {
       const securitySection = this.securitySection!;
 
@@ -73,21 +86,21 @@ export class ManagementService {
         [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
       ];
 
-      if (!uiConfig || uiConfig.userManagementEnabled) {
+      if (this.userManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(usersManagementApp.id)!,
           features.showLinks,
         ]);
       }
 
-      if (!uiConfig || uiConfig.roleManagementEnabled) {
+      if (this.roleManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(rolesManagementApp.id)!,
           features.showLinks,
         ]);
       }
 
-      if (!uiConfig || uiConfig.roleMappingManagementEnabled) {
+      if (this.roleMappingManagementEnabled) {
         securityManagementAppsStatuses.push([
           securitySection.getApp(roleMappingsManagementApp.id)!,
           features.showLinks && features.showRoleMappingsManagement,

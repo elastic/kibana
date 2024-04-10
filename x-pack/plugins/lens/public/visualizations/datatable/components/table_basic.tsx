@@ -46,6 +46,7 @@ import type {
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
+  buildSchemaDetectors,
   createGridFilterHandler,
   createGridHideHandler,
   createGridResizeHandler,
@@ -244,8 +245,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [columnConfig]
   );
 
-  const { sortingColumnId: sortBy, sortingDirection: sortDirection } = props.args;
-
   const isReadOnlySorted = renderMode !== 'edit';
 
   const onColumnResize = useMemo(
@@ -337,6 +336,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ]
   );
 
+  const schemaDetectors = useMemo(
+    () => buildSchemaDetectors(columns, columnConfig, firstLocalTable, formatters),
+    [columns, firstLocalTable, columnConfig, formatters]
+  );
+
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick || !isInteractive) {
       return [];
@@ -400,8 +404,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const sorting = useMemo<EuiDataGridSorting | undefined>(
-    () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
-    [onEditAction, sortBy, sortDirection]
+    () =>
+      createGridSortingConfig(
+        columnConfig.sortingColumnId,
+        columnConfig.sortingDirection as LensGridDirection,
+        onEditAction
+      ),
+    [onEditAction, columnConfig]
   );
 
   const renderSummaryRow = useMemo(() => {
@@ -476,12 +485,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
                 }
               : undefined,
           }}
+          inMemory={{ level: 'sorting' }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
           rowCount={firstLocalTable.rows.length}
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
+          schemaDetectors={schemaDetectors}
           sorting={sorting}
           pagination={
             pagination && {

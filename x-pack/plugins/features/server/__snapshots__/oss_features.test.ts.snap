@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Download CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Saved Search panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
@@ -558,6 +558,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -581,6 +582,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -613,6 +615,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",
@@ -710,6 +713,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1032,6 +1036,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1169,6 +1174,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1192,6 +1198,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "tag",
         ],
@@ -1224,6 +1231,7 @@ Array [
           "visualization",
           "canvas-workpad",
           "lens",
+          "links",
           "map",
           "dashboard",
           "query",
@@ -1321,6 +1329,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [
@@ -1643,6 +1652,7 @@ Array [
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "settings": Array [],
         "update": Array [],
       },
       "catalogue": Array [

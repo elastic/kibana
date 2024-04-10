@@ -15,60 +15,31 @@ import {
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  ALERT_RULE_NAME,
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
-import { type Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
-export interface AlertActionsProps {
-  alert: Alert;
-  ecsData: Ecs;
-  id?: string;
-  refresh: () => void;
-  setFlyoutAlert: React.Dispatch<React.SetStateAction<any | undefined>>;
-}
-
-const CASES_ACTIONS_ENABLED = false;
-
-export function AlertActions({
-  alert,
-  ecsData,
-  id: pageId,
-  refresh,
-  setFlyoutAlert,
-}: AlertActionsProps) {
-  const alertDoc = Object.entries(alert).reduce((acc, [key, val]) => {
-    return { ...acc, [key]: val?.[0] };
-  }, {});
-
-  const {
-    cases,
-    http: {
-      basePath: { prepend },
-    },
-  } = useMlKibana().services;
-  const casesPrivileges = cases?.helpers.canUseCases();
-
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+export function AlertActions(props: AlertActionsProps) {
+  const { alert, refresh } = props;
+  const { cases, triggersActionsUi } = useMlKibana().services;
+  const casesPrivileges = cases?.helpers.canUseCases([CASE_APP_ID]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
   const alertId = alert[ALERT_UUID]?.[0] ?? '';
 
-  const linkToRule = ruleId
-    ? prepend(`/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`)
-    : null;
+  const ecsData = useMemo<Ecs>(
+    () => ({
+      _id: alert._id,
+      _index: alert._index,
+    }),
+    [alert._id, alert._index]
+  );
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
@@ -87,14 +58,12 @@ export function AlertActions({
       : [];
   }, [alert, alertId, ecsData?._id, ecsData?._index, ruleId]);
 
-  const isActiveAlert = useMemo(() => alert[ALERT_STATUS]![0] === ALERT_STATUS_ACTIVE, [alert]);
-
   const onSuccess = useCallback(() => {
     refresh();
   }, [refresh]);
 
-  const createCaseFlyout = cases!.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
-  const selectCaseModal = cases!.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const createCaseFlyout = cases?.hooks?.useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal({ onSuccess });
 
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
@@ -105,25 +74,32 @@ export function AlertActions({
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
+    createCaseFlyout?.open({ attachments: caseAttachments });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
+    selectCaseModal?.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
 
-  const handleUntrackAlert = useCallback(async () => {
-    await untrackAlerts({
-      indices: [ecsData?._index ?? ''],
-      alertUuids: [alertId],
-    });
-    onSuccess();
-  }, [untrackAlerts, alertId, ecsData, onSuccess]);
+  const DefaultAlertActions = useMemo(
+    () =>
+      triggersActionsUi?.getAlertsTableDefaultAlertActions({
+        key: 'defaultRowActions',
+        onActionExecuted: closeActionsPopover,
+        isAlertDetailsEnabled: false,
+        resolveRulePagePath: (alertRuleId) =>
+          alertRuleId
+            ? `/app/management/insightsAndAlerting/triggersActions/rule/${alertRuleId}`
+            : null,
+        ...props,
+      }),
+    [props, triggersActionsUi]
+  );
 
   const actionsMenuItems = [
-    ...(CASES_ACTIONS_ENABLED && casesPrivileges?.create && casesPrivileges.read
+    ...(casesPrivileges && casesPrivileges?.create && casesPrivileges.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
@@ -147,44 +123,7 @@ export function AlertActions({
           </EuiContextMenuItem>,
         ]
       : []),
-    ...(linkToRule
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="viewRuleDetails"
-            key="viewRuleDetails"
-            href={linkToRule}
-          >
-            {i18n.translate('xpack.ml.alertsTable.viewRuleDetailsButtonText', {
-              defaultMessage: 'View rule details',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    <EuiContextMenuItem
-      data-test-subj="viewAlertDetailsFlyout"
-      key="viewAlertDetailsFlyout"
-      onClick={() => {
-        closeActionsPopover();
-        setFlyoutAlert({ fields: alertDoc });
-      }}
-    >
-      {i18n.translate('xpack.ml.alertsTable.viewAlertDetailsButtonText', {
-        defaultMessage: 'View alert details',
-      })}
-    </EuiContextMenuItem>,
-    ...(isActiveAlert
-      ? [
-          <EuiContextMenuItem
-            data-test-subj="untrackAlert"
-            key="untrackAlert"
-            onClick={handleUntrackAlert}
-          >
-            {i18n.translate('xpack.ml.alerts.actions.untrack', {
-              defaultMessage: 'Mark as untracked',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
+    DefaultAlertActions,
   ];
 
   const actionsToolTip =

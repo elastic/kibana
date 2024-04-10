@@ -10,11 +10,12 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MountPoint } from '@kbn/core/public';
-import { TopNavMenu, TopNavMenuBadgeProps } from './top_nav_menu';
+import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiToolTipProps } from '@elastic/eui';
+import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 
 const unifiedSearch = {
   ui: {
@@ -66,35 +67,35 @@ describe('TopNavMenu', () => {
   ];
 
   it('Should render nothing when no config is provided', () => {
-    const component = shallowWithIntl(<TopNavMenu appName={'test'} />);
+    const component = mountWithIntl(<TopNavMenu appName={'test'} />);
     expect(component.find(WRAPPER_SELECTOR).length).toBe(0);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should not render menu items when config is empty', () => {
-    const component = shallowWithIntl(<TopNavMenu appName={'test'} config={[]} />);
+    const component = mountWithIntl(<TopNavMenu appName={'test'} config={[]} />);
     expect(component.find(WRAPPER_SELECTOR).length).toBe(0);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render 1 menu item', () => {
-    const component = shallowWithIntl(<TopNavMenu appName={'test'} config={[menuItems[0]]} />);
+    const component = mountWithIntl(<TopNavMenu appName={'test'} config={[menuItems[0]]} />);
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(1);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render multiple menu items', () => {
-    const component = shallowWithIntl(<TopNavMenu appName={'test'} config={menuItems} />);
+    const component = mountWithIntl(<TopNavMenu appName={'test'} config={menuItems} />);
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
   });
 
   it('Should render search bar', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearch} />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
@@ -103,7 +104,7 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render menu items and search bar', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <TopNavMenu
         appName={'test'}
         config={menuItems}
@@ -117,7 +118,7 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render with a class name', () => {
-    const component = shallowWithIntl(
+    const component = mountWithIntl(
       <TopNavMenu
         appName={'test'}
         config={menuItems}
@@ -126,7 +127,7 @@ describe('TopNavMenu', () => {
         className={'myCoolClass'}
       />
     );
-    expect(component.find('.kbnTopNavMenu').length).toBe(1);
+    expect(findTestSubject(component, 'top-nav').hasClass('kbnTopNavMenu')).toBe(true);
     expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 

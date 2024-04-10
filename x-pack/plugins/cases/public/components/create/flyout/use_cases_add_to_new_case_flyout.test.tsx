@@ -33,8 +33,6 @@ describe('use cases add to new case flyout hook', () => {
             persistableStateAttachmentTypeRegistry,
             owner: ['test'],
             permissions: allCasesPermissions(),
-            appId: 'test',
-            appTitle: 'jest',
             basePath: '/jest',
             dispatch,
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },

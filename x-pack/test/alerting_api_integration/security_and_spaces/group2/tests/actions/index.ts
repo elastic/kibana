@@ -32,6 +32,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/es_index_preconfigured'));
     loadTestFile(require.resolve('./connector_types/opsgenie'));
     loadTestFile(require.resolve('./connector_types/pagerduty'));
+    loadTestFile(require.resolve('./connector_types/sentinelone'));
     loadTestFile(require.resolve('./connector_types/server_log'));
     loadTestFile(require.resolve('./connector_types/slack_webhook'));
     loadTestFile(require.resolve('./connector_types/slack_api'));
@@ -46,8 +47,10 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_all_system'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_enqueue'));
 

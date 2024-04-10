@@ -71,7 +71,7 @@ describe('Data Streams tab', () => {
       expect(exists('emptyPrompt')).toBe(true);
     });
 
-    test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
+    test('when Fleet is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
       testBed = await setup(httpSetup, {
         plugins: {},
         url: urlServiceMock,
@@ -796,7 +796,7 @@ describe('Data Streams tab', () => {
         _meta: {
           package: 'test',
           managed: true,
-          managed_by: 'ingest-manager',
+          managed_by: 'fleet',
         },
       });
       const nonManagedDataStream = createDataStreamPayload({ name: 'non-managed-data-stream' });
@@ -813,19 +813,12 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('listed in the table with Fleet-managed label', () => {
+    test('listed in the table with managed label', () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `managed-data-stream${nonBreakingSpace}Fleet-managed`,
-          'green',
-          '1',
-          '7 days',
-          'Delete',
-        ],
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
     });
@@ -835,14 +828,7 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        [
-          '',
-          `managed-data-stream${nonBreakingSpace}Fleet-managed`,
-          'green',
-          '1',
-          '7 days',
-          'Delete',
-        ],
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', '7 days', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', '7 days', 'Delete'],
       ]);
 

@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  PanelState,
-} from '@kbn/embeddable-plugin/public';
-
-import { DashboardPanelState } from '../../../../common';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '../dashboard_container';
 
 export async function addOrUpdateEmbeddable<
@@ -23,31 +16,24 @@ export async function addOrUpdateEmbeddable<
 >(this: DashboardContainer, type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
   const idToReplace = embeddableId || explicitInput.id;
   if (idToReplace && this.input.panels[idToReplace]) {
-    return this.replacePanel(this.input.panels[idToReplace], {
+    const previousPanelState = this.input.panels[idToReplace];
+    const newPanelState = {
       type,
       explicitInput: {
         ...explicitInput,
         id: idToReplace,
       },
-    });
+    };
+    const panelId = await this.replaceEmbeddable(
+      previousPanelState.explicitInput.id,
+      {
+        ...newPanelState.explicitInput,
+        id: previousPanelState.explicitInput.id,
+      },
+      newPanelState.type,
+      true
+    );
+    return panelId;
   }
   return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
-}
-
-export async function replacePanel(
-  this: DashboardContainer,
-  previousPanelState: DashboardPanelState<EmbeddableInput>,
-  newPanelState: Partial<PanelState>,
-  generateNewId?: boolean
-): Promise<string> {
-  const panelId = await this.replaceEmbeddable(
-    previousPanelState.explicitInput.id,
-    {
-      ...newPanelState.explicitInput,
-      id: previousPanelState.explicitInput.id,
-    },
-    newPanelState.type,
-    generateNewId
-  );
-  return panelId;
 }

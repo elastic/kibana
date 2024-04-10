@@ -25,4 +25,5 @@ export const mockContextValue: LeftPanelContext = {
   searchHit: mockSearchHit,
   dataAsNestedObject: mockDataAsNestedObject,
   investigationFields: [],
+  isPreview: false,
 };

@@ -14,8 +14,7 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 
 const SearchBarWrapper = styled(EuiFlexItem)`
   min-width: 200px;
-  & .euiPopover,
-  & .euiPopover__anchor {
+  & .euiPopover {
     // This is needed to "cancel" styles passed down from EuiTourStep that
     // interfere with EuiFieldSearch and don't allow it to take the full width
     display: block;

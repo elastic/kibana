@@ -13,6 +13,8 @@ import {
   alertComment,
   basicCase,
   connectorsMock,
+  customFieldsConfigurationMock,
+  customFieldsMock,
   getCaseUsersMockResponse,
   getUserAction,
 } from '../../../containers/mock';
@@ -38,6 +40,9 @@ import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
 import { CaseMetricsFeature } from '../../../../common/types/api';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -54,11 +59,16 @@ jest.mock('../../../containers/use_get_categories');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
 jest.mock('../../../containers/use_get_case_users');
+jest.mock('../../../containers/use_replace_custom_field');
 jest.mock('../use_on_update_field');
 jest.mock('../../../common/use_cases_features');
+jest.mock('../../../containers/configure/use_get_case_configuration');
+jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
+(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: {} });
+(useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -124,6 +134,8 @@ const useGetCasesFeaturesRes = {
   isSyncAlertsEnabled: true,
 };
 
+const replaceCustomField = jest.fn();
+
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 const useGetCaseUserActionsStatsMock = useGetCaseUserActionsStats as jest.Mock;
@@ -133,10 +145,19 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
+const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/171575
-describe.skip('Case View Page activity tab', () => {
+describe('Case View Page activity tab', () => {
+  let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+  const basicLicense = licensingMock.createLicense({
+    license: { type: 'basic' },
+  });
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
@@ -155,15 +176,41 @@ describe.skip('Case View Page activity tab', () => {
       isLoading: false,
       useOnUpdateField: jest.fn,
     });
-  });
-  let appMockRender: AppMockRenderer;
+    useReplaceCustomFieldMock.mockImplementation(() => ({
+      isUpdatingCustomField: false,
+      isError: false,
+      mutate: replaceCustomField,
+    }));
 
-  const platinumLicense = licensingMock.createLicense({
-    license: { type: 'platinum' },
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
   });
 
-  const basicLicense = licensingMock.createLicense({
-    license: { type: 'basic' },
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
   });
 
   beforeEach(() => {
@@ -178,13 +225,18 @@ describe.skip('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
     appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
+    const caseViewActivity = await screen.findByTestId('case-view-activity');
+    expect(await within(caseViewActivity).findAllByTestId('user-actions-list')).toHaveLength(2);
+    expect(
+      await within(caseViewActivity).findByTestId('case-view-status-action-button')
+    ).toBeInTheDocument();
+
     expect(await screen.findByTestId('description')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-status-action-button')).toBeInTheDocument();
+
+    const caseViewSidebar = await screen.findByTestId('case-view-page-sidebar');
+    expect(await within(caseViewSidebar).findByTestId('case-tags')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('cases-categories')).toBeInTheDocument();
+    expect(await within(caseViewSidebar).findByTestId('connector-edit-header')).toBeInTheDocument();
 
     await waitForComponentToUpdate();
   });
@@ -216,11 +268,7 @@ describe.skip('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(screen.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
 
     await waitForComponentToUpdate();
@@ -233,11 +281,7 @@ describe.skip('Case View Page activity tab', () => {
     });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
-    expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
-    expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
-    expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
+
     expect(await screen.findByTestId('case-severity-selection')).toBeDisabled();
 
     await waitForComponentToUpdate();
@@ -312,6 +356,36 @@ describe.skip('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: platinumLicense });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+    expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
+  });
+
+  it('should call useReplaceCustomField correctly', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+      },
+    });
+    appMockRender.render(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    userEvent.click(await screen.findByRole('switch'));
+
+    await waitFor(() => {
+      expect(replaceCustomField).toHaveBeenCalledWith({
+        caseId: caseData.id,
+        caseVersion: caseData.version,
+        customFieldId: customFieldsMock[1].key,
+        customFieldValue: false,
+      });
+    });
 
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
   });

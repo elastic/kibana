@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
-import { useExpandableFlyoutContext } from './context';
+import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
+import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
 import { PreviewSection } from './components/preview_section';
 import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
@@ -26,9 +28,9 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    */
   registeredPanels: Panel[];
   /**
-   * Propagate out EuiFlyout onClose event
+   * Allows for custom styles to be passed to the EuiFlyout component
    */
-  handleOnFlyoutClosed?: () => void;
+  customStyles?: Interpolation<Theme>;
 }
 
 /**
@@ -39,19 +41,14 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
  * is already rendered.
  */
 export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
+  customStyles,
   registeredPanels,
-  handleOnFlyoutClosed,
   ...flyoutProps
 }) => {
   const windowWidth = useWindowSize();
 
-  const { panels, closeFlyout } = useExpandableFlyoutContext();
-  const { left, right, preview } = panels;
-
-  const onClose = useCallback(() => {
-    if (handleOnFlyoutClosed) handleOnFlyoutClosed();
-    closeFlyout();
-  }, [closeFlyout, handleOnFlyoutClosed]);
+  const { left, right, preview } = useExpandableFlyoutState();
+  const { closeFlyout } = useExpandableFlyoutApi();
 
   const leftSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === left?.id),
@@ -69,7 +66,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     ? mostRecentPreview?.params?.banner
     : undefined;
 
-  const showBackButton = preview && preview.length > 1;
+  const showBackButton = !!preview && preview.length > 1;
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
@@ -86,13 +83,19 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     showPreview,
   });
 
-  const hideFlyout = !left && !right && !preview.length;
+  const hideFlyout = !left && !right && !preview?.length;
   if (hideFlyout) {
     return null;
   }
 
   return (
-    <EuiFlyout {...flyoutProps} size={flyoutWidth} ownFocus={false} onClose={onClose}>
+    <EuiFlyout
+      {...flyoutProps}
+      size={flyoutWidth}
+      ownFocus={false}
+      onClose={closeFlyout}
+      css={customStyles}
+    >
       <EuiFlexGroup
         direction={leftSection ? 'row' : 'column'}
         wrap={false}

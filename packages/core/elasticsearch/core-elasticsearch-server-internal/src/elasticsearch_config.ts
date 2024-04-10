@@ -40,7 +40,7 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
-  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   idleSocketTimeout: schema.duration({ defaultValue: '60s' }),
   compression: schema.boolean({ defaultValue: false }),
@@ -94,7 +94,7 @@ export const configSchema = schema.object({
       }),
     ],
     {
-      defaultValue: ['authorization'],
+      defaultValue: ['authorization', 'es-client-authentication'],
     }
   ),
   customHeaders: schema.recordOf(schema.string(), schema.string(), {
@@ -144,7 +144,10 @@ export const configSchema = schema.object({
     }
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
-  healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+  healthCheck: schema.object({
+    delay: schema.duration({ defaultValue: 2500 }),
+    startupDelay: schema.duration({ defaultValue: 500 }),
+  }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
     traditional: schema.conditional(
@@ -301,10 +304,13 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly skipStartupConnectionCheck: boolean;
   /**
-   * The interval between health check requests Kibana sends to the Elasticsearch.
+   * The interval between health check requests Kibana sends to the Elasticsearch before the first green signal.
+   */
+  public readonly healthCheckStartupDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
-
   /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
@@ -435,6 +441,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
@@ -465,6 +472,10 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
   let keyPassphrase: string | undefined;
   let certificate: string | undefined;
   let certificateAuthorities: string[] | undefined;
+
+  const readFile = (file: string) => {
+    return readFileSync(file, 'utf8');
+  };
 
   const addCAs = (ca: string[] | undefined) => {
     if (ca && ca.length) {
@@ -521,8 +532,4 @@ const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
     certificate,
     certificateAuthorities,
   };
-};
-
-const readFile = (file: string) => {
-  return readFileSync(file, 'utf8');
 };

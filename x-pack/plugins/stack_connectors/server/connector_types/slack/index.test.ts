@@ -344,7 +344,11 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
     expect(params.message).toBe('`*bold*`');
   });
 });

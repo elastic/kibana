@@ -53,7 +53,7 @@ describe('control group renderer', () => {
     expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
       expect.objectContaining({ controlStyle: 'twoLine' }),
       undefined,
-      undefined,
+      { lastSavedInput: expect.objectContaining({ controlStyle: 'twoLine' }) },
       undefined
     );
   });

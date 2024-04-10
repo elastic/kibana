@@ -15,7 +15,7 @@ describe('ModelSelector', () => {
     const { getByTestId } = render(
       <ModelSelector onModelSelectionChange={onModelSelectionChange} />
     );
-    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(MODEL_GPT_3_5_TURBO);
+    expect(getByTestId('comboBoxSearchInput')).toHaveValue(MODEL_GPT_3_5_TURBO);
   });
   it('should call onModelSelectionChange when custom option', () => {
     const onModelSelectionChange = jest.fn();

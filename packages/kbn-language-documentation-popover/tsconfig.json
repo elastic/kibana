@@ -14,7 +14,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
-    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

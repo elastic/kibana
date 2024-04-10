@@ -15,6 +15,7 @@ import {
 } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
 
 import type { CoreStart } from '@kbn/core/public';
+import { createOpenChangePointInMlAppAction } from './open_change_point_ml';
 import type { AiopsPluginStartDeps } from '../types';
 import { createEditChangePointChartsPanelAction } from './edit_change_point_charts_panel';
 import {
@@ -32,6 +33,8 @@ export function registerAiopsUiActions(
     coreStart,
     pluginStart
   );
+  const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
+
   // // Register actions and triggers
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editChangePointChartPanelAction);
 
@@ -46,4 +49,5 @@ export function registerAiopsUiActions(
     CATEGORIZE_FIELD_VALUE_TRIGGER,
     categorizeFieldValueAction(coreStart, pluginStart)
   );
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
 }

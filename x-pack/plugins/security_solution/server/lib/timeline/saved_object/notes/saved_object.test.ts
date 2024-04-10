@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { Note } from '../../../../../common/api/timeline';
 
 import { pickSavedNote } from './saved_object';
@@ -34,7 +34,7 @@ describe('saved_object', () => {
   });
 
   describe('Set create / update time correctly ', () => {
-    test('Creating a timeline', () => {
+    test('Creating a note', () => {
       const savedNote = getMockSavedNote();
       const noteId = null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
@@ -44,7 +44,7 @@ describe('saved_object', () => {
       expect(result.updated).toEqual(mockDateNow);
     });
 
-    test('Updating a timeline', () => {
+    test('Updating a note', () => {
       const savedNote = getMockSavedNote();
       const noteId = savedNote.noteId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
@@ -56,7 +56,7 @@ describe('saved_object', () => {
   });
 
   describe('Set userInfo correctly ', () => {
-    test('Creating a timeline', () => {
+    test('Creating a note', () => {
       const savedNote = getMockSavedNote();
       const noteId = null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
@@ -66,7 +66,7 @@ describe('saved_object', () => {
       expect(result.updatedBy).toEqual(userInfo.username);
     });
 
-    test('Creating a timeline with user email', () => {
+    test('Creating a note with user email', () => {
       const savedNote = getMockSavedNote();
       const noteId = null;
       const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
@@ -76,7 +76,7 @@ describe('saved_object', () => {
       expect(result.updatedBy).toEqual(userInfo.email);
     });
 
-    test('Creating a timeline with user full name', () => {
+    test('Creating a note with user full name', () => {
       const savedNote = getMockSavedNote();
       const noteId = null;
       const userInfo = {
@@ -90,7 +90,7 @@ describe('saved_object', () => {
       expect(result.updatedBy).toEqual(userInfo.full_name);
     });
 
-    test('Updating a timeline', () => {
+    test('Updating a note', () => {
       const savedNote = getMockSavedNote();
       const noteId = savedNote.noteId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
@@ -100,7 +100,7 @@ describe('saved_object', () => {
       expect(result.updatedBy).toEqual(userInfo.username);
     });
 
-    test('Updating a timeline with user email', () => {
+    test('Updating a note with user email', () => {
       const savedNote = getMockSavedNote();
       const noteId = savedNote.noteId ?? null;
       const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
@@ -110,7 +110,7 @@ describe('saved_object', () => {
       expect(result.updatedBy).toEqual(userInfo.email);
     });
 
-    test('Updating a timeline with user full name', () => {
+    test('Updating a note with user full name', () => {
       const savedNote = getMockSavedNote();
       const noteId = savedNote.noteId ?? null;
       const userInfo = {

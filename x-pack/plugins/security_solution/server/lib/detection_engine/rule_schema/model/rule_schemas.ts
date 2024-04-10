@@ -77,6 +77,7 @@ import {
   TiebreakerField,
   TimestampField,
   AlertSuppressionCamel,
+  ThresholdAlertSuppression,
   ThresholdNormalized,
   AnomalyThreshold,
   HistoryWindowStart,
@@ -184,6 +185,7 @@ export const ThreatSpecificRuleParams = z.object({
   concurrentSearches: ConcurrentSearches.optional(),
   itemsPerSearch: ItemsPerSearch.optional(),
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type ThreatRuleParams = BaseRuleParams & ThreatSpecificRuleParams;
@@ -237,6 +239,7 @@ export const ThresholdSpecificRuleParams = z.object({
   savedId: SavedQueryId.optional(),
   threshold: ThresholdNormalized,
   dataViewId: DataViewId.optional(),
+  alertSuppression: ThresholdAlertSuppression.optional(),
 });
 
 export type ThresholdRuleParams = BaseRuleParams & ThresholdSpecificRuleParams;
@@ -265,6 +268,7 @@ export const NewTermsSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   language: KqlQueryLanguage,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type NewTermsRuleParams = BaseRuleParams & NewTermsSpecificRuleParams;

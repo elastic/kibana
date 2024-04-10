@@ -11,41 +11,73 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { ConfigSchema } from './config';
 import { securityConfigDeprecationProvider } from './config_deprecations';
-import type { PluginSetupDependencies, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import type { PluginSetupDependencies, SecurityPluginSetup } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
+export { HTTPAuthorizationHeader } from './authentication';
+export type { CasesSupportedOperations } from './authorization';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common';
+export { ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW } from './routes/tags';
+
+// Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  InvalidateAPIKeysParams,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
+  AuditServiceSetup,
+  APIKeys,
+  AuthenticationServiceStart,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
   ValidateAPIKeyParams,
-  AuthenticationServiceStart,
-} from './authentication';
-export { HTTPAuthorizationHeader } from './authentication';
-export type { CheckPrivilegesPayload, CasesSupportedOperations } from './authorization';
-export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
-export type { AuditLogger, AuditEvent, AuditHttp, AuditKibana, AuditRequest } from './audit';
-export type { SecurityPluginSetup, SecurityPluginStart };
-export type { AuthenticatedUser } from '../common/model';
-export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
-export type { AuditServiceSetup } from './audit';
-export type {
-  UserProfileServiceStart,
+  CreateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  CreateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  Actions,
+  AlertingActions,
+  ApiActions,
+  AppActions,
+  CasesActions,
+  SavedObjectActions,
+  SpaceActions,
+  UIActions,
+  AuthorizationServiceSetup,
+  CheckPrivileges,
+  CheckPrivilegesPayload,
+  CheckUserProfilesPrivileges,
+  CheckPrivilegesDynamically,
+  CheckPrivilegesDynamicallyWithRequest,
+  CheckUserProfilesPrivilegesResponse,
+  CheckUserProfilesPrivilegesPayload,
+  CheckPrivilegesOptions,
+  CheckPrivilegesResponse,
+  CheckPrivilegesWithRequest,
+  CheckSavedObjectsPrivileges,
+  CheckSavedObjectsPrivilegesWithRequest,
+  ElasticsearchPrivilegesType,
+  KibanaPrivilegesType,
+  AuthorizationMode,
+  PrivilegeDeprecationsRolesByFeatureIdResponse,
+  PrivilegeDeprecationsService,
+  PrivilegeDeprecationsRolesByFeatureIdRequest,
   UserProfileBulkGetParams,
   UserProfileSuggestParams,
   UserProfileRequiredPrivileges,
   UserProfileGetCurrentParams,
-} from './user_profile';
+  UserProfileServiceStart,
+} from '@kbn/security-plugin-types-server';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
@@ -56,6 +88,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     sameSiteCookies: true,
     showNavLinks: true,
     ui: true,
+    roleManagementEnabled: true,
   },
 };
 export const plugin: PluginInitializer<

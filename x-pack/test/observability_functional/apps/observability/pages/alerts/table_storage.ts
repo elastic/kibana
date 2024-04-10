@@ -50,18 +50,22 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('remembers sorting changes', async () => {
       await observability.alerts.common.navigateToTimeWithData();
-      const timestampColumnButton = await testSubjects.find(
-        'dataGridHeaderCellActionButton-@timestamp'
+      const triggeredColumnButton = await testSubjects.find(
+        'dataGridHeaderCellActionButton-kibana.alert.start'
       );
-      await timestampColumnButton.click();
-      const columnMenu = await testSubjects.find('dataGridHeaderCellActionGroup-@timestamp');
+      await triggeredColumnButton.click();
+      const columnMenu = await testSubjects.find(
+        'dataGridHeaderCellActionGroup-kibana.alert.start'
+      );
       const sortButton = await columnMenu.findByCssSelector('[title="Sort Old-New"]');
       await sortButton.click();
 
       await observability.alerts.common.navigateToTimeWithData();
 
-      const timestampColumnHeading = await testSubjects.find('dataGridHeaderCell-@timestamp');
-      expect(await timestampColumnHeading.getAttribute('aria-sort')).to.be('ascending');
+      const triggeredColumnHeading = await testSubjects.find(
+        'dataGridHeaderCell-kibana.alert.start'
+      );
+      expect(await triggeredColumnHeading.getAttribute('aria-sort')).to.be('ascending');
     });
   });
 };

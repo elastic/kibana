@@ -8,27 +8,67 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { VISUALIZATIONS_SECTION_HEADER_TEST_ID } from './test_ids';
-import { TestProviders } from '../../../../common/mock';
+import {
+  ANALYZER_PREVIEW_TEST_ID,
+  SESSION_PREVIEW_TEST_ID,
+  VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
+  VISUALIZATIONS_SECTION_HEADER_TEST_ID,
+} from './test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { RightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { useExpandSection } from '../hooks/use_expand_section';
+import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
+jest.mock('../hooks/use_expand_section');
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-const contextValue = {
+jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn(),
+}));
+const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+);
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
+);
+
+const panelContextValue = {
   ...mockContextValue,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
+const renderVisualizationsSection = (contextValue = panelContextValue) =>
+  render(
+    <IntlProvider locale="en">
+      <TestProvider>
+        <RightPanelContext.Provider value={contextValue}>
+          <VisualizationsSection />
+        </RightPanelContext.Provider>
+      </TestProvider>
+    </IntlProvider>
+  );
+
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
+    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -38,36 +78,31 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render visualizations component', () => {
-    const flyoutContextValue = {
-      openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContext;
-
-    const { getByTestId, getAllByRole } = render(
-      <IntlProvider locale="en">
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-          <RightPanelContext.Provider value={contextValue}>
-            <VisualizationsSection />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
-      </IntlProvider>
-    );
+    const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'false');
-    expect(getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+    expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toHaveTextContent('Visualizations');
+    expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render visualization component as expanded when expanded is true', () => {
-    const { getByTestId, getAllByRole } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <VisualizationsSection expanded={true} />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
+  it('should render the component collapsed if value is false in local storage', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(false);
 
-    expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
-    expect(getAllByRole('button')[0]).toHaveAttribute('aria-expanded', 'true');
-    expect(getAllByRole('button')[0]).not.toHaveAttribute('disabled');
+    const { getByTestId } = renderVisualizationsSection();
+    expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
+  });
+
+  it('should render the component expanded if value is true in local storage', () => {
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineAlertClick: jest.fn(),
+    });
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    const { getByTestId } = renderVisualizationsSection();
+    expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
+
+    expect(getByTestId(`${SESSION_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(getByTestId(`${ANALYZER_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
   });
 });

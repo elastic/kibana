@@ -19,11 +19,14 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export type DiscoverDisplayMode = 'embedded' | 'standalone';
-
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
   textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+}
+
+export interface SidebarToggleState {
+  isCollapsed: boolean;
+  toggle: undefined | ((isCollapsed: boolean) => void);
 }

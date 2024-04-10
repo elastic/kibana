@@ -16,20 +16,26 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
  */
 export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
-  scopeId: string
+  scopeId: string,
+  isPreview: boolean
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
-    const values = highlightedFields[fieldName].values;
-    const overrideFieldName = highlightedFields[fieldName].overrideField;
+    const overrideFieldName = highlightedFields[fieldName].overrideField?.field;
+    const overrideFieldValues = highlightedFields[fieldName].overrideField?.values;
     const field = overrideFieldName ? overrideFieldName : fieldName;
+    const values = overrideFieldValues?.length
+      ? overrideFieldValues
+      : highlightedFields[fieldName].values;
 
     return {
       field,
       description: {
         field,
+        ...(overrideFieldName ? { originalField: fieldName } : {}),
         values,
         scopeId,
+        isPreview,
       },
     };
   });

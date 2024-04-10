@@ -16,11 +16,9 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -40,6 +38,7 @@ interface NoDataComponentProps {
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
   noDataPage?: NoDataPagePluginStart;
+  share?: SharePluginStart;
 }
 
 const NoDataComponent = ({
@@ -48,13 +47,32 @@ const NoDataComponent = ({
   dataViewEditor,
   onDataViewCreated,
   noDataPage,
+  share,
 }: NoDataComponentProps) => {
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
     noDataPage,
+    share,
   };
+
+  const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+  const AnalyticsNoDataPageKibanaProvider = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+        return { default: NoDataProvider };
+      })
+    )
+  );
+  const AnalyticsNoDataPage = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+        return { default: NoDataPage };
+      })
+    )
+  );
+
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
@@ -70,6 +88,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       kbnUrlStateStorage,
       dataViewEditor,
       noDataPage,
+      share,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -131,6 +150,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
         noDataPage={noDataPage}
+        share={share}
       />
     );
   }

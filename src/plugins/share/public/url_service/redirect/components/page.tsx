@@ -8,21 +8,31 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+
 import { EuiPageTemplate } from '@elastic/eui';
-import { ThemeServiceSetup } from '@kbn/core/public';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
+import type { ChromeDocTitle, ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { Error } from './error';
-import { RedirectManager } from '../redirect_manager';
+
+import type { RedirectManager } from '../redirect_manager';
+import { RedirectEmptyPrompt } from './empty_prompt';
 import { Spinner } from './spinner';
 
 export interface PageProps {
+  homeHref: string;
+  docTitle: ChromeDocTitle;
+  customBranding: CustomBrandingSetup;
   manager: Pick<RedirectManager, 'error$'>;
   theme: ThemeServiceSetup;
-  customBranding: CustomBrandingStart;
 }
 
-export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) => {
+export const Page: React.FC<PageProps> = ({
+  manager,
+  homeHref,
+  customBranding,
+  docTitle,
+  theme,
+}) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
@@ -30,7 +40,7 @@ export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) =>
     return (
       <KibanaThemeProvider theme={{ theme$: theme.theme$ }}>
         <EuiPageTemplate>
-          <Error error={error} />
+          <RedirectEmptyPrompt docTitle={docTitle} error={error} homeHref={homeHref} />
         </EuiPageTemplate>
       </KibanaThemeProvider>
     );

@@ -6,48 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
 
-import { AssistantProvider, useAssistantContext } from '.';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { AssistantAvailability } from '../..';
+import { useAssistantContext } from '.';
+import { useLocalStorage } from 'react-use';
+import { TestProviders } from '../mock/test_providers/test_providers';
 
-const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockGetInitialConversations = jest.fn(() => ({}));
-const mockGetComments = jest.fn(() => []);
-const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-const mockAssistantAvailability: AssistantAvailability = {
-  hasAssistantPrivilege: false,
-  hasConnectorsAllPrivilege: true,
-  hasConnectorsReadPrivilege: true,
-  isAssistantEnabled: true,
-};
-
-const ContextWrapper: React.FC = ({ children }) => (
-  <AssistantProvider
-    actionTypeRegistry={actionTypeRegistry}
-    assistantAvailability={mockAssistantAvailability}
-    augmentMessageCodeBlocks={jest.fn()}
-    baseAllow={[]}
-    baseAllowReplacement={[]}
-    basePath={'https://localhost:5601/kbn'}
-    defaultAllow={[]}
-    defaultAllowReplacement={[]}
-    docLinks={{
-      ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-      DOC_LINK_VERSION: 'current',
-    }}
-    getInitialConversations={mockGetInitialConversations}
-    getComments={mockGetComments}
-    http={mockHttp}
-    setConversations={jest.fn()}
-    setDefaultAllow={jest.fn()}
-    setDefaultAllowReplacement={jest.fn()}
-  >
-    {children}
-  </AssistantProvider>
-);
+jest.mock('react-use', () => ({
+  useLocalStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
+  useSessionStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
+}));
 
 describe('AssistantContext', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -61,12 +28,30 @@ describe('AssistantContext', () => {
   });
 
   test('it should return the httpFetch function', async () => {
-    const { result } = renderHook(useAssistantContext, { wrapper: ContextWrapper });
-    const http = await result.current.http;
+    const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
 
     const path = '/path/to/resource';
-    await http.fetch(path);
+    await result.current.http.fetch(path);
 
-    expect(mockHttp.fetch).toBeCalledWith(path);
+    expect(result.current.http.fetch).toBeCalledWith(path);
+  });
+
+  test('getLastConversationTitle defaults to provided id', async () => {
+    const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
+    const id = result.current.getLastConversationTitle('123');
+    expect(id).toEqual('123');
+  });
+
+  test('getLastConversationTitle uses local storage id when no id is provided ', async () => {
+    const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
+    const id = result.current.getLastConversationTitle();
+    expect(id).toEqual('456');
+  });
+
+  test('getLastConversationTitle defaults to Welcome when no local storage id and no id is provided ', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
+    const { result } = renderHook(useAssistantContext, { wrapper: TestProviders });
+    const id = result.current.getLastConversationTitle();
+    expect(id).toEqual('Welcome');
   });
 });

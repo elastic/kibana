@@ -16,6 +16,10 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type {
+  AuditServiceSetup,
+  AuthenticationServiceStart,
+} from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
@@ -28,7 +32,6 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -37,12 +40,14 @@ import type { Session } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  http: Pick<
+    HttpServiceSetup,
+    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+  >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
-  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -78,23 +83,6 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
-/**
- * Authentication services available on the security plugin's start contract.
- */
-export interface AuthenticationServiceStart {
-  apiKeys: Pick<
-    APIKeys,
-    | 'areAPIKeysEnabled'
-    | 'areCrossClusterAPIKeysEnabled'
-    | 'create'
-    | 'invalidate'
-    | 'validate'
-    | 'grantAsInternalUser'
-    | 'invalidateAsInternalUser'
-  >;
-  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-}
-
 export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
@@ -106,7 +94,6 @@ export class AuthenticationService {
     config,
     http,
     license,
-    buildNumber,
     elasticsearch,
     customBranding,
   }: AuthenticationServiceSetupParams) {
@@ -125,9 +112,13 @@ export class AuthenticationService {
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
-        this.logger.error('License is not available, authentication is not possible.');
+        this.logger.error(
+          `License information could not be obtained from Elasticsearch due to an error: ${
+            license.getUnavailableReason() ?? 'unknown'
+          }`
+        );
         return response.customError({
-          body: 'License is not available.',
+          body: 'License information could not be obtained from Elasticsearch. Please check the logs for further details.',
           statusCode: 503,
           headers: { 'Retry-After': '30' },
         });
@@ -174,7 +165,7 @@ export class AuthenticationService {
 
       if (authenticationResult.failed()) {
         const error = authenticationResult.error!;
-        this.logger.info(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
+        this.logger.error(`Authentication attempt failed: ${getDetailedErrorMessage(error)}`);
 
         // proxy Elasticsearch "native" errors
         const statusCode = getErrorStatusCode(error);
@@ -196,29 +187,43 @@ export class AuthenticationService {
     });
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
-        return toolkit.next();
-      }
-
       if (!this.authenticator) {
         // Core doesn't allow returning error here.
         this.logger.error('Authentication sub-system is not fully initialized yet.');
         return toolkit.next();
       }
 
+      const isAuthRoute = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW);
+      const isLogoutRoute =
+        request.route.path === '/api/security/logout' ||
+        request.route.path === '/api/v1/security/logout';
+
       // If users can eventually re-login we want to redirect them directly to the page they tried
       // to access initially, but we only want to do that for routes that aren't part of the various
       // authentication flows that wouldn't make any sense after successful authentication.
-      const originalURL = !request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
-        ? this.authenticator.getRequestOriginalURL(request)
-        : `${http.basePath.get(request)}/`;
-      if (!isLoginPageAvailable) {
+      const originalURL = isAuthRoute
+        ? `${http.basePath.get(request)}/`
+        : this.authenticator.getRequestOriginalURL(request);
+
+      // Let API responses or <400 responses pass through as we can let their handlers deal with them.
+      if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {
+        return toolkit.next();
+      }
+
+      if (preResponse.statusCode !== 401 && !isAuthRoute) {
+        return toolkit.next();
+      }
+
+      // Now we are only dealing with authentication flow errors or 401 errors in non-authentication routes.
+      // Additionally, if logout fails for any reason, we also want to show an error page.
+      // At this point we redirect users to the login page if it's available, or render a dedicated unauthenticated error page.
+      if (!isLoginPageAvailable || isLogoutRoute) {
         const customBrandingValue = await customBranding.getBrandingFor(request, {
           unauthenticated: true,
         });
         return toolkit.render({
           body: renderUnauthenticatedPage({
-            buildNumber,
+            staticAssets: http.staticAssets,
             basePath: http.basePath,
             originalURL,
             customBranding: customBrandingValue,
@@ -255,11 +260,12 @@ export class AuthenticationService {
 
       if (!license.isLicenseAvailable() || !license.isEnabled()) {
         this.logger.error(
-          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}).`
+          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}, unavailable reason: ${license.getUnavailableReason()}).`
         );
         return toolkit.notHandled();
       }
 
+      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
       if (getErrorStatusCode(error) !== 401) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
@@ -310,7 +316,7 @@ export class AuthenticationService {
       } else if (authenticationResult.redirected()) {
         this.logger.error('Re-authentication failed since redirect is required.');
       } else {
-        this.logger.error('Re-authentication cannot be handled.');
+        this.logger.debug('Re-authentication cannot be handled.');
       }
 
       return toolkit.notHandled();
@@ -354,7 +360,7 @@ export class AuthenticationService {
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
     this.session = session;
-    this.authenticator = new Authenticator({
+    const authenticator = (this.authenticator = new Authenticator({
       audit,
       loggers,
       clusterClient,
@@ -371,7 +377,7 @@ export class AuthenticationService {
       session,
       isElasticCloudDeployment,
       customLogoutURL,
-    });
+    }));
 
     return {
       apiKeys: {
@@ -385,7 +391,41 @@ export class AuthenticationService {
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
       },
 
-      login: this.authenticator.login.bind(this.authenticator),
+      login: async (request: KibanaRequest, attempt: ProviderLoginAttempt) => {
+        const providerIdentifier =
+          'name' in attempt.provider ? attempt.provider.name : attempt.provider.type;
+        this.logger.info(`Performing login attempt with "${providerIdentifier}" provider.`);
+
+        let loginResult: AuthenticationResult;
+        try {
+          loginResult = await authenticator.login(request, attempt);
+        } catch (err) {
+          this.logger.error(
+            `Login attempt with "${providerIdentifier}" provider failed due to unexpected error: ${getDetailedErrorMessage(
+              err
+            )}`
+          );
+          throw err;
+        }
+
+        if (loginResult.succeeded() || loginResult.redirected()) {
+          this.logger.info(
+            `Login attempt with "${providerIdentifier}" provider succeeded (requires redirect: ${loginResult.redirected()}).`
+          );
+        } else if (loginResult.failed()) {
+          this.logger.error(
+            `Login attempt with "${providerIdentifier}" provider failed: ${
+              loginResult.error ? getDetailedErrorMessage(loginResult.error) : 'unknown error'
+            }`
+          );
+        } else if (loginResult.notHandled()) {
+          this.logger.error(
+            `Login attempt with "${providerIdentifier}" provider cannot be handled.`
+          );
+        }
+
+        return loginResult;
+      },
       logout: this.authenticator.logout.bind(this.authenticator),
       acknowledgeAccessAgreement: this.authenticator.acknowledgeAccessAgreement.bind(
         this.authenticator

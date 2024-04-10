@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CoreSetup,
   CoreStart,
@@ -19,25 +20,32 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type {
+  AuthenticationServiceSetup,
+  AuthenticationServiceStart,
+  AuthorizationServiceSetup,
+  AuthorizationServiceStart,
+  SecurityPluginSetup,
+  SecurityPluginStart as SecurityPluginStartWithoutDeprecatedMembers,
+} from '@kbn/security-plugin-types-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
-import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import { AuthorizationService } from './authorization';
+import { buildSecurityApi } from './build_security_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
-import type { SecurityNavControlServiceStart } from './nav_control';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
 import { SecurityLicenseService } from '../common/licensing';
-import type { SecurityLicense } from '../common/licensing';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -68,21 +76,25 @@ export class SecurityPlugin
   private readonly config: ConfigType;
   private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
+  private readonly authorizationService = new AuthorizationService();
   private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
-  private readonly managementService = new ManagementService();
+  private readonly managementService: ManagementService;
   private readonly securityCheckupService: SecurityCheckupService;
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private authz!: AuthorizationServiceSetup;
   private securityApiClients!: SecurityApiClients;
+  private buildFlavor: BuildFlavor;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
+
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
-    this.navControlService = new SecurityNavControlService(
-      initializerContext.env.packageInfo.buildFlavor
-    );
+    this.navControlService = new SecurityNavControlService(this.buildFlavor);
+    this.managementService = new ManagementService(this.config);
   }
 
   public setup(
@@ -99,6 +111,10 @@ export class SecurityPlugin
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,
+    });
+
+    this.authz = this.authorizationService.setup({
+      config: this.config,
     });
 
     this.securityApiClients = {
@@ -127,6 +143,8 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
+    core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
+
     if (management) {
       this.managementService.setup({
         license,
@@ -134,7 +152,7 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig: this.config.ui,
+        buildFlavor: this.buildFlavor,
       });
     }
 
@@ -161,6 +179,7 @@ export class SecurityPlugin
 
     return {
       authc: this.authc,
+      authz: this.authz,
       license,
     };
   }
@@ -181,11 +200,11 @@ export class SecurityPlugin
 
     this.sessionTimeout.start();
     this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityApiClients.userProfiles.start();
 
     if (management) {
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig: this.config.ui,
       });
     }
 
@@ -199,6 +218,7 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      authz: this.authz as AuthorizationServiceStart,
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
           this.securityApiClients.userProfiles
@@ -212,7 +232,12 @@ export class SecurityPlugin
         update: this.securityApiClients.userProfiles.update.bind(
           this.securityApiClients.userProfiles
         ),
+        partialUpdate: this.securityApiClients.userProfiles.partialUpdate.bind(
+          this.securityApiClients.userProfiles
+        ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
+        userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
+        enabled$: this.securityApiClients.userProfiles.enabled$,
       },
     };
   }
@@ -230,34 +255,7 @@ function getLogoutUrl(http: HttpSetup) {
   return `${http.basePath.serverBasePath}/logout`;
 }
 
-export interface SecurityPluginSetup {
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceSetup;
-  /**
-   * Exposes information about the available security features under the current license.
-   */
-  license: SecurityLicense;
-}
-
-export interface SecurityPluginStart {
-  /**
-   * Exposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is.
-   */
-  navControlService: SecurityNavControlServiceStart;
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceStart;
-  /**
-   * A set of methods to work with Kibana user profiles.
-   */
-  userProfiles: Pick<
-    UserProfileAPIClient,
-    'getCurrent' | 'bulkGet' | 'suggest' | 'update' | 'userProfile$'
-  >;
-
+export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecatedMembers {
   /**
    * Exposes UI components that will be loaded asynchronously.
    * @deprecated

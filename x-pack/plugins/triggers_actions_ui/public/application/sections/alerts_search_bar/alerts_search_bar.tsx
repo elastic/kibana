@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Query, TimeRange } from '@kbn/es-query';
+import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertDataView } from '../../hooks/use_alert_data_view';
+import { useAlertDataViews } from '../../hooks/use_alert_data_view';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
@@ -21,6 +23,7 @@ import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
+// Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
@@ -28,6 +31,7 @@ export function AlertsSearchBar({
   ruleTypeId,
   query,
   filters,
+  quickFilters = [],
   onQueryChange,
   onQuerySubmit,
   onFiltersUpdated,
@@ -38,6 +42,8 @@ export function AlertsSearchBar({
   showSubmitButton = true,
   placeholder = SEARCH_BAR_PLACEHOLDER,
   submitOnBlur = false,
+  filtersForSuggestions,
+  ...props
 }: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
@@ -46,11 +52,11 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataviews, loading } = useAlertDataView(featureIds ?? []);
+  const { dataViews, loading } = useAlertDataViews(featureIds ?? []);
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataviews;
+    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataViews;
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
@@ -90,6 +96,56 @@ export function AlertsSearchBar({
     });
   };
 
+  const additionalQueryBarMenuItems = useMemo(() => {
+    if (showFilterBar && quickFilters.length > 0) {
+      // EuiContextMenu expects a flattened panels structure so here we collect all
+      // the nested panels in a linear list
+      const panels = [] as EuiContextMenuPanelDescriptor[];
+      const quickFiltersItemToContextMenuItem = (qf: QuickFiltersMenuItem) => {
+        if (isQuickFiltersGroup(qf)) {
+          const panelId = `quick-filters-panel-${panels.length}`;
+          panels.push({
+            id: panelId,
+            title: qf.title,
+            items: qf.items.map(
+              quickFiltersItemToContextMenuItem
+            ) as EuiContextMenuPanelItemDescriptor[],
+            'data-test-subj': panelId,
+          } as EuiContextMenuPanelDescriptor);
+          return {
+            name: qf.title,
+            icon: qf.icon ?? 'filterInCircle',
+            panel: panelId,
+            'data-test-subj': `quick-filters-item-${qf.title}`,
+          };
+        } else {
+          const { filter, ...menuItem } = qf;
+          return {
+            ...menuItem,
+            icon: qf.icon ?? 'filterInCircle',
+            onClick: () => {
+              if (!filters?.some((f) => compareFilters(f, filter))) {
+                onFiltersUpdated?.([...(filters ?? []), filter]);
+              }
+            },
+            'data-test-subj': `quick-filters-item-${qf.name}`,
+          };
+        }
+      };
+      return {
+        items: quickFilters.map(
+          quickFiltersItemToContextMenuItem
+        ) as EuiContextMenuPanelItemDescriptor[],
+        panels,
+      };
+    } else {
+      return {
+        items: [],
+        panels: [],
+      };
+    }
+  }, [filters, onFiltersUpdated, quickFilters, showFilterBar]);
+
   return (
     <SearchBar
       appName={appName}
@@ -99,6 +155,7 @@ export function AlertsSearchBar({
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
+      additionalQueryBarMenuItems={additionalQueryBarMenuItems}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"
@@ -113,6 +170,8 @@ export function AlertsSearchBar({
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}
       suggestionsAbstraction={isSecurity ? undefined : SA_ALERTS}
+      filtersForSuggestions={filtersForSuggestions}
+      {...props}
     />
   );
 }

@@ -170,6 +170,7 @@ export const assetFiltersSingleKindRT = rt.exact(
     type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
     ean: rt.union([rt.string, rt.array(rt.string)]),
     id: rt.string,
+    parentEan: rt.string,
     ['cloud.provider']: rt.string,
     ['cloud.region']: rt.string,
     ['orchestrator.cluster.name']: rt.string,
@@ -178,9 +179,10 @@ export const assetFiltersSingleKindRT = rt.exact(
 
 export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
 
+const supportedKindRT = rt.union([rt.literal('host'), rt.literal('service')]);
 export const assetFiltersRT = rt.intersection([
   assetFiltersSingleKindRT,
-  rt.partial({ kind: rt.union([assetKindRT, rt.array(assetKindRT)]) }),
+  rt.partial({ kind: rt.union([supportedKindRT, rt.array(supportedKindRT)]) }),
 ]);
 
 export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
@@ -248,7 +250,6 @@ export const getServiceAssetsQueryOptionsRT = rt.intersection([
     from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
-    parent: rt.string,
     stringFilters: rt.string,
     filters: assetFiltersSingleKindRT,
   }),
@@ -277,3 +278,21 @@ export const getPodAssetsResponseRT = rt.type({
   pods: rt.array(assetRT),
 });
 export type GetPodAssetsResponse = rt.TypeOf<typeof getPodAssetsResponseRT>;
+
+/**
+ * Assets
+ */
+export const getAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersRT,
+  }),
+]);
+export type GetAssetsQueryOptions = rt.TypeOf<typeof getAssetsQueryOptionsRT>;
+export const getAssetsResponseRT = rt.type({
+  assets: rt.array(assetRT),
+});
+export type GetAssetsResponse = rt.TypeOf<typeof getAssetsResponseRT>;

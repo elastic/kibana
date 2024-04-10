@@ -16,14 +16,15 @@ import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
   Filter,
+  FilterCompareOptions,
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
@@ -93,7 +94,7 @@ export interface DiscoverAppState {
   /**
    * Data Grid related state
    */
-  grid?: UnifiedDataTableSettings;
+  grid?: DiscoverGridSettings;
   /**
    * Hide chart
    */
@@ -130,6 +131,10 @@ export interface DiscoverAppState {
    * Document explorer row height option
    */
   rowHeight?: number;
+  /**
+   * Document explorer header row height option
+   */
+  headerRowHeight?: number;
   /**
    * Number of rows in the grid per page
    */
@@ -328,26 +333,36 @@ export function setState(
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+export function isEqualFilters(
+  filtersA?: Filter[] | Filter,
+  filtersB?: Filter[] | Filter,
+  comparatorOptions: FilterCompareOptions = COMPARE_ALL_OPTIONS
+) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, comparatorOptions);
 }
 
 /**
  * Helper function to compare 2 different state, is needed since comparing filters
  * works differently
  */
-export function isEqualState(stateA: DiscoverAppState, stateB: DiscoverAppState) {
+export function isEqualState(
+  stateA: DiscoverAppState,
+  stateB: DiscoverAppState,
+  exclude: string[] = []
+) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
     return false;
   }
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+
+  const { filters: stateAFilters = [], ...stateAPartial } = omit(stateA, exclude);
+  const { filters: stateBFilters = [], ...stateBPartial } = omit(stateB, exclude);
+
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

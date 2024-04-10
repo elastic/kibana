@@ -12,8 +12,7 @@
   ],
   "baseBranches": [
     "main",
-    "7.16",
-    "7.15"
+    "7.17"
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -75,26 +74,6 @@
         "backport:skip",
         "Team:Operations",
         "Team:Core"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "@elastic/elasticsearch",
-      "matchPackageNames": [
-        "@elastic/elasticsearch"
-      ],
-      "reviewers": [
-        "team:kibana-operations",
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "8.1"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Operations",
-        "Team:Core",
-        "backport:skip"
       ],
       "enabled": true
     },
@@ -362,7 +341,7 @@
     {
       "groupName": "scss",
       "packageNames": [
-        "node-sass"
+        "sass-embedded"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -458,12 +437,37 @@
       "matchPackagePatterns": [
         "^@storybook"
       ],
+      "excludePackageNames": [
+        "@storybook/testing-react"
+      ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
       ],
       "enabled": true,
       "allowedVersions": "<7.0"
+    },
+    {
+      "groupName": "@storybook/testing-react",
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchPackageNames": [
+        "@storybook/testing-react"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
+      ],
+      "enabled": true,
+      "allowedVersions": "<2.0"
     },
     {
       "groupName": "react-query",
@@ -518,8 +522,7 @@
         "team:enterprise-search-frontend",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
-        "team:platform-deployment-management",
-        "team:infra-monitoring-ui",
+        "team:kibana-management",
         "team:kibana-gis",
         "team:security-solution"
       ],
@@ -619,13 +622,13 @@
         "@xstate/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:obs-ux-logs"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI",
+        "Team:Obs UX Logs",
         "release_note:skip"
       ],
       "enabled": true,
@@ -637,13 +640,49 @@
         "@opentelemetry/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI"
+        "Team:Monitoring"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "csp",
+      "packageNames": [
+        "content-security-policy-parser"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:serverless-test-all"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchPackageNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "enabled": true
     }

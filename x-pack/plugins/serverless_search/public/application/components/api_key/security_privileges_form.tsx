@@ -7,7 +7,7 @@
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 

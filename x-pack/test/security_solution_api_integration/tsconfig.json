@@ -36,5 +36,11 @@
     "@kbn/securitysolution-ecs",
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/datemath",
+    "@kbn/safer-lodash-set",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/actions-plugin",
   ]
 }

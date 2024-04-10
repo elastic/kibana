@@ -73,6 +73,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     unit: 'm',
   },
   suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {
@@ -92,6 +93,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   timestampOverride: '',
   threat: threatDefault,
   note: '',
+  setup: '',
   threatIndicatorPath: undefined,
   timestampOverrideFallbackDisabled: undefined,
 };

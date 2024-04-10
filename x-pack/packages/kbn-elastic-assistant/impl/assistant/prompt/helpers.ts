@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Message } from '../../assistant_context/types';
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
-
-import { transformRawData } from '../../data_anonymization/transform_raw_data';
+import { Replacements, transformRawData } from '@kbn/elastic-assistant-common';
+import type { ClientMessage } from '../../assistant_context/types';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import type { Prompt } from '../types';
+import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
 
 export const getSystemMessages = ({
   isNewChat,
@@ -19,12 +18,12 @@ export const getSystemMessages = ({
 }: {
   isNewChat: boolean;
   selectedSystemPrompt: Prompt | undefined;
-}): Message[] => {
+}): ClientMessage[] => {
   if (!isNewChat || selectedSystemPrompt == null) {
     return [];
   }
 
-  const message: Message = {
+  const message: ClientMessage = {
     content: selectedSystemPrompt.content,
     role: 'system',
     timestamp: new Date().toLocaleString(),
@@ -32,17 +31,18 @@ export const getSystemMessages = ({
 
   return [message];
 };
-
-export async function getCombinedMessage({
+interface ClientMessageWithReplacements extends ClientMessage {
+  replacements: Replacements;
+}
+export function getCombinedMessage({
   currentReplacements,
   getAnonymizedValue = defaultGetAnonymizedValue,
   isNewChat,
-  onNewReplacements,
   promptText,
   selectedPromptContexts,
   selectedSystemPrompt,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   getAnonymizedValue?: ({
     currentReplacements,
     rawValue,
@@ -51,31 +51,36 @@ export async function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
-}): Promise<Message> {
+}): ClientMessageWithReplacements {
+  let replacements: Replacements = currentReplacements ?? {};
+  const onNewReplacements = (newReplacements: Replacements) => {
+    replacements = { ...replacements, ...newReplacements };
+  };
+
   const promptContextsContent = Object.keys(selectedPromptContexts)
     .sort()
     .map((id) => {
-      const promptContext = transformRawData({
+      const promptContextData = transformRawData({
+        allow: selectedPromptContexts[id].allow,
+        allowReplacement: selectedPromptContexts[id].allowReplacement,
         currentReplacements,
         getAnonymizedValue,
         onNewReplacements,
-        selectedPromptContext: selectedPromptContexts[id],
+        rawData: selectedPromptContexts[id].rawData,
       });
 
-      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
+      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContextData)}`;
     });
 
   return {
     content: `${
       isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-    }${promptContextsContent}
-
-${promptText}`,
+    }${promptContextsContent}\n\n${promptText}`,
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toLocaleString(),
+    replacements,
   };
 }

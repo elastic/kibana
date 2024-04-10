@@ -6,18 +6,19 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { EventKind } from '../shared/constants/event_kinds';
-import { getField } from '../shared/utils';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
-import type { RightPanelTabsType } from './tabs';
-import { tabs } from './tabs';
+import type { RightPanelTabType } from './tabs';
+import * as tabs from './tabs';
 import { PanelFooter } from './footer';
+import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
@@ -36,20 +37,35 @@ export interface RightPanelProps extends FlyoutPanelProps {
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
-  const { openRightPanel } = useExpandableFlyoutContext();
-  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const { storage, telemetry } = useKibana().services;
+  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
+  const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
+    useRightPanelContext();
 
-  // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
-  const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
-  const tabsDisplayed = documentIsSignal ? tabs : tabs.filter((tab) => tab.id !== 'overview');
+  // if the flyout is expandable we render all 3 tabs (overview, table and json)
+  // if the flyout is not, we render only table and json
+  const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
+  const tabsDisplayed = useMemo(() => {
+    return flyoutIsExpandable
+      ? [tabs.overviewTab, tabs.tableTab, tabs.jsonTab]
+      : [tabs.tableTab, tabs.jsonTab];
+  }, [flyoutIsExpandable]);
 
+  // we give priority to the url, meaning if a value is saved in the url then we load this one
+  // if not we check the local storage and use that value if it exists
+  // if not we use the default tab
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
-    if (!path) return defaultTab;
-    return tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
-  }, [path, tabsDisplayed]);
+    const tabSavedInlocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
 
-  const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
+    if (!path) return tabSavedInlocalStorage || defaultTab;
+    return (
+      tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ??
+      (tabSavedInlocalStorage || defaultTab)
+    );
+  }, [path, storage, tabsDisplayed]);
+
+  const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
     openRightPanel({
       id: DocumentDetailsRightPanelKey,
       path: {
@@ -61,18 +77,40 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
         scopeId,
       },
     });
+
+    // saving which tab is currently selected in the right panel in local storage
+    storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
+
+    telemetry.reportDetailsFlyoutTabClicked({
+      tableId: scopeId,
+      panel: 'right',
+      tabId,
+    });
   };
+
+  // If flyout is open in preview mode, do not reload with stale information
+  useEffect(() => {
+    const beforeUnloadHandler = () => {
+      if (isPreview) {
+        closeFlyout();
+      }
+    };
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnloadHandler);
+    };
+  }, [isPreview, closeFlyout]);
 
   return (
     <>
-      <PanelNavigation flyoutIsExpandable={documentIsSignal} />
+      <PanelNavigation flyoutIsExpandable={flyoutIsExpandable} />
       <PanelHeader
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
-      <PanelFooter />
+      <PanelFooter isPreview={isPreview} />
     </>
   );
 });

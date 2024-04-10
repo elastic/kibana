@@ -9,7 +9,8 @@
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 
@@ -77,7 +78,9 @@ export const App: FunctionComponent = () => {
         initialFilter=""
         initialPageSize={50}
         listingLimit={1000}
-        onClickTitle={({ attributes }) => setSelectedFile(attributes as unknown as FileJSON)}
+        getOnClickTitle={({ attributes }) =>
+          () =>
+            setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}

@@ -6,12 +6,11 @@
  */
 
 import {
-  PostureTypes,
-  VulnSeverity,
   AwsCredentialsTypeFieldMap,
   GcpCredentialsTypeFieldMap,
-  AzureCredentialsTypeFieldMap,
-} from './types';
+  PostureTypes,
+  VulnSeverity,
+} from './types_old';
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
@@ -24,14 +23,21 @@ export const VULNERABILITIES_DASHBOARD_ROUTE_PATH =
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const BENCHMARKS_API_CURRENT_VERSION = '1';
 
-export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
-export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
+export const FIND_CSP_BENCHMARK_RULE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
+export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
-export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
-export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
+export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_bulk_action';
+export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
+
+export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_get_states';
+export const CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION = '1';
 
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
+export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 // TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
@@ -45,6 +51,7 @@ export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
+
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
@@ -79,6 +86,8 @@ export const RULE_FAILED = `failed`;
 
 export const POSTURE_TYPE_ALL = 'all';
 
+export const CSPM_FINDINGS_STATS_INTERVAL = 5;
+
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
@@ -86,7 +95,9 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingFlyoutEvidence: true,
 } as const;
 
-export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE = 'cloud-security-posture-settings';
+export const INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID = 'csp-internal-settings';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';
@@ -151,17 +162,33 @@ export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   cloud_formation: [],
 };
 
-export const SETUP_ACCESS_CLOUD_SHELL = 'google_cloud_shell';
-export const SETUP_ACCESS_MANUAL = 'manual';
-
 export const DETECTION_ENGINE_ALERTS_INDEX_DEFAULT = '.alerts-security.alerts-default';
 
 export const GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP: GcpCredentialsTypeFieldMap = {
+  'credentials-none': [],
   'credentials-file': ['gcp.credentials.file'],
   'credentials-json': ['gcp.credentials.json'],
 };
 
-export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP: AzureCredentialsTypeFieldMap = {
-  manual: [],
+export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   arm_template: [],
+  service_principal_with_client_secret: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_secret',
+  ],
+  service_principal_with_client_certificate: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_certificate_path',
+    'azure.credentials.client_certificate_password',
+  ],
+  service_principal_with_client_username_and_password: [
+    'azure.credentials.tenant_id',
+    'azure.credentials.client_id',
+    'azure.credentials.client_username',
+    'azure.credentials.client_password',
+  ],
+  managed_identity: [],
+  manual: [],
 };

@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
-  EuiFieldText,
-  EuiFieldPassword,
+  EuiCallOut,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSelect,
-  EuiCallOut,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -23,25 +21,39 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  AwsCredentialsTypeOptions,
   getAwsCredentialsFormManualOptions,
-  AwsOptions,
-  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './get_aws_credentials_form_options';
-import { RadioGroup } from '../csp_boxed_radio_group';
-import {
-  getCspmCloudFormationDefaultValue,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
-import { SetupFormat, useAwsCredentialsForm } from './hooks';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import { useAwsCredentialsForm } from './hooks';
 import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { AwsCredentialsType } from '../../../../common/types';
+import { AwsCredentialsType } from '../../../../common/types_old';
+import { AwsInputVarFields } from './aws_input_var_fields';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+} from '../../test_subjects';
 
 interface AWSSetupInfoContentProps {
-  integrationLink: string;
+  info: ReactNode;
 }
 
-const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
+export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
+
+export const AWS_SETUP_FORMAT = {
+  CLOUD_FORMATION: 'cloud_formation',
+  MANUAL: 'manual',
+};
+
+export const AWS_CREDENTIALS_TYPE = {
+  ASSUME_ROLE: 'assume_role',
+  DIRECT_ACCESS_KEYS: 'direct_access_keys',
+  TEMPORARY_KEYS: 'temporary_keys',
+  SHARED_CREDENTIALS: 'shared_credentials',
+  CLOUD_FORMATION: 'cloud_formation',
+} as const;
+export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
     <>
       <EuiHorizontalRule margin="xl" />
@@ -55,48 +67,28 @@ const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
-          values={{
-            gettingStartedLink: (
-              <EuiLink href={integrationLink} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        {info}
       </EuiText>
     </>
   );
 };
 
-const getSetupFormatOptions = (): Array<{ id: SetupFormat; label: string }> => [
+const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: 'cloud_formation',
+    id: AWS_SETUP_FORMAT.CLOUD_FORMATION,
     label: 'CloudFormation',
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION,
   },
   {
-    id: 'manual',
+    id: AWS_SETUP_FORMAT.MANUAL,
     label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
+    testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
 ];
 
-export const getDefaultAwsVarsGroup = (packageInfo: PackageInfo): AwsCredentialsType => {
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
-  if (hasCloudFormationTemplate) {
-    return 'cloud_formation';
-  }
-
-  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
-};
-
-interface Props {
+export interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
@@ -217,7 +209,7 @@ export const AwsCredentialsForm = ({
   onChange,
   setIsValid,
   disabled,
-}: Props) => {
+}: AwsFormProps) => {
   const {
     awsCredentialsType,
     setupFormat,
@@ -237,7 +229,24 @@ export const AwsCredentialsForm = ({
 
   return (
     <>
-      <AWSSetupInfoContent integrationLink={integrationLink} />
+      <AWSSetupInfoContent
+        info={
+          <FormattedMessage
+            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            values={{
+              gettingStartedLink: (
+                <EuiLink href={integrationLink} target="_blank">
+                  <FormattedMessage
+                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    defaultMessage="Getting Started"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
@@ -249,12 +258,16 @@ export const AwsCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === 'cloud_formation' && (
+      {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
         <CloudFormationSetup hasCloudFormationTemplate={hasCloudFormationTemplate} input={input} />
       )}
-      {setupFormat === 'manual' && (
+      {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
+            label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
+              defaultMessage: 'Preferred manual method',
+            })}
+            options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy(
@@ -281,60 +294,26 @@ export const AwsCredentialsForm = ({
     </>
   );
 };
-const AwsCredentialTypeSelector = ({
+export const AwsCredentialTypeSelector = ({
   type,
   onChange,
+  label,
+  options,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
+  label: string;
+  options: AwsCredentialsTypeOptions;
 }) => (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
-      defaultMessage: 'Preferred manual method',
-    })}
-  >
+  <EuiFormRow fullWidth label={label}>
     <EuiSelect
       fullWidth
-      options={getAwsCredentialsFormManualOptions()}
+      options={options}
       value={type}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}
+      data-test-subj={AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>
-);
-
-const AwsInputVarFields = ({
-  fields,
-  onChange,
-}: {
-  fields: Array<AwsOptions[keyof AwsOptions]['fields'][number] & { value: string; id: string }>;
-  onChange: (key: string, value: string) => void;
-}) => (
-  <div>
-    {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
-        <>
-          {field.type === 'password' && (
-            <EuiFieldPassword
-              id={field.id}
-              type="dual"
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-          {field.type === 'text' && (
-            <EuiFieldText
-              id={field.id}
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-            />
-          )}
-        </>
-      </EuiFormRow>
-    ))}
-  </div>
 );

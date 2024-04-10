@@ -20,7 +20,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read"]
         }
@@ -65,7 +66,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read"]
         }
@@ -101,7 +103,9 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            "logstash-*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -114,7 +118,7 @@
           "privileges": ["read", "write"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*", "risk-score.risk-score-*"],
           "privileges": ["read"]
         }
       ],
@@ -140,9 +144,14 @@
             "file_operations_all"
           ],
           "securitySolutionCases": ["all"],
+          "securitySolutionAssistant": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
-          "osquery": ["all"]
+          "osquery": ["all"],
+          "discover": ["all"],
+          "dashboard": ["all"],
+          "maps": ["all"],
+          "visualize": ["all"]
         },
         "spaces": ["*"],
         "base": []
@@ -165,7 +174,8 @@
             "packetbeat-*",
             "winlogbeat-*",
             ".lists*",
-            ".items*"
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -216,7 +226,8 @@
             "packetbeat-*",
             "winlogbeat-*",
             ".lists*",
-            ".items*"
+            ".items*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["read", "write"]
         },
@@ -271,7 +282,8 @@
             "filebeat-*",
             "logs-*",
             "packetbeat-*",
-            "winlogbeat-*"
+            "winlogbeat-*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["manage", "write", "read"]
         },
@@ -319,7 +331,8 @@
             "winlogbeat-*",
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
-            ".fleet-actions*"
+            ".fleet-actions*",
+            ".asset-criticality.asset-criticality-*"
           ],
           "privileges": ["all"]
         },

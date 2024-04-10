@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
+import type { NormalizedActionRequest } from './utils';
 import {
   categorizeActionResults,
   categorizeResponseResults,
@@ -18,6 +19,7 @@ import {
   isLogsEndpointAction,
   isLogsEndpointActionResponse,
   mapToNormalizedActionRequest,
+  createActionDetailsRecord,
 } from './utils';
 import type {
   ActivityLogAction,
@@ -28,10 +30,12 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 import { v4 as uuidv4 } from 'uuid';
 import type { Results } from '../../routes/actions/mocks';
 import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
+import { ActivityLogItemTypes } from '../../../../common/endpoint/types';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
@@ -72,6 +76,8 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
+        agentType: 'endpoint',
+        hosts: {},
         command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
@@ -92,6 +98,8 @@ describe('When using Actions service utilities', () => {
         )
       ).toEqual({
         agents: ['90d62689-f72d-4a05-b5e3-500cad0dc366'],
+        agentType: 'endpoint',
+        hosts: {},
         command: 'kill-process',
         comment: expect.any(String),
         createdAt: '2022-04-27T16:08:47.449Z',
@@ -176,7 +184,7 @@ describe('When using Actions service utilities', () => {
             agent: { id: '123' },
             EndpointActions: {
               completed_at: COMPLETED_AT,
-              data: { output: { type: 'json', content: { foo: 'bar' } } },
+              data: { output: { type: 'json', content: { code: 'aaa' } } },
             },
           },
         },
@@ -198,7 +206,7 @@ describe('When using Actions service utilities', () => {
         outputs: {
           '123': {
             content: {
-              foo: 'bar',
+              code: 'aaa',
             },
             type: 'json',
           },
@@ -388,9 +396,18 @@ describe('When using Actions service utilities', () => {
     describe('with multiple agent ids', () => {
       let agentIds: string[];
       let actionId: string;
-      let action123Responses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
-      let action456Responses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
-      let action789Responses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+      let action123Responses: Array<
+        | ActivityLogActionResponse
+        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
+      >;
+      let action456Responses: Array<
+        | ActivityLogActionResponse
+        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
+      >;
+      let action789Responses: Array<
+        | ActivityLogActionResponse
+        | EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
+      >;
 
       beforeEach(() => {
         agentIds = ['123', '456', '789'];
@@ -605,11 +622,11 @@ describe('When using Actions service utilities', () => {
       it('should include output for agents for which the action was complete', () => {
         // Add output to the completed actions
         (
-          action123Responses[1] as EndpointActivityLogActionResponse
+          action123Responses[1] as EndpointActivityLogActionResponse<EndpointActionResponseDataOutput>
         ).item.data.EndpointActions.data.output = {
           type: 'json',
           content: {
-            foo: 'bar',
+            code: 'bar',
           },
         };
 
@@ -662,7 +679,7 @@ describe('When using Actions service utilities', () => {
           outputs: {
             '123': {
               content: {
-                foo: 'bar',
+                code: 'bar',
               },
               type: 'json',
             },
@@ -953,6 +970,123 @@ describe('When using Actions service utilities', () => {
           wasSuccessful: false,
         })
       ).toEqual({ isExpired: false, status: 'failed' });
+    });
+  });
+
+  describe('#createActionDetailsRecord()', () => {
+    let actionRequest: NormalizedActionRequest;
+    let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+    let agentHostInfo: Record<string, string>;
+
+    beforeEach(() => {
+      actionRequest = {
+        agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
+        command: 'kill-process',
+        comment: 'kill this one',
+        createdAt: '2022-04-27T16:08:47.449Z',
+        createdBy: 'elastic',
+        expiration: '2022-04-29T16:08:47.449Z',
+        id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+        type: 'ACTION_REQUEST',
+        parameters: undefined,
+        agentType: 'endpoint',
+        hosts: {},
+      };
+
+      actionResponses = [
+        {
+          type: ActivityLogItemTypes.FLEET_RESPONSE,
+          item: {
+            id: actionRequest.id,
+            data: fleetActionGenerator.generateResponse({
+              action_id: actionRequest.id,
+              agent_id: actionRequest.agents[0],
+            }),
+          },
+        },
+
+        {
+          type: ActivityLogItemTypes.RESPONSE,
+          item: {
+            id: actionRequest.id,
+            data: endpointActionGenerator.generateResponse({
+              agent: { id: actionRequest.agents },
+              EndpointActions: {
+                action_id: actionRequest.id,
+              },
+            }),
+          },
+        },
+      ];
+
+      agentHostInfo = {
+        [actionRequest.agents[0]]: 'host-a',
+      };
+    });
+
+    it('should return expected action details record', () => {
+      expect(createActionDetailsRecord(actionRequest, actionResponses, agentHostInfo)).toEqual({
+        action: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+        id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+        agentType: 'endpoint',
+        agents: ['6e6796b0-af39-4f12-b025-fcb06db499e5'],
+        command: 'kill-process',
+        comment: 'kill this one',
+        completedAt: expect.any(String),
+        startedAt: '2022-04-27T16:08:47.449Z',
+        status: 'successful',
+        wasSuccessful: true,
+        errors: undefined,
+        createdBy: 'elastic',
+        isCompleted: true,
+        isExpired: false,
+        parameters: undefined,
+        agentState: {
+          '6e6796b0-af39-4f12-b025-fcb06db499e5': {
+            completedAt: expect.any(String),
+            isCompleted: true,
+            wasSuccessful: true,
+          },
+        },
+        hosts: {
+          '6e6796b0-af39-4f12-b025-fcb06db499e5': {
+            name: 'host-a',
+          },
+        },
+        outputs: {
+          '6e6796b0-af39-4f12-b025-fcb06db499e5': {
+            content: {
+              code: 'ra_get-file_success_done',
+              contents: [
+                {
+                  file_name: 'bad_file.txt',
+                  path: '/some/path/bad_file.txt',
+                  sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                  size: 1234,
+                  type: 'file',
+                },
+              ],
+              zip_size: 123,
+            },
+            type: 'json',
+          },
+        },
+      });
+    });
+
+    it('should populate host name from action request', () => {
+      agentHostInfo = {};
+      actionRequest.hosts[actionRequest.agents[0]] = { name: 'host-b' };
+
+      expect(
+        createActionDetailsRecord(actionRequest, actionResponses, agentHostInfo)
+      ).toMatchObject({
+        hosts: {
+          '6e6796b0-af39-4f12-b025-fcb06db499e5': {
+            name: 'host-b',
+          },
+        },
+      });
     });
   });
 });

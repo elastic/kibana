@@ -33,9 +33,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   package_policies:
     description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
     type: array
@@ -68,6 +68,10 @@ properties:
   overrides:
     type: object
     description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+    nullable: true
+  advanced_settings:
+    type: object
+    description: Advanced settings stored in the agent policy, e.g. agent_limits_go_max_procs
     nullable: true
 required:
   - id

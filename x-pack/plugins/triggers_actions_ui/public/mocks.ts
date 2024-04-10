@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -14,8 +16,6 @@ import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
-  RuleAddProps,
-  RuleEditProps,
   RuleTypeModel,
   AlertsTableProps,
   FieldBrowserProps,
@@ -23,6 +23,7 @@ import {
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
+  RuleUiAction,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -48,6 +49,7 @@ import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { AlertActionsProps } from './types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -58,8 +60,18 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
-    getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
-      return getActionFormLazy({ ...props, actionTypeRegistry, connectorServices });
+    getActionForm: (
+      props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+        setActions: (actions: RuleAction[]) => void;
+      }
+    ) => {
+      const { setActions, ...restProps } = props;
+      return getActionFormLazy({
+        ...restProps,
+        setActions: setActions as (actions: RuleUiAction[]) => void,
+        actionTypeRegistry,
+        connectorServices,
+      });
     },
     getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
@@ -71,7 +83,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+    getAddRuleFlyout: (props) => {
       return getAddRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
@@ -79,7 +91,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getEditRuleFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+    getEditRuleFlyout: (props) => {
       return getEditRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
@@ -95,6 +107,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getAlertsTable: (props: AlertsTableProps) => {
       return getAlertsTableLazy(props);
+    },
+    getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+      return getAlertsTableDefaultAlertActionsLazy(props);
     },
     getFieldBrowser: (props: FieldBrowserProps) => {
       return getFieldBrowserLazy(props);

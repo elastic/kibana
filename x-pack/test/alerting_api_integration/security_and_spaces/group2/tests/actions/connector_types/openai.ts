@@ -11,6 +11,7 @@ import {
   OpenAISimulator,
   genAiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/openai_simulation';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -248,6 +249,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
+            errorSource: TaskErrorSource.FRAMEWORK,
           });
         });
 
@@ -265,6 +267,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${genAiActionId}. Connector name: OpenAI. Connector type: .gen-ai`,
           });
         });
@@ -313,7 +316,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               data: genAiSuccessResponse,
             });
           });
-          describe('OpenAI dashboard', () => {
+          describe('Token tracking dashboard', () => {
             const dashboardId = 'specific-dashboard-id-default';
 
             it('should not create a dashboard when user does not have kibana event log permissions', async () => {
@@ -461,6 +464,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
+              errorSource: TaskErrorSource.FRAMEWORK,
             });
           });
 
@@ -483,6 +487,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

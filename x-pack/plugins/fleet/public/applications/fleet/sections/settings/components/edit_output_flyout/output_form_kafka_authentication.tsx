@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -72,9 +72,54 @@ const kafkaAuthenticationsOptions = [
 export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onUsePlainText: () => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
-  const { inputs, useSecretsStorage, onUsePlainText } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    kafkaAuthPassword: false,
+    kafkaSslKey: false,
+  });
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+    if (useSecretsStorage) {
+      if (inputs.kafkaAuthPasswordInput.value && !inputs.kafkaAuthPasswordSecretInput.value) {
+        inputs.kafkaAuthPasswordSecretInput.setValue(inputs.kafkaAuthPasswordInput.value);
+        inputs.kafkaAuthPasswordInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, kafkaAuthPassword: true });
+      }
+
+      if (inputs.kafkaSslKeyInput.value && !inputs.kafkaSslKeySecretInput.value) {
+        inputs.kafkaSslKeySecretInput.setValue(inputs.kafkaSslKeyInput.value);
+        inputs.kafkaSslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, kafkaSslKey: true });
+      }
+    }
+  }, [
+    useSecretsStorage,
+    inputs.kafkaAuthPasswordInput,
+    inputs.kafkaAuthPasswordSecretInput,
+    inputs.kafkaSslKeyInput,
+    inputs.kafkaSslKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+    isConvertedToSecret,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.kafkaAuthPasswordInput.clear();
+      inputs.kafkaSslKeyInput.clear();
+    } else {
+      inputs.kafkaAuthPasswordSecretInput.setValue('');
+      inputs.kafkaSslKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({ kafkaAuthPassword: false, kafkaSslKey: false });
+    onToggleSecretStorage(secretEnabled);
+  };
 
   const kafkaVerificationModeOptions = useMemo(
     () =>
@@ -148,8 +193,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
               />
             </EuiFormRow>
-            {inputs.kafkaSslKeyInput.value || !useSecretsStorage ? (
-              <EuiFormRow
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
                 label={
                   <FormattedMessage
@@ -158,6 +203,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaSslKeyInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
               >
                 <EuiTextArea
                   fullWidth
@@ -170,7 +217,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                     }
                   )}
                 />
-              </EuiFormRow>
+              </SecretFormRow>
             ) : (
               <SecretFormRow
                 fullWidth
@@ -181,11 +228,15 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaSslKeySecretInput.formRowProps}
-                onUsePlainText={onUsePlainText}
+                useSecretsStorage={useSecretsStorage}
+                isConvertedToSecret={isConvertedToSecret.kafkaSslKey}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+                cancelEdit={inputs.kafkaSslKeySecretInput.cancelEdit}
               >
                 <EuiTextArea
                   fullWidth
                   rows={5}
+                  data-test-subj="kafkaSslKeySecretInput"
                   {...inputs.kafkaSslKeySecretInput.props}
                   placeholder={i18n.translate(
                     'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
@@ -218,8 +269,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 {...inputs.kafkaAuthUsernameInput.props}
               />
             </EuiFormRow>
-            {inputs.kafkaAuthPasswordInput.value || !useSecretsStorage ? (
-              <EuiFormRow
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
                 label={
                   <FormattedMessage
@@ -228,6 +279,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaAuthPasswordInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
               >
                 <EuiFieldPassword
                   type={'dual'}
@@ -235,7 +288,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   fullWidth
                   {...inputs.kafkaAuthPasswordInput.props}
                 />
-              </EuiFormRow>
+              </SecretFormRow>
             ) : (
               <SecretFormRow
                 fullWidth
@@ -246,7 +299,10 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
-                onUsePlainText={onUsePlainText}
+                useSecretsStorage={useSecretsStorage}
+                isConvertedToSecret={isConvertedToSecret.kafkaAuthPassword}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+                cancelEdit={inputs.kafkaAuthPasswordSecretInput.cancelEdit}
               >
                 <EuiFieldPassword
                   type={'dual'}

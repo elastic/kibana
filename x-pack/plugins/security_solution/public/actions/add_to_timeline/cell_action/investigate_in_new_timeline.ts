@@ -14,8 +14,8 @@ import {
   filterOutNullableValues,
 } from '@kbn/cell-actions/src/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import { timelineActions } from '../../../timelines/store/timeline';
-import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import { timelineActions } from '../../../timelines/store';
+import { addProvider, showTimeline } from '../../../timelines/store/actions';
 import { TimelineId } from '../../../../common/types';
 import type { SecurityAppStore } from '../../../common/store';
 import { fieldHasCellActions } from '../../utils';
@@ -29,7 +29,7 @@ import { createDataProviders, isValidDataProviderField } from '../data_provider'
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 export const createInvestigateInNewTimelineCellActionFactory = createCellActionFactory(
   ({

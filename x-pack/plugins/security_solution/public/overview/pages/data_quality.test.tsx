@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
 
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -30,14 +30,6 @@ jest.mock('../../common/lib/kibana', () => {
   return {
     ...original,
     KibanaServices: mockKibanaServices,
-    useGetUserCasesPermissions: () => ({
-      all: false,
-      create: false,
-      read: true,
-      update: false,
-      delete: false,
-      push: false,
-    }),
     useKibana: jest.fn(),
     useUiSetting$: () => ['0,0.[000]'],
   };
@@ -80,6 +72,16 @@ describe('DataQuality', () => {
           hooks: {
             useCasesAddToNewCaseFlyout: jest.fn(),
           },
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: false,
+              create: false,
+              read: true,
+              update: false,
+              delete: false,
+              push: false,
+            }),
+          },
         },
         configSettings: { ILMEnabled: true },
       },
@@ -115,7 +117,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -147,7 +149,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -179,7 +181,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -216,7 +218,7 @@ describe('DataQuality', () => {
     });
 
     test('it renders the landing page', () => {
-      expect(screen.getByTestId('siem-landing-page')).toBeInTheDocument();
+      expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
     });
   });
 
@@ -253,7 +255,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -290,7 +292,7 @@ describe('DataQuality', () => {
     });
 
     test('it does NOT render the landing page', () => {
-      expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('empty-prompt')).not.toBeInTheDocument();
     });
   });
 
@@ -306,6 +308,16 @@ describe('DataQuality', () => {
             },
             hooks: {
               useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: false,
+                create: false,
+                read: true,
+                update: false,
+                delete: false,
+                push: false,
+              }),
             },
           },
           configSettings: { ILMEnabled: false },

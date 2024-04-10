@@ -7,14 +7,22 @@
 
 import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { updateSearchSource, getSmallerDataViewSpec } from './fetch_search_source_query';
+import {
+  updateSearchSource,
+  generateLink,
+  updateFilterReferences,
+  getSmallerDataViewSpec,
+} from './fetch_search_source_query';
 import {
   createStubDataView,
   stubbedSavedObjectIndexPattern,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 
 const createDataView = () => {
   const id = 'test-id';
@@ -55,26 +63,27 @@ const defaultParams: OnlySearchSourceRuleParams = {
 };
 
 describe('fetchSearchSourceQuery', () => {
+  const dataViewMock = createDataView();
+
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
+
+  const fakeNow = new Date('2020-02-09T23:15:41.941Z');
+
+  beforeAll(() => {
+    jest.resetAllMocks();
+    global.Date.now = jest.fn(() => fakeNow.getTime());
+  });
+
   describe('updateSearchSource', () => {
-    const dataViewMock = createDataView();
-    afterAll(() => {
-      jest.resetAllMocks();
-    });
-
-    const fakeNow = new Date('2020-02-09T23:15:41.941Z');
-
-    beforeAll(() => {
-      jest.resetAllMocks();
-      global.Date.now = jest.fn(() => fakeNow.getTime());
-    });
-
     it('without latest timestamp', async () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const searchSource = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -83,6 +92,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -113,7 +123,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const searchSource = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -122,6 +132,24 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.track_total_hits).toBe(true);
+      expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`
+        Object {
+          "meta": Object {
+            "field": "time",
+            "index": "test-id",
+            "params": Object {},
+          },
+          "query": Object {
+            "range": Object {
+              "time": Object {
+                "format": "strict_date_optional_time",
+                "gt": "2020-02-09T23:12:41.941Z",
+              },
+            },
+          },
+        }
+      `);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -160,7 +188,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const searchSource = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -169,6 +197,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -199,7 +228,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const searchSource = updateSearchSource(
+      const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -208,6 +237,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(filterToExcludeHitsFromPreviousRun).toBe(null);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -244,7 +274,7 @@ describe('fetchSearchSourceQuery', () => {
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
       const { dateStart, dateEnd } = getTimeRange();
-      const searchSource = updateSearchSource(
+      const { searchSource } = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
@@ -253,6 +283,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.track_total_hits).toBeUndefined();
       expect(searchRequest.size).toMatchInlineSnapshot(`0`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -304,6 +335,143 @@ describe('fetchSearchSourceQuery', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('generateLink', () => {
+    it('should include additional time filter', async () => {
+      const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
+
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { dateStart, dateEnd } = getTimeRange();
+      const { filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+        searchSourceInstance,
+        dataViewMock,
+        params,
+        '2020-02-09T23:12:41.941Z',
+        dateStart,
+        dateEnd
+      );
+
+      expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`
+        Object {
+          "meta": Object {
+            "field": "time",
+            "index": "test-id",
+            "params": Object {},
+          },
+          "query": Object {
+            "range": Object {
+              "time": Object {
+                "format": "strict_date_optional_time",
+                "gt": "2020-02-09T23:12:41.941Z",
+              },
+            },
+          },
+        }
+      `);
+
+      const locatorMock = {
+        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+      } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+
+      const dataViews = {
+        ...dataViewPluginMocks.createStartContract(),
+        create: async (spec: DataViewSpec) =>
+          new DataView({ spec, fieldFormats: fieldFormatsMock }),
+      };
+
+      const linkWithoutExcludedRuns = await generateLink(
+        searchSourceInstance,
+        locatorMock,
+        dataViews,
+        dataViewMock,
+        dateStart,
+        dateEnd,
+        'test1',
+        null
+      );
+
+      expect(linkWithoutExcludedRuns).toBe('test1/app/r?l=DISCOVER_APP_LOCATOR');
+      expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: [],
+        })
+      );
+
+      const linkWithExcludedRuns = await generateLink(
+        searchSourceInstance,
+        locatorMock,
+        dataViews,
+        dataViewMock,
+        dateStart,
+        dateEnd,
+        'test2',
+        filterToExcludeHitsFromPreviousRun
+      );
+
+      expect(linkWithExcludedRuns).toBe('test2/app/r?l=DISCOVER_APP_LOCATOR');
+      expect(locatorMock.getRedirectUrl).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          filters: expect.arrayContaining(
+            updateFilterReferences(
+              [filterToExcludeHitsFromPreviousRun!],
+              dataViewMock.id!,
+              undefined
+            )
+          ),
+        })
+      );
+    });
+
+    it('should skip fetching fields', async () => {
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { dateStart, dateEnd } = getTimeRange();
+
+      const locatorMock = {
+        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+      } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+
+      const dataViews = {
+        ...dataViewPluginMocks.createStartContract(),
+        create: jest
+          .fn()
+          .mockImplementation(
+            (spec: DataViewSpec) => new DataView({ spec, fieldFormats: fieldFormatsMock })
+          ),
+      };
+
+      await generateLink(
+        searchSourceInstance,
+        locatorMock,
+        dataViews,
+        dataViewMock,
+        dateStart,
+        dateEnd,
+        'test1',
+        null
+      );
+
+      expect(dataViews.create).toHaveBeenCalledWith(
+        {
+          allowHidden: false,
+          allowNoIndex: false,
+          fieldAttrs: {},
+          fieldFormats: {},
+          id: undefined,
+          name: '',
+          runtimeFieldMap: {},
+          sourceFilters: [],
+          timeFieldName: 'time',
+          title: 'title',
+          type: 'index-pattern',
+          version: undefined,
+        },
+        true // skipFetchFields flag
+      );
     });
   });
 
@@ -406,6 +574,7 @@ describe('fetchSearchSourceQuery', () => {
                 },
                 test3: {
                   count: 30,
+                  customDescription: 'test3',
                 },
               },
             },

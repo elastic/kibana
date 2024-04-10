@@ -415,9 +415,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],

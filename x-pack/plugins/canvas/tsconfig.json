@@ -86,6 +86,9 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-pdf-common",
+    "@kbn/code-editor",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",

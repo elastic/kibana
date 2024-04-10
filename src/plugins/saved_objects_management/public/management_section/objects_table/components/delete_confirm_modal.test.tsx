@@ -15,17 +15,20 @@ import { DeleteConfirmModal } from './delete_confirm_modal';
 interface CreateObjectOptions {
   namespaces?: string[];
   hiddenType?: boolean;
+  managed?: boolean;
 }
 
 const createObject = ({
   namespaces,
   hiddenType = false,
+  managed = false,
 }: CreateObjectOptions = {}): SavedObjectWithMetadata => ({
   id: 'foo',
   type: 'bar',
   attributes: {},
   references: [],
   namespaces,
+  managed,
   meta: {
     hiddenType,
   },

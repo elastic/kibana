@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../explore/components/risk_score/translations';
+import { getRiskEntityTranslation } from '../../../../entity_analytics/components/risk_score/translations';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-export * from '../../../../explore/components/risk_score/translations';
+export * from '../../../../entity_analytics/components/risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',

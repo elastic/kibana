@@ -12,13 +12,12 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 
-import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
-import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
-import type {
-  Category,
-  CatResponse,
-  SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/types';
+import {
+  type CategorizationAdditionalFilter,
+  createCategoryRequest,
+} from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
+import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -68,17 +67,26 @@ export function useCategorizeRequest() {
       index: string,
       field: string,
       timeField: string,
-      from: number | undefined,
-      to: number | undefined,
+      timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
-      intervalMs?: number
-    ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      intervalMs?: number,
+      additionalFilter?: CategorizationAdditionalFilter
+    ): Promise<ReturnType<typeof processCategoryResults>> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, from, to, query, wrap, intervalMs),
+            createCategoryRequest(
+              index,
+              field,
+              timeField,
+              timeRange,
+              query,
+              wrap,
+              intervalMs,
+              additionalFilter
+            ),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
@@ -93,7 +101,7 @@ export function useCategorizeRequest() {
             },
             error: (error) => {
               if (error.name === 'AbortError') {
-                return resolve({ categories: [], sparkLinesPerCategory: {} });
+                return resolve({ categories: [], hasExamples: false });
               }
               reject(error);
             },

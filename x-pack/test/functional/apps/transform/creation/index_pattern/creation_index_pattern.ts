@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               chartAvailable: true,
               id: 'customer_full_name',
-              legend: 'top 20 of 3321 categories',
+              legend: 'top 20 of 3327 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
                 { color: '#54B399', percentage: 75 },
@@ -271,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#54B399', percentage: 80 },
               ],
             },
             {
@@ -727,9 +727,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');

@@ -181,3 +181,15 @@ export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
   },
   order,
 });
+
+export const createGenericSubtitle = (
+  isInitialLoading: boolean,
+  showTotalAlertsCount: boolean,
+  totalAlerts: string
+) => !isInitialLoading && showTotalAlertsCount && totalAlerts;
+
+export const createEmbeddedDataSubtitle = (
+  embeddedDataLoaded: boolean,
+  embeddedDataAvailable: boolean,
+  totalAlerts: string
+) => embeddedDataLoaded && embeddedDataAvailable && totalAlerts;

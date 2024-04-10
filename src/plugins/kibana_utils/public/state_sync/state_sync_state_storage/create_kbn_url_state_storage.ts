@@ -7,7 +7,7 @@
  */
 
 import { Observable, of } from 'rxjs';
-import { catchError, map, share } from 'rxjs/operators';
+import { catchError, map, share } from 'rxjs';
 import { History } from 'history';
 import { throttle } from 'lodash';
 import { IStateStorage } from './types';
@@ -116,7 +116,11 @@ export const createKbnUrlStateStorage = (
           unlisten();
         };
       }).pipe(
-        map(() => getStateFromKbnUrl<State>(key, undefined, { getFromHashQuery: useHashQuery })),
+        map(() =>
+          getStateFromKbnUrl<State>(key, history?.createHref(history.location), {
+            getFromHashQuery: useHashQuery,
+          })
+        ),
         catchError((error) => {
           if (onGetErrorThrottled) onGetErrorThrottled(error);
           return of(null);

@@ -20,13 +20,13 @@
       "taskManager",
       "cloud",
       "fleet",
-      "actions"
+      "actions",
+      "discover"
     ],
     "optionalPlugins": [
       "securitySolutionEss"
     ],
     "requiredBundles": [
-      "kibanaUtils",
       "usageCollection"
     ]
   }

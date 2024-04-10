@@ -16,6 +16,8 @@ export const ACTION_BTN = '[data-test-subj$="-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
+export const CREATE_NEW_EMAIL_CONNECTOR = '[data-test-subj="addNewActionConnectorButton-.email"]';
+
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
 
 export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
@@ -42,7 +44,7 @@ export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSe
 
 export const FORM_VALIDATION_ERROR = '.euiFormErrorText';
 
-export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
+export const JSON_EDITOR = "[data-test-subj='documentToIndex']";
 
 export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
 
@@ -68,3 +70,21 @@ export const ACTIONS_SUMMARY_ALERT_BUTTON = '[data-test-subj="actionNotifyWhen-o
 
 export const ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON =
   '[data-test-subj="actionNotifyWhen-option-for_each"]';
+
+export const ACTIONS_ALERTS_QUERY_FILTER_BUTTON = '[data-test-subj="alertsFilterQueryToggle"]';
+
+export const ACTIONS_ALERTS_QUERY_FILTER_INPUT = (actionIndex = 0) =>
+  `[data-test-subj="alertActionAccordion-${actionIndex}"] textarea[data-test-subj="queryInput"]`;
+
+export const ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON =
+  '[data-test-subj="alertsFilterTimeframeToggle"]';
+
+export const ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON = (day: number) =>
+  `[data-test-subj="alertsFilterTimeframeWeekdayButtons"] button[data-test-subj="${day}"]`;
+
+export const ACTIONS_ALERTS_TIMEFRAME_START_INPUT = '.euiDatePicker.euiDatePickerRange__start';
+
+export const ACTIONS_ALERTS_TIMEFRAME_END_INPUT = '.euiDatePicker.euiDatePickerRange__end';
+
+export const ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT =
+  '[data-test-subj="alertsFilterTimeframeTimezone"] [data-test-subj="comboBoxSearchInput"]';

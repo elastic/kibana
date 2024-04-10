@@ -35,6 +35,14 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
+export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
+  {
+    defaultMessage:
+      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
+  }
+);
+
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -536,6 +544,13 @@ export const COLUMN_TAGS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.tagsTitle',
   {
     defaultMessage: 'Tags',
+  }
+);
+
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
   }
 );
 
@@ -1196,6 +1211,14 @@ export const INSTALL_RULE_BUTTON = i18n.translate(
     defaultMessage: 'Install rule',
   }
 );
+
+export const INSTALL_RULE_BUTTON_ARIA_LABEL = (ruleName: string) =>
+  i18n.translate('xpack.securitySolution.addRules.installRuleButton.ariaLabel', {
+    defaultMessage: 'Install "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
 
 export const UPDATE_RULE_BUTTON = i18n.translate(
   'xpack.securitySolution.addRules.upgradeRuleButton',

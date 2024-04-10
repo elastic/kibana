@@ -10,28 +10,23 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
-import { createKibanaDataView } from '../../../../../components/ml_inference/retry_create_data_view';
 
-import { ActionDispatchers, ACTION } from './actions';
+import type { ActionDispatchers } from './actions';
+import { ACTION } from './actions';
 import { reducer } from './reducer';
-import {
-  getInitialState,
-  getJobConfigFromFormState,
-  FormMessage,
-  State,
-  SourceIndexMap,
-  getFormStateFromJobConfig,
-} from './state';
+import type { FormMessage, State, SourceIndexMap } from './state';
+import { getInitialState, getJobConfigFromFormState, getFormStateFromJobConfig } from './state';
 
-import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+import type { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 
 export interface AnalyticsCreationStep {
   number: ANALYTICS_STEPS;
@@ -60,7 +55,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
   const { createDataView, jobId } = form;
-  let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -93,13 +87,21 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     const analyticsJobConfig = (
       isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
     ) as DataFrameAnalyticsConfig;
-
-    if (isAdvancedEditorEnabled) {
-      destinationIndex = analyticsJobConfig.dest.index;
-    }
+    const errorMessage = i18n.translate(
+      'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
+      {
+        defaultMessage: 'An error occurred creating the data frame analytics job:',
+      }
+    );
 
     try {
-      await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
+      const creationResp = await ml.dataFrameAnalytics.createDataFrameAnalytics(
+        jobId,
+        analyticsJobConfig,
+        createDataView,
+        form.timeFieldName
+      );
+
       addRequestMessage({
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
@@ -109,24 +111,29 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsJobCreated(true);
-      if (createDataView) {
-        createKibanaDataView(destinationIndex, dataViews, form.timeFieldName, addRequestMessage);
+
+      if (
+        creationResp.dataFrameAnalyticsJobsCreated.length &&
+        creationResp.dataFrameAnalyticsJobsErrors.length === 0
+      ) {
+        setIsJobCreated(true);
+        refresh();
+        return true;
+      } else if (creationResp.dataFrameAnalyticsJobsErrors.length) {
+        addRequestMessage({
+          error: extractErrorProperties(creationResp.dataFrameAnalyticsJobsErrors[0].error).message,
+          message: errorMessage,
+        });
+        return false;
       }
-      refresh();
-      return true;
     } catch (e) {
       addRequestMessage({
         error: extractErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob',
-          {
-            defaultMessage: 'An error occurred creating the data frame analytics job:',
-          }
-        ),
+        message: errorMessage,
       });
       return false;
     }
+    return false;
   };
 
   const prepareFormValidation = async () => {

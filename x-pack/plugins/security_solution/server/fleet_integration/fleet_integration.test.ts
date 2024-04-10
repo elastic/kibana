@@ -24,13 +24,18 @@ import {
 } from '../../common/endpoint/models/policy_config';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import type { KibanaRequest } from '@kbn/core/server';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
@@ -50,14 +55,18 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import type { PostDeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import type {
+  GetAgentPoliciesResponseItem,
+  PostDeletePackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
-import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
-import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
 import * as moment from 'moment';
+import type { PostAgentPolicyCreateCallback } from '@kbn/fleet-plugin/server/types';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -81,7 +90,7 @@ describe('ingest_integration tests ', () => {
   });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
-  let appFeaturesService: AppFeaturesService;
+  let productFeaturesService: ProductFeaturesService;
 
   beforeEach(() => {
     endpointAppContextMock = createMockEndpointAppContextServiceStartContract();
@@ -90,7 +99,7 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
-    appFeaturesService = endpointAppContextMock.appFeaturesService;
+    productFeaturesService = endpointAppContextMock.productFeaturesService;
 
     jest
       .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
@@ -147,7 +156,7 @@ describe('ingest_integration tests ', () => {
         licenseService,
         exceptionListClient,
         cloudService,
-        appFeaturesService
+        productFeaturesService
       );
 
       return callback(
@@ -382,6 +391,115 @@ describe('ingest_integration tests ', () => {
     });
   });
 
+  describe('agent policy update callback', () => {
+    it('ProductFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      await expect(() => callback(policyConfig)).rejects.toThrow(
+        'Agent Tamper Protection is not allowed in current environment'
+      );
+    });
+    it('ProductFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('ProductFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('ProductFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyUpdateCallback(logger, productFeaturesService);
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+  });
+
+  describe('agent policy create callback', () => {
+    let logger: Logger;
+    let callback: PostAgentPolicyCreateCallback;
+    let policyConfig: GetAgentPoliciesResponseItem;
+
+    beforeEach(() => {
+      logger = loggingSystemMock.create().get('ingest_integration.test');
+      callback = getAgentPolicyCreateCallback(logger, productFeaturesService);
+      policyConfig = generator.generateAgentPolicy();
+    });
+
+    it('ProductFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      callback = getAgentPolicyCreateCallback(logger, productFeaturesService);
+      policyConfig.is_protected = true;
+
+      await expect(() => callback(policyConfig)).rejects.toThrow(
+        'Agent Tamper Protection is not allowed in current environment'
+      );
+    });
+
+    it('ProductFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      callback = getAgentPolicyCreateCallback(logger, productFeaturesService);
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+
+    it('ProductFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
+      policyConfig.is_protected = true;
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+
+    it('ProductFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+  });
+
   describe('package policy update callback (when the license is below platinum)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -399,7 +517,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -418,7 +536,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -442,6 +560,28 @@ describe('ingest_integration tests ', () => {
     });
 
     const validDateYesterday = moment.utc().subtract(1, 'day');
+
+    it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
+      );
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextMock.logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService,
+        esClient,
+        productFeaturesService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
+      expect(() =>
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow(
+        'To modify protection updates, you must add at least Endpoint Complete to your project.'
+      );
+    });
 
     it.each([
       {
@@ -487,7 +627,7 @@ describe('ingest_integration tests ', () => {
           endpointAppContextMock.endpointMetadataService,
           cloudService,
           esClient,
-          appFeaturesService
+          productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = {
@@ -547,7 +687,7 @@ describe('ingest_integration tests ', () => {
           endpointAppContextMock.endpointMetadataService,
           cloudService,
           esClient,
-          appFeaturesService
+          productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
         policyConfig.inputs[0]!.config!.policy.value = {
@@ -585,7 +725,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -599,9 +739,9 @@ describe('ingest_integration tests ', () => {
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
 
-    it('should turn off protections if endpointPolicyProtections appFeature is disabled', async () => {
-      appFeaturesService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
+    it('should turn off protections if endpointPolicyProtections productFeature is disabled', async () => {
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
       );
       const callback = getPackagePolicyUpdateCallback(
         endpointAppContextMock.logger,
@@ -610,7 +750,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
 
       const updatedPolicy = await callback(
@@ -689,7 +829,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
@@ -726,7 +866,7 @@ describe('ingest_integration tests ', () => {
         endpointAppContextMock.endpointMetadataService,
         cloudService,
         esClient,
-        appFeaturesService
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated

@@ -20,6 +20,10 @@ describe('configureToggleCustomFieldFactory ', () => {
       label: 'Toggle',
       getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
+      filterOptions: [
+        { key: 'on', label: 'On', value: true },
+        { key: 'off', label: 'Off', value: false },
+      ],
     });
   });
 });

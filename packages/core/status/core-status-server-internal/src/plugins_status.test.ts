@@ -10,7 +10,7 @@ import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
 import { of, Observable, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from '@kbn/core-status-common';
-import { first, skip } from 'rxjs/operators';
+import { first, skip } from 'rxjs';
 import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
@@ -41,7 +41,7 @@ describe('PluginStatusService', () => {
         pluginDependencies,
       });
 
-      service.blockNewRegistrations();
+      service.start();
       expect(() => {
         service.set(
           'a',
@@ -365,6 +365,8 @@ describe('PluginStatusService', () => {
 
       const pluginA$ = new ReplaySubject<ServiceStatus>(1);
       service.set('a', pluginA$);
+      service.start(); // the plugin emission timeout starts counting when we call pluginsStatus.start()
+
       // the first emission happens right after core$ services emit
       const firstEmission = firstValueFrom(service.getAll$().pipe(skip(1)));
 

@@ -8,6 +8,7 @@ import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -17,7 +18,6 @@ import {
   BulkActionsVerbs,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
@@ -32,6 +32,7 @@ import {
 } from './translations';
 import { TimelineItem } from '../bulk_actions/components/toolbar';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
+import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
@@ -54,8 +55,10 @@ export interface UseBulkActions {
 type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
 
-type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh'> &
-  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'>;
+type UseBulkUntrackActionsProps = Pick<BulkActionsProps, 'refresh' | 'query' | 'featureIds'> &
+  Pick<UseBulkActions, 'clearSelection' | 'setIsBulkActionsLoading'> & {
+    isAllSelected: boolean;
+  };
 
 const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: string) =>
   alerts.filter(
@@ -181,6 +184,9 @@ export const useBulkUntrackActions = ({
   setIsBulkActionsLoading,
   refresh,
   clearSelection,
+  query,
+  featureIds = [],
+  isAllSelected,
 }: UseBulkUntrackActionsProps) => {
   const onSuccess = useCallback(() => {
     refresh();
@@ -189,6 +195,8 @@ export const useBulkUntrackActions = ({
 
   const { application } = useKibana().services;
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
+
   // Check if at least one Observability feature is enabled
   if (!application?.capabilities) return [];
   const hasApmPermission = application.capabilities.apm?.['alerting:show'];
@@ -212,7 +220,7 @@ export const useBulkUntrackActions = ({
     {
       label: MARK_AS_UNTRACKED,
       key: 'mark-as-untracked',
-      disableOnQuery: true,
+      disableOnQuery: false,
       disabledLabel: MARK_AS_UNTRACKED,
       'data-test-subj': 'mark-as-untracked',
       onClick: async (alerts?: TimelineItem[]) => {
@@ -221,7 +229,11 @@ export const useBulkUntrackActions = ({
         const indices = alerts.map((alert) => alert._index ?? '');
         try {
           setIsBulkActionsLoading(true);
-          await untrackAlerts({ indices, alertUuids });
+          if (isAllSelected) {
+            await untrackAlertsByQuery({ query, featureIds });
+          } else {
+            await untrackAlerts({ indices, alertUuids });
+          }
           onSuccess();
         } finally {
           setIsBulkActionsLoading(false);
@@ -239,7 +251,9 @@ export function useBulkActions({
   useBulkActionsConfig = () => [],
   featureIds,
 }: BulkActionsProps): UseBulkActions {
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [bulkActionsState, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
   const clearSelection = useCallback(() => {
@@ -253,6 +267,9 @@ export function useBulkActions({
     setIsBulkActionsLoading,
     refresh,
     clearSelection,
+    query,
+    featureIds,
+    isAllSelected: bulkActionsState.isAllSelected,
   });
 
   const initialItems = [

@@ -37,11 +37,21 @@ describe('CustomFieldsList', () => {
   it('shows CustomFieldsList correctly', async () => {
     appMockRender.render(<CustomFieldsList {...props} />);
 
-    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-fields-list')).toBeInTheDocument();
 
-    for (const field of customFieldsConfigurationMock) {
-      expect(screen.getByTestId(`custom-field-${field.key}-${field.type}`)).toBeInTheDocument();
-    }
+    expect(
+      await screen.findByTestId(
+        `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
+      )
+    ).toBeInTheDocument();
+    expect((await screen.findAllByText('Text')).length).toBe(2);
+    expect((await screen.findAllByText('Required')).length).toBe(2);
+    expect(
+      await screen.findByTestId(
+        `custom-field-${customFieldsConfigurationMock[1].key}-${customFieldsConfigurationMock[1].type}`
+      )
+    ).toBeInTheDocument();
+    expect((await screen.findAllByText('Toggle')).length).toBe(2);
   });
 
   it('shows single CustomFieldsList correctly', async () => {
@@ -49,16 +59,21 @@ describe('CustomFieldsList', () => {
       <CustomFieldsList {...{ ...props, customFields: [customFieldsConfigurationMock[0]] }} />
     );
 
-    const list = screen.getByTestId('custom-fields-list');
+    const list = await screen.findByTestId('custom-fields-list');
 
     expect(list).toBeInTheDocument();
     expect(
-      screen.getByTestId(
+      await screen.findByTestId(
         `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
       )
     ).toBeInTheDocument();
+    expect(await screen.findByText('Text')).toBeInTheDocument();
+    expect(await screen.findByText('Required')).toBeInTheDocument();
     expect(
-      within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+      await within(list).findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+    ).toBeInTheDocument();
+    expect(
+      await within(list).findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
     ).toBeInTheDocument();
   });
 
@@ -76,10 +91,12 @@ describe('CustomFieldsList', () => {
     it('shows confirmation modal when deleting a field ', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
-        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        await within(list).findByTestId(
+          `${customFieldsConfigurationMock[0].key}-custom-field-delete`
+        )
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
@@ -88,15 +105,17 @@ describe('CustomFieldsList', () => {
     it('calls onDeleteCustomField when confirm', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
-        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        await within(list).findByTestId(
+          `${customFieldsConfigurationMock[0].key}-custom-field-delete`
+        )
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      userEvent.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
@@ -109,15 +128,17 @@ describe('CustomFieldsList', () => {
     it('does not call onDeleteCustomField when cancel', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
-        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
+        await within(list).findByTestId(
+          `${customFieldsConfigurationMock[0].key}-custom-field-delete`
+        )
       );
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Cancel'));
+      userEvent.click(await screen.findByText('Cancel'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-custom-field-modal')).not.toBeInTheDocument();
@@ -134,10 +155,10 @@ describe('CustomFieldsList', () => {
     it('calls onEditCustomField correctly', async () => {
       appMockRender.render(<CustomFieldsList {...props} />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
-        within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
+        await within(list).findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 
       await waitFor(() => {

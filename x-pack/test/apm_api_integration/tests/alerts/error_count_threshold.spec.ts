@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -96,13 +96,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      await Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
     });
 
-    after(async () => {
-      await synthtraceEsClient.clean();
-    });
+    after(() => synthtraceEsClient.clean());
 
+    // FLAKY: https://github.com/elastic/kibana/issues/176948
     describe('create rule without kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
@@ -251,6 +250,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/176964
     describe('create rule with kql filter for opbeans-php', () => {
       let ruleId: string;
 

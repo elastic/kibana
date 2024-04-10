@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
@@ -36,12 +37,21 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
+const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexLink?: string) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: data.rule.name,
+    description: (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
+          defaultMessage: 'Manage Rule',
+        })}
+      >
+        <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
+      </EuiToolTip>
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
@@ -160,10 +170,14 @@ const getEvidenceList = ({ result }: CspFinding) =>
     },
   ].filter(truthy);
 
-export const OverviewTab = ({ data }: { data: CspFinding }) => {
-  const {
-    services: { discover },
-  } = useKibana();
+export const OverviewTab = ({
+  data,
+  ruleFlyoutLink,
+}: {
+  data: CspFinding;
+  ruleFlyoutLink: string;
+}) => {
+  const { discover } = useKibana().services;
   const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
@@ -185,7 +199,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, discoverIndexLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverIndexLink),
         },
         {
           initialIsOpen: true,
@@ -206,7 +220,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverIndexLink, hasEvidence]
+    [data, discoverIndexLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (

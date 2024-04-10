@@ -25,7 +25,9 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/ui-actions-plugin",
     "@kbn/field-utils",
-    "@kbn/unified-field-list"
+    "@kbn/unified-field-list",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock"
   ],
   "exclude": [
     "target/**/*",

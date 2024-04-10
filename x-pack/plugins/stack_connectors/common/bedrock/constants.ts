@@ -18,10 +18,11 @@ export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',
   INVOKE_STREAM = 'invokeStream',
+  DASHBOARD = 'getDashboard',
   TEST = 'test',
 }
 
 export const DEFAULT_TOKEN_LIMIT = 8191;
-export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-v2';
+export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-sonnet-20240229-v1:0';
 
-export const DEFAULT_BEDROCK_URL = `https://bedrock.us-east-1.amazonaws.com` as const;
+export const DEFAULT_BEDROCK_URL = `https://bedrock-runtime.us-east-1.amazonaws.com` as const;

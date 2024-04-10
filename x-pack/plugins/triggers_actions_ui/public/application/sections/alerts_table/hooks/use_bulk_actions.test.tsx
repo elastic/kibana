@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -37,7 +38,7 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   const refresh = jest.fn();
@@ -307,7 +308,22 @@ describe('bulk action hooks', () => {
         },
       }));
       const { result } = renderHook(
-        () => useBulkUntrackActions({ setIsBulkActionsLoading, refresh, clearSelection }),
+        () =>
+          useBulkUntrackActions({
+            setIsBulkActionsLoading,
+            refresh,
+            clearSelection,
+            isAllSelected: true,
+            query: {
+              bool: {
+                must: {
+                  term: {
+                    test: 'test',
+                  },
+                },
+              },
+            },
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -360,7 +376,7 @@ describe('bulk action hooks', () => {
               },
               Object {
                 "data-test-subj": "mark-as-untracked",
-                "disableOnQuery": true,
+                "disableOnQuery": false,
                 "disabledLabel": "Mark as untracked",
                 "key": "mark-as-untracked",
                 "label": "Mark as untracked",

@@ -13,14 +13,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ES_QUERY_ID,
+  RuleCreationValidConsumer,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
+import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
 const container = document.createElement('div');
 let isOpen = false;
 
-const ALERT_TYPE_ID = '.es-query';
+const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+  AlertConsumers.OBSERVABILITY,
+  STACK_ALERTS_FEATURE_ID,
+];
 
 interface AlertsPopoverProps {
   onClose: () => void;
@@ -32,7 +43,7 @@ interface AlertsPopoverProps {
   isPlainRecord?: boolean;
 }
 
-interface EsQueryAlertMetaData {
+interface EsQueryAlertMetaData extends RuleTypeMetaData {
   isManagementPage?: boolean;
   adHocDataViewList: DataView[];
 }
@@ -98,17 +109,21 @@ export function AlertsPopover({
 
     return triggersActionsUi?.getAddRuleFlyout({
       metadata: discoverMetadata,
-      consumer: STACK_ALERTS_FEATURE_ID,
+      consumer: 'alerts',
       onClose: (_, metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
         onClose();
       },
       onSave: async (metadata) => {
-        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
+        onFinishFlyoutInteraction(metadata!);
       },
       canChangeTrigger: false,
-      ruleTypeId: ALERT_TYPE_ID,
+      ruleTypeId: ES_QUERY_ID,
       initialValues: { params: getParams() },
+      validConsumers: EsQueryValidConsumer,
+      useRuleProducer: true,
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
+      initialSelectedConsumer: AlertConsumers.LOGS,
     });
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
 
@@ -152,7 +167,7 @@ export function AlertsPopover({
           ),
           icon: 'tableOfContents',
           href: services?.application?.getUrlForApp(
-            'management/insightsAndAlerting/triggersActions/alerts'
+            'management/insightsAndAlerting/triggersActions/rules'
           ),
           ['data-test-subj']: 'discoverManageAlertsButton',
         },

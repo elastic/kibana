@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
 import {
@@ -23,6 +23,7 @@ export const AlertSummaryWidget = ({
   onClick = () => {},
   timeRange,
   hideChart,
+  onLoaded,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -33,6 +34,12 @@ export const AlertSummaryWidget = ({
     filter,
     timeRange,
   });
+
+  useEffect(() => {
+    if (!isLoading && onLoaded) {
+      onLoaded({ activeAlertCount, recoveredAlertCount });
+    }
+  }, [activeAlertCount, isLoading, onLoaded, recoveredAlertCount]);
 
   if (isLoading)
     return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;

@@ -26,11 +26,10 @@ import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { DiscoverDisplayMode, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { changeDataView } from '../hooks/utils/change_data_view';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
-import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
@@ -54,7 +53,9 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-interface DiscoverStateContainerParams {
+import type { DiscoverCustomizationContext } from '../../../customizations';
+
+export interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
@@ -67,11 +68,14 @@ interface DiscoverStateContainerParams {
    * core ui settings service
    */
   services: DiscoverServices;
-  /*
-   * mode in which discover is running
-   *
-   * */
-  mode?: DiscoverDisplayMode;
+  /**
+   * Context object for customization related properties
+   */
+  customizationContext: DiscoverCustomizationContext;
+  /**
+   * a custom url state storage
+   */
+  stateStorageContainer?: IKbnUrlStateStorage;
 }
 
 export interface LoadParams {
@@ -84,6 +88,10 @@ export interface LoadParams {
    */
   dataView?: DataView;
   /**
+   * Custom initial app state for loading a saved search
+   */
+  initialAppState?: DiscoverAppState;
+  /**
    * the data view spec to use, if undefined, the saved search's data view will be used
    */
   dataViewSpec?: DataViewSpec;
@@ -94,7 +102,6 @@ export interface DiscoverStateContainer {
    * Global State, the _g part of the URL
    */
   globalState: DiscoverGlobalStateContainer;
-
   /**
    * App state, the _a part of the URL
    */
@@ -119,6 +126,10 @@ export interface DiscoverStateContainer {
    * Service for handling search sessions
    */
   searchSessionManager: DiscoverSearchSessionManager;
+  /**
+   * Context object for customization related properties
+   */
+  customizationContext: DiscoverCustomizationContext;
   /**
    * Complex functions to update multiple containers from UI
    */
@@ -176,7 +187,7 @@ export interface DiscoverStateContainer {
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
-    onChangeDataView: (id: string) => Promise<void>;
+    onChangeDataView: (id: string | DataView) => Promise<void>;
     /**
      * Set the currently selected data view
      * @param dataView
@@ -190,7 +201,7 @@ export interface DiscoverStateContainer {
      * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => void;
+    updateAdHocDataViewId: () => Promise<DataView | undefined>;
   };
 }
 
@@ -201,7 +212,8 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
-  mode = 'standalone',
+  customizationContext,
+  stateStorageContainer,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -209,12 +221,14 @@ export function getDiscoverStateContainer({
   /**
    * state storage for state in the URL
    */
-  const stateStorage = createKbnUrlStateStorage({
-    useHash: storeInSessionStorage,
-    history,
-    useHashQuery: mode !== 'embedded',
-    ...(toasts && withNotifyOnErrors(toasts)),
-  });
+  const stateStorage =
+    stateStorageContainer ??
+    createKbnUrlStateStorage({
+      useHash: storeInSessionStorage,
+      history,
+      useHashQuery: customizationContext.displayMode !== 'embedded',
+      ...(toasts && withNotifyOnErrors(toasts)),
+    });
 
   /**
    * Search session logic
@@ -292,12 +306,16 @@ export function getDiscoverStateContainer({
     const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
-    updateFiltersReferences(prevDataView, newDataView);
+    updateFiltersReferences({
+      prevDataView,
+      nextDataView: newDataView,
+      services,
+    });
 
     internalStateContainer.transitions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
     await appStateContainer.replaceUrlState({ index: newDataView.id });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearchContainer.getId());
-    getUrlTracker().setTrackingEnabled(trackingEnabled);
+    services.urlTracker.setTrackingEnabled(trackingEnabled);
 
     return newDataView;
   };
@@ -347,6 +365,7 @@ export function getDiscoverStateContainer({
       dataStateContainer,
       internalStateContainer,
       savedSearchContainer,
+      globalStateContainer,
       services,
       setDataView,
     });
@@ -356,6 +375,15 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
+    // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
+    // might change the time filter and thus needs to re-check whether the saved search has changed.
+    const timefilerUnsubscribe = merge(
+      services.timefilter.getTimeUpdate$(),
+      services.timefilter.getRefreshIntervalUpdate$()
+    ).subscribe(() => {
+      savedSearchContainer.updateTimeRange();
+    });
+
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
       savedSearchContainer.getState()
@@ -407,6 +435,7 @@ export function getDiscoverStateContainer({
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
+      timefilerUnsubscribe.unsubscribe();
     };
   };
 
@@ -457,6 +486,17 @@ export function getDiscoverStateContainer({
       timefilter: services.timefilter,
     });
     const newAppState = getDefaultAppState(nextSavedSearch, services);
+
+    // a saved search can't have global (pinned) filters so we can reset global filters state
+    const globalFilters = globalStateContainer.get()?.filters;
+    if (globalFilters) {
+      await globalStateContainer.set({
+        ...globalStateContainer.get(),
+        filters: [],
+      });
+    }
+
+    internalStateContainer.transitions.resetOnSavedSearchChange();
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -475,6 +515,7 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
+    customizationContext,
     actions: {
       initializeAndSync,
       fetchData,
@@ -550,6 +591,7 @@ function createUrlGeneratorState({
       : data.query.timefilter.timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
+    grid: appState.grid,
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,

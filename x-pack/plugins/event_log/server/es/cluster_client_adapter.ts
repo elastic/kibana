@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferTime, filter as rxFilter, concatMap } from 'rxjs/operators';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
@@ -82,6 +82,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
+  hits?: estypes.SearchHitsMetadata<unknown>;
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
@@ -455,12 +456,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     };
 
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
       throw new Error(
@@ -488,19 +490,20 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       query,
       aggs,
     };
-
     try {
-      const { aggregations } = await esClient.search<IValidatedEvent>({
+      const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
         body,
       });
       return {
         aggregations,
+        hits,
       };
     } catch (err) {
-      throw new Error(
+      this.logger.debug(
         `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
       );
+      throw err;
     }
   }
 }

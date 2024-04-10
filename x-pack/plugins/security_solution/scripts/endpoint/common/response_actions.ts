@@ -23,6 +23,7 @@ import type {
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  EndpointActionResponseDataOutput,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -79,18 +80,19 @@ export const sendEndpointActionResponse = async (
   action: ActionDetails,
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
-  const endpointResponse = endpointActionGenerator.generateResponse({
-    agent: { id: action.agents[0] },
-    EndpointActions: {
-      action_id: action.id,
-      data: {
-        command: action.command as EndpointActionData['command'],
-        comment: '',
-        ...getOutputDataIfNeeded(action),
+  const endpointResponse =
+    endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
+      agent: { id: action.agents[0] },
+      EndpointActions: {
+        action_id: action.id,
+        data: {
+          command: action.command as EndpointActionData['command'],
+          comment: '',
+          ...getOutputDataIfNeeded(action),
+        },
+        started_at: action.startedAt,
       },
-      started_at: action.startedAt,
-    },
-  });
+    });
 
   // 20% of the time we generate an error
   if (state === 'failure' || (state !== 'success' && endpointActionGenerator.randomFloat() < 0.2)) {
@@ -103,7 +105,8 @@ export const sendEndpointActionResponse = async (
       endpointResponse.EndpointActions.data.output
     ) {
       (
-        endpointResponse.EndpointActions.data.output.content as ResponseActionGetFileOutputContent
+        endpointResponse.EndpointActions.data.output
+          .content as unknown as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
     }
 
@@ -112,7 +115,8 @@ export const sendEndpointActionResponse = async (
       endpointResponse.EndpointActions.data.output
     ) {
       (
-        endpointResponse.EndpointActions.data.output.content as ResponseActionExecuteOutputContent
+        endpointResponse.EndpointActions.data.output
+          .content as unknown as ResponseActionExecuteOutputContent
       ).stderr = 'execute command timed out';
     }
   }
@@ -168,7 +172,7 @@ export const sendEndpointActionResponse = async (
         ? '/execute/file/path'
         : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           (
-            action as ActionDetails<
+            action as unknown as ActionDetails<
               ResponseActionGetFileOutputContent,
               ResponseActionGetFileParameters
             >
@@ -244,12 +248,11 @@ export const sendEndpointActionResponse = async (
       .then(() => sleep(2000));
   }
 
-  return endpointResponse;
+  return endpointResponse as unknown as LogsEndpointActionResponse;
 };
-type ResponseOutput<TOutputContent extends object = object> = Pick<
-  LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'],
-  'output'
->;
+type ResponseOutput<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+> = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
@@ -262,7 +265,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
             entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as ResponseOutput<GetProcessesActionOutputContent>;
+      } as unknown as ResponseOutput<GetProcessesActionOutputContent>;
 
     case 'get-file':
       return {
@@ -275,7 +278,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
               {
                 type: 'file',
                 path: (
-                  action as ActionDetails<
+                  action as unknown as ActionDetails<
                     ResponseActionGetFileOutputContent,
                     ResponseActionGetFileParameters
                   >
@@ -287,7 +290,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
             ],
           },
         },
-      } as ResponseOutput<ResponseActionGetFileOutputContent>;
+      } as unknown as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
       const executeOutput: Partial<ResponseActionExecuteOutputContent> = {
@@ -309,7 +312,7 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         output: endpointActionGenerator.generateExecuteActionResponseOutput({
           content: executeOutput,
         }),
-      } as ResponseOutput<ResponseActionExecuteOutputContent>;
+      } as unknown as ResponseOutput<ResponseActionExecuteOutputContent>;
 
     default:
       return { output: undefined };

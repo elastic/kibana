@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './use_doc_viewer_services';
 export * from './use_es_doc_search';

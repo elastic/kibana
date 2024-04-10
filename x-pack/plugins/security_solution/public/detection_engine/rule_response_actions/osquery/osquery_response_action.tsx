@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { ResponseActionFormField } from './osquery_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
@@ -28,7 +28,9 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
   const isMounted = useIsMounted();
 
   // serverless component that is returned when users do not have Endpoint.Complete tier
-  const UpsellingComponent = useUpsellingComponent(AppFeatureKey.osqueryAutomatedResponseActions);
+  const UpsellingComponent = useUpsellingComponent(
+    ProductFeatureKey.osqueryAutomatedResponseActions
+  );
 
   if (osquery) {
     const { disabled, permissionDenied } = osquery.fetchInstallationStatus();

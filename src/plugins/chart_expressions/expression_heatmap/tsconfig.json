@@ -28,6 +28,7 @@
     "@kbn/analytics",
     "@kbn/chart-expressions-common",
     "@kbn/i18n-react",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -18,6 +18,7 @@ import type {
   EpmPackageInstallStatus,
   SimpleSOAssetType,
   AssetSOObject,
+  InstallResultStatus,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -154,7 +155,7 @@ export interface IBulkInstallPackageHTTPError {
 
 export interface InstallResult {
   assets?: AssetReference[];
-  status?: 'installed' | 'already_installed';
+  status?: InstallResultStatus;
   error?: Error;
   installType: InstallType;
   installSource: InstallSource;
@@ -217,6 +218,7 @@ export interface GetInputsTemplatesRequest {
   };
   query: {
     format: 'json' | 'yml' | 'yaml';
+    prerelease?: boolean;
   };
 }
 

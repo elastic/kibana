@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  epmRouteService,
+} from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
+import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import expect from 'expect';
+import { refreshSavedObjectIndices } from '../../refresh_index';
+
+const MAX_RETRIES = 2;
+const ATTEMPT_TIMEOUT = 120000;
 
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
@@ -23,49 +33,75 @@ export const installPrebuiltRulesFleetPackage = async ({
   supertest,
   version,
   overrideExistingPackage,
+  retryService,
 }: {
   es: Client;
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   version?: string;
   overrideExistingPackage: boolean;
-}): Promise<void> => {
+  retryService: RetryService;
+}): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
-    await supertest
-      .post(epmRouteService.getInstallPath('security_detection_engine', version))
-      .set('kbn-xsrf', 'true')
-      .send({
-        force: overrideExistingPackage,
-      })
-      .expect(200);
+    const response = await retryService.tryWithRetries<InstallPackageResponse>(
+      installPrebuiltRulesFleetPackage.name,
+      async () => {
+        const testResponse = await supertest
+          .post(epmRouteService.getInstallPath('security_detection_engine', version))
+          .set('kbn-xsrf', 'true')
+          .send({
+            force: overrideExistingPackage,
+          })
+          .expect(200);
+        expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+        expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+
+        return testResponse.body;
+      },
+      {
+        retryCount: MAX_RETRIES,
+        timeout: ATTEMPT_TIMEOUT,
+      }
+    );
+
+    await refreshSavedObjectIndices(es);
+
+    return response;
   } else {
     // Install the latest version
-    await supertest
-      .post(epmRouteService.getBulkInstallPath())
-      .query({ prerelease: true })
-      .set('kbn-xsrf', 'true')
-      .send({
-        packages: ['security_detection_engine'],
-        force: overrideExistingPackage,
-      })
-      .expect(200);
-  }
+    const response = await retryService.tryWithRetries<BulkInstallPackagesResponse>(
+      installPrebuiltRulesFleetPackage.name,
+      async () => {
+        const testResponse = await supertest
+          .post(epmRouteService.getBulkInstallPath())
+          .query({ prerelease: true })
+          .set('kbn-xsrf', 'true')
+          .send({
+            packages: ['security_detection_engine'],
+            force: overrideExistingPackage,
+          })
+          .expect(200);
 
-  // Before we proceed, we need to refresh saved object indices.
-  // At the previous step we installed the Fleet package with prebuilt detection rules.
-  // Prebuilt rules are assets that Fleet indexes as saved objects of a certain type.
-  // Fleet does this via a savedObjectsClient.import() call with explicit `refresh: false`.
-  // So, despite of the fact that the endpoint waits until the prebuilt rule assets will be
-  // successfully indexed, it doesn't wait until they become "visible" for subsequent read
-  // operations.
-  // And this is usually what we do next in integration tests: we read these SOs with utility
-  // function such as getPrebuiltRulesAndTimelinesStatus().
-  // Now, the time left until the next refresh can be anything from 0 to the default value, and
-  // it depends on the time when savedObjectsClient.import() call happens relative to the time of
-  // the next refresh. Also, probably the refresh time can be delayed when ES is under load?
-  // Anyway, this can cause race condition between a write and subsequent read operation, and to
-  // fix it deterministically we have to refresh saved object indices and wait until it's done.
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+        const body = testResponse.body as BulkInstallPackagesResponse;
+
+        // First and only item in the response should be the security_detection_engine package
+        expect(body.items[0]).toBeDefined();
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
+        // Endpoint call should have installed at least 1 security-rule asset
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
+
+        return body;
+      },
+      {
+        retryCount: MAX_RETRIES,
+        timeout: ATTEMPT_TIMEOUT,
+      }
+    );
+
+    await refreshSavedObjectIndices(es);
+
+    return response;
+  }
 };
 
 /**

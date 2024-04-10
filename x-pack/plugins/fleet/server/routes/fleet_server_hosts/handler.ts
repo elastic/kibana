@@ -6,8 +6,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isEqual } from 'lodash';
+
+import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
@@ -24,10 +27,24 @@ import type {
   PutFleetServerHostRequestSchema,
 } from '../../types';
 
-function checkFleetServerHostsWriteAPIsAllowed() {
-  const config = appContextService.getConfig();
-  if (config?.internal?.fleetServerStandalone) {
-    throw new FleetServerHostUnauthorizedError('Fleet server host write APIs are disabled');
+async function checkFleetServerHostsWriteAPIsAllowed(
+  soClient: SavedObjectsClientContract,
+  hostUrls: string[]
+) {
+  const cloudSetup = appContextService.getCloud();
+  if (!cloudSetup?.isServerlessEnabled) {
+    return;
+  }
+
+  // Fleet Server hosts must have the default host URL in serverless.
+  const serverlessDefaultFleetServerHost = await getFleetServerHost(
+    soClient,
+    SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+  );
+  if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
+    throw new FleetServerHostUnauthorizedError(
+      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
+    );
   }
 }
 
@@ -41,7 +58,8 @@ export const postFleetServerHost: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   try {
-    checkFleetServerHostsWriteAPIsAllowed();
+    // In serverless, allow create fleet server host if host url is same as default.
+    await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
 
     const { id, ...data } = request.body;
     const FleetServerHost = await createFleetServerHost(
@@ -89,11 +107,10 @@ export const deleteFleetServerHostHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    checkFleetServerHostsWriteAPIsAllowed();
-
     const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
+
     await deleteFleetServerHost(soClient, esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
@@ -117,11 +134,14 @@ export const putFleetServerHostHandler: RequestHandler<
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    checkFleetServerHostsWriteAPIsAllowed();
-
     const coreContext = await await context.core;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
     const soClient = coreContext.savedObjects.client;
+
+    // In serverless, allow update fleet server host if host url is same as default.
+    if (request.body.host_urls) {
+      await checkFleetServerHostsWriteAPIsAllowed(soClient, request.body.host_urls);
+    }
 
     const item = await updateFleetServerHost(soClient, request.params.itemId, request.body);
     const body = {

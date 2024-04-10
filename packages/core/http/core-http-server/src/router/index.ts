@@ -57,8 +57,11 @@ export type {
   RouteValidationResultFactory,
   RouteValidationSpec,
   RouteValidatorConfig,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
   RouteValidatorOptions,
+  RouteValidator,
+  RouteValidatorRequestAndResponses,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';
@@ -66,8 +69,10 @@ export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
 export type { RawRequest, FakeRawRequest } from './raw_request';
+export { getRequestValidation, isFullValidatorContainer } from './utils';

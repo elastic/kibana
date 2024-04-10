@@ -10,11 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleTypeParams,
+  RuleTypeMetaData,
   RuleUpdates,
   RuleFlyoutCloseReason,
   IErrorObject,
@@ -25,7 +26,7 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
+import { InitialRule, getRuleReducer } from './rule_reducer';
 import { createRule } from '../../lib/rule_api/create';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
@@ -37,7 +38,7 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_RULE_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
@@ -49,7 +50,12 @@ const defaultCreateRuleErrorMessage = i18n.translate(
   }
 );
 
-const RuleAdd = ({
+export type RuleAddComponent = typeof RuleAdd;
+
+const RuleAdd = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>({
   consumer,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -65,8 +71,9 @@ const RuleAdd = ({
   filteredRuleTypes,
   validConsumers,
   useRuleProducer,
+  initialSelectedConsumer,
   ...props
-}: RuleAddProps) => {
+}: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
@@ -84,8 +91,8 @@ const RuleAdd = ({
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-
-  const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
+  const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: initialRule,
   });
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
@@ -97,9 +104,14 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+
+  const selectableConsumer = useMemo(
+    () => rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId),
+    [rule]
+  );
   const [selectedConsumer, setSelectedConsumer] = useState<
     RuleCreationValidConsumer | null | undefined
-  >();
+  >(selectableConsumer ? initialSelectedConsumer : null);
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -113,6 +125,8 @@ const RuleAdd = ({
     http,
     notifications: { toasts },
     application: { capabilities },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
@@ -218,12 +232,15 @@ const RuleAdd = ({
       getRuleErrors(
         {
           ...rule,
-          ...(selectedConsumer !== undefined ? { consumer: selectedConsumer } : {}),
+          ...(selectableConsumer && selectedConsumer !== undefined
+            ? { consumer: selectedConsumer }
+            : {}),
         } as Rule,
         ruleType,
-        config
+        config,
+        actionTypeRegistry
       ),
-    [rule, selectedConsumer, ruleType, config]
+    [rule, selectableConsumer, selectedConsumer, ruleType, config, actionTypeRegistry]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -235,7 +252,7 @@ const RuleAdd = ({
         http,
         rule: {
           ...rule,
-          ...(selectedConsumer ? { consumer: selectedConsumer } : {}),
+          ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
         } as RuleUpdates,
       });
       toasts.addSuccess(
@@ -255,7 +272,8 @@ const RuleAdd = ({
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });
@@ -298,6 +316,7 @@ const RuleAdd = ({
                   }
                 )}
                 validConsumers={validConsumers}
+                selectedConsumer={selectedConsumer}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
@@ -305,9 +324,9 @@ const RuleAdd = ({
                 hideGrouping={hideGrouping}
                 hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
-                selectedConsumer={selectedConsumer}
                 setConsumer={setSelectedConsumer}
                 useRuleProducer={useRuleProducer}
+                initialSelectedConsumer={initialSelectedConsumer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

@@ -19,6 +19,5 @@ export interface SearchBarProps {
   reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
-  darkMode: boolean;
   chromeStyle$: Observable<ChromeStyle>;
 }

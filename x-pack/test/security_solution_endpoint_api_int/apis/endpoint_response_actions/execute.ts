@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171667
   // FLAKY: https://github.com/elastic/kibana/issues/171666
   describe.skip('Endpoint `execute` response action', function () {
     targetTags(this, ['@ess', '@serverless']);
@@ -30,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      if (indexedData) {
+        await endpointTestResources.unloadEndpointData(indexedData);
+      }
     });
 
     it('should not allow `execute` action without required privilege', async () => {

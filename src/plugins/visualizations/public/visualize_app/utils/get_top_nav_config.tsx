@@ -309,6 +309,8 @@ export const getTopNavConfig = (
                 vis,
                 data.query.timefilter.timefilter
               );
+              const searchFilters = data.query.filterManager.getAppFilters();
+              const searchQuery = data.query.queryString.getQuery();
               const updatedWithMeta = {
                 ...navigateToLensConfig,
                 embeddableId,
@@ -319,6 +321,8 @@ export const getTopNavConfig = (
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
                 isEmbeddable: Boolean(originatingApp),
+                ...(searchFilters && { searchFilters }),
+                ...(searchQuery && { searchQuery }),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
@@ -601,6 +605,14 @@ export const getTopNavConfig = (
                       }
                     )}
                     onClose={() => {}}
+                    mustCopyOnSaveMessage={
+                      savedVis.managed
+                        ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
+                            defaultMessage:
+                              'Elastic manages this visualization. Save any changes to a new visualization.',
+                          })
+                        : undefined
+                    }
                   />
                 );
               }

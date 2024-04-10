@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import type { SerializedEnrichPolicy } from '../../../../../../common';
 
 export interface Props {

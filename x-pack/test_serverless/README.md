@@ -48,10 +48,11 @@ x-pack/test_serverless/
 ### Common tests
 
 As outlined above, tests in the `common` API integration and functional test suites are
-covering functionality that's shared across serverless projects. As a result, these tests
-are automatically included in all project specific test configurations and don't have a
-dedicated configuration file. We always run in the context of one of the serverless projects
-and invoke the corresponding set of tests, which then also includes the `common` tests.
+covering functionality that's shared across serverless projects. That's why these tests
+don't have a dedicated config file and instead need to be included in project specific
+configurations.
+
+**If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
 
 In case a common test needs to be skipped for one of the projects, there are the following
 suite tags available to do so: `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be
@@ -70,6 +71,8 @@ specific test directory and not to `common` with two skips.
 
 Note, that `common` tests are invoked three times in a full test run: once per project to make
 sure the covered shared functionality works correctly in every project. So when writing tests there, be mindful about the test run time.
+
+See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/api_integration/test_suites/common/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/functional/test_suites/common/README.md).
 
 ### Shared services and page objects
 
@@ -99,6 +102,72 @@ tests that should run in a serverless environment have to be added to the
 
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
+
+### Roles-based testing
+
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+and in oder to properly test Kibana functionality, test design requires to login with
+a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
+the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
+
+General recommendations:
+- use the minimal required role to access tested functionality
+- when feature logic depends on both project type & role, make sure to add separate tests
+- avoid using basic authentication, unless it is the actual test case
+- run the tests against real project(s) on MKI to validate it is stable
+
+
+#### Functional UI test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `loginWithRole` call in `before` hook
+- no need to log out, you can change role by calling `loginWithRole` again.
+- for the common tests you can use `loginWithPrivilegedRole` to login as Editor/Developer 
+
+```
+describe("my test suite", async function() {
+  before(async () => {
+    await PageObjects.svlCommonPage.loginWithRole('viewer');
+    await esArchiver.load(...);
+    await PageObjects.dashboard.navigateToApp();
+  });
+
+  it('test step', async() => {
+    await PageObjects.dashboard.loadSavedDashboard('old dashboard');
+    await PageObjects.dashboard.waitForRenderComplete();
+    ...
+  });
+});
+```
+
+#### API integration test example
+
+Recommendations:
+- in each test file top level `describe` suite should start with `createApiKeyForRole` call in `before` hook
+- don't forget to invalidate api key using `invalidateApiKeyForRole` in `after` hook
+- make api calls using `supertestWithoutAuth` with generated api key header
+
+```
+describe("my test suite", async function() {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
+    it(''test step', async () => {
+      const { body, status } = await supertestWithoutAuth
+        .delete('/api/spaces/space/default')
+        .set(commonRequestHeader)
+        .set(roleAuthc.apiKeyHeader);
+      ...
+    });
+});
+```
 
 ### Testing with feature flags
 

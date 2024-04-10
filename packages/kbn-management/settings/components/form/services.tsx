@@ -12,6 +12,7 @@ import {
   FieldCategoryKibanaProvider,
   FieldCategoryProvider,
 } from '@kbn/management-settings-components-field-category';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 
@@ -44,9 +45,10 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
   const { settings, notifications, docLinks, theme, i18n } = deps;
 
   const services: Services = {
-    saveChanges: (changes) => {
+    saveChanges: (changes, scope: UiSettingsScope) => {
+      const scopeClient = scope === 'namespace' ? settings.client : settings.globalClient;
       const arr = Object.entries(changes).map(([key, value]) =>
-        settings.client.set(key, value.unsavedValue)
+        scopeClient.set(key, value.unsavedValue)
       );
       return Promise.all(arr);
     },

@@ -29,9 +29,9 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
 
-    expect(screen.getByTestId('checkbox-observability')).not.toBeDisabled();
-    expect(screen.getByTestId('checkbox-securitySolution')).not.toBeDisabled();
-    expect(screen.getByTestId('checkbox-management')).not.toBeDisabled();
+    expect(screen.getByTestId('option-observability')).not.toBeDisabled();
+    expect(screen.getByTestId('option-securitySolution')).not.toBeDisabled();
+    expect(screen.getByTestId('option-management')).not.toBeDisabled();
   });
 
   it('should disable options if option is not in the available categories array', () => {
@@ -43,9 +43,9 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
 
-    expect(screen.getByTestId('checkbox-observability')).toBeDisabled();
-    expect(screen.getByTestId('checkbox-securitySolution')).toBeDisabled();
-    expect(screen.getByTestId('checkbox-management')).toBeDisabled();
+    expect(screen.getByTestId('option-observability')).toBeDisabled();
+    expect(screen.getByTestId('option-securitySolution')).toBeDisabled();
+    expect(screen.getByTestId('option-management')).toBeDisabled();
   });
 
   it('can initialize checkboxes with initial values from props', async () => {
@@ -57,9 +57,9 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
 
-    expect(screen.getByTestId('checkbox-observability')).not.toBeChecked();
-    expect(screen.getByTestId('checkbox-securitySolution')).toBeChecked();
-    expect(screen.getByTestId('checkbox-management')).toBeChecked();
+    expect(screen.getByTestId('option-observability')).not.toBeChecked();
+    expect(screen.getByTestId('option-securitySolution')).toBeChecked();
+    expect(screen.getByTestId('option-management')).toBeChecked();
   });
 
   it('can check checkboxes', async () => {
@@ -71,16 +71,16 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
 
-    const managementCheckbox = screen.getByTestId('checkbox-management');
-    const securityCheckbox = screen.getByTestId('checkbox-securitySolution');
+    const managementCheckbox = screen.getByTestId('option-management');
+    const securityCheckbox = screen.getByTestId('option-securitySolution');
 
     fireEvent.click(managementCheckbox);
 
-    expect(mockOnChange).toHaveBeenLastCalledWith('management', expect.anything());
+    expect(mockOnChange).toHaveBeenLastCalledWith(['observability', 'management']);
 
     fireEvent.click(securityCheckbox);
 
-    expect(mockOnChange).toHaveBeenLastCalledWith('securitySolution', expect.anything());
+    expect(mockOnChange).toHaveBeenLastCalledWith(['observability', 'securitySolution']);
   });
 
   it('should display loading spinner if isLoading is true', () => {
@@ -105,5 +105,63 @@ describe('maintenanceWindowCategorySelection', () => {
       />
     );
     expect(screen.getByText('test error')).toBeInTheDocument();
+  });
+
+  it('should display radio group if scoped query is enabled', () => {
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        isScopedQueryEnabled={false}
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(
+      screen.getByTestId('maintenanceWindowCategorySelectionCheckboxGroup')
+    ).toBeInTheDocument();
+
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        isScopedQueryEnabled={true}
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        onChange={mockOnChange}
+      />
+    );
+
+    expect(screen.getByTestId('maintenanceWindowCategorySelectionRadioGroup')).toBeInTheDocument();
+  });
+
+  it('should set only 1 category at a time if scoped query is enabled', () => {
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        isScopedQueryEnabled={true}
+        selectedCategories={[]}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        onChange={mockOnChange}
+      />
+    );
+
+    let managementCheckbox = screen.getByLabelText('Stack rules');
+
+    fireEvent.click(managementCheckbox);
+
+    expect(mockOnChange).toHaveBeenLastCalledWith(['management']);
+
+    appMockRenderer.render(
+      <MaintenanceWindowCategorySelection
+        isScopedQueryEnabled={true}
+        selectedCategories={['observability']}
+        availableCategories={['observability', 'management', 'securitySolution']}
+        onChange={mockOnChange}
+      />
+    );
+
+    managementCheckbox = screen.getByLabelText('Stack rules');
+
+    fireEvent.click(managementCheckbox);
+
+    expect(mockOnChange).toHaveBeenLastCalledWith(['management']);
   });
 });

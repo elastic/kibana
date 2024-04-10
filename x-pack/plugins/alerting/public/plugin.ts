@@ -10,9 +10,11 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './services/alert_api';
+import { loadRule, loadRuleType } from './services/rule_api';
 import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {
@@ -63,6 +65,8 @@ export interface AlertingPluginSetup {
 export interface AlertingPluginStart {
   licensing: LicensingPluginStart;
   spaces: SpacesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export class AlertingPublicPlugin
