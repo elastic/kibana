@@ -7,10 +7,10 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type { ReportInsightsTelemetryEventParams } from './events/insights/types';
 import type {
   InsightsTelemetryEvent,
   ReportInsightsGeneratedParams,
+  ReportInsightsTelemetryEventParams,
 } from './events/insights/types';
 import type { SecurityMetadata } from '../../../actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
