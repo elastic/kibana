@@ -55,7 +55,7 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
-  onWarning: (arg: boolean) => void;
+  onWarning?: (arg: boolean) => void;
   warning?: Warning;
   'aria-label'?: string;
 }
