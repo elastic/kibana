@@ -4956,6 +4956,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/index-management@link:x-pack/packages/index-management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-patterns-test-plugin@link:test/plugin_functional/plugins/index_patterns":
   version "0.0.0"
   uid ""
