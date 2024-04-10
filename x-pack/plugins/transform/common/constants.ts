@@ -118,7 +118,7 @@ export const mapEsHealthStatus2TransformHealthStatus = (
 ): TransformHealthStatus =>
   typeof healthStatus === 'string' && isTransformHealthStatus(healthStatus.toLowerCase())
     ? (healthStatus.toLowerCase() as TransformHealthStatus)
-    : 'unknown';
+    : TRANSFORM_HEALTH_STATUS.unknown;
 
 export const TRANSFORM_HEALTH_COLOR = {
   green: 'success',
