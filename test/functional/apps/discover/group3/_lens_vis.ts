@@ -65,11 +65,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await PageObjects.discover.getHitCount()).to.be(totalCount);
   }
 
-  async function changeVisSeriesType(seriesType: string) {
+  async function openLensEditFlyout() {
+    await testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
     await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
     await retry.waitFor('flyout', async () => {
       return await testSubjects.exists('lnsChartSwitchPopover');
     });
+  }
+
+  async function changeVisSeriesType(seriesType: string) {
+    await openLensEditFlyout();
     await testSubjects.click('lnsChartSwitchPopover');
     await testSubjects.setValue('lnsChartSwitchSearch', seriesType, {
       clearWithKeyboard: true,
@@ -86,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function getCurrentVisSeriesTypeLabel() {
     await toasts.dismissAll();
-    await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await openLensEditFlyout();
     const seriesType = await testSubjects.getVisibleText('lnsChartSwitchPopover');
     await testSubjects.click('cancelFlyoutButton');
     return seriesType;
@@ -99,8 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return await chartElement.getAttribute('data-title');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180404
-  describe.skip('discover lens vis', function describeIndexTests() {
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -652,7 +656,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Donut');
       expect(await getCurrentVisChartTitle()).to.be('Donut');
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization'); // open the flyout
+      await openLensEditFlyout();
       await testSubjects.existOrFail('lnsEditOnFlyFlyout');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
