@@ -267,6 +267,13 @@ export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
   }
 );
 
+export const IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importExceptionEndpointListWarning',
+  {
+    defaultMessage: 'We only allow one Exception List for Endpoint Security.',
+  }
+);
+
 export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.exceptions.badge.readOnly.tooltip',
   {
