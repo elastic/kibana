@@ -10,15 +10,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  // const ml = getService('ml');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['discover']);
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
@@ -135,16 +133,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
         await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
 
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
-      });
-    },
-
-    async selectDiscoverIndexPattern(indexPattern: string) {
-      await retry.tryForTime(2 * 1000, async () => {
-        await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await testSubjects.getVisibleText(
-          'discover-dataView-switch-link'
-        );
-        expect(indexPatternTitle).to.be(indexPattern);
       });
     },
   };
