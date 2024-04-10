@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { ExtensionsService } from './extensions_service';
-
-export { PublicApiService } from './public_api_service';
+export * from './src/types';
+export * from './src/home_sections';
+export * from './src/services';

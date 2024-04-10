@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { ExtensionsService } from './extensions_service';
-
-export { PublicApiService } from './public_api_service';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/packages/index-management'],
+};
