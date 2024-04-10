@@ -41,7 +41,7 @@ export interface HasSloOverviewConfig {
   updateSloOverviewConfig: (next: SloEmbeddableInput) => void;
 }
 
-export const apiHasSloAlertsConfig = (api: unknown | null): api is HasSloOverviewConfig => {
+export const apiHasSloOverviewConfig = (api: unknown | null): api is HasSloOverviewConfig => {
   return Boolean(
     api &&
       typeof (api as HasSloOverviewConfig).getSloOverviewConfig === 'function' &&

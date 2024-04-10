@@ -21,11 +21,11 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { SLOEmbeddable } from '../embeddable/slo/overview/slo_embeddable';
 import { SLO_EMBEDDABLE } from '../embeddable/slo/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { HasSloAlertsConfig } from '../embeddable/slo/alerts/types';
+import { HasSloOverviewConfig } from '../embeddable/slo/overview/types';
 
 export const EDIT_SLO_OVERVIEW_ACTION = 'editSloOverviewPanelAction';
-type EditSloAlertsPanelApi = CanAccessViewMode & HasType & HasSloAlertsConfig;
-const isEditSloAlertsPanelApi = (api: unknown): api is EditSloAlertsPanelApi =>
+type EditSloOverviewPanelApi = CanAccessViewMode & HasType & HasSloOverviewConfig;
+const isEditSloOverviewPanelApi = (api: unknown): api is EditSloOverviewPanelApi =>
   Boolean(
     apiHasType(api) &&
       apiIsOfType(api, SLO_EMBEDDABLE) &&
@@ -69,6 +69,7 @@ export function createEditSloOverviewPanelAction(
       }
     },
     isCompatible: async ({ embeddable }: EmbeddableApiContext) =>
-      isEditSloAlertsPanelApi(embeddable),
+      isEditSloOverviewPanelApi(embeddable) &&
+      embeddable.getSloOverviewConfig().overviewMode === 'groups',
   });
 }
