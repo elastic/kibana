@@ -44,11 +44,15 @@ const fixedQueryByOneAction = async (queryString: string) => {
 export const correctQueryWithActions = async (queryString: string) => {
   let shouldCorrectQuery = true;
   let fixedQuery = queryString;
+  // this is an escape hatch, the loop will end automatically if the ast doesnt return more actions
+  // in case it goes wrong, we allow it to loop 10 times
+  let limit = 10;
 
-  while (shouldCorrectQuery) {
+  while (shouldCorrectQuery && limit >= 0) {
     const { query, shouldRunAgain } = await fixedQueryByOneAction(fixedQuery);
     shouldCorrectQuery = shouldRunAgain;
     fixedQuery = query;
+    limit--;
   }
 
   return fixedQuery;
