@@ -116,7 +116,6 @@ export const ContainerLayout = withTheme(
               }}
             />
           </SubSection>
-
           <SubSection
             id="containerK8sCpuUsage"
             label={i18n.translate(

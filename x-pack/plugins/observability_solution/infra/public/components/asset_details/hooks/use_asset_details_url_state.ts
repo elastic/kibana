@@ -71,10 +71,10 @@ const AlertStatusRT = rt.union([
 ]);
 
 interface TabIdWithSectionBrand {
-  readonly TabIdWithSection: unique symbol; // use `unique symbol` here to ensure uniqueness across modules / packages
+  readonly TabIdWithSection: unique symbol;
 }
 
-// Custom codec for tabId with section
+// Custom codec for tabId with fragment
 const TabIdWithSectionRT = rt.brand(
   rt.string,
   (s): s is rt.Branded<string, TabIdWithSectionBrand> =>
