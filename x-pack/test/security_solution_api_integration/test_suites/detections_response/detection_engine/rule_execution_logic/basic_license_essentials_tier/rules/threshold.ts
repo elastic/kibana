@@ -25,9 +25,9 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { createRule, deleteAllAlerts } from '../../../../../../../common/utils/security_solution';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -46,7 +46,6 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('@ess @serverless Threshold type rules', () => {
     before(async () => {
@@ -55,11 +54,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(path);
-    });
-
-    afterEach(async () => {
-      await esDeleteAllIndices('.preview.alerts*');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
     });
 
     // First test creates a real rule - remaining tests use preview API
@@ -72,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
@@ -338,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
     });
 
