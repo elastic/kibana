@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
+import { agentPolicyStatuses, dataTypes, agentLoggingLevels } from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
@@ -62,6 +62,16 @@ export const AgentPolicyBaseSchema = {
   monitoring_output_id: schema.maybe(schema.nullable(schema.string())),
   download_source_id: schema.maybe(schema.nullable(schema.string())),
   fleet_server_host_id: schema.maybe(schema.nullable(schema.string())),
+  logging_level: schema.maybe(
+    schema.nullable(
+      schema.oneOf([
+        schema.literal(agentLoggingLevels.Info),
+        schema.literal(agentLoggingLevels.Debug),
+        schema.literal(agentLoggingLevels.Warning),
+        schema.literal(agentLoggingLevels.Error),
+      ])
+    )
+  ),
   agent_features: schema.maybe(
     schema.arrayOf(
       schema.object({

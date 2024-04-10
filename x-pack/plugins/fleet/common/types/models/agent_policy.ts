@@ -7,13 +7,14 @@
 
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { agentPolicyStatuses } from '../../constants';
+import type { agentPolicyStatuses, agentLoggingLevels } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
+export type AgentLoggingLevels = typeof agentLoggingLevels;
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
 // x-pack/plugins/fleet/server/services/agent_policy.ts#L571
@@ -40,6 +41,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
+  logging_level?: ValueOf<AgentLoggingLevels>;
 }
 
 // SO definition for this type is declared in server/types/interfaces

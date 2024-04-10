@@ -25,6 +25,7 @@ import {
   EuiBetaBadge,
   EuiBadge,
   EuiSwitch,
+  EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+  agentLoggingLevels,
 } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
@@ -74,6 +76,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
   disabled = false,
 }) => {
+  const LEVEL_VALUES = Object.keys(agentLoggingLevels);
+
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
@@ -401,7 +405,48 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-
+      <EuiDescribedFormGroup
+        title={
+          <h4 data-test-subj="agentLoggingHeader">
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
+              defaultMessage="Agent logging level"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.agentLoggingDescription"
+            defaultMessage="TBD"
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.agentLogLevel && validation.agentLogLevel
+              ? validation.agentLogLevel
+              : null
+          }
+          isInvalid={Boolean(touchedFields.agentLogLevel && validation.agentLogLevel)}
+          isDisabled={disabled}
+        >
+          <EuiSelect
+            disabled={disabled}
+            value={agentPolicy.logging_level}
+            fullWidth
+            onChange={(e) => {
+              updateAgentPolicy({
+                logging_level: e.target.value,
+              });
+            }}
+            options={LEVEL_VALUES.map((level) => ({
+              text: level,
+              value: agentLoggingLevels[level],
+            }))}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
       {AgentTamperProtectionSection}
 
       <EuiDescribedFormGroup
