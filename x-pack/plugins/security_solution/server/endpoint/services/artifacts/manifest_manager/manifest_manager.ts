@@ -876,21 +876,15 @@ export class ManifestManager {
     // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit.
     // This is to avoid fetching Unified Manifests from SO on every getLatestManifest call which is every task run (1 minute).
     if (!this.cachedUnifiedManifestsSO.length) {
-      this.logger.info(`No cached Unified Manifests found. Fetching from SO.`);
-
       this.cachedUnifiedManifestsSO =
         await this.getUnifiedManifestClient().getAllUnifiedManifests();
     }
-    this.logger.info(
-      `Fetched Unified Manifests from SO. Count: ${this.cachedUnifiedManifestsSO.length}`
-    );
-
     return this.cachedUnifiedManifestsSO;
   }
 
   protected clearCachedUnifiedManifestsSO(): void {
+    // Clear cached Unified Manifests after successful commit.
     this.cachedUnifiedManifestsSO = [];
-    this.logger.info(`Cleared cached Unified Manifests`);
   }
 
   public transformUnifiedManifestSOtoLegacyManifestSO(
@@ -1018,7 +1012,7 @@ export class ManifestManager {
     return { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete };
   }
 
-  public async bumpGlobalUnifiedManifestVersion() {
+  public async bumpGlobalUnifiedManifestVersion(): Promise<void> {
     const globalUnifiedManifestSO =
       await this.getUnifiedManifestClient().getUnifiedManifestByPolicyId('.global');
     if (!globalUnifiedManifestSO?.saved_objects?.length) {
@@ -1026,9 +1020,7 @@ export class ManifestManager {
       return;
     }
     const globalUnifiedManifest = globalUnifiedManifestSO.saved_objects[0];
-    this.logger.info(
-      `Global Unified Manifest found to bump version: ${globalUnifiedManifest.attributes.semanticVersion}`
-    );
+
     const newSemanticVersion =
       this.setNewSemanticVersion(globalUnifiedManifest.attributes.semanticVersion) || '1.0.0';
     await this.getUnifiedManifestClient().updateUnifiedManifest({
@@ -1036,7 +1028,6 @@ export class ManifestManager {
       id: globalUnifiedManifest.id,
       semanticVersion: newSemanticVersion,
     });
-    this.logger.info(`Bumped Global Unified Manifest version to ${newSemanticVersion}`);
   }
 
   public async commitUnified(manifestSo: InternalManifestSchema): Promise<void> {
@@ -1050,22 +1041,11 @@ export class ManifestManager {
     const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
       this.prepareUnifiedManifestsSOUpdates(unifiedManifestSO, existingUnifiedManifestsSo);
 
-    this.logger.info(
-      `unifiedManifestsToCreate ${JSON.stringify(unifiedManifestsToCreate, null, 2)}`
-    );
-    this.logger.info(
-      `unifiedManifestsToUpdate ${JSON.stringify(unifiedManifestsToUpdate, null, 2)}`
-    );
-
-    this.logger.info(
-      `unifiedManifestsToDelete ${JSON.stringify(unifiedManifestsToDelete, null, 2)}`
-    );
-
     if (unifiedManifestsToCreate.length) {
       await asyncForEach(chunk(unifiedManifestsToCreate, 100), async (unifiedManifestsBatch) => {
         await this.getUnifiedManifestClient().createUnifiedManifests(unifiedManifestsBatch);
       });
-      this.logger.info(`Created ${unifiedManifestsToCreate.length} unified manifests`);
+      this.logger.debug(`Created ${unifiedManifestsToCreate.length} unified manifests`);
     }
 
     if (unifiedManifestsToUpdate.length) {
@@ -1073,7 +1053,7 @@ export class ManifestManager {
         await this.getUnifiedManifestClient().updateUnifiedManifests(unifiedManifestsBatch);
       });
 
-      this.logger.info(`Updated ${unifiedManifestsToUpdate.length} unified manifests`);
+      this.logger.debug(`Updated ${unifiedManifestsToUpdate.length} unified manifests`);
     }
 
     if (unifiedManifestsToDelete.length) {
@@ -1081,7 +1061,7 @@ export class ManifestManager {
         await this.getUnifiedManifestClient().deleteUnifiedManifestByIds(unifiedManifestsBatch);
       });
 
-      this.logger.info(`Deleted ${unifiedManifestsToDelete.length} unified manifests`);
+      this.logger.debug(`Deleted ${unifiedManifestsToDelete.length} unified manifests`);
     }
 
     if (
@@ -1098,7 +1078,7 @@ export class ManifestManager {
       if (!hasGlobalManifest || unifiedManifestsToDelete.length) {
         await this.bumpGlobalUnifiedManifestVersion();
       }
-      // Clear fetched Unified Manifests from cache since they are not up to date anymore
+      // Clear fetched Unified Manifests from cache since they are not up-to-date anymore
       this.clearCachedUnifiedManifestsSO();
     }
   }

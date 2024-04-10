@@ -19,10 +19,7 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
-import {
-  InternalManifestSchema,
-  InternalUnifiedManifestBaseSchema,
-} from '@kbn/security-solution-plugin/server/endpoint/schemas';
+
 import { FtrService } from '../../functional/ftr_provider_context';
 import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
 import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations_feature_flag/mocks';
@@ -127,7 +124,7 @@ export class EndpointArtifactsTestResources extends FtrService {
     return this.createExceptionItem(blocklist);
   }
 
-  async getArtifacts(): Promise<InternalManifestSchema[]> {
+  async getArtifacts() {
     const {
       hits: { hits: manifestResults },
     } = await this.esClient.search({
@@ -140,19 +137,22 @@ export class EndpointArtifactsTestResources extends FtrService {
     return manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
   }
 
-  async getArtifactsFromUnifiedManifestSO(): Promise<InternalUnifiedManifestBaseSchema[]> {
+  async getArtifactsFromUnifiedManifestSO(): Promise<
+    Array<
+      InternalUnifiedManifestSchemaResponseType['_source']['endpoint:unified-user-artifact-manifest']
+    >
+  > {
     const {
       hits: { hits: manifestResults },
-    } = await this.esClient.search({
+    } = await this.esClient.search<InternalUnifiedManifestSchemaResponseType['_source']>({
       index: '.kibana*',
       query: {
         bool: { filter: [{ term: { type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE } }] },
       },
     });
 
-    return manifestResults.map((result) => {
-      const _source = result._source as InternalUnifiedManifestSchemaResponseType['_source'];
-      return _source[ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE];
-    });
+    return manifestResults.map(
+      (result) => result._source!['endpoint:unified-user-artifact-manifest']
+    );
   }
 }
