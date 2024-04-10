@@ -122,7 +122,6 @@ export interface StatusChangeArgs {
   newStatus: RuleExecutionStatus;
   message?: string;
   metrics?: MetricsArgs;
-  userError?: boolean;
 }
 
 export interface MetricsArgs {
