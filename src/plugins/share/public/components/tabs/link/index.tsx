@@ -16,6 +16,7 @@ import { LinkContent } from './link_content';
 type ILinkTab = IModalTabDeclaration<{
   dashboardUrl: string;
   isNotSaved: boolean;
+  setIsClicked: boolean;
 }>;
 
 const LINK_TAB_ACTIONS = {
@@ -27,6 +28,7 @@ const linkTabReducer: ILinkTab['reducer'] = (
   state = {
     dashboardUrl: '',
     isNotSaved: false,
+    setIsClicked: false,
   },
   action
 ) => {
@@ -73,6 +75,13 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     });
   }, [dispatch, objectType, isDirty, allowShortUrl]);
 
+  const setIsClicked = useCallback(() => {
+    dispatch({
+      type: LINK_TAB_ACTIONS.SET_IS_NOT_SAVED,
+      payload: setIsClicked,
+    });
+  }, [dispatch]);
+
   return (
     <LinkContent
       {...{
@@ -88,6 +97,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         isNotSaved: state?.isNotSaved,
         setIsNotSaved,
         allowShortUrl,
+        setIsClicked: state?.setIsClicked,
       }}
     />
   );
@@ -108,6 +118,7 @@ export const linkTab: ILinkTab = {
     dataTestSubj: 'copyShareUrlButton',
     label: i18n.translate('share.link.copyLinkButton', { defaultMessage: 'Copy link' }),
     handler: ({ state }) => {
+      state.setIsClicked = true;
       copyToClipboard(state.dashboardUrl);
     },
     style: ({ state }) => state.isNotSaved,

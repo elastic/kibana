@@ -26,6 +26,7 @@ type LinkProps = Pick<
 > & {
   setDashboardLink: (url: string) => void;
   setIsNotSaved: () => void;
+  setIsClicked: boolean;
 };
 
 interface UrlParams {
@@ -45,9 +46,10 @@ export const LinkContent = ({
   setDashboardLink,
   setIsNotSaved,
   allowShortUrl,
+  setIsClicked,
 }: LinkProps) => {
   const isMounted = useMountedState();
-  const [url, setUrl] = useState<string>('');
+  const [, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
@@ -132,7 +134,7 @@ export const LinkContent = ({
 
   const createShortUrl = useCallback(
     async (tempUrl: string) => {
-      if (!isMounted || shortUrlCache) return;
+      if (!isMounted || shortUrlCache) return setDashboardLink(shortUrlCache!);
       const shortUrl = shareableUrlLocatorParams
         ? await urlService.shortUrls.get(null).createWithLocator(shareableUrlLocatorParams)
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
@@ -165,9 +167,9 @@ export const LinkContent = ({
 
   useEffect(() => {
     isMounted();
-    setUrlHelper();
+    if (setIsClicked === true) setUrlHelper();
     setIsNotSaved();
-  }, [objectType, url, setIsNotSaved, isDirty, isMounted, setUrlHelper]);
+  }, [objectType, setIsNotSaved, isDirty, isMounted, setUrlHelper, setIsClicked]);
 
   const renderSaveState =
     objectType === 'lens' && isNotSaved() ? (
