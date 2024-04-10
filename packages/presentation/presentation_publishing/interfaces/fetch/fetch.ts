@@ -7,6 +7,7 @@
  */
 
 import {
+  BehaviorSubject,
   combineLatest,
   debounceTime,
   delay,
@@ -66,30 +67,6 @@ function hasLocalTimeRange(api: unknown) {
   return apiPublishesTimeRange(api) ? typeof api.timeRange$.value === 'object' : false;
 }
 
-// Returns an observable that will emit once on subscribe and never again
-function getOnSubscribeObservable(api: unknown): Observable<unknown> {
-  const observables: Array<Observable<unknown>> = [];
-
-  if (apiPublishesTimeRange(api)) {
-    observables.push(api.timeRange$);
-  }
-
-  if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
-    observables.push(api.parentApi.filters$);
-    observables.push(api.parentApi.query$);
-    observables.push(api.parentApi.timeRange$);
-    if (api.parentApi.timeslice$) {
-      observables.push(api.parentApi.timeslice$);
-    }
-  }
-
-  if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    observables.push(api.parentApi.searchSessionId$);
-  }
-
-  return combineLatest(observables).pipe(first());
-}
-
 // Returns observables that emit to changes after subscribe
 // 1. Observables are not guaranteed to have an initial value (can not be used in combineLatest)
 // 2. Observables will not emit on subscribe
@@ -140,7 +117,7 @@ function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
 }
 
 export function fetch$(api: unknown): Observable<FetchContext> {
-  const onSubscribe$ = getOnSubscribeObservable(api);
+  const onSubscribe$ = new BehaviorSubject<undefined>(undefined).pipe(first());
   const batchedObservables = getBatchedObservables(api);
   const immediateObservables = getImmediateObservables(api);
 
