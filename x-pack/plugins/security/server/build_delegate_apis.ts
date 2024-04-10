@@ -30,5 +30,10 @@ export const buildUserProfileApi = ({
 }: {
   getUserProfile: () => UserProfileServiceStartInternal;
 }): CoreUserProfileDelegateContract => {
-  return getUserProfile();
+  return {
+    getCurrent: (params) => getUserProfile().getCurrent(params),
+    suggest: (params) => getUserProfile().suggest(params),
+    bulkGet: (params) => getUserProfile().bulkGet(params),
+    update: (uids, data) => getUserProfile().update(uids, data),
+  };
 };

@@ -138,6 +138,12 @@ describe('Security Plugin', () => {
 
       expect(mockCoreSetup.security.registerSecurityApi).toHaveBeenCalledTimes(1);
     });
+
+    it('calls core.userProfile.registerUserProfileDelegate', () => {
+      plugin.setup(mockCoreSetup, mockSetupDependencies);
+
+      expect(mockCoreSetup.userProfile.registerUserProfileDelegate).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('start()', () => {
