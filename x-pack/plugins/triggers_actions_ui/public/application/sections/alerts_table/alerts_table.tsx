@@ -439,7 +439,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   const customActionsRow = useMemo(() => {
     return renderCustomActionsRow
       ? {
-          id: 'customActions',
+          id: 'expandColumn',
           width: actionsColumnWidth,
           headerCellRender: ControlColumnHeaderRenderCell,
           rowCellRender: ControlColumnRowRenderCell,
