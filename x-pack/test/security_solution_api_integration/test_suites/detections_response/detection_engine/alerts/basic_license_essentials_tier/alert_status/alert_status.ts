@@ -43,11 +43,11 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/179704
-  describe.skip('@ess @serverless change alert status endpoints', () => {
+  describe('@ess @serverless change alert status endpoints', () => {
     describe('validation checks', () => {
       describe('update by ids', () => {
-        it('should not give errors when querying and the alerts index does not exist yet', async () => {
+        // Failing: See https://github.com/elastic/kibana/issues/179693
+        it.skip('should not give errors when querying and the alerts index does not exist yet', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
             .set('kbn-xsrf', 'true')
@@ -60,7 +60,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
         });
 
-        it('should not give errors when querying and the alerts index does exist and is empty', async () => {
+        // Failing: See https://github.com/elastic/kibana/issues/179691
+        it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
           await createAlertsIndex(supertest, log);
           const { body } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
@@ -78,7 +79,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('update by query', () => {
-        it('should not give errors when querying and the alerts index does not exist yet', async () => {
+        // Failing: See https://github.com/elastic/kibana/issues/179681
+        it.skip('should not give errors when querying and the alerts index does not exist yet', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
             .set('kbn-xsrf', 'true')
@@ -91,7 +93,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
         });
 
-        it('should not give errors when querying and the alerts index does exist and is empty', async () => {
+        // Failing: See https://github.com/elastic/kibana/issues/179704
+        it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
           await createAlertsIndex(supertest, log);
           const { body } = await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)

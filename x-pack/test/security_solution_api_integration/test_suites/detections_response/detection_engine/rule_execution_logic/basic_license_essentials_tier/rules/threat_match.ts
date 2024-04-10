@@ -154,7 +154,6 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -166,11 +165,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(audibeatHostsPath);
-    });
-
-    afterEach(async () => {
-      await esDeleteAllIndices('.preview.alerts*');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
