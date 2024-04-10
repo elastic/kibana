@@ -7,22 +7,22 @@
 
 import type { HostStatus } from '.';
 import type {
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
 } from '../service/response_actions/constants';
 
-export interface AgentStatusInfo {
-  id: string;
-  agentType: ResponseActionAgentType;
-  found: boolean;
-  isolated: boolean;
-  isPendingUninstall: boolean;
-  isUninstalled: boolean;
-  lastSeen: string; // ISO date
-  pendingActions: Record<ResponseActionsApiCommandNames, number>;
-  status: HostStatus;
+export interface AgentStatusRecords {
+  [agentId: string]: {
+    agentId: string;
+    agentType: ResponseActionAgentType;
+    found: boolean;
+    isolated: boolean;
+    lastSeen: string; // ISO date
+    pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
+    status: HostStatus;
+  };
 }
 
 export interface AgentStatusApiResponse {
-  data: Record<string, AgentStatusInfo>;
+  data: AgentStatusRecords;
 }
