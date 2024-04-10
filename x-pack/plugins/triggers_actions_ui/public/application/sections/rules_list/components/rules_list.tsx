@@ -42,13 +42,12 @@ import {
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import {
-  getCreateRuleRoute,
-  getEditRuleRoute,
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { getCreateRuleRoute, getEditRuleRoute } from '../../../lib/get_rule_v2_routes';
 import {
   Rule,
   RuleTableItem,

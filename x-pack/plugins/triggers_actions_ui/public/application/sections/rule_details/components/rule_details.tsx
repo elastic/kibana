@@ -26,12 +26,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
-import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleActionsPopover } from './rule_actions_popover';
+import { getEditRuleRoute } from '../../../lib/get_rule_v2_routes';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
