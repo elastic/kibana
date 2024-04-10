@@ -21745,6 +21745,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.advanced_settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "advanced_settings",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
