@@ -182,9 +182,11 @@ export class NavigationPublicPlugin
 
     // Keep track of the solution navigation enabled state
     let isSolutionNavEnabled = false;
-    this.isSolutionNavEnabled$.pipe(takeUntil(this.stop$)).subscribe((_isSolutionNavEnabled) => {
-      isSolutionNavEnabled = _isSolutionNavEnabled;
-    });
+    isSolutionNavExperiementEnabled$
+      .pipe(takeUntil(this.stop$))
+      .subscribe((_isSolutionNavEnabled) => {
+        isSolutionNavEnabled = _isSolutionNavEnabled;
+      });
 
     return {
       ui: {
