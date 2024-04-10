@@ -106,6 +106,15 @@ export const postActionsConnectorExecuteRoute = (
             };
           }
 
+          const connectorId = decodeURIComponent(request.params.connectorId);
+          const connectors = await actionsClient.getBulk({
+            ids: [connectorId],
+            throwIfSystemAction: false,
+          });
+
+          // get the actions plugin start contract from the request context:
+          const actions = (await context.elasticAssistant).actions;
+
           if (conversationId) {
             const conversation = await dataClient?.getConversation({
               id: conversationId,
@@ -158,6 +167,58 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
+            if (conversation?.title === 'New chat') {
+              try {
+                const autoTitle = await executeAction({
+                  actions,
+                  request,
+                  connectorId,
+                  actionTypeId: connectors[0]?.actionTypeId,
+                  params: {
+                    subAction: request.body.subAction,
+                    subActionParams: {
+                      model: request.body.model,
+                      messages: [
+                        {
+                          role: 'assistant',
+                          content:
+                            'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                        },
+                        newMessage ?? prevMessages[0],
+                      ],
+                      ...(connectors[0]?.actionTypeId === '.gen-ai'
+                        ? { n: 1, stop: null, temperature: 0.2 }
+                        : { temperature: 0, stopSequences: [] }),
+                    },
+                  },
+                  logger,
+                });
+                if ((autoTitle as StaticResponse).status === 'ok') {
+                  try {
+                    // This regular expression captures a string enclosed in single or double quotes.
+                    // It extracts the string content without the quotes.
+                    // Example matches:
+                    // - "Hello, World!" => Captures: Hello, World!
+                    // - 'Another Example' => Captures: Another Example
+                    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+                    const match = (autoTitle as StaticResponse).data.match(/^["']?([^"']+)["']?$/);
+                    const title = match ? match[1] : (autoTitle as StaticResponse).data;
+
+                    await dataClient?.updateConversation({
+                      conversationUpdateProps: {
+                        id: conversationId,
+                        title,
+                      },
+                    });
+                  } catch (e) {
+                    /* empty */
+                  }
+                }
+              } catch (e) {
+                /* empty */
+              }
+            }
+
             onLlmResponse = async (
               content: string,
               traceData: Message['traceData'] = {}
@@ -185,67 +246,6 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
             };
-          }
-
-          const connectorId = decodeURIComponent(request.params.connectorId);
-          const connectors = await actionsClient.getBulk({
-            ids: [connectorId],
-            throwIfSystemAction: false,
-          });
-
-          // get the actions plugin start contract from the request context:
-          const actions = (await context.elasticAssistant).actions;
-
-          if (!prevMessages?.length && newMessage && conversationId) {
-            try {
-              const autoTitle = await executeAction({
-                actions,
-                request,
-                connectorId,
-                actionTypeId: connectors[0]?.actionTypeId,
-                params: {
-                  subAction: request.body.subAction,
-                  subActionParams: {
-                    model: request.body.model,
-                    messages: [
-                      {
-                        role: 'assistant',
-                        content:
-                          'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
-                      },
-                      newMessage,
-                    ],
-                    ...(connectors[0]?.actionTypeId === '.gen-ai'
-                      ? { n: 1, stop: null, temperature: 0.2 }
-                      : { temperature: 0, stopSequences: [] }),
-                  },
-                },
-                logger,
-              });
-              if ((autoTitle as StaticResponse).status === 'ok') {
-                try {
-                  // This regular expression captures a string enclosed in single or double quotes.
-                  // It extracts the string content without the quotes.
-                  // Example matches:
-                  // - "Hello, World!" => Captures: Hello, World!
-                  // - 'Another Example' => Captures: Another Example
-                  // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-                  const match = (autoTitle as StaticResponse).data.match(/^["']?([^"']+)["']?$/);
-                  const title = match ? match[1] : (autoTitle as StaticResponse).data;
-
-                  await dataClient?.updateConversation({
-                    conversationUpdateProps: {
-                      id: conversationId,
-                      title,
-                    },
-                  });
-                } catch (e) {
-                  /* empty */
-                }
-              }
-            } catch (e) {
-              /* empty */
-            }
           }
 
           // if not langchain, call execute action directly and return the response:

@@ -26,6 +26,7 @@ export const AssistantOverlay: React.FC = () => {
     select: (data) => {
       return data.data.avatar;
     },
+    keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
@@ -35,6 +36,7 @@ export const AssistantOverlay: React.FC = () => {
   if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
+
   return (
     <ElasticAssistantOverlay
       isFlyoutMode={aiAssistantFlyoutMode}

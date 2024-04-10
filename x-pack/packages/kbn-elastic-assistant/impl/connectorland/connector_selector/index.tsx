@@ -169,7 +169,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           isOpen={modalForceOpen}
           onChange={onChange}
           options={allConnectorOptions}
-          valueOfSelected={selectedConnectorId ?? ''}
+          valueOfSelected={selectedConnectorId}
           popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
         />
         {isConnectorModalVisible && (

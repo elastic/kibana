@@ -32,6 +32,7 @@ interface CreateConversationProps {
   messages?: ClientMessage[];
   conversationIds?: string[];
   apiConfig?: Conversation['apiConfig'];
+  isFlyoutMode: boolean;
 }
 
 interface SetApiConfigProps {
@@ -117,10 +118,13 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const getDefaultConversation = useCallback(
-    ({ cTitle, messages }: CreateConversationProps): Conversation => {
+    ({ cTitle, messages, isFlyoutMode }: CreateConversationProps): Conversation => {
       const newConversation: Conversation =
         cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? WELCOME_CONVERSATION
+          ? {
+              ...WELCOME_CONVERSATION,
+              messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
+            }
           : {
               ...DEFAULT_CONVERSATION_STATE,
               id: '',

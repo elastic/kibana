@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, {
   Dispatch,
   SetStateAction,
@@ -35,7 +37,8 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import deepEqual from 'fast-deep-equal';
 
-import { find, isEmpty } from 'lodash';
+import { find, isEmpty, uniqBy } from 'lodash';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -80,6 +83,7 @@ const ModalPromptEditorWrapper = styled.div`
 import {
   FetchConversationsResponse,
   useFetchCurrentUserConversations,
+  CONVERSATIONS_QUERY_KEYS,
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
@@ -163,7 +167,7 @@ const AssistantComponent: React.FC<Props> = ({
     data: conversations,
     isLoading,
     refetch: refetchResults,
-    isSuccess: conversationsLoaded,
+    isFetched: conversationsLoaded,
   } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
@@ -171,7 +175,7 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   // Connector details
-  const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
+  const { data: connectors, isFetched: areConnectorsFetched } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
@@ -208,12 +212,10 @@ const AssistantComponent: React.FC<Props> = ({
       setCurrentConversation((prev) => {
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
-          find(conversations, [
-            'title',
-            isAssistantEnabled
-              ? getLastConversationId(conversationTitle)
-              : WELCOME_CONVERSATION_TITLE,
-          ]);
+          (isAssistantEnabled &&
+            (conversations[getLastConversationId(conversationTitle)] ||
+              find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
+          find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
 
         if (deepEqual(prev, nextConversation)) return prev;
 
@@ -223,7 +225,7 @@ const AssistantComponent: React.FC<Props> = ({
               nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode })
         );
       });
     }
@@ -236,6 +238,7 @@ const AssistantComponent: React.FC<Props> = ({
     currentConversation?.id,
     currentConversationId,
     isAssistantEnabled,
+    isFlyoutMode,
   ]);
 
   // Welcome setup state
@@ -252,8 +255,10 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
-    [currentConversation, isAssistantEnabled]
+    () =>
+      currentConversation &&
+      getBlockBotConversation(currentConversation, isAssistantEnabled, isFlyoutMode),
+    [currentConversation, isAssistantEnabled, isFlyoutMode]
   );
 
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
@@ -521,6 +526,17 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentConversation,
   });
 
+  const handleChatSend = useCallback(
+    async (promptText: string) => {
+      await handleSendMessage(promptText);
+      if (currentConversation?.title === NEW_CHAT) {
+        await refetchResults();
+        await refetchCurrentConversation({ cId: currentConversationTitle });
+      }
+    },
+    [currentConversation?.title, handleSendMessage, refetchCurrentConversation, refetchResults]
+  );
+
   const chatbotComments = useMemo(
     () => (
       <>
@@ -540,7 +556,8 @@ const AssistantComponent: React.FC<Props> = ({
           {...(!isFlyoutMode
             ? {
                 css: css`
-                  margin-right: 24px;
+                  margin-right: ${euiThemeVars.euiSizeL};
+
                   > li > div:nth-child(2) {
                     overflow: hidden;
                   }
@@ -549,6 +566,8 @@ const AssistantComponent: React.FC<Props> = ({
             : {
                 // Avoid comments going off the flyout
                 css: css`
+                  padding-bottom: ${euiThemeVars.euiSizeL};
+
                   > li > div:nth-child(2) {
                     overflow: hidden;
                   }
@@ -634,25 +653,51 @@ const AssistantComponent: React.FC<Props> = ({
     await refetchResults();
   }, [refetchResults]);
 
-  useEffect(() => {
-    if (
-      showMissingConnectorCallout &&
-      areConnectorsFetched &&
-      defaultConnector &&
-      currentConversation
-    ) {
-      const apiConfig = getGenAiConfig(defaultConnector);
-      setApiConfig({
-        conversation: currentConversation,
-        apiConfig: {
-          ...currentConversation.apiConfig,
-          connectorId: defaultConnector.id,
-          actionTypeId: defaultConnector.actionTypeId,
-          provider: apiConfig?.apiProvider,
-          model: apiConfig?.defaultModel,
-        },
-      }).then(() => refetchConversationsState());
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation<Conversation | undefined, unknown, Conversation>(
+    ['SET_DEFAULT_CONNECTOR'],
+    {
+      mutationFn: async (payload) => {
+        const apiConfig = getGenAiConfig(defaultConnector);
+        return setApiConfig({
+          conversation: payload,
+          apiConfig: {
+            ...payload?.apiConfig,
+            connectorId: defaultConnector?.id as string,
+            actionTypeId: defaultConnector?.actionTypeId as string,
+            provider: apiConfig?.apiProvider,
+            model: apiConfig?.defaultModel,
+          },
+        });
+      },
+      onSuccess: async (data) => {
+        await queryClient.cancelQueries({ queryKey: CONVERSATIONS_QUERY_KEYS });
+        if (data) {
+          queryClient.setQueryData<{ data: Conversation[] }>(CONVERSATIONS_QUERY_KEYS, (prev) => ({
+            ...(prev ?? {}),
+            data: uniqBy([data, ...(prev?.data ?? [])], 'id'),
+          }));
+        }
+        return data;
+      },
     }
+  );
+
+  useEffect(() => {
+    (async () => {
+      if (
+        showMissingConnectorCallout &&
+        areConnectorsFetched &&
+        defaultConnector &&
+        currentConversation
+      ) {
+        const conversation = await mutateAsync(currentConversation);
+        if (currentConversation.id === '' && conversation) {
+          setCurrentConversationId(conversation.id);
+        }
+      }
+    })();
   }, [
     currentConversation,
     defaultConnector,
@@ -660,6 +705,7 @@ const AssistantComponent: React.FC<Props> = ({
     setApiConfig,
     showMissingConnectorCallout,
     areConnectorsFetched,
+    mutateAsync,
   ]);
 
   const handleCreateConversation = useCallback(async () => {
@@ -873,7 +919,7 @@ const AssistantComponent: React.FC<Props> = ({
                     showMissingConnectorCallout &&
                     areConnectorsFetched && (
                       <ConnectorMissingCallout
-                        isConnectorConfigured={connectors?.length > 0}
+                        isConnectorConfigured={(connectors?.length ?? 0) > 0}
                         isSettingsModalVisible={isSettingsModalVisible}
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
                         isFlyoutMode={isFlyoutMode}
@@ -947,7 +993,7 @@ const AssistantComponent: React.FC<Props> = ({
                           handleButtonSendMessage={handleButtonSendMessage}
                           handleOnChatCleared={handleOnChatCleared}
                           handlePromptChange={handlePromptChange}
-                          handleSendMessage={handleSendMessage}
+                          handleSendMessage={handleChatSend}
                           handleRegenerateResponse={handleRegenerateResponse}
                           isLoading={isLoadingChatSend}
                           isFlyoutMode={isFlyoutMode}
@@ -1036,7 +1082,7 @@ const AssistantComponent: React.FC<Props> = ({
                 <EuiFlexGroup justifyContent="spaceAround">
                   <EuiFlexItem grow={false}>
                     <ConnectorMissingCallout
-                      isConnectorConfigured={connectors?.length > 0}
+                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
                       isSettingsModalVisible={isSettingsModalVisible}
                       setIsSettingsModalVisible={setIsSettingsModalVisible}
                       isFlyoutMode={isFlyoutMode}
@@ -1068,7 +1114,7 @@ const AssistantComponent: React.FC<Props> = ({
           handleButtonSendMessage={handleButtonSendMessage}
           handleOnChatCleared={handleOnChatCleared}
           handlePromptChange={handlePromptChange}
-          handleSendMessage={handleSendMessage}
+          handleSendMessage={handleChatSend}
           handleRegenerateResponse={handleRegenerateResponse}
           isLoading={isLoadingChatSend}
           isFlyoutMode={isFlyoutMode}

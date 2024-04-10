@@ -57,7 +57,8 @@ export const mergeBaseWithPersistedConversations = (
 
 export const getBlockBotConversation = (
   conversation: Conversation,
-  isAssistantEnabled: boolean
+  isAssistantEnabled: boolean,
+  isFlyoutMode: boolean
 ): Conversation => {
   if (!isAssistantEnabled) {
     if (
@@ -75,7 +76,7 @@ export const getBlockBotConversation = (
 
   return {
     ...conversation,
-    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
+    messages: [...conversation.messages, ...(!isFlyoutMode ? WELCOME_CONVERSATION.messages : [])],
   };
 };
 

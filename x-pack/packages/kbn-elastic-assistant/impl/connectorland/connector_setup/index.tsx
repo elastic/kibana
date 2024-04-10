@@ -39,7 +39,7 @@ export interface ConnectorSetupProps {
 }
 
 export const useConnectorSetup = ({
-  conversation = WELCOME_CONVERSATION,
+  conversation: defaultConversation,
   isFlyoutMode,
   onSetupComplete,
   onConversationUpdate,
@@ -47,6 +47,14 @@ export const useConnectorSetup = ({
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
 } => {
+  const conversation = useMemo(
+    () =>
+      defaultConversation || {
+        ...WELCOME_CONVERSATION,
+        messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
+      },
+    [defaultConversation, isFlyoutMode]
+  );
   const { setApiConfig } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
@@ -201,7 +209,7 @@ export const useConnectorSetup = ({
   }, []);
 
   return {
-    comments,
+    comments: isFlyoutMode ? [] : comments,
     prompt: isFlyoutMode ? (
       <div data-test-subj="prompt">
         <AddConnectorModal

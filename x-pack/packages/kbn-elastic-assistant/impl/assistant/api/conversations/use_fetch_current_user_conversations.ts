@@ -37,26 +37,26 @@ export interface UseFetchCurrentUserConversationsParams {
  *
  * @returns {useQuery} hook for getting the status of the conversations
  */
+const query = {
+  page: 1,
+  perPage: 100,
+};
+
+export const CONVERSATIONS_QUERY_KEYS = [
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  query.page,
+  query.perPage,
+  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+];
+
 export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
   refetchOnWindowFocus = true,
 }: UseFetchCurrentUserConversationsParams) => {
-  const query = {
-    page: 1,
-    perPage: 100,
-  };
-
-  const cachingKeys = [
-    ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-    query.page,
-    query.perPage,
-    ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ];
-
   return useQuery(
-    [cachingKeys, query],
+    CONVERSATIONS_QUERY_KEYS,
     async () =>
       http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
@@ -68,7 +68,7 @@ export const useFetchCurrentUserConversations = ({
       select: (data) => onFetch(data),
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
-      refetchOnWindowFocus,
+      refetchOnWindowFocus: false,
     }
   );
 };
