@@ -117,7 +117,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
           content={i18n.translate(
             'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip',
             {
-              defaultMessage: 'Manage GenAI connector',
+              defaultMessage: 'Manage connector',
             }
           )}
         >
@@ -129,7 +129,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
             aria-label={i18n.translate(
               'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
               {
-                defaultMessage: 'Manage GenAI connector link',
+                defaultMessage: 'Manage connector',
               }
             )}
           />
