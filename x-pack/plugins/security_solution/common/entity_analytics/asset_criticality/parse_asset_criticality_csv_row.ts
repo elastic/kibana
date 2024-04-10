@@ -20,6 +20,13 @@ interface InvalidRecord {
   error: string;
 }
 
+const validationErrorWithMessage = (message: string): InvalidRecord => {
+  return {
+    valid: false,
+    error: message,
+  };
+};
+
 type ReturnType = ValidRecord | InvalidRecord;
 
 export const isErrorResult = (result: ReturnType): result is InvalidRecord => {
@@ -32,94 +39,72 @@ const trimColumn = (column: string): string => {
 
 export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (row.length !== 3) {
-    return {
-      valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError',
-        {
-          defaultMessage: 'Expected 3 columns, got {rowLength}',
-          values: { rowLength: row.length },
-        }
-      ),
-    };
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError', {
+        defaultMessage: 'Expected 3 columns, got {rowLength}',
+        values: { rowLength: row.length },
+      })
+    );
   }
 
   const [entityType, idValue, criticalityLevel] = row;
 
   if (!entityType) {
-    return {
-      valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError',
-        {
-          defaultMessage: 'Missing entity type',
-        }
-      ),
-    };
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError', {
+        defaultMessage: 'Missing entity type',
+      })
+    );
   }
 
   if (!idValue) {
-    return {
-      valid: false,
-      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingIdError', {
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingIdError', {
         defaultMessage: 'Missing identifier',
-      }),
-    };
+      })
+    );
   }
 
   if (idValue.length > MAX_COLUMN_CHARS) {
-    return {
-      valid: false,
-      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.idTooLongError', {
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.idTooLongError', {
         defaultMessage:
           'Identifier is too long, expected less than {maxChars} characters, got {idLength}',
         values: { maxChars: MAX_COLUMN_CHARS, idLength: idValue.length },
-      }),
-    };
+      })
+    );
   }
 
   if (!criticalityLevel) {
-    return {
-      valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError',
-        {
-          defaultMessage: 'Missing criticality level',
-        }
-      ),
-    };
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError', {
+        defaultMessage: 'Missing criticality level',
+      })
+    );
   }
 
   const lowerCaseCriticalityLevel = criticalityLevel.toLowerCase();
 
   if (!isValidCriticalityLevel(lowerCaseCriticalityLevel)) {
-    return {
-      valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError',
-        {
-          defaultMessage:
-            'Invalid criticality level "{criticalityLevel}", expected one of {validLevels}',
-          values: {
-            criticalityLevel: trimColumn(criticalityLevel),
-            validLevels: ValidCriticalityLevels.join(', '),
-          },
-        }
-      ),
-    };
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError', {
+        defaultMessage:
+          'Invalid criticality level "{criticalityLevel}", expected one of {validLevels}',
+        values: {
+          criticalityLevel: trimColumn(criticalityLevel),
+          validLevels: ValidCriticalityLevels.join(', '),
+        },
+      })
+    );
   }
 
   if (entityType !== 'host' && entityType !== 'user') {
-    return {
-      valid: false,
-      error: i18n.translate(
-        'xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError',
-        {
-          defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
-          values: { entityType: trimColumn(entityType) },
-        }
-      ),
-    };
+    return validationErrorWithMessage(
+      i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {
+        defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
+        values: { entityType: trimColumn(entityType) },
+      })
+    );
   }
 
   const idField = entityType === 'host' ? 'host.name' : 'user.name';
