@@ -6,13 +6,12 @@
  */
 
 import React, { Suspense } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
-import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { AwsOptions } from './get_aws_credentials_form_options';
 import { findVariableDef } from '../utils';
-import { CspLoadingState } from '../../csp_loading_state';
 
 export const AwsInputVarFields = ({
   fields,
@@ -42,8 +41,8 @@ export const AwsInputVarFields = ({
                   }
                 `}
               >
-                <Suspense fallback={<CspLoadingState />}>
-                  <PackagePolicyInputVarField
+                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                  <LazyPackagePolicyInputVarField
                     varDef={{
                       ...findVariableDef(packageInfo, field.id)!,
                       required: true,

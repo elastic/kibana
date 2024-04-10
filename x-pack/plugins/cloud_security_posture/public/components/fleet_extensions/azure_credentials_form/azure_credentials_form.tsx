@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -24,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
@@ -34,7 +35,6 @@ import { useAzureCredentialsForm } from './hooks';
 import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
-import { CspLoadingState } from '../../csp_loading_state';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;
@@ -294,8 +294,8 @@ export const AzureInputVarFields = ({
                   }
                 `}
               >
-                <Suspense fallback={<CspLoadingState />}>
-                  <PackagePolicyInputVarField
+                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                  <LazyPackagePolicyInputVarField
                     varDef={{
                       ...findVariableDef(packageInfo, field.id)!,
                       required: true,
