@@ -13,6 +13,8 @@ import { Reference } from '../references';
 export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
   validate?: (value: T) => string | void;
+  /** A human-friendly description of this type to be used in documentation */
+  description?: string;
 }
 
 export interface SchemaStructureEntry {
@@ -84,6 +86,10 @@ export abstract class Type<V> {
 
     if (options.validate) {
       schema = schema.custom(convertValidationFunction(options.validate));
+    }
+
+    if (options.description) {
+      schema = schema.description(options.description);
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

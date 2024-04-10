@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('navigation app', function () {
-    loadTestFile(require.resolve('./_solution_nav_switcher'));
-  });
-}
+// we are expecting to retrieve this from an API instead
+// https://github.com/elastic/elasticsearch/issues/107069
+export const ESQL_LATEST_VERSION = '2024.04.01';
