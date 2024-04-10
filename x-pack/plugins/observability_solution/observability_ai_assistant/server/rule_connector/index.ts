@@ -8,7 +8,7 @@
 import { filter, lastValueFrom } from 'rxjs';
 import parse from 'joi-to-json';
 import { i18n } from '@kbn/i18n';
-import { schema, Type, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
@@ -168,16 +168,14 @@ async function executor(
                     if (connector.actionTypeId === '.slack') {
                       return {
                         ...connector,
-                        params: parse((SlackConnectorParamsSchema as Type<any>).getSchema(), 'json')
-                          .properties,
+                        params: parse(SlackConnectorParamsSchema.getSchema(), 'json').properties,
                       };
                     }
 
                     if (connector.actionTypeId === '.email') {
                       return {
                         ...connector,
-                        params: parse((EmailConnectorParamsSchema as Type<any>).getSchema(), 'json')
-                          .properties,
+                        params: parse(EmailConnectorParamsSchema.getSchema(), 'json').properties,
                       };
                     }
                     return connector;
