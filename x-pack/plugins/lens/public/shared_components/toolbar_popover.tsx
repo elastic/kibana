@@ -7,7 +7,7 @@
 
 import './toolbar_popover.scss';
 import React, { useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
@@ -19,7 +19,7 @@ const typeToIconMap: { [type: string]: string | IconType } = {
   visualOptions: 'brush',
 };
 
-export interface ToolbarPopoverProps {
+export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   /**
    * Determines popover title
    */
@@ -39,7 +39,7 @@ export interface ToolbarPopoverProps {
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;
-}
+};
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   children,
@@ -48,10 +48,11 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   isDisabled = false,
   groupPosition,
   buttonDataTestSubj,
-  panelClassName = 'lnsVisToolbar__popover',
   handleClose,
+  panelClassName = 'lnsVisToolbar__popover',
+  ...euiPopoverProps
 }) => {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
@@ -66,7 +67,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
             as={'iconButton'}
             iconType={iconType}
             onClick={() => {
-              setOpen(!open);
+              setIsOpen(!isOpen);
             }}
             label={title}
             aria-label={title}
@@ -75,12 +76,13 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
             data-test-subj={buttonDataTestSubj}
           />
         }
-        isOpen={open}
+        isOpen={isOpen}
         closePopover={() => {
-          setOpen(false);
+          setIsOpen(false);
           handleClose?.();
         }}
         anchorPosition="downRight"
+        {...euiPopoverProps}
       >
         <EuiPopoverTitle>{title}</EuiPopoverTitle>
         {children}

@@ -208,7 +208,13 @@ export function SaveDashboardModal({
                     }
                   )}
                 >
-                  <EuiIcon type="questionInCircle" title="Icon with tooltip" />
+                  <EuiIcon
+                    type="questionInCircle"
+                    title={i18n.translate(
+                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                      { defaultMessage: 'Icon with tooltip' }
+                    )}
+                  />
                 </EuiToolTip>
               </p>
             }
@@ -282,7 +288,7 @@ function getEditSuccessToastLabels(dashboardName: string) {
       }
     ),
     text: i18n.translate('xpack.apm.serviceDashboards.editSuccess.toast.text', {
-      defaultMessage: 'Your dashboard link have been updated',
+      defaultMessage: 'Your dashboard link has been updated',
     }),
   };
 }

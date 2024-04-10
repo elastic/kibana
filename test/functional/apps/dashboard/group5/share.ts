@@ -46,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.share.clickShareTopNavButton();
       return await PageObjects.share.isShareMenuOpen();
     });
-    const sharedUrl = await PageObjects.share.getSharedUrl();
-    return sharedUrl;
+    return await PageObjects.share.getSharedUrl();
   };
 
   describe('share dashboard', () => {

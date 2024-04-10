@@ -84,7 +84,7 @@ export class SharePageObject extends FtrService {
   }
 
   async getSharedUrl() {
-    return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
+    return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url')) ?? '';
   }
 
   async createShortUrlExistOrFail() {

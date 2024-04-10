@@ -1752,10 +1752,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.5.2":
-  version "93.5.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.2.tgz#42bb985a960a7b2d46fe7e25846a476d30900b71"
-  integrity sha512-/1k7k7xYMPj9AM0OTgMilvKI6IdnVOPyQ7YQwE57NKrmBYfj9H91AKQNZ+rXze7QuuuFi73dUMSfbeE9ncqGZA==
+"@elastic/eui@93.6.0":
+  version "93.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.6.0.tgz#9a5892164a4457ba0382a76b63731eeed10dfb89"
+  integrity sha512-o6TEgSE+mOJmZYtMm+xYMeFQoOcoGTQOMWwRBCkP1efEPAlqjeBnUeahco8jKM3kqTeah+jMLm/A02ZjRwU+GA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.202"
@@ -4953,6 +4953,10 @@
   uid ""
 
 "@kbn/index-management-plugin@link:x-pack/plugins/index_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/index-management@link:x-pack/packages/index-management":
   version "0.0.0"
   uid ""
 
@@ -17027,9 +17031,9 @@ expr-eval@^2.0.2:
   integrity sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==
 
 express@^4.17.1, express@^4.17.3:
-  version "4.17.3"
-  resolved "https://registry.yarnpkg.com/express/-/express-4.17.3.tgz#f6c7302194a4fb54271b73a1fe7a06478c8f85a1"
-  integrity sha512-yuSQpz5I+Ch7gFrPCk4/c+dIBKlQUxtgwqzph132bsT6qhuzss6I8cLJQz7B3rFblzd6wtcI0ZbGltH/C4LjUg==
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/express/-/express-4.19.2.tgz#e25437827a3aa7f2a827bc8171bbbb664a356465"
+  integrity sha512-5T6nhjsT+EOMzuck8JjBHARTHfMht0POzlA60WV2pMD3gyXw2LZnZ+ueGdNxG+0calOJcWKbpFcuzLZ91YWq9Q==
   dependencies:
     accepts "~1.3.8"
     array-flatten "1.1.1"
