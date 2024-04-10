@@ -171,7 +171,8 @@ export const configSchema = schema.object({
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({
-        batchSize: schema.number({ defaultValue: 500 }),
+        errorRetries: schema.number({ defaultValue: 1 }),
+        maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
       }),
     }),
   }),

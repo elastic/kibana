@@ -24,9 +24,8 @@ export const ErrorItem = z.object({
 
 export type Stats = z.infer<typeof Stats>;
 export const Stats = z.object({
-  updated: z.number().int(),
-  created: z.number().int(),
-  errors: z.number().int(),
+  successful: z.number().int(),
+  failed: z.number().int(),
   total: z.number().int(),
 });
 

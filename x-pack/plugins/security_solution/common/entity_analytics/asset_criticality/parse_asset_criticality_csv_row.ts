@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
 import type { AssetCriticalityUpsert, CriticalityLevel } from './types';
@@ -31,28 +32,62 @@ const trimColumn = (column: string): string => {
 
 export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (row.length !== 3) {
-    return { valid: false, error: `Expected 3 columns got ${row.length}` };
+    return {
+      valid: false,
+      error: i18n.translate(
+        'xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError',
+        {
+          defaultMessage: 'Expected 3 columns, got {rowLength}',
+          values: { rowLength: row.length },
+        }
+      ),
+    };
   }
 
   const [entityType, idValue, criticalityLevel] = row;
 
   if (!entityType) {
-    return { valid: false, error: 'Missing entity type' };
+    return {
+      valid: false,
+      error: i18n.translate(
+        'xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError',
+        {
+          defaultMessage: 'Missing entity type',
+        }
+      ),
+    };
   }
 
   if (!idValue) {
-    return { valid: false, error: 'Missing ID' };
+    return {
+      valid: false,
+      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingIdError', {
+        defaultMessage: 'Missing identifier',
+      }),
+    };
   }
 
   if (idValue.length > MAX_COLUMN_CHARS) {
     return {
       valid: false,
-      error: `ID is too long, expected less than ${MAX_COLUMN_CHARS} characters got ${idValue.length}`,
+      error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.idTooLongError', {
+        defaultMessage:
+          'Identifier is too long, expected less than {maxChars} characters, got {idLength}',
+        values: { maxChars: MAX_COLUMN_CHARS, idLength: idValue.length },
+      }),
     };
   }
 
   if (!criticalityLevel) {
-    return { valid: false, error: 'Missing criticality level' };
+    return {
+      valid: false,
+      error: i18n.translate(
+        'xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError',
+        {
+          defaultMessage: 'Missing criticality level',
+        }
+      ),
+    };
   }
 
   const lowerCaseCriticalityLevel = criticalityLevel.toLowerCase();
@@ -60,16 +95,30 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (!isValidCriticalityLevel(lowerCaseCriticalityLevel)) {
     return {
       valid: false,
-      error: `Invalid criticality level ${trimColumn(
-        criticalityLevel
-      )} expected one of ${ValidCriticalityLevels.join(', ')}`,
+      error: i18n.translate(
+        'xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError',
+        {
+          defaultMessage:
+            'Invalid criticality level "{criticalityLevel}", expected one of {validLevels}',
+          values: {
+            criticalityLevel: trimColumn(criticalityLevel),
+            validLevels: ValidCriticalityLevels.join(', '),
+          },
+        }
+      ),
     };
   }
 
   if (entityType !== 'host' && entityType !== 'user') {
     return {
       valid: false,
-      error: `Invalid entity type ${trimColumn(entityType)} expected host or user`,
+      error: i18n.translate(
+        'xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError',
+        {
+          defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
+          values: { entityType: trimColumn(entityType) },
+        }
+      ),
     };
   }
 

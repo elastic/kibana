@@ -9,7 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
-import { checkTargetMappings } from './check_target_mappings';
+import { checkTargetTypesMappings } from './check_target_mappings';
 import { getBaseMappings } from '../core';
 
 const indexTypes = ['type1', 'type2', 'type3'];
@@ -60,14 +60,14 @@ const appMappings: IndexMapping = {
   },
 };
 
-describe('checkTargetMappings', () => {
+describe('checkTargetTypesMappings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('when index mappings are missing required properties', () => {
     it("returns 'index_mappings_incomplete' if index mappings are not defined", async () => {
-      const task = checkTargetMappings({
+      const task = checkTargetTypesMappings({
         indexTypes,
         appMappings,
         latestMappingsVersions,
@@ -78,7 +78,7 @@ describe('checkTargetMappings', () => {
     });
 
     it("returns 'index_mappings_incomplete' if index mappings do not define _meta", async () => {
-      const task = checkTargetMappings({
+      const task = checkTargetTypesMappings({
         indexTypes,
         appMappings,
         indexMappings: {
@@ -93,7 +93,7 @@ describe('checkTargetMappings', () => {
     });
 
     it("returns 'index_mappings_incomplete' if index mappings do not define migrationMappingPropertyHashes nor mappingVersions", async () => {
-      const task = checkTargetMappings({
+      const task = checkTargetTypesMappings({
         indexTypes,
         appMappings,
         indexMappings: {
@@ -109,7 +109,7 @@ describe('checkTargetMappings', () => {
     });
 
     it("returns 'index_mappings_incomplete' if index mappings define a different value for 'dynamic' property", async () => {
-      const task = checkTargetMappings({
+      const task = checkTargetTypesMappings({
         indexTypes,
         appMappings,
         indexMappings: {
@@ -128,7 +128,7 @@ describe('checkTargetMappings', () => {
   describe('when index mappings have all required properties', () => {
     describe('when some core properties (aka root fields) have changed', () => {
       it('returns the list of fields that have changed', async () => {
-        const task = checkTargetMappings({
+        const task = checkTargetTypesMappings({
           indexTypes,
           appMappings,
           indexMappings: {
@@ -149,8 +149,9 @@ describe('checkTargetMappings', () => {
         const result = await task();
         expect(result).toEqual(
           Either.left({
-            type: 'root_fields_changed' as const,
-            updatedFields: ['references'],
+            type: 'types_changed' as const,
+            // types are flagged as changed cause we have not provided a hashToVersionMap
+            updatedTypes: ['type1', 'type2'],
           })
         );
       });
@@ -159,8 +160,8 @@ describe('checkTargetMappings', () => {
     describe('when core properties have NOT changed', () => {
       describe('when index mappings ONLY contain the legacy hashes', () => {
         describe('and legacy hashes match the current model versions', () => {
-          it('returns a compared_mappings_match response', async () => {
-            const task = checkTargetMappings({
+          it('returns a types_match response', async () => {
+            const task = checkTargetTypesMappings({
               indexTypes,
               appMappings,
               indexMappings: legacyMappings,
@@ -175,7 +176,7 @@ describe('checkTargetMappings', () => {
             const result = await task();
             expect(result).toEqual(
               Either.right({
-                type: 'compared_mappings_match' as const,
+                type: 'types_match' as const,
               })
             );
           });
@@ -183,7 +184,7 @@ describe('checkTargetMappings', () => {
 
         describe('and legacy hashes do NOT match the current model versions', () => {
           it('returns the list of updated SO types', async () => {
-            const task = checkTargetMappings({
+            const task = checkTargetTypesMappings({
               indexTypes,
               appMappings,
               indexMappings: legacyMappings,
@@ -207,8 +208,8 @@ describe('checkTargetMappings', () => {
 
       describe('when index mappings contain the mappingVersions', () => {
         describe('and mappingVersions match', () => {
-          it('returns a compared_mappings_match response', async () => {
-            const task = checkTargetMappings({
+          it('returns a types_match response', async () => {
+            const task = checkTargetTypesMappings({
               indexTypes,
               appMappings,
               indexMappings: {
@@ -228,7 +229,7 @@ describe('checkTargetMappings', () => {
             const result = await task();
             expect(result).toEqual(
               Either.right({
-                type: 'compared_mappings_match' as const,
+                type: 'types_match' as const,
               })
             );
           });
@@ -236,7 +237,7 @@ describe('checkTargetMappings', () => {
 
         describe('and mappingVersions do NOT match', () => {
           it('returns the list of updated SO types', async () => {
-            const task = checkTargetMappings({
+            const task = checkTargetTypesMappings({
               indexTypes,
               appMappings,
               indexMappings: {

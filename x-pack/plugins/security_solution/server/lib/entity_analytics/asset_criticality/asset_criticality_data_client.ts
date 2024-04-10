@@ -25,6 +25,10 @@ interface AssetCriticalityClientOpts {
 
 type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
 
+type BulkUpsertFromStreamOptions = {
+  recordsStream: NodeJS.ReadableStream;
+} & Pick<Parameters<ElasticsearchClient['helpers']['bulk']>[0], 'flushBytes' | 'retries'>;
+
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
 
@@ -133,55 +137,11 @@ export class AssetCriticalityDataClient {
     return doc;
   }
 
-  public async bulkUpsert(
-    records: AssetCriticalityUpsert[]
-  ): Promise<
-    Array<
-      | { id: string; error: string }
-      | { record: AssetCriticalityRecord; result: 'created' | 'updated' }
-    >
-  > {
-    if (records.length === 0) {
-      return [];
-    }
-
-    const docs = records.map((record) => ({
-      _id: createId(record),
-      doc: {
-        id_field: record.idField,
-        id_value: record.idValue,
-        criticality_level: record.criticalityLevel,
-        '@timestamp': new Date().toISOString(),
-      },
-    }));
-
-    const body = docs.flatMap(({ doc, _id }) => [
-      { update: { _id } },
-      { doc, doc_as_upsert: true },
-    ]);
-
-    const response = await this.options.esClient.bulk({
-      body,
-      index: this.getIndex(),
-    });
-
-    return response.items.map((item, index) => {
-      const doc = docs[index];
-      if (item.update && item.update.error) {
-        return { id: doc._id, error: item.update.error.reason || item.update.error.type };
-      } else {
-        if (item?.update?.result === 'created') {
-          return { record: doc.doc, result: 'created' };
-        }
-        return { record: doc.doc, result: 'updated' };
-      }
-    });
-  }
-
   /**
    * Bulk upsert asset criticality records from a stream.
    * @param recordsStream a stream of records to upsert, records may also be an error e.g if there was an error parsing
-   * @param batchSize the number of records to upsert in a single batch
+   * @param flushBytes how big elasticsearch bulk requests should be before they are sent
+   * @param retries the number of times to retry a failed bulk request
    * @returns an object containing the number of records updated, created, errored, and the total number of records processed
    * @throws an error if the stream emits an error
    * @remarks
@@ -192,85 +152,65 @@ export class AssetCriticalityDataClient {
    **/
   public bulkUpsertFromStream = async ({
     recordsStream,
-    batchSize,
-  }: {
-    recordsStream: NodeJS.ReadableStream;
-    batchSize: number;
-  }): Promise<AssetCriticalityCsvUploadResponse> => {
+    flushBytes,
+    retries,
+  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityCsvUploadResponse> => {
     const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
     const stats: AssetCriticalityCsvUploadResponse['stats'] = {
-      updated: 0,
-      created: 0,
-      errors: 0,
+      successful: 0,
+      failed: 0,
       total: 0,
     };
 
-    async function* recordsGenerator(): AsyncGenerator<
-      AssetCriticalityUpsert | Error,
-      void,
-      undefined
-    > {
-      for await (const record of recordsStream) {
-        yield record as unknown as AssetCriticalityUpsert | Error;
-      }
-    }
-
-    const processBatch = async (
-      batch: Array<{ record: AssetCriticalityUpsert; index: number }>
-    ) => {
-      if (batch.length === 0) {
-        return;
-      }
-      try {
-        const upsertResult = await this.bulkUpsert(batch.map((b) => b.record));
-        const startIndex = batch[0].index;
-        upsertResult.forEach((result, resultIndex) => {
-          if ('error' in result) {
-            errors.push({
-              message: result.error,
-              index: startIndex + resultIndex,
-            });
-            stats.errors++;
-          } else {
-            stats[result.result]++;
-          }
-        });
-      } catch (error) {
-        for (const b of batch) {
+    let streamIndex = 0;
+    const recordGenerator = async function* () {
+      for await (const untypedRecord of recordsStream) {
+        const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+        stats.total++;
+        if (record instanceof Error) {
+          stats.failed++;
           errors.push({
-            message: error.message,
-            index: b.index,
+            message: record.message,
+            index: streamIndex,
           });
-          stats.errors++;
+        } else {
+          yield {
+            record,
+            index: streamIndex,
+          };
         }
+        streamIndex++;
       }
     };
 
-    const gen = recordsGenerator();
-    let index = 0;
-    let currentBatch: Array<{ record: AssetCriticalityUpsert; index: number }> = [];
-
-    for await (const record of gen) {
-      stats.total++;
-      if (record instanceof Error) {
-        stats.errors++;
+    const { failed, successful } = await this.options.esClient.helpers.bulk({
+      datasource: recordGenerator(),
+      index: this.getIndex(),
+      flushBytes,
+      retries,
+      refreshOnCompletion: true, // refresh the index after all records are processed
+      onDocument: ({ record }) => [
+        { update: { _id: createId(record) } },
+        {
+          doc: {
+            id_field: record.idField,
+            id_value: record.idValue,
+            criticality_level: record.criticalityLevel,
+            '@timestamp': new Date().toISOString(),
+          },
+          doc_as_upsert: true,
+        },
+      ],
+      onDrop: ({ document, error }) => {
         errors.push({
-          message: record.message,
-          index,
+          message: error?.reason || 'Unknown error',
+          index: document.index,
         });
-      } else {
-        currentBatch.push({ record, index });
-        if (currentBatch.length === batchSize) {
-          await processBatch(currentBatch);
-          currentBatch = [];
-        }
-      }
-      index++;
-    }
+      },
+    });
 
-    if (currentBatch.length > 0) {
-      await processBatch(currentBatch);
-    }
+    stats.successful += successful;
+    stats.failed += failed;
 
     return { errors, stats };
   };

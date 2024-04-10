@@ -49,18 +49,15 @@ components:
     Stats:
       type: object
       properties:
-        updated:
+        successful:
           type: integer
-        created:
-          type: integer
-        errors:
+        failed:
           type: integer
         total:
           type: integer
       required:
-        - updated
-        - created
-        - errors
+        - successful
+        - failed
         - total
     AssetCriticalityCsvUploadResponse:
       type: object

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -82,34 +83,18 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
 };
 
 interface AssetCriticalitySystemProcessedAssignmentFileEvent {
-  parameters: {
-    fileSizeBytes?: number;
-  };
   processing: {
     startTime: string;
     endTime: string;
     tookMs: number;
   };
-  result: {
-    updated: number;
-    created: number;
-    errors: number;
-    total: number;
-  };
+  result: AssetCriticalityCsvUploadResponse['stats'];
 }
 
 export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventTypeOpts<AssetCriticalitySystemProcessedAssignmentFileEvent> =
   {
     eventType: 'asset_criticality_system_processed_assignment_file',
     schema: {
-      parameters: {
-        properties: {
-          fileSizeBytes: {
-            type: 'long',
-            _meta: { description: 'Size of the supplied file in bytes', optional: true }, // optional as it may not be available in content-length header
-          },
-        },
-      },
       processing: {
         properties: {
           startTime: { type: 'date', _meta: { description: 'Processing start time' } },
@@ -119,17 +104,13 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
       },
       result: {
         properties: {
-          updated: {
+          successful: {
             type: 'long',
-            _meta: { description: 'Number of criticality records updated' },
+            _meta: { description: 'Number of criticality records successfully created or updated' },
           },
-          created: {
+          failed: {
             type: 'long',
-            _meta: { description: 'Number of criticality records updated' },
-          },
-          errors: {
-            type: 'long',
-            _meta: { description: 'Number if lines which encountered errors' },
+            _meta: { description: 'Number of criticality records which had errors' },
           },
           total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
         },

@@ -40,7 +40,8 @@ export const createMockConfig = (): ConfigType => {
       },
       assetCriticality: {
         csvUpload: {
-          batchSize: 1000,
+          errorRetries: 3,
+          maxBulkRequestBodySizeBytes: 10_485_760,
         },
       },
     },
