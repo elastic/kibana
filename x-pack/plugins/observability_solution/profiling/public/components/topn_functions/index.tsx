@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
+import { ESTopNFunctions, getCalleeFunction, TopNFunctionSortField } from '@kbn/profiling-utils';
 import { last, orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
@@ -28,8 +28,8 @@ import { FunctionRow } from './function_row';
 import { convertRowToFrame, getFunctionsRows, getTotalCount, IFunctionRow } from './utils';
 
 interface Props {
-  topNFunctions?: TopNFunctions;
-  comparisonTopNFunctions?: TopNFunctions;
+  topNFunctions?: ESTopNFunctions;
+  comparisonTopNFunctions?: ESTopNFunctions;
   totalSeconds: number;
   isDifferentialView: boolean;
   baselineScaleFactor?: number;

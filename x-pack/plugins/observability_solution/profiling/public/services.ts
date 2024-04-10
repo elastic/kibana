@@ -8,7 +8,7 @@
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
   createFlameGraph,
-  TopNFunctions,
+  ESTopNFunctions,
   type BaseFlameGraph,
   type ElasticFlameGraph,
 } from '@kbn/profiling-utils';
@@ -46,7 +46,7 @@ export interface Services {
     startIndex: number;
     endIndex: number;
     kuery: string;
-  }) => Promise<TopNFunctions>;
+  }) => Promise<ESTopNFunctions>;
   fetchElasticFlamechart: (params: {
     http: AutoAbortedHttpService;
     timeFrom: number;
@@ -100,7 +100,7 @@ export function getServices(): Services {
         endIndex,
         kuery,
       };
-      return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
+      return (await http.get(paths.TopNFunctions, { query })) as Promise<ESTopNFunctions>;
     },
 
     fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, showErrorFrames }) => {

@@ -18,7 +18,7 @@ export function getInformationRows({
   sourceFileName,
   sourceLine,
 }: {
-  fileID: string;
+  fileID?: string;
   frameType: number;
   exeFileName: string;
   addressOrLine: number;

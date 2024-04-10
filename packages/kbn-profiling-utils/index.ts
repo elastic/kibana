@@ -53,3 +53,4 @@ export type {
 } from './common/profiling';
 export type { ProfilingStatus } from './common/profiling_status';
 export type { TopNFunctions } from './common/functions';
+export type { ESTopNFunctions, AggregationField, Frame } from './common/topN_functions';

@@ -19,7 +19,7 @@ import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
 
 export interface Frame {
-  fileID: string;
+  fileID?: string;
   frameType: number;
   exeFileName: string;
   addressOrLine: number;

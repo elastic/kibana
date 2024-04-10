@@ -45,32 +45,42 @@ export function registerTopNFunctionsSearchRoute({
         const endSecs = timeTo / 1000;
 
         const esClient = await getClient(context);
-        const topNFunctions = await profilingDataAccess.services.fetchFunctions({
-          core,
-          esClient,
-          startIndex,
-          endIndex,
-          totalSeconds: endSecs - startSecs,
-          query: {
-            bool: {
-              filter: [
-                ...kqlQuery(kuery),
-                {
-                  range: {
-                    ['@timestamp']: {
-                      gte: String(startSecs),
-                      lt: String(endSecs),
-                      format: 'epoch_second',
-                    },
+
+        const query = {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(startSecs),
+                    lt: String(endSecs),
+                    format: 'epoch_second',
                   },
                 },
-              ],
-            },
+              },
+            ],
           },
-        });
+        };
+
+        const [topNFunctions, newtopNFunctions] = await Promise.all([
+          profilingDataAccess.services.fetchFunctions({
+            core,
+            esClient,
+            startIndex,
+            endIndex,
+            totalSeconds: endSecs - startSecs,
+            query,
+          }),
+          profilingDataAccess.services.fetchESFunctions({
+            core,
+            esClient,
+            query,
+          }),
+        ]);
 
         return response.ok({
-          body: topNFunctions,
+          body: newtopNFunctions,
         });
       } catch (error) {
         return handleRouteHandlerError({

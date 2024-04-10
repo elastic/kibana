@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { convertTonsToKgs } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
@@ -173,20 +174,22 @@ export function DifferentialTopNFunctionsView() {
               baseValue={
                 state.data
                   ? {
-                      totalCount: state.data.TotalCount,
+                      totalCount: state.data.total_count,
                       scaleFactor: isNormalizedByTime ? baselineTime : baseline,
-                      totalAnnualCO2Kgs: state.data.totalAnnualCO2Kgs,
-                      totalAnnualCostUSD: state.data.totalAnnualCostUSD,
+                      totalAnnualCO2Kgs: convertTonsToKgs(state.data.self_annual_co2_tons),
+                      totalAnnualCostUSD: state.data.self_annual_cost_usd,
                     }
                   : undefined
               }
               comparisonValue={
                 comparisonState.data
                   ? {
-                      totalCount: comparisonState.data.TotalCount,
+                      totalCount: comparisonState.data.total_count,
                       scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
-                      totalAnnualCO2Kgs: comparisonState.data.totalAnnualCO2Kgs,
-                      totalAnnualCostUSD: comparisonState.data.totalAnnualCostUSD,
+                      totalAnnualCO2Kgs: convertTonsToKgs(
+                        comparisonState.data.self_annual_co2_tons
+                      ),
+                      totalAnnualCostUSD: comparisonState.data.self_annual_cost_usd,
                     }
                   : undefined
               }

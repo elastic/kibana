@@ -17,10 +17,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  ESTopNFunctions,
+  Frame,
   getCalleeFunction,
-  StackFrameMetadata,
   TopNComparisonFunctionSortField,
-  TopNFunctions,
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
@@ -62,13 +62,12 @@ export type OnChangeSortParams =
       comparisonSortDirection: SortDirection;
     };
 
-export function getFrameIdentification(frame: StackFrameMetadata) {
+export function getFrameIdentification(frame: Frame) {
   return [
-    frame.SourceFilename,
-    frame.FunctionName,
-    frame.ExeFileName,
-    frame.FileID,
-    frame.AddressOrLine,
+    frame.file_name,
+    frame.function_name,
+    frame.executable_file_name,
+    frame.address_or_line,
   ].join('|');
 }
 
@@ -78,9 +77,9 @@ export interface SelectedFrame {
 }
 
 interface Props {
-  base?: TopNFunctions;
+  base?: ESTopNFunctions;
   baselineScaleFactor?: number;
-  comparison?: TopNFunctions;
+  comparison?: ESTopNFunctions;
   comparisonScaleFactor?: number;
   onChangePage: (nextPage: number) => void;
   onChangeSort: (sorting: OnChangeSortParams) => void;
