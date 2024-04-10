@@ -2856,10 +2856,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestagentpolicies20768dc7ce5eced3eb309e50d8a6cf76",
+            "id": "def-common.HASH_TO_VERSION_MAP.ingestagentpolicies0fd93cd11c019b118e93a9157c22057b",
             "type": "string",
             "tags": [],
-            "label": "'ingest-agent-policies|20768dc7ce5eced3eb309e50d8a6cf76'",
+            "label": "'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,

@@ -80,8 +80,10 @@ export const fetchConnectorExecuteAction = async ({
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
-    langSmithProject: traceOptions?.langSmithProject,
-    langSmithApiKey: traceOptions?.langSmithApiKey,
+    langSmithProject:
+      traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
+    langSmithApiKey:
+      traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
     ...optionalRequestParams,
   };
 
