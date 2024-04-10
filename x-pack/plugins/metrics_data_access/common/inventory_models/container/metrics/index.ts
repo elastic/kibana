@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetrics } from '../../types';
+import { InventoryMetricsWithCharts } from '../../types';
 import { cpu } from './snapshot/cpu';
 import { memory } from './snapshot/memory';
 import { rx } from './snapshot/rx';
@@ -21,6 +21,8 @@ import { containerNetworkTraffic } from './tsvb/container_network_traffic';
 import { containerK8sOverview } from './tsvb/container_k8s_overview';
 import { containerK8sCpuUsage } from './tsvb/container_k8s_cpu_usage';
 import { containerK8sMemoryUsage } from './tsvb/container_k8s_memory_usage';
+import { ContainerFormulas } from './formulas';
+import { ContainerCharts } from './charts';
 
 const containerSnapshotMetrics = { cpu, memory, rx, tx };
 
@@ -28,7 +30,7 @@ export const containerSnapshotMetricTypes = Object.keys(containerSnapshotMetrics
   keyof typeof containerSnapshotMetrics
 >;
 
-export const metrics: InventoryMetrics = {
+export const metrics: InventoryMetricsWithCharts<ContainerFormulas, ContainerCharts> = {
   tsvb: {
     containerOverview,
     containerCpuUsage,
@@ -42,6 +44,8 @@ export const metrics: InventoryMetrics = {
     containerK8sMemoryUsage,
   },
   snapshot: containerSnapshotMetrics,
+  getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
+  getCharts: async () => await import('./charts').then(({ charts }) => charts),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

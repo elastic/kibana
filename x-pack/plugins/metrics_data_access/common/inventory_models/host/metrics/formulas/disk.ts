@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  DISK_READ_IOPS_LABEL,
+  DISK_READ_THROUGHPUT_LABEL,
+  DISK_SPACE_AVAILABILITY_LABEL,
+  DISK_SPACE_AVAILABLE_LABEL,
+  DISK_USAGE_LABEL,
+  DISK_WRITE_IOPS_LABEL,
+  DISK_WRITE_THROUGHPUT_LABEL,
+} from '../../../shared/charts/constants';
 
 export const diskIORead: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskIORead', {
-    defaultMessage: 'Disk Read IOPS',
-  }),
+  label: DISK_READ_IOPS_LABEL,
   value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
   format: 'number',
   decimals: 0,
@@ -19,9 +25,7 @@ export const diskIORead: LensBaseLayer = {
 };
 
 export const diskReadThroughput: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskReadThroughput', {
-    defaultMessage: 'Disk Read Throughput',
-  }),
+  label: DISK_READ_THROUGHPUT_LABEL,
   value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
   format: 'bytes',
   decimals: 1,
@@ -29,36 +33,28 @@ export const diskReadThroughput: LensBaseLayer = {
 };
 
 export const diskSpaceAvailable: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskSpaceAvailable', {
-    defaultMessage: 'Disk Space Available',
-  }),
+  label: DISK_SPACE_AVAILABLE_LABEL,
   value: 'average(system.filesystem.free)',
   format: 'bytes',
   decimals: 0,
 };
 
 export const diskSpaceAvailability: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskSpaceAvailability', {
-    defaultMessage: 'Disk Space Availability',
-  }),
+  label: DISK_SPACE_AVAILABILITY_LABEL,
   value: '1 - average(system.filesystem.used.pct)',
   format: 'percent',
   decimals: 0,
 };
 
 export const diskUsage: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskUsage', {
-    defaultMessage: 'Disk Usage',
-  }),
+  label: DISK_USAGE_LABEL,
   value: 'average(system.filesystem.used.pct)',
   format: 'percent',
   decimals: 0,
 };
 
 export const diskIOWrite: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskIOWrite', {
-    defaultMessage: 'Disk Write IOPS',
-  }),
+  label: DISK_WRITE_IOPS_LABEL,
   value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
   format: 'number',
   decimals: 0,
@@ -66,9 +62,7 @@ export const diskIOWrite: LensBaseLayer = {
 };
 
 export const diskWriteThroughput: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskWriteThroughput', {
-    defaultMessage: 'Disk Write Throughput',
-  }),
+  label: DISK_WRITE_THROUGHPUT_LABEL,
   value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
   format: 'bytes',
   decimals: 1,

@@ -153,3 +153,28 @@ export const useHostKpiCharts = ({
 
   return charts;
 };
+
+export const useContainerPageViewMetricsCharts = ({
+  metricsDataViewId,
+}: {
+  metricsDataViewId?: string;
+}) => {
+  const model = findInventoryModel('container');
+
+  const { value: charts = [] } = useAsync(async () => {
+    const { cpu, memory } = await model.metrics.getCharts();
+
+    return [cpu.xy.cpuUsage, memory.xy.memoryUsage].map((chart) => {
+      return {
+        ...chart,
+        ...(metricsDataViewId && {
+          dataset: {
+            index: metricsDataViewId,
+          },
+        }),
+      };
+    });
+  }, [metricsDataViewId]);
+
+  return charts;
+};

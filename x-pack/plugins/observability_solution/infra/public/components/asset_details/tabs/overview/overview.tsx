@@ -45,6 +45,7 @@ export const Overview = () => {
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
+      assetType={asset.type}
     />
   ) : (
     <MetricsSectionCompact
@@ -62,10 +63,12 @@ export const Overview = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
-      <EuiFlexItem grow={false}>
-        <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
-        <CpuProfilingPrompt />
-      </EuiFlexItem>
+      {asset.type === 'host' ? (
+        <EuiFlexItem grow={false}>
+          <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
+          <CpuProfilingPrompt />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
