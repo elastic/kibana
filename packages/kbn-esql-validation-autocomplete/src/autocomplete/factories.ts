@@ -58,7 +58,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   return {
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
-    ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-validation-autocomplete.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
     documentation: {
@@ -163,6 +163,16 @@ export const buildConstantsDefinitions = (
         defaultMessage: `Constant`,
       }),
     sortText: 'A',
+  }));
+
+export const buildValueDefinitions = (values: string[]): SuggestionRawDefinition[] =>
+  values.map((value) => ({
+    label: `"${value}"`,
+    text: `"${value}"`,
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+      defaultMessage: 'Literal value',
+    }),
+    kind: 'Value',
   }));
 
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {

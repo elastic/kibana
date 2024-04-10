@@ -52,8 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     if (mode === 'savedObject') {
       await PageObjects.share.exportAsSavedObject();
     }
-    const sharedUrl = await PageObjects.share.getSharedUrl();
-    return sharedUrl;
+    return PageObjects.share.getSharedUrl();
   };
 
   describe('share dashboard', () => {
