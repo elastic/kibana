@@ -96,13 +96,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return seriesType;
   }
 
-  async function getCurrentVisChartTitle() {
-    const chartElement = await find.byCssSelector(
-      '[data-test-subj="unifiedHistogramChart"] [data-render-complete="true"]'
-    );
-    return await chartElement.getAttribute('data-title');
-  }
-
   describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
