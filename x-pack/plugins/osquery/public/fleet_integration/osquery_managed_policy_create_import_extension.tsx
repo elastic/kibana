@@ -307,6 +307,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         const updatedPolicy = produce(newPolicy, (draft) => {
           if (editMode && policy?.inputs.length) {
             set(draft, 'inputs', policy.inputs);
+          } else if (newPolicy.inputs[0]?.streams?.length) {
+            set(draft, 'inputs', newPolicy.inputs);
           } else {
             set(draft, 'inputs[0]', {
               type: 'osquery',
