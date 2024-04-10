@@ -579,12 +579,19 @@ export interface StateContext<T> {
   latestExecutedState?: LatestExecutedState<T>;
 }
 
+export interface EsIndexPattern {
+  /** The user-facing title */
+  title: string;
+  /** The actual pattern with the * */
+  name: string;
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
-  es_index_patterns: Record<string, string>;
   name: string;
+  es_index_patterns: EsIndexPattern[];
   version: string;
   install_status: EpmPackageInstallStatus;
   install_version: string;

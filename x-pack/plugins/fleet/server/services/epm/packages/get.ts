@@ -34,6 +34,7 @@ import type {
   InstalledPackage,
   PackageSpecManifest,
   AssetsMap,
+  EsIndexPattern,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -379,23 +380,16 @@ export async function getInstalledPackageManifests(
 }
 
 function getInstalledPackageSavedObjectDataStreams(
-  indexPatterns: Record<string, string>,
+  indexPatterns: EsIndexPattern[],
   dataStreamType?: string
 ) {
-  return Object.entries(indexPatterns)
-    .map(([key, value]) => {
-      return {
-        name: value,
-        title: key,
-      };
-    })
-    .filter((stream) => {
-      if (!dataStreamType) {
-        return true;
-      } else {
-        return stream.name.startsWith(`${dataStreamType}-`);
-      }
-    });
+  return indexPatterns.filter((stream) => {
+    if (!dataStreamType) {
+      return true;
+    } else {
+      return stream.name.startsWith(`${dataStreamType}-`);
+    }
+  });
 }
 
 export const getInstallations = getPackageSavedObjects;

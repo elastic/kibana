@@ -935,7 +935,10 @@
     "properties": {
       "es_index_patterns": {
         "dynamic": false,
-        "properties": {}
+        "properties": {
+          "pattern": { "type": "keyword" },
+          "name": { "type": "keyword" }
+        }
       },
       "experimental_data_stream_features": {
         "properties": {

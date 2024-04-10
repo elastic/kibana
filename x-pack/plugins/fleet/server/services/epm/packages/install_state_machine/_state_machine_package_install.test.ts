@@ -266,7 +266,7 @@ describe('_stateMachineInstallPackage', () => {
         verification_status: 'verified',
         installed_kibana: [] as any,
         installed_es: [] as any,
-        es_index_patterns: {},
+        es_index_patterns: [],
       },
       type: PACKAGES_SAVED_OBJECT_TYPE,
       references: [],

@@ -47,7 +47,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         verification_status: 'verified',
         installed_kibana: [] as any,
         installed_es: installedEs,
-        es_index_patterns: {},
+        es_index_patterns: [],
       },
       type: PACKAGES_SAVED_OBJECT_TYPE,
       references: [],
