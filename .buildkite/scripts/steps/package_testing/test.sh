@@ -57,14 +57,19 @@ function echoKibanaLogs {
 }
 trap "echoKibanaLogs" EXIT
 
-vagrant provision "$TEST_PACKAGE"
+if [[ "$TEST_PACKAGE" == "fips" ]]; then
+  # TODO: add test script
+  sleep 10
+else
+  vagrant provision "$TEST_PACKAGE"
 
-export TEST_BROWSER_HEADLESS=1
-export TEST_KIBANA_URL="http://elastic:changeme@$KIBANA_IP_ADDRESS:5601"
-export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
+  export TEST_BROWSER_HEADLESS=1
+  export TEST_KIBANA_URL="http://elastic:changeme@$KIBANA_IP_ADDRESS:5601"
+  export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 
-echo "--- FTR - Reporting"
+  echo "--- FTR - Reporting"
 
-cd x-pack
+  cd x-pack
 
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+  node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+fi
