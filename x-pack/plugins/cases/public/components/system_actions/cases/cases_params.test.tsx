@@ -61,7 +61,7 @@ describe('CasesParamsFields renders', () => {
             {
               name: 'host.ip',
               type: 'ip',
-              esTypes: ['keyword'],
+              aggregatable: true,
             },
             {
               name: 'host.geo.location',
@@ -170,7 +170,7 @@ describe('CasesParamsFields renders', () => {
               {
                 name: 'host.ip',
                 type: 'ip',
-                esTypes: ['keyword'],
+                aggregatable: true,
               },
               {
                 name: 'host.geo.location',
@@ -179,7 +179,7 @@ describe('CasesParamsFields renders', () => {
               {
                 name: 'alert.name',
                 type: 'string',
-                esTypes: ['keyword'],
+                aggregatable: true,
               },
             ],
           },

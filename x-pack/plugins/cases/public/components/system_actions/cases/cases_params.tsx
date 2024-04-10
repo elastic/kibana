@@ -113,7 +113,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     return dataViews
       .map((dataView) => {
         return dataView.fields
-          .filter((field) => field.esTypes?.includes('keyword'))
+          .filter((field) => Boolean(field.aggregatable))
           .map((field) => ({
             value: field.name,
             label: field.name,
