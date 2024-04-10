@@ -27,6 +27,7 @@
     "@kbn/serverless",
     "@kbn/shared-ux-error-boundary",
     "@kbn/deeplinks-management",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*"
