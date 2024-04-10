@@ -592,6 +592,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'superuser at space1':
             case 'global_read at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
               expect(response.statusCode).to.eql(200);
               break;
@@ -600,7 +601,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-            case 'system_actions at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: 'Unauthorized to find rules for any rule types',
