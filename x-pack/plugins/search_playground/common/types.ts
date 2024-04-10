@@ -29,6 +29,7 @@ export enum APIRoutes {
 export enum LLMs {
   openai = 'openai',
   openai_azure = 'openai_azure',
+  bedrock = 'bedrock',
 }
 
 export interface ChatRequestData {

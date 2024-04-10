@@ -38,7 +38,7 @@ interface PromptTemplateOptions {
   type?: 'openai' | 'mistral';
 }
 
-export const Prompt = (instructions: string, options: PromptTemplateOptions) => {
+export const Prompt = (instructions: string, options: PromptTemplateOptions): string => {
   const systemInstructions = `
   - ${instructions}
   ${
