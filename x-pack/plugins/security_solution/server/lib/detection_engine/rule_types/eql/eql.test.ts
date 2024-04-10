@@ -10,6 +10,7 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
+import type { ExperimentalFeatures } from '../../../../../common';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 import type { EqlRuleParams } from '../../rule_schema';
@@ -31,6 +32,7 @@ describe('eql_executor', () => {
     to: dateMath.parse(params.to)!,
     maxSignals: params.maxSignals,
   };
+  const mockExperimentalFeatures = {} as ExperimentalFeatures;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,6 +66,7 @@ describe('eql_executor', () => {
           alertTimestampOverride: undefined,
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: false,
+          experimentalFeatures: mockExperimentalFeatures,
         });
         expect(result.warningMessages).toEqual([
           `The following exceptions won't be applied to rule execution: ${
@@ -112,6 +115,7 @@ describe('eql_executor', () => {
           alertTimestampOverride: undefined,
           alertWithSuppression: jest.fn(),
           isAlertSuppressionActive: true,
+          experimentalFeatures: mockExperimentalFeatures,
         });
 
         expect(result.warningMessages).toContain(
@@ -140,6 +144,11 @@ describe('eql_executor', () => {
         primaryTimestamp: '@timestamp',
         exceptionFilter: undefined,
         unprocessedExceptions: [],
+        wrapSuppressedHits: jest.fn(),
+        alertTimestampOverride: undefined,
+        alertWithSuppression: jest.fn(),
+        isAlertSuppressionActive: true,
+        experimentalFeatures: mockExperimentalFeatures,
       });
       expect(result.userError).toEqual(true);
     });
