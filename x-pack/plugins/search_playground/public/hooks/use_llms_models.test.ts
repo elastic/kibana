@@ -50,29 +50,8 @@ describe('useLLMsModels Hook', () => {
         connectorId: 'connectorId1',
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-1106',
-        value: 'gpt-3.5-turbo-1106',
-      },
-      {
-        connectorId: 'connectorId1',
-        disabled: false,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k',
-        value: 'gpt-3.5-turbo-16k',
-      },
-      {
-        connectorId: 'connectorId1',
-        disabled: false,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k-0613',
-        value: 'gpt-3.5-turbo-16k-0613',
-      },
-      {
-        connectorId: 'connectorId1',
-        disabled: false,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-instruct',
-        value: 'gpt-3.5-turbo-instruct',
+        name: 'gpt-4',
+        value: 'gpt-4',
       },
     ]);
   });
@@ -101,29 +80,8 @@ describe('useLLMsModels Hook', () => {
         connectorId: undefined,
         disabled: true,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-1106',
-        value: 'gpt-3.5-turbo-1106',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k',
-        value: 'gpt-3.5-turbo-16k',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-16k-0613',
-        value: 'gpt-3.5-turbo-16k-0613',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo-instruct',
-        value: 'gpt-3.5-turbo-instruct',
+        name: 'gpt-4',
+        value: 'gpt-4',
       },
     ]);
   });
