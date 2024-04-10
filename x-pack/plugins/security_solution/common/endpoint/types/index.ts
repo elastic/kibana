@@ -1000,6 +1000,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1130,6 +1131,12 @@ export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
   off = 'off',
+}
+
+export enum AntivirusRegistrationModes {
+  enabled = 'enabled',
+  disabled = 'disabled',
+  sync = 'sync_with_malware_prevent',
 }
 
 /**
