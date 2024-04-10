@@ -1,9 +1,9 @@
-- name: gather cpu only
+- name: gather ansible cpu facts
   setup:
     gather_subset:
       - "!all"
       - "!min"
-      - "processor"
+      - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
 - name: Print all available facts
