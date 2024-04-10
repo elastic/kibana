@@ -1,3 +1,7 @@
+- name: Print all available facts
+  ansible.builtin.debug:
+    var: ansible_facts
+
 - name: ensure usr/share/kibana dir exists
   become: yes
   file:
