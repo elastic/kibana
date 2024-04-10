@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
   const config = getService('config');
-  const dataViews = getService('dataViews');
   const localArchiveDirectories = {
     nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
     discover: 'test/functional/fixtures/kbn_archiver/discover.json',
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('set up a query with filters to save');
     await PageObjects.common.setTime({ from, to });
     await PageObjects.common.navigateToApp('discover');
-    await dataViews.switchToAndValidate(logstashIndexPatternString);
+    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await PageObjects.discover.getHitCount();
       expect(hitCount).to.be('4,731');
@@ -121,12 +120,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await dataViews.switchToAndValidate(dateNestedIndexPattern);
+        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await dataViews.switchToAndValidate(logstashIndexPatternString);
+        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
+        const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+        expect(currentDataView).to.be(logstashIndexPatternString);
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be('4,731');

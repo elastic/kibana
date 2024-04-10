@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const dataViews = getService('dataViews');
 
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
@@ -38,8 +37,9 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('discoverQueryHits');
 
       // Discover should use the destination index pattern
-      const actualIndexPatternSwitchLinkText = await dataViews.getSelectedName();
-
+      const actualIndexPatternSwitchLinkText = await (
+        await testSubjects.find('discover-dataView-switch-link')
+      ).getVisibleText();
       expect(actualIndexPatternSwitchLinkText).to.eql(
         expectedDestinationIndex,
         `Destination index should be ${expectedDestinationIndex}, got ${actualIndexPatternSwitchLinkText}`

@@ -9,11 +9,12 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const dataViews = getService('dataViews');
+  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -35,6 +36,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kbnDirectory = config.get('esTestCluster.ccs')
     ? remoteArchiveDirectory
     : localArchiveDirectory;
+
+  const createDataView = async (dataViewName: string) => {
+    await PageObjects.discover.clickIndexPatternActions();
+    await PageObjects.unifiedSearch.clickCreateNewDataView();
+    await testSubjects.setValue('createIndexPatternTitleInput', dataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await testSubjects.click('saveIndexPatternButton');
+  };
 
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
@@ -58,8 +69,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
-      await dataViews.createFromSearchBar({ name: dataViewToCreate });
-      await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
+      await createDataView(dataViewToCreate);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitForWithTimeout(
+        'data view selector to include a newly created dataview',
+        5000,
+        async () => {
+          const dataViewTitle = await PageObjects.discover.getCurrentlySelectedDataView();
+          // data view editor will add wildcard symbol by default
+          // so we need to include it in our original title when comparing
+          return dataViewTitle === `${dataViewToCreate}*`;
+        }
+      );
     });
   });
 }

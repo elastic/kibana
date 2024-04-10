@@ -54,7 +54,6 @@ import { UsageCollectionService } from './usage_collection';
 import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 import { ESQLService } from './esql';
-import { DataViewsService } from './data_views';
 
 export const services = {
   ...commonServiceProviders,
@@ -77,7 +76,6 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardSettings: DashboardSettingsProvider,
-  dataViews: DataViewsService,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   selectable: SelectableService,

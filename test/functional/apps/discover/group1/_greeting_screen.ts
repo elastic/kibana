@@ -11,11 +11,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -47,11 +47,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await dataViews.createFromPrompt({ name: 'logs', hasTimeField: true });
-      expect(await dataViews.isAdHoc()).to.be(false);
+      await testSubjects.click('createDataViewButton');
 
-      await dataViews.createFromSearchBar({ name: 'log', adHoc: true, hasTimeField: true });
-      expect(await dataViews.isAdHoc()).to.be(true);
+      await testSubjects.setValue('createIndexPatternTitleInput', 'logs', {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+      await retry.waitFor('timestamp field loaded', async () => {
+        const timestampField = await testSubjects.find('timestampField');
+        return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
+      });
+      await testSubjects.click('saveIndexPatternButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(false);
+
+      await PageObjects.discover.createAdHocDataView('log', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
 
       expect(await PageObjects.discover.getIndexPatterns()).to.eql(['log*\nTemporary', 'logs*']);
     });

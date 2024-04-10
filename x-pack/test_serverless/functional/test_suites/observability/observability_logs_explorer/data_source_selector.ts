@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -718,7 +717,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(url).to.contain(`/app/discover`);
           });
 
-          await dataViews.waitForSwitcherToBe(expectedDataViews[1]);
+          await retry.try(async () => {
+            expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
+              expectedDataViews[1]
+            );
+          });
         });
       });
 

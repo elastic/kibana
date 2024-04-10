@@ -1044,6 +1044,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Returns the current index pattern of the data panel
+     */
+    async getDataPanelIndexPattern() {
+      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
+    },
+
+    /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {
@@ -1478,6 +1485,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('lns-dataView-switch-link');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await testSubjects.click('indexPattern-add-field');
+    },
+
+    async createAdHocDataView(name: string, hasTimeField?: boolean) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {

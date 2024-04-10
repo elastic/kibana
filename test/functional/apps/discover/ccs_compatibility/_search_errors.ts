@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
@@ -41,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on single shard shows warning and results', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.switchToAndValidate(defaultIndex);
+      await PageObjects.discover.selectIndexPattern(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -74,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('exception on all shards shows error', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.switchToAndValidate(defaultIndex);
+      await PageObjects.discover.selectIndexPattern(defaultIndex);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();

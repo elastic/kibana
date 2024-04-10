@@ -9,11 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
-  const dataViews = getService('dataViews');
 
   describe('lens runtime fields', () => {
     it('should be able to add runtime field and use it', async () => {
@@ -22,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
-        await dataViews.clickAddFieldFromSearchBar();
+        await PageObjects.lens.clickAddField();
         await fieldEditor.setName('runtimefield');
         await fieldEditor.enableValue();
         await fieldEditor.typeScript("emit('abc')");

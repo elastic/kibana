@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
-  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'settings',
     'common',
@@ -206,11 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update(defaultSettings);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dataViews.createFromSearchBar({
-          name: 'log*',
-          adHoc: true,
-          hasTimeField: false,
-        });
+        await PageObjects.discover.createAdHocDataView('log*', false);
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
@@ -254,11 +249,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update(defaultSettings);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await dataViews.createFromSearchBar({
-          name: 'log*',
-          adHoc: true,
-          hasTimeField: false,
-        });
+        await PageObjects.discover.createAdHocDataView('log*', false);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });

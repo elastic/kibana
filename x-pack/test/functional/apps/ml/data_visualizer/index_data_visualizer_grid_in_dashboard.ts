@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const ml = getService('ml');
-  const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -46,7 +45,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
+          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
+            testData.sourceIndexOrSavedSearch
+          );
         }
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 

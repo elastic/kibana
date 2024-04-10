@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
   const retry = getService('retry');
-  const dataViews = getService('dataViews');
 
   const startTime = 'Jan 1, 2016 @ 00:00:00.000';
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
         });
       } else {
-        await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
+        await ml.dashboardEmbeddables.selectDiscoverIndexPattern(testData.sourceIndexOrSavedSearch);
       }
 
       await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
@@ -55,7 +54,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
+          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
+            testData.sourceIndexOrSavedSearch
+          );
         }
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 

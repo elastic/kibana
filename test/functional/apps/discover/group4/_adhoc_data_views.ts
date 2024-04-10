@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const security = getService('security');
-  const dataViews = getService('dataViews');
 
   const addSearchToDashboard = async (name: string) => {
     await dashboardAddPanel.addSavedSearch(name);
@@ -58,11 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
-      await dataViews.createFromSearchBar({
-        name: 'logstash',
-        adHoc: true,
-        hasTimeField: true,
-      });
+      await PageObjects.discover.createAdHocDataView('logstash', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const first = await PageObjects.discover.getCurrentDataViewId();
 
       await PageObjects.discover.addRuntimeField(
@@ -83,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await dataViews.getSelectedName()).to.be('logstash*');
+      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
 
       // navigate to single doc view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -94,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await dataViews.getSelectedName()).to.be('logstash*');
+      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
     });
 
     it('should support query and filtering', async () => {
@@ -140,11 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('search results should be different after data view update', async () => {
-      await dataViews.createFromSearchBar({
-        name: 'logst',
-        adHoc: true,
-        hasTimeField: true,
-      });
+      await PageObjects.discover.createAdHocDataView('logst', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
       // trigger data view id update
@@ -238,11 +231,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should notify about invalid filter reffs', async () => {
-      await dataViews.createFromSearchBar({
-        name: 'logstas',
-        adHoc: true,
-        hasTimeField: true,
-      });
+      await PageObjects.discover.createAdHocDataView('logstas', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       await filterBar.addFilter({
         field: 'nestedField.child',
         operation: 'is',

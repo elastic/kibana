@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
-  const dataViews = getService('dataViews');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -98,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await dataViews.clickAddFieldFromSearchBar();
+      await PageObjects.lens.clickAddField();
       await fieldEditor.setName(`ab' "'`, true, true);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");

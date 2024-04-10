@@ -13,10 +13,6 @@ describe('testSubjSelector()', function () {
     expect(subj('foo bar')).toEqual('[data-test-subj="foo bar"]');
     expect(subj('foo > bar')).toEqual('[data-test-subj="foo"] [data-test-subj="bar"]');
     expect(subj('foo > bar baz')).toEqual('[data-test-subj="foo"] [data-test-subj="bar baz"]');
-    expect(subj('*foo')).toEqual('[data-test-subj*="foo"]');
-    expect(subj('foo*')).toEqual('[data-test-subj="foo*"]');
-    expect(subj('foo*bar')).toEqual('[data-test-subj="foo*bar"]');
-    expect(subj('*foo >* bar')).toEqual('[data-test-subj*="foo"] [data-test-subj*="bar"]');
     expect(subj('foo> ~bar')).toEqual('[data-test-subj="foo"] [data-test-subj~="bar"]');
     expect(subj('~ foo')).toEqual('[data-test-subj~="foo"]');
     expect(subj('~foo & ~ bar')).toEqual('[data-test-subj~="foo"][data-test-subj~="bar"]');

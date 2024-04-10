@@ -23,7 +23,6 @@ const PINNED_FILTER = {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const filterBar = getService('filterBar');
 
@@ -37,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it(`retains pinned filters from other plugins`, async () => {
       await ml.navigation.navigateToDiscoverViaAppsMenu();
-
-      await dataViews.switchToAndValidate('ft_farequote');
+      await ml.dashboardEmbeddables.selectDiscoverIndexPattern('ft_farequote');
       await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
       await filterBar.addFilter({

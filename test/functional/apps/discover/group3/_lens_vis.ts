@@ -18,8 +18,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
   const toasts = getService('toasts');
-  const dataViews = getService('dataViews');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'settings',
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+    'unifiedFieldList',
+    'unifiedSearch',
+  ]);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -164,15 +172,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show no histogram for non-time-based data views and recover for time-based data views', async () => {
-      await dataViews.createFromSearchBar({
-        name: 'logs',
-        adHoc: true,
-        hasTimeField: true,
-        changeTimestampField: `--- I don't want to use the time filter ---`,
-      });
+      await PageObjects.discover.createAdHocDataView('logs*', false);
+
       await checkNoVis(defaultTotalCount);
 
-      await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
+      await PageObjects.discover.clickIndexPatternActions();
+      await PageObjects.unifiedSearch.editDataView('logs*', '@timestamp');
+
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
     });
 

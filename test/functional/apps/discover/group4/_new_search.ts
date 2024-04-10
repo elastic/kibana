@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const dataViews = getService('dataViews');
 
   describe('discover new search action', function () {
     before(async function () {
@@ -62,11 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should work correctly for a saved search in data view mode', async function () {
-      await dataViews.createFromSearchBar({
-        name: 'logs*',
-        adHoc: true,
-        hasTimeField: true,
-      });
+      await PageObjects.discover.createAdHocDataView('logs*', true);
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await queryBar.setQuery('bytes > 100');
@@ -86,8 +81,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getHitCount()).to.be('14,004');
       expect(await filterBar.hasFilter('extension', 'css')).to.be(false);
       expect(await queryBar.getQueryString()).to.be('');
-      expect(await dataViews.getSelectedName()).to.be('logs**');
-      expect(await dataViews.isAdHoc()).to.be(true);
+      expect(
+        await PageObjects.unifiedSearch.getSelectedDataView('discover-dataView-switch-link')
+      ).to.be('logs**');
+      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
     });
 
     it('should work correctly for ESQL mode', async () => {
