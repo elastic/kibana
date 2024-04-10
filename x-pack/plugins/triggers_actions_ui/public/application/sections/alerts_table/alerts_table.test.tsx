@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-
+import { identity } from 'lodash';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -16,6 +16,7 @@ import {
   ALERT_STATUS,
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { AlertsTable } from './alerts_table';
 import {
   AlertsField,
@@ -39,6 +40,13 @@ import { act } from 'react-dom/test-utils';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const mockCaseService = createCasesServiceMock();
+
+const mockFieldFormatsRegistry = {
+  deserialize: jest.fn().mockImplementation(() => ({
+    id: 'string',
+    convert: jest.fn().mockImplementation(identity),
+  })),
+} as unknown as FieldFormatsRegistry;
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -315,7 +323,7 @@ describe('AlertsTable', () => {
     alertsCount: alerts.length,
     onSortChange: jest.fn(),
     onPageChange: jest.fn(),
-    fieldFormats: (value) => value,
+    fieldFormats: mockFieldFormatsRegistry,
   };
 
   const defaultBulkActionsState = {

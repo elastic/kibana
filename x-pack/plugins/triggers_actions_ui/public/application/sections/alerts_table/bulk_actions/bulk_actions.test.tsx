@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-
+import { identity } from 'lodash';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsTable } from '../alerts_table';
 import {
@@ -43,6 +44,13 @@ const columns = [
     displayAsText: 'Reason',
   },
 ];
+
+const mockFieldFormatsRegistry = {
+  deserialize: jest.fn().mockImplementation(() => ({
+    id: 'string',
+    convert: jest.fn().mockImplementation(identity),
+  })),
+} as unknown as FieldFormatsRegistry;
 
 const mockCaseService = createCasesServiceMock();
 
@@ -243,7 +251,7 @@ describe('AlertsTable.BulkActions', () => {
     alertsCount: alerts.length,
     onSortChange: () => {},
     onPageChange: () => {},
-    fieldFormats: (value) => value,
+    fieldFormats: mockFieldFormatsRegistry,
   };
 
   const tablePropsWithBulkActions = {
