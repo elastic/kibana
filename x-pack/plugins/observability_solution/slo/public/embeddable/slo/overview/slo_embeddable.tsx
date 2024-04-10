@@ -36,9 +36,7 @@ import { PluginContext } from '../../../context/plugin_context';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
 import { GroupSloView } from './group_view';
-// import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
 import type { SloEmbeddableInput } from './types';
-import { groupByOptions } from './slo_group_filters';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
@@ -69,25 +67,12 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     super(initialInput, {}, parent);
     this.reloadSubject = new Subject<boolean>();
     this.reloadGroupSubject = new Subject<SloEmbeddableInput | undefined>();
-    if (initialInput.overviewMode === 'single') {
-      this.setTitle(
-        this.input.title ||
-          i18n.translate('xpack.slo.sloEmbeddable.displayTitle', {
-            defaultMessage: 'SLO Overview',
-          })
-      );
-    } else {
-      const groupByText = groupByOptions.find(
-        (option) => option.value === initialInput.groupFilters?.groupBy
-      )?.text;
-      this.setTitle(
-        this.input.title ||
-          i18n.translate('xpack.slo.sloEmbeddable.groupBy.displayTitle', {
-            defaultMessage: 'SLO Overview group by {groupByText}',
-            values: { groupByText },
-          })
-      );
-    }
+    this.setTitle(
+      this.input.title ||
+        i18n.translate('xpack.slo.sloEmbeddable.displayTitle', {
+          defaultMessage: 'SLO Overview',
+        })
+    );
 
     this.subscription = this.getInput$().subscribe((input) => {
       this.reloadGroupSubject.next(input);
@@ -95,7 +80,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
   }
 
   setTitle(title: string) {
-    this.setPanelTitle(title);
     this.updateInput({ title });
   }
 

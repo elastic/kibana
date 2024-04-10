@@ -6,13 +6,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { SLOView } from '../../../pages/slos/components/toggle_slo_view';
 import { SloEmbeddableInput } from './types';
 import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
-import { groupByOptions } from './slo_group_filters';
 
 interface Props {
   groupBy: string;
@@ -71,20 +69,7 @@ export function GroupSloView({
 
         const nGroups = input?.groupFilters?.groups ?? groups;
         setGroups(nGroups);
-
-        let newTitle = '';
-        const groupByText = groupByOptions.find((option) => option.value === ngroupBy)?.text;
-        if (input.overviewMode === 'single') {
-          newTitle = 'SLO Overview';
-        } else {
-          newTitle = i18n.translate('xpack.slo.sloEmbeddable.groupBy.displayTitle', {
-            defaultMessage: 'SLO Overview group by {groupByText}',
-            values: { groupByText },
-          });
-        }
-        setTitle(newTitle);
       }
-      // setLastRefreshTime(Date.now());
     });
     return () => {
       subs?.unsubscribe();
