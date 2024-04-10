@@ -8,7 +8,7 @@
 import { filter, lastValueFrom } from 'rxjs';
 import parse from 'joi-to-json';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
@@ -65,7 +65,7 @@ export function getObsAIAssistantConnectorType(
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     isSystemActionType: true,
-    getKibanaPrivileges: (params) => [],
+    getKibanaPrivileges: (params) => ['api:observabilityAIAssistant'],
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.observabilityAiAssistant.alertConnector.title', {
       defaultMessage: 'Observability AI Assistant',
@@ -168,14 +168,16 @@ async function executor(
                     if (connector.actionTypeId === '.slack') {
                       return {
                         ...connector,
-                        params: parse(SlackConnectorParamsSchema.getSchema(), 'json').properties,
+                        params: parse((SlackConnectorParamsSchema as Type<any>).getSchema(), 'json')
+                          .properties,
                       };
                     }
 
                     if (connector.actionTypeId === '.email') {
                       return {
                         ...connector,
-                        params: parse(EmailConnectorParamsSchema.getSchema(), 'json').properties,
+                        params: parse((EmailConnectorParamsSchema as Type<any>).getSchema(), 'json')
+                          .properties,
                       };
                     }
                     return connector;
