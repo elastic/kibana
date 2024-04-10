@@ -103,22 +103,30 @@ export const writeLangSmithFeedback = async (
  * If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
  * section, otherwise it is written to the `Project` provided
  *
+ * @param apiKey API Key for LangSmith (will fetch from env vars if not provided)
  * @param projectName Name of project to trace results to
  * @param exampleId Dataset exampleId to associate trace with
  * @param logger
  */
-export const getLangSmithTracer = (
-  projectName: string | undefined,
-  exampleId: string | undefined,
-  logger: Logger | ToolingLog
-): LangChainTracer[] => {
+export const getLangSmithTracer = ({
+  apiKey,
+  projectName,
+  exampleId,
+  logger,
+}: {
+  apiKey?: string;
+  projectName?: string;
+  exampleId?: string;
+  logger: Logger | ToolingLog;
+}): LangChainTracer[] => {
   try {
-    if (!isLangSmithEnabled()) {
+    if (!isLangSmithEnabled() && apiKey == null) {
       return [];
     }
     const lcTracer = new LangChainTracer({
-      projectName: projectName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
+      projectName, // Shows as the 'test' run's 'name' in langsmith ui
       exampleId,
+      client: new Client({ apiKey }),
     });
 
     return [lcTracer];

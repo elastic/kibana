@@ -51,7 +51,7 @@ Array [
     class="euiFlyoutBody insInspectorPanel__flyoutBody emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
+      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
       tabindex="0"
     >
       <div
