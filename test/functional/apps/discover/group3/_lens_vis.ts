@@ -17,16 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects([
-    'settings',
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-    'dashboard',
-    'unifiedFieldList',
-    'unifiedSearch',
-  ]);
+  const dataViews = getService('dataViews');
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -72,11 +64,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await PageObjects.discover.getHitCount()).to.be(totalCount);
   }
 
-  async function changeVisShape(seriesType: string) {
+  async function openLensEditFlyout() {
+    await testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
     await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
     await retry.waitFor('flyout', async () => {
       return await testSubjects.exists('lnsChartSwitchPopover');
     });
+  }
+
+  async function changeVisShape(seriesType: string) {
+    await openLensEditFlyout();
     await testSubjects.click('lnsChartSwitchPopover');
     await testSubjects.setValue('lnsChartSwitchSearch', seriesType, {
       clearWithKeyboard: true,
@@ -93,13 +90,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function getCurrentVisTitle() {
     await toasts.dismissAll();
-    await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await openLensEditFlyout();
     const seriesType = await testSubjects.getVisibleText('lnsChartSwitchPopover');
     await testSubjects.click('cancelFlyoutButton');
     return seriesType;
   }
 
-  describe('discover lens vis', function describeIndexTests() {
+  async function getCurrentVisChartTitle() {
+    const chartElement = await find.byCssSelector(
+      '[data-test-subj="unifiedHistogramChart"] [data-render-complete="true"]'
+    );
+    return await chartElement.getAttribute('data-title');
+  }
+
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -166,13 +170,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show no histogram for non-time-based data views and recover for time-based data views', async () => {
-      await PageObjects.discover.createAdHocDataView('logs*', false);
-
+      await dataViews.createFromSearchBar({
+        name: 'logs',
+        adHoc: true,
+        hasTimeField: true,
+        changeTimestampField: `--- I don't want to use the time filter ---`,
+      });
       await checkNoVis(defaultTotalCount);
 
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView('logs*', '@timestamp');
-
+      await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
       expect(await PageObjects.discover.getVisContextSuggestionType()).to.be(
         'histogramForDataView'
@@ -649,7 +655,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('partitionVisChart');
       expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization'); // open the flyout
+      await openLensEditFlyout();
       await testSubjects.existOrFail('lnsEditOnFlyFlyout');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
