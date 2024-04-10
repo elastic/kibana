@@ -35,13 +35,13 @@ if [[ "$TEST_PACKAGE" == "fips" ]]; then
   vagrant up "$TEST_PACKAGE"
 else
   vagrant up "$TEST_PACKAGE" --no-provision
-fi
 
-node scripts/es snapshot \
-  -E network.bind_host=127.0.0.1,192.168.56.1 \
-  -E discovery.type=single-node \
-  --license=trial &
-while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
+  node scripts/es snapshot \
+    -E network.bind_host=127.0.0.1,192.168.56.1 \
+    -E discovery.type=single-node \
+    --license=trial &
+  while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
+fi
 
 function echoKibanaLogs {
   if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
@@ -50,7 +50,7 @@ function echoKibanaLogs {
 
     echo "--- Journal "
     vagrant ssh $TEST_PACKAGE -t -c 'sudo journalctl -u kibana.service --no-pager'
-  elif [[ "$TEST_PACKAGE" == "docker" ]] || [[ "$TEST_PACKAGE" == "fips" ]]; then
+  elif [[ "$TEST_PACKAGE" == "docker" ]]; then
     echo '--- Docker logs'
     vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'
   fi
