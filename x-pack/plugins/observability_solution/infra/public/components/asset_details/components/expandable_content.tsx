@@ -37,7 +37,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
               onClick={toggle}
             >
               <FormattedMessage
-                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
+                id="xpack.infra.assetDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
                 values={{
                   count: others.length,
@@ -51,7 +51,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
       {hasOthers && isExpanded && (
         <EuiFlexItem>
           <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={toggle}>
-            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
+            {i18n.translate('xpack.infra.assetDetails.tabs.metadata.seeLess', {
               defaultMessage: 'Show less',
             })}
           </EuiLink>

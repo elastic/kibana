@@ -11,37 +11,37 @@ import { ContentTabIds, type Tab } from '../../components/asset_details/types';
 export const commonFlyoutTabs: Tab[] = [
   {
     id: ContentTabIds.OVERVIEW,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.overview.title', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.overview', {
       defaultMessage: 'Overview',
     }),
   },
   {
     id: ContentTabIds.METADATA,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.metadata.title', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
     }),
   },
   {
     id: ContentTabIds.METRICS,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.metrics.title', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.metrics', {
       defaultMessage: 'Metrics',
     }),
   },
   {
     id: ContentTabIds.PROCESSES,
-    name: i18n.translate('xpack.infra.metrics.assetDetails.tabs.processes', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
   },
   {
     id: ContentTabIds.PROFILING,
-    name: i18n.translate('xpack.infra.metrics.assetDetails.tabs.profiling', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.profiling', {
       defaultMessage: 'Universal Profiling',
     }),
   },
   {
     id: ContentTabIds.LOGS,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.logs.title', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.logs', {
       defaultMessage: 'Logs',
     }),
   },
