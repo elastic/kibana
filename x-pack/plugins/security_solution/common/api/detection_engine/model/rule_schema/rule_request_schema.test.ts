@@ -10,6 +10,7 @@ import { getListArrayMock } from '../../../../detection_engine/schemas/types/lis
 import {
   getCreateEsqlRulesSchemaMock,
   getCreateMachineLearningRulesSchemaMock,
+  getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
   getCreateRulesSchemaMockWithDataView,
   getCreateSavedQueryRulesSchemaMock,
@@ -1267,6 +1268,7 @@ describe('rules schema', () => {
       { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
       { ruleType: 'query', ruleMock: getCreateRulesSchemaMock() },
       { ruleType: 'saved_query', ruleMock: getCreateSavedQueryRulesSchemaMock() },
+      { ruleType: 'new_terms', ruleMock: getCreateNewTermsRulesSchemaMock() },
     ];
 
     cases.forEach(({ ruleType, ruleMock }) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiInputPopover, EuiFieldText, htmlIdGenerator } from '@elastic/eui';
+import type { EuiSelectableOption, EuiFieldTextProps } from '@elastic/eui';
+import { EuiInputPopover, EuiFieldText, htmlIdGenerator, keys } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -90,15 +90,20 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(true);
   }, []);
 
+  const handleKeyboardOpen: EuiFieldTextProps['onKeyDown'] = useCallback((event) => {
+    if (event.key === keys.ENTER) {
+      setIsPopoverOpen(true);
+    }
+  }, []);
+
   const popoverId = useMemo(() => htmlIdGenerator('searchTimelinePopover')(), []);
 
   const superSelect = useMemo(
     () => (
       <EuiFieldText
-        readOnly
         disabled={isDisabled}
-        onFocus={handleOpenPopover}
         onClick={handleOpenPopover}
+        onKeyDown={handleKeyboardOpen}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
         aria-label={ariaLabel}
@@ -107,7 +112,15 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         role="combobox"
       />
     ),
-    [ariaLabel, handleOpenPopover, isDisabled, isPopoverOpen, popoverId, timelineTitle]
+    [
+      ariaLabel,
+      handleKeyboardOpen,
+      handleOpenPopover,
+      isDisabled,
+      isPopoverOpen,
+      popoverId,
+      timelineTitle,
+    ]
   );
 
   const handleGetSelectableOptions = useCallback(

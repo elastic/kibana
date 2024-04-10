@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
@@ -128,6 +128,8 @@ const RuleAdd = <
     http,
     notifications: { toasts },
     application: { capabilities },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
@@ -273,7 +275,8 @@ const RuleAdd = <
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });

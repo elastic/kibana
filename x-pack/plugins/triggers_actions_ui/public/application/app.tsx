@@ -8,12 +8,16 @@
 import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
+import {
+  ChromeBreadcrumb,
+  CoreStart,
+  I18nStart,
+  ScopedHistory,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
-import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -26,7 +30,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { createRuleRoute, editRuleRoute, ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -77,7 +80,8 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
-  theme$: Observable<CoreTheme>;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
@@ -95,26 +99,21 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, theme } = deps;
+  const { dataViews, i18n, theme } = deps;
   const sections: Section[] = ['rules', 'logs'];
-  const isDarkMode = theme.getTheme().darkMode;
 
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return (
-    <I18nProvider>
-      <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <KibanaContextProvider services={{ ...deps }}>
-            <Router history={deps.history}>
-              <QueryClientProvider client={queryClient}>
-                <AppWithoutRouter sectionsRegex={sectionsRegex} />
-              </QueryClientProvider>
-            </Router>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </EuiThemeProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+      <KibanaContextProvider services={{ ...deps }}>
+        <Router history={deps.history}>
+          <QueryClientProvider client={queryClient}>
+            <AppWithoutRouter sectionsRegex={sectionsRegex} />
+          </QueryClientProvider>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

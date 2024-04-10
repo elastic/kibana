@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import React, {
@@ -198,6 +198,8 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
+    i18n: i18nStart,
+    theme,
   } = kibanaServices;
 
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -707,7 +709,8 @@ export const RulesList = ({
       toasts.addDanger({
         title: parsedError.summary,
         text: toMountPoint(
-          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>
+          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
+          { theme, i18n: i18nStart }
         ),
       });
     } else {

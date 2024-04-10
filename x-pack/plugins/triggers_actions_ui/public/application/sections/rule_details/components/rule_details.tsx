@@ -24,7 +24,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -91,12 +91,9 @@ const ruleDetailStyle = {
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
-  actionTypes,
   bulkDisableRules,
   bulkEnableRules,
   bulkDeleteRules,
-  snoozeRule,
-  unsnoozeRule,
   requestRefresh,
   refreshToken,
 }) => {
@@ -108,6 +105,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setBreadcrumbs,
     chrome,
     http,
+    i18n: i18nStart,
+    theme,
     notifications: { toasts },
   } = useKibana().services;
   const ruleReducer = useMemo(() => getRuleReducer(actionTypeRegistry), [actionTypeRegistry]);
@@ -231,12 +230,21 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}
-            </>
+            </>,
+            { i18n: i18nStart, theme }
           ),
         });
       }
     }
-  }, [rule.schedule.interval, goToEditForm, config.minimumScheduleInterval, toasts, hasEditButton]);
+  }, [
+    i18nStart,
+    theme,
+    rule.schedule.interval,
+    config.minimumScheduleInterval,
+    toasts,
+    hasEditButton,
+    goToEditForm,
+  ]);
 
   const setRule = async () => {
     history.push(getRuleDetailsRoute(rule.id));
