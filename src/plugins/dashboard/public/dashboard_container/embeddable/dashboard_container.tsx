@@ -842,12 +842,4 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
-
-  public getFilters() {
-    return this.getInput().filters;
-  }
-
-  public getQuery(): Query | undefined {
-    return this.getInput().query;
-  }
 }

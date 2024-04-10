@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -18,7 +19,14 @@ import {
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
@@ -473,6 +481,24 @@ export const initializeDashboard = async ({
     dashboardContainer.integrationSubscriptions.add(
       combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
         filters$.next(getCombinedFilters());
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
       })
     );
   });

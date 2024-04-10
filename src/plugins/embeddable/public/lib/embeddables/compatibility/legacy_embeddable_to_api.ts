@@ -196,11 +196,11 @@ export const legacyEmbeddableToApi = (
     embeddable.updateInput({ timeRange: nextTimeRange });
 
   const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
-    isFilterableEmbeddable(embeddable) ? embeddable.getFilters() : undefined
+    undefined
   );
   const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
-  >(isFilterableEmbeddable(embeddable) ? embeddable.getQuery() : undefined);
+  >(undefined);
   // if this embeddable is a legacy filterable embeddable, publish changes to those filters to the panelFilters subject.
   if (isFilterableEmbeddable(embeddable)) {
     embeddable.untilInitializationFinished().then(() => {
