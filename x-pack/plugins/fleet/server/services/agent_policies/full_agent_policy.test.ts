@@ -721,7 +721,6 @@ describe('getFullAgentPolicy', () => {
         agent_limits_go_max_procs: 2,
         agent_download_timeout: '60s',
         agent_download_target_directory: '/tmp',
-        agent_logging_metrics_period: '10s',
       },
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -734,7 +733,6 @@ describe('getFullAgentPolicy', () => {
           target_directory: '/tmp',
         },
         limits: { go_max_procs: 2 },
-        logging: { metrics: { period: '10s' } },
       },
     });
   });
