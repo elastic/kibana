@@ -25,11 +25,6 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
     },
 
-    async getAssetDetailsKubernetesMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsKubernetesChartsSection');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
-    },
-
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
@@ -100,9 +95,18 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
     },
 
-    async getAssetDetailsOverviewTabMetricsCharts() {
+    async getOverviewTabHostMetricCharts(metric: string) {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsHostChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getOverviewTabKubernetesMetricCharts() {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
     // Collapsable sections
@@ -192,17 +196,26 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsMetricsTab');
     },
 
-    async getAssetDetailsMetricsTabCharts() {
+    async metricsChartsContentExists() {
+      return testSubjects.click('infraAssetDetailsMetricChartsContent');
+    },
+
+    async getMetricsTabHostCharts(metric: string) {
       const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsHostChartsSection${metric}`
+      );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getMetricsTabKubernetesCharts() {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
     async quickAccessItemExists(metric: string) {
       return testSubjects.click(`infraMetricsQuickAccessItem${metric}`);
-    },
-
-    async metricsChartsContentExists() {
-      return testSubjects.existOrFail('infraAssetDetailsMetricChartsContent');
     },
 
     // Processes
@@ -255,7 +268,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async logsExists() {
-      testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+      return testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
     },
 
     async getLogsSearchField() {

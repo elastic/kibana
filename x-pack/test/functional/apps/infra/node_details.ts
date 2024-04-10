@@ -198,19 +198,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 6 charts in the metrics section', async () => {
-            const charts = await pageObjects.assetDetails.getAssetDetailsOverviewTabMetricsCharts();
-            expect(charts.length).to.equal(6);
-          });
-
           [
-            { metric: 'cpu' },
-            { metric: 'memory' },
-            { metric: 'network' },
-            { metric: 'disk' },
-          ].forEach(({ metric }) => {
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
             it(`should show ${metric} charts group the in metrics section`, async () => {
               await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+            });
+
+            it(`should render ${chartsCount} ${metric} charts in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
             });
           });
 
@@ -378,20 +378,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickMetricsTab();
           });
 
-          it('should render 11 charts', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsTabCharts();
-            expect(hosts.length).to.equal(11);
-          });
-
           [
-            { metric: 'cpu' },
-            { metric: 'memory' },
-            { metric: 'network' },
-            { metric: 'disk' },
-            { metric: 'logs' },
-          ].forEach(({ metric }) => {
+            { metric: 'cpu', chartsCount: 4 },
+            { metric: 'memory', chartsCount: 2 },
+            { metric: 'disk', chartsCount: 3 },
+            { metric: 'network', chartsCount: 1 },
+            { metric: 'logs', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
             it(`should show ${metric} charts group the in metrics section`, async () => {
               await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+            });
+
+            it(`should render ${chartsCount} ${metric} charts in the Metrics section`, async () => {
+              const charts = await pageObjects.assetDetails.getMetricsTabHostCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
             });
 
             it(`should render quick access items for ${metric}`, async () => {
@@ -448,7 +448,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render logs tab', async () => {
-            await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+            await pageObjects.assetDetails.logsExists();
           });
 
           it('preserves search term between page reloads', async () => {
@@ -554,15 +554,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('should render 12 charts in the Metrics section', async () => {
-              const hosts =
-                await pageObjects.assetDetails.getAssetDetailsOverviewTabMetricsCharts();
-              expect(hosts.length).to.equal(10);
-            });
+            [
+              { metric: 'cpu', chartsCount: 2 },
+              { metric: 'memory', chartsCount: 1 },
+              { metric: 'disk', chartsCount: 2 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 4 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should render ${chartsCount} ${metric} chart`, async () => {
+                retry.tryForTime(30 * 1000, async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
+                    : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
 
-            it('should render 4 charts in the Kubernetes Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
-              expect(hosts.length).to.equal(4);
+                  expect(charts.length).to.equal(chartsCount);
+                });
+              });
             });
           });
 
@@ -571,22 +578,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               await pageObjects.assetDetails.clickMetricsTab();
             });
 
-            it('should render 15 charts', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsTabCharts();
-              expect(hosts.length).to.equal(15);
-            });
-
             [
-              { metric: 'cpu' },
-              { metric: 'memory' },
-              { metric: 'network' },
-              { metric: 'disk' },
-              { metric: 'logs' },
-              { metric: 'kubernetes' },
-            ].forEach(({ metric }) => {
-              it(`should show ${metric} charts group the in metrics section`, async () => {
+              { metric: 'cpu', chartsCount: 4 },
+              { metric: 'memory', chartsCount: 2 },
+              { metric: 'disk', chartsCount: 3 },
+              { metric: 'network', chartsCount: 1 },
+              { metric: 'logs', chartsCount: 1 },
+              { metric: 'kubernetes', chartsCount: 4 },
+            ].forEach(({ metric, chartsCount }) => {
+              it(`should show ${metric} charts group`, async () => {
                 retry.tryForTime(30 * 1000, async () => {
                   await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+                });
+              });
+
+              it(`should render ${chartsCount} ${metric} chart`, async () => {
+                retry.tryForTime(30 * 1000, async () => {
+                  const charts = await (metric === 'kubernetes'
+                    ? pageObjects.assetDetails.getMetricsTabKubernetesCharts()
+                    : pageObjects.assetDetails.getMetricsTabHostCharts(metric));
+
+                  expect(charts.length).to.equal(chartsCount);
                 });
               });
 
