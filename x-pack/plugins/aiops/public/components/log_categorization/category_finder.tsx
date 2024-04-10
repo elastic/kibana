@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 // import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitch, EuiTextArea, EuiSpacer } from '@elastic/eui';
+import { type Category } from '@kbn/aiops-log-pattern-analysis/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { Category, EventRate, SparkLinesPerCategory } from './use_categorize_request';
+import { type EventRate } from './use_categorize_request';
 
 interface Props {
   value: string | undefined;
   categories: Category[];
-  sparkLines: SparkLinesPerCategory;
   eventRate: EventRate;
   loading: boolean;
   setFilterKey: (key: string | null) => void;
@@ -24,7 +25,6 @@ interface Props {
 export const CategoryFinder: FC<Props> = ({
   value,
   categories,
-  sparkLines,
   eventRate,
   loading,
   setFilterKey,

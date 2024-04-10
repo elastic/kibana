@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerStart } from './plugin';
 
 export interface UnifiedDocViewerServices {
@@ -24,4 +25,5 @@ export interface UnifiedDocViewerServices {
   storage: Storage;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
+  uiActions: UiActionsStart;
 }

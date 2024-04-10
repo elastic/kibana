@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { type FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import {
   EuiFlexGroup,
@@ -21,10 +21,10 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { buildEmptyFilter, Filter } from '@kbn/es-query';
+import { buildEmptyFilter, type Filter } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
-
-import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+import { type Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
@@ -35,11 +35,13 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { MiniHistogram } from '../mini_histogram';
-import { createFilter, QueryMode, QUERY_MODE } from './use_discover_links';
+import { createFilter } from './use_discover_links';
 import {
   getDefaultLogCategorizationAppState,
-  LogCategorizationPageUrlState,
+  type LogCategorizationPageUrlState,
 } from '../../application/url_state/log_pattern_analysis';
+
+type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -169,8 +171,7 @@ export const LogCategorizationPopover: FC<LogCategorizationPageProps> = ({
         index,
         selectedField.name,
         timeField,
-        earliest,
-        latest,
+        { from: earliest!, to: latest! },
         searchQuery,
         intervalMs
       );
@@ -178,7 +179,10 @@ export const LogCategorizationPopover: FC<LogCategorizationPageProps> = ({
         // setFieldValidationResult(validationResult);
         setData({
           categories: categorizationResult.categories,
-          sparkLines: categorizationResult.sparkLinesPerCategory,
+          sparkLines: categorizationResult.categories.reduce((acc, category) => {
+            acc[category.key] = category.sparkline!;
+            return acc;
+          }, {} as SparkLinesPerCategory),
         });
         if (fieldValue) {
           const category = categorizationResult.categories.find((c) =>
