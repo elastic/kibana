@@ -18,8 +18,11 @@ import {
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
+import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
+import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
 
 const mockedUseKibana = mockUseKibana();
 
@@ -49,53 +52,54 @@ describe('<RightPanelTour />', () => {
         storage: storageMock,
       },
     });
+    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(false);
 
     storageMock.clear();
   });
 
-  it('should render full tour for alerts', async () => {
+  it('should render tour for alerts', async () => {
     const { getByText, getByTestId } = renderRightPanelTour();
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-1')).toBeVisible();
+      expect(getByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).toBeVisible();
     });
     fireEvent.click(getByText('Next'));
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-2')).toBeVisible();
+      expect(getByTestId(`${FLYOUT_TOUR_TEST_ID}-2`)).toBeVisible();
     });
     fireEvent.click(getByText('Next'));
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-3')).toBeVisible();
+      expect(getByTestId(`${FLYOUT_TOUR_TEST_ID}-3`)).toBeVisible();
     });
     fireEvent.click(getByText('Next'));
   });
 
-  it('should render partial tour for preview', async () => {
-    const { getByText, getByTestId } = renderRightPanelTour({
+  it('should not render tour for preview', () => {
+    const { queryByTestId, queryByText } = renderRightPanelTour({
       ...mockContextValue,
       isPreview: true,
     });
-    await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-1')).toBeVisible();
-    });
-    fireEvent.click(getByText('Next'));
-    await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-2')).toBeVisible();
-    });
-    fireEvent.click(getByText('Next'));
+    expect(queryByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).not.toBeInTheDocument();
+    expect(queryByText('Next')).not.toBeInTheDocument();
   });
 
-  it('should render partial tour for non-alerts', async () => {
-    const { getByText, getByTestId } = renderRightPanelTour({
+  it('should not render tour for non-alerts', () => {
+    const { queryByText, queryByTestId } = renderRightPanelTour({
       ...mockContextValue,
       getFieldsData: () => '',
     });
-    await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-1')).toBeVisible();
+
+    expect(queryByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).not.toBeInTheDocument();
+    expect(queryByText('Next')).not.toBeInTheDocument();
+  });
+
+  it('should not render tour for flyout in timeline', () => {
+    (useIsTimelineFlyoutOpen as jest.Mock).mockReturnValue(true);
+    const { queryByText, queryByTestId } = renderRightPanelTour({
+      ...mockContextValue,
+      getFieldsData: () => '',
     });
-    fireEvent.click(getByText('Next'));
-    await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-2')).toBeVisible();
-    });
-    fireEvent.click(getByText('Next'));
+
+    expect(queryByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).not.toBeInTheDocument();
+    expect(queryByText('Next')).not.toBeInTheDocument();
   });
 });

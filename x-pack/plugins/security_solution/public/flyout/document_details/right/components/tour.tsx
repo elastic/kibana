@@ -12,6 +12,7 @@ import { useRightPanelContext } from '../context';
 import { FlyoutTour } from '../../shared/components/flyout_tour';
 import { getRightSectionTourSteps } from '../../shared/utils/tour_step_config';
 import { getField } from '../../shared/utils';
+import { DocumentDetailsRightPanelKey } from '..';
 import { DocumentDetailsLeftPanelKey } from '../../left';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
@@ -20,7 +21,7 @@ import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyo
  * Guided tour for the right panel in details flyout
  */
 export const RightPanelTour: FC = memo(() => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, getFieldsData } = useRightPanelContext();
 
   const eventKind = getField(getFieldsData('event.kind'));
@@ -28,7 +29,7 @@ export const RightPanelTour: FC = memo(() => {
   const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();
   const showTour = isAlert && !isPreview && !isTimelineFlyoutOpen;
 
-  const onPanelSwitch = useCallback(() => {
+  const goToLeftPanel = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
       params: {
@@ -39,14 +40,26 @@ export const RightPanelTour: FC = memo(() => {
     });
   }, [eventId, indexName, scopeId, openLeftPanel]);
 
+  const goToOverviewTab = useCallback(() => {
+    openRightPanel({
+      id: DocumentDetailsRightPanelKey,
+      path: { tab: 'overview' },
+      params: {
+        id: eventId,
+        indexName,
+        scopeId,
+      },
+    });
+  }, [eventId, indexName, scopeId, openRightPanel]);
+
   const tourStepContent = useMemo(() => getRightSectionTourSteps(), []);
 
   return showTour ? (
     <FlyoutTour
       tourStepContent={tourStepContent}
       totalSteps={5}
-      onPanelSwitch={onPanelSwitch}
-      switchStep={tourStepContent.length}
+      goToOverviewTab={goToOverviewTab}
+      goToLeftPanel={goToLeftPanel}
     />
   ) : null;
 });

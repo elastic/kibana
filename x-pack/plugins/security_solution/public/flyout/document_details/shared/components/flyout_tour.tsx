@@ -30,16 +30,16 @@ export interface FlyoutTourProps {
    */
   totalSteps: number;
   /**
-   * Optional step number to indicate a callback after the specified step
+   * Callback to go to overview tab before tour
    */
-  switchStep?: number;
+  goToOverviewTab?: () => void;
   /**
-   * Optional callback to be called after switchStep
+   * Callback to go to open left panel
    */
-  onPanelSwitch?: () => void;
+  goToLeftPanel?: () => void;
 }
 
-const POPOVER_WIDTH = 300;
+const MAX_POPOVER_WIDTH = 500;
 const TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subtitle', {
   defaultMessage: 'New ways to investigate alerts',
 });
@@ -51,8 +51,8 @@ const TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subtitl
 export const FlyoutTour: FC<FlyoutTourProps> = ({
   tourStepContent,
   totalSteps,
-  switchStep,
-  onPanelSwitch,
+  goToOverviewTab,
+  goToLeftPanel,
 }) => {
   const {
     services: { storage },
@@ -66,17 +66,24 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
     return tourConfig;
   });
 
+  useEffect(() => {
+    storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.FLYOUT, tourState);
+    if (tourState.currentTourStep === 1 && goToOverviewTab) {
+      goToOverviewTab();
+    }
+  }, [storage, tourState, goToOverviewTab]);
+
   const nextStep = useCallback(() => {
     setTourState((prev) => {
-      if (switchStep && onPanelSwitch && prev.currentTourStep === switchStep) {
-        onPanelSwitch();
+      if (prev.currentTourStep === 3 && goToLeftPanel) {
+        goToLeftPanel();
       }
       return {
         ...prev,
         currentTourStep: prev.currentTourStep + 1,
       };
     });
-  }, [switchStep, onPanelSwitch]);
+  }, [goToLeftPanel]);
 
   const finishTour = useCallback(() => {
     setTourState((prev) => {
@@ -114,10 +121,6 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
     [finishTour, nextStep, totalSteps]
   );
 
-  useEffect(() => {
-    storage.set(NEW_FEATURES_TOUR_STORAGE_KEYS.FLYOUT, tourState);
-  }, [storage, tourState]);
-
   // Do not show tour if it is inactive
   if (!tourState.isTourActive) {
     return null;
@@ -138,7 +141,7 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
             key={stepCount}
             step={stepCount}
             isStepOpen={tourState.isTourActive}
-            minWidth={POPOVER_WIDTH}
+            maxWidth={MAX_POPOVER_WIDTH}
             stepsTotal={totalSteps}
             onFinish={finishTour}
             title={steps.title}

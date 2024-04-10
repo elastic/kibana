@@ -15,6 +15,7 @@ import {
 } from '../../../../common/mock';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_TOUR_TEST_ID } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -23,7 +24,7 @@ const mockedUseKibana = mockUseKibana();
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 const mockStore = createMockStore(undefined, undefined, undefined, storageMock);
 
-const content = [1, 2].map((i) => ({
+const content = [1, 2, 3, 4].map((i) => ({
   title: `step${i}`,
   content: <p>{`step${i}`}</p>,
   stepNumber: i,
@@ -32,9 +33,10 @@ const content = [1, 2].map((i) => ({
 
 const tourProps = {
   tourStepContent: content,
-  totalSteps: 2,
+  totalSteps: 4,
 };
-const switchPanel = jest.fn();
+const goToLeftPanel = jest.fn();
+const goToOverviewTab = jest.fn();
 
 const renderTour = (props: FlyoutTourProps) =>
   render(
@@ -42,6 +44,8 @@ const renderTour = (props: FlyoutTourProps) =>
       <FlyoutTour {...props} />
       <div data-test-subj="step1" />
       <div data-test-subj="step2" />
+      <div data-test-subj="step3" />
+      <div data-test-subj="step4" />
     </TestProviders>
   );
 
@@ -59,42 +63,55 @@ describe('Flyout Tour', () => {
   });
 
   it('should  render tour steps', async () => {
-    const { getByTestId, getByText } = renderTour(tourProps);
+    const wrapper = renderTour(tourProps);
 
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-1')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).toBeVisible();
     });
-
-    fireEvent.click(getByText('Next'));
+    fireEvent.click(wrapper.getByText('Next'));
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-2')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-2`)).toBeVisible();
     });
-
+    fireEvent.click(wrapper.getByText('Next'));
     await waitFor(() => {
-      expect(getByText('Finish')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-3`)).toBeVisible();
+    });
+    fireEvent.click(wrapper.getByText('Next'));
+    await waitFor(() => {
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-4`)).toBeVisible();
+    });
+    await waitFor(() => {
+      expect(wrapper.getByText('Finish')).toBeVisible();
     });
   });
 
-  it('should call switch panel callback when it is available', async () => {
-    const { getByTestId, getByText } = renderTour({
+  it('should call goToOverview at step 1', () => {
+    renderTour({
       ...tourProps,
-      onPanelSwitch: switchPanel,
-      switchStep: 1,
+      goToOverviewTab,
+    });
+    expect(goToOverviewTab).toHaveBeenCalled();
+  });
+
+  it('should call goToLeftPanel when after step 3', async () => {
+    const wrapper = renderTour({
+      ...tourProps,
+      goToLeftPanel,
     });
 
     await waitFor(() => {
-      expect(getByTestId('flyout-tour-step-1')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-1`)).toBeVisible();
     });
-
-    fireEvent.click(getByText('Next'));
-
+    fireEvent.click(wrapper.getByText('Next'));
     await waitFor(() => {
-      expect(switchPanel).toHaveBeenCalled();
-      expect(getByTestId('flyout-tour-step-2')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-2`)).toBeVisible();
     });
-
+    fireEvent.click(wrapper.getByText('Next'));
     await waitFor(() => {
-      expect(getByText('Finish')).toBeVisible();
+      expect(wrapper.getByTestId(`${FLYOUT_TOUR_TEST_ID}-3`)).toBeVisible();
     });
+    fireEvent.click(wrapper.getByText('Next'));
+
+    expect(goToLeftPanel).toHaveBeenCalled();
   });
 });

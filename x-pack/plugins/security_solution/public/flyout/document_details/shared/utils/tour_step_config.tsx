@@ -93,13 +93,13 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
     },
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.preview.title', {
-        defaultMessage: 'An easier way to access rule details',
+        defaultMessage: 'Quickly access rule details',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.rulePreview.description"
-            defaultMessage="Click {rulePreview} to see a preview of the rule"
+            defaultMessage="Click {rulePreview} to learn more about the rule that generated the alert."
             values={{
               rulePreview: (
                 <EuiCode>
@@ -118,13 +118,22 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
     },
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.expandDetails.title', {
-        defaultMessage: 'Flyout is now expandable',
+        defaultMessage: 'A more developed view of important alert details',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.expandDetails.description"
-            defaultMessage="Click to expand or collapse the expanded details"
+            defaultMessage="Click {expandDetails} to access more information about sections in the right panel."
+            values={{
+              expandDetails: (
+                <EuiCode>
+                  {i18n.translate('xpack.securitySolution.flyout.tour.expandDetails.text', {
+                    defaultMessage: 'Expand details',
+                  })}
+                </EuiCode>
+              ),
+            }}
           />
         </EuiText>
       ),
