@@ -142,7 +142,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       if (confirmModalLabels) {
         setShowConfirmModal(true);
       } else {
-        return submitEventFilter;
+        return submitEventFilter();
       }
     }, [confirmModalLabels, submitEventFilter]);
 
