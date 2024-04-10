@@ -90,14 +90,15 @@ export class ProjectNavigationService {
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
   private application?: InternalApplicationStart;
   private navLinksService?: ChromeNavLinks;
-  private http?: InternalHttpStart;
+  private _http?: InternalHttpStart;
+  private addSolutionIdToUrlPath?: (solutionId: string, url: string) => string;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
   public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
-    this.http = http;
+    this._http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
@@ -184,7 +185,6 @@ export class ProjectNavigationService {
                       definitions: solutionNavDefinitions,
                       activeId: activeSolutionNavDefinitionId,
                       onChange: (id: string) => {
-                        this.changeActiveSolutionNavigation(id);
                         this.goToSolutionHome(id);
                       },
                     }
@@ -210,6 +210,10 @@ export class ProjectNavigationService {
       changeActiveSolutionNavigation: this.changeActiveSolutionNavigation.bind(this),
       /** In stateful Kibana, get the active solution navigation definition */
       getActiveSolutionNavDefinition$: this.getActiveSolutionNavDefinition$.bind(this),
+      /** Provide custom handler to make a URL path "solution-aware" by adding its id in the path */
+      setAddSolutionIdToUrlPath: (handler: (solutionId: string, path: string) => string) => {
+        this.addSolutionIdToUrlPath = handler;
+      },
     };
   }
 
@@ -301,20 +305,14 @@ export class ProjectNavigationService {
     forceUpdate = false,
   }: { location?: Location; forceUpdate?: boolean } = {}) {
     const activeNodes = this.findActiveNodes({ location });
-    // Each time we call findActiveNodes() we create a new array of activeNodes. As this array is used
-    // in React in useCallback() and useMemo() dependencies arrays it triggers an infinite navigation
-    // tree registration loop. To avoid that we only notify the listeners when the activeNodes array
-    // has actually changed.
-    const requiresUpdate = forceUpdate ? true : !deepEqual(activeNodes, this.activeNodes$.value);
-
-    if (!requiresUpdate) return;
-
-    this.activeNodes$.next(activeNodes);
+    if (forceUpdate || !deepEqual(activeNodes, this.activeNodes$.value)) {
+      this.activeNodes$.next(activeNodes);
+    }
   }
 
   private onHistoryLocationChange(location: Location) {
-    this.location$.next(location);
     this.updateActiveProjectNavigationNodes({ location });
+    this.location$.next(location);
   }
 
   private handleActiveNodesChange() {
@@ -388,6 +386,13 @@ export class ProjectNavigationService {
 
               if (maybeActiveNodes.length > 0) {
                 found = true;
+
+                if (this.addSolutionIdToUrlPath) {
+                  const url = this.addSolutionIdToUrlPath(id, location.pathname);
+                  this.application?.navigateToUrl(`${url}${location.search}`);
+                  return;
+                }
+
                 this.changeActiveSolutionNavigation(id);
               }
             });
@@ -410,6 +415,7 @@ export class ProjectNavigationService {
 
       if (noActiveDefinition) {
         this.navigationTree$.next(undefined);
+        this.activeNodes$.next([]);
         return;
       }
 
@@ -425,20 +431,24 @@ export class ProjectNavigationService {
   private goToSolutionHome(id: string) {
     const definitions = this.solutionNavDefinitions$.getValue();
     const definition = definitions[id];
-    if (!definition) return;
+    if (!definition) {
+      throw new Error(`No solution navigation definition found for id ${id}`);
+    }
 
     // Navigate to the new home page if it's defined
     const link = this.navLinksService?.get(definition.homePage ?? 'undefined');
-    if (link) {
-      const linkUrl = this.http?.basePath.remove(link.url) ?? link.url;
-      const location = createLocation(linkUrl);
-      this.location$.next(location);
-      this.application?.navigateToUrl(link.href);
+    if (!link) {
+      throw new Error(`No home page defined for solution navigation ${definition.id}`);
     }
+
+    const url = this.http.basePath.remove(link.url);
+    const solutionHomeUrl = this.addSolutionIdToUrlPath
+      ? this.addSolutionIdToUrlPath(id, url)
+      : url;
+    this.application?.navigateToUrl(solutionHomeUrl);
   }
 
-  private changeActiveSolutionNavigation(id: string | null, { onlyIfNotSet = false } = {}) {
-    if (onlyIfNotSet && this.nextSolutionNavDefinitionId$.getValue() !== null) return;
+  private changeActiveSolutionNavigation(id: string | null) {
     this.nextSolutionNavDefinitionId$.next(id);
   }
 
@@ -473,6 +483,13 @@ export class ProjectNavigationService {
         ...solutionNavs,
       });
     }
+  }
+
+  private get http() {
+    if (!this._http) {
+      throw new Error('Http service not provided.');
+    }
+    return this._http;
   }
 
   public stop() {

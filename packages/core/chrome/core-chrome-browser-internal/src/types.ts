@@ -113,12 +113,9 @@ export interface InternalChromeStart extends ChromeStart {
      * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
      * will be replaced with the legacy Kibana navigation.
      */
-    changeActiveSolutionNavigation(
-      id: string | null,
-      options?: {
-        /** only change if there isn't any active solution yet */
-        onlyIfNotSet?: boolean;
-      }
-    ): void;
+    changeActiveSolutionNavigation(id: string | null): void;
+
+    /** Provide a handler to make a URL path "solution-aware" (e.g. through a specific basePath or queryParam) */
+    setAddSolutionIdToUrlPath(handler: (solutionId: string, path: string) => string): void;
   };
 }

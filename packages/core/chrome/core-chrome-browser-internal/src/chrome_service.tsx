@@ -547,6 +547,8 @@ export class ChromeService {
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+        setAddSolutionIdToUrlPath:
+          projectNavigation.setAddSolutionIdToUrlPath.bind(projectNavigation),
       },
     };
   }
