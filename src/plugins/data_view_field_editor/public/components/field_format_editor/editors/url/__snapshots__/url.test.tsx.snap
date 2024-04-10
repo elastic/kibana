@@ -282,181 +282,129 @@ exports[`UrlFormatEditor should render normally 1`] = `
         class="euiBasicTable kbnFieldFormatEditor__samples"
         id="generated-id"
       >
-        <div>
-          <div
-            class="euiTableHeaderMobile"
-          >
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
-            >
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              />
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              />
-            </div>
-          </div>
-          <table
-            class="euiTable css-0 euiTable--compressed euiTable--responsive"
-            id="__table_generated-id"
-            tabindex="-1"
-          >
-            <caption
-              class="euiTableCaption emotion-euiScreenReaderOnly"
-            />
-            <thead>
-              <tr>
-                <th
-                  class="euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_input_0"
-                  role="columnheader"
-                  scope="col"
+        <table
+          class="euiTable emotion-euiTable-fixed-compressed-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_input_0"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
                   <span
-                    class="euiTableCellContent"
+                    class="eui-textTruncate"
+                    title="Input"
                   >
-                    <span
-                      class="euiTableCellContent__text"
-                      title="Input"
-                    >
-                      Input
-                    </span>
+                    Input
                   </span>
-                </th>
-                <th
-                  class="euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_output_1"
-                  role="columnheader"
-                  scope="col"
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_output_1"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
                   <span
-                    class="euiTableCellContent"
+                    class="eui-textTruncate"
+                    title="Output"
                   >
-                    <span
-                      class="euiTableCellContent__text"
-                      title="Output"
-                    >
-                      Output
-                    </span>
+                    Output
                   </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody
-              class="css-0"
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
             >
-              <tr
-                class="euiTableRow"
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Input
-                  </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    john
-                  </div>
-                </td>
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
-                >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Output
-                  </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    <div
-                      class=""
-                    >
-                      converted url for john
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr
-                class="euiTableRow"
+                  john
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Input
+                  <div>
+                    converted url for john
                   </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    /some/pathname/asset.png
-                  </div>
-                </td>
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
-                >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Output
-                  </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    <div
-                      class=""
-                    >
-                      converted url for /some/pathname/asset.png
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr
-                class="euiTableRow"
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
               >
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Input
-                  </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    1234
-                  </div>
-                </td>
-                <td
-                  class="euiTableRowCell euiTableRowCell--middle"
+                  /some/pathname/asset.png
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  <div
-                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                  >
-                    Output
+                  <div>
+                    converted url for /some/pathname/asset.png
                   </div>
-                  <div
-                    class="euiTableCellContent euiTableCellContent--overflowingContent"
-                  >
-                    <div
-                      class=""
-                    >
-                      converted url for 1234
-                    </div>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  1234
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div>
+                    converted url for 1234
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
