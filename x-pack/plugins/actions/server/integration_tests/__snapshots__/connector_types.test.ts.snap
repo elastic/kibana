@@ -655,6 +655,11 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-get-additional-properties": [Function],
+            },
+          ],
           "rules": Array [
             Object {
               "args": Object {

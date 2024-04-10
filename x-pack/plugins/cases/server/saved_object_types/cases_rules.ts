@@ -14,9 +14,6 @@ export const casesRulesSavedObjectType: SavedObjectsType = {
   name: CASE_RULES_SAVED_OBJECT,
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
-  /**
-   * TODO: Verify
-   */
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,

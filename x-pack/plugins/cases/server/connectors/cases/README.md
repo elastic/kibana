@@ -145,7 +145,7 @@ The deduplication ID will be constructed as
 
 where
 
-`<rule_id>`: The ID of the rule. It can be optional to support two different rules attaching alerts to the same case. The rule id must be included if the grouping definition is not defined.
+`<rule_id>`: The ID of the rule. Including it in the deduplication ID ensures all cases created are at least rule-specific.
 `<space_id>`: The space ID of the rule. Space ID is a required field.
 `<owner>`: The owner of the Case. This will be set to the application from which the rule was created from. Owner is a required field.
 `<grouping_definition>`: The grouping field and the grouping value. It can be optional to support attaching all alerts of a rule to the same case.
