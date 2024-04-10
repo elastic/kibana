@@ -30,7 +30,7 @@ interface GenAiConfig {
 export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig | undefined => {
   if (!connector?.isPreconfigured) {
     const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-    if (config.apiProvider === OpenAiProviderType.AzureAi) {
+    if (config?.apiProvider === OpenAiProviderType.AzureAi) {
       return {
         ...config,
         defaultModel: getAzureApiVersionParameter(config.apiUrl ?? ''),
