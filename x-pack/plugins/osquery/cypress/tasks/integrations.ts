@@ -44,29 +44,25 @@ export const addCustomIntegration = (integrationName: string, policyName: string
   cy.getBySel('confirmModalCancelButton').click();
 };
 
-export const policyContainsIntegration = (
-  integrationName: string,
-  policyName: string,
-  containStreams?: boolean
-) => {
+export const policyContainsIntegration = (integrationName: string, policyName: string) => {
   cy.visit('app/fleet/policies');
   cy.contains(policyName).click();
-  integrationExistsWithinPolicyDetails(integrationName, containStreams);
+  integrationExistsWithinPolicyDetails(integrationName);
 };
 
-export const integrationExistsWithinPolicyDetails = (
-  integrationName: string,
-  containStreams?: boolean
-) => {
+export const integrationExistsWithinPolicyDetails = (integrationName: string) => {
   cy.contains('Actions').click();
   cy.contains('View policy').click();
   cy.contains(`name: ${integrationName}`);
+};
+
+export const checkDataStreamsInPolicyDetails = () => {
   cy.getBySel('PackagePoliciesTableLink')
     .invoke('text')
     .then((text) => {
       const version = extractSemanticVersion(text) as string;
       const isVersionWithStreams = satisfies(version, '>=1.12.0');
-      if (containStreams || isVersionWithStreams) {
+      if (isVersionWithStreams) {
         cy.contains('dataset: osquery_manager.result').should('exist');
       } else {
         cy.contains('dataset: osquery_manager.result').should('not.exist');

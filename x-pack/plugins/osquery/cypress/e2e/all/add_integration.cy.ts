@@ -35,6 +35,7 @@ import {
   interceptPackId,
   interceptAgentPolicyId,
   policyContainsIntegration,
+  checkDataStreamsInPolicyDetails,
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -92,13 +93,14 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
+      checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.getBySel('saveIntegration').click();
       cy.contains(`Successfully updated '${integrationName}'`);
       // should include streams on edit (upgrade)
-      policyContainsIntegration(integrationName, policyName, true);
+      policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
@@ -136,6 +138,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');
       policyContainsIntegration(integrationName, policyName);
+      checkDataStreamsInPolicyDetails();
       cy.visit(OSQUERY);
       cy.contains('Live queries history');
     });
@@ -175,6 +178,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('agentActionsBtn').click();
         });
       integrationExistsWithinPolicyDetails(integrationName);
+      checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
 
@@ -210,7 +214,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
           cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
         });
       integrationExistsWithinPolicyDetails(integrationName);
-
+      checkDataStreamsInPolicyDetails();
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
       cy.get(TABLE_ROWS).should('have.length.above', 5);
