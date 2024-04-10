@@ -935,24 +935,12 @@ export class ObservabilityAIAssistantClient {
       return '';
     }
 
-    const overrides = requestInstructions.filter(
-      (instruction): instruction is UserInstruction => typeof instruction !== 'string'
+    const priorityInstructions = requestInstructions.map((instruction) =>
+      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
     );
-    const overrideIds = overrides.map((instruction) => instruction.doc_id);
-
-    const plainInstructions = requestInstructions
-      .filter((instruction): instruction is string => typeof instruction === 'string')
-      .map<UserInstruction>((instruction, index) => ({
-        doc_id: `${index}-${instruction.substring(0, 10)}`, // This will be thrown away further down
-        text: instruction,
-      }));
-
-    const kept = knowledgeBaseInstructions.filter(
-      (instruction) => !overrideIds.includes(instruction.doc_id)
-    );
-
-    const instructions = [...overrides, ...plainInstructions, ...kept].map(
-      (instruction) => instruction.text
+    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
+    const instructions = priorityInstructions.concat(
+      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
     );
 
     const instructionsWithinBudget = withTokenBudget(instructions, 1000);
