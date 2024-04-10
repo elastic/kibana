@@ -14,6 +14,17 @@ import { getUrlPrefix } from './space_test_utils';
 import { ObjectRemover } from './object_remover';
 
 const connectorSetup = {
+  gemini: {
+    connectorTypeId: '.gemini',
+    name: 'A gemini action',
+    secrets: {
+      accessKey: 'geminiAccessKey',
+      secret: 'geminiSecret',
+    },
+    config: {
+      defaultModel: 'anthropic.claude-v2',
+    },
+  },
   bedrock: {
     connectorTypeId: '.bedrock',
     name: 'A bedrock action',
@@ -48,7 +59,7 @@ export const createConnector = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   objectRemover: ObjectRemover,
   apiUrl: string,
-  connectorType: 'bedrock' | 'openai',
+  connectorType: 'bedrock' | 'openai' | 'gemini',
   spaceId?: string
 ) => {
   const { connectorTypeId, config, name, secrets } = connectorSetup[connectorType];

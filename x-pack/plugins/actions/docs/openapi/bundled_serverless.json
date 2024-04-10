@@ -480,6 +480,42 @@
           }
         }
       },
+      "create_connector_request_gemini": {
+        "title": "Create Google Gemini connector request",
+        "description": "The Google Gemini connector uses axios to send a POST request to Google Gemini.",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".gemini"
+            ],
+            "examples": [
+              ".gemini"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector.",
+            "examples": [
+              "my-connector"
+            ]
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_gemini"
+          }
+        }
+      },
       "create_connector_request_cases_webhook": {
         "title": "Create Webhook - Case Managment connector request",
         "description": "The Webhook - Case Management connector uses axios to send POST, PUT, and GET requests to a case management RESTful API web service.\n",
@@ -1286,6 +1322,44 @@
           "secret": {
             "type": "string",
             "description": "The AWS secret for authentication."
+          }
+        }
+      },
+      "config_properties_gemini": {
+        "title": "Connector request properties for an Google Gemini connector",
+        "description": "Defines properties for connectors when type is `.gemini`.",
+        "type": "object",
+        "required": [
+          "apiUrl"
+        ],
+        "properties": {
+          "apiUrl": {
+            "type": "string",
+            "description": "The Google Gemini request URL."
+          },
+          "defaultModel": {
+            "type": "string",
+            "description": "The generative artificial intelligence model for Google Gemini to use. Current support is for the Anthropic Claude models.\n",
+            "default": "anthropic.claude-3-sonnet-20240229-v1:0"
+          }
+        }
+      },
+      "secrets_properties_gemini": {
+        "title": "Connector secrets properties for an Google Gemini connector",
+        "description": "Defines secrets for connectors when type is `.gemini`.",
+        "type": "object",
+        "required": [
+          "accessKey",
+          "secret"
+        ],
+        "properties": {
+          "accessKey": {
+            "type": "string",
+            "description": "The Google access key for authentication."
+          },
+          "secret": {
+            "type": "string",
+            "description": "The Google secret for authentication."
           }
         }
       },
@@ -2440,6 +2514,9 @@
             "$ref": "#/components/schemas/create_connector_request_bedrock"
           },
           {
+            "$ref": "#/components/schemas/create_connector_request_gemini"
+          },
+          {
             "$ref": "#/components/schemas/create_connector_request_cases_webhook"
           },
           {
@@ -2510,6 +2587,7 @@
           "propertyName": "connector_type_id",
           "mapping": {
             ".bedrock": "#/components/schemas/create_connector_request_bedrock",
+            ".gemini": "#/components/schemas/create_connector_request_gemini",
             ".cases-webhook": "#/components/schemas/create_connector_request_cases_webhook",
             ".d3security": "#/components/schemas/create_connector_request_d3security",
             ".email": "#/components/schemas/create_connector_request_email",
@@ -2555,6 +2633,50 @@
             "description": "The type of connector.",
             "enum": [
               ".bedrock"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the connector."
+          },
+          "is_deprecated": {
+            "$ref": "#/components/schemas/is_deprecated"
+          },
+          "is_missing_secrets": {
+            "$ref": "#/components/schemas/is_missing_secrets"
+          },
+          "is_preconfigured": {
+            "$ref": "#/components/schemas/is_preconfigured"
+          },
+          "is_system_action": {
+            "$ref": "#/components/schemas/is_system_action"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          }
+        }
+      },
+      "connector_response_properties_gemini": {
+        "title": "Connector response properties for an Google Gemini connector",
+        "type": "object",
+        "required": [
+          "config",
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "connector_type_id": {
+            "type": "string",
+            "description": "The type of connector.",
+            "enum": [
+              ".gemini"
             ]
           },
           "id": {
@@ -3634,6 +3756,9 @@
             "$ref": "#/components/schemas/connector_response_properties_bedrock"
           },
           {
+            "$ref": "#/components/schemas/connector_response_properties_gemini"
+          },
+          {
             "$ref": "#/components/schemas/connector_response_properties_cases_webhook"
           },
           {
@@ -3704,6 +3829,7 @@
           "propertyName": "connector_type_id",
           "mapping": {
             ".bedrock": "#/components/schemas/connector_response_properties_bedrock",
+            ".gemini": "#/components/schemas/connector_response_properties_gemini",
             ".cases-webhook": "#/components/schemas/connector_response_properties_cases_webhook",
             ".d3security": "#/components/schemas/connector_response_properties_d3security",
             ".email": "#/components/schemas/connector_response_properties_email",
@@ -3746,6 +3872,26 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_bedrock"
+          }
+        }
+      },
+      "update_connector_request_gemini": {
+        "title": "Update Google Gemini connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_gemini"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_gemini"
           }
         }
       },
@@ -4160,6 +4306,9 @@
             "$ref": "#/components/schemas/update_connector_request_bedrock"
           },
           {
+            "$ref": "#/components/schemas/update_connector_request_gemini"
+          },
+          {
             "$ref": "#/components/schemas/update_connector_request_cases_webhook"
           },
           {
@@ -4241,6 +4390,7 @@
         "description": "The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.",
         "enum": [
           ".bedrock",
+          ".gemini",
           ".cases-webhook",
           ".d3security",
           ".email",
@@ -4476,6 +4626,18 @@
           {
             "id": ".bedrock",
             "name": "AWS Bedrock",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "enterprise",
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
+            "is_system_action_type": false
+          },
+          {
+            "id": ".gemini",
+            "name": "Google Gemini",
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
