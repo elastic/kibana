@@ -84,7 +84,7 @@ export interface Message {
 }
 
 export interface DocAnnotation {
-  metadata: { id: string; score: number };
+  metadata: { _id: string; _score: number; _index: string };
   pageContent: string;
 }
 
@@ -94,8 +94,8 @@ export interface Annotation {
 }
 
 export interface Doc {
-  id: string;
   content: string;
+  metadata: { _id: string; _score: number; _index: string };
 }
 
 export interface AIMessage extends Message {
@@ -106,10 +106,7 @@ export interface AIMessage extends Message {
 
 export enum SummarizationModelName {
   gpt3_5_turbo = 'gpt-3.5-turbo',
-  gpt3_5_turbo_1106 = 'gpt-3.5-turbo-1106',
-  gpt3_5_turbo_16k = 'gpt-3.5-turbo-16k',
-  gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
-  gpt3_5_turbo_instruct = 'gpt-3.5-turbo-instruct',
+  gpt_4 = 'gpt-4',
 }
 
 export interface ElasticsearchIndex {
