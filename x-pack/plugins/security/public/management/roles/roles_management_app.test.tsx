@@ -55,7 +55,8 @@ async function mountApp(basePath: string, pathname: string) {
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
-        theme$: themeServiceMock.createTheme$(),
+        theme: coreStart.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
   });
 
