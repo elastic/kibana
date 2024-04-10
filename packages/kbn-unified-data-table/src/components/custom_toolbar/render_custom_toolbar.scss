@@ -1,8 +1,8 @@
-.dscGridToolbar {
+.unifiedDataTableToolbar {
   padding: $euiSizeS $euiSizeS $euiSizeXS;
 }
 
-.dscGridToolbarControlButton .euiDataGridToolbarControl {
+.unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
   block-size: $euiSizeXL;
   border: $euiBorderThin;
   border-radius: $euiBorderRadiusSmall;
@@ -28,7 +28,7 @@
   }
 }
 
-.dscGridToolbarControlGroup {
+.unifiedDataTableToolbarControlGroup {
   box-shadow: inset 0 0 0 $euiBorderWidthThin $euiBorderColor;
   border-radius: $euiBorderRadiusSmall;
   display: inline-flex;
@@ -36,7 +36,7 @@
   flex-direction: row;
 }
 
-.dscGridToolbarControlIconButton .euiButtonIcon {
+.unifiedDataTableToolbarControlIconButton .euiButtonIcon {
   inline-size: $euiSizeXL;
   block-size: $euiSizeXL;
 
@@ -47,12 +47,12 @@
     transform: none !important;
   }
 
-  .dscGridToolbarControlIconButton + & {
+  .unifiedDataTableToolbarControlIconButton + & {
     border-inline-start: $euiBorderThin;
     border-radius: 0;
   }
 }
 
-.dscGridToolbarBottom {
+.unifiedDataTableToolbarBottom {
   position: relative; // for placing a loading indicator correctly
 }

@@ -164,9 +164,17 @@ function getFieldMapping(
     string: `"a"`,
     number: '5',
   };
-  return params.map(({ name: _name, type, constantOnly, ...rest }) => {
+  return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
     if (fieldTypes.includes(typeString)) {
+      if (useLiterals && literalOptions) {
+        return {
+          name: `"${literalOptions[0]}"`,
+          type,
+          ...rest,
+        };
+      }
+
       const fieldName =
         constantOnly && typeString in literalValues
           ? literalValues[typeString as keyof typeof literalValues]!
@@ -187,7 +195,7 @@ function getFieldMapping(
         ...rest,
       };
     }
-    if (/[]$/.test(typeString)) {
+    if (/\[\]$/.test(typeString)) {
       return {
         name: getMultiValue(typeString),
         type,
@@ -198,7 +206,7 @@ function getFieldMapping(
   });
 }
 
-function generateWrongMappingForArgs(
+function generateIncorrectlyTypedParameters(
   name: string,
   signatures: FunctionDefinition['signatures'],
   currentParams: FunctionDefinition['signatures'][number]['params'],
@@ -208,28 +216,30 @@ function generateWrongMappingForArgs(
     string: `"a"`,
     number: '5',
   };
-  const wrongFieldMapping = currentParams.map(({ name: _name, constantOnly, type, ...rest }, i) => {
-    // this thing is complex enough, let's not make it harder for constants
-    if (constantOnly) {
-      return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+  const wrongFieldMapping = currentParams.map(
+    ({ name: _name, constantOnly, literalOptions, type, ...rest }, i) => {
+      // this thing is complex enough, let's not make it harder for constants
+      if (constantOnly) {
+        return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+      }
+      const canBeFieldButNotString = Boolean(
+        fieldTypes.filter((t) => t !== 'string').includes(type) &&
+          signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+      );
+      const canBeFieldButNotNumber =
+        fieldTypes.filter((t) => t !== 'number').includes(type) &&
+        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
+      const isLiteralType = /literal$/.test(type);
+      // pick a field name purposely wrong
+      const nameValue =
+        canBeFieldButNotString || isLiteralType
+          ? values.stringField
+          : canBeFieldButNotNumber
+          ? values.numberField
+          : values.booleanField;
+      return { name: nameValue, type, ...rest };
     }
-    const canBeFieldButNotString = Boolean(
-      fieldTypes.filter((t) => t !== 'string').includes(type) &&
-        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
-    );
-    const canBeFieldButNotNumber =
-      fieldTypes.filter((t) => t !== 'number').includes(type) &&
-      signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
-    const isLiteralType = /literal$/.test(type);
-    // pick a field name purposely wrong
-    const nameValue =
-      canBeFieldButNotString || isLiteralType
-        ? values.stringField
-        : canBeFieldButNotNumber
-        ? values.numberField
-        : values.booleanField;
-    return { name: nameValue, type, ...rest };
-  });
+  );
 
   const generatedFieldTypes = {
     [values.stringField]: 'string',
@@ -250,6 +260,7 @@ function generateWrongMappingForArgs(
       return `Argument of [${name}] must be [${type}], found value [${fieldName}] type [${generatedFieldTypes[fieldName]}]`;
     })
     .filter(nonNullable);
+
   return { wrongFieldMapping, expectedErrors };
 }
 
@@ -565,7 +576,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version'].includes(name)
+            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -585,11 +596,15 @@ describe('validation logic', () => {
 
             testErrorsAndWarnings(`row var = ${signatureString}`, []);
 
-            const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
               name,
               signatures,
               params,
-              { stringField: '"a"', numberField: '5', booleanField: 'true' }
+              {
+                stringField: '"a"',
+                numberField: '5',
+                booleanField: 'true',
+              }
             );
             const wrongSignatureString = tweakSignatureForRowCommand(
               getFunctionSignatures(
@@ -633,6 +648,15 @@ describe('validation logic', () => {
           `Argument of [not_${op}] must be [string], found value [5] type [number]`,
         ]);
       }
+
+      testErrorsAndWarnings(
+        `row var = mv_sort(["a", "b"], "bogus")`,
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
+
+      testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
+      testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('row 1 anno', [
@@ -1187,7 +1211,7 @@ describe('validation logic', () => {
             []
           );
 
-          const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+          const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
             name,
             signatures,
             params,
@@ -1435,7 +1459,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version'].includes(name)
+            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1455,7 +1479,7 @@ describe('validation logic', () => {
               }`
             );
 
-            const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
               name,
               signatures,
               params,
@@ -1675,6 +1699,15 @@ describe('validation logic', () => {
         "SyntaxError: missing '(' at 'stringField'",
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}",
       ]);
+
+      testErrorsAndWarnings(
+        'from a_index | eval mv_sort(["a", "b"], "bogus")',
+        [],
+        ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
+      );
+
+      testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
+      testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [
@@ -2064,7 +2097,7 @@ describe('validation logic', () => {
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version'].includes(name)
+            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
@@ -2103,7 +2136,7 @@ describe('validation logic', () => {
               }`,
               nestedAggsExpectedErrors
             );
-            const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            const { wrongFieldMapping, expectedErrors } = generateIncorrectlyTypedParameters(
               name,
               signatures,
               params,

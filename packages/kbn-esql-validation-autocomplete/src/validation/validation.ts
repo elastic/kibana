@@ -22,6 +22,7 @@ import type {
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
+  FunctionArgSignature,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
@@ -51,6 +52,7 @@ import {
   isSettingItem,
   isAssignment,
   isVariable,
+  isValidLiteralOption,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
@@ -75,12 +77,30 @@ import {
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: SignatureArgType,
+  argDef: FunctionArgSignature,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
+    if (
+      actualArg.literalType === 'string' &&
+      argDef.literalOptions &&
+      isValidLiteralOption(actualArg, argDef)
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unsupportedLiteralOption',
+          values: {
+            name: astFunction.name,
+            value: actualArg.value,
+            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+          },
+          locations: actualArg.location,
+        })
+      );
+    }
+
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
