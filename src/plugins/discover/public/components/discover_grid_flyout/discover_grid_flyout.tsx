@@ -25,6 +25,7 @@ import {
   keys,
   EuiButtonEmpty,
   useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -82,7 +83,7 @@ export function DiscoverGridFlyout({
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
   const { euiTheme } = useEuiTheme();
-
+  const isXlScreen = useIsWithinMinBreakpoint('xl');
   const defaultWidth = flyoutCustomization?.size ?? 540; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
   const minWidth = euiTheme.base * 24;
@@ -230,6 +231,9 @@ export function DiscoverGridFlyout({
         minWidth={minWidth}
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}
+        css={{
+          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
+        }}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
@@ -274,15 +278,11 @@ export function DiscoverGridFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                {i18n.translate('discover.grid.flyout.close', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            {i18n.translate('discover.grid.flyout.close', {
+              defaultMessage: 'Close',
+            })}
+          </EuiButtonEmpty>
         </EuiFlyoutFooter>
       </EuiFlyoutResizable>
     </EuiPortal>
