@@ -113,11 +113,16 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const initialState = savedObjectToPanel[type](savedObject) ?? { savedObjectId: id };
-      container.addNewPanel({
-        panelType: legacyFactoryForSavedObjectType.type,
-        initialState,
-      });
+      const initialState = savedObjectToPanel[type]
+        ? savedObjectToPanel[type](savedObject)
+        : { savedObjectId: id };
+      container.addNewPanel(
+        {
+          panelType: legacyFactoryForSavedObjectType.type,
+          initialState,
+        },
+        true
+      );
 
       const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
       runAddTelemetry(container, factoryType, savedObject, savedObjectMetaData);
