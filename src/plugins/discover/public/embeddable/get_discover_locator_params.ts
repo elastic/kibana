@@ -8,8 +8,8 @@
 
 import type { Filter } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishesSavedObjectId } from '@kbn/presentation-publishing';
+import { HasSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverAppLocatorParams } from '../../common';
-import { HasSavedSearch } from './types';
 
 export const getDiscoverLocatorParams = (
   api: HasSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>

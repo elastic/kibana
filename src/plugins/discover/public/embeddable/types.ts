@@ -9,20 +9,12 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   Adapters,
-  DefaultEmbeddableApi,
   Embeddable,
   EmbeddableOutput,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import {
-  EmbeddableApiContext,
-  HasLibraryTransforms,
-  PublishesDataLoading,
-  SerializedTitles,
-} from '@kbn/presentation-publishing';
 import type {
-  SavedSearch,
-  SavedSearchByValueAttributes,
+  HasSavedSearch,
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
@@ -47,17 +39,6 @@ export type ISearchEmbeddable = IEmbeddable<SearchInput, SearchOutput> &
 export interface SearchEmbeddable extends Embeddable<SearchInput, SearchOutput> {
   type: string;
 }
-
-export interface HasSavedSearch {
-  getSavedSearch: () => SavedSearch | undefined;
-}
-
-export const apiHasSavedSearch = (
-  api: EmbeddableApiContext['embeddable']
-): api is HasSavedSearch => {
-  const embeddable = api as HasSavedSearch;
-  return Boolean(embeddable.getSavedSearch) && typeof embeddable.getSavedSearch === 'function';
-};
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

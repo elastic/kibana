@@ -17,12 +17,7 @@ import {
   ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import {
-  apiHasSavedSearch,
-  HasSavedSearch,
-  loadSharingDataHelpers,
-  SEARCH_EMBEDDABLE_TYPE,
-} from '@kbn/discover-plugin/public';
+import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
@@ -36,12 +31,13 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { apiHasSavedSearch, HasSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { HasTimeRange } from '@kbn/discover-plugin/public/embeddable';
 
 import { getI18nStrings } from './strings';
 
@@ -81,7 +77,7 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-type GetCsvActionApi = HasType & HasSavedSearch & CanAccessViewMode;
+type GetCsvActionApi = HasType & HasSavedSearch & CanAccessViewMode & HasTimeRange; // TODO: Fix this?
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
