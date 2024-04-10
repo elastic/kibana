@@ -488,6 +488,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     const additionalContext = passedCellContext ? passedCellContext : {};
     return {
       ...additionalContext,
+      ...alertsTableConfiguration,
       ecsData: ecsAlertsData,
       oldAlertsData,
       context: userAssigneeContext,
@@ -510,6 +511,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     };
   }, [
     passedCellContext,
+    alertsTableConfiguration,
     ecsAlertsData,
     oldAlertsData,
     refresh,
