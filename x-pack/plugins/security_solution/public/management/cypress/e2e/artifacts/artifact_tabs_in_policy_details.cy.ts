@@ -59,7 +59,8 @@ const visitArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-describe('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/171644
+describe.skip('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {
