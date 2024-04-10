@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getPendingActionsSummary } from '../../..';
 import type { RawSentinelOneInfo, SentinelOneSearchResponse } from './types';
 import { catchAndWrapError } from '../../../../utils';
 import type { AgentStatuses } from '../../../../../../common/endpoint/types';
@@ -26,6 +27,9 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
 
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatuses> {
+    const esClient = this.options.esClient;
+    const metadataService = this.options.endpointService.getEndpointMetadataService();
+
     const query = {
       bool: {
         must: [
@@ -45,7 +49,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
     };
 
     try {
-      const response = (await this.options.esClient
+      const response = (await esClient
         .search(
           {
             index: SENTINEL_ONE_AGENT_INDEX,
@@ -90,8 +94,19 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
         return acc;
       }, {});
 
+      const allPendingActions = await getPendingActionsSummary(
+        esClient,
+        metadataService,
+        this.log,
+        agentIds
+      );
+
       return agentIds.reduce<AgentStatuses>((acc, agentId) => {
         const agentInfo = mostRecentAgentInfosByAgentId[agentId].sentinel_one.agent;
+
+        const pendingActions = allPendingActions.find(
+          (agentPendingActions) => agentPendingActions.agent_id === agentId
+        );
 
         acc[agentId] = {
           agentId,
@@ -105,14 +120,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
             agentInfo?.is_pending_uninstall || agentInfo?.is_uninstalled
             ? HostStatus.UNENROLLED
             : HostStatus.OFFLINE,
-          pendingActions: agentInfo
-            ? {
-                isolate:
-                  agentInfo.network_status === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING ? 1 : 0,
-                unisolate:
-                  agentInfo?.network_status === SENTINEL_ONE_NETWORK_STATUS.CONNECTING ? 1 : 0,
-              }
-            : {},
+          pendingActions: pendingActions?.pending_actions ?? {},
         };
 
         return acc;
