@@ -53,21 +53,17 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): RenderCellValue => {
+export const getRenderCellValue: RenderCellValue = ({ columnId, data, fieldFormats }) => {
   const alertValueFormatter = getAlertFormatters(fieldFormats);
+  if (data == null) return null;
 
-  return () =>
-    ({ columnId, data }: { columnId: string; data: Array<{ field: string; value: any }> }) => {
-      if (data == null) return null;
+  const mappedNonEcsValue = getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
+  const value = getRenderValue(mappedNonEcsValue);
 
-      const mappedNonEcsValue = getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      });
-      const value = getRenderValue(mappedNonEcsValue);
-
-      return alertValueFormatter(columnId, value, data);
-    };
+  return alertValueFormatter(columnId, value, data);
 };
 
 const defaultParam: Record<string, FieldFormatParams> = {

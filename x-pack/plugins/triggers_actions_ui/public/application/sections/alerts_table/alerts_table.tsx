@@ -313,6 +313,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     controls,
     toolbarVisibility: toolbarVisibilityProp,
     shouldHighlightRow,
+    fieldFormats,
   } = props;
 
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -505,7 +506,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       refresh,
       clearSelection,
       renderCustomActionsRow,
-      'test-test-custom-attribute': 'ello cool api',
+      fieldFormats,
     };
   }, [
     passedCellContext,
@@ -527,6 +528,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     showAlertStatusWithFlapping,
     getSetIsActionLoadingCallback,
     userAssigneeContext,
+    fieldFormats,
   ]);
 
   const renderCellPopover = useMemo(

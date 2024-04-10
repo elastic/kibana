@@ -9,7 +9,6 @@ import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-// TODO: prolly
 export const getUseTriggersActionsFieldBrowserOptions = (scopeId: SourcererScopeName) => {
   const useTriggersActionsFieldBrowserOptions: AlertsTableConfigurationRegistry['useFieldBrowserOptions'] =
     ({ onToggleColumn }) => {

@@ -13,6 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
   IconType,
   RecursivePartial,
@@ -600,6 +601,7 @@ export type AlertsTableProps = {
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   renderCellPopover?: ReturnType<GetRenderCellPopover>;
+  fieldFormats: FieldFormatsRegistry;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;

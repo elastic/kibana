@@ -20,6 +20,7 @@ import {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -214,7 +215,10 @@ const AlertsTableStateWithQueryProvider = memo(
     dynamicRowHeight,
     lastReloadRequestTime,
   }: AlertsTableStateProps) => {
-    const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
+    const { cases: casesService, fieldFormats } = useKibana<{
+      cases?: CasesService;
+      fieldFormats: FieldFormatsRegistry;
+    }>().services;
     const hasAlertsTableConfiguration =
       alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -468,6 +472,7 @@ const AlertsTableStateWithQueryProvider = memo(
         alertsCount,
         onSortChange,
         onPageChange,
+        fieldFormats,
       }),
       [
         alertsTableConfiguration,
@@ -506,6 +511,7 @@ const AlertsTableStateWithQueryProvider = memo(
         alertsCount,
         onSortChange,
         onPageChange,
+        fieldFormats,
       ]
     );
 

@@ -261,6 +261,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       rowRenderers: defaultRowRenderers,
       isDetails: false,
       truncate: true,
+      isDraggable: false,
     };
   }, []);
 
