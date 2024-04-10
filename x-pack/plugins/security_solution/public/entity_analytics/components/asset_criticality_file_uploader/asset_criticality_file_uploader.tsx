@@ -15,6 +15,7 @@
 import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import React, { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
 import { reducer } from './reducer';
@@ -26,19 +27,42 @@ import { useFileValidation } from './hooks';
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, { isLoading: false, step: 1 });
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
+  const { telemetry } = useKibana().services;
+
   const onValidationComplete = useCallback(
     ({
       fileName,
+      fileSize,
       validLinesAsText,
       invalidLinesAsText,
       invalidLinesErrors,
       validLinesCount,
       invalidLinesCount,
+      processingStartTime,
+      processingEndTime,
+      tookMs,
     }) => {
+      telemetry.reportAssetCriticalityCsvPreviewGenerated({
+        file: {
+          size: fileSize,
+        },
+        processing: {
+          startTime: processingStartTime,
+          endTime: processingEndTime,
+          tookMs,
+        },
+        stats: {
+          validLines: validLinesCount,
+          invalidLines: invalidLinesCount,
+          totalLines: validLinesCount + invalidLinesCount,
+        },
+      });
+
       dispatch({
         type: 'fileValidated',
         payload: {
           fileName,
+          fileSize,
           validLinesAsText,
           invalidLinesAsText,
           invalidLinesErrors,
@@ -47,7 +71,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
         },
       });
     },
-    []
+    [telemetry]
   );
   const onValidationError = useCallback((message) => {
     dispatch({ type: 'fileError', payload: { message } });
@@ -138,6 +162,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
             invalidLinesAsText={state.invalidLinesAsText}
             invalidLinesErrors={state.invalidLinesErrors ?? []}
             fileName={state.fileName ?? ''}
+            fileSize={state.fileSize ?? 0}
             onReturn={() => {
               dispatch({ type: 'resetState' });
             }}

@@ -15,6 +15,7 @@ export interface ReducerState {
   fileUploadResponse?: AssetCriticalityCsvUploadResponse;
   fileUploadError?: string;
   fileName?: string;
+  fileSize?: number;
   invalidLinesAsText?: string;
   validLinesAsText?: string;
   validLinesCount?: number;
@@ -29,6 +30,7 @@ export type ReducerAction =
       type: 'fileValidated';
       payload: {
         fileName: string;
+        fileSize: number;
         invalidLinesAsText: string;
         validLinesAsText: string;
         validLinesCount: number;

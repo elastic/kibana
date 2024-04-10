@@ -18,6 +18,10 @@ describe('reducer', () => {
 
   const onCompleteParams: OnCompleteParams = {
     fileName: 'test.csv',
+    fileSize: 100,
+    processingStartTime: '2021-07-01T00:00:00',
+    processingEndTime: '2021-07-01T00:01:00',
+    tookMs: 60000,
     validLinesAsText: 'valid lines',
     invalidLinesAsText: 'invalid lines',
     invalidLinesErrors: [],
