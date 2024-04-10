@@ -81,6 +81,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
    * Logs datatable.
    */
   logDatatable?(name: string, datatable: Datatable): void;
+  logRawDatatable(name: string, datatable: Datatable): void;
 }
 
 /**
@@ -89,5 +90,6 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
 export interface DefaultInspectorAdapters {
   requests: RequestAdapter;
   tables: TablesAdapter;
+  rawTables: TablesAdapter;
   expression: ExpressionsInspectorAdapter;
 }

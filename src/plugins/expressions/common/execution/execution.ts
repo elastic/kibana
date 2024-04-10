@@ -284,6 +284,11 @@ export class Execution<
       logDatatable: (name: string, datatable: Datatable) => {
         inspectorAdapters.tables[name] = datatable;
       },
+      logRawDatatable: (name: string, datatable: Datatable) => {
+        if (inspectorAdapters.rawTables) {
+          inspectorAdapters.rawTables[name] = datatable;
+        }
+      },
       isSyncColorsEnabled: () => execution.params.syncColors!,
       isSyncCursorEnabled: () => execution.params.syncCursor!,
       isSyncTooltipsEnabled: () => execution.params.syncTooltips!,

@@ -276,12 +276,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           removeSearchWarningMessagesRef.current = undefined;
         }
 
-        if (adapters && adapters.tables) {
+        if (adapters && adapters.rawTables) {
           // add adapters.tables to cache
-          Object.entries(adapters.tables?.tables).forEach((table) => {
+          Object.entries(adapters.rawTables?.tables).forEach((table) => {
             exprCache.setValue(table[0], table[1]);
           });
-
+        }
+        if (adapters && adapters.tables) {
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(

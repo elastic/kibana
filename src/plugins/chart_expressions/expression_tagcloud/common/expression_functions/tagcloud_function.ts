@@ -184,6 +184,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         }
         const logTable = prepareLogTable(input, argsTable, true);
         handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+        handlers.inspectorAdapters.rawTables.logDatatable('default', input);
       }
       return {
         type: 'render',

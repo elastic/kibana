@@ -196,6 +196,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       );
 
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.rawTables.logDatatable('default', data);
     }
 
     return {

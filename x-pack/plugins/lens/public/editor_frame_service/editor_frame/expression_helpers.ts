@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Ast, AstFunction, fromExpression, toExpression } from '@kbn/interpreter';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin/common';
 import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
@@ -90,13 +90,18 @@ export function getDataVariables(inputAst: ExpressionAstExpression) {
   return variables;
 }
 
-function loadFromCacheExpression(layerId: string): AstFunction {
+function loadFromCacheExpression(layerId: string): Ast {
   return {
-    type: 'function',
-    function: 'var',
-    arguments: {
-      name: [layerId],
-    },
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'var',
+        arguments: {
+          name: [layerId],
+        },
+      },
+    ],
   };
 }
 
@@ -194,22 +199,14 @@ export function buildExpression({
   // check if any of the datasource expressions should be loaded from cache
   for (const layerId in datasourceExpressionsByLayers) {
     if (datasourceExpressionsByLayers[layerId]) {
-      // const expr = toExpression(datasourceExpressionsByLayers[layerId]);
-      const dataFnIndex = datasourceExpressionsByLayers[layerId].chain.findIndex((f) =>
-        ['esdsl', 'essql', 'esaggs', 'esql'].includes(f.function)
-      );
+      const expr = toExpression(datasourceExpressionsByLayers[layerId]);
 
-      if (datasourceExpressionsByLayers[layerId].chain[dataFnIndex]) {
-        const exprFn = toExpression(datasourceExpressionsByLayers[layerId].chain[dataFnIndex]);
-
-        const cacheItem = exprCache.get(layerId);
-        if (cacheItem && cacheItem.expression === exprFn && cacheItem.value && canUseCache) {
-          // and update it to var X
-          datasourceExpressionsByLayers[layerId].chain[dataFnIndex] =
-            loadFromCacheExpression(layerId);
-        } else {
-          exprCache.set(layerId, exprFn);
-        }
+      const cacheItem = exprCache.get(layerId);
+      if (cacheItem && cacheItem.expression === expr && cacheItem.value && canUseCache) {
+        // and update it to var X
+        datasourceExpressionsByLayers[layerId] = loadFromCacheExpression(layerId);
+      } else {
+        exprCache.set(layerId, expr);
       }
     }
   }

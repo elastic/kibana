@@ -52,6 +52,7 @@ export const logDatatables = (
 
     const logTable = prepareLogTable(layer.table, layerDimensions, true);
     handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
+    handlers.inspectorAdapters.rawTables.logDatatable(layer.layerId, layer.table);
   });
   if (annotations) {
     annotations.layers.forEach((layer) => {
@@ -114,6 +115,7 @@ export const logDatatable = (
 
     const logTable = prepareLogTable(data, layerDimensions, true);
     handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    handlers.inspectorAdapters.rawTables.logDatatable('default', data);
   }
 };
 

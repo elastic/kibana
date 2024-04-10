@@ -217,6 +217,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       }
       const logTable = prepareLogTable(data, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.rawTables.logDatatable('default', data);
     }
     return {
       type: 'render',

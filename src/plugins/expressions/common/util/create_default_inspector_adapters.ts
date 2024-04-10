@@ -15,5 +15,6 @@ import type { DefaultInspectorAdapters } from '../execution';
 export const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
   tables: new TablesAdapter(),
+  rawTables: new TablesAdapter(),
   expression: new ExpressionsInspectorAdapter(),
 });
