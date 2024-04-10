@@ -72,7 +72,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   <EuiIcon type={'checkInCircleFilled'} color="success" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span>
+                  <span data-test-subj="asset-criticality-validLinesMessage">
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
                       defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality will be assigned} other {{validLinesCountBold} assets criticalities will be assigned}}"
@@ -117,7 +117,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   <EuiIcon type={'error'} color="danger" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span>
+                  <span data-test-subj="asset-criticality-invalidLinesMessage">
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
                       defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} line is invalid and won't be assigned} other {{invalidLinesCountBold} lines are invalid and won't be assigned}}"
@@ -181,7 +181,12 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onConfirm} disabled={validLinesCount === 0}>
+          <EuiButton
+            fill
+            onClick={onConfirm}
+            disabled={validLinesCount === 0}
+            data-test-subj="asset-criticality-assign-button"
+          >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assignButtonText"
               defaultMessage="Assign"

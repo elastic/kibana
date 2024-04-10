@@ -29,6 +29,7 @@ export const AssetCriticalityUploadPage = () => {
   return (
     <>
       <EuiPageHeader
+        data-test-subj="assetCriticalityUploadPage"
         pageTitle={
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.title"

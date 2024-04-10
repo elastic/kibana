@@ -22,7 +22,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-const validLinesAsText = `user-001,low_impact\nuser-002,medium_impact,user\nuser-003,medium_impact,user\nhost-001,extreme_impact,host\nhost-002,extreme_impact,host`;
+const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact`;
 const invalidLinesAsText = `user,user-001,wow_impact\nbleh,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
 export default {
