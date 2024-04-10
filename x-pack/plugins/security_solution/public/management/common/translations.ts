@@ -200,7 +200,7 @@ export const CONFIRM_WARNING_MODAL_LABELS = {
   }),
   body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
     defaultMessage:
-      'Using a "*" or a "?" in the value and with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with entry in its current state.',
+      'Using a "*" or a "?" in the value with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with the entry in its current state.',
   }),
   confirmButton: i18n.translate(
     'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
