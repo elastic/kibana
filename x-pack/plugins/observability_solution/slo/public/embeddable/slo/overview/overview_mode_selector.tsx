@@ -25,7 +25,7 @@ const overviewModeOptions: EuiButtonGroupOptionProps[] = [
     label: (
       <FormattedMessage
         id="xpack.slo.overviewEmbeddable.typeSelector.groupSLOLabel"
-        defaultMessage="Group of SLOs"
+        defaultMessage="Grouped SLOs"
       />
     ),
   },

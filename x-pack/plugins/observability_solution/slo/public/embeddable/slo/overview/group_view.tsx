@@ -16,6 +16,7 @@ import { groupByOptions } from './slo_group_filters';
 
 interface Props {
   groupBy: string;
+  groups?: string[];
   kqlQuery?: string;
   sloView: SLOView;
   sort?: string;
@@ -27,6 +28,7 @@ interface Props {
 export function GroupSloView({
   sloView,
   groupBy: initialGroupBy = 'status',
+  groups: initialGroups = [],
   kqlQuery: initialKqlQuery = '',
   filters: initialFilters = [],
   reloadGroupSubject,
@@ -35,6 +37,26 @@ export function GroupSloView({
   const [groupBy, setGroupBy] = useState(initialGroupBy);
   const [kqlQuery, setKqlQuery] = useState(initialKqlQuery);
   const [filters, setFilters] = useState(initialFilters);
+  const [groups, setGroups] = useState(initialGroups);
+
+  let groupsKqlQuery = '';
+  groups.map((group, index) => {
+    const shouldAddOr = index < groups.length - 1;
+    groupsKqlQuery += `(${groupBy}:"${group}")`;
+    if (shouldAddOr) {
+      groupsKqlQuery += ' or ';
+    }
+  });
+
+  let combinedKqlQuery = '';
+  if (kqlQuery && groupsKqlQuery) {
+    combinedKqlQuery = `${groupsKqlQuery} and ${kqlQuery}`;
+  } else if (groupsKqlQuery) {
+    combinedKqlQuery = groupsKqlQuery;
+  } else if (kqlQuery) {
+    combinedKqlQuery = kqlQuery;
+  }
+
   useEffect(() => {
     const subs = reloadGroupSubject?.subscribe((input) => {
       if (input) {
@@ -46,6 +68,9 @@ export function GroupSloView({
 
         const nFilters = input?.groupFilters?.filters ?? filters;
         setFilters(nFilters);
+
+        const nGroups = input?.groupFilters?.groups ?? groups;
+        setGroups(nGroups);
 
         let newTitle = '';
         const groupByText = groupByOptions.find((option) => option.value === ngroupBy)?.text;
@@ -64,7 +89,9 @@ export function GroupSloView({
     return () => {
       subs?.unsubscribe();
     };
-  }, [filters, groupBy, kqlQuery, reloadGroupSubject, setTitle]);
+  }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject, setTitle]);
 
-  return <GroupView sloView={sloView} groupBy={groupBy} kqlQuery={kqlQuery} filters={filters} />;
+  return (
+    <GroupView sloView={sloView} groupBy={groupBy} kqlQuery={combinedKqlQuery} filters={filters} />
+  );
 }

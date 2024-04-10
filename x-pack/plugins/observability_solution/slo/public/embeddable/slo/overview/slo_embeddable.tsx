@@ -117,6 +117,8 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       if (overviewMode === 'groups') {
         const groupBy = groupFilters?.groupBy ?? 'status';
         const kqlQuery = groupFilters?.kqlQuery ?? '';
+        const groups = groupFilters?.groups ?? [];
+
         return (
           <Wrapper>
             <EuiFlexGroup
@@ -138,7 +140,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
                   data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
                 >
                   {i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
-                    defaultMessage: 'Open Search criteria',
+                    defaultMessage: 'Edit criteria',
                   })}
                 </EuiLink>
               </EuiFlexItem>
@@ -147,6 +149,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
               <GroupSloView
                 sloView="cardView"
                 groupBy={groupBy}
+                groups={groups}
                 kqlQuery={kqlQuery}
                 filters={groupFilters?.filters}
                 reloadGroupSubject={this.reloadGroupSubject}

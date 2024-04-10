@@ -6,14 +6,13 @@
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
-import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
 import { Filter } from '@kbn/es-query';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   groupBy: GroupBy;
-  groups?: SLOGroupWithSummaryResponse[];
+  groups?: string[] | undefined[];
   tagsFilter?: Filter;
   filters?: Filter[];
   kqlQuery?: string;

@@ -5,9 +5,16 @@
  * 2.0.
  */
 import './slo_group_filters.scss';
-import React, { useState } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
+import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
+
+import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { useFetchSloGroups } from '../../../hooks/use_fetch_slo_groups';
+import { SLI_OPTIONS } from '../../../pages/slo_edit/constants';
 // import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
@@ -41,11 +48,39 @@ export const groupByOptions: Option[] = [
 ];
 
 interface Props {
-  onSelected: (prop: string, value: any | undefined) => void;
+  onSelected: (prop: string, value: string | Array<string | undefined>) => void;
   selectedFilters: GroupFilters; // TODO fix type
 }
 
 export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
+  const mapSelectedGroupsToOptions = (groups: string[] | undefined) =>
+    groups?.map((group) => {
+      const selectedGroupBy = selectedFilters.groupBy;
+      let label = group;
+      if (selectedGroupBy === 'status') {
+        label = group.toLowerCase();
+      } else if (selectedGroupBy === 'slo.indicator.type') {
+        label = SLI_OPTIONS.find((option) => option.value === group)!.text ?? group;
+      }
+      return {
+        label,
+        value: group,
+      };
+    }) ?? [];
+  const mapGroupsToOptions = (items: SLOGroupWithSummaryResponse[] | undefined) =>
+    items?.map((item) => {
+      let label = item.group;
+      if (item.groupBy === 'status') {
+        label = item.group.toLowerCase();
+      } else if (item.groupBy === 'slo.indicator.type') {
+        label = SLI_OPTIONS.find((option) => option.value === item.group)!.text ?? item.group;
+      }
+      return {
+        label,
+        value: item.group,
+      };
+    }) ?? [];
+
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -58,40 +93,67 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
     useState<GroupBy>(selectedFilters.groupBy) ?? 'status';
   const [filters, setFilters] = useState(selectedFilters.filters) ?? [];
   const [kqlQuery, setkqlQuery] = useState(selectedFilters.kqlQuery);
+  const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Status');
+  const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [selectedGroupOptions, setSelectedGroupOptions] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(mapSelectedGroupsToOptions(selectedFilters.groups));
+  const [searchValue, setSearchValue] = useState<string>('');
+  const sliTypeSearch = SLI_OPTIONS.find((option) =>
+    option.text.toLowerCase().includes(searchValue.toLowerCase())
+  )?.value;
+  const query = `${searchValue}*`;
+
+  const { data, isLoading } = useFetchSloGroups({
+    perPage: 100,
+    groupBy: selectedGroupBy,
+    kqlQuery: `slo.tags: (${query}) or status: (${query.toUpperCase()}) or slo.indicator.type: (${sliTypeSearch})`,
+  });
+
+  useEffect(() => {
+    const isLoadedWithData = !isLoading && data?.results !== undefined;
+    const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
+      ? mapGroupsToOptions(data?.results)
+      : [];
+    setGroupOptions(opts);
+
+    if (selectedGroupBy === 'slo.tags') {
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.tagsLabel', {
+          defaultMessage: 'Tags',
+        })
+      );
+    } else if (selectedGroupBy === 'status') {
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.statusLabel', {
+          defaultMessage: 'Status',
+        })
+      );
+    } else if (selectedGroupBy === 'slo.indicator.type') {
+      setSelectedGroupByLabel(
+        i18n.translate('xpack.slo.sloGroupConfiguration.sliTypeLabel', {
+          defaultMessage: 'SLI type',
+        })
+      );
+    }
+  }, [isLoading, data, selectedGroupBy]);
+
+  const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
+    setSelectedGroupOptions(opts);
+    const selectedGroups = opts.length >= 1 ? opts.map((opt) => opt.value) : [];
+    onSelected('groups', selectedGroups);
+  };
+
+  const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
+    []
+  );
 
   return (
     <>
-      <SearchBar
-        appName={sloAppId}
-        placeholder={PLACEHOLDER}
-        indexPatterns={dataView ? [dataView] : []}
-        showSubmitButton={false}
-        showFilterBar={true}
-        filters={filters}
-        onFiltersUpdated={(newFilters) => {
-          setFilters(newFilters);
-          onSelected('filters', newFilters);
-        }}
-        onQuerySubmit={({ query: value }) => {
-          setkqlQuery(String(value?.query));
-          onSelected('kqlQuery', String(value?.query));
-        }}
-        onQueryChange={({ query: value }) => {
-          setkqlQuery(String(value?.query));
-          onSelected('kqlQuery', String(value?.query));
-        }}
-        query={{ query: String(kqlQuery), language: 'kuery' }}
-        showDatePicker={false}
-        disableQueryLanguageSwitcher={true}
-        saveQueryMenuVisibility="globally_managed"
-        onClearSavedQuery={() => {}}
-        showQueryInput={true}
-        onSavedQueryUpdated={(savedQuery) => {
-          setFilters(savedQuery.attributes.filters);
-          setkqlQuery(String(savedQuery.attributes.query.query));
-        }}
-      />
-
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.slo.sloGroupConfiguration.groupTypeLabel', {
@@ -106,6 +168,88 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           onChange={(e) => {
             setSelectedGroupBy(e.target.value as GroupBy);
             onSelected('groupBy', e.target.value);
+            setSelectedGroupOptions([]);
+          }}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.slo.sloGroupConfiguration.groupByLabel', {
+          defaultMessage: '{ selectedGroupByLabel }',
+          values: { selectedGroupByLabel },
+        })}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.slo.sloGroupConfiguration.groupsOptional"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
+        <EuiComboBox
+          aria-label={i18n.translate('xpack.slo.sloGroupConfiguration.sloSelector.ariaLabel', {
+            defaultMessage: '{ selectedGroupByLabel }',
+            values: { selectedGroupByLabel },
+          })}
+          placeholder={i18n.translate('xpack.slo.sloGroupConfiguration.sloSelector.placeholder', {
+            defaultMessage: 'Select a {selectedGroupByLabel}',
+            values: { selectedGroupByLabel },
+          })}
+          data-test-subj="sloGroup"
+          options={groupOptions}
+          selectedOptions={selectedGroupOptions}
+          async
+          onChange={onChange}
+          onSearchChange={onSearchChange}
+          fullWidth
+          singleSelection={false}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.slo.sloGroupConfiguration.customFiltersLabel', {
+          defaultMessage: 'Custom filter',
+        })}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.slo.sloGroupConfiguration.customFiltersOptional"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
+        <SearchBar
+          appName={sloAppId}
+          placeholder={PLACEHOLDER}
+          indexPatterns={dataView ? [dataView] : []}
+          showSubmitButton={false}
+          showFilterBar={true}
+          filters={filters}
+          onFiltersUpdated={(newFilters) => {
+            setFilters(newFilters);
+            onSelected('filters', newFilters);
+          }}
+          onQuerySubmit={({ query: value }) => {
+            setkqlQuery(String(value?.query));
+            onSelected('kqlQuery', String(value?.query));
+          }}
+          onQueryChange={({ query: value }) => {
+            setkqlQuery(String(value?.query));
+            onSelected('kqlQuery', String(value?.query));
+          }}
+          query={{ query: String(kqlQuery), language: 'kuery' }}
+          showDatePicker={false}
+          disableQueryLanguageSwitcher={true}
+          saveQueryMenuVisibility="globally_managed"
+          onClearSavedQuery={() => {}}
+          showQueryInput={true}
+          onSavedQueryUpdated={(savedQuery) => {
+            setFilters(savedQuery.attributes.filters);
+            setkqlQuery(String(savedQuery.attributes.query.query));
           }}
         />
       </EuiFormRow>
@@ -114,5 +258,5 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
 }
 
 const PLACEHOLDER = i18n.translate('xpack.slo.list.search', {
-  defaultMessage: 'Search your SLOs ...',
+  defaultMessage: 'Custom filter',
 });

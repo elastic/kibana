@@ -44,7 +44,7 @@ export function createEditSloOverviewPanelAction(
     },
     getDisplayName: () =>
       i18n.translate('xpack.slo.actions.editSloOverviewEmbeddableTitle', {
-        defaultMessage: 'Edit configuration',
+        defaultMessage: 'Edit criteria',
       }),
     async execute({ embeddable }: EmbeddableApiContext) {
       if (!embeddable) {

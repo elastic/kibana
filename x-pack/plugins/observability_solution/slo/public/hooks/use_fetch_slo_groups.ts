@@ -33,7 +33,6 @@ interface UseFetchSloGroupsResponse {
   isSuccess: boolean;
   isError: boolean;
   data: FindSLOGroupsResponse | undefined;
-  refetch: void;
 }
 
 export function useFetchSloGroups({
@@ -75,7 +74,7 @@ export function useFetchSloGroups({
     }
   }, [filterDSL, tagsFilter, statusFilter, dataView]);
 
-  const { data, isLoading, isSuccess, isError, isRefetching, refetch } = useQuery({
+  const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
     queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters, lastRefresh }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(

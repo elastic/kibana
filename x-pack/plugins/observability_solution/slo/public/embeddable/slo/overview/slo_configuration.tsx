@@ -123,7 +123,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         >
           <FormattedMessage
             id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
+            defaultMessage="Save criteria"
           />
         </EuiButton>
       </EuiModalFooter>
@@ -141,8 +141,8 @@ function GroupSloConfiguration({
     groupBy: initialInput?.groupFilters.groupBy ?? 'status',
     filters: initialInput?.groupFilters.filters ?? [],
     kqlQuery: initialInput?.groupFilters.kqlQuery ?? '',
+    groups: initialInput?.groupFilters.groups ?? [],
   });
-  const [hasError, setHasError] = useState(false);
 
   const onConfirmClick = () =>
     onCreate({
@@ -152,7 +152,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiModalBody>
+      <EuiModalBody className="sloOverviewEmbeddable">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -160,7 +160,6 @@ function GroupSloConfiguration({
                 <SloGroupFilters
                   selectedFilters={selectedGroupFilters}
                   onSelected={(prop, value) => {
-                    setHasError(value === undefined);
                     setSelectedGroupFilters((prevState) => ({ ...prevState, [prop]: value }));
                   }}
                 />
@@ -177,15 +176,10 @@ function GroupSloConfiguration({
           />
         </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="sloConfirmButton"
-          isDisabled={selectedGroupFilters.groups?.length === 0 || hasError}
-          onClick={onConfirmClick}
-          fill
-        >
+        <EuiButton data-test-subj="sloConfirmButton" onClick={onConfirmClick} fill>
           <FormattedMessage
             id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
+            defaultMessage="Save criteria"
           />
         </EuiButton>
       </EuiModalFooter>
@@ -209,10 +203,15 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
               })}
             </EuiModalHeaderTitle>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <OverviewModeSelector value={overviewMode} onChange={(mode) => setOverviewMode(mode)} />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
+          {initialInput?.overviewMode === undefined && (
+            <EuiFlexItem>
+              <OverviewModeSelector
+                value={overviewMode}
+                onChange={(mode) => setOverviewMode(mode)}
+              />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiModalHeader>
       {overviewMode === 'groups' ? (
