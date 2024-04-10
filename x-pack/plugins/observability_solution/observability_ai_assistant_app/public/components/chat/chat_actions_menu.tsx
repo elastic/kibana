@@ -149,7 +149,7 @@ export function ChatActionsMenu({
 
                 <EuiButtonEmpty
                   flush="left"
-                  size="xs"
+                  size="s"
                   data-test-subj="settingsTabGoToConnectorsButton"
                   href={http.basePath.prepend(
                     `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
