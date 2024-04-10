@@ -21,8 +21,10 @@ import {
   type ExpandableFlyoutApi,
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
+import { of } from 'rxjs';
 
 const expandDetails = jest.fn();
+const collapseDetails = jest.fn();
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
   return <TestProviders>{children}</TestProviders>;
@@ -36,6 +38,7 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
+  onClose$: of(jest.fn()),
 } as unknown as ExpandableFlyoutApi;
 
 describe('<FlyoutNavigation />', () => {
@@ -66,7 +69,11 @@ describe('<FlyoutNavigation />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+          <FlyoutNavigation
+            flyoutIsExpandable={true}
+            expandDetails={expandDetails}
+            collapseDetails={collapseDetails}
+          />
         </ExpandableFlyoutTestProviders>
       );
 
@@ -76,6 +83,7 @@ describe('<FlyoutNavigation />', () => {
 
       getByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID).click();
       expect(flyoutContextValue.closeLeftPanel).toHaveBeenCalled();
+      expect(collapseDetails).toHaveBeenCalled();
     });
   });
 

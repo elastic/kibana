@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Subject } from 'rxjs';
 
 export interface ExpandableFlyoutApi {
   /**
@@ -49,6 +50,10 @@ export interface ExpandableFlyoutApi {
    * Close all panels and closes flyout
    */
   closeFlyout: () => void;
+  /**
+   * Observable that emits when the flyout is closed
+   */
+  onClose$: Subject<boolean>;
 }
 
 export interface PanelPath {

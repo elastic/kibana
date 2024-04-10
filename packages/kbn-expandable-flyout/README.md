@@ -58,6 +58,7 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 - **closePreviewPanel**: close the preview panels
 - **previousPreviewPanel**: navigate to the previous preview panel
 - **closeFlyout**: close the flyout
+- **onClose$**: observable that emits when the flyout is closed
 
 ## Usage
 
@@ -81,6 +82,36 @@ Then use the [React UI component](https://github.com/elastic/kibana/tree/main/pa
 <ExpandableFlyout registeredPanels={myPanels} />
 ```
 _where `myPanels` is a list of all the panels that can be rendered in the flyout_
+
+
+Here's how you can use the api to open the flyout or listen to the onClose$ event, for example:
+```typescript jsx
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+
+...
+
+const { onClose$, openFlyout } = useExpandableFlyoutApi();
+  
+// open a flyout with right, left and preview panels
+openFlyout({
+  right: {
+    id: 'myFlyoutRightPanelId',
+    params: {}
+  },
+  left: {
+    id: 'myFlyoutLeftPanelId',
+    params: {}
+  },
+  preview: {
+    id: 'myFlyoutPreviewPanelId',
+    params: {}
+  },
+});
+
+// callback called when flyout is closed
+// do not forget to unsubscribe here (using take(1) or other methods) to avoid any memory leaks
+onClose$.pipe(take(1)).subscribe(() => console.log('flyout closed'));
+```
 
 ## Terminology
 
