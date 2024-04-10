@@ -119,6 +119,7 @@ export type ChangesArguments = FromSchema<typeof changesFunctionParameters>;
 
 export interface ChangesFunctionResponse {
   content: {
+    description: string;
     changes: {
       logs: LogChange[];
       metrics: MetricChange[];

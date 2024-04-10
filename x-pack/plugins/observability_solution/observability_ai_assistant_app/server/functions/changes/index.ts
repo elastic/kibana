@@ -55,7 +55,7 @@ export function registerChangesFunction({
 
       const dateHistogram: AggregationsAutoDateHistogramAggregation = {
         field: '@timestamp',
-        buckets: 50,
+        buckets: 100,
       };
 
       const [metricChanges, logChanges] = await Promise.all([
@@ -122,6 +122,10 @@ export function registerChangesFunction({
 
       return {
         content: {
+          description: `For each item, the user can see the type of change, the impact, the timestamp, the trend, and the label.
+            Do not regurgitate these results back to the user.
+            Instead, focus on the interesting changes, mention possible correlations or root causes, and suggest next steps to the user.
+            "indeterminate" means that the system could not detect any changes.`,
           changes: {
             metrics: allMetricChangesWithoutTimeseries,
             logs: allLogChangesWithoutTimeseries,

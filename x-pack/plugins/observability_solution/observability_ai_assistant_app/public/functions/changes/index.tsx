@@ -4,34 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { groupBy, mapValues, orderBy } from 'lodash';
-import {
-  BarSeries,
-  Chart,
-  CurveType,
-  LineSeries,
-  PartialTheme,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
-import { ChangePointType } from '@kbn/es-types/src';
-import dedent from 'dedent';
+import React from 'react';
 import type {
   ChangesArguments,
   ChangesFunctionResponse,
   LogChangeWithTimeseries,
   MetricChangeWithTimeseries,
 } from '../../../common/functions/changes';
+import {
+  ChangeList,
+  ChangeListItem,
+  ChangeListItemImpact,
+} from '../../components/changes/change_list';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
-import { useChartTheme } from '../../hooks/use_chart_theme';
 
 function sortAndGroup<T extends LogChangeWithTimeseries | MetricChangeWithTimeseries>(
   groups: T[]
@@ -46,148 +37,33 @@ function sortAndGroup<T extends LogChangeWithTimeseries | MetricChangeWithTimese
   return orderBy(grouped, (group) => group.items[0].changes?.p_value ?? Number.POSITIVE_INFINITY);
 }
 
-function ChangeGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{title}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
+function getImpactFromPValue(pValue: number) {
+  if (pValue < 1e-6) {
+    return ChangeListItemImpact.high;
+  }
+
+  if (pValue < 0.001) {
+    return ChangeListItemImpact.medium;
+  }
+
+  return ChangeListItemImpact.low;
 }
 
-function SparkPlot({
-  type,
-  timeseries,
-}: {
-  type: 'line' | 'bar';
-  timeseries: Array<{ x: number; y: number | null }>;
-}) {
-  const defaultChartTheme = useChartTheme();
-
-  const sparkplotChartTheme: PartialTheme = {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    lineSeriesStyle: {
-      point: { opacity: 0 },
-    },
-    areaSeriesStyle: {
-      point: { opacity: 0 },
-    },
+function toChangeListItem(
+  item: LogChangeWithTimeseries | MetricChangeWithTimeseries
+): ChangeListItem {
+  return {
+    label: 'regex' in item ? item.regex : item.key,
+    timeseries: item.over_time,
+    change:
+      item.changes && item.changes.p_value !== undefined && item.changes.time !== undefined
+        ? {
+            impact: getImpactFromPValue(item.changes.p_value),
+            time: new Date(item.changes.time).getTime(),
+            type: item.changes.type,
+          }
+        : undefined,
   };
-
-  return (
-    <Chart
-      size={{
-        width: 128,
-        height: 64,
-      }}
-    >
-      <Settings
-        theme={[sparkplotChartTheme, ...defaultChartTheme.theme]}
-        baseTheme={defaultChartTheme.baseTheme}
-        showLegend={false}
-        locale={i18n.getLocale()}
-      />
-      <Tooltip type="none" />
-      {type && type === 'bar' ? (
-        <BarSeries
-          id="Sparkbar"
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={timeseries}
-        />
-      ) : (
-        <LineSeries
-          id="Sparkline"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={timeseries}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-      )}
-    </Chart>
-  );
-}
-
-function ChangePointLabel({
-  change: { type, time, p_value: pValue },
-}: {
-  change: { type: ChangePointType; time?: string; p_value?: number };
-}) {
-  const label =
-    type === 'indeterminable' || time === undefined ? (
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.observabilityAiAssistant.changes.noSignificantChanges', {
-          defaultMessage: 'No significant changes',
-        })}
-      </EuiText>
-    ) : (
-      <EuiText size="xs">
-        {i18n.translate('xpack.observabilityAiAssistant.changes.changePointDetected', {
-          defaultMessage: dedent(`{type, select,
-            dip {Dip}
-            distribution_change {Distribution change}
-            non_stationary {Non-stationary}
-            spike {Spike}
-            stationary {Stationary}
-            step_change {Step change}
-            trend_change {Trend change}
-          } detected at {time}`),
-          values: {
-            type,
-            time: new Date(time).toLocaleString(),
-          },
-        })}
-      </EuiText>
-    );
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false} />
-      <EuiFlexItem grow>{label}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function ChangeGroupItem({
-  title,
-  type,
-  timeseries,
-  change,
-}: {
-  title: string;
-  type: 'line' | 'bar';
-  timeseries: Array<{ x: number; y: number | null }>;
-  change: {
-    time?: string;
-    type: ChangePointType;
-    p_value?: number;
-  };
-}) {
-  return (
-    <EuiFlexGroup direction="row" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <SparkPlot type={type} timeseries={timeseries} />
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {title && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{title}</EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <ChangePointLabel change={change} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 }
 
 function LogChanges({ logs }: { logs: LogChangeWithTimeseries[] }) {
@@ -197,17 +73,7 @@ function LogChanges({ logs }: { logs: LogChangeWithTimeseries[] }) {
     <EuiFlexGroup direction="column">
       {logsGroupedAndSorted.map((group) => (
         <EuiFlexItem>
-          <ChangeGroup title={group.name} key={group.name}>
-            {group.items.map((item) => (
-              <ChangeGroupItem
-                type="bar"
-                key={item.key}
-                timeseries={item.over_time}
-                change={item.changes}
-                title={item.pattern}
-              />
-            ))}
-          </ChangeGroup>
+          <ChangeList title={group.name} items={group.items.map(toChangeListItem)} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
@@ -221,17 +87,7 @@ function MetricChanges({ metrics }: { metrics: MetricChangeWithTimeseries[] }) {
     <EuiFlexGroup direction="column">
       {metricsGroupedAndSorted.map((group) => (
         <EuiFlexItem>
-          <ChangeGroup title={group.name} key={group.name}>
-            {group.items.map((item) => (
-              <ChangeGroupItem
-                type="line"
-                key={item.key}
-                timeseries={item.over_time}
-                change={item.changes}
-                title={item.key}
-              />
-            ))}
-          </ChangeGroup>
+          <ChangeList title={group.name} items={group.items.map(toChangeListItem)} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

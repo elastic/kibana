@@ -165,8 +165,6 @@ export function ServiceOverviewThroughputChart({
         transactionType,
         environment,
         preferred,
-        start,
-        end,
       })
     );
   }, [
