@@ -43,6 +43,9 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
     end
     fips.vm.box = 'generic/rhel9'
+    fips.vm.provision "shell", inline: <<-SHELL
+      echo "export OPENSSL_MODULES=/usr/local/lib64/ossl-modules" >> /etc/profile.d/kibana-fips-env.sh
+    SHELL
     fips.vm.provision "ansible" do |ansible|
       ansible.playbook = "fips.yml"
     end
