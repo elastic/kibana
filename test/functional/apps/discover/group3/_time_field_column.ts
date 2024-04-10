@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const monacoEditor = getService('monacoEditor');
+  const dataViews = getService('dataViews');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
   const docTable = getService('docTable');
@@ -257,9 +258,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           describe('without a time field', () => {
             beforeEach(async () => {
-              await PageObjects.discover.createAdHocDataView('logs*', false);
+              await dataViews.createFromSearchBar({
+                name: 'logs*',
+                adHoc: true,
+                hasTimeField: false,
+              });
               await PageObjects.discover.waitUntilSearchingHasFinished();
-              await PageObjects.header.waitUntilLoadingHasFinished();
             });
 
             it('should render initial columns correctly', async () => {

@@ -16,7 +16,7 @@ import {
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { getOpenAlerts } from '../../../../utils';
+import { getAlerts } from '../../../../utils';
 import {
   createRule,
   deleteAllRules,
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
         saved_id: 'doesnt-exist',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       const alert = alerts.hits.hits[0]._source;
       expect(alert).eql({
         ...alert,
