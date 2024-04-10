@@ -163,6 +163,7 @@ function getFieldMapping(
   const literalValues = {
     string: `"a"`,
     number: '5',
+    date: 'now()',
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
@@ -247,7 +248,12 @@ function generateIncorrectlyTypedParameters(
     [values.booleanField]: 'boolean',
   };
 
-  const expectedErrors = signatures[0].params
+  const signatureToUse = signatures.find(({ params: fnParams }) =>
+    // check that all params are of the same type
+    fnParams.every(({ type }, i) => type === currentParams[i].type)
+  )!;
+
+  const expectedErrors = signatureToUse.params
     .filter(({ constantOnly }) => !constantOnly)
     .map(({ type }, i) => {
       const fieldName = wrongFieldMapping[i].name;
@@ -1186,16 +1192,12 @@ describe('validation logic', () => {
       });
       for (const { name, signatures, ...rest } of numericOrStringFunctions) {
         const supportedSignatures = signatures.filter(({ returnType }) =>
+          // TODO — not sure why the tests have this limitation... seems like any type
+          // that can be part of a boolean expression should be allowed in a where clause
           ['number', 'string'].includes(returnType)
         );
         for (const { params, returnType, ...restSign } of supportedSignatures) {
-          const correctMapping = params
-            .filter(({ optional }) => !optional)
-            .map(({ type }) =>
-              ['number', 'string'].includes(Array.isArray(type) ? type.join(', ') : type)
-                ? { name: `${type}Field`, type }
-                : { name: `numberField`, type }
-            );
+          const correctMapping = getFieldMapping(params);
           testErrorsAndWarnings(
             `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
               // hijacking a bit this function to produce a function call
@@ -1752,6 +1754,31 @@ describe('validation logic', () => {
             ]);
           }
         }
+      });
+
+      describe('constant-only parameters', () => {
+        testErrorsAndWarnings(
+          'from index | eval auto_bucket(dateField, abs(numberField), "", "")',
+          ['Argument of [abs] must be a constant, received [numberField]']
+        );
+        testErrorsAndWarnings(
+          'from index | eval auto_bucket(dateField, abs(length(numberField)), "", "")',
+          ['Argument of [length] must be a constant, received [numberField]']
+        );
+        testErrorsAndWarnings('from index | eval auto_bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | eval auto_bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings(
+          'from index | eval auto_bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          []
+        );
+        testErrorsAndWarnings(
+          'from index | eval auto_bucket(dateField, numberField, stringField, stringField)',
+          [
+            'Argument of [auto_bucket] must be a constant, received [numberField]',
+            'Argument of [auto_bucket] must be a constant, received [stringField]',
+            'Argument of [auto_bucket] must be a constant, received [stringField]',
+          ]
+        );
       });
     });
 

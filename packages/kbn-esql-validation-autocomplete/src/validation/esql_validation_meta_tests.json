@@ -5332,6 +5332,34 @@
       "warning": []
     },
     {
+      "query": "from a_index | where st_centroid([1, 2, 3])",
+      "error": [
+        "WHERE does not support function st_centroid"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where st_centroid([1, 2, 3]) > 0",
+      "error": [
+        "WHERE does not support function st_centroid"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where st_centroid(geoPointField)",
+      "error": [
+        "WHERE does not support function st_centroid"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where st_centroid(geoPointField) > 0",
+      "error": [
+        "WHERE does not support function st_centroid"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where abs(numberField) > 0",
       "error": [],
       "warning": []
@@ -5393,17 +5421,14 @@
       "warning": []
     },
     {
-      "query": "from a_index | where auto_bucket(numberField, numberField, numberField, numberField) > 0",
+      "query": "from a_index | where auto_bucket(numberField, 5, 5, 5) > 0",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where auto_bucket(stringField, stringField, booleanField, booleanField) > 0",
+      "query": "from a_index | where auto_bucket(stringField, 5, 5, 5) > 0",
       "error": [
-        "Argument of [auto_bucket] must be [date], found value [stringField] type [string]",
-        "Argument of [auto_bucket] must be [number], found value [stringField] type [string]",
-        "Argument of [auto_bucket] must be [string], found value [booleanField] type [boolean]",
-        "Argument of [auto_bucket] must be [string], found value [booleanField] type [boolean]"
+        "Argument of [auto_bucket] must be [number], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -5503,7 +5528,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where log(numberField) > 0",
+      "query": "from a_index | where log(numberField, numberField) > 0",
       "error": [],
       "warning": []
     },
@@ -5639,7 +5664,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | where round(numberField) > 0",
+      "query": "from a_index | where round(numberField, numberField) > 0",
       "error": [],
       "warning": []
     },
@@ -6897,28 +6922,28 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField)",
+      "query": "from a_index | eval var = st_centroid([1, 2, 3])",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval var = st_centroid([1, 2, 3]) > 0",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField)",
+      "query": "from a_index | eval st_centroid([1, 2, 3])",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval st_centroid([1, 2, 3]) > 0",
       "error": [
         "EVAL does not support function st_centroid"
       ],
@@ -7155,53 +7180,98 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, stringField, stringField)",
+      "query": "from a_index | eval var = auto_bucket(dateField, 5, \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval auto_bucket(dateField, 5, \"a\", \"a\")",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, stringField)",
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, dateField, dateField)",
+      "query": "from a_index | eval auto_bucket(dateField, 5, now(), now())",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, dateField, dateField)",
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [dateField]",
+        "Argument of [auto_bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, 5, \"a\", now())",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, stringField, dateField)",
+      "query": "from a_index | eval auto_bucket(dateField, 5, \"a\", now())",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, dateField)",
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]",
+        "Argument of [auto_bucket] must be a constant, received [dateField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, 5, now(), \"a\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, dateField, stringField)",
+      "query": "from a_index | eval auto_bucket(dateField, 5, now(), \"a\")",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, dateField, stringField)",
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [dateField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(numberField, 5, 5, 5)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = auto_bucket(numberField, numberField, numberField, numberField)",
+      "query": "from a_index | eval auto_bucket(numberField, 5, 5, 5)",
       "error": [],
       "warning": []
     },
     {
       "query": "from a_index | eval auto_bucket(numberField, numberField, numberField, numberField)",
-      "error": [],
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [numberField]"
+      ],
       "warning": []
     },
     {
@@ -10671,6 +10741,44 @@
       "warning": []
     },
     {
+      "query": "from index | eval auto_bucket(dateField, abs(numberField), \"\", \"\")",
+      "error": [
+        "Argument of [abs] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | eval auto_bucket(dateField, abs(length(numberField)), \"\", \"\")",
+      "error": [
+        "Argument of [length] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index | eval auto_bucket(dateField, pi(), \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval auto_bucket(dateField, 1 + 30 / 10, \"\", \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval auto_bucket(dateField, 1 + 30 / 10, concat(\"\", \"\"), \"\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index | eval auto_bucket(dateField, numberField, stringField, stringField)",
+      "error": [
+        "Argument of [auto_bucket] must be a constant, received [numberField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]",
+        "Argument of [auto_bucket] must be a constant, received [stringField]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats ",
       "error": [
         "At least one aggregation or grouping expression required in [STATS]"
@@ -12216,33 +12324,53 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(cartesianPointField)",
+      "query": "from a_index | stats var = st_centroid([1, 2, 3])",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(cartesianPointField)",
+      "query": "from a_index | stats st_centroid([1, 2, 3])",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(avg(numberField))",
+      "query": "from a_index | stats var = round(st_centroid([1, 2, 3]))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(st_centroid([1, 2, 3]))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(st_centroid([1, 2, 3])) + st_centroid([1, 2, 3])",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(st_centroid([1, 2, 3])) + st_centroid([1, 2, 3])",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = st_centroid([1, 2, 3])",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(avg(numberField))",
+      "query": "from a_index | stats st_centroid([1, 2, 3])",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(stringField)",
+      "query": "from a_index | stats st_centroid(booleanField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid] must be [number[]], found value [booleanField] type [boolean]"
       ],
       "warning": []
     },
@@ -12280,7 +12408,7 @@
     {
       "query": "from a_index | stats st_centroid(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid] must be [geo_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
