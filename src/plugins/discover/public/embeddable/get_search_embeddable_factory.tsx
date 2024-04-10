@@ -46,12 +46,9 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
       const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
         const { state: rawState, references } = extract({
           type: SEARCH_EMBEDDABLE_TYPE,
-          id: uuid,
-          ...initialState,
           ...serializeTitles(),
           ...serializeSearchEmbeddable(),
-        });
-        console.log('serializeState', rawState);
+        } as unknown as EmbeddableStateWithType);
         return {
           rawState: rawState as unknown as SearchEmbeddableSerializedState,
           references,
@@ -87,7 +84,6 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
           checkForDuplicateTitle: attributeService.checkForDuplicateTitle,
           getByValueState: () => {
             const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
-            console.log('get by value', byValueState);
             return {
               ...byValueState,
               attributes: searchEmbeddableApi.attributes$.getValue(),

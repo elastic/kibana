@@ -38,7 +38,7 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
   savedObjectId?: string;
 };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchInput> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   HasSavedSearch &
   HasLibraryTransforms &
   PublishesDataLoading;

@@ -25,10 +25,10 @@ export interface SavedSearch extends SavedSearchCommon {
 }
 
 interface SearchBaseInput extends EmbeddableInput {
-  timeRange: TimeRange;
-  timeslice?: [number, number];
-  query?: Query;
-  filters?: Filter[];
+  timeRange: TimeRange; //
+  timeslice?: [number, number]; // ???
+  query?: Query; // ???
+  filters?: Filter[]; // ???
   hidePanelTitles?: boolean;
   columns?: string[];
   sort?: SortOrder[];

@@ -19,12 +19,14 @@ export const initializeSearchEmbeddableApi = async (
   attributeService: { unwrapMethod: (id: string) => Promise<SavedSearchByValueAttributes> }
 ) => {
   // ts-ignore FIX THIS TYPE LATER
-  const { attributes } = initialState?.savedObjectId
+  const { attributes: initialAttributes } = initialState?.savedObjectId
     ? await attributeService.unwrapMethod(initialState.savedObjectId)
     : initialState;
 
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
-  const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes | undefined>(attributes);
+  const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes | undefined>(
+    initialAttributes
+  );
 
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableSerializedState> => {
     if (savedObjectId$.getValue()) {
@@ -36,7 +38,6 @@ export const initializeSearchEmbeddableApi = async (
         ],
       };
     }
-
     /** Otherwise, compare all of the state */
     return {
       attributes: [

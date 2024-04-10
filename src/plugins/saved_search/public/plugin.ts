@@ -182,8 +182,7 @@ export class SavedSearchPublicPlugin
           saveMethod: async (
             attributes: SavedSearchByValueAttributes,
             savedObjectId?: string
-          ): string => {
-            console.log('save method', attributes);
+          ): Promise<string> => {
             const { references, attributes: attrs } = splitReferences(attributes);
             const id = await saveSearchSavedObject(
               savedObjectId,
