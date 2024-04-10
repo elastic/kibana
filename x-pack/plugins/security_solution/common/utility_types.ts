@@ -78,3 +78,19 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
  * Read more: https://medium.com/@aeron169/building-a-xor-type-in-typescript-5f4f7e709a9d
  */
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+
+/**
+ * This utility type is used to extract the Nth parameter of a function type.
+ * For example, `Parameter<0, (foo: string, bar: number) => void>` will be `string`.
+ *
+ * This helps streamline situations where using the built-in Parameters<T>[N] can be confusing.
+ * Example:
+ * ```ts
+ * type Foo = Pick<NonNullable<Parameters<MyObject["foo"]["bar"]>[0]>, "baz">;
+ * type Foo = Pick<NonNullable<Parameter<0, MyObject["foo"]["bar"]>>, "baz">;
+ * ```
+ *
+ * @param N The index of the parameter to extract.
+ * @param T The function type from which to extract the parameter.
+ */
+export type Parameter<N extends number, T> = T extends (...args: infer P) => unknown ? P[N] : never;
