@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const find = getService('find');
   const esql = getService('esql');
@@ -237,6 +238,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('unifiedSearch_switch_modal');
         });
+      });
+    });
+
+    describe('inspector', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+      });
+
+      it('shows requests in the inspector', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await inspector.open();
+        const requestNames = await inspector.getRequestNames();
+        expect(requestNames).to.contain('Results');
       });
     });
 
