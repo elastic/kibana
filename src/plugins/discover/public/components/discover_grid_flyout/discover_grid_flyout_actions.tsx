@@ -41,15 +41,13 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
   const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
   const isLargeScreen = dimensions?.width ? dimensions.width > euiTheme.base * 30 : false;
   return (
-    <EuiFlexGroup ref={setRef}>
-      <EuiFlexItem>
-        <FlyoutActions
-          flyoutActions={flyoutActions}
-          isMobileScreen={isMobileScreen}
-          isLargeScreen={isLargeScreen}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div ref={setRef}>
+      <FlyoutActions
+        flyoutActions={flyoutActions}
+        isMobileScreen={isMobileScreen}
+        isLargeScreen={isLargeScreen}
+      />
+    </div>
   );
 }
 
