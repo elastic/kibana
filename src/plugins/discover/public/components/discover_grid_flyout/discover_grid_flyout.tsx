@@ -84,7 +84,7 @@ export function DiscoverGridFlyout({
   const flyoutCustomization = useDiscoverCustomization('flyout');
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
-  const defaultWidth = flyoutCustomization?.size ?? 540; // Give enough room to search bar to not wrap
+  const defaultWidth = flyoutCustomization?.size ?? euiTheme.base * 34; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;

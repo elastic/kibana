@@ -39,13 +39,13 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
   const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
   const dimensions = useResizeObserver(ref);
   const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
-  const isLargeScreen = dimensions?.width ? dimensions.width > euiTheme.base * 30 : false;
+  const isLargeFlyout = dimensions?.width ? dimensions.width > euiTheme.base * 30 : false;
   return (
     <div ref={setRef}>
       <FlyoutActions
         flyoutActions={flyoutActions}
         isMobileScreen={isMobileScreen}
-        isLargeScreen={isLargeScreen}
+        isLargeFlyout={isLargeFlyout}
       />
     </div>
   );
@@ -54,11 +54,11 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
 function FlyoutActions({
   flyoutActions,
   isMobileScreen,
-  isLargeScreen,
+  isLargeFlyout,
 }: {
   flyoutActions: DiscoverGridFlyoutActionsProps['flyoutActions'];
   isMobileScreen: boolean;
-  isLargeScreen: boolean;
+  isLargeFlyout: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopoverOpen] =
@@ -96,7 +96,7 @@ function FlyoutActions({
     flyoutActions.length
   );
   const showFlyoutIconsOnly =
-    remainingFlyoutActions.length > 0 || (!isLargeScreen && visibleFlyoutActions.length > 1);
+    remainingFlyoutActions.length > 0 || (!isLargeFlyout && visibleFlyoutActions.length > 1);
 
   return (
     <EuiFlexGroup
