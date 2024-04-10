@@ -81,24 +81,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with connected calendar shows link to calendar', async () => {
-      await ml.testExecution.logTestStep('calendar present for connected job');
       await ml.expandedJobDetails.assertJobRowCalendars(jobId, [calendarId]);
     });
 
     it('expanded row with forecast should display open forecast button', async () => {
-      await ml.testExecution.logTestStep('open forecast link present');
       await ml.expandedJobDetails.assertForecastElements(jobId);
     });
 
     it('expanded row with annotations can be edited', async () => {
-      await ml.testExecution.logTestStep('can edit annotations from expanded row');
       await ml.expandedJobDetails.editAnnotation(jobId, 'appex qa rox');
     });
 
     it('expanded row with data feed flyout should display correctly', async () => {
-      await ml.testExecution.logTestStep(
-        'open data feed flyout and verify the title displays correctly'
-      );
       await ml.expandedJobDetails.assertDataFeedFlyout(jobId);
     });
 
