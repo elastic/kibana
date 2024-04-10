@@ -31,7 +31,6 @@ export const inject = (
       },
     } as EmbeddableStateWithType;
   }
-  console.log('inject ->', state);
   return state;
 };
 

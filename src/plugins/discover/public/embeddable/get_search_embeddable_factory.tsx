@@ -29,11 +29,11 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
     type: SEARCH_EMBEDDABLE_TYPE,
     deserializeState: (state) => {
       if (!state.rawState) return {};
-      const serializedState = cloneDeep(state.rawState) as EmbeddableStateWithType;
-      return inject(
-        serializedState,
-        state.references ?? []
-      ) as unknown as SearchEmbeddableSerializedState;
+      const serializedState = state.rawState as EmbeddableStateWithType;
+      const deserializedState = inject(serializedState, state.references ?? []);
+      console.log('deserializeState', deserializedState);
+
+      return deserializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
@@ -51,6 +51,7 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
           ...serializeTitles(),
           ...serializeSearchEmbeddable(),
         });
+        console.log('serializeState', rawState);
         return {
           rawState: rawState as unknown as SearchEmbeddableSerializedState,
           references,
@@ -75,7 +76,6 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
               title,
               ...searchEmbeddableApi.attributes$.getValue(),
             });
-            // searchEmbeddableApi.savedObjectId$.next(savedObjectId);
             return savedObjectId;
           },
           getByReferenceState: (savedObjectId: string) => {
@@ -87,14 +87,13 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
           checkForDuplicateTitle: attributeService.checkForDuplicateTitle,
           getByValueState: () => {
             const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
+            console.log('get by value', byValueState);
             return {
               ...byValueState,
-              attributes: {
-                ...byValueState.attributes,
-              },
+              attributes: searchEmbeddableApi.attributes$.getValue(),
             };
           },
-          serializeState: () => serializeState(),
+          serializeState,
         },
         {
           ...titleComparators,

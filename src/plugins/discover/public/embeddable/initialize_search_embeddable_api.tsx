@@ -54,7 +54,6 @@ export const initializeSearchEmbeddableApi = async (
     },
     searchEmbeddableComparators: getSearchEmbeddableComparators(),
     serializeSearchEmbeddable: () => {
-      console.log('serialize', savedObjectId$.getValue());
       const savedObjectId = savedObjectId$.getValue();
       if (savedObjectId) {
         return {
