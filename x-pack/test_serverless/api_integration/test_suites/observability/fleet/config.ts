@@ -20,7 +20,7 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=true'],
+  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
 
   kbnServerArgs,
 });
