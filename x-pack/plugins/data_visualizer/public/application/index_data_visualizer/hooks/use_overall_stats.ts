@@ -51,7 +51,6 @@ import {
   fetchDataWithTimeout,
   rateLimitingForkJoin,
 } from '../search_strategy/requests/fetch_utils';
-
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   esql = false,
   searchStrategyParams: TParams | undefined,
@@ -91,7 +90,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     function updatePopulatedFields() {
       let unmounted = false;
 
-      // If null, that mean we tried to fetch populated fields already but it timed out
+      // If null, that means we tried to fetch populated fields already but it timed out
       // so don't try again
       if (!searchStrategyParams || populatedFieldsInIndex === null) return;
 

@@ -173,6 +173,7 @@ export function useFieldStatsSearchStrategy(
 
     const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
+      abortSignal: abortCtrl.current.signal,
       sessionId,
       ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
@@ -273,7 +274,12 @@ export function useFieldStatsSearchStrategy(
 
         if (Array.isArray(fieldBatches)) {
           fieldBatches.forEach((f) => {
-            if (Array.isArray(f) && f.length === 1) {
+            if (
+              Array.isArray(f) &&
+              f.length === 1 &&
+              Array.isArray(f[0].fields) &&
+              f[0].fields.length > 0
+            ) {
               statsMap.set(f[0].fields[0], f[0]);
             }
           });

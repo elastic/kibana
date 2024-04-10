@@ -21,7 +21,6 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { isDefined } from '@kbn/ml-is-defined';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -49,6 +48,7 @@ import {
   DATA_VISUALIZER_INDEX_VIEWER_ID,
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
+import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
 
 const defaults = getDefaultPageState();
 
@@ -124,41 +124,13 @@ export const useDataVisualizerGridData = (
   const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
     // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
     // For example, adding {field} will also add {field.keyword} if it exists
-    const visibleFieldsWithSubFields =
-      input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
-        ? undefined
-        : [
-            ...new Set([
-              ...dataViewFields
-                .filter((field) => {
-                  if (input?.visibleFieldNames?.length === 0) return true;
-                  const visibleNames = input?.visibleFieldNames ?? [];
-                  if (visibleNames.includes(field.name)) return true;
-                  const parent = field.getSubtypeMulti()?.multi?.parent;
-                  const matchesParent = parent ? visibleNames.indexOf(parent) > -1 : false;
-                  if (matchesParent) {
-                    return true;
-                  }
-                  return false;
-                })
-                .map((f) => f.name),
-              ...(input.fieldsToFetch ?? []),
-              ,
-            ]),
-          ].filter(isDefined);
-    return {
-      visibleFieldNames:
-        input.id === DATA_VISUALIZER_INDEX_VIEWER_ID
-          ? input.visibleFieldNames
-          : visibleFieldsWithSubFields,
-      fieldsToFetch: Array.isArray(visibleFieldsWithSubFields)
-        ? [
-            ...visibleFieldsWithSubFields,
-            ...Object.keys(currentDataView.getRuntimeMappings() ?? {}),
-          ]
-        : undefined,
-    };
-  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, dataViewFields, currentDataView]);
+    return getFieldsWithSubFields({
+      input,
+      currentDataView,
+      shouldGetSubfields: input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
