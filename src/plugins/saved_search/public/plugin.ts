@@ -6,51 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   registerSavedObjectToPanelMethod,
 } from '@kbn/embeddable-plugin/public';
-import {
-  getSavedSearch,
-  saveSavedSearch,
-  SaveSavedSearchOptions,
-  getNewSavedSearch,
-  SavedSearchUnwrapResult,
-  SearchByValueInput,
-  SavedSearchByValueAttributes,
-} from './services/saved_searches';
-import { SavedSearch, SavedSearchAttributes } from '../common/types';
-import { SavedSearchType, LATEST_VERSION } from '../common';
-import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
+import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import {
-  type SavedSearchAttributeService,
-  getSavedSearchAttributeService,
+  getNewSavedSearch,
+  getSavedSearch,
+  SavedSearchUnwrapResult,
+  saveSavedSearch,
+  SaveSavedSearchOptions,
+  SearchByValueInput,
   toSavedSearch,
 } from './services/saved_searches';
+import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 import {
+  getSavedSearchAttributeService,
   savedObjectToEmbeddableAttributes,
-  splitReferences,
 } from './services/saved_searches/saved_search_attribute_service';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { createGetSavedSearchDeps } from './services/saved_searches/create_get_saved_search_deps';
-import { getSearchSavedObject } from '../common/service/get_saved_searches';
-import { saveSearchSavedObject } from './services/saved_searches/save_saved_searches';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
 
 /**
  * Saved search plugin public Setup contract
@@ -70,7 +60,6 @@ export interface SavedSearchPublicPluginStart {
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
   byValue: {
-    attributeService: unknown;
     toSavedSearch: (
       id: string | undefined,
       result: SavedSearchUnwrapResult
@@ -169,6 +158,12 @@ export class SavedSearchPublicPlugin
   ): SavedSearchPublicPluginStart {
     const deps = { search, spaces, savedObjectsTaggingOss, contentManagement, embeddable };
     const service = new SavedSearchesService(deps);
+    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const { getSearchEmbeddableFactory } = await import(
+        './embeddable/get_search_embeddable_factory'
+      );
+      return getSearchEmbeddableFactory({ attributeService: getSavedSearchAttributeService(deps) });
+    });
 
     return {
       get: (savedSearchId: string) => service.get(savedSearchId),
@@ -178,40 +173,6 @@ export class SavedSearchPublicPlugin
         return service.save(savedSearch, options);
       },
       byValue: {
-        attributeService: {
-          saveMethod: async (
-            attributes: SavedSearchByValueAttributes,
-            savedObjectId?: string
-          ): Promise<string> => {
-            const { references, attributes: attrs } = splitReferences(attributes);
-            const id = await saveSearchSavedObject(
-              savedObjectId,
-              attrs,
-              references,
-              deps.contentManagement
-            );
-            return id;
-          },
-          unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
-            const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(deps));
-
-            return {
-              attributes: savedObjectToEmbeddableAttributes(so.item),
-              metaInfo: {
-                sharingSavedObjectProps: so.meta,
-                managed: so.item.managed,
-              },
-            };
-          },
-          checkForDuplicateTitle: (props: OnSaveProps) => {
-            return checkForDuplicateTitle({
-              title: props.newTitle,
-              isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
-              onTitleDuplicate: props.onTitleDuplicate,
-              contentManagement: deps.contentManagement,
-            });
-          },
-        }, // TODO: ???
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
           return toSavedSearch(id, result, deps);
         },

@@ -14,12 +14,15 @@ import type {
 } from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+
 import { getSavedSearchObjectType } from './saved_objects';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';
 import { kibanaContext } from '../common/expressions';
 import { getKibanaContext } from './expressions/kibana_context';
 import { getSavedSearch } from '../common/service/get_saved_searches';
+import { createSearchEmbeddableFactory } from './embeddable';
 
 /**
  * Saved search plugin server Setup contract
@@ -28,6 +31,7 @@ export interface SavedSearchPublicSetupDependencies {
   data: DataPluginSetup;
   contentManagement: ContentManagementServerSetup;
   expressions: ExpressionsServerSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface SavedSearchServerStartDeps {
@@ -41,7 +45,7 @@ export class SavedSearchServerPlugin
 
   public setup(
     core: CoreSetup,
-    { data, contentManagement, expressions }: SavedSearchPublicSetupDependencies
+    { data, contentManagement, expressions, embeddable }: SavedSearchPublicSetupDependencies
   ) {
     contentManagement.register({
       id: SavedSearchType,
@@ -63,6 +67,8 @@ export class SavedSearchServerPlugin
     expressions.registerFunction(
       getKibanaContext(core.getStartServices as StartServicesAccessor<SavedSearchServerStartDeps>)
     );
+
+    embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
 
     return {};
   }

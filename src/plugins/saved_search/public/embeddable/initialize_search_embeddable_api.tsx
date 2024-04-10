@@ -10,13 +10,12 @@ import { BehaviorSubject } from 'rxjs';
 import deepEqual from 'react-fast-compare';
 
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
-
+import { SavedSearchAttributeService, SavedSearchByValueAttributes } from '..';
 import { SearchEmbeddableSerializedState } from './types';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,
-  attributeService: { unwrapMethod: (id: string) => Promise<SavedSearchByValueAttributes> }
+  attributeService: SavedSearchAttributeService
 ) => {
   // ts-ignore FIX THIS TYPE LATER
   const { attributes: initialAttributes } = initialState?.savedObjectId

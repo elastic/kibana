@@ -33,16 +33,6 @@ import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput; // TODO: Delete
 
-export type SearchEmbeddableSerializedState = SerializedTitles & {
-  attributes?: SavedSearchByValueAttributes;
-  savedObjectId?: string;
-};
-
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
-  HasSavedSearch &
-  HasLibraryTransforms &
-  PublishesDataLoading;
-
 // TODO: Delete
 export interface SearchOutput extends EmbeddableOutput {
   indexPatterns?: DataView[];

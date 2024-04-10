@@ -400,8 +400,6 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    this.registerEmbeddable(core, plugins);
-
     return {
       locator: this.locator,
       showInlineTopNav: () => {
@@ -490,5 +488,27 @@ export class DiscoverPlugin
     });
     // const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
     // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
+
+  /**
+   * Create profile-aware locators for internal use
+   */
+  private async getProfileAwareLocators({
+    locator,
+    contextLocator,
+    singleDocLocator,
+  }: {
+    locator: DiscoverAppLocator;
+    contextLocator: DiscoverContextAppLocator;
+    singleDocLocator: DiscoverSingleDocLocator;
+  }) {
+    const { ProfileAwareLocator } = await import('./customizations/profile_aware_locator');
+    const history = this.historyService.getHistory();
+
+    return {
+      locator: new ProfileAwareLocator(locator, history),
+      contextLocator: new ProfileAwareLocator(contextLocator, history),
+      singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
+    };
   }
 }

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -16,13 +15,17 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { extract, inject } from '../../common/embeddable';
-import { DiscoverServices } from '../build_services';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
+import { inject, extract } from '../../common/embeddable/search_inject_extract';
+import { SavedSearchAttributeService } from '../services/saved_searches';
 
-export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverServices }) => {
-  const imageEmbeddableFactory: ReactEmbeddableFactory<
+export const getSearchEmbeddableFactory = ({
+  attributeService,
+}: {
+  attributeService: SavedSearchAttributeService;
+}) => {
+  const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
     SearchEmbeddableApi
   > = {
@@ -37,7 +40,6 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
-      const attributeService = services.savedSearch.byValue.attributeService;
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const { searchEmbeddableApi, searchEmbeddableComparators, serializeSearchEmbeddable } =
@@ -105,5 +107,5 @@ export const getSearchEmbeddableFactory = ({ services }: { services: DiscoverSer
     },
   };
 
-  return imageEmbeddableFactory;
+  return savedSearchEmbeddableFactory;
 };
