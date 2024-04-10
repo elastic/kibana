@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { updateAntivirusRegistrationEnabledInPlace } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
 import { AntivirusRegistrationCard } from './components/cards/antivirus_registration_card';
 import { LinuxEventCollectionCard } from './components/cards/linux_event_collection_card';
@@ -39,6 +40,13 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const getTestId = useTestIdGenerator(props['data-test-subj']);
   const ProtectionsUpSellingComponent = useGetProtectionsUnavailableComponent();
 
+  const onChangeProxy: PolicySettingsFormProps['onChange'] = ({ isValid, updatedPolicy }) => {
+    // perform tasks that synchronises changes between settings
+    updateAntivirusRegistrationEnabledInPlace(updatedPolicy);
+
+    props.onChange({ isValid, updatedPolicy });
+  };
+
   return (
     <div data-test-subj={getTestId()}>
       <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
@@ -56,7 +64,11 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
         <>
           <RelatedDetectionRulesCallout />
           <EuiSpacer size="l" />
-          <MalwareProtectionsCard {...props} data-test-subj={getTestId('malware')} />
+          <MalwareProtectionsCard
+            {...props}
+            onChange={onChangeProxy}
+            data-test-subj={getTestId('malware')}
+          />
           <EuiSpacer size="l" />
 
           <RansomwareProtectionCard {...props} data-test-subj={getTestId('ransomware')} />
@@ -85,7 +97,11 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <LinuxEventCollectionCard {...props} data-test-subj={getTestId('linuxEvents')} />
       <EuiSpacer size="l" />
 
-      <AntivirusRegistrationCard {...props} data-test-subj={getTestId('antivirusRegistration')} />
+      <AntivirusRegistrationCard
+        {...props}
+        onChange={onChangeProxy}
+        data-test-subj={getTestId('antivirusRegistration')}
+      />
 
       <EuiSpacer size="m" />
       <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />
