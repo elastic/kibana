@@ -1752,10 +1752,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@93.5.2":
-  version "93.5.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.5.2.tgz#42bb985a960a7b2d46fe7e25846a476d30900b71"
-  integrity sha512-/1k7k7xYMPj9AM0OTgMilvKI6IdnVOPyQ7YQwE57NKrmBYfj9H91AKQNZ+rXze7QuuuFi73dUMSfbeE9ncqGZA==
+"@elastic/eui@93.6.0":
+  version "93.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.6.0.tgz#9a5892164a4457ba0382a76b63731eeed10dfb89"
+  integrity sha512-o6TEgSE+mOJmZYtMm+xYMeFQoOcoGTQOMWwRBCkP1efEPAlqjeBnUeahco8jKM3kqTeah+jMLm/A02ZjRwU+GA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.202"
@@ -10815,6 +10815,15 @@
     "@types/graceful-fs" "*"
     "@types/node" "*"
     chokidar "^2.1.2"
+
+"@types/webpack-bundle-analyzer@^4.7.0":
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@types/webpack-bundle-analyzer/-/webpack-bundle-analyzer-4.7.0.tgz#fe199e724ce3d38705f6f1ba4d62429b7c360541"
+  integrity sha512-c5i2ThslSNSG8W891BRvOd/RoCjI2zwph8maD22b1adtSns20j+0azDDMCK06DiVrzTgnwiDl5Ntmu1YRJw8Sg==
+  dependencies:
+    "@types/node" "*"
+    tapable "^2.2.0"
+    webpack "^5"
 
 "@types/webpack-env@^1.15.3", "@types/webpack-env@^1.16.0":
   version "1.16.3"
