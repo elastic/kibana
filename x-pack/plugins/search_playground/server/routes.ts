@@ -25,8 +25,9 @@ import {
 export function createRetriever(esQuery: string) {
   return (question: string) => {
     try {
-      const query = JSON.parse(esQuery.replace(/{query}/g, question.replace(/"/g, '\\"')));
-      return query.query;
+      const replacedQuery = esQuery.replace(/{query}/g, question.replace(/"/g, '\\"'));
+      const query = JSON.parse(replacedQuery);
+      return query;
     } catch (e) {
       throw Error(e);
     }
