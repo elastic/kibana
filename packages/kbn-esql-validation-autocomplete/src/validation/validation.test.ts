@@ -655,6 +655,9 @@ describe('validation logic', () => {
         ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
       );
 
+      testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
+      testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
+
       describe('date math', () => {
         testErrorsAndWarnings('row 1 anno', [
           'ROW does not support [date_period] in expression [1 anno]',
@@ -1702,6 +1705,9 @@ describe('validation logic', () => {
         [],
         ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
       );
+
+      testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "ASC")`, []);
+      testErrorsAndWarnings(`from a_index | eval mv_sort(["a", "b"], "DESC")`, []);
 
       describe('date math', () => {
         testErrorsAndWarnings('from a_index | eval 1 anno', [

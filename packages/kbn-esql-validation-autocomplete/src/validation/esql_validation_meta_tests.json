@@ -2336,6 +2336,16 @@
       ]
     },
     {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row 1 anno",
       "error": [
         "ROW does not support [date_period] in expression [1 anno]"
@@ -9449,6 +9459,16 @@
       "warning": [
         "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
       ]
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
+      "warning": []
     },
     {
       "query": "from a_index | eval 1 anno",
