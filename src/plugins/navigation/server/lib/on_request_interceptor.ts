@@ -31,6 +31,7 @@ export function initSolutionOnRequestInterceptor({
   ) {
     const serverBasePath = http.basePath.serverBasePath;
     let path = request.url.pathname;
+    const isRequestingApplication = path.startsWith('/app');
 
     // If navigating within the context of a solution, then we store the Solution's URL Context on the request,
     // and rewrite the request to not include the solution identifier in the URL.
@@ -43,7 +44,10 @@ export function initSolutionOnRequestInterceptor({
 
     // To avoid a double full page reload (1) after logging in and (2) to set the default solution
     // in the base path, we proactively redirect to the default solution
-    if (!pathHasExplicitSolutionIdentifier && path.includes('spaces/space_selector')) {
+    if (
+      !pathHasExplicitSolutionIdentifier &&
+      (path.includes('spaces/space_selector') || isRequestingApplication)
+    ) {
       solutionId = defaultSolution;
       path = addSolutionIdToPath('/', solutionId, path);
       pathHasExplicitSolutionIdentifier = true;
