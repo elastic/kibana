@@ -18,7 +18,6 @@ type LinkProps = Pick<
   | 'objectType'
   | 'objectId'
   | 'isDirty'
-  | 'isEmbedded'
   | 'urlService'
   | 'shareableUrl'
   | 'shareableUrlForSavedObject'
@@ -39,7 +38,6 @@ export const LinkContent = ({
   objectType,
   objectId,
   isDirty,
-  isEmbedded,
   shareableUrl,
   shareableUrlForSavedObject,
   urlService,
@@ -56,17 +54,6 @@ export const LinkContent = ({
   const isNotSaved = useCallback(() => {
     return objectId === undefined || objectId === '' || isDirty;
   }, [objectId, isDirty]);
-
-  const makeUrlEmbeddable = useCallback((tempUrl: string): string => {
-    const embedParam = '?embed=true';
-    const urlHasQueryString = tempUrl.indexOf('?') !== -1;
-
-    if (urlHasQueryString) {
-      return tempUrl.replace('?', `${embedParam}&`);
-    }
-
-    return `${tempUrl}${embedParam}`;
-  }, []);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -89,12 +76,11 @@ export const LinkContent = ({
 
   const updateUrlParams = useCallback(
     (tempUrl: string) => {
-      tempUrl = isEmbedded ? makeUrlEmbeddable(tempUrl) : tempUrl;
       tempUrl = urlParams ? getUrlParamExtensions(tempUrl) : tempUrl;
       setUrl(tempUrl);
       return tempUrl;
     },
-    [makeUrlEmbeddable, getUrlParamExtensions, urlParams, isEmbedded]
+    [getUrlParamExtensions, urlParams]
   );
 
   const getSnapshotUrl = useCallback(
