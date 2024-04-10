@@ -22,8 +22,6 @@ export function createLogAIAssistant({
 export const createLogsAIAssistantRenderer =
   (LogAIAssistantRender: ReturnType<typeof createLogAIAssistant>) =>
   ({ doc }: ObservabilityLogsAIAssistantFeatureRenderDeps) => {
-    if (!doc) return;
-
     const mappedDoc = useMemo(
       () => ({
         fields: Object.entries(doc.flattened).map(([field, value]) => ({
