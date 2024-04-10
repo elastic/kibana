@@ -78,6 +78,11 @@
   make:
     chdir: /usr/share/kibana/openssl-3.0.8
     target: install
+
+- name: link OpenSSL package
+  become: yes
+  shell:
+    cmd: ldconfig /usr/local/lib64/
 # - name: start kibana
 #   become: yes
 #   docker_container:

@@ -2,3 +2,4 @@
   hosts: fips
   roles:
     - install_kibana_fips
+    - assert_fips_enabled

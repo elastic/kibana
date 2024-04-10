@@ -1,0 +1,12 @@
+- name: register kibana node getFips
+  become: true
+  command: /usr/share/kibana/node/bin/node --enable-fips --openssl-config=/usr/share/kibana/config/nodejs.cnf -p 'crypto.getFips()'
+  register: kibana_node_fips
+
+- debug:
+    msg: "{{ kibana_node_fips }}"
+
+- name: assert FIPS enabled
+  assert:
+    that:
+      - kibana_node_fips.stdout == 1
