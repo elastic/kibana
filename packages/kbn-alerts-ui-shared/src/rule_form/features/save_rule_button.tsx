@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { useCreateRuleApi, useUpdateRuleApi } from '../apis';
 import { useValidation } from '../contexts';
+import { flattenErrorObject } from '../common/validation_error';
 
 const createRuleButtonLabel = i18n.translate('alertsUIShared.ruleForm.createRuleButtonLabel', {
   defaultMessage: 'Create rule',
@@ -32,7 +33,10 @@ export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const createRule = useCreateRuleApi();
   const updateRule = useUpdateRuleApi();
-  const { isOverallValid } = useValidation();
+  const validation = useValidation();
+
+  const { isOverallValid } = validation;
+  const errorList = useMemo(() => flattenErrorObject(validation).join(' '), [validation]);
 
   const onClickSave = useCallback(async () => {
     setIsSaving(true);
@@ -47,8 +51,19 @@ export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
   }, [createRule, updateRule, onSuccessfulSave, isEdit]);
 
   return (
-    <EuiButton isDisabled={!isOverallValid} isLoading={isSaving} onClick={onClickSave} fill>
-      {isEdit ? saveRuleButtonLabel : createRuleButtonLabel}
-    </EuiButton>
+    <EuiFlexGroup alignItems="center">
+      {!isOverallValid && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={errorList}>
+            <EuiIcon type="alert" color="subdued" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton isDisabled={!isOverallValid} isLoading={isSaving} onClick={onClickSave} fill>
+          {isEdit ? saveRuleButtonLabel : createRuleButtonLabel}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

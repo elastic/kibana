@@ -20,6 +20,7 @@ import {
   getStatusFromErrorObject,
   IncompleteError,
   InvalidError,
+  isValidationError,
   isValidationErrorList,
   isValidationErrorObject,
 } from '../../common/validation_error';
@@ -31,13 +32,15 @@ export interface ValidateRuleDefinitionProps {
 }
 
 const convertStringErrorsToIncomplete: (
-  errors: string | string[] | IErrorObject
+  errors: string | string[] | IErrorObject | Array<string | RuleFormValidationError>
 ) => RuleFormValidationErrorObject = (errors) => {
   if (typeof errors === 'string') {
     return { errors: [IncompleteError(errors)] };
   }
   if (Array.isArray(errors)) {
-    return { errors: errors.map((error) => IncompleteError(error)) };
+    return {
+      errors: errors.map((error) => (isValidationError(error) ? error : IncompleteError(error))),
+    };
   }
   return {
     errors: Object.entries(errors).reduce(
@@ -51,13 +54,15 @@ const convertStringErrorsToIncomplete: (
 };
 
 const convertStringErrorsToInvalid: (
-  errors: string | string[] | IErrorObject
+  errors: string | string[] | IErrorObject | Array<string | RuleFormValidationError>
 ) => RuleFormValidationErrorObject = (errors) => {
   if (typeof errors === 'string') {
     return { errors: [InvalidError(errors)] };
   }
   if (Array.isArray(errors)) {
-    return { errors: errors.map((error) => InvalidError(error)) };
+    return {
+      errors: errors.map((error) => (isValidationError(error) ? error : InvalidError(error))),
+    };
   }
   return {
     errors: Object.entries(errors).reduce(

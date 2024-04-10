@@ -42,7 +42,10 @@ import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleAlertDelayField } from './rule_alert_delay_field';
 import { expressionFocus } from '../../store/meta_slice';
 import { ValidationStatus } from '../../common/constants';
-import { flattenErrorObject } from '../../common/validation_error';
+import {
+  convertValidationErrorObjectToIErrorObject,
+  flattenErrorObject,
+} from '../../common/validation_error';
 
 interface RuleDefinitionProps {
   expressionPlugins: RuleTypeParamsExpressionPlugins;
@@ -102,7 +105,16 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
 
   const advancedOptionsInitialIsOpen = useSelectAreAdvancedOptionsSet();
 
-  const ruleParamsDisplayErrors = useMemo(() => {
+  /* TODO: Refactor expression components to take advantage of validation statuses.
+   * For now, most existing rule types will break if passed error objects that don't contain
+   * pure strings, so strip the validation states from them
+   */
+  const ruleParamsIErrorObject = useMemo(
+    () => convertValidationErrorObjectToIErrorObject(ruleParamsErrors),
+    [ruleParamsErrors]
+  );
+
+  const ruleParamsErrorList = useMemo(() => {
     if (ruleDefinitionValidationStatus === ValidationStatus.INVALID) {
       return flattenErrorObject(ruleParamsErrors);
     } else {
@@ -160,17 +172,24 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
              * should only be marked as incomplete if there are validation errors.
              */}
             <div onFocusCapture={() => dispatch(expressionFocus())}>
+              {ruleParamsErrorList && (
+                <EuiCallOut
+                  size="s"
+                  color="danger"
+                  iconType="warning"
+                  title={ruleParamsErrorList.join(' ')}
+                />
+              )}
               <EuiErrorBoundary>
                 <RuleParamsExpressionComponent
                   id={ruleId}
                   ruleParams={ruleParams}
                   ruleInterval={ruleInterval}
                   ruleThrottle={''}
-                  errors={ruleParamsErrors}
+                  errors={ruleParamsIErrorObject}
                   setRuleParams={(key, value) => dispatch(setParam([key, value]))}
                   setRuleProperty={(_, value) => {
                     /* setRuleProperty is only ever used to replace all params */
-                    /* Deprecated in favor of defining default parameters */
                     dispatch(replaceParams(value));
                   }}
                   defaultActionGroupId={'default'}
@@ -180,14 +199,6 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                   {...expressionPlugins}
                 />
               </EuiErrorBoundary>
-              {ruleParamsDisplayErrors && (
-                <EuiCallOut
-                  size="s"
-                  color="danger"
-                  iconType="warning"
-                  title={ruleParamsDisplayErrors.join(' ')}
-                />
-              )}
             </div>
           </Suspense>
         )}

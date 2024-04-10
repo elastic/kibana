@@ -7,3 +7,9 @@
  */
 
 export { RuleFormPageComponent as RuleFormPage } from './page';
+export { InvalidError, IncompleteError } from './common/validation_error';
+export type {
+  RuleFormValidationError,
+  RuleFormValidationErrorList,
+  RuleFormValidationErrorObject,
+} from './types';

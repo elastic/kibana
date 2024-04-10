@@ -11,6 +11,7 @@ import {
   RuleFormValidationError,
   RuleFormValidationErrorList,
   RuleFormValidationErrorObject,
+  RuleFormStateValidation,
   IErrorObject,
 } from '../types';
 
@@ -82,13 +83,29 @@ export const isValidationErrorObject = (error: unknown): error is RuleFormValida
   );
 };
 
-export const flattenErrorObject = (errorObject: RuleFormValidationErrorObject | IErrorObject) => {
+export const flattenErrorObject = (
+  errorObject: RuleFormStateValidation | RuleFormValidationErrorObject | IErrorObject
+) => {
   const errors: RuleFormValidationErrorList = [];
   for (const value of Object.values(errorObject)) {
     if (isValidationErrorList(value) || Array.isArray(value)) {
       errors.push(...value.map((error) => (typeof error === 'string' ? error : error.text)));
     } else {
       errors.push(...flattenErrorObject(value));
+    }
+  }
+  return errors;
+};
+
+export const convertValidationErrorObjectToIErrorObject = (
+  errorObject: RuleFormValidationErrorObject
+) => {
+  const errors: IErrorObject = {};
+  for (const [key, value] of Object.entries(errorObject)) {
+    if (isValidationErrorList(value)) {
+      errors[key] = value.map((error) => (typeof error === 'string' ? error : error.text));
+    } else {
+      errors[key] = convertValidationErrorObjectToIErrorObject(value);
     }
   }
   return errors;
