@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
+import type { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 /*
  * EnterpriseSearchLogStream is a light wrapper on top of logsShared's embeddable LogStream component.
