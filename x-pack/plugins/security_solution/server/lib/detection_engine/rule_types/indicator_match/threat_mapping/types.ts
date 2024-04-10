@@ -41,7 +41,6 @@ import type {
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { ExperimentalFeatures } from '../../../../../../common';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -80,7 +79,6 @@ export interface CreateThreatSignalsOptions {
   inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateThreatSignalOptions {
@@ -124,7 +122,6 @@ export interface CreateThreatSignalOptions {
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateEventSignalOptions {
@@ -169,7 +166,6 @@ export interface CreateEventSignalOptions {
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 type EntryKey = 'field' | 'value';

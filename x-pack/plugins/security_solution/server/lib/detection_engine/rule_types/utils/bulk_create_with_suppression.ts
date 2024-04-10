@@ -55,7 +55,7 @@ export const bulkCreateWithSuppression = async <
   alertTimestampOverride: Date | undefined;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures?: ExperimentalFeatures;
 }): Promise<GenericBulkCreateResponse<T>> => {
   if (wrappedDocs.length === 0) {
     return {

@@ -44,7 +44,6 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -68,7 +67,6 @@ export const thresholdExecutor = async ({
   spaceId,
   runOpts,
   licensing,
-  experimentalFeatures,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -91,7 +89,6 @@ export const thresholdExecutor = async ({
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
-  experimentalFeatures: ExperimentalFeatures;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -170,7 +167,6 @@ export const thresholdExecutor = async ({
         ruleExecutionLogger,
         spaceId,
         runOpts,
-        experimentalFeatures,
       });
       const createResult = suppressedResults.bulkCreateResult;
 

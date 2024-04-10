@@ -54,7 +54,7 @@ export interface BulkCreateSuppressedAlertsParams
   >;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures | undefined;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.

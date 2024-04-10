@@ -68,7 +68,6 @@ export const createThreatSignals = async ({
   unprocessedExceptions,
   inputIndexFields,
   licensing,
-  experimentalFeatures,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -297,7 +296,6 @@ export const createThreatSignals = async ({
           runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   } else {
@@ -363,7 +361,6 @@ export const createThreatSignals = async ({
           runOpts,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   }

@@ -21,7 +21,6 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
@@ -35,19 +34,12 @@ import {
   dataGeneratorFactory,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
-  // TODO: add a new service for loading archiver files similar to "getService('es')"
-  const config = getService('config');
-  const isServerless = config.get('serverless');
-  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless Threshold type rules, alert suppression', () => {
     const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
@@ -57,12 +49,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     before(async () => {
-      await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
-      await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
@@ -863,73 +853,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
-    });
-
-    describe('with host risk index', async () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
-      });
-
-      it('should be enriched with host risk score', async () => {
-        const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
-          threshold: {
-            field: 'host.name',
-            value: 100,
-          },
-          alert_suppression: {
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-          },
-        };
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
-
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Low');
-        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(20);
-        expect(previewAlerts[1]?._source?.host?.risk?.calculated_level).toEqual('Critical');
-        expect(previewAlerts[1]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
-      });
-    });
-
-    describe('with asset criticality', async () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
-        await kibanaServer.uiSettings.update({
-          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-        });
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
-      });
-
-      it('should be enriched alert with criticality_level', async () => {
-        const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
-          threshold: {
-            field: 'host.name',
-            value: 100,
-          },
-          alert_suppression: {
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-          },
-        };
-        const { previewId } = await previewRule({ supertest, rule });
-        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
-        const fullAlert = previewAlerts[0]?._source;
-
-        expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
-      });
     });
   });
 };
