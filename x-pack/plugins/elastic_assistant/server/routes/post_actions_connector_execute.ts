@@ -70,6 +70,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        let onLlmResponse;
 
         try {
           const authenticatedUser = assistantContext.getCurrentUser();
@@ -85,7 +86,6 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          let onLlmResponse;
           let prevMessages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
@@ -154,7 +154,8 @@ export const postActionsConnectorExecuteRoute = (
 
             onLlmResponse = async (
               content: string,
-              traceData: Message['traceData'] = {}
+              traceData: Message['traceData'] = {},
+              isError = false
             ): Promise<void> => {
               if (updatedConversation) {
                 await dataClient?.appendConversationMessages({
@@ -166,6 +167,7 @@ export const postActionsConnectorExecuteRoute = (
                         replacements: latestReplacements,
                       }),
                       traceData,
+                      isError,
                     }),
                   ],
                 });
@@ -290,6 +292,9 @@ export const postActionsConnectorExecuteRoute = (
         } catch (err) {
           logger.error(err);
           const error = transformError(err);
+          if (onLlmResponse) {
+            onLlmResponse(error.message, {}, true);
+          }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
