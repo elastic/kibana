@@ -1003,7 +1003,7 @@ export class Embeddable
       error: type === 'error' ? error : undefined,
     });
 
-    const newActiveData = adapters?.tables?.tables;
+    const newActiveData = adapters?.rawTables?.tables;
 
     if (newActiveData) {
       Object.entries(newActiveData).forEach((table) => {
