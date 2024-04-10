@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { waitFor } from '../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
   const ml = getService('ml');
+  const svlMl = getService('svlMl');
+  const PageObjects = getPageObjects(['svlCommonPage']);
   const logger = getService('log');
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
@@ -91,10 +92,28 @@ export default ({ getService }: FtrProviderContext): void => {
        * Project-controller will set `xpack.ml.nlp.enabled:false` in Kibana for non-complete tiers, which will disable
        * the NLP UIs. This test is to ensure those interfaces are not available to the user.
        *
-       * TODO: Skipped until project-controller code is merged
        */
-      it.skip('ensures Kibana NLP interface is unavailable', async () => {
-        await supertest.get('/app/ml/trained_models').set('kbn-xsrf', 'true');
+      describe('ensures Kibana NLP interface is unavailable', async () => {
+        before(async () => {
+          await PageObjects.svlCommonPage.login();
+          await ml.api.syncSavedObjects();
+        });
+
+        after(async () => {
+          await PageObjects.svlCommonPage.forceLogout();
+        });
+
+        it('renders trained models list', async () => {
+          await ml.navigation.navigateToMl();
+          await ml.testExecution.logTestStep('should load the trained models page');
+          await svlMl.navigation.security.navigateToTrainedModels();
+
+          await ml.testExecution.logTestStep(
+            'should display the stats bar and the analytics table with no trained models'
+          );
+          await ml.trainedModels.assertStats(0);
+          await ml.trainedModelsTable.assertTableIsNotPopulated();
+        });
       });
     });
   });
