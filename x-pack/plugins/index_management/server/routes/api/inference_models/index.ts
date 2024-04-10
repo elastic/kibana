@@ -12,5 +12,5 @@ import { registerAddInferenceModel } from './register_put_inference_route';
 
 export function registerInferenceModelRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
-  registerAddInferenceModel(dependencies)
+  registerAddInferenceModel(dependencies);
 }

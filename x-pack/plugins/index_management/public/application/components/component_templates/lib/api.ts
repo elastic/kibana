@@ -19,8 +19,6 @@ import {
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 
 export const getApi = (
   useRequest: UseRequestHook,
@@ -97,26 +95,6 @@ export const getApi = (
     });
   }
 
-  async function getInferenceModels() {
-    return sendRequest({
-      path: `${apiBasePath}/inference/all`,
-      method: 'get',
-    });
-  }
-  async function createInferenceEndpoint(
-    modelId: string,
-    taskType: InferenceTaskType,
-    modelConfig: ModelConfig
-  ) {
-    return sendRequest({
-      path: `${apiBasePath}/inference/${encodeURIComponent(taskType)}/${encodeURIComponent(
-        modelId
-      )}`,
-      method: 'put',
-      body: JSON.stringify({ ...modelConfig }),
-    });
-  }
-
   async function postDataStreamRollover(name: string) {
     return sendRequest<ComponentTemplateDatastreams>({
       path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
@@ -141,7 +119,5 @@ export const getApi = (
     getComponentTemplateDatastreams,
     postDataStreamRollover,
     postDataStreamMappingsFromTemplate,
-    getInferenceModels,
-    createInferenceEndpoint
   };
 };

@@ -22,18 +22,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useComponentTemplatesContext } from '../../../../component_templates/component_templates_context';
-import { getFieldConfig } from '../../../lib';
-import { useAppContext } from '../../../../../app_context';
-import { Form, UseField, useForm } from '../../../shared_imports';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
-
+import { getFieldConfig } from '../../../lib';
+import { useAppContext } from '../../../../../app_context';
+import { Form, UseField, useForm } from '../../../shared_imports';
+import { useLoadInferenceModels, createInferenceEndpoint } from '../../../../../services/api';
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
@@ -42,38 +41,39 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   const { docLinks } = useAppContext();
   const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
-  const { api } = useComponentTemplatesContext();
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [inferenceAddError, setInferenceAddError] = useState<string | undefined>(undefined);
 
   const fieldConfigModelId = getFieldConfig('inference_id');
-  const defaultInferenceIds: EuiSelectableOption[] = [
-    { checked: 'on', label: 'elser_model_2' },
-    { label: 'e5' },
-  ];
+  const defaultInferenceIds: EuiSelectableOption[] = useMemo(() => {
+    return [{ checked: 'on', label: 'elser_model_2' }, { label: 'e5' }];
+  }, []);
 
-  const [options, setOptions] = useState<EuiSelectableOption[]>(defaultInferenceIds);
-  const setInferenceModels = async () => {
-    const models = await api.getInferenceModels();
-    const inferenceIdOptionsFromModels =
-      models?.data?.map((model: InferenceAPIConfigResponse) => ({
+  const { isLoading, data: models, resendRequest } = useLoadInferenceModels();
+
+  const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
+  const inferenceIdOptionsFromModels = useMemo(() => {
+    const inferenceIdOptions =
+      models?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
       })) || [];
-    setOptions([...defaultInferenceIds, ...inferenceIdOptionsFromModels]);
-  };
+    return inferenceIdOptions;
+  }, [models]);
+
   useEffect(() => {
-    setInferenceModels();
-  }, [api]);
+    setOptions([...defaultInferenceIds, ...inferenceIdOptionsFromModels]);
+  }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       try {
-        const { error } = await api.createInferenceEndpoint(inferenceId, taskType, modelConfig);
+        const { error } = await createInferenceEndpoint(inferenceId, taskType, modelConfig);
 
         if (!error) {
           setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-          await setInferenceModels();
+
+          resendRequest();
         } else {
           setInferenceAddError(error.message);
         }
@@ -81,7 +81,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
         setInferenceAddError(exception.message);
       }
     },
-    [isInferenceFlyoutVisible]
+    [isInferenceFlyoutVisible, resendRequest]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {
@@ -188,6 +188,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
             )}
             data-test-subj={dataTestSubj}
             searchable
+            isLoading={isLoading}
             singleSelection
             searchProps={{
               compressed: true,
