@@ -43,7 +43,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
         <div data-test-subj={getTestId('badArgument-message')}>{store.errorMessage}</div>
 
         {!command.commandDefinition.helpHidden && (
-          <>
+          <div data-test-subj={getTestId('badArgument-commandUsage')}>
             <EuiSpacer size="s" />
             <CommandInputUsage commandDef={command.commandDefinition} />
             <ConsoleCodeBlock>
@@ -61,7 +61,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
                 }}
               />
             </ConsoleCodeBlock>
-          </>
+          </div>
         )}
       </UnsupportedMessageCallout>
     );

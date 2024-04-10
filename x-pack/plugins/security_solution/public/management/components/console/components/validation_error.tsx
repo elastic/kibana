@@ -44,7 +44,7 @@ export const ValidationError = memo<
       <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
 
       {!command.commandDefinition.helpHidden && (
-        <>
+        <div data-test-subj={getTestId('validationError-commandUsage')}>
           <EuiSpacer size="s" />
           <CommandInputUsage commandDef={command.commandDefinition} />
           <ConsoleCodeBlock>
@@ -62,7 +62,7 @@ export const ValidationError = memo<
               }}
             />
           </ConsoleCodeBlock>
-        </>
+        </div>
       )}
     </UnsupportedMessageCallout>
   );
