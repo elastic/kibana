@@ -412,7 +412,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (ruleParams: Params) => ValidationResult;
+  validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;

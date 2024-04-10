@@ -27,7 +27,7 @@ import {
   SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
 } from './constants';
 
-const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
+const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: boolean) => {
   const {
     size,
     threshold,
@@ -144,11 +144,12 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
       })
     );
   }
-  if ((size && size < 0) || size > 10000) {
+  const maxSize = isServerless ? 100 : 10000;
+  if ((size && size < 0) || size > maxSize) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
         defaultMessage: 'Size must be between 0 and {max, number}.',
-        values: { max: 10000 },
+        values: { max: maxSize },
       })
     );
   }
@@ -297,10 +298,13 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
   return errors;
 };
 
-export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
+export const validateExpression = (
+  ruleParams: EsQueryRuleParams,
+  isServerless?: boolean
+): ValidationResult => {
   const validationResult = { errors: {} };
 
-  const commonErrors = validateCommonParams(ruleParams);
+  const commonErrors = validateCommonParams(ruleParams, isServerless);
   validationResult.errors = commonErrors;
 
   /**
@@ -331,8 +335,11 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
   return validationResult;
 };
 
-export const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
-  const { errors: validationErrors } = validateExpression(ruleParams);
+export const hasExpressionValidationErrors = (
+  ruleParams: EsQueryRuleParams,
+  isServerless: boolean
+) => {
+  const { errors: validationErrors } = validateExpression(ruleParams, isServerless);
   return Object.keys(validationErrors).some(
     (key) => validationErrors[key] && validationErrors[key].length
   );

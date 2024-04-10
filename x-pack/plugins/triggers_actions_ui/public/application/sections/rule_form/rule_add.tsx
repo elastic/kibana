@@ -127,6 +127,7 @@ const RuleAdd = <
     application: { capabilities },
     i18n: i18nStart,
     theme,
+    isServerless,
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
@@ -238,9 +239,10 @@ const RuleAdd = <
         } as Rule,
         ruleType,
         config,
-        actionTypeRegistry
+        actionTypeRegistry,
+        isServerless
       ),
-    [rule, selectableConsumer, selectedConsumer, ruleType, config, actionTypeRegistry]
+    [rule, selectableConsumer, selectedConsumer, ruleType, config, actionTypeRegistry, isServerless]
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
