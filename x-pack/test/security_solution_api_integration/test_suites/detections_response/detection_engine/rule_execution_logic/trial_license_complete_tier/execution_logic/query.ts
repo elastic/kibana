@@ -98,8 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177101
-  describe.skip('@ess @serverless Query type rules', () => {
+  describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
@@ -203,7 +202,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should query and get back expected alert structure when it is a alert on a alert', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177101
+    it.skip('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
@@ -278,6 +278,45 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+
+      it('should have host and user risk score fields when suppression enabled on interval', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+
+      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
@@ -301,6 +340,24 @@ export default ({ getService }: FtrProviderContext) => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
+      });
+
+      it('should be enriched alert with criticality_level when suppression enabled', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
