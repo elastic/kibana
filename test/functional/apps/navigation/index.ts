@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const ENABLE_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:enable';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:optInStatus';
-
-export const DEFAULT_SOLUTION_NAV_UI_SETTING_ID = 'solutionNav:default';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('navigation app', function () {
+    loadTestFile(require.resolve('./_solution_nav_switcher'));
+  });
+}

@@ -245,6 +245,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
+      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();

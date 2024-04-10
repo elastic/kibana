@@ -16,6 +16,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinition,
   SolutionNavigationDefinitions,
+  ChromeStyle,
   CloudLinks,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
@@ -56,6 +57,7 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
+  setChromeStyle: (style: ChromeStyle) => void;
 }
 
 export class ProjectNavigationService {
@@ -89,14 +91,23 @@ export class ProjectNavigationService {
   private http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
+  private setChromeStyle: StartDeps['setChromeStyle'] = () => {};
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
+  public start({
+    application,
+    navLinksService,
+    http,
+    chromeBreadcrumbs$,
+    logger,
+    setChromeStyle,
+  }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
     this.http = http;
     this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
+    this.setChromeStyle = setChromeStyle;
 
     this.handleActiveNodesChange();
     this.handleEmptyActiveNodes();
@@ -407,6 +418,7 @@ export class ProjectNavigationService {
     // When we **do** have definitions, then passing `null` does mean we should change to "classic".
     if (Object.keys(definitions).length > 0) {
       if (id === null) {
+        this.setChromeStyle('classic');
         this.navigationTree$.next(undefined);
         this.activeSolutionNavDefinitionId$.next(null);
       } else {
@@ -414,6 +426,8 @@ export class ProjectNavigationService {
         if (!definition) {
           throw new Error(`Solution navigation definition with id "${id}" does not exist.`);
         }
+
+        this.setChromeStyle('project');
 
         const { sideNavComponent } = definition;
         if (sideNavComponent) {
