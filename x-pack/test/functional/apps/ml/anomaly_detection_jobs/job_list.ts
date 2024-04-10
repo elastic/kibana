@@ -60,24 +60,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToSettings();
-      await ml.settings.navigateToCalendarManagement();
 
-      await ml.settingsCalendar.assertCreateCalendarButtonEnabled(true);
-      await ml.settingsCalendar.navigateToCalendarCreationPage();
-
-      await ml.settingsCalendar.waitForFormEnabled();
-
-      await ml.settingsCalendar.assertJobSelectionExists();
-      await ml.settingsCalendar.assertJobSelectionEnabled(true);
-      await ml.settingsCalendar.assertJobGroupSelectionExists();
-      await ml.settingsCalendar.assertJobGroupSelectionEnabled(true);
-
-      await ml.settingsCalendar.setCalendarId(calendarId);
-
-      await ml.settingsCalendar.selectJob(jobId);
-
-      await ml.settingsCalendar.saveCalendar();
-      await ml.settingsCalendar.assertCalendarRowExists(calendarId);
+      await ml.api.createCalendar(calendarId, {
+        description: 'calendar for job list test',
+        job_ids: [jobId],
+      });
 
       await ml.securityUI.loginAsMlPowerUser();
 
@@ -88,8 +75,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.closeAnomalyDetectionJob(jobId);
-      await ml.api.cleanMlIndices();
       await ml.api.deleteAnomalyDetectionJobES(jobId);
+      await ml.api.cleanMlIndices();
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
