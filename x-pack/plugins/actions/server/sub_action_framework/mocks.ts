@@ -183,12 +183,14 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     };
   }
 
-  public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
+  public async getIncident({ id }: { id: string }): Promise<Record<string, unknown>> {
     return {
-      id: 'get-incident',
-      title: 'Test incident',
-      url: 'https://example.com',
-      pushedDate: '2022-05-06T09:41:00.401Z',
+      id: '1',
+      name: '1',
+      description: {
+        format: 'html',
+        content: 'description',
+      },
     };
   }
 }

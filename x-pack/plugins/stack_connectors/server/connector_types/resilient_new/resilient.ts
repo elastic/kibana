@@ -111,7 +111,7 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
   private getOrgUrl() {
     const { apiUrl: url, orgId } = this.config;
 
-    return `${url}/rest/orgs/${orgId}`;
+    return `${url}rest/orgs/${orgId}`;
   }
 
   private getIncidentFieldsUrl = () => `${this.getOrgUrl()}/types/incident/fields`;
@@ -146,16 +146,19 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
       if (incidentData?.incidentTypes) {
         data = {
           ...data,
-          incident_type_ids: incidentData.incidentTypes.map((id: number) => ({ id })),
+          incident_type_ids: incidentData.incidentTypes.map((id: number | string) => ({
+            id: Number(id),
+          })),
         };
       }
 
       if (incidentData?.severityCode) {
         data = {
           ...data,
-          severity_code: { id: incidentData.severityCode },
+          severity_code: { id: Number(incidentData.severityCode) },
         };
       }
+
       const res = await this.request({
         url: `${this.urls.incident}?text_content_output_format=objects_convert`,
         method: 'POST',
@@ -217,7 +220,12 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
         url: this.getIncidentViewURL(updatedIncident.id.toString()),
       };
     } catch (error) {
-      throw new Error(`Unable to update incident with id ${incidentId}. Error: ${error.message}`);
+      throw new Error(
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to update incident with id ${incidentId}. Error: ${error.message}.`
+        )
+      );
     }
   }
 
@@ -245,7 +253,10 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
       };
     } catch (error) {
       throw new Error(
-        `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
+        )
       );
     }
   }

@@ -16,7 +16,6 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
   params,
   variables
 ) => {
-  console.log('resilient_new_render', { params });
   if (params?.subAction !== SUB_ACTION.RUN && params?.subAction !== SUB_ACTION.TEST) return params;
 
   return {
