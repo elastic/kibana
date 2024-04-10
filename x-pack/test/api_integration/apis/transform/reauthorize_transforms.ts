@@ -116,7 +116,8 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.securityCommon.clearAllTransformApiKeys();
     });
 
-    describe('single transform reauthorize_transforms', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/180503
+    describe.skip('single transform reauthorize_transforms', function () {
       const transformCreatedByViewerId = getTransformIdByUser(USER.TRANSFORM_VIEWER);
 
       beforeEach(async () => {
