@@ -114,7 +114,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Feature flag', () => {
       it('Link point to O11y Rules pages by default', async () => {
-        const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
+        const manageRulesPageHref =
+          (await observability.alerts.rulesPage.getManageRulesPageHref()) ?? '';
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });
     });
