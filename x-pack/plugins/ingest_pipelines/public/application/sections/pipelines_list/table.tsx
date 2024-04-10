@@ -189,42 +189,42 @@ export const PipelineTable: FunctionComponent<Props> = ({
     },
     columns: [
       {
-        width: '25%',
+        width: '35%',
         field: 'name',
         name: i18n.translate('xpack.ingestPipelines.list.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
-          <EuiLink
-            data-test-subj="pipelineDetailsLink"
-            {...reactRouterNavigate(history, {
-              pathname: '/',
-              search: `pipeline=${encodeURIComponent(name)}`,
-            })}
-          >
-            {name}
-          </EuiLink>
+        render: (name: string, pipeline: Pipeline) => (
+          <EuiFlexGroup gutterSize='none' alignItems="center">
+            <EuiFlexItem>
+              <EuiLink
+                data-test-subj="pipelineDetailsLink"
+                {...reactRouterNavigate(history, {
+                  pathname: '/',
+                  search: `pipeline=${encodeURIComponent(name)}`,
+                })}
+              >
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
+                {pipeline.isManaged && (
+                  <EuiFlexItem grow={false}>
+                    <ManagedPipelineBadge />
+                  </EuiFlexItem>
+                )}
+                {pipeline.deprecated && (
+                  <EuiFlexItem grow={false}>
+                    <DeprecatedPipelineBadge />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-      },
-      {
-        width: '100px',
-        render: (pipeline: Pipeline) => {
-          return (
-            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
-              {pipeline.isManaged && (
-                <EuiFlexItem grow={false}>
-                  <ManagedPipelineBadge />
-                </EuiFlexItem>
-              )}
-              {pipeline.deprecated && (
-                <EuiFlexItem grow={false}>
-                  <DeprecatedPipelineBadge />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
-        },
       },
       {
         field: 'description',
