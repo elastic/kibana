@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { AnomalySwimLane } from './anomaly_swim_lane';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const AnomalySwimLane = dynamic(async () => import('./anomaly_swim_lane'));
