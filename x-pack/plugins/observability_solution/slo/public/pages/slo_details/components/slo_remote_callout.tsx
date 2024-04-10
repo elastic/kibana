@@ -30,7 +30,7 @@ export function SloRemoteCallout({ slo }: { slo: SLOWithSummaryResponse }) {
       <p>
         <FormattedMessage
           id="xpack.slo.sloDetails.headerTitle.calloutDescription"
-          defaultMessage="This is a remote SLO which belongs to another Kibana instance. it is fetched from the remote cluster: {remoteName} with kibana url {kibanaUrl}."
+          defaultMessage="This is a remote SLO which belongs to another Kibana instance. It is fetched from the remote cluster: {remoteName} with Kibana URL {kibanaUrl}."
           values={{
             remoteName: <strong>{slo.remote.remoteName}</strong>,
             kibanaUrl: (
