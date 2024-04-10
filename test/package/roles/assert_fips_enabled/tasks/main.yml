@@ -8,4 +8,4 @@
 - name: assert FIPS enabled
   assert:
     that:
-      - kibana_node_fips.stdout == 1
+      - kibana_node_fips.stdout == "1"
