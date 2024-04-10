@@ -265,7 +265,7 @@ function createDeepLinks(
 
     getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
       return {
-        id: 'indexDataVisualizer',
+        id: 'esqlDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
           defaultMessage: 'ES|QL Data Visualizer',
         }),
