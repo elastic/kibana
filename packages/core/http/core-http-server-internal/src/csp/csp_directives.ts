@@ -27,7 +27,7 @@ export type CspDirectiveName =
  * The default report only directives rules
  */
 export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'form-action': [`'self'`],
+  'form-action': [`'report-sample'`, `'self'`],
 };
 
 /**

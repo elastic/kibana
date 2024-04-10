@@ -87,6 +87,7 @@ const configSchema = schema.object(
       schema.object({
         form_action: schema.arrayOf(schema.string(), {
           defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
         }),
       })
     ),
