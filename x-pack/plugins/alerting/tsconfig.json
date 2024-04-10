@@ -69,6 +69,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/core-execution-context-server-mocks",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"
