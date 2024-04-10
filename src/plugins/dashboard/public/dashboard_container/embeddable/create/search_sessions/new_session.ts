@@ -10,8 +10,9 @@ import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { apiPublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
+import { DashboardContainer } from '../../dashboard_container';
 
 export function newSession$(api: unknown) {
   const observables: Array<Observable<unknown>> = [];
@@ -55,19 +56,10 @@ export function newSession$(api: unknown) {
     }
   }
 
-  // TODO replace lastReloadRequestTime$ with reload$
-  if (
-    (api as { lastReloadRequestTime$?: PublishingSubject<string | undefined> })
-      .lastReloadRequestTime$
-  ) {
-    observables.push(
-      (api as { lastReloadRequestTime$: PublishingSubject<string | undefined> })
-        .lastReloadRequestTime$
-    );
+  // TODO replace lastReloadRequestTime$ with reload$ when removing legacy embeddable framework
+  if ((api as DashboardContainer).lastReloadRequestTime$) {
+    observables.push((api as DashboardContainer).lastReloadRequestTime$);
   }
 
-  const combine$ = combineLatest(observables).pipe(skip(1));
-  return combine$;
-  // TODO replace lastReloadRequestTime$ with reload$
-  // return apiPublishesReload(api) ? merge(api.reload$, combine$) : combine$;
+  return combineLatest(observables).pipe(skip(1));
 }

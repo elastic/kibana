@@ -8,18 +8,16 @@
 
 import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { newSession$ } from './new_session';
 
 describe('newSession$', () => {
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject(undefined);
-  const reload$ = new Subject<void>();
   const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
   const api = {
     filters$,
     query$,
-    reload$,
     timeRange$,
   };
 
@@ -100,20 +98,6 @@ describe('newSession$', () => {
       subscription.unsubscribe();
     });
   });
-
-  /* describe('reload$', () => {
-    test('should fire on reload', async () => {
-      let count = 0;
-      const subscription = newSession$(api).subscribe(() => {
-        count++;
-      });
-
-      reload$.next();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(count).toBe(1);
-      subscription.unsubscribe();
-    });
-  });*/
 
   describe('timeRange$', () => {
     test('should fire on timeRange change', async () => {
