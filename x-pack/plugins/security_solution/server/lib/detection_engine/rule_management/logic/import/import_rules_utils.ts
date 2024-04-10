@@ -20,6 +20,8 @@ import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';
 import { readRules } from '../crud/read_rules';
 import { updateRules } from '../crud/update_rules';
+import { deleteRules } from '../crud/delete_rules';
+import { findRules } from '../search/find_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
@@ -104,7 +106,7 @@ export const importRules = async ({
               });
 
               if (rule == null) {
-                await createRules({
+                const createdRule = await createRules({
                   rulesClient,
                   params: {
                     ...parsedRule,
@@ -112,10 +114,33 @@ export const importRules = async ({
                   },
                   allowMissingConnectorSecrets,
                 });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
+                // find rules with the same rule_id, in case of concurrent imports
+                const rules = await findRules({
+                  rulesClient,
+                  filter: `alert.attributes.params.ruleId: "${parsedRule.rule_id}"`,
+                  page: 1,
+                  fields: undefined,
+                  perPage: undefined,
+                  sortField: 'created_at',
+                  sortOrder: 'asc',
                 });
+                // OK if it is a unique rule or the earlier rule created
+                if (rules.total === 1 || createdRule.id === rules.data[0].id) {
+                  resolve({
+                    rule_id: parsedRule.rule_id,
+                    status_code: 200,
+                  });
+                  // else delete the duplicate rule and return status 409
+                } else {
+                  deleteRules({ ruleId: createdRule.id, rulesClient });
+                  resolve(
+                    createBulkErrorObject({
+                      ruleId: parsedRule.rule_id,
+                      statusCode: 409,
+                      message: `rule_id: "${parsedRule.rule_id}" already exists`,
+                    })
+                  );
+                }
               } else if (rule != null && overwriteRules) {
                 await updateRules({
                   rulesClient,

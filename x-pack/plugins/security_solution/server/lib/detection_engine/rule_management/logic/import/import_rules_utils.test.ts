@@ -18,10 +18,14 @@ import {
 
 import { createRules } from '../crud/create_rules';
 import { updateRules } from '../crud/update_rules';
+import { deleteRules } from '../crud/delete_rules';
 import { importRules } from './import_rules_utils';
+
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
 jest.mock('../crud/create_rules');
 jest.mock('../crud/update_rules');
+jest.mock('../crud/delete_rules');
 
 describe('importRules', () => {
   const mlAuthz = {
@@ -37,6 +41,10 @@ describe('importRules', () => {
     clients.actionsClient.getAll.mockResolvedValue([]);
 
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    (createRules as jest.Mock).mockReset();
   });
 
   it('returns rules response if no rules to import', async () => {
@@ -74,6 +82,12 @@ describe('importRules', () => {
   });
 
   it('creates rule if no matching existing rule found', async () => {
+    (createRules as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.rulesClient.find
+      .mockResolvedValue(getEmptyFindResult())
+      .mockResolvedValueOnce(getEmptyFindResult())
+      .mockResolvedValueOnce(getFindResultWithSingleHit());
+
     const result = await importRules({
       ruleChunks: [[getImportRulesSchemaMock({ rule_id: 'rule-1' })]],
       rulesResponseAcc: [],
@@ -249,5 +263,63 @@ describe('importRules', () => {
         rule_id: 'rule-1',
       },
     ]);
+  });
+
+  describe('when multiple rules with the same rule_id are found right after rule creation', () => {
+    const mockRuleId = '2a0e0ddd-8fba-49e2-b1bf-ff90be3e6fe1';
+    const mockRuleOne = {
+      id: '97e61faf-dd3d-43bf-b1b5-0bf470423bb5',
+    } as SanitizedRule;
+    const mockRuleTwo = {
+      id: '3e592a38-5f88-43a9-b50e-b0236adecd67',
+    } as SanitizedRule;
+
+    beforeEach(() => {
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({ data: [mockRuleOne, mockRuleTwo], total: 2 })
+      );
+    });
+
+    it('keeps the rule that was created first', async () => {
+      (createRules as jest.Mock).mockResolvedValue(mockRuleOne);
+
+      const result = await importRules({
+        ruleChunks: [[getImportRulesSchemaMock({ rule_id: mockRuleId })]],
+        rulesResponseAcc: [],
+        mlAuthz,
+        overwriteRules: false,
+        rulesClient: context.alerting.getRulesClient(),
+        existingLists: {},
+      });
+
+      expect(result).toEqual([{ rule_id: mockRuleId, status_code: 200 }]);
+      expect(createRules).toHaveBeenCalled();
+      expect(deleteRules).not.toHaveBeenCalled();
+    });
+
+    it('deletes duplicate rules', async () => {
+      (createRules as jest.Mock).mockResolvedValue(mockRuleTwo);
+
+      const result = await importRules({
+        ruleChunks: [[getImportRulesSchemaMock({ rule_id: mockRuleId })]],
+        rulesResponseAcc: [],
+        mlAuthz,
+        overwriteRules: false,
+        rulesClient: context.alerting.getRulesClient(),
+        existingLists: {},
+      });
+
+      expect(result).toEqual([
+        {
+          rule_id: mockRuleId,
+          error: {
+            status_code: 409,
+            message: `rule_id: "${mockRuleId}" already exists`,
+          },
+        },
+      ]);
+      expect(createRules).toHaveBeenCalled();
+      expect(deleteRules).toHaveBeenCalled();
+    });
   });
 });
