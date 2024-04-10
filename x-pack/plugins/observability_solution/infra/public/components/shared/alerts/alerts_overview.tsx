@@ -54,7 +54,7 @@ export const AlertsOverview = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetId],
+        assetIds: [assetId],
         status: alertStatus,
       }),
     [assetId, dateRange, alertStatus]
@@ -64,7 +64,7 @@ export const AlertsOverview = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetId],
+        assetIds: [assetId],
         status: ALERT_STATUS_ALL,
       }),
     [assetId, dateRange]
