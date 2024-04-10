@@ -11,7 +11,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
-  getFetch$,
+  fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
@@ -55,7 +55,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
-      const fetchSubscription = getFetch$(api)
+      const fetchSubscription = fetch$(api)
         .pipe(
           switchMap(async (fetchContext) => {
             error$.next(undefined);

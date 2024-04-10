@@ -139,7 +139,7 @@ function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   return observables;
 }
 
-export function getFetch$(api: unknown): Observable<FetchContext> {
+export function fetch$(api: unknown): Observable<FetchContext> {
   const onSubscribe$ = getOnSubscribeObservable(api);
   const batchedObservables = getBatchedObservables(api);
   const immediateObservables = getImmediateObservables(api);
