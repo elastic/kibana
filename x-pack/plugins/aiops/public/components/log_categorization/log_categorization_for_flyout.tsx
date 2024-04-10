@@ -321,7 +321,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           loading={loading}
           categoriesLength={data?.categories?.length ?? null}
           eventRateLength={eventRate.length}
-          fieldSelected={selectedField !== null}
         />
         {loading === false && data !== null && data.categories.length > 0 ? (
           <>

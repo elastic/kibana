@@ -387,7 +387,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
         loading={loading}
         categoriesLength={data?.categories?.length ?? null}
         eventRateLength={eventRate.length}
-        fieldSelected={selectedField !== null}
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
