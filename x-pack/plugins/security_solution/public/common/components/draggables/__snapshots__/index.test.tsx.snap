@@ -32,6 +32,7 @@ exports[`draggables rendering it renders the default DefaultDraggable 1`] = `
       "queryMatch": Object {
         "field": "some-field",
         "operator": ":",
+        "params": undefined,
         "value": "some-query-value",
       },
     }

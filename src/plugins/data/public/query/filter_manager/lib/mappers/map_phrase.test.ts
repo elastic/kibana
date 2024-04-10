@@ -44,8 +44,14 @@ describe('filter manager utilities', () => {
       expect(result).toMatchInlineSnapshot(`"hello"`);
     });
 
-    test('without formatter empty value', () => {
+    test('without formatter empty string value', () => {
       const filter = { meta: { value: '' } } as PhraseFilter;
+      const result = getPhraseDisplayValue(filter);
+      expect(result).toMatchInlineSnapshot(`"Empty string"`);
+    });
+
+    test('without formatter empty value', () => {
+      const filter = { meta: { value: undefined } } as PhraseFilter;
       const result = getPhraseDisplayValue(filter);
       expect(result).toMatchInlineSnapshot(`""`);
     });
