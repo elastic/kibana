@@ -18,16 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const browser = getService('browser');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects([
-    'settings',
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-    'dashboard',
-    'unifiedFieldList',
-    'unifiedSearch',
-  ]);
+  const dataViews = getService('dataViews');
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -107,7 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return await chartElement.getAttribute('data-title');
   }
 
-  describe('discover lens vis', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/180404
+  describe.skip('discover lens vis', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -171,13 +164,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show no histogram for non-time-based data views and recover for time-based data views', async () => {
-      await PageObjects.discover.createAdHocDataView('logs*', false);
-
+      await dataViews.createFromSearchBar({
+        name: 'logs',
+        adHoc: true,
+        hasTimeField: true,
+        changeTimestampField: `--- I don't want to use the time filter ---`,
+      });
       await checkNoVis(defaultTotalCount);
 
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.unifiedSearch.editDataView('logs*', '@timestamp');
-
+      await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
     });
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import type { TransformHealthTests } from './types/alerting';
@@ -103,14 +104,21 @@ export const TRANSFORM_STATE = {
 
 export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
-export const TRANSFORM_HEALTH = {
+export const TRANSFORM_HEALTH_STATUS = {
   green: 'green',
-  unknown: 'unknown',
   yellow: 'yellow',
   red: 'red',
+  unknown: 'unknown',
 } as const;
-
-export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
+export type TransformHealthStatus = keyof typeof TRANSFORM_HEALTH_STATUS;
+export const isTransformHealthStatus = (arg: unknown): arg is TransformHealthStatus =>
+  typeof arg === 'string' && Object.keys(TRANSFORM_HEALTH_STATUS).includes(arg);
+export const mapEsHealthStatus2TransformHealthStatus = (
+  healthStatus?: estypes.HealthStatus
+): TransformHealthStatus =>
+  typeof healthStatus === 'string' && isTransformHealthStatus(healthStatus.toLowerCase())
+    ? (healthStatus.toLowerCase() as TransformHealthStatus)
+    : TRANSFORM_HEALTH_STATUS.unknown;
 
 export const TRANSFORM_HEALTH_COLOR = {
   green: 'success',
