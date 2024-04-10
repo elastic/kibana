@@ -11,7 +11,6 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
-  AxisExtentConfig,
   CommonXYDataLayerConfig,
   DataDecorationConfig,
   YAxisConfig,
@@ -269,18 +268,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
 }

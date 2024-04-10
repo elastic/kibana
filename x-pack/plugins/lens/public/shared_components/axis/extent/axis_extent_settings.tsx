@@ -8,9 +8,13 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup, htmlIdGenerator, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AxisExtentMode, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { RangeInputField } from '../../range_input_field';
 import { validateExtent } from './helpers';
 import type { UnifiedAxisExtentConfig } from './types';
+
+export const LOG_LOWER_BOUND_MAX = 0.01;
+export const LOWER_BOUND_MAX = 0;
 
 const idPrefix = htmlIdGenerator()();
 
@@ -29,13 +33,14 @@ export function AxisBoundsControl({
   extent: UnifiedAxisExtentConfig;
   setExtent: (newExtent: UnifiedAxisExtentConfig | undefined) => void;
   dataBounds: DataBoundsObject | undefined;
-  shouldIncludeZero: boolean;
+  hasBarOrArea: boolean;
   disableCustomRange: boolean;
   testSubjPrefix: string;
   canHaveNiceValues?: boolean;
+  scaleType?: YScaleType;
 }) {
-  const { extent, shouldIncludeZero, setExtent, dataBounds, testSubjPrefix } = props;
-  const { inclusiveZeroError, boundaryError } = validateExtent(shouldIncludeZero, extent);
+  const { extent, hasBarOrArea, setExtent, dataBounds, testSubjPrefix, scaleType } = props;
+  const { errorMsg, helpMsg } = validateExtent(hasBarOrArea, extent, scaleType);
   // Bucket type does not have the "full" mode
   const modeForNiceValues = type === 'metric' ? 'full' : 'dataBounds';
   const canShowNiceValues = canHaveNiceValues && extent.mode === modeForNiceValues;
@@ -61,12 +66,12 @@ export function AxisBoundsControl({
               defaultMessage: 'Round to nice values',
             })}
             data-test-subj={`${testSubjPrefix}_axisExtent_niceValues`}
-            checked={Boolean(extent.niceValues == null || extent.niceValues)}
-            onChange={() => {
+            checked={extent.niceValues == null || extent.niceValues}
+            onChange={({ target: { checked: niceValues } }) => {
               setExtent({
                 ...extent,
                 mode: modeForNiceValues,
-                niceValues: !Boolean(extent.niceValues == null || extent.niceValues),
+                niceValues,
               });
             }}
             compressed
@@ -75,26 +80,10 @@ export function AxisBoundsControl({
       ) : null}
       {canShowCustomRanges ? (
         <RangeInputField
-          isInvalid={inclusiveZeroError || boundaryError}
+          isInvalid={Boolean(errorMsg)}
           label={' '}
-          helpText={
-            shouldIncludeZero && (!inclusiveZeroError || boundaryError)
-              ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
-                  defaultMessage: 'Bounds must include zero.',
-                })
-              : undefined
-          }
-          error={
-            boundaryError
-              ? i18n.translate('xpack.lens.axisExtent.boundaryError', {
-                  defaultMessage: 'Lower bound has to be larger than upper bound',
-                })
-              : shouldIncludeZero && inclusiveZeroError
-              ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
-                  defaultMessage: 'Bounds must include zero.',
-                })
-              : undefined
-          }
+          helpText={helpMsg}
+          error={errorMsg}
           testSubjLayout={`${testSubjPrefix}_axisExtent_customBounds`}
           testSubjLower={`${testSubjPrefix}_axisExtent_lowerBound`}
           testSubjUpper={`${testSubjPrefix}_axisExtent_upperBound`}
@@ -111,7 +100,7 @@ export function AxisBoundsControl({
             if (extent.lowerBound === undefined && dataBounds) {
               setExtent({
                 ...extent,
-                lowerBound: Math.min(0, dataBounds.min),
+                lowerBound: getBounds('custom', scaleType, dataBounds).lowerBound,
               });
             }
           }}
@@ -142,20 +131,22 @@ interface ModeAxisBoundsControlProps {
   extent: UnifiedAxisExtentConfig;
   setExtent: (newExtent: UnifiedAxisExtentConfig | undefined) => void;
   dataBounds: DataBoundsObject | undefined;
-  shouldIncludeZero: boolean;
+  hasBarOrArea: boolean;
   disableCustomRange: boolean;
   testSubjPrefix: string;
   children: React.ReactNode;
+  scaleType?: YScaleType;
 }
 
 function MetricAxisBoundsControl({
   extent,
   setExtent,
   dataBounds,
-  shouldIncludeZero,
+  hasBarOrArea,
   disableCustomRange,
   testSubjPrefix,
   children,
+  scaleType,
 }: ModeAxisBoundsControlProps) {
   return (
     <>
@@ -166,7 +157,7 @@ function MetricAxisBoundsControl({
           defaultMessage: 'Bounds',
         })}
         helpText={
-          shouldIncludeZero
+          hasBarOrArea
             ? i18n.translate('xpack.lens.axisExtent.disabledDataBoundsMessage', {
                 defaultMessage: 'Only line charts can be fit to the data bounds',
               })
@@ -195,7 +186,7 @@ function MetricAxisBoundsControl({
                 defaultMessage: 'Data',
               }),
               'data-test-subj': `${testSubjPrefix}_axisExtent_groups_DataBounds'`,
-              isDisabled: shouldIncludeZero,
+              isDisabled: hasBarOrArea,
             },
             {
               id: `${idPrefix}custom`,
@@ -207,7 +198,7 @@ function MetricAxisBoundsControl({
             },
           ]}
           idSelected={`${idPrefix}${
-            (shouldIncludeZero && extent.mode === 'dataBounds') || disableCustomRange
+            (hasBarOrArea && extent.mode === 'dataBounds') || disableCustomRange
               ? 'full'
               : extent.mode
           }`}
@@ -216,9 +207,7 @@ function MetricAxisBoundsControl({
             setExtent({
               ...extent,
               mode: newMode,
-              lowerBound:
-                newMode === 'custom' && dataBounds ? Math.min(0, dataBounds.min) : undefined,
-              upperBound: newMode === 'custom' && dataBounds ? dataBounds.max : undefined,
+              ...getBounds(newMode, scaleType, dataBounds),
             });
           }}
         />
@@ -226,6 +215,49 @@ function MetricAxisBoundsControl({
       {children}
     </>
   );
+}
+
+export function getBounds(
+  mode: AxisExtentMode,
+  scaleType?: YScaleType,
+  dataBounds?: DataBoundsObject
+): Pick<UnifiedAxisExtentConfig, 'lowerBound' | 'upperBound'> {
+  if (mode !== 'custom' || !dataBounds) return {};
+
+  if (dataBounds.min >= 0 && dataBounds.max >= 0) {
+    const lowerBoundMax = scaleType === 'log' ? LOG_LOWER_BOUND_MAX : LOWER_BOUND_MAX;
+    return {
+      upperBound: dataBounds.max,
+      lowerBound: Math.min(lowerBoundMax, dataBounds.min),
+    };
+  }
+
+  if (dataBounds.min <= 0 && dataBounds.max <= 0) {
+    const upperBoundMin = scaleType === 'log' ? -LOG_LOWER_BOUND_MAX : LOWER_BOUND_MAX;
+    return {
+      upperBound: Math.max(upperBoundMin, dataBounds.min),
+      lowerBound: dataBounds.min,
+    };
+  }
+
+  if (scaleType === 'log') {
+    if (Math.abs(dataBounds.min) > Math.abs(dataBounds.max)) {
+      return {
+        upperBound: -LOG_LOWER_BOUND_MAX,
+        lowerBound: dataBounds.min,
+      };
+    }
+
+    return {
+      upperBound: dataBounds.max,
+      lowerBound: LOG_LOWER_BOUND_MAX,
+    };
+  }
+
+  return {
+    upperBound: dataBounds.max,
+    lowerBound: dataBounds.min,
+  };
 }
 
 function BucketAxisBoundsControl({

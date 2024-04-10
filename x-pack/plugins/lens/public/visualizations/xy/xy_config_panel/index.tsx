@@ -72,12 +72,13 @@ const getDataBounds = function (
 ) {
   const groups: Partial<Record<string, { min: number; max: number }>> = {};
   axes.forEach((axis) => {
-    let min = Number.MAX_VALUE;
-    let max = Number.MIN_VALUE;
+    let min = Number.MAX_SAFE_INTEGER;
+    let max = -Number.MAX_SAFE_INTEGER;
     axis.series.forEach((series) => {
       activeData?.[series.layer]?.rows.forEach((row) => {
         const value = row[series.accessor];
-        if (!Number.isNaN(value)) {
+        // TODO: add tests for null value
+        if (value !== null && Number.isFinite(value)) {
           if (value < min) {
             min = value;
           }
@@ -87,7 +88,7 @@ const getDataBounds = function (
         }
       });
     });
-    if (min !== Number.MAX_VALUE && max !== Number.MIN_VALUE) {
+    if (min !== Number.MAX_SAFE_INTEGER && max !== -Number.MAX_SAFE_INTEGER) {
       groups[axis.groupId] = {
         min: Math.round((min + Number.EPSILON) * 100) / 100,
         max: Math.round((max + Number.EPSILON) * 100) / 100,

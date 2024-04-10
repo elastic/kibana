@@ -26,9 +26,10 @@ import {
   AxisTicksSettings,
 } from '../../../shared_components';
 import { XYLayerConfig, AxesSettingsConfig } from '../types';
-import { validateExtent } from '../axes_configuration';
 
 import './axis_settings_popover.scss';
+import { validateExtent } from '../../../shared_components/axis/extent/helpers';
+import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -239,17 +240,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   const onExtentChange = useCallback(
     (newExtent) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
-        const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, newExtent);
-        if (
-          axis === 'x' ||
-          newExtent.mode !== 'custom' ||
-          (!boundaryError && !inclusiveZeroError)
-        ) {
+        const { errorMsg } = validateExtent(hasBarOrAreaOnAxis, newExtent, scale);
+        if (axis === 'x' || newExtent.mode !== 'custom' || !errorMsg) {
           setExtent(newExtent);
         }
       }
     },
-    [extent, axis, hasBarOrAreaOnAxis, setExtent]
+    [setExtent, extent, hasBarOrAreaOnAxis, scale, axis]
   );
 
   const { inputValue: localExtent, handleInputChange: setLocalExtent } = useDebouncedValue<
@@ -402,7 +399,18 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
                 value: 'sqrt',
               },
             ]}
-            onChange={(e) => setScale(e.target.value as YScaleType)}
+            onChange={(e) => {
+              const newScale = e.target.value as YScaleType;
+              setScale(newScale);
+
+              if (localExtent) {
+                // Update bounds to resect constraints of new scale
+                setLocalExtent({
+                  ...localExtent,
+                  ...getBounds(localExtent.mode, newScale, dataBounds),
+                });
+              }
+            }}
             value={scale}
           />
         </EuiFormRow>
@@ -411,9 +419,10 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         <AxisBoundsControl
           type={axis !== 'x' ? 'metric' : 'bucket'}
           extent={localExtent}
+          scaleType={scale}
           setExtent={setLocalExtent}
           dataBounds={dataBounds}
-          shouldIncludeZero={hasBarOrAreaOnAxis}
+          hasBarOrArea={hasBarOrAreaOnAxis}
           disableCustomRange={hasPercentageAxis}
           testSubjPrefix="lnsXY"
           // X axis is passing the extent object only in case of numeric histogram

@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../../common/types';
-import {
-  getDataBounds,
-  validateAxisDomain,
-  validateZeroInclusivityExtent,
-} from '../../shared_components';
+import { getDataBounds } from '../../shared_components';
 import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
@@ -147,11 +142,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  return {
-    inclusiveZeroError: hasBarOrArea && !validateZeroInclusivityExtent(extent),
-    boundaryError: !validateAxisDomain(extent),
-  };
 }
