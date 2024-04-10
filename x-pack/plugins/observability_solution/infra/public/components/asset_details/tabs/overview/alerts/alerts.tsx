@@ -46,7 +46,7 @@ export const AlertsSummaryContent = ({
     setActiveAlertsCount(alertsCount?.activeAlertCount);
   };
 
-  const assetFields = findInventoryFields(assetType);
+  const assetIdField = findInventoryFields(assetType).id;
 
   return (
     <>
@@ -65,11 +65,7 @@ export const AlertsSummaryContent = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <LinkToAlertsPage
-                assetId={assetId}
-                queryField={assetFields.id}
-                dateRange={dateRange}
-              />
+              <LinkToAlertsPage assetId={assetId} queryField={assetIdField} dateRange={dateRange} />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -78,7 +74,7 @@ export const AlertsSummaryContent = ({
       </Section>
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout
-          filter={`${assetFields.id}: "${assetId}"`}
+          filter={`${assetIdField}: "${assetId}"`}
           nodeType={assetType}
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}

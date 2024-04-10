@@ -116,29 +116,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.clickOverviewTab();
         });
 
-        [{ tab: 'metadata' }, { tab: 'processes' }, { tab: 'logs' }, { tab: 'anomalies' }].forEach(
-          ({ tab }) => {
-            it(`should keep the same date range across tabs: ${tab}`, async () => {
-              const clickFuncs: Record<string, () => void> = {
-                metadata: pageObjects.assetDetails.clickMetadataTab,
-                processes: pageObjects.assetDetails.clickProcessesTab,
-                logs: pageObjects.assetDetails.clickLogsTab,
-                anomalies: pageObjects.assetDetails.clickAnomaliesTab,
-              };
+        [
+          { tab: 'metadata' },
+          { tab: 'processes' },
+          { tab: 'metrics' },
+          { tab: 'logs' },
+          { tab: 'anomalies' },
+        ].forEach(({ tab }) => {
+          it(`should keep the same date range across tabs: ${tab}`, async () => {
+            const clickFuncs: Record<string, () => void> = {
+              metadata: pageObjects.assetDetails.clickMetadataTab,
+              processes: pageObjects.assetDetails.clickProcessesTab,
+              logs: pageObjects.assetDetails.clickLogsTab,
+              anomalies: pageObjects.assetDetails.clickAnomaliesTab,
+              metrics: pageObjects.assetDetails.clickMetricsTab,
+            };
 
-              await clickFuncs[tab]();
+            await clickFuncs[tab]();
 
-              const datePickerValue = await pageObjects.timePicker.getTimeConfig();
-              expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
-              expect(datePickerValue.start).to.equal(
-                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-              expect(datePickerValue.end).to.equal(
-                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
-              );
-            });
-          }
-        );
+            const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+            expect(await pageObjects.timePicker.timePickerExists()).to.be(true);
+            expect(datePickerValue.start).to.equal(
+              START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+            expect(datePickerValue.end).to.equal(
+              END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+            );
+          });
+        });
 
         it('preserves selected date range between page reloads', async () => {
           const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
@@ -193,9 +198,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
+          it('should render 6 charts in the metrics section', async () => {
+            const charts = await pageObjects.assetDetails.getAssetDetailsOverviewTabMetricsCharts();
+            expect(charts.length).to.equal(6);
+          });
+
+          [
+            { metric: 'cpu' },
+            { metric: 'memory' },
+            { metric: 'network' },
+            { metric: 'disk' },
+          ].forEach(({ metric }) => {
+            it(`should show ${metric} charts group the in metrics section`, async () => {
+              await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+            });
           });
 
           it('should show all section as collapsable', async () => {
@@ -357,6 +373,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should render 11 charts', async () => {
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsTabCharts();
+            expect(hosts.length).to.equal(11);
+          });
+
+          [
+            { metric: 'cpu' },
+            { metric: 'memory' },
+            { metric: 'network' },
+            { metric: 'disk' },
+            { metric: 'logs' },
+          ].forEach(({ metric }) => {
+            it(`should show ${metric} charts group the in metrics section`, async () => {
+              await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+            });
+
+            it(`should render quick access items for ${metric}`, async () => {
+              await pageObjects.assetDetails.quickAccessItemExists(metric);
+            });
+          });
+        });
+
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
@@ -512,13 +555,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             it('should render 12 charts in the Metrics section', async () => {
-              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-              expect(hosts.length).to.equal(12);
+              const hosts =
+                await pageObjects.assetDetails.getAssetDetailsOverviewTabMetricsCharts();
+              expect(hosts.length).to.equal(10);
             });
 
             it('should render 4 charts in the Kubernetes Metrics section', async () => {
               const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
               expect(hosts.length).to.equal(4);
+            });
+          });
+
+          describe('Metrics Tab', () => {
+            before(async () => {
+              await pageObjects.assetDetails.clickMetricsTab();
+            });
+
+            it('should render 15 charts', async () => {
+              const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsTabCharts();
+              expect(hosts.length).to.equal(15);
+            });
+
+            [
+              { metric: 'cpu' },
+              { metric: 'memory' },
+              { metric: 'network' },
+              { metric: 'disk' },
+              { metric: 'logs' },
+              { metric: 'kubernetes' },
+            ].forEach(({ metric }) => {
+              it(`should show ${metric} charts group the in metrics section`, async () => {
+                retry.tryForTime(30 * 1000, async () => {
+                  await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
+                });
+              });
+
+              it(`should render quick access items for ${metric}`, async () => {
+                retry.tryForTime(30 * 1000, async () => {
+                  await pageObjects.assetDetails.quickAccessItemExists(metric);
+                });
+              });
             });
           });
         });

@@ -22,7 +22,7 @@ import { MetadataErrorCallout } from '../../components/metadata_error_callout';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
-import { MetricsContent } from './metrics';
+import { MetricsContent } from './metrics/metrics';
 
 export const Overview = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -72,6 +72,7 @@ export const Overview = () => {
       <EuiFlexItem grow={false}>
         <MetricsContent
           assetId={asset.id}
+          assetType={asset.type}
           dateRange={state.dateRange}
           dataView={metrics.dataView}
         />

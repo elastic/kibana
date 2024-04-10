@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import React from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
-import { ContentTabIds } from '../../types';
-import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { HostCharts, KubernetesCharts } from '../../charts';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { HostCharts, KubernetesCharts } from '../../../charts';
+import { ContentTabIds } from '../../../types';
 
 interface Props {
   assetId: string;
@@ -19,7 +18,7 @@ interface Props {
   dataView?: DataView;
 }
 
-export const MetricsContent = (props: Props) => {
+export const HostMetrics = (props: Props) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = (metric: string) => {

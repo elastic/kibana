@@ -43,7 +43,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
             tooltipContent={
               <EuiText size="xs">
                 <FormattedMessage
-                  id="xpack.infra.gettingStarted.cards.appSearch.title"
+                  id="xpack.infra.assetDetails.charts.host.toolTip"
                   defaultMessage="See host-related {link} for more information"
                   values={{
                     link: (
@@ -52,7 +52,11 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
                         href={`${HOST_METRICS_DOC_HREF}#key-metrics-${metric}`}
                         target="_blank"
                       >
-                        {`${metric} metrics`}
+                        <FormattedMessage
+                          id="xpack.infra.assetDetails.charts.host.toolTip.linkText"
+                          defaultMessage="{metric} metric"
+                          values={{ metric }}
+                        />
                       </EuiLink>
                     ),
                   }}
@@ -61,22 +65,21 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
             }
           />
         }
-        data-test-subj="infraAssetDetailsMetricsCollabsible"
+        data-test-subj={`infraAssetDetailsHostChartsSection${metric}`}
         id={metric}
         ref={ref}
         extraAction={
           onShowAll ? (
             <EuiButtonEmpty
-              data-test-subj="infraAssetDetailsMetadataShowAllButton"
+              data-test-subj="infraAssetDetailsHostChartsShowAllButton"
               onClick={() => onShowAll(metric)}
               size="xs"
               flush="both"
               iconSide="right"
               iconType="sortRight"
-              key="metadata-link"
             >
               <FormattedMessage
-                id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
+                id="xpack.infra.assetDetails.charts.host.showAllButton"
                 defaultMessage="Show all"
               />
             </EuiButtonEmpty>

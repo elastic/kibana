@@ -88,6 +88,7 @@ export const Section = React.forwardRef<HTMLDivElement, Props>(
       <EuiFlexGroup
         id={collapsibleSectionAccordionId}
         data-section-id={id}
+        data-test-subj={dataTestSubj}
         gutterSize="m"
         direction="column"
         ref={ref}

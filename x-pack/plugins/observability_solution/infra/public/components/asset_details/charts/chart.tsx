@@ -68,7 +68,7 @@ export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props 
   return (
     <LensChart
       {...props}
-      id={`infraAssetDetailsHostMetricsChart${id}`}
+      id={`infraAssetDetailsMetricChart${id}`}
       borderRadius="m"
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}

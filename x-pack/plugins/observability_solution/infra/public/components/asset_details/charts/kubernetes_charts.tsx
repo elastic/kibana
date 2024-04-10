@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKubernetesCharts } from '../hooks/use_metrics_charts';
-import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { Section } from '../components/section';
 import { SectionTitle } from '../components/section_title';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';
 import { INTEGRATIONS } from '../constants';
 import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
+import { useIntegrationCheck } from '../hooks/use_integration_check';
 
 interface Props {
   assetId: string;
@@ -34,32 +34,27 @@ export const KubernetesCharts = React.forwardRef<
   const { charts } = useKubernetesCharts({
     dataViewId: dataView?.id,
   });
-  const { metadata } = useMetadataStateContext();
 
-  const shouldRender = useMemo(
-    () => (metadata?.features ?? []).some((f) => f.name === INTEGRATIONS.kubernetes),
-    [metadata?.features]
-  );
+  const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetes });
 
-  return shouldRender ? (
+  return hasIntegration ? (
     <Section
       title={<SectionTitle title={HOST_METRIC_GROUP_TITLES.kubernetes} />}
-      data-test-subj="infraAssetDetailsMetricsCollabsible"
+      data-test-subj="infraAssetDetailsKubernetesChartsSection"
       id="kubernetes"
       ref={ref}
       extraAction={
         onShowAll ? (
           <EuiButtonEmpty
-            data-test-subj="infraAssetDetailsMetadataShowAllButton"
+            data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
             onClick={() => onShowAll('kubernetes')}
             size="xs"
             flush="both"
             iconSide="right"
             iconType="sortRight"
-            key="metadata-link"
           >
             <FormattedMessage
-              id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
+              id="xpack.infra.assetDetails.charts.kubernetes.showAllButton"
               defaultMessage="Show all"
             />
           </EuiButtonEmpty>

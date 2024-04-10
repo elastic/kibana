@@ -159,7 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+            const hosts = await pageObjects.assetDetails.getAssetDetailsAllMetricsCharts();
             expect(hosts.length).to.equal(9);
           });
 

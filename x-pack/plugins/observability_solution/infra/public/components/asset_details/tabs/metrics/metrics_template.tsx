@@ -95,18 +95,16 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     useEffect(() => {
       if (scrollTo) {
+        // Wait for the calculation of offsetScrollMarginTop
         initialScrollTimeoutRef.current = setTimeout(() => scrollToSection(scrollTo), 100);
       }
     }, [scrollTo, scrollToSection]);
 
     useEffect(
       () => () => {
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-        }
-        if (initialScrollTimeoutRef.current) {
-          clearTimeout(initialScrollTimeoutRef.current);
-        }
+        [scrollTimeoutRef.current, initialScrollTimeoutRef.current]
+          .filter((timeout): timeout is NodeJS.Timeout => !!timeout)
+          .forEach((timeout) => clearTimeout(timeout));
       },
       []
     );
@@ -122,6 +120,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
             flex-direction: column;
           }
         `}
+        data-test-subj="infraAssetDetailsMetricChartsContent"
         ref={ref}
       >
         <EuiFlexItem
@@ -153,6 +152,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
             >
               {quickAccessItems.map((item) => (
                 <EuiListGroupItem
+                  data-test-subj={`infraMetricsQuickAccessItem${item}`}
                   onClick={() => onQuickAccessItemClick(item)}
                   label={HOST_METRIC_GROUP_TITLES[item]}
                   size="s"

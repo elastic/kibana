@@ -256,8 +256,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+            const hosts = await pageObjects.assetDetails.getAssetDetailsOverviewTabMetricsCharts();
+            expect(hosts.length).to.equal(6);
           });
 
           it('should show all section as collapsible', async () => {
@@ -318,6 +318,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const removeFilterShouldNotExist =
               await pageObjects.assetDetails.metadataRemovePinExists();
             expect(removeFilterShouldNotExist).to.be(false);
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show processes table', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });
 
