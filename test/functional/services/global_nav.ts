@@ -42,10 +42,8 @@ export class GlobalNavService extends FtrService {
 
   public async badgeExistsOrFail(expectedLabel: string): Promise<void> {
     await this.testSubjects.existOrFail('headerBadge');
-    const actualLabel = await this.testSubjects.getAttribute(
-      'headerBadge',
-      'data-test-badge-label'
-    );
+    const actualLabel =
+      (await this.testSubjects.getAttribute('headerBadge', 'data-test-badge-label')) ?? '';
     expect(actualLabel.toUpperCase()).to.equal(expectedLabel.toUpperCase());
   }
 

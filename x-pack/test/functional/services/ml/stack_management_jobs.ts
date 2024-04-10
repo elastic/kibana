@@ -477,7 +477,7 @@ export function MachineLearningStackManagementJobsProvider({
       ).findAllByClassName('euiAvatar--space');
 
       for (const el of spacesEl) {
-        spaces.push((await el.getAttribute('data-test-subj')).replace('space-avatar-', ''));
+        spaces.push(((await el.getAttribute('data-test-subj')) ?? '').replace('space-avatar-', ''));
       }
 
       return spaces;

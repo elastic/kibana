@@ -27,5 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_field_data_with_fields_api'));
     loadTestFile(require.resolve('./_classic_table_doc_navigation'));
     loadTestFile(require.resolve('./_hide_announcements'));
+    loadTestFile(require.resolve('./_esql_grid'));
   });
 }
