@@ -23,7 +23,7 @@ import {
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
-import { bufferWhen, exhaustMap, filter, map, merge, Subject, takeUntil, timer } from 'rxjs';
+import { bufferWhen, exhaustMap, filter, interval, map, merge, Subject, takeUntil } from 'rxjs';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -94,7 +94,7 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
       .pipe(
         takeUntil(stop$),
         // Buffer until either the timer or a forced flush occur
-        bufferWhen(() => merge(timer(bufferTimeMs, bufferTimeMs), this.flush$)),
+        bufferWhen(() => merge(interval(bufferTimeMs), this.flush$)),
         map((listOfFields) => {
           const fieldsMap = listOfFields.flat().reduce((acc, fieldName) => {
             const incrementCounterField: Required<SavedObjectsIncrementCounterField> = acc.get(
