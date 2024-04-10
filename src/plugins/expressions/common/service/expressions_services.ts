@@ -173,12 +173,6 @@ export interface ExpressionExecutionParams {
    * @deafult 0
    */
   throttle?: number;
-
-  /**
-   * Requests' meta for showing in Inspector
-   */
-  titleForInspector?: string;
-  descriptionForInspector?: string;
 }
 
 /**

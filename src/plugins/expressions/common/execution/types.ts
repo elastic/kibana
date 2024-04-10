@@ -81,12 +81,6 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
    * Logs datatable.
    */
   logDatatable?(name: string, datatable: Datatable): void;
-
-  /**
-   * Requests' meta for showing in Inspector
-   */
-  titleForInspector?: string;
-  descriptionForInspector?: string;
 }
 
 /**

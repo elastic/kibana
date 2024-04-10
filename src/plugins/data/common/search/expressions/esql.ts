@@ -39,6 +39,12 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
+
+  /**
+   * Requests' meta for showing in Inspector
+   */
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -106,17 +112,25 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
+      titleForInspector: {
+        aliases: ['titleForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.essql.titleForInspector.help', {
+          defaultMessage: 'The title to show in Inspector.',
+        }),
+      },
+      descriptionForInspector: {
+        aliases: ['descriptionForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.essql.descriptionForInspector.help', {
+          defaultMessage: 'The description to show in Inspector.',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale },
-      {
-        abortSignal,
-        inspectorAdapters,
-        getKibanaRequest,
-        titleForInspector,
-        descriptionForInspector,
-      }
+      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
+      { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
         getStartDependencies(() => {

@@ -42,20 +42,20 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
+      defaultMessage: 'Results',
+    }),
+    descriptionForInspector: i18n.translate(
+      'discover.inspectorTextBasedRequestDescriptionDocument',
+      {
+        defaultMessage: 'This request queries Elasticsearch using ES|QL to fetch results.',
+      }
+    ),
   })
     .then((ast) => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
-          titleForInspector: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
-            defaultMessage: 'Results',
-          }),
-          descriptionForInspector: i18n.translate(
-            'discover.inspectorTextBasedRequestDescriptionDocument',
-            {
-              defaultMessage: 'This request queries Elasticsearch using ES|QL to fetch results.',
-            }
-          ),
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
