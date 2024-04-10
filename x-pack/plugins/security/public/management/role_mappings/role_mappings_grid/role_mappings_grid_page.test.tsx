@@ -292,28 +292,22 @@ describe('RoleMappingsGridPage', () => {
     await nextTick();
     wrapper.update();
 
-    const editButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="editRoleMappingButton-some-realm"]'
-    );
+    const editButton = wrapper.find('a[data-test-subj="editRoleMappingButton-some-realm"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/some-realm');
 
-    const cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="cloneRoleMappingButton-some-realm"]'
-    );
+    const cloneButton = wrapper.find('a[data-test-subj="cloneRoleMappingButton-some-realm"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/some-realm');
 
-    const actionMenuButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="euiCollapsedItemActionsButton"]'
-    );
+    const actionMenuButton = wrapper.find('button[data-test-subj="euiCollapsedItemActionsButton"]');
     expect(actionMenuButton).toHaveLength(1);
 
     actionMenuButton.simulate('click');
     wrapper.update();
 
     const deleteButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
+      'button[data-test-subj="deleteRoleMappingButton-some-realm"]'
     );
     expect(deleteButton).toHaveLength(1);
   });
@@ -371,30 +365,22 @@ describe('RoleMappingsGridPage', () => {
       await nextTick();
       wrapper.update();
 
-      const bulkButton = wrapper.find('EuiButtonEmpty[data-test-subj="bulkDeleteActionButton"]');
+      const bulkButton = wrapper.find('[data-test-subj="bulkDeleteActionButton"]');
       expect(bulkButton).toHaveLength(0);
 
-      const createButton = wrapper.find('EuiButton[data-test-subj="createRoleMappingButton"]');
+      const createButton = wrapper.find('[data-test-subj="createRoleMappingButton"]');
       expect(createButton).toHaveLength(0);
 
-      const editButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="editRoleMappingButton-some-realm"]'
-      );
+      const editButton = wrapper.find('[data-test-subj="editRoleMappingButton-some-realm"]');
       expect(editButton).toHaveLength(0);
 
-      const cloneButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="cloneRoleMappingButton-some-realm"]'
-      );
+      const cloneButton = wrapper.find('[data-test-subj="cloneRoleMappingButton-some-realm"]');
       expect(cloneButton).toHaveLength(0);
 
-      const deleteButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
-      );
+      const deleteButton = wrapper.find('[data-test-subj="deleteRoleMappingButton-some-realm"]');
       expect(deleteButton).toHaveLength(0);
 
-      const actionMenuButton = wrapper.find(
-        'EuiButtonIcon[data-test-subj="euiCollapsedItemActionsButton"]'
-      );
+      const actionMenuButton = wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]');
       expect(actionMenuButton).toHaveLength(0);
     });
   });
