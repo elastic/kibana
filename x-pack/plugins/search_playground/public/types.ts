@@ -104,11 +104,6 @@ export interface AIMessage extends Message {
   retrievalDocs: Doc[];
 }
 
-export enum SummarizationModelName {
-  gpt3_5_turbo = 'gpt-3.5-turbo',
-  gpt_4 = 'gpt-4',
-}
-
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
   has_in_progress_syncs?: boolean; // these default to false if not a connector or crawler

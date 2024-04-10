@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
-import { LLMModel, SummarizationModelName } from '../types';
+import { LLMModel } from '../types';
 import { useLoadConnectors } from './use_load_connectors';
 
 const mapLlmToModels: Record<
@@ -36,7 +36,7 @@ const mapLlmToModels: Record<
   [LLMs.openai]: {
     icon: OpenAILogo,
     getModels: (connectorName, includeName) =>
-      Object.values(SummarizationModelName).map((model) => ({
+      ['gpt-3.5-turbo', 'gpt-4'].map((model) => ({
         label: `${model} ${includeName ? `(${connectorName})` : ''}`,
         value: model,
       })),
