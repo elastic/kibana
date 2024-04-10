@@ -52,7 +52,7 @@ export const EmptyState = () => {
               }}
             />
           </p>
-          <EuiLink href={documentationService.getCreateEnrichPolicyLink()} target="_blank">
+          <EuiLink href={documentationService.getEnrichIngestDataLink()} target="_blank">
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicies.list.emptyPromptLearnMoreLink"
               defaultMessage="Learn more about enriching your data"

@@ -65,6 +65,7 @@ class DocumentationService {
   private indexStats: string = '';
   private bulkApi: string = '';
   private updateExistingDS: string = '';
+  private enrichIngestData: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -123,6 +124,7 @@ class DocumentationService {
     this.indexStats = links.apis.indexStats;
     this.bulkApi = links.enterpriseSearch.bulkApi;
     this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
+    this.enrichIngestData = links.ingest.enrich;
   }
 
   public getEsDocsBase() {
@@ -345,6 +347,10 @@ class DocumentationService {
 
   public getUpdateExistingDS() {
     return this.updateExistingDS;
+  }
+
+  public getEnrichIngestDataLink() {
+    return this.enrichIngestData;
   }
 
   public getWellKnownTextLink() {
