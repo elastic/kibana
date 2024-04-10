@@ -42,7 +42,6 @@ import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
 import { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
-import { getErrorMessagesFromLLMMessage } from './utils';
 
 enum ChartType {
   XY = 'XY',
@@ -68,6 +67,7 @@ interface VisualizeQueryResponsev1 {
   };
   content: {
     message: string;
+    errorMessages: string[];
   };
 }
 
@@ -351,12 +351,10 @@ export function registerVisualizeQueryRenderFunction({
       const typedResponse = response as VisualizeQueryResponse;
 
       const columns = 'data' in typedResponse ? typedResponse.data.columns : typedResponse.content;
-      const contentMessage =
-        'content' in typedResponse && 'message' in typedResponse.content
-          ? typedResponse.content.message
-          : '';
-
-      const errorMessages = getErrorMessagesFromLLMMessage(contentMessage);
+      const errorMessages =
+        'content' in typedResponse && 'errorMessages' in typedResponse.content
+          ? typedResponse.content.errorMessages
+          : [];
 
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;

@@ -16,10 +16,10 @@ import { FunctionRegistrationParameters } from '.';
 const getMessageForLLM = (
   intention: VisualizeESQLUserIntention,
   query: string,
-  queryErrors: string[]
+  hasErrors: boolean
 ) => {
-  if (queryErrors.length) {
-    return 'The query has syntax errors: ```\n' + queryErrors + '\n```';
+  if (hasErrors) {
+    return 'The query has syntax errors';
   }
   return intention === VisualizeESQLUserIntention.executeAndReturnResults ||
     intention === VisualizeESQLUserIntention.generateQueryOnly
@@ -64,7 +64,7 @@ export function registerVisualizeESQLFunction({
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
 
-      const message = getMessageForLLM(intention, query, errorMessages);
+      const message = getMessageForLLM(intention, query, Boolean(errorMessages.length));
 
       return {
         data: {
@@ -72,6 +72,7 @@ export function registerVisualizeESQLFunction({
         },
         content: {
           message,
+          errorMessages,
         },
       };
     }
