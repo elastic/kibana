@@ -35,6 +35,7 @@ export const EditRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   const [dispalyedRuleName, setDisplayedRuleName] = useState<string | undefined>(ruleName);
 
   const {
+    application: { navigateToUrl },
     http,
     notifications: { toasts },
     setBreadcrumbs,
@@ -59,12 +60,12 @@ export const EditRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   }, []);
 
   const onClickReturn = useCallback(() => {
-    history.push(referrer);
-  }, [referrer, history]);
+    navigateToUrl(referrer);
+  }, [referrer, navigateToUrl]);
 
   const onSaveRule = useCallback(() => {
-    history.push(referrer);
-  }, [history, referrer]);
+    navigateToUrl(referrer);
+  }, [referrer, navigateToUrl]);
 
   useEffect(() => {
     setBreadcrumbs([

@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
@@ -39,6 +40,9 @@ import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice
 import { RuleScheduleField } from './rule_schedule_field';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleAlertDelayField } from './rule_alert_delay_field';
+import { expressionFocus } from '../../store/meta_slice';
+import { ValidationStatus } from '../../common/constants';
+import { flattenErrorObject } from '../../common/validation_error';
 
 interface RuleDefinitionProps {
   expressionPlugins: RuleTypeParamsExpressionPlugins;
@@ -64,7 +68,10 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
 
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
-  const ruleParamsErrors = useValidation().ruleDefinition.errors.params;
+  const {
+    errors: { params: ruleParamsErrors },
+    status: ruleDefinitionValidationStatus,
+  } = useValidation().ruleDefinition;
   const ruleInterval = useRuleFormSelector((state) => state.ruleDefinition.schedule.interval);
   const ruleTypeModel = useRuleType();
   const dispatch = useRuleFormDispatch();
@@ -94,6 +101,14 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   );
 
   const advancedOptionsInitialIsOpen = useSelectAreAdvancedOptionsSet();
+
+  const ruleParamsDisplayErrors = useMemo(() => {
+    if (ruleDefinitionValidationStatus === ValidationStatus.INVALID) {
+      return flattenErrorObject(ruleParamsErrors);
+    } else {
+      return null;
+    }
+  }, [ruleParamsErrors, ruleDefinitionValidationStatus]);
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder>
@@ -138,27 +153,42 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
               />
             }
           >
-            <EuiErrorBoundary>
-              <RuleParamsExpressionComponent
-                id={ruleId}
-                ruleParams={ruleParams}
-                ruleInterval={ruleInterval}
-                ruleThrottle={''}
-                alertNotifyWhen={'onActionGroupChange'}
-                errors={ruleParamsErrors}
-                setRuleParams={(key, value) => dispatch(setParam([key, value]))}
-                setRuleProperty={(_, value) => {
-                  /* setRuleProperty is only ever used to replace all params */
-                  /* Deprecated in favor of defining default parameters */
-                  dispatch(replaceParams(value));
-                }}
-                defaultActionGroupId={'default'}
-                actionGroups={[{ id: 'default', name: 'Default' }]}
-                metadata={metadata}
-                onChangeMetaData={onChangeMetaData}
-                {...expressionPlugins}
-              />
-            </EuiErrorBoundary>
+            {/*
+             * Backwards compatibility with expression components that call setParam to populate default params.
+             * Capture when the user focuses on the expression component. Until the user interacts
+             * with the expression, validation errors should not be shown, and the rule definition
+             * should only be marked as incomplete if there are validation errors.
+             */}
+            <div onFocusCapture={() => dispatch(expressionFocus())}>
+              <EuiErrorBoundary>
+                <RuleParamsExpressionComponent
+                  id={ruleId}
+                  ruleParams={ruleParams}
+                  ruleInterval={ruleInterval}
+                  ruleThrottle={''}
+                  errors={ruleParamsErrors}
+                  setRuleParams={(key, value) => dispatch(setParam([key, value]))}
+                  setRuleProperty={(_, value) => {
+                    /* setRuleProperty is only ever used to replace all params */
+                    /* Deprecated in favor of defining default parameters */
+                    dispatch(replaceParams(value));
+                  }}
+                  defaultActionGroupId={'default'}
+                  actionGroups={[{ id: 'default', name: 'Default' }]}
+                  metadata={metadata}
+                  onChangeMetaData={onChangeMetaData}
+                  {...expressionPlugins}
+                />
+              </EuiErrorBoundary>
+              {ruleParamsDisplayErrors && (
+                <EuiCallOut
+                  size="s"
+                  color="danger"
+                  iconType="warning"
+                  title={ruleParamsDisplayErrors.join(' ')}
+                />
+              )}
+            </div>
           </Suspense>
         )}
       </EuiSplitPanel.Inner>

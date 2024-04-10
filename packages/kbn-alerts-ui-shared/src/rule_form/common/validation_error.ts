@@ -81,3 +81,15 @@ export const isValidationErrorObject = (error: unknown): error is RuleFormValida
     )
   );
 };
+
+export const flattenErrorObject = (errorObject: RuleFormValidationErrorObject | IErrorObject) => {
+  const errors: RuleFormValidationErrorList = [];
+  for (const value of Object.values(errorObject)) {
+    if (isValidationErrorList(value) || Array.isArray(value)) {
+      errors.push(...value.map((error) => (typeof error === 'string' ? error : error.text)));
+    } else {
+      errors.push(...flattenErrorObject(value));
+    }
+  }
+  return errors;
+};

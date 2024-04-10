@@ -9,17 +9,27 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { setParam } from '../features/rule_definition';
 
-const initialState: { haveRuleParamsChanged: boolean } = {
+const initialState: {
+  haveRuleParamsChanged: boolean;
+  hasExpressionParamsComponentBeenInteractedWith: boolean;
+} = {
+  hasExpressionParamsComponentBeenInteractedWith: false,
   haveRuleParamsChanged: false,
 };
 
 export const metaSlice = createSlice({
   name: 'meta',
   initialState,
-  reducers: {},
+  reducers: {
+    expressionFocus(state) {
+      state.hasExpressionParamsComponentBeenInteractedWith = true;
+    },
+  },
   extraReducers(builder) {
     builder.addCase(setParam, (state) => {
-      state.haveRuleParamsChanged = true;
+      if (state.hasExpressionParamsComponentBeenInteractedWith) state.haveRuleParamsChanged = true;
     });
   },
 });
+
+export const { expressionFocus } = metaSlice.actions;

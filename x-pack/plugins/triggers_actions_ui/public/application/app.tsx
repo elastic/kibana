@@ -132,10 +132,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
         {getIsExperimentalFeatureEnabled('ruleFormV2') && (
-          <>
-            <Route path={editRuleRoute} component={EditRulePage} />
-            <Route path={createRuleRoute} component={CreateRulePage} />
-          </>
+          <Route path={editRuleRoute} component={EditRulePage} />
+        )}
+        {getIsExperimentalFeatureEnabled('ruleFormV2') && (
+          <Route path={createRuleRoute} component={CreateRulePage} />
         )}
         <Route
           path={ruleDetailsRoute}

@@ -32,6 +32,7 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   const { referrer, consumer, validConsumers } = (location.state ?? {}) as CreateRuleLocationState;
 
   const {
+    application: { navigateToUrl },
     http,
     notifications: { toasts },
     setBreadcrumbs,
@@ -49,8 +50,8 @@ export const CreateRulePage: React.FC<RouteComponentProps<MatchParams>> = ({
   );
 
   const onClickReturn = useCallback(() => {
-    history.push(referrer);
-  }, [referrer, history]);
+    navigateToUrl(referrer);
+  }, [referrer, navigateToUrl]);
 
   const onSaveRule = useCallback(
     (ruleId: string) => {

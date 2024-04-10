@@ -81,15 +81,15 @@ export const useValidateRuleDefinition = ({
     if (isValidationErrorList(errors) || isValidationErrorObject(errors)) {
       return { errors } as RuleFormValidationErrorObject;
     }
+    if (!errors || errors.length === 0) {
+      return { errors: new Array<RuleFormValidationError>() };
+    }
     if (!haveRuleParamsChanged) {
       /**
        * Backwards compaitibility for V1 error validation
        * On init, convert all string errors to IncompleteError. They should only be marked as
        * invalid if the user has interacted with the field.
        */
-      if (!errors || errors.length === 0) {
-        return { errors: new Array<RuleFormValidationError>() };
-      }
       return convertStringErrorsToIncomplete(errors);
     }
     return convertStringErrorsToInvalid(errors);

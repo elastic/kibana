@@ -392,7 +392,7 @@ export interface RuleTypeParamsExpressionProps<
    * Expression components should never set any properties besides params.
    */
   setRuleProperty: <Prop extends keyof Rule>(
-    key: 'params',
+    key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;

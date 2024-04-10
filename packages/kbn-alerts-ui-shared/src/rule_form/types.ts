@@ -64,7 +64,7 @@ export interface RuleTypeParamsExpressionProps<
    */
   setRuleProperty: <Prop extends keyof RuleFormRule>(
     key: 'params',
-    value: RuleFormRule[Prop] | null
+    value: Record<string, unknown>
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;
   errors: RuleFormValidationErrorObject | RuleFormValidationErrorList | IErrorObject;
