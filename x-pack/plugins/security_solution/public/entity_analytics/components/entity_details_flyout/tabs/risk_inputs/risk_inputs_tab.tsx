@@ -277,7 +277,7 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
     field: 'field',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.fieldColumn"
         defaultMessage="Field"
       />
     ),
@@ -288,7 +288,7 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
     field: 'value',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.valueColumn"
         defaultMessage="Value"
       />
     ),
@@ -301,7 +301,7 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
     align: 'right',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.contributionColumn"
         defaultMessage="Contribution"
       />
     ),
