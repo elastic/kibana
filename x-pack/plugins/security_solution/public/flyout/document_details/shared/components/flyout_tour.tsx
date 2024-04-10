@@ -14,24 +14,35 @@ import type { FC } from 'react';
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { tourConfig } from './tour_step_config';
-import type { FlyoutTourStepsProps } from './tour_step_config';
+import { tourConfig, type TourState } from '../utils/tour_step_config';
+import type { FlyoutTourStepsProps } from '../utils/tour_step_config';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-
-interface TourState {
-  currentTourStep: number;
-  isTourActive: boolean;
-  tourPopoverWidth: number;
-  tourSubtitle: string;
-}
+import { FLYOUT_TOUR_TEST_ID } from './test_ids';
 
 export interface FlyoutTourProps {
+  /**
+   * Content to be displayed in each tour card
+   */
   tourStepContent: FlyoutTourStepsProps[];
+  /**
+   * Total number of tour steps
+   */
   totalSteps: number;
+  /**
+   * Optional step number to indicate a callback after the specified step
+   */
   switchStep?: number;
+  /**
+   * Optional callback to be called after switchStep
+   */
   onPanelSwitch?: () => void;
 }
+
+const POPOVER_WIDTH = 300;
+const TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subtitle', {
+  defaultMessage: 'New ways to investigate alerts',
+});
 
 /**
  * Shared component that generates tour steps based on supplied tour step content.
@@ -118,7 +129,7 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
         const stepCount = steps.stepNumber;
         if (tourState.currentTourStep !== stepCount) return null;
         const panelProps = {
-          'data-test-subj': `flyout-tour-step-${stepCount}`,
+          'data-test-subj': `${FLYOUT_TOUR_TEST_ID}-${stepCount}`,
         };
 
         return (
@@ -127,7 +138,7 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
             key={stepCount}
             step={stepCount}
             isStepOpen={tourState.isTourActive}
-            minWidth={tourState.tourPopoverWidth}
+            minWidth={POPOVER_WIDTH}
             stepsTotal={totalSteps}
             onFinish={finishTour}
             title={steps.title}
@@ -135,7 +146,7 @@ export const FlyoutTour: FC<FlyoutTourProps> = ({
             anchor={`[data-test-subj=${steps.anchor}]`}
             anchorPosition={steps.anchorPosition}
             footerAction={getFooterAction(stepCount)}
-            subtitle={tourConfig.tourSubtitle}
+            subtitle={TOUR_SUBTITLE}
           />
         );
       })}

@@ -10,55 +10,71 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EXPAND_DETAILS_BUTTON_TEST_ID } from '../../../shared/components/test_ids';
-import { OVERVIEW_TEST_ID } from '../../right/test_ids';
+import { OVERVIEW_TAB_LABEL_TEST_ID } from '../../right/test_ids';
 import { RULE_SUMMARY_BUTTON_TEST_ID } from '../../right/components/test_ids';
 import {
-  INSIGHTS_TAB_PREVALENCE_TEST_ID,
-  INSIGHTS_TAB_ENTITIES_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
 } from '../../left/tabs/test_ids';
 
 export const FLYOUT_TOUR_CONFIG_ANCHORS = {
-  OVERVIEW_TAB: OVERVIEW_TEST_ID,
+  OVERVIEW_TAB: OVERVIEW_TAB_LABEL_TEST_ID,
   RULE_PREVIEW: RULE_SUMMARY_BUTTON_TEST_ID,
   EXPAND_BUTTON: EXPAND_DETAILS_BUTTON_TEST_ID,
-  ENTITIES: INSIGHTS_TAB_ENTITIES_TEST_ID,
-  PREVALENCE: INSIGHTS_TAB_PREVALENCE_TEST_ID,
+  ENTITIES: INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
+  PREVALENCE: INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
+};
+
+export interface TourState {
+  /**
+   * The current step number
+   */
+  currentTourStep: number;
+  /**
+   * True if tour is active (user has not completed or exited the tour)
+   */
+  isTourActive: boolean;
+}
+
+export const tourConfig: TourState = {
+  currentTourStep: 1,
+  isTourActive: true,
 };
 
 export interface FlyoutTourStepsProps {
+  /**
+   * Title of the tour step
+   */
   title: string;
+  /**
+   * Content of tour step
+   */
   content: JSX.Element;
+  /**
+   * Step number
+   */
   stepNumber: number;
+  /**
+   * Data test subject of the anchor component
+   */
   anchor: string;
+  /**
+   * Optional anchor position prop
+   */
   anchorPosition?: EuiTourStepProps['anchorPosition'];
 }
 
-export const FLYOUT_TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subTitle', {
-  defaultMessage: 'Flyout is now expandable',
-});
-
-export const tourConfig = {
-  currentTourStep: 1,
-  isTourActive: true,
-  tourPopoverWidth: 300,
-  tourSubtitle: 'Introducing expandable details',
-};
-
-export const getRightSectionTourSteps = (
-  isAlert: boolean,
-  isPreview: boolean
-): FlyoutTourStepsProps[] => {
-  const offset = isAlert && !isPreview ? 0 : -1;
+export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
   const rightSectionTourSteps: FlyoutTourStepsProps[] = [
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.overview.title', {
-        defaultMessage: 'New insights in overview',
+        defaultMessage: 'A more detailed overview of the alert',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.overview.description"
-            defaultMessage="Find previews and summarized insights in {overview}"
+            defaultMessage="Explore sections on the {overview} tab to quickly build an understanding of the alert."
             values={{
               overview: (
                 <EuiCode>
@@ -96,7 +112,7 @@ export const getRightSectionTourSteps = (
           />
         </EuiText>
       ),
-      stepNumber: isAlert && !isPreview ? 2 : -1,
+      stepNumber: 2,
       anchor: FLYOUT_TOUR_CONFIG_ANCHORS.RULE_PREVIEW,
       anchorPosition: 'rightUp',
     },
@@ -112,21 +128,15 @@ export const getRightSectionTourSteps = (
           />
         </EuiText>
       ),
-      stepNumber: 3 + offset,
+      stepNumber: 3,
       anchor: FLYOUT_TOUR_CONFIG_ANCHORS.EXPAND_BUTTON,
       anchorPosition: 'downCenter',
     },
   ];
-  return isAlert && !isPreview
-    ? rightSectionTourSteps
-    : rightSectionTourSteps.filter((step) => step.stepNumber > 0);
+  return rightSectionTourSteps;
 };
 
-export const getLeftSectionTourSteps = (
-  isAlert: boolean,
-  isPreview: boolean
-): FlyoutTourStepsProps[] => {
-  const offset = isAlert && !isPreview ? 0 : -1;
+export const getLeftSectionTourSteps = (): FlyoutTourStepsProps[] => {
   return [
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.entities.title', {
@@ -149,7 +159,7 @@ export const getLeftSectionTourSteps = (
           />
         </EuiText>
       ),
-      stepNumber: 4 + offset,
+      stepNumber: 4,
       anchor: FLYOUT_TOUR_CONFIG_ANCHORS.ENTITIES,
       anchorPosition: 'rightUp',
     },
@@ -174,13 +184,9 @@ export const getLeftSectionTourSteps = (
           />
         </EuiText>
       ),
-      stepNumber: 5 + offset,
+      stepNumber: 5,
       anchor: FLYOUT_TOUR_CONFIG_ANCHORS.PREVALENCE,
       anchorPosition: 'rightUp',
     },
   ];
 };
-
-export const getTotalSteps = (isAlert: boolean, isPreview: boolean): number =>
-  getRightSectionTourSteps(isAlert, isPreview).length +
-  getLeftSectionTourSteps(isAlert, isPreview).length;

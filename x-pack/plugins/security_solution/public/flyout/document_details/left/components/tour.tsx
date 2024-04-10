@@ -11,29 +11,22 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useLeftPanelContext } from '../context';
 import { FlyoutTour } from '../../shared/components/flyout_tour';
-import {
-  getLeftSectionTourSteps,
-  getRightSectionTourSteps,
-  getTotalSteps,
-} from '../../shared/components/tour_step_config';
+import { getLeftSectionTourSteps } from '../../shared/utils/tour_step_config';
+import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 
 /**
  * Guided tour for the left panel in details flyout
  */
 export const LeftPanelTour: FC = memo(() => {
   const { getFieldsData, isPreview } = useLeftPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
+  const isAlert = eventKind === EventKind.signal;
+  const isTimelineFlyoutOpen = useIsTimelineFlyoutOpen();
+  const showTour = isAlert && !isPreview && !isTimelineFlyoutOpen;
 
-  const [tourStepContent, totalSteps] = useMemo(() => {
-    const eventKind = getField(getFieldsData('event.kind'));
-    const isAlert = eventKind === EventKind.signal;
-    return [
-      getLeftSectionTourSteps(isAlert, isPreview),
-      getTotalSteps(isAlert, isPreview),
-      getRightSectionTourSteps(isAlert, isPreview).length,
-    ];
-  }, [getFieldsData, isPreview]);
+  const tourStepContent = useMemo(() => getLeftSectionTourSteps(), []);
 
-  return <FlyoutTour tourStepContent={tourStepContent} totalSteps={totalSteps} />;
+  return showTour ? <FlyoutTour tourStepContent={tourStepContent} totalSteps={5} /> : null;
 });
 
 LeftPanelTour.displayName = 'LeftPanelTour';

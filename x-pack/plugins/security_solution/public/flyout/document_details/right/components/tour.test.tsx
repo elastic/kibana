@@ -17,7 +17,7 @@ import {
 } from '../../../../common/mock';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/components/tour_step_config';
+import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
 
 jest.mock('../../../../common/lib/kibana');
 

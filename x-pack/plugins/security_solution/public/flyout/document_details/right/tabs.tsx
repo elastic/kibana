@@ -10,7 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   JSON_TAB_TEST_ID,
-  OVERVIEW_TEST_ID,
+  OVERVIEW_TAB_LABEL_TEST_ID,
   OVERVIEW_TAB_TEST_ID,
   TABLE_TAB_TEST_ID,
 } from './test_ids';
@@ -30,7 +30,7 @@ export const overviewTab: RightPanelTabType = {
   id: 'overview',
   'data-test-subj': OVERVIEW_TAB_TEST_ID,
   name: (
-    <div data-test-subj={OVERVIEW_TEST_ID}>
+    <div data-test-subj={OVERVIEW_TAB_LABEL_TEST_ID}>
       <FormattedMessage
         id="xpack.securitySolution.flyout.right.header.overviewTabLabel"
         defaultMessage="Overview"
