@@ -18,6 +18,13 @@ export function getContextualInsightMessages({
     {
       '@timestamp': new Date().toISOString(),
       message: {
+        role: MessageRole.User,
+        content: message,
+      },
+    },
+    {
+      '@timestamp': new Date().toISOString(),
+      message: {
         role: MessageRole.Assistant,
         function_call: {
           name: 'get_contextual_insight_instructions',
@@ -34,13 +41,6 @@ export function getContextualInsightMessages({
           instructions,
         }),
         name: 'get_contextual_insight_instructions',
-      },
-    },
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.User,
-        content: message,
       },
     },
   ];
