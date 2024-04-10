@@ -7,6 +7,8 @@
 
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-plugin/public';
+import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { partitionField } from '../../../../../../common/infra_ml';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
@@ -32,11 +34,7 @@ export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
 };
 
 export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
-  const {
-    ml: {
-      components: { AnomalySwimLane },
-    },
-  } = useKibanaContextForPlugin().services;
+  const { ml } = useKibanaContextForPlugin().services;
 
   const formattedTimeRange = useMemo(() => {
     return {
@@ -53,6 +51,11 @@ export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selec
         .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
     };
   }, [selectedDatasets]);
+
+  const AnomalySwimLane = ml?.components.AnomalySwimLane;
+  if (!AnomalySwimLane) {
+    return <MissingEmbeddableFactoryCallout embeddableType={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE} />;
+  }
 
   return (
     <AnomalySwimLane
