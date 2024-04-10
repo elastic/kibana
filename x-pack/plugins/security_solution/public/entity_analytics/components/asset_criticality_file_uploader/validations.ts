@@ -25,7 +25,7 @@ export const validateParsedContent = (
     return { valid: [], invalid: [], errors: [] };
   }
 
-  let errorIndex = 1;
+  let errorIndex = 1; // Error index starts from 1 because EuiCodeBlock line numbers start from 1
   const { valid, invalid, errors } = data.reduce<{
     valid: string[][];
     invalid: string[][];

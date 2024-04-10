@@ -5,50 +5,106 @@
  * 2.0.
  */
 
-import type { ReducerState, ReducerAction } from './reducer';
+import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
+import type { OnCompleteParams } from './hooks';
+import type { ReducerAction, ReducerState } from './reducer';
 import { reducer } from './reducer';
 
 describe('reducer', () => {
-  let initialState: ReducerState;
+  const initialState: ReducerState = {
+    isLoading: false,
+    step: 1,
+  };
 
-  beforeEach(() => {
-    initialState = {
-      isLoading: false,
-      step: 1,
-    };
-  });
+  const onCompleteParams: OnCompleteParams = {
+    fileName: 'test.csv',
+    validLinesAsText: 'valid lines',
+    invalidLinesAsText: 'invalid lines',
+    invalidLinesErrors: [],
+    validLinesCount: 10,
+    invalidLinesCount: 0,
+  };
 
-  it('should handle uploadingFile action', () => {
+  it('should handle "uploadingFile" action', () => {
     const action: ReducerAction = { type: 'uploadingFile' };
     const nextState = reducer(initialState, action);
 
     expect(nextState.isLoading).toBe(true);
-    expect(nextState.step).toBe(1);
   });
 
-  it('should handle fileUploaded action with response', () => {
-    const response = {
-      /* mock response object */
+  it('should handle "fileUploaded" action with response', () => {
+    const response: AssetCriticalityCsvUploadResponse = {
+      errors: [],
+      stats: {
+        total: 10,
+        updated: 5,
+        created: 5,
+        errors: 0,
+      },
     };
     const action: ReducerAction = { type: 'fileUploaded', payload: { response } };
-    const nextState = reducer(initialState, action);
+    const nextState = reducer({ ...initialState, isLoading: true }, action);
 
-    expect(nextState.isLoading).toBe(false);
-    expect(nextState.step).toBe(1);
-    expect(nextState.fileUploadResponse).toBe(response);
-    expect(nextState.fileUploadError).toBeUndefined();
+    expect(nextState).toEqual({
+      isLoading: false,
+      step: 3,
+      fileUploadResponse: response,
+      fileUploadError: undefined,
+    });
   });
 
-  it('should handle fileUploaded action with errorMessage', () => {
+  it('should handle "fileUploaded" action with errorMessage', () => {
     const errorMessage = 'File upload failed';
     const action: ReducerAction = { type: 'fileUploaded', payload: { errorMessage } };
-    const nextState = reducer(initialState, action);
+    const nextState = reducer({ ...initialState, isLoading: true }, action);
 
-    expect(nextState.isLoading).toBe(false);
-    expect(nextState.step).toBe(1);
-    expect(nextState.fileUploadResponse).toBeUndefined();
-    expect(nextState.fileUploadError).toBe(errorMessage);
+    expect(nextState).toEqual({
+      isLoading: false,
+      step: 3,
+      fileUploadResponse: undefined,
+      fileUploadError: errorMessage,
+    });
   });
 
-  // Add more test cases for other actions...
+  it('should handle "loadingFile" action', () => {
+    const fileName = 'file.csv';
+    const action: ReducerAction = { type: 'loadingFile', payload: { fileName } };
+    const nextState = reducer(initialState, action);
+
+    expect(nextState).toEqual({
+      isLoading: true,
+      step: 1,
+      fileName,
+    });
+  });
+
+  it('should handle "fileValidated" action', () => {
+    const action: ReducerAction = { type: 'fileValidated', payload: onCompleteParams };
+    const nextState = reducer({ ...initialState, isLoading: true }, action);
+
+    expect(nextState).toEqual({
+      isLoading: false,
+      step: 2,
+      ...onCompleteParams,
+    });
+  });
+
+  it('should handle "fileError" action', () => {
+    const message = 'File error';
+    const action: ReducerAction = { type: 'fileError', payload: { message } };
+    const nextState = reducer({ step: 9999, isLoading: true }, action);
+
+    expect(nextState).toEqual({
+      isLoading: false,
+      step: 1,
+      fileError: message,
+    });
+  });
+
+  it('should handle "resetState" action', () => {
+    const action: ReducerAction = { type: 'resetState' };
+    const nextState = reducer({ step: 9999, isLoading: true, ...onCompleteParams }, action);
+
+    expect(nextState).toEqual(initialState);
+  });
 });
