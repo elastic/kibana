@@ -468,26 +468,26 @@ export class DiscoverPlugin
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    // const getStartServices = async () => {
-    //   const [coreStart, deps] = await core.getStartServices();
-    //   return {
-    //     executeTriggerActions: deps.uiActions.executeTriggerActions,
-    //     isEditable: () => coreStart.application.capabilities.discover.save as boolean,
-    //   };
-    // };
-    // const getDiscoverServicesInternal = async () => {
-    //   const [coreStart, deps] = await core.getStartServices();
-    //   return this.getDiscoverServices(coreStart, deps);
-    // };
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        executeTriggerActions: deps.uiActions.executeTriggerActions,
+        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+      };
+    };
+    const getDiscoverServicesInternal = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return this.getDiscoverServices(coreStart, deps);
+    };
     // console.log('here');
-    // registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
-    //   // const startServices = await getStartServices();
-    //   const discoverServices = await getDiscoverServicesInternal();
-    //   const { getSearchEmbeddableFactory } = await import(
-    //     './embeddable/get_search_embeddable_factory'
-    //   );
-    //   return getSearchEmbeddableFactory({ discoverServices });
-    // });
+    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+      // const startServices = await getStartServices();
+      const discoverServices = await getDiscoverServicesInternal();
+      const { getSearchEmbeddableFactory } = await import(
+        './embeddable/get_search_embeddable_factory'
+      );
+      return getSearchEmbeddableFactory({ services: discoverServices });
+    });
     // const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
     // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }

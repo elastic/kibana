@@ -29,6 +29,7 @@ import {
   getNewSavedSearch,
   SavedSearchUnwrapResult,
   SearchByValueInput,
+  SavedSearchByValueAttributes,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
@@ -40,8 +41,16 @@ import {
   getSavedSearchAttributeService,
   toSavedSearch,
 } from './services/saved_searches';
-import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
+import {
+  savedObjectToEmbeddableAttributes,
+  splitReferences,
+} from './services/saved_searches/saved_search_attribute_service';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { createGetSavedSearchDeps } from './services/saved_searches/create_get_saved_search_deps';
+import { getSearchSavedObject } from '../common/service/get_saved_searches';
+import { saveSearchSavedObject } from './services/saved_searches/save_saved_searches';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
 
 /**
  * Saved search plugin public Setup contract
@@ -61,7 +70,7 @@ export interface SavedSearchPublicPluginStart {
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
   byValue: {
-    attributeService: SavedSearchAttributeService;
+    attributeService: unknown;
     toSavedSearch: (
       id: string | undefined,
       result: SavedSearchUnwrapResult
@@ -169,7 +178,41 @@ export class SavedSearchPublicPlugin
         return service.save(savedSearch, options);
       },
       byValue: {
-        attributeService: getSavedSearchAttributeService(deps), // TODO: ???
+        attributeService: {
+          saveMethod: async (
+            attributes: SavedSearchByValueAttributes,
+            savedObjectId?: string
+          ): string => {
+            console.log('save method', attributes);
+            const { references, attributes: attrs } = splitReferences(attributes);
+            const id = await saveSearchSavedObject(
+              savedObjectId,
+              attrs,
+              references,
+              deps.contentManagement
+            );
+            return id;
+          },
+          unwrapMethod: async (savedObjectId: string): Promise<SavedSearchUnwrapResult> => {
+            const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(deps));
+
+            return {
+              attributes: savedObjectToEmbeddableAttributes(so.item),
+              metaInfo: {
+                sharingSavedObjectProps: so.meta,
+                managed: so.item.managed,
+              },
+            };
+          },
+          checkForDuplicateTitle: (props: OnSaveProps) => {
+            return checkForDuplicateTitle({
+              title: props.newTitle,
+              isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+              onTitleDuplicate: props.onTitleDuplicate,
+              contentManagement: deps.contentManagement,
+            });
+          },
+        }, // TODO: ???
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
           return toSavedSearch(id, result, deps);
         },

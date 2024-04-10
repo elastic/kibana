@@ -17,7 +17,12 @@ import {
   ThemeServiceSetup,
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
+import {
+  apiHasSavedSearch,
+  HasSavedSearch,
+  loadSharingDataHelpers,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
@@ -30,14 +35,14 @@ import {
   HasType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { apiHasSavedSearch, HasSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
-import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
