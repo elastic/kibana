@@ -51,7 +51,6 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   /**
    * indexes 2 sets of documents:
