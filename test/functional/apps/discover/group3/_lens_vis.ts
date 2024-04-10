@@ -160,6 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 20, 2015 @ 00:00:00.000 - Sep 20, 2015 @ 00:00:00.000 (interval: Auto - millisecond)',
         '1'
       );
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be(
+        'histogramForDataView'
+      );
     });
 
     it('should show no histogram for non-time-based data views and recover for time-based data views', async () => {
@@ -171,6 +174,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedSearch.editDataView('logs*', '@timestamp');
 
       await checkHistogramVis(defaultTimespan, defaultTotalCount);
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be(
+        'histogramForDataView'
+      );
     });
 
     it('should show ESQL histogram for text-based query', async () => {
@@ -211,6 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await getCurrentVisTitle()).to.be('Line');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
     });
 
     it('should be able to load a saved search with custom histogram vis, edit vis and revert changes', async () => {
@@ -283,6 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisTitle()).to.be('Line');
       await testSubjects.existOrFail('xyVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '10');
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
@@ -304,6 +312,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await PageObjects.discover.revertUnsavedChanges();
 
@@ -313,6 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisTitle()).to.be('Line');
       await testSubjects.existOrFail('xyVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '10');
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
@@ -332,6 +342,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '10'
       );
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       // now we are changing to a different query to check invalidation logic
       await monacoEditor.setCodeEditorValue(
@@ -350,6 +361,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await PageObjects.discover.saveSearch('testCustomESQLHistogramInvalidation', true);
 
@@ -359,6 +371,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await browser.refresh();
 
@@ -465,6 +478,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
@@ -476,6 +490,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
 
       await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
@@ -490,6 +505,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageB');
 
@@ -502,6 +518,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
     });
 
     it('should be able to change to an unfamiliar vis type via lens flyout', async () => {
@@ -521,6 +538,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await PageObjects.discover.saveSearch('testCustomESQLVisPie', true);
 
@@ -537,6 +555,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisTitle()).to.be('Pie');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await monacoEditor.setCodeEditorValue(
         'from logstash-* | stats averageB = avg(bytes) by extension.raw'
@@ -546,6 +565,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -610,12 +630,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await getCurrentVisTitle()).to.be('Bar vertical stacked');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       await PageObjects.discover.chooseLensSuggestion('treemap');
       expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await PageObjects.discover.saveSearch('testCustomESQLVisRevert');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -625,6 +647,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.chooseLensSuggestion('donut');
       expect(await getCurrentVisTitle()).to.be('Donut');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization'); // open the flyout
       await testSubjects.existOrFail('lnsEditOnFlyFlyout');
@@ -638,6 +661,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('lnsEditOnFlyFlyout'); // it should close the flyout
       expect(await getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
     });
   });
 }

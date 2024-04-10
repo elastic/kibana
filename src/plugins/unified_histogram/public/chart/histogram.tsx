@@ -220,6 +220,7 @@ export function Histogram({
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
         data-request-data={requestData}
+        data-suggestion-type={visContext.suggestionType}
         css={chartCss}
         ref={chartRef}
       >

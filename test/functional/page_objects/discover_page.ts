@@ -262,6 +262,10 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('applyFlyoutButton');
   }
 
+  public async getVisContextSuggestionType() {
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-suggestion-type');
+  }
+
   public async getHistogramLegendList() {
     const unifiedHistogram = await this.testSubjects.find('unifiedHistogramChart');
     const list = await unifiedHistogram.findAllByClassName('echLegendItem__label');
