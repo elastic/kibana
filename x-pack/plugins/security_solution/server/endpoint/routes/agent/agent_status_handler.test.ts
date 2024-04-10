@@ -9,7 +9,7 @@ import type { HttpApiTestSetupMock } from '../../mocks';
 import { createHttpApiTestSetupMock } from '../../mocks';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { registerAgentStatusRoute } from './agent_status_handler';
-import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 
@@ -54,7 +54,7 @@ describe('Agent Status API route handler', () => {
     };
 
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.customError).toHaveBeenCalledWith({
@@ -67,7 +67,7 @@ describe('Agent Status API route handler', () => {
     // @ts-expect-error `query.*` is not mutable
     httpRequestMock.query.agentType = 'endpoint';
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.customError).toHaveBeenCalledWith({
@@ -78,7 +78,7 @@ describe('Agent Status API route handler', () => {
 
   it('should return status code 200 with expected payload', async () => {
     await apiTestSetup
-      .getRegisteredVersionedRoute('get', ENDPOINT_AGENT_STATUS_ROUTE, '1')
+      .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
     expect(httpResponseMock.ok).toHaveBeenCalledWith({

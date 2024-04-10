@@ -10,7 +10,7 @@ import { getAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
-import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -26,7 +26,7 @@ export const registerAgentStatusRoute = (
   router.versioned
     .get({
       access: 'internal',
-      path: ENDPOINT_AGENT_STATUS_ROUTE,
+      path: AGENT_STATUS_ROUTE,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     })
     .addVersion(
@@ -58,7 +58,7 @@ export const getAgentStatusRouteHandler = (
     const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
     const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
-    // Note:  because our API schemas are defined as module static variables (as opposed to a
+    // Note: because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
     if (

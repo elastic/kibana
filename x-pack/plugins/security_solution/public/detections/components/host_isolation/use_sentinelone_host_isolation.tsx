@@ -10,7 +10,7 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
 
@@ -33,7 +33,7 @@ export const useGetSentinelOneAgentStatus = (
     refetchInterval: 2000,
     queryFn: () =>
       http
-        .get<{ data: AgentStatusApiResponse['data'] }>(ENDPOINT_AGENT_STATUS_ROUTE, {
+        .get<{ data: AgentStatusApiResponse['data'] }>(AGENT_STATUS_ROUTE, {
           version: '1',
           query: {
             agentIds,
