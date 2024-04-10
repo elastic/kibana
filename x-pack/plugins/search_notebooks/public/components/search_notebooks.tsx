@@ -14,6 +14,7 @@ import { NotebooksList } from './notebooks_list';
 import { SelectionPanel } from './selection_panel';
 import { TitlePanel } from './title_panel';
 import { SearchNotebook } from './search_notebook';
+import { SearchLabsButtonPanel } from './search_labs_button_panel';
 
 const LIST_PANEL_ID = 'notebooksList';
 const OUTPUT_PANEL_ID = 'notebooksOutput';
@@ -77,6 +78,7 @@ export const SearchNotebooks = () => {
                 selectedNotebookId={selectedNotebookId}
                 onNotebookSelect={onNotebookSelectionClick}
               />
+              <SearchLabsButtonPanel />
             </EuiFlexGroup>
           </EuiResizablePanel>
 
