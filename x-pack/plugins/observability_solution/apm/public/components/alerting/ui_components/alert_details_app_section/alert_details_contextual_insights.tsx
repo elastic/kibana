@@ -16,8 +16,6 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
-  CONTAINER_ID,
-  HOST_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -53,8 +51,6 @@ export function AlertDetailContextualInsights({
         params: {
           query: {
             [SERVICE_NAME]: alert.fields[SERVICE_NAME],
-            [HOST_NAME]: alert.fields[HOST_NAME],
-            [CONTAINER_ID]: alert.fields[CONTAINER_ID],
             [SERVICE_ENVIRONMENT]: alert.fields[SERVICE_ENVIRONMENT],
             [TRANSACTION_TYPE]: alert.fields[TRANSACTION_TYPE],
             [TRANSACTION_NAME]: alert.fields[TRANSACTION_NAME],
