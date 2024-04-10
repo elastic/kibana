@@ -263,6 +263,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
+          connector_type_id: '.observability-ai-assistant',
+          name: 'System action: .observability-ai-assistant',
+          is_deprecated: false,
+          is_preconfigured: false,
+          is_system_action: true,
+          id: 'system-connector-.observability-ai-assistant',
+          referenced_by_count: 0,
+        },
+        {
           connector_type_id: 'test.system-action',
           id: 'system-connector-test.system-action',
           is_deprecated: false,
