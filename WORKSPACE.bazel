@@ -24,8 +24,8 @@ node_repositories(
   node_repositories = {
     "20.12.2-darwin_amd64": ("node-v20.12.2-darwin-x64.tar.gz", "node-v20.12.2-darwin-x64", "cd5e9a80a38ccffc036a87b232a5402339c7bf8fa9a494ae0731a1a671687718"),
     "20.12.2-darwin_arm64": ("node-v20.12.2-darwin-arm64.tar.gz", "node-v20.12.2-darwin-arm64", "98eb624b52efec2530079e1d11296ec0ac20771b94b087d21649250339cf5332"),
-    "20.12.2-linux_arm64": ("node-v20.12.2-linux-arm64.tar.xz", "node-v20.12.2-linux-arm64", "b5fc7983fb9506b8c3de53dfa85ff63f9f49cedc94984e29e4c89328536ba4b9"),
-    "20.12.2-linux_amd64": ("node-v20.12.2-linux-x64.tar.xz", "node-v20.12.2-linux-x64", "595272130310cbe12301430756f23d153f7ab95d00174c02adc11a2e3703d183"),
+    "20.12.2-linux_arm64": ("node-v20.12.2-linux-arm64.tar.xz", "node-v20.12.2-linux-arm64", "26f6dfac78a119e088458c1e6f2beb6c546a170d916060a23c92075718f92966"),
+    "20.12.2-linux_amd64": ("node-v20.12.2-linux-x64.tar.xz", "node-v20.12.2-linux-x64", "37756bc241b099e7435e20ba088dd9c13f39c6dc4235661c807cdd7b361371ef"),
     "20.12.2-windows_amd64": ("node-v20.12.2-win-x64.zip", "node-v20.12.2-win-x64", "66dda1717cae30a13be6bb17ad96ee54b69f2c23c85acd9c3299b095fa26b452"),
   },
   node_version = "20.12.2",
