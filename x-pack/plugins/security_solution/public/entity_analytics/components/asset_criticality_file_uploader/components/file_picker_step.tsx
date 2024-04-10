@@ -94,6 +94,16 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
 
         <ul className={listStyle}>
           <li>
+            <FormattedMessage
+              defaultMessage="Resource Type: Indicate whether the resource is a {host} or a {user}."
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
+              values={{
+                host: <b>{'host'}</b>,
+                user: <b>{'user'}</b>,
+              }}
+            />
+          </li>
+          <li>
             {
               <FormattedMessage
                 defaultMessage="Identifier: The unique identifier for each asset {hostName} or {userName}."
@@ -111,16 +121,6 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
               values={{
                 labels: <b>{ValidCriticalityLevels.join(', ')}</b>,
-              }}
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              defaultMessage="Resource Type: Indicate whether the resource is a {host} or a {user}."
-              id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
-              values={{
-                host: <b>{'host'}</b>,
-                user: <b>{'user'}</b>,
               }}
             />
           </li>
