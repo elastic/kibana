@@ -29,8 +29,8 @@ import {
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   HIDE_ANNOUNCEMENTS,
+  isLegacyTableEnabled,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -140,15 +140,19 @@ function DiscoverDocumentsComponent({
 
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
 
+  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const isLegacy = useMemo(
+    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
+    [uiSettings, isTextBasedQuery]
+  );
 
   const documentState = useDataState(documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
-  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // It's just necessary for non-text-based query lang requests since they don't have a partial result state, that's
   // considered as loading state in the Component.
