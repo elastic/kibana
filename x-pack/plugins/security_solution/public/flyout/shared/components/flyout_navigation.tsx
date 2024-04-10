@@ -18,6 +18,9 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useWhichFlyout } from '../../document_details/right/hooks/use_which_flyout';
+import { FLYOUT_STORAGE_KEYS } from '../../document_details/shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   HEADER_ACTIONS_TEST_ID,
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
@@ -45,12 +48,21 @@ export interface FlyoutNavigationProps {
  */
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
+    const { storage } = useKibana().services;
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel } = useExpandableFlyoutApi();
     const panels = useExpandableFlyoutState();
+    const flyout = useWhichFlyout();
 
     const isExpanded: boolean = !!panels.left;
-    const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
+    const collapseDetails = useCallback(() => {
+      const localStorageLeftPanelExpanded = storage.get(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED);
+      storage.set(FLYOUT_STORAGE_KEYS.LEFT_PANEL_EXPANDED, {
+        ...localStorageLeftPanelExpanded,
+        [flyout]: false,
+      });
+      closeLeftPanel();
+    }, [closeLeftPanel, flyout, storage]);
 
     const collapseButton = useMemo(
       () => (

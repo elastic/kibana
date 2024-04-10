@@ -49,6 +49,10 @@ export interface ExpandableFlyoutApi {
    * Close all panels and closes flyout
    */
   closeFlyout: () => void;
+  /**
+   * Function called when the flyout is closed
+   */
+  onClose: (closeFct: () => void) => void;
 }
 
 export interface PanelPath {

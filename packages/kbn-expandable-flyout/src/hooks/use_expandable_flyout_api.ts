@@ -25,6 +25,9 @@ import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
 
 export type { ExpandableFlyoutApi };
 
+// we store all the functions that should be called when the flyout is closed
+let onCloseFunctions: Array<() => void> = [];
+
 /**
  * This hook allows you to interact with the flyout, open panels and previews etc.
  */
@@ -80,7 +83,17 @@ export const useExpandableFlyoutApi = () => {
     [dispatch, id]
   );
 
-  const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
+  const closePanels = useCallback(() => {
+    dispatch(closePanelsAction({ id }));
+
+    // running all functions when the flyout closes then resets
+    onCloseFunctions.forEach((fc) => fc());
+    onCloseFunctions = [];
+  }, [dispatch, id]);
+
+  const onClose = useCallback((fc: () => void) => {
+    onCloseFunctions.push(fc);
+  }, []);
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({
@@ -93,6 +106,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closeFlyout: closePanels,
       previousPreviewPanel,
+      onClose,
     }),
     [
       openPanels,
@@ -104,6 +118,7 @@ export const useExpandableFlyoutApi = () => {
       closePreviewPanel,
       closePanels,
       previousPreviewPanel,
+      onClose,
     ]
   );
 
