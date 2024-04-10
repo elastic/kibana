@@ -127,6 +127,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           agentType: 'structured-chat-zero-shot-react-description',
           memory,
           verbose: true,
+          maxIterations: 3,
+          agentArgs: {
+            humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+          },
         })
       : isStream
       ? await initializeAgentExecutorWithOptions(tools, llm, {
@@ -240,7 +244,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     }
 
     return executor.call(
-      { input: latestMessage[0].content },
+      { input: latestMessage[0].content.trim() },
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: DEFAULT_AGENT_EXECUTOR_ID,

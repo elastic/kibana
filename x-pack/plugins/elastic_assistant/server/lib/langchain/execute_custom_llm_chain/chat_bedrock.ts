@@ -80,7 +80,7 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
           model: this.#request.body.model,
           messages: [assistantMessage], // the assistant message
           temperature: 0,
-          stopSequences: [],
+          stopSequences: options?.stop,
         },
       },
     };
