@@ -4488,6 +4488,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-shared-plugin@link:src/plugins/discover_shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-utils@link:packages/kbn-discover-utils":
   version "0.0.0"
   uid ""

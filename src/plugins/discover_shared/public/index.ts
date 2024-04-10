@@ -12,7 +12,7 @@ export function plugin() {
   return new DiscoverSharedPlugin();
 }
 
-export type { DiscoverSharedClientSetupExports, DiscoverSharedClientStartExports } from './types';
+export type { DiscoverSharedPublicSetup, DiscoverSharedPublicStart } from './types';
 export type {
   ObservabilityLogsAIAssistantFeatureRenderDeps,
   ObservabilityLogsAIAssistantFeature,

@@ -412,6 +412,7 @@
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",
+    "@kbn/discover-shared-plugin": "link:src/plugins/discover_shared",
     "@kbn/discover-utils": "link:packages/kbn-discover-utils",
     "@kbn/doc-links": "link:packages/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",

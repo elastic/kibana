@@ -7,7 +7,9 @@
  */
 
 import { FeaturesRegistry } from '@kbn/discover-utils';
+import { DiscoverFeature } from './types';
 
-export const createDiscoverFeaturesServiceStartMock = () => ({
-  registry: new FeaturesRegistry(),
-});
+const registry = new FeaturesRegistry<DiscoverFeature>();
+
+export const createDiscoverFeaturesServiceSetupMock = () => ({ registry });
+export const createDiscoverFeaturesServiceStartMock = () => ({ registry });

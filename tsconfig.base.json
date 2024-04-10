@@ -718,6 +718,8 @@
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],
       "@kbn/discover-plugin/*": ["src/plugins/discover/*"],
+      "@kbn/discover-shared-plugin": ["src/plugins/discover_shared"],
+      "@kbn/discover-shared-plugin/*": ["src/plugins/discover_shared/*"],
       "@kbn/discover-utils": ["packages/kbn-discover-utils"],
       "@kbn/discover-utils/*": ["packages/kbn-discover-utils/*"],
       "@kbn/doc-links": ["packages/kbn-doc-links"],

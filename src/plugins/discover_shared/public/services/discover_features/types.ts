@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocumentOverview, FeaturesRegistry } from '@kbn/discover-utils';
+import { DataTableRecord, FeaturesRegistry } from '@kbn/discover-utils';
 
 /**
  * Features types
@@ -21,11 +21,11 @@ import { DocumentOverview, FeaturesRegistry } from '@kbn/discover-utils';
  */
 
 export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
-  doc: DocumentOverview;
+  doc: DataTableRecord;
 }
 export interface ObservabilityLogsAIAssistantFeature {
   id: 'observability-logs-ai-assistant';
-  render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => React.ReactNode;
+  render: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
 }
 
 // This should be a union of all the available client features.

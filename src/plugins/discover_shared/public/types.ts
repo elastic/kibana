@@ -12,22 +12,22 @@ import {
   DiscoverFeaturesServiceStart,
 } from './services/discover_features';
 
-export interface DiscoverSharedClientSetupExports {
+export interface DiscoverSharedPublicSetup {
   features: DiscoverFeaturesServiceSetup;
 }
 
-export interface DiscoverSharedClientStartExports {
+export interface DiscoverSharedPublicStart {
   features: DiscoverFeaturesServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DiscoverSharedClientPluginSetupDeps {}
+export interface DiscoverSharedPublicSetupDeps {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DiscoverSharedClientPluginStartDeps {}
+export interface DiscoverSharedPublicStartDeps {}
 
-export type DiscoverSharedClientPlugin = Plugin<
-  DiscoverSharedClientSetupExports,
-  DiscoverSharedClientStartExports,
-  DiscoverSharedClientPluginSetupDeps,
-  DiscoverSharedClientPluginStartDeps
+export type DiscoverSharedPublicPlugin = Plugin<
+  DiscoverSharedPublicSetup,
+  DiscoverSharedPublicStart,
+  DiscoverSharedPublicSetupDeps,
+  DiscoverSharedPublicStartDeps
 >;

@@ -7,9 +7,9 @@
  */
 
 import { DiscoverFeaturesService } from './services/discover_features';
-import { DiscoverSharedClientPlugin } from './types';
+import { DiscoverSharedPublicPlugin } from './types';
 
-export class DiscoverSharedPlugin implements DiscoverSharedClientPlugin {
+export class DiscoverSharedPlugin implements DiscoverSharedPublicPlugin {
   private discoverFeaturesService: DiscoverFeaturesService = new DiscoverFeaturesService();
 
   public setup() {

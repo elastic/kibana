@@ -14,6 +14,7 @@ import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { LogsOverviewAIAssistant } from './logs_overview_ai_assistant';
 
 export function LogsOverview({
   columns,
@@ -36,6 +37,7 @@ export function LogsOverview({
       <EuiSpacer size="m" />
       <LogsOverviewHeader doc={parsedDoc} />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
+      <LogsOverviewAIAssistant doc={hit} />
     </FieldActionsProvider>
   );
 }

@@ -8,7 +8,7 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { BaseFeature, FeaturesMap } from './types';
 
-export class FeaturesRegistry<Feature extends BaseFeature> {
+export class FeaturesRegistry<Feature extends BaseFeature = BaseFeature> {
   private readonly features = new BehaviorSubject<FeaturesMap<Feature>>(new Map());
 
   /**

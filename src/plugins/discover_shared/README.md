@@ -31,7 +31,7 @@ export interface SecurityAIAssistantFeature {
 
 export interface ObservabilityLogsAIAssistantFeature {
   id: 'observability-logs-ai-assistant';
-  render: (deps: {doc: DocumentOverview}) => React.ReactNode;
+  render: (deps: {doc: DataTableRecord}) => React.ReactNode;
   // Add any prop required for the feature
 }
 
@@ -49,7 +49,7 @@ Once we have an interface for the feature, Discover can now retrieve it and use 
 function LogsOverviewAIAssistant ({ doc }) {
   const { discoverShared } = getUnifiedDocViewerServices();
 
-  const discoverShared = discoverShared.features.registry.getById('observability-logs-ai-assistant')
+  const logsAIAssistantFeature = discoverShared.features.registry.getById('observability-logs-ai-assistant')
 
   if (logsAIAssistantFeature) {
     return logsAIAssistantFeature.render({ doc })
