@@ -37,43 +37,4 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     schema: z.number().int().min(0).default(0),
   },
-  {
-    name: 'agent.download.timeout',
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle', {
-      defaultMessage: 'Agent binary download timeout',
-    }),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription',
-      {
-        defaultMessage: 'Timeout for downloading the agent binary',
-      }
-    ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#configure-agent-download-timeout',
-    api_field: {
-      name: 'agent_download_timeout',
-    },
-    schema: zodStringWithDurationValidation.default('2h'),
-  },
-  {
-    name: 'agent.download.target_directory',
-    api_field: {
-      name: 'agent_download_target_directory',
-    },
-    title: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle',
-      {
-        defaultMessage: 'Agent binary target directory',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription',
-      {
-        defaultMessage: 'The disk path to which the agent binary will be downloaded',
-      }
-    ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
-    schema: z.string(),
-  },
 ];

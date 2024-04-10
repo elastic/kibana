@@ -719,8 +719,6 @@ describe('getFullAgentPolicy', () => {
     mockAgentPolicy({
       advanced_settings: {
         agent_limits_go_max_procs: 2,
-        agent_download_timeout: '60s',
-        agent_download_target_directory: '/tmp',
       },
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -728,10 +726,6 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy).toMatchObject({
       id: 'agent-policy',
       agent: {
-        download: {
-          timeout: '60s',
-          target_directory: '/tmp',
-        },
         limits: { go_max_procs: 2 },
       },
     });
