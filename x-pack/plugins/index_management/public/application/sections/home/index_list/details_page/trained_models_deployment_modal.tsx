@@ -16,7 +16,7 @@ interface SemanticTextProps {
   isSemanticTextEnabled: boolean;
   setIsModalVisible: (isVisible: boolean) => void;
   refreshModal: () => void;
-  pendingDeployments: Set<string>;
+  pendingDeployments: string[];
   url?: SharePluginStart['url'];
 }
 

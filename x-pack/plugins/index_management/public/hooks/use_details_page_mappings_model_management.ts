@@ -21,6 +21,23 @@ interface InferenceModel {
 
 type DeploymentStatusType = Record<string, 'deployed' | 'not_deployed'>;
 
+const getCustomInferenceIdMap = (
+  deploymentStatsByModelId: DeploymentStatusType,
+  models?: InferenceModel
+) => {
+  return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
+    const inferenceId = model.model_id;
+    const trainedModelId =
+      'model_id' in model.service_settings ? model.service_settings.model_id : '';
+    inferenceMap[inferenceId] = {
+      trainedModelId,
+      isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
+      defaultInferenceEndpoint: false,
+    };
+    return inferenceMap;
+  }, {});
+};
+
 export const useDetailsPageMappingsModelManagement = (state: State) => {
   const {
     plugins: { ml },
@@ -31,7 +48,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   const { inferenceToModelIdMap } = state;
   const dispatch = useDispatch();
 
-  const [pendingDeployments, setPendingDeployments] = useState<Set<string>>(new Set());
+  const [pendingDeployments, setPendingDeployments] = useState<string[]>([]);
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
     const inferenceModels = await api.getInferenceModels();
@@ -71,23 +88,6 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
     };
   }, []);
 
-  const getCustomInferenceIdMap = useCallback(
-    (deploymentStatsByModelId: DeploymentStatusType, models?: InferenceModel) => {
-      return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
-        const inferenceId = model.model_id;
-        const trainedModelId =
-          'model_id' in model.service_settings ? model.service_settings.model_id : '';
-        inferenceMap[inferenceId] = {
-          trainedModelId,
-          isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
-          defaultInferenceEndpoint: false,
-        };
-        return inferenceMap;
-      }, {});
-    },
-    []
-  );
-
   const fetchInferenceToModelIdMap = useCallback(async () => {
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
 
@@ -100,7 +100,6 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
       value: { inferenceToModelIdMap: { ...defaultInferenceIds, ...modelIdMap } },
     });
   }, [
-    getCustomInferenceIdMap,
     getDefaultInferenceIds,
     getTrainedModelStats,
     dispatch,
@@ -110,10 +109,10 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   const getInferenceIdsInPendingList = useCallback(() => {
     const denormalizedFields = deNormalize(state.fields);
 
-    const inferenceIdsInPendingList: Set<string> = new Set();
+    const inferenceIdsInPendingList: string[] = [];
     for (const field of Object.values(denormalizedFields)) {
       if (field.type === 'semantic_text' && field.inference_id) {
-        inferenceIdsInPendingList.add(field.inference_id as string);
+        inferenceIdsInPendingList.push(field.inference_id as string);
       }
     }
 
@@ -122,13 +121,13 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
 
   const getPendingDeployments = useCallback(() => {
     const inferenceIdsInPendingList = getInferenceIdsInPendingList();
-    const notDeployedTrainedModelIds = new Set<string>();
+    const notDeployedTrainedModelIds: string[] = [];
 
-    if (inferenceIdsInPendingList.size > 0) {
-      Array.from(inferenceIdsInPendingList).forEach((inferenceId: string) => {
+    if (inferenceIdsInPendingList.length > 0) {
+      inferenceIdsInPendingList.forEach((inferenceId: string) => {
         const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';
         if (trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed) {
-          notDeployedTrainedModelIds.add(trainedModelId);
+          notDeployedTrainedModelIds.push(trainedModelId);
         }
       });
     }
