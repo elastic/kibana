@@ -18,7 +18,6 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ParamsSchema as SlackConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/slack';
-import { ParamsSchema as EmailConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/email';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -41,12 +40,21 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
+const AlertStateSchema = schema.oneOf([
+  schema.literal('new'),
+  schema.literal('ongoing'),
+  schema.literal('recovered'),
+  schema.literal('unknown'),
+]);
+
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
   rule: RuleSchema,
+  alertState: AlertStateSchema,
 });
 
+type AlertState = TypeOf<typeof AlertStateSchema>;
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
 type RuleType = TypeOf<typeof RuleSchema>;
@@ -99,6 +107,7 @@ function renderParameterTemplates(
     connector: params.connector,
     message: params.message,
     rule: params.rule,
+    alertState: params.alertState,
   };
 }
 
@@ -106,6 +115,14 @@ async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
+  const state = execOptions.params.alertState;
+  if (state !== 'new') {
+    // system connector action frequency can't be user configured. we use this
+    // flag as dedup mechanism to prevent triggering the same worfklow again.
+    // while recovered state is a valid trigger we only allow new alerts for now
+    return { actionId: execOptions.actionId, status: 'ok' };
+  }
+
   const request = execOptions.request!;
   const resources = await initResources(request);
   const client = await resources.service.getClient({ request });
@@ -119,7 +136,7 @@ async function executor(
     await resources.plugins.actions.start()
   ).getActionsClientWithRequest(request);
 
-  const systemMessage = buildSystemMessage(functionClient, execOptions.params.rule);
+  const systemMessage = buildSystemMessage(functionClient, execOptions.params.rule, state);
 
   await lastValueFrom(
     client
@@ -172,12 +189,6 @@ async function executor(
                       };
                     }
 
-                    if (connector.actionTypeId === '.email') {
-                      return {
-                        ...connector,
-                        params: parse(EmailConnectorParamsSchema.getSchema(), 'json').properties,
-                      };
-                    }
                     return connector;
                   });
                 }),
@@ -205,21 +216,29 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   return {
     connectorTypeId: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     ruleActionParamsSchema: ParamsSchema,
-    buildActionParams: ({ params, rule, ruleUrl }) => {
+    buildActionParams: ({ params, rule, ruleUrl, alerts }) => {
       return {
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+        alertState:
+          alerts.new.count > 0
+            ? 'new'
+            : alerts.ongoing.count > 0
+            ? 'ongoing'
+            : alerts.recovered.count > 0
+            ? 'recovered'
+            : 'unknown',
       };
     },
   };
 };
 
-function buildSystemMessage(functionClient: ChatFunctionClient, rule: RuleType) {
+function buildSystemMessage(functionClient: ChatFunctionClient, rule: RuleType, state: AlertState) {
   let systemMessage = functionClient.getContexts().find((def) => def.name === 'core')?.description;
   systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
     rule
-  )} just fired.`;
+  )} ${state === 'new' ? 'fired' : 'recovered'}.`;
   systemMessage += ` As a background process you are not interacting with a user. Only generate a single answer and wrap all your findings in that answer.`;
   systemMessage += ` If available, include the link to the conversation at the end of your answer.`;
 

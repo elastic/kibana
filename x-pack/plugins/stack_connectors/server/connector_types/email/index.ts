@@ -169,7 +169,7 @@ const ParamsSchemaProps = {
   }),
 };
 
-export const ParamsSchema = schema.object(ParamsSchemaProps);
+const ParamsSchema = schema.object(ParamsSchemaProps);
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
