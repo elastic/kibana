@@ -88,12 +88,13 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
     endTime: string;
     tookMs: number;
   };
-  result: AssetCriticalityCsvUploadResponse['stats'];
+  result?: AssetCriticalityCsvUploadResponse['stats'];
+  status: 'success' | 'partial_success' | 'fail';
 }
 
 export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventTypeOpts<AssetCriticalitySystemProcessedAssignmentFileEvent> =
   {
-    eventType: 'asset_criticality_system_processed_assignment_file',
+    eventType: 'Asset Criticality Csv Upload Processed',
     schema: {
       processing: {
         properties: {
@@ -115,13 +116,58 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
           total: { type: 'long', _meta: { description: 'Total number of lines in the file' } },
         },
       },
+      status: {
+        type: 'keyword',
+        _meta: { description: 'Status of the processing either success, partial_success or fail' },
+      },
     },
   };
 
-export const createAssetCriticalityProcessedFileEvent = (
-  event: AssetCriticalitySystemProcessedAssignmentFileEvent
-): [string, AssetCriticalitySystemProcessedAssignmentFileEvent] => {
-  return [ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT.eventType, event];
+interface CreateAssetCriticalityProcessedFileEvent {
+  result?: AssetCriticalityCsvUploadResponse['stats'];
+  startTime: Date;
+  endTime: Date;
+}
+export const createAssetCriticalityProcessedFileEvent = ({
+  result,
+  startTime,
+  endTime,
+}: CreateAssetCriticalityProcessedFileEvent): [
+  string,
+  AssetCriticalitySystemProcessedAssignmentFileEvent
+] => {
+  const status = getUploadStatus(result);
+
+  const processing = {
+    startTime: startTime.toISOString(),
+    endTime: endTime.toISOString(),
+    tookMs: endTime.getTime() - startTime.getTime(),
+  };
+
+  return [
+    ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT.eventType,
+    {
+      processing,
+      result,
+      status,
+    },
+  ];
+};
+
+const getUploadStatus = (stats?: AssetCriticalityCsvUploadResponse['stats']) => {
+  if (!stats) {
+    return 'fail';
+  }
+
+  if (stats.failed === 0) {
+    return 'success';
+  }
+
+  if (stats.successful > 0) {
+    return 'partial_success';
+  }
+
+  return 'fail';
 };
 
 export const events = [

@@ -59,12 +59,12 @@ export const assetCriticalityCSVUploadRoute = (
       async (context, request, response) => {
         const start = new Date();
         const siemResponse = buildSiemResponse(response);
+        const [coreStart] = await getStartServices();
+        const telemetry = coreStart.analytics;
 
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
-          const [coreStart] = await getStartServices();
-          const telemetry = coreStart.analytics;
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
@@ -95,11 +95,8 @@ export const assetCriticalityCSVUploadRoute = (
           const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
 
           const [eventType, event] = createAssetCriticalityProcessedFileEvent({
-            processing: {
-              startTime: start.toISOString(),
-              endTime: end.toISOString(),
-              tookMs,
-            },
+            startTime: start,
+            endTime: end,
             result: stats,
           });
 
@@ -108,8 +105,20 @@ export const assetCriticalityCSVUploadRoute = (
           return response.ok({ body: resBody });
         } catch (e) {
           logger.error(`Error during asset criticality csv upload: ${e}`);
-          const error = transformError(e);
+          try {
+            const end = new Date();
 
+            const [eventType, event] = createAssetCriticalityProcessedFileEvent({
+              startTime: start,
+              endTime: end,
+            });
+
+            telemetry.reportEvent(eventType, event);
+          } catch (error) {
+            logger.error(`Error reporting telemetry event: ${error}`);
+          }
+
+          const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
