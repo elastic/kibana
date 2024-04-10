@@ -12,7 +12,7 @@ import type {
   OnPreRoutingToolkit,
 } from '@kbn/core/server';
 
-import { getSpaceIdFromPath } from '../../../common';
+import { getSpaceIdFromPath, stripSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
@@ -33,13 +33,12 @@ export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDep
     if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;
 
-      http.basePath.set(request, { id: 'spaces', basePath: reqBasePath });
-
       const indexPath = path.indexOf(reqBasePath);
-      const otherBasePaths = indexPath > 0 ? path.slice(0, indexPath) : '';
-      const newPathname = path.slice(indexPath + reqBasePath.length) || '/';
+      const newPathname = stripSpaceIdFromPath(path) || '/';
 
-      return toolkit.rewriteUrl(`${otherBasePaths}${newPathname}${request.url.search}`);
+      http.basePath.set(request, { id: 'spaces', basePath: reqBasePath, index: indexPath });
+
+      return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
     }
 
     return toolkit.next();

@@ -36,7 +36,7 @@ export const spaceSelectorApp = Object.freeze({
           { element, theme$ },
           {
             spacesManager,
-            serverBasePath: coreStart.http.basePath.serverBasePath,
+            serverBasePath: coreStart.http.basePath.get(),
             customBranding$: coreStart.customBranding.customBranding$,
           }
         );

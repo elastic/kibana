@@ -83,6 +83,6 @@ function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
   return requestBasePath;
 }
 
-function stripSpaceIdFromPath(path: string): string {
+export function stripSpaceIdFromPath(path: string): string {
   return path.replace(spaceContextRegex, '');
 }
