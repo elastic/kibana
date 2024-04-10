@@ -73,6 +73,7 @@ The 8.13.2 release includes the following bug fixes.
 === Bug Fixes
 Canvas::
 * Fixes text settings to be honored in Canvas markdown elements ({kibana-pull}179948[#179948]).
+* Fixes custom styling for Canvas Workpads ({kibana-pull}180070[#180070]).
 Discover::
 * Fixes keyboard navigation for search input on the document viewer flyout ({kibana-pull}180022[#180022]).
 Elastic Security::
@@ -81,6 +82,8 @@ Fleet::
 * Fixes having to wait ten minutes after agent upgrade if agent cleared watching state ({kibana-pull}179917[#179917]).
 Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
 * Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
+Lens & Visualizations::
+* Fixes custom styling for TSVB visualizations ({kibana-pull}180053[#180053]).
 Machine Learning::
 * Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
 * AIOps: Fixes text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
