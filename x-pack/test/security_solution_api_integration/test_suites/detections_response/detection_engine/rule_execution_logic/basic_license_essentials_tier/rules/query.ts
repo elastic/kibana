@@ -20,15 +20,11 @@ import {
   ALERT_LAST_DETECTED,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   QueryRuleCreateProps,
-  BulkActionTypeEnum,
   AlertSuppressionMissingFieldsStrategyEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -40,8 +36,6 @@ import {
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
@@ -56,10 +50,7 @@ import {
   getSimpleRule,
   previewRule,
   setAlertStatus,
-  getRuleSOById,
   patchRule,
-  createRuleThroughAlertingEndpoint,
-  getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
 } from '../../../../utils';
 import {
@@ -98,8 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177101
-  describe.skip('@ess @serverless Query type rules', () => {
+  describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
@@ -2312,53 +2302,6 @@ export default ({ getService }: FtrProviderContext) => {
         // alert should have agent.name "test-a"  and agent.version "test-1" as per rule query
         expect(previewAlerts[1]._source?.agent).to.have.property('version', 'test-1');
         expect(previewAlerts[1]._source?.agent).to.have.property('name', 'test-3');
-      });
-    });
-
-    // TODO: Ask YARA
-    describe('@brokenInServerless legacy investigation_fields', () => {
-      let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
-
-      beforeEach(async () => {
-        ruleWithLegacyInvestigationField = await createRuleThroughAlertingEndpoint(
-          supertest,
-          getRuleSavedObjectWithLegacyInvestigationFields()
-        );
-      });
-
-      afterEach(async () => {
-        await deleteAllRules(supertest, log);
-      });
-
-      it('should generate alerts when rule includes legacy investigation_fields', async () => {
-        // enable rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send({ query: '', action: BulkActionTypeEnum.enable })
-          .expect(200);
-
-        // Confirming that enabling did not migrate rule, so rule
-        // run/alerts generated here were from rule with legacy investigation field
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
-
-        // fetch rule for format needed to pass into
-        const { body: ruleBody } = await supertest
-          .get(
-            `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
-          )
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .expect(200);
-
-        const alertsAfterEnable = await getAlerts(supertest, log, es, ruleBody, 'succeeded');
-        expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });
   });
