@@ -252,19 +252,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       comment: reqIndexOptions.comment,
     });
 
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-    }
-
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
@@ -315,19 +302,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }),
       comment: reqIndexOptions.comment,
     });
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-    }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
