@@ -166,6 +166,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       if (hash !== previousDocumentStatsHash) {
         setCurrentDocumentStatsHash(hash);
         setData(null);
+        setFieldValidationResult(null);
       }
     },
     [documentStats, previousDocumentStatsHash]
@@ -181,6 +182,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
       if (hash !== previousAdditionalConfigsHash) {
         setCurrentAdditionalConfigsHash(hash);
         setData(null);
+        setFieldValidationResult(null);
       }
     },
     [minimumTimeRangeOption, previousAdditionalConfigsHash, selectedField]
@@ -417,7 +419,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
               loading={loading}
               categoriesLength={data?.categories?.length ?? null}
               eventRateLength={eventRate.length}
-              fieldSelected={selectedField !== null}
+              fields={fields}
             />
             {loading === false &&
             data !== null &&
