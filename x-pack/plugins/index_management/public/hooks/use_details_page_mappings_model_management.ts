@@ -97,16 +97,9 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   }, [dispatch, fetchInferenceModelsAndTrainedModelStats]);
 
   const inferenceIdsInPendingList = useMemo(() => {
-    const denormalizedFields = deNormalize(state.fields);
-
-    const inferenceIds: string[] = [];
-    for (const field of Object.values(denormalizedFields)) {
-      if (field.type === 'semantic_text' && field.inference_id) {
-        inferenceIds.push(field.inference_id as string);
-      }
-    }
-
-    return inferenceIds;
+    return Object.values(deNormalize(state.fields))
+      .filter((field) => field.type === 'semantic_text' && field.inference_id)
+      .map((field) => field.inference_id as string);
   }, [state.fields]);
 
   const pendingDeployments = useMemo(() => {
