@@ -14,6 +14,7 @@ import {
   AppMountParameters,
   ChromeBreadcrumb,
   ScopedHistory,
+  ThemeServiceStart,
 } from '@kbn/core/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
@@ -22,7 +23,7 @@ import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
@@ -35,7 +36,7 @@ export const ManagementRouter = memo(
     setBreadcrumbs,
     onAppMounted,
     sections,
-    theme$,
+    theme,
     analytics,
   }: ManagementRouterProps) => {
     return (
@@ -55,7 +56,7 @@ export const ManagementRouter = memo(
                           setBreadcrumbs={setBreadcrumbs}
                           onAppMounted={onAppMounted}
                           history={history}
-                          theme$={theme$}
+                          theme={theme}
                         />
                       )}
                     />
