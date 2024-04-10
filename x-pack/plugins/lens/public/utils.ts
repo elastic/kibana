@@ -47,11 +47,7 @@ export function getVisualizeGeoFieldMessage(fieldType: string) {
 
 export const getResolvedDateRange = function (timefilter: TimefilterContract) {
   const { from, to } = timefilter.getTime();
-  const { min, max } = timefilter.calculateBounds({
-    from,
-    to,
-  });
-  return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
+  return { fromDate: from, toDate: to };
 };
 
 export function containsDynamicMath(dateMathString: string) {
