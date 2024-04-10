@@ -10,12 +10,12 @@ import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
-  from,
+  // from,
   map,
   Observable,
   of,
   ReplaySubject,
-  shareReplay,
+  // shareReplay,
   skipWhile,
   switchMap,
   take,
@@ -34,7 +34,7 @@ import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
-import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
+import { ENABLE_SOLUTION_NAV_UI_SETTING_ID } from '../common';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -86,7 +86,7 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud, security, cloudExperiments } = depsStart;
+    const { unifiedSearch, cloud, security } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
 
