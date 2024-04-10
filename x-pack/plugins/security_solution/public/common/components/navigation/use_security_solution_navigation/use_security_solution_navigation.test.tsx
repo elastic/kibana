@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { of } from 'rxjs';
 import { useSecuritySolutionNavigation } from './use_security_solution_navigation';
@@ -12,6 +14,11 @@ import { useSecuritySolutionNavigation } from './use_security_solution_navigatio
 const mockUseBreadcrumbsNav = jest.fn();
 jest.mock('../breadcrumbs', () => ({
   useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
+}));
+
+const mockSecuritySideNav = jest.fn(() => <div data-test-subj="SecuritySideNav" />);
+jest.mock('../security_side_nav', () => ({
+  SecuritySideNav: () => mockSecuritySideNav(),
 }));
 
 const mockGetChromeStyle$ = jest.fn().mockReturnValue(of('classic'));
@@ -32,7 +39,7 @@ describe('Security Solution Navigation', () => {
       mockGetChromeStyle$.mockReturnValue(of('classic'));
     });
 
-    it('should return proper navigation props', () => {
+    it('should return proper navigation props', async () => {
       const { result } = renderHook(useSecuritySolutionNavigation);
       expect(result.current).toEqual(
         expect.objectContaining({
@@ -42,7 +49,21 @@ describe('Security Solution Navigation', () => {
           closeFlyoutButtonPosition: 'inside',
         })
       );
-      expect(result.current?.children).toBeDefined();
+
+      // check regular props
+      expect(result.current).toEqual({
+        canBeCollapsed: true,
+        name: 'Security',
+        icon: 'logoSecurity',
+        children: expect.anything(),
+        closeFlyoutButtonPosition: 'inside',
+      });
+
+      // check rendering of SecuritySideNav children
+      const { findByTestId } = render(<>{result.current?.children}</>);
+
+      expect(mockSecuritySideNav).toHaveBeenCalled();
+      expect(await findByTestId('SecuritySideNav')).toBeInTheDocument();
     });
 
     it('should initialize breadcrumbs', () => {
