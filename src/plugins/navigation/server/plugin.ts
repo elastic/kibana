@@ -36,15 +36,16 @@ export class NavigationServerPlugin
     if (plugins.cloud?.isCloudEnabled && !this.isServerless()) {
       const config = this.initializerContext.config.get<NavigationConfig>();
 
-      core.getStartServices().then(([coreStart, deps]) => {
-        deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).then((value) => {
-          if (value) {
-            core.uiSettings.registerGlobal(getUiSettings(config));
-          } else {
-            this.removeUiSettings(coreStart, getUiSettings(config));
-          }
-        });
-      });
+      core.uiSettings.registerGlobal(getUiSettings(config));
+      // core.getStartServices().then(([coreStart, deps]) => {
+      //   deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).then((value) => {
+      //     if (value) {
+      //       core.uiSettings.registerGlobal(getUiSettings(config));
+      //     } else {
+      //       this.removeUiSettings(coreStart, getUiSettings(config));
+      //     }
+      //   });
+      // });
     }
 
     return {};

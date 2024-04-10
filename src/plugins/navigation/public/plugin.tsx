@@ -130,38 +130,38 @@ export class NavigationPublicPlugin
       solutionNavigation: { defaultSolution },
     } = config;
 
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
+    // const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    let isSolutionNavExperiementEnabled$ = of(false);
-    this.isSolutionNavEnabled$ = of(false);
+    const isSolutionNavExperiementEnabled$ = of(true);
+    this.isSolutionNavEnabled$ = of(true);
 
-    if (cloudExperiments) {
-      isSolutionNavExperiementEnabled$ =
-        !onCloud || isServerless
-          ? of(false)
-          : from(cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)).pipe(
-              shareReplay(1)
-            );
+    // if (cloudExperiments) {
+    //   isSolutionNavExperiementEnabled$ =
+    //     !onCloud || isServerless
+    //       ? of(false)
+    //       : from(cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, true)).pipe(
+    //           shareReplay(1)
+    //         );
 
-      this.isSolutionNavEnabled$ = isSolutionNavExperiementEnabled$.pipe(
-        switchMap((isFeatureEnabled) => {
-          return !isFeatureEnabled
-            ? of(false)
-            : combineLatest([
-                core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-                this.userProfileOptOut$,
-              ]).pipe(
-                takeUntil(this.stop$),
-                debounceTime(10),
-                map(([enabled, userOptedOut]) => {
-                  if (!enabled || userOptedOut === true) return false;
-                  return true;
-                })
-              );
-        })
-      );
-    }
+    //   this.isSolutionNavEnabled$ = isSolutionNavExperiementEnabled$.pipe(
+    //     switchMap((isFeatureEnabled) => {
+    //       return !isFeatureEnabled
+    //         ? of(false)
+    //         : combineLatest([
+    //             core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
+    //             this.userProfileOptOut$,
+    //           ]).pipe(
+    //             takeUntil(this.stop$),
+    //             debounceTime(10),
+    //             map(([enabled, userOptedOut]) => {
+    //               if (!enabled || userOptedOut === true) return false;
+    //               return true;
+    //             })
+    //           );
+    //     })
+    //   );
+    // }
 
     this.isSolutionNavEnabled$
       .pipe(takeUntil(this.stop$), distinctUntilChanged())
