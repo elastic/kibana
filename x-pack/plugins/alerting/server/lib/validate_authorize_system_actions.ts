@@ -6,20 +6,25 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { getSystemActionKibanaPrivileges } from '../connector_adapters/get_system_action_kibana_privileges';
 import { bulkValidateConnectorAdapterActionParams } from '../connector_adapters/validate_rule_action_params';
 import { NormalizedSystemAction } from '../rules_client';
 import { RuleSystemAction } from '../types';
 interface Params {
   actionsClient: ActionsClient;
+  actionsAuthorization: ActionsAuthorization;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   systemActions: Array<RuleSystemAction | NormalizedSystemAction>;
+  rule: { consumer: string };
 }
 
-export const validateSystemActions = async ({
+export const validateAndAuthorizeSystemActions = async ({
   actionsClient,
   connectorAdapterRegistry,
+  actionsAuthorization,
+  rule,
   systemActions = [],
 }: Params) => {
   if (systemActions.length === 0) {
@@ -64,4 +69,12 @@ export const validateSystemActions = async ({
     connectorAdapterRegistry,
     actions: systemActionsWithActionTypeId,
   });
+
+  const additionalPrivileges = getSystemActionKibanaPrivileges({
+    connectorAdapterRegistry,
+    systemActions: systemActionsWithActionTypeId,
+    rule: { consumer: rule.consumer },
+  });
+
+  await actionsAuthorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
 };
