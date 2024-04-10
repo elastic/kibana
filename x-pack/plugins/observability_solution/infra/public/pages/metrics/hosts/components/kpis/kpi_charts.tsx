@@ -34,7 +34,7 @@ export const KpiCharts = () => {
       ];
 
   const getSubtitle = (formulaValue: string) => {
-    if (formulaValue.startsWith('max(')) {
+    if (formulaValue.startsWith('max')) {
       return searchCriteria.limit < (hostCountData?.count.value ?? 0)
         ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
             defaultMessage: 'Max (of {limit} hosts)',
