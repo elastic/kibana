@@ -129,8 +129,8 @@ describe('EventFieldsBrowser', () => {
 
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .exists()
@@ -168,8 +168,8 @@ describe('EventFieldsBrowser', () => {
       );
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
+          .find('tr.euiTableRow')
+          .find('td.euiTableRowCell')
           .at(1)
           .find('[data-euiicon-type]')
           .last()

@@ -100,8 +100,7 @@ describe('Background Search Session Management Table', () => {
         );
       });
 
-      expect(table.find('thead th .euiTableCellContent__text').map((node) => node.text()))
-        .toMatchInlineSnapshot(`
+      expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
           "Name",
