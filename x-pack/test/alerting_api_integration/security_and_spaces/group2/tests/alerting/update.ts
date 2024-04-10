@@ -109,6 +109,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -210,6 +211,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -302,6 +304,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -401,6 +404,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -498,6 +502,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -581,6 +586,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.name).to.eql(' leading and trailing whitespace ');
               break;
@@ -622,6 +628,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -666,6 +673,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -693,6 +701,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -749,6 +758,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -783,6 +793,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -846,6 +857,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
@@ -919,6 +931,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
@@ -983,6 +996,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))

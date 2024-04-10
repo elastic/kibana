@@ -115,6 +115,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].actions).to.eql([
                 {
                   id: createdAction.id,
@@ -192,6 +193,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               response.body.rules.forEach((rule: SanitizedRule) =>
                 expect(rule.tags).to.eql([`multiple-rules-edit-${scenario.id}`, 'tag-A'])
               );
@@ -265,6 +267,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
               break;
@@ -328,6 +331,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -395,6 +399,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body.rules[0].tags).to.eql(['foo', 'tag-A', 'tag-B']);
               expect(response.statusCode).to.eql(200);
 
@@ -429,6 +434,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -467,6 +473,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -505,6 +512,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -544,6 +552,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
@@ -591,6 +600,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message: 'Unauthorized to find rules for any rule types',
