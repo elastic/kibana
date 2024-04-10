@@ -88,11 +88,6 @@ export interface KnowledgeBaseEntry {
   role: KnowledgeBaseEntryRole;
 }
 
-export interface UserInstruction {
-  doc_id: string;
-  text: string;
-}
-
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;
   data?: Array<{

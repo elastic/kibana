@@ -10,7 +10,7 @@ export function getCategoryQuery({ categories }: { categories?: string[] }) {
     bool: {
       must_not: {
         exists: {
-          field: 'labels.category.keyword',
+          field: 'labels.category',
         },
       },
     },
@@ -27,7 +27,7 @@ export function getCategoryQuery({ categories }: { categories?: string[] }) {
           noCategoryFilter,
           {
             terms: {
-              'labels.category.keyword': categories,
+              'labels.category': categories,
             },
           },
         ],

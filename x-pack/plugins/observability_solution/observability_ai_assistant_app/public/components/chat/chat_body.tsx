@@ -220,10 +220,7 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({
-      title: initialTitle,
-      messages: conversation.value?.messages ?? messages,
-    });
+    const content = JSON.stringify({ title: initialTitle, messages });
 
     navigator.clipboard?.writeText(content || '');
   };

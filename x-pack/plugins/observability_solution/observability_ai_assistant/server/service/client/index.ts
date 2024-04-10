@@ -25,8 +25,6 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
-import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -45,7 +43,6 @@ import {
 } from '../../../common/functions/types';
 import {
   MessageRole,
-  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -152,7 +149,6 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
-    instructions?: Array<string | UserInstruction>;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -161,7 +157,6 @@ export class ObservabilityAIAssistantClient {
         const conversationId = params.conversationId || '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
-        const requestInstructions = params.instructions || [];
 
         const tokenCountResult = {
           prompt: 0,
@@ -516,21 +511,12 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        this.resolveInstructions(requestInstructions)
-          .then((instructions) => {
-            return next(
-              extendSystemMessage(messages, [
-                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-                instructions,
-              ])
-            );
-          })
-          .catch((error) => {
-            if (!signal.aborted) {
-              this.dependencies.logger.error(error);
-            }
-            subscriber.error(error);
-          });
+        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
+          if (!signal.aborted) {
+            this.dependencies.logger.error(error);
+          }
+          subscriber.error(error);
+        });
 
         const titlePromise =
           !conversationId && !title && persist
@@ -787,7 +773,6 @@ export class ObservabilityAIAssistantClient {
           },
         },
       ],
-      functionCall: 'title_conversation',
       connectorId,
       signal,
     });
@@ -926,28 +911,17 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
-    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
-      this.dependencies.user,
-      this.dependencies.namespace
-    );
+  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
+    const [systemMessage, ...rest] = messages;
 
-    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
-      return '';
-    }
+    const extendedSystemMessage: Message = {
+      ...systemMessage,
+      message: {
+        ...systemMessage.message,
+        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
+      },
+    };
 
-    const priorityInstructions = requestInstructions.map((instruction) =>
-      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
-    );
-    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
-    const instructions = priorityInstructions.concat(
-      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
-    );
-
-    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
-
-    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
-
-    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
+    return [extendedSystemMessage].concat(rest);
   };
 }
