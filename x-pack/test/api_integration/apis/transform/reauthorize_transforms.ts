@@ -215,7 +215,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('bulk reauthorize_transforms', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/180499
+    describe.skip('bulk reauthorize_transforms', function () {
       const reqBody: ReauthorizeTransformsRequestSchema = [
         USER.TRANSFORM_VIEWER,
         USER.TRANSFORM_POWERUSER,
