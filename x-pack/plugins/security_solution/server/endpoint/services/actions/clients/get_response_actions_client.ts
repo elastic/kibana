@@ -6,11 +6,10 @@
  */
 
 import type { SentinelOneActionsClientOptions } from './sentinelone/sentinel_one_actions_client';
+import { SentinelOneActionsClient } from './sentinelone/sentinel_one_actions_client';
 import type { ResponseActionsClient } from './lib/types';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
 import { EndpointActionsClient } from './endpoint/endpoint_actions_client';
-import { SentinelOneActionsClient } from './sentinelone/sentinel_one_actions_client';
-import { UnsupportedResponseActionsAgentTypeError } from './errors';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 
 export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOptions &
@@ -21,10 +20,9 @@ export type GetResponseActionsClientConstructorOptions = ResponseActionsClientOp
  * @param agentType
  * @param constructorOptions
  *
- * @throws UnsupportedResponseActionsAgentTypeError
  */
 export const getResponseActionsClient = (
-  agentType: string | ResponseActionAgentType,
+  agentType: ResponseActionAgentType,
   constructorOptions: GetResponseActionsClientConstructorOptions
 ): ResponseActionsClient => {
   switch (agentType) {
@@ -33,8 +31,4 @@ export const getResponseActionsClient = (
     case 'sentinel_one':
       return new SentinelOneActionsClient(constructorOptions);
   }
-
-  throw new UnsupportedResponseActionsAgentTypeError(
-    `Agent type [${agentType}] does not support response actions`
-  );
 };

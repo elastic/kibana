@@ -25,7 +25,7 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
   }
 
   toString() {
-    return JSON.stringify(stringify(this.toJSON()), null, 2);
+    return stringify(this.toJSON());
   }
 }
 
@@ -36,12 +36,6 @@ export class ResponseActionsNotSupportedError extends ResponseActionsClientError
     meta?: unknown
   ) {
     super(`Action ${responseAction ? `[${responseAction}] ` : ''}not supported`, statusCode, meta);
-  }
-}
-
-export class UnsupportedResponseActionsAgentTypeError extends ResponseActionsClientError {
-  constructor(message: string, statusCode = 501, meta?: unknown) {
-    super(message, statusCode, meta);
   }
 }
 
