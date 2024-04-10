@@ -73,11 +73,7 @@ export const getLinksEmbeddableFactory = () => {
           defaultPanelDescription,
           ...titlesApi,
           ...linksApi,
-          ...intializeLibraryTransforms(
-            { links: linksApi.links$.value, layout: linksApi.layout$.value },
-            serializeState,
-            isByReference
-          ),
+          ...intializeLibraryTransforms(linksApi.attributes$.value, serializeState, isByReference),
           isEditingEnabled: () => true,
           getTypeDisplayName: () => APP_NAME,
           serializeState,
@@ -89,9 +85,9 @@ export const getLinksEmbeddableFactory = () => {
       );
 
       const Component = () => {
-        const [resolvedLinks, layout] = useBatchedPublishingSubjects(
+        const [resolvedLinks, { layout }] = useBatchedPublishingSubjects(
           api.resolvedLinks$,
-          api.layout$
+          api.attributes$
         );
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {

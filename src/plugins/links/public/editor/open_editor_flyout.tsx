@@ -18,7 +18,7 @@ import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { LinksLayoutType } from '../../common/content_management';
+import { LinksAttributes, LinksLayoutType } from '../../common/content_management';
 import { runSaveToLibrary } from '../content_management/save_to_library';
 import { LinksEditorFlyoutReturn } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
@@ -42,13 +42,13 @@ export async function openEditorFlyout({
   initialState,
   parentDashboard,
   resolvedLinks$,
-  layout$,
+  attributes$,
   savedObjectId$,
 }: {
   initialState?: LinksSerializedState;
   parentDashboard?: unknown;
   resolvedLinks$?: BehaviorSubject<ResolvedLink[]>;
-  layout$?: BehaviorSubject<LinksLayoutType | undefined>;
+  attributes$?: BehaviorSubject<LinksAttributes>;
   savedObjectId$?: BehaviorSubject<string | undefined>;
 }): Promise<LinksEditorFlyoutReturn> {
   if (!initialState) {
@@ -103,11 +103,12 @@ export async function openEditorFlyout({
         links,
         layout: newLayout,
       };
-      resolvedLinks$?.next(newLinks);
       const savedAttributes = initialState?.savedObjectId
         ? await attributeService.wrapAttributes(newAttributes, true)
         : await runSaveToLibrary(newAttributes, initialState);
       savedObjectId$?.next(savedAttributes?.savedObjectId);
+      resolvedLinks$?.next(newLinks);
+      attributes$?.next(newAttributes);
       resolve(savedAttributes);
       closeEditorFlyout(editorFlyout);
     };
@@ -128,7 +129,7 @@ export async function openEditorFlyout({
         },
       };
       resolvedLinks$?.next(newLinks);
-      layout$?.next(newLayout);
+      attributes$?.next(newAttributes);
       resolve(newState);
       closeEditorFlyout(editorFlyout);
     };

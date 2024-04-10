@@ -16,14 +16,13 @@ import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { HasLibraryTransforms, apiHasLibraryTransforms } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { CONTENT_ID } from '../../common';
-import { Link, LinksAttributes, LinksLayoutType } from '../../common/content_management';
+import { Link, LinksAttributes } from '../../common/content_management';
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi &
   HasEditCapabilities &
   HasLibraryTransforms<LinksSerializedState> & {
-    links$: BehaviorSubject<Link[] | undefined>;
-    layout$: BehaviorSubject<LinksLayoutType | undefined>;
+    attributes$: BehaviorSubject<LinksAttributes>;
     resolvedLinks$: BehaviorSubject<ResolvedLink[]>;
     savedObjectId$: BehaviorSubject<string | undefined>;
   };

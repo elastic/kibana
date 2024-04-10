@@ -60,7 +60,7 @@ export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERT
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LinksAttributes = {
-  title: string;
+  title?: string;
   description?: string;
   links?: Link[];
   layout?: LinksLayoutType;

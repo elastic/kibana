@@ -10,10 +10,9 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, skip } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { LinksInput } from '../embeddable/types';
-import { getLinksAttributeService } from '../services/attribute_service';
+import { getLinksAttributeService, LinksDocument } from '../services/attribute_service';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
-import { LinksLayoutType } from '../../common/content_management';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
 
 export async function initializeLinks(state: LinksSerializedState, parentApi: unknown) {
@@ -24,15 +23,18 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
 
   const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>(await resolveLinks(attributes.links));
   const error$ = new BehaviorSubject<Error | undefined>(undefined);
-  const links$ = new BehaviorSubject(attributes.links);
-  const layout$ = new BehaviorSubject(attributes.layout);
+
+  const attributes$ = new BehaviorSubject(attributes);
 
   // whenever resolvedLinks$ changes, update links$ with the persistable state
   // title and description are not persisted
   resolvedLinks$.pipe(skip(1)).subscribe({
     next: (resolvedLinks) => {
       console.log('resolvedLinks', resolvedLinks);
-      return links$.next(resolvedLinks.map(({ title, description, ...link }) => link));
+      return {
+        ...attributes$.value,
+        links: resolvedLinks.map(({ title, description, ...link }) => link),
+      };
     },
     error: (error) => error$.next(error),
   });
@@ -43,7 +45,7 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
         state,
         parentDashboard: parentApi,
         resolvedLinks$,
-        layout$,
+        attributes$,
         savedObjectId$,
       });
     } catch {
@@ -57,26 +59,15 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
         savedObjectId: [
           savedObjectId$,
           (nextSavedObjectId?: string) => savedObjectId$.next(nextSavedObjectId),
-          (a, b) => {
-            console.log(a, b);
-            return a === b;
-          },
         ],
       };
     }
     return {
-      links: [
-        links$,
-        (nextLinks?: Link[]) => {
-          console.log('nextLinks', nextLinks);
-          return links$.next(nextLinks ?? []);
-        },
-        (a, b) => {
-          console.log('before', a, 'after', b);
-          return fastIsEqual(a, b);
-        },
+      attributes: [
+        attributes$,
+        (nextAttributes?: LinksDocument) => attributes$.next(nextAttributes ?? { title: '' }),
+        fastIsEqual,
       ],
-      layout: [layout$, (nextLayout?: LinksLayoutType) => layout$.next(nextLayout)],
     };
   };
 
@@ -84,23 +75,19 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
     linksApi: {
       blockingError: error$,
       onEdit,
-      links$,
       resolvedLinks$,
-      layout$,
+      attributes$,
       savedObjectId$,
     },
     linksComparators: getLinksComparators(),
     serializeLinks: () => {
-      if (savedObjectId$.getValue()) {
+      if (savedObjectId$.value) {
         return {
-          savedObjectId: savedObjectId$.getValue(),
+          savedObjectId: savedObjectId$.value,
         };
       }
       return {
-        attributes: {
-          links: links$.getValue(),
-          layout: layout$.getValue(),
-        },
+        attributes: attributes$.value,
       };
     },
   };
