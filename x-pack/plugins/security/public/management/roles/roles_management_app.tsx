@@ -12,8 +12,9 @@ import { useParams } from 'react-router-dom';
 import type { BuildFlavor } from '@kbn/config';
 import type { FatalErrorsSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router } from '@kbn/shared-ux-router';
 
 import type { SecurityLicense } from '../../../common';
@@ -48,7 +49,7 @@ export const rolesManagementApp = Object.freeze({
       id: this.id,
       order: 20,
       title,
-      async mount({ element, theme$, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [
           [startServices, { dataViews, features, spaces }],
           { RolesGridPage },
@@ -67,14 +68,7 @@ export const rolesManagementApp = Object.freeze({
           import('../users'),
         ]);
 
-        const {
-          application,
-          docLinks,
-          http,
-          i18n: i18nStart,
-          notifications,
-          chrome,
-        } = startServices;
+        const { application, docLinks, http, notifications, chrome } = startServices;
 
         chrome.docTitle.change(title);
 
@@ -123,40 +117,38 @@ export const rolesManagementApp = Object.freeze({
         };
 
         render(
-          <KibanaContextProvider services={startServices}>
-            <i18nStart.Context>
-              <KibanaThemeProvider theme$={theme$}>
-                <Router history={history}>
-                  <ReadonlyBadge
-                    featureId="roles"
-                    tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
-                      defaultMessage: 'Unable to create or edit roles',
-                    })}
-                  />
-                  <BreadcrumbsProvider
-                    onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
-                  >
-                    <Breadcrumb text={title} href="/">
-                      <Route path={['/', '']} exact={true}>
-                        <RolesGridPage
-                          notifications={notifications}
-                          rolesAPIClient={rolesAPIClient}
-                          history={history}
-                          readOnly={!startServices.application.capabilities.roles.save}
-                        />
-                      </Route>
-                      <Route path="/edit/:roleName?">
-                        <EditRolePageWithBreadcrumbs action="edit" />
-                      </Route>
-                      <Route path="/clone/:roleName">
-                        <EditRolePageWithBreadcrumbs action="clone" />
-                      </Route>
-                    </Breadcrumb>
-                  </BreadcrumbsProvider>
-                </Router>
-              </KibanaThemeProvider>
-            </i18nStart.Context>
-          </KibanaContextProvider>,
+          <KibanaRenderContextProvider {...startServices}>
+            <KibanaContextProvider services={startServices}>
+              <Router history={history}>
+                <ReadonlyBadge
+                  featureId="roles"
+                  tooltip={i18n.translate('xpack.security.management.roles.readonlyTooltip', {
+                    defaultMessage: 'Unable to create or edit roles',
+                  })}
+                />
+                <BreadcrumbsProvider
+                  onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
+                >
+                  <Breadcrumb text={title} href="/">
+                    <Route path={['/', '']} exact={true}>
+                      <RolesGridPage
+                        notifications={notifications}
+                        rolesAPIClient={rolesAPIClient}
+                        history={history}
+                        readOnly={!startServices.application.capabilities.roles.save}
+                      />
+                    </Route>
+                    <Route path="/edit/:roleName?">
+                      <EditRolePageWithBreadcrumbs action="edit" />
+                    </Route>
+                    <Route path="/clone/:roleName">
+                      <EditRolePageWithBreadcrumbs action="clone" />
+                    </Route>
+                  </Breadcrumb>
+                </BreadcrumbsProvider>
+              </Router>
+            </KibanaContextProvider>
+          </KibanaRenderContextProvider>,
           element
         );
 

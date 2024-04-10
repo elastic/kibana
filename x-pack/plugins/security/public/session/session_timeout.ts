@@ -9,6 +9,7 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, skip, tap, throttleTime } from 'rxjs';
 
 import type {
+  CoreStart,
   HttpFetchOptionsWithPath,
   HttpSetup,
   NotificationsSetup,
@@ -57,6 +58,7 @@ export class SessionTimeout {
   private stopLogoutTimer?: Function;
 
   constructor(
+    private startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
     private notifications: NotificationsSetup,
     private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
@@ -265,7 +267,12 @@ export class SessionTimeout {
         this.hideWarning(true);
         return onExtend();
       };
-      const toast = createSessionExpirationToast(this.sessionState$, onExtend, onClose);
+      const toast = createSessionExpirationToast(
+        this.startServices,
+        this.sessionState$,
+        onExtend,
+        onClose
+      );
       this.warningToast = this.notifications.toasts.add(toast);
     }
   };
