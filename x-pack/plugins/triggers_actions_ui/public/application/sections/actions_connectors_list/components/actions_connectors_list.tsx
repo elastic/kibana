@@ -6,7 +6,7 @@
  */
 
 import { ClassNames } from '@emotion/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -24,10 +24,11 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -54,6 +55,13 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { routeToConnectors } from '../../../constants';
+
+interface EditConnectorProps {
+  initialConnector?: ActionConnector;
+  tab?: EditConnectorTabs;
+  isFix?: boolean;
+}
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -89,6 +97,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     chrome,
     docLinks,
   } = useKibana().services;
+  const { connectorId } = useParams<{ connectorId?: string }>();
+  const history = useHistory();
+  const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -97,13 +108,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [editConnectorProps, setEditConnectorProps] = useState<{
-    initialConnector?: ActionConnector;
-    tab?: EditConnectorTabs;
-    isFix?: boolean;
-  }>({});
+  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   useEffect(() => {
     loadActions();
@@ -164,6 +171,43 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
 
+  const editItem = useCallback(
+    (actionConnector?: ActionConnector, tab?: EditConnectorTabs, isFix?: boolean) => {
+      history.push(
+        setStateToKbnUrl(
+          '_a',
+          { initialConnector: actionConnector, tab, isFix: isFix ?? false },
+          { useHash: false },
+          routeToConnectors
+        )
+      );
+    },
+    [history]
+  );
+
+  useEffect(() => {
+    const { initialConnector, tab, isFix } =
+      getStatesFromKbnUrl<{ _a: EditConnectorProps }>()?._a || {};
+
+    if (initialConnector) {
+      setEditConnectorProps({ initialConnector, tab, isFix });
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if (connectorId && !isLoadingActions) {
+      const connector = actions.find((action) => action.id === connectorId);
+      history.push(
+        setStateToKbnUrl(
+          '_a',
+          { initialConnector: connector, tab: EditConnectorTabs.Configuration, isFix: false },
+          { useHash: false },
+          routeToConnectors
+        )
+      );
+    }
+  }, [actions, connectorId, history, isLoadingActions]);
+
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
       const action = actions.find((a) => a.id === c);
@@ -195,14 +239,6 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     } finally {
       setIsLoadingActions(false);
     }
-  }
-
-  async function editItem(
-    actionConnector: ActionConnector,
-    tab: EditConnectorTabs,
-    isFix?: boolean
-  ) {
-    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
   const actionsTableColumns = [
@@ -547,10 +583,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             connector={editConnectorProps.initialConnector}
             tab={editConnectorProps.tab}
             onClose={() => {
-              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+              editItem();
             }}
             onConnectorUpdated={(connector) => {
-              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
+              editItem(connector, editConnectorProps.tab, editConnectorProps.isFix);
               loadActions();
             }}
             actionTypeRegistry={actionTypeRegistry}

@@ -38,7 +38,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   models,
   onSelect,
 }) => {
-  const managementLink = useManagementLink();
+  const managementLink = useManagementLink(selectedModel.connectorId);
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
