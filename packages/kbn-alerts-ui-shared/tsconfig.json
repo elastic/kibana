@@ -31,5 +31,9 @@
     "@kbn/ui-theme",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
+    "@kbn/alerting-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/core-doc-links-browser",
+    "@kbn/router-utils",
   ]
 }
