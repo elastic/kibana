@@ -1611,6 +1611,10 @@
   },
   "ingest-agent-policies": {
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {
