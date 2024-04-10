@@ -787,6 +787,7 @@ export class ObservabilityAIAssistantClient {
           },
         },
       ],
+      functionCall: 'title_conversation',
       connectorId,
       signal,
     });
