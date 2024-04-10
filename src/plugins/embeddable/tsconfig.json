@@ -17,7 +17,6 @@
     "@kbn/es-query",
     "@kbn/core-theme-browser",
     "@kbn/i18n",
-    "@kbn/test-jest-helpers",
     "@kbn/std",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
