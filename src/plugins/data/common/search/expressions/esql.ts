@@ -17,6 +17,7 @@ import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
@@ -130,6 +131,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
+            version: ESQL_LATEST_VERSION,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
