@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { waitFor } from '../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -19,17 +20,20 @@ export default ({ getService }: FtrProviderContext) => {
     describe('New Complete Deployment', () => {
       it('registers, runs and immediately deletes NLP Cleanup Task', async () => {
         try {
-          // When running on CI, the task may not have run and been disabled, so wait for a moment for it to be cleaned up
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          // When running on CI, the task may not have run and been disabled, so poll for it to be cleaned up
+          await waitFor(
+            async () => {
+              const task = await kibanaServer.savedObjects.get({
+                type: 'task',
+                id: TASK_ID,
+              });
 
-          const task = await kibanaServer.savedObjects.get({
-            type: 'task',
-            id: TASK_ID,
-          });
-          logger.error(`Task should not exist: \n${JSON.stringify(task, null, 2)}`);
+              return task == null;
+            },
+            'waitForTaskToBeDeleted',
+            logger
+          );
         } catch (e) {
-          // TODO: Better way to check if task doesn't exist? savedObjects.find() is paginated and returned tasks > pageSize...
-          // Maybe query event log, or `.kibana_task_manager` index directly?
           expect(e.message).to.eql('Request failed with status code 404');
 
           return;
