@@ -531,10 +531,9 @@ const AssistantComponent: React.FC<Props> = ({
       await handleSendMessage(promptText);
       if (currentConversation?.title === NEW_CHAT) {
         await refetchResults();
-        await refetchCurrentConversation({ cId: currentConversationTitle });
       }
     },
-    [currentConversation?.title, handleSendMessage, refetchCurrentConversation, refetchResults]
+    [currentConversation, handleSendMessage, refetchResults]
   );
 
   const chatbotComments = useMemo(
@@ -990,7 +989,7 @@ const AssistantComponent: React.FC<Props> = ({
                           isDisabled={isSendingDisabled}
                           shouldRefocusPrompt={shouldRefocusPrompt}
                           userPrompt={userPrompt}
-                          handleButtonSendMessage={handleButtonSendMessage}
+                          handleButtonSendMessage={handleChatSend}
                           handleOnChatCleared={handleOnChatCleared}
                           handlePromptChange={handlePromptChange}
                           handleSendMessage={handleChatSend}
