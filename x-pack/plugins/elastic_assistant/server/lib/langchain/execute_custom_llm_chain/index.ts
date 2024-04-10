@@ -13,6 +13,7 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
+import { ChatBedrock } from './chat_bedrock';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -52,7 +53,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 }) => {
   // TODO implement llmClass for bedrock streaming
   // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+  const llmClass =
+    llmType === 'bedrock' ? ChatBedrock : isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
 
   const llm = new llmClass({
     actions,
@@ -115,7 +117,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   // isStream check is not on agentType alone because typescript doesn't like
-  const executor = isStream
+  const executor = llmType === 'bedrock' ? ChatBedrock ? await initializeAgentExecutorWithOptions(tools, llm, {
+    agentType: 'structured-chat-zero-shot-react-description',
+    memory,
+    verbose: true,
+  })  : isStream
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         memory,
@@ -132,7 +138,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 
   let traceData;
-  if (isStream) {
+  if (isStream && llmType !== 'bedrock') {
     let streamingSpan: Span | undefined;
     if (agent.isStarted()) {
       streamingSpan = agent.startSpan(`${DEFAULT_AGENT_EXECUTOR_ID} (Streaming)`) ?? undefined;
