@@ -88,7 +88,7 @@ export class ActionsClientLlm extends LLM {
           messages: [assistantMessage], // the assistant message
           ...(this.llmType === 'openai'
             ? { n: 1, stop: null, temperature: 0.2 }
-            : { temperature: 0, stopSequences: [] }),
+            : { temperature: 0, stopSequences: ['\n\nHuman:', 'Observation:'] }),
         },
       },
     };
