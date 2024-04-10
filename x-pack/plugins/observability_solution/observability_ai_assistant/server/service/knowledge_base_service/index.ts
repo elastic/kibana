@@ -517,13 +517,12 @@ export class KnowledgeBaseService {
           },
         },
         size: 500,
-        _source: false,
-        fields: ['doc_id', 'text'],
+        _source: ['doc_id', 'text'],
       });
 
       return response.hits.hits.map((hit) => ({
-        doc_id: hit.fields?.doc_id[0],
-        text: hit.fields?.text[0],
+        doc_id: hit._source?.doc_id ?? '',
+        text: hit._source?.text ?? '',
       }));
     } catch (error) {
       this.dependencies.logger.error('Failed to load instructions from knowledge base');
