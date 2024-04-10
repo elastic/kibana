@@ -92,7 +92,7 @@ const transformUpdateActions = (
     []
   );
 
-export const bulkChangeConversations = async (
+export const bulkUpdateConversations = async (
   http: HttpSetup,
   conversationsActions: ConversationsBulkActions,
   toasts?: IToasts

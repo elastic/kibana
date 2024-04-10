@@ -89,7 +89,7 @@ describe('getAnonymizedValues', () => {
     const result = getAnonymizedValues({
       anonymizationFields: [
         { id: 'test.field', field: 'test.field', allowed: false, anonymized: true },
-      ], // does NOT include `test.field`
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,

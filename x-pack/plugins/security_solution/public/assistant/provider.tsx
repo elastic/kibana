@@ -12,7 +12,7 @@ import type { IToasts, NotificationsStart } from '@kbn/core-notifications-browse
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
-  bulkChangeConversations,
+  bulkUpdateConversations,
   mergeBaseWithPersistedConversations,
   useFetchCurrentUserConversations,
 } from '@kbn/elastic-assistant';
@@ -77,7 +77,7 @@ export const createConversations = async (
     const connectors = await loadConnectors({ http });
 
     // post bulk create
-    const bulkResult = await bulkChangeConversations(
+    const bulkResult = await bulkUpdateConversations(
       http,
       {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

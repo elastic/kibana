@@ -16,7 +16,7 @@ describe('ContextEditor', () => {
   const anonymizationFields = {
     total: 20,
     page: 1,
-    perPage: 100,
+    perPage: 1000,
     data: allow.map((f) => ({ id: f, field: f, allowed: true, anonymized: f === 'field1' })),
   };
   const rawData = allow.reduce(

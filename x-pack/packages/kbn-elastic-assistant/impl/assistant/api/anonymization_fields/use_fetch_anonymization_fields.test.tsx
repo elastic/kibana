@@ -47,7 +47,7 @@ describe('useFetchAnonymizationFields', () => {
           method: 'GET',
           query: {
             page: 1,
-            per_page: 100,
+            per_page: 1000,
           },
           version: '2023-10-31',
           signal: undefined,

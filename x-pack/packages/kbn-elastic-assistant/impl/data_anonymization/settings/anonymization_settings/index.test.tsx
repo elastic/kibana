@@ -17,7 +17,7 @@ const props: Props = {
   anonymizationFields: {
     total: 4,
     page: 1,
-    perPage: 100,
+    perPage: 1000,
     data: [
       {
         field: 'foo',

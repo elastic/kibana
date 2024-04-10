@@ -75,7 +75,7 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
             selectedPromptContext.contextAnonymizationFields ?? {
               total: 0,
               page: 1,
-              perPage: 100,
+              perPage: 1000,
               data: [],
             }
           }

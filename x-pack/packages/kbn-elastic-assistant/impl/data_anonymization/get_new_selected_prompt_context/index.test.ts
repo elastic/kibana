@@ -13,7 +13,7 @@ describe('getNewSelectedPromptContext', () => {
   const anonymizationFields = {
     total: 4,
     page: 1,
-    perPage: 100,
+    perPage: 1000,
     data: [
       { field: 'field1', id: 'field1', allowed: true, anonymized: false },
       { field: 'field2', id: 'field2', allowed: true, anonymized: false },
@@ -52,7 +52,7 @@ describe('getNewSelectedPromptContext', () => {
       contextAnonymizationFields: {
         total: 2,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           { field: 'field1', id: 'field1', allowed: true, anonymized: false },
           { field: 'field2', id: 'field2', allowed: true, anonymized: false },

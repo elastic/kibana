@@ -13,9 +13,9 @@ import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import {
   ConversationsBulkActions,
-  bulkChangeConversations,
-} from '../../api/conversations/use_bulk_actions_conversations';
-import { bulkChangeAnonymizationFields } from '../../api/anonymization_fields/use_bulk_anonymization_fields';
+  bulkUpdateConversations,
+} from '../../api/conversations/bulk_update_actions_conversations';
+import { bulkUpdateAnonymizationFields } from '../../api/anonymization_fields/bulk_update_anonymization_fields';
 
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;
@@ -120,7 +120,7 @@ export const useSettingsUpdater = (
       conversationsSettingsBulkActions.update ||
       conversationsSettingsBulkActions.delete;
     const bulkResult = hasBulkConversations
-      ? await bulkChangeConversations(http, conversationsSettingsBulkActions, toasts)
+      ? await bulkUpdateConversations(http, conversationsSettingsBulkActions, toasts)
       : undefined;
 
     const didUpdateKnowledgeBase =
@@ -149,7 +149,7 @@ export const useSettingsUpdater = (
       anonymizationFieldsBulkActions.update ||
       anonymizationFieldsBulkActions.delete;
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
-      ? await bulkChangeAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
+      ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
 
     return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);

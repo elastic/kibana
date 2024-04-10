@@ -44,7 +44,7 @@ export async function getNewSelectedPromptContext({
     return {
       contextAnonymizationFields: {
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         total: extendedAnonymizationData.length,
         data: extendedAnonymizationData,
       },

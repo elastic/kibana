@@ -13,7 +13,7 @@ import { mockAlertPromptContext } from '../../mock/prompt_context';
 import type { SelectedPromptContext } from '../prompt_context/types';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'alert data',
 };
@@ -154,7 +154,7 @@ User prompt text`);
         contextAnonymizationFields: {
           total: 0,
           page: 1,
-          perPage: 100,
+          perPage: 1000,
           data: [
             {
               id: 'field1',

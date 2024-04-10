@@ -5,44 +5,29 @@
  * 2.0.
  */
 
-import { bulkChangeConversations } from './use_bulk_actions_conversations';
 import {
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { bulkUpdateAnonymizationFields } from './bulk_update_anonymization_fields';
 
-const conversation1 = {
-  id: 'conversation1',
-  title: 'Conversation 1',
-  apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
-  replacements: {},
-  category: 'default',
-  messages: [
-    {
-      id: 'message1',
-      role: 'user' as const,
-      content: 'Hello',
-      timestamp: '2024-02-14T19:58:30.299Z',
-    },
-    {
-      id: 'message2',
-      role: 'user' as const,
-      content: 'How are you?',
-      timestamp: '2024-02-14T19:58:30.299Z',
-    },
-  ],
+const anonymizationField1 = {
+  id: 'field1',
+  field: 'Anonymization field 1',
+  anonymized: true,
+  allowed: true,
 };
-const conversation2 = {
-  ...conversation1,
-  id: 'conversation2',
-  title: 'Conversation 2',
+const anonymizationField2 = {
+  ...anonymizationField1,
+  id: 'field2',
+  field: 'field 2',
 };
 const toasts = {
   addError: jest.fn(),
 };
-describe('bulkChangeConversations', () => {
+describe('bulkUpdateAnonymizationFields', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
@@ -51,72 +36,66 @@ describe('bulkChangeConversations', () => {
     jest.clearAllMocks();
   });
   it('should send a POST request with the correct parameters and receive a successful response', async () => {
-    const conversationsActions = {
-      create: {},
-      update: {},
+    const anonymizationFieldsActions = {
+      create: [],
+      update: [],
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions);
+    await bulkUpdateAnonymizationFields(httpMock, anonymizationFieldsActions);
 
     expect(httpMock.fetch).toHaveBeenCalledWith(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+      ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         body: JSON.stringify({
-          update: [],
           create: [],
-          delete: { ids: [] },
-        }),
-      }
-    );
-  });
-
-  it('should transform the conversations dictionary to an array of conversations to create', async () => {
-    const conversationsActions = {
-      create: {
-        conversation1,
-        conversation2,
-      },
-      update: {},
-      delete: { ids: [] },
-    };
-
-    await bulkChangeConversations(httpMock, conversationsActions);
-
-    expect(httpMock.fetch).toHaveBeenCalledWith(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-      {
-        method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-        body: JSON.stringify({
           update: [],
-          create: [conversation1, conversation2],
           delete: { ids: [] },
         }),
       }
     );
   });
 
-  it('should transform the conversations dictionary to an array of conversations to update', async () => {
-    const conversationsActions = {
-      update: {
-        conversation1,
-        conversation2,
-      },
+  it('should transform the anonymization field dictionary to an array of fields to create', async () => {
+    const anonymizationFieldsActions = {
+      create: [anonymizationField1, anonymizationField2],
+      update: [],
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions);
+    await bulkUpdateAnonymizationFields(httpMock, anonymizationFieldsActions);
 
     expect(httpMock.fetch).toHaveBeenCalledWith(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+      ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         body: JSON.stringify({
-          update: [conversation1, conversation2],
+          create: [anonymizationField1, anonymizationField2],
+          update: [],
+          delete: { ids: [] },
+        }),
+      }
+    );
+  });
+
+  it('should transform the anonymization field dictionary to an array of fields to update', async () => {
+    const anonymizationFieldsActions = {
+      update: [anonymizationField1, anonymizationField2],
+      delete: { ids: [] },
+    };
+
+    await bulkUpdateAnonymizationFields(httpMock, anonymizationFieldsActions);
+
+    expect(httpMock.fetch).toHaveBeenCalledWith(
+      ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+      {
+        method: 'POST',
+        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        body: JSON.stringify({
+          update: [anonymizationField1, anonymizationField2],
           delete: { ids: [] },
         }),
       }
@@ -130,20 +109,26 @@ describe('bulkChangeConversations', () => {
         errors: [
           {
             statusCode: 400,
-            message: 'Error updating conversations',
-            conversations: [{ id: conversation1.id, name: conversation1.title }],
+            message: 'Error updating anonymization field',
+            anonymization_fields: [{ id: anonymizationField1.id, name: anonymizationField1.field }],
           },
         ],
       },
     });
-    const conversationsActions = {
-      create: {},
-      update: {},
+    const anonymizationFieldsActions = {
+      create: [],
+      update: [anonymizationField1],
       delete: { ids: [] },
     };
-    await bulkChangeConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
+    await bulkUpdateAnonymizationFields(
+      httpMock,
+      anonymizationFieldsActions,
+      toasts as unknown as IToasts
+    );
     expect(toasts.addError.mock.calls[0][0]).toEqual(
-      new Error('Error message: Error updating conversations for conversation Conversation 1')
+      new Error(
+        'Error message: Error updating anonymization field for anonymization field Anonymization field 1'
+      )
     );
   });
 
@@ -152,13 +137,17 @@ describe('bulkChangeConversations', () => {
       success: false,
       attributes: {},
     });
-    const conversationsActions = {
-      create: {},
-      update: {},
+    const anonymizationFieldsActions = {
+      create: [],
+      update: [],
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
+    await bulkUpdateAnonymizationFields(
+      httpMock,
+      anonymizationFieldsActions,
+      toasts as unknown as IToasts
+    );
     expect(toasts.addError.mock.calls[0][0]).toEqual(new Error(''));
   });
 });

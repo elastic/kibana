@@ -208,7 +208,7 @@ export const bulkActionAnonymizationFieldsRoute = (
             docsCreated.length > 0
               ? await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
                   page: 1,
-                  perPage: 100,
+                  perPage: 1000,
                   filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
                 })
               : undefined;

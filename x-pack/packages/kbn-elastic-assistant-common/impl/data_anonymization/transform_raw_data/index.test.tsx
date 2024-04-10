@@ -35,7 +35,7 @@ describe('transformRawData', () => {
     const anonymizationFields = {
       total: 2,
       page: 1,
-      perPage: 100,
+      perPage: 1000,
       data: [{ id: 'field1', field: 'field1', allowed: true, anonymized: true }],
     };
     const inputRawData = {
@@ -61,7 +61,7 @@ describe('transformRawData', () => {
     const anonymizationFields = {
       total: 2,
       page: 1,
-      perPage: 100,
+      perPage: 1000,
       data: [
         { id: 'field1', field: 'field1', allowed: true, anonymized: true },
         { id: 'field2', field: 'field2', allowed: true, anonymized: false },
@@ -88,7 +88,7 @@ describe('transformRawData', () => {
     const anonymizationFields = {
       total: 2,
       page: 1,
-      perPage: 100,
+      perPage: 1000,
       data: [
         { id: 'field1', field: 'field1', allowed: true, anonymized: true },
         { id: 'field2', field: 'field2', allowed: true, anonymized: false },

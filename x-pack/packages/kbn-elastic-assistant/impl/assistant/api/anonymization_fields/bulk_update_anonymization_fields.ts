@@ -16,7 +16,7 @@ import {
   PerformBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
-export const bulkChangeAnonymizationFields = async (
+export const bulkUpdateAnonymizationFields = async (
   http: HttpSetup,
   anonymizationFieldsActions: PerformBulkActionRequestBody,
   toasts?: IToasts

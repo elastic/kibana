@@ -33,7 +33,7 @@ export const useFetchAnonymizationFields = ({
 }: UseFetchAnonymizationFieldsParams) => {
   const query = {
     page: 1,
-    per_page: 100,
+    per_page: 1000, // Continue use in-memory paging till the new design will be ready
   };
 
   const cachingKeys = [

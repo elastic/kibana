@@ -28,7 +28,6 @@ const defaultSort: SortConfig = {
 export interface Props {
   anonymizationFields: FindAnonymizationFieldsResponse;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  onReset?: () => void;
   rawData: Record<string, string[]> | null;
   pageSize?: number;
 }
@@ -54,7 +53,6 @@ const search: EuiSearchBarProps = {
 const ContextEditorComponent: React.FC<Props> = ({
   anonymizationFields,
   onListUpdated,
-  onReset,
   rawData,
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
@@ -106,13 +104,12 @@ const ContextEditorComponent: React.FC<Props> = ({
       <Toolbar
         onListUpdated={onListUpdated}
         onlyDefaults={rawData == null}
-        onReset={onReset}
         onSelectAll={onSelectAll}
         selected={selected}
         totalFields={rawData == null ? anonymizationFields.total : Object.keys(rawData).length}
       />
     ),
-    [anonymizationFields.total, onListUpdated, onReset, onSelectAll, rawData, selected]
+    [anonymizationFields.total, onListUpdated, onSelectAll, rawData, selected]
   );
 
   return (

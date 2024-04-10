@@ -25,13 +25,13 @@ const defaultProps: Props = {
 };
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'test-raw-data',
 };
 
 const mockSelectedEventPromptContext: SelectedPromptContext = {
-  contextAnonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockEventPromptContext.id,
   rawData: 'test-raw-data',
 };

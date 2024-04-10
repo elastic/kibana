@@ -17,7 +17,7 @@ describe('Stats', () => {
     contextAnonymizationFields: {
       total: 0,
       page: 1,
-      perPage: 100,
+      perPage: 1000,
       data: [
         {
           id: 'field1',

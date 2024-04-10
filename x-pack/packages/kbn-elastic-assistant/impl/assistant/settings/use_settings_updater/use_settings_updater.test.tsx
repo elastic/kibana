@@ -32,7 +32,7 @@ const mockQuickPrompts: Prompt[] = [defaultSystemPrompt];
 const anonymizationFields = {
   total: 2,
   page: 1,
-  perPage: 100,
+  perPage: 1000,
   data: [
     { id: 'allow1', field: 'allow1', allowed: true, anonymized: false },
     { id: 'replacement1', field: 'replacement1', allowed: false, anonymized: true },
@@ -71,7 +71,7 @@ const updatedValues = {
   updatedAnonymizationData: {
     total: 2,
     page: 1,
-    perPage: 100,
+    perPage: 1000,
     data: [
       { id: 'allow2', field: 'allow2', allowed: true, anonymized: false },
       { id: 'replacement2', field: 'replacement2', allowed: false, anonymized: true },

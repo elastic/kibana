@@ -53,8 +53,7 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
       const updatedFieldsKeys = updates.map((u) => u.field);
 
       const updatedFields = updates.map((u) => ({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ...anonymizationFields.data.find((f) => f.field === u.field)!,
+        ...(anonymizationFields.data.find((f) => f.field === u.field) ?? { id: '', field: '' }),
         ...(u.update === 'allow' || u.update === 'defaultAllow'
           ? { allowed: u.operation === 'add' }
           : {}),
@@ -82,11 +81,6 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
       setUpdatedAnonymizationData,
     ]
   );
-
-  const onReset = useCallback(() => {
-    // setUpdatedDefaultAllow(baseAllow);
-    // setUpdatedDefaultAllowReplacement(baseAllowReplacement);
-  }, []);
 
   const anonymized: number = useMemo(() => {
     return anonymizationFields.data.reduce((acc, data) => (data.anonymized ? acc + 1 : acc), 0);
@@ -121,7 +115,6 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
       <ContextEditor
         anonymizationFields={anonymizationFields}
         onListUpdated={onListUpdated}
-        onReset={onReset}
         rawData={null}
         pageSize={defaultPageSize}
       />

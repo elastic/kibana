@@ -35,7 +35,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 3,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'fieldName1',
@@ -67,7 +67,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 3,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'fieldName1',
@@ -101,7 +101,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 2,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'field1',
@@ -127,7 +127,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 2,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'field1',
@@ -152,7 +152,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 0,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [],
       };
       const field = 'field1';
@@ -164,7 +164,7 @@ describe('helpers', () => {
       const anonymizationFields = {
         total: 2,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'field1',
@@ -190,7 +190,7 @@ describe('helpers', () => {
     const anonymizationFields = {
       total: 2,
       page: 1,
-      perPage: 100,
+      perPage: 1000,
       data: [
         {
           id: 'user.name',
@@ -231,7 +231,7 @@ describe('helpers', () => {
       contextAnonymizationFields: {
         total: 2,
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         data: [
           {
             id: 'user.name',
@@ -321,7 +321,7 @@ describe('helpers', () => {
           { allowed: true, anonymized: false, field: 'user.name', id: 'user.name' },
         ],
         page: 1,
-        perPage: 100,
+        perPage: 1000,
         total: 2,
       });
     });
