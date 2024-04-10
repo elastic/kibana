@@ -133,18 +133,18 @@ export class NavigationPublicPlugin
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    let isFeatureEnabled$ = of(false);
+    let isSolutionNavExperiementEnabled$ = of(false);
     this.isSolutionNavEnabled$ = of(false);
 
     if (cloudExperiments) {
-      isFeatureEnabled$ = from(
-        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-      ).pipe(
-        shareReplay(1),
-        map((isFeatureFlagEnabled) => isFeatureFlagEnabled && onCloud && !isServerless)
-      );
+      isSolutionNavExperiementEnabled$ =
+        !onCloud || isServerless
+          ? of(false)
+          : from(cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)).pipe(
+              shareReplay(1)
+            );
 
-      this.isSolutionNavEnabled$ = isFeatureEnabled$.pipe(
+      this.isSolutionNavEnabled$ = isSolutionNavExperiementEnabled$.pipe(
         switchMap((isFeatureEnabled) => {
           return !isFeatureEnabled
             ? of(false)
@@ -172,7 +172,7 @@ export class NavigationPublicPlugin
       });
 
     // Initialize the solution navigation if it is enabled
-    isFeatureEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
+    isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
       if (!isFeatureEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
