@@ -56,7 +56,6 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
-      isSolutionNavEnabled$: this.isSolutionNavigationEnabled$.asObservable(),
       upselling: this.upsellingService,
       onboarding: this.onboardingPageService,
     };

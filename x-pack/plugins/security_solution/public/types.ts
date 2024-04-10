@@ -154,7 +154,6 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   getComponents$: GetComponents$;
-  isSolutionNavEnabled$: Observable<boolean>;
   upselling: UpsellingService;
   onboarding: OnboardingPageService;
 }

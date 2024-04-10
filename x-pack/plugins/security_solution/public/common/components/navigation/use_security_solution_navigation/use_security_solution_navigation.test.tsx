@@ -14,13 +14,11 @@ jest.mock('../breadcrumbs', () => ({
   useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
 }));
 
-const mockIsSolutionNavEnabled$ = jest.fn(() => of(false));
+const mockGetChromeStyle$ = jest.fn().mockReturnValue(of('classic'));
 jest.mock('../../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
-      services: {
-        isSolutionNavEnabled$: mockIsSolutionNavEnabled$(),
-      },
+      services: { chrome: { getChromeStyle$: () => mockGetChromeStyle$() } },
     }),
   };
 });
@@ -31,7 +29,7 @@ describe('Security Solution Navigation', () => {
   });
   describe('when classic navigation is enabled', () => {
     beforeAll(() => {
-      mockIsSolutionNavEnabled$.mockReturnValue(of(false));
+      mockGetChromeStyle$.mockReturnValue(of('classic'));
     });
 
     it('should return proper navigation props', () => {
@@ -55,7 +53,7 @@ describe('Security Solution Navigation', () => {
 
   describe('when solution navigation is enabled', () => {
     beforeAll(() => {
-      mockIsSolutionNavEnabled$.mockReturnValue(of(true));
+      mockGetChromeStyle$.mockReturnValue(of('project'));
     });
 
     it('should return undefined props when disabled', () => {
