@@ -22,7 +22,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,

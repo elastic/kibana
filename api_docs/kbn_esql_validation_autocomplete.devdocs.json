@@ -219,6 +219,8 @@
             "section": "def-common.AstProviderFn",
             "text": "AstProviderFn"
           },
+          ", options: ",
+          "CodeActionOptions",
           ", resourceRetriever: ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
@@ -311,6 +313,21 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.getActions.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "CodeActionOptions"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getActions.$5",
             "type": "Object",
             "tags": [],
             "label": "resourceRetriever",

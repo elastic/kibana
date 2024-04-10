@@ -254,6 +254,15 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOsqueryTab');
     },
 
+    // Dashboards
+    async clickDashboardsTab() {
+      return testSubjects.click('infraAssetDetailsDashboardsTab');
+    },
+
+    async addDashboardExists() {
+      await testSubjects.existOrFail('infraAddDashboard');
+    },
+
     // APM Tab link
     async clickApmTabLink() {
       return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
