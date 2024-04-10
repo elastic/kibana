@@ -290,6 +290,7 @@
     "installed_kibana_space_id",
     "internal",
     "keep_policies_up_to_date",
+    "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
     "package_assets",
@@ -470,6 +471,7 @@
   ],
   "infrastructure-ui-source": [],
   "ingest-agent-policies": [
+    "advanced_settings",
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
