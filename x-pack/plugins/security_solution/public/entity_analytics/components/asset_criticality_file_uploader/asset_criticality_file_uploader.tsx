@@ -49,8 +49,8 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     },
     []
   );
-  const onValidationError = useCallback((message, file) => {
-    dispatch({ type: 'fileError', payload: { message, file } });
+  const onValidationError = useCallback((message) => {
+    dispatch({ type: 'fileError', payload: { message } });
   }, []);
 
   const validateFile = useFileValidation({

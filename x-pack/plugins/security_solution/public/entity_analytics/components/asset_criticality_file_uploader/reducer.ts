@@ -23,14 +23,8 @@ export interface ReducerState {
 }
 
 export type ReducerAction =
-  | { type: 'uploadingFile' }
-  | {
-      type: 'fileUploaded';
-      payload: { response?: AssetCriticalityCsvUploadResponse; errorMessage?: string };
-    }
-  | { type: 'goToStep'; payload: { step: number } }
-  | { type: 'resetState' }
   | { type: 'loadingFile'; payload: { fileName: string } }
+  | { type: 'resetState' }
   | {
       type: 'fileValidated';
       payload: {
@@ -42,7 +36,12 @@ export type ReducerAction =
         invalidLinesCount: number;
       };
     }
-  | { type: 'fileError'; payload: { message: string; file: File } };
+  | { type: 'fileError'; payload: { message: string } }
+  | { type: 'uploadingFile' }
+  | {
+      type: 'fileUploaded';
+      payload: { response?: AssetCriticalityCsvUploadResponse; errorMessage?: string };
+    };
 
 const initialState = {
   isLoading: false,
