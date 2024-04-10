@@ -29,6 +29,7 @@ import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
+  ConcreteTaskInstanceVersion,
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
@@ -38,6 +39,8 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+
+const SO_TYPE = 'task';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -77,6 +80,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
 export type BulkUpdateResult = Result<
@@ -150,7 +154,7 @@ export class TaskStore {
   public convertToSavedObjectIds(
     taskIds: Array<ConcreteTaskInstance['id']>
   ): Array<ConcreteTaskInstance['id']> {
-    return taskIds.map((id) => this.serializer.generateRawId(undefined, 'task', id));
+    return taskIds.map((id) => this.serializer.generateRawId(undefined, SO_TYPE, id));
   }
 
   /**
@@ -166,7 +170,7 @@ export class TaskStore {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
-        'task',
+        SO_TYPE,
         taskInstanceToAttributes(validatedTaskInstance),
         { id: taskInstance.id, refresh: false }
       );
@@ -193,7 +197,7 @@ export class TaskStore {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
-        type: 'task',
+        type: SO_TYPE,
         attributes: taskInstanceToAttributes(validatedTaskInstance),
         id: taskInstance.id,
       };
@@ -255,7 +259,7 @@ export class TaskStore {
     let updatedSavedObject;
     try {
       updatedSavedObject = await this.savedObjectsRepository.update<SerializedConcreteTaskInstance>(
-        'task',
+        SO_TYPE,
         doc.id,
         attributes,
         {
@@ -304,7 +308,7 @@ export class TaskStore {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
           docs.map((doc) => ({
-            type: 'task',
+            type: SO_TYPE,
             id: doc.id,
             version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
@@ -321,7 +325,7 @@ export class TaskStore {
     return updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
-          type: 'task',
+          type: SO_TYPE,
           id: updatedSavedObject.id,
           error: updatedSavedObject.error,
         });
@@ -349,7 +353,7 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     try {
-      await this.savedObjectsRepository.delete('task', id, { refresh: false });
+      await this.savedObjectsRepository.delete(SO_TYPE, id, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -364,7 +368,7 @@ export class TaskStore {
    */
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
     try {
-      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
+      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: SO_TYPE }));
       return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
@@ -381,7 +385,7 @@ export class TaskStore {
   public async get(id: string): Promise<ConcreteTaskInstance> {
     let result;
     try {
-      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
+      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>(SO_TYPE, id);
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -400,7 +404,7 @@ export class TaskStore {
     let result;
     try {
       result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
-        ids.map((id) => ({ type: 'task', id }))
+        ids.map((id) => ({ type: SO_TYPE, id }))
       );
     } catch (e) {
       this.errors$.next(e);
@@ -413,6 +417,43 @@ export class TaskStore {
       const taskInstance = savedObjectToConcreteTaskInstance(task);
       return asOk(taskInstance);
     });
+  }
+
+  /**
+   * Gets task version info by ids
+   *
+   * @param {Array<string>} esIds
+   * @returns {Promise<ConcreteTaskInstance[]>}
+   */
+  public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
+    const taskVersions = await this.esClientWithoutRetries.mget<never>({
+      index: this.index,
+      _source: false,
+      body: {
+        ids,
+      },
+    });
+
+    const result = taskVersions.docs.map((taskVersion) => {
+      if (isMGetSuccess(taskVersion)) {
+        return {
+          esId: taskVersion._id,
+          seqNo: taskVersion._seq_no,
+          primaryTerm: taskVersion._primary_term,
+        };
+      }
+
+      const errorTaskVersion = taskVersion as estypes.MgetMultiGetError;
+      const error = errorTaskVersion.error
+        ? `${taskVersion.error.type}: ${taskVersion.error.reason}`
+        : `unknown error performing bulk for ${taskVersion._id}`;
+      return {
+        esId: taskVersion._id,
+        error,
+      };
+    });
+
+    return result;
   }
 
   /**
@@ -437,9 +478,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
-      const {
-        hits: { hits: tasks },
-      } = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
+      const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
         body: {
@@ -447,6 +486,21 @@ export class TaskStore {
           query,
         },
       });
+      const {
+        hits: { hits: tasks },
+      } = result;
+
+      const versionMap = new Map<string, ConcreteTaskInstanceVersion>();
+      for (const task of tasks) {
+        if (task._seq_no == null || task._primary_term == null) continue;
+
+        const esId = task._id.startsWith('task:') ? task._id.slice(5) : task._id;
+        versionMap.set(esId, {
+          esId: task._id,
+          seqNo: task._seq_no,
+          primaryTerm: task._primary_term,
+        });
+      }
 
       return {
         docs: tasks
@@ -457,6 +511,7 @@ export class TaskStore {
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
           .filter((doc): doc is ConcreteTaskInstance => !!doc),
+        versionMap,
       };
     } catch (e) {
       this.errors$.next(e);
@@ -527,6 +582,15 @@ export class TaskStore {
       throw e;
     }
   }
+
+  public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {
+    const versions = await this.bulkGetVersions(esIds);
+    const result = new Map<string, ConcreteTaskInstanceVersion>();
+    for (const version of versions) {
+      result.set(version.esId, version);
+    }
+    return result;
+  }
 }
 
 /**
@@ -588,7 +652,7 @@ function parseJSONField(json: string, fieldName: string, id: string) {
 
 function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
   const originalQuery = opts.query;
-  const queryOnlyTasks = { term: { type: 'task' } };
+  const queryOnlyTasks = { term: { type: SO_TYPE } };
   const query = originalQuery
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
@@ -603,7 +667,7 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
+      filter: [{ term: { type: SO_TYPE } }, { term: { 'task.enabled': true } }],
     },
   };
   const query = originalQuery
@@ -613,4 +677,8 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
     ...opts,
     query,
   };
+}
+
+function isMGetSuccess(doc: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return (doc as estypes.GetGetResult).found !== undefined;
 }

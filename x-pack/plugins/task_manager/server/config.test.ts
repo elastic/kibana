@@ -242,6 +242,14 @@ describe('config validation', () => {
     }).not.toThrowError();
   });
 
+  test('the default claim strategy is valid', () => {
+    configSchema.validate({ claim_strategy: 'default' });
+  });
+
+  test('the mget claim strategy is valid', () => {
+    configSchema.validate({ claim_strategy: 'mget' });
+  });
+
   test('the claim strategy is validated', () => {
     const config = { claim_strategy: 'invalid-strategy' };
     expect(() => {

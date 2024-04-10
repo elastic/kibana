@@ -7,12 +7,18 @@
 
 import { getTaskClaimer } from '.';
 import { claimAvailableTasksDefault } from './strategy_default';
+import { claimAvailableTasksMget } from './strategy_mget';
 
 describe('task_claimers/index', () => {
   describe('getTaskClaimer()', () => {
     test('returns expected result for default', () => {
       const taskClaimer = getTaskClaimer('default');
       expect(taskClaimer).toBe(claimAvailableTasksDefault);
+    });
+
+    test('returns expected result for mget', () => {
+      const taskClaimer = getTaskClaimer('mget');
+      expect(taskClaimer).toBe(claimAvailableTasksMget);
     });
 
     test('throws error for unsupported parameter', () => {
