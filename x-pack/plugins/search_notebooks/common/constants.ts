@@ -15,7 +15,7 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
   }),
   description: i18n.translate('xpack.searchNotebooks.introductionNotebook.description', {
     defaultMessage:
-      'Jupyter notebooks are an open-source document format for sharing live code examples with narrative text.',
+      'Jupyter Notebooks are an open-source document format for sharing interactive code embedded in narrative text.',
   }),
   notebook: {
     cells: [
@@ -24,7 +24,7 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
         source: [
           '# What are Jupyter Notebooks\n',
           '\n',
-          'Jupyter Notebooks are an innovative tool that utilizes code, computation output and rich text into a single interactive document. They serve as a versatile platform for data analysis, scientific research and educational purposes.',
+          'Jupyter Notebooks combine executable code and rich Markdown documentation in a single interactive document. Easy to run, edit and share, they enable collaboration in fields like data science, scientific computing, and machine learning.',
         ],
       },
       {
