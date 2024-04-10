@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  copyToClipboard,
+  EuiButton,
+  EuiCodeBlock,
+  EuiCopy,
+  EuiForm,
+  EuiModalFooter,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -23,11 +32,7 @@ type LinkProps = Pick<
   | 'shareableUrlForSavedObject'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & {
-  setDashboardLink: (url: string) => void;
-  setIsNotSaved: () => void;
-  setIsClicked: boolean;
-};
+>;
 
 interface UrlParams {
   [extensionName: string]: {
@@ -43,13 +48,10 @@ export const LinkContent = ({
   shareableUrlForSavedObject,
   urlService,
   shareableUrlLocatorParams,
-  setDashboardLink,
-  setIsNotSaved,
   allowShortUrl,
-  setIsClicked,
 }: LinkProps) => {
   const isMounted = useMountedState();
-  const [, setUrl] = useState<string>('');
+  const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
@@ -132,44 +134,37 @@ export const LinkContent = ({
     return updateUrlParams(formattedUrl);
   }, [getSnapshotUrl, isNotSaved, updateUrlParams]);
 
-  const createShortUrl = useCallback(
-    async (tempUrl: string) => {
-      if (!isMounted || shortUrlCache) return setDashboardLink(shortUrlCache!);
-      const shortUrl = shareableUrlLocatorParams
-        ? await urlService.shortUrls.get(null).createWithLocator(shareableUrlLocatorParams)
-        : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
-      setShortUrlCache(shortUrl as string);
-      setUrl(shortUrl as string);
-      return setDashboardLink(shortUrl as string);
-    },
-    [setDashboardLink, isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache]
-  );
+  const createShortUrl = useCallback(async () => {
+    if (shareableUrlLocatorParams) {
+      const shortUrls = urlService.shortUrls.get(null);
+      const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+      const urlWithLoc = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      setShortUrlCache(urlWithLoc);
+      return urlWithLoc;
+    } else {
+      const snapshotUrl = getSnapshotUrl();
+      const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+      setShortUrlCache(shortUrl.url);
+      return shortUrl.url;
+    }
+  }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
 
-  const setUrlHelper = useCallback(() => {
-    let tempUrl: string | undefined;
+  const setUrlHelper = useCallback(async () => {
+    let tempUrl = '';
 
     if (objectType === 'dashboard' || objectType === 'search') {
       tempUrl = getSnapshotUrl();
     } else if ('lens') {
-      tempUrl = getSavedObjectUrl();
+      tempUrl = getSavedObjectUrl() as string;
     }
-    return allowShortUrl
-      ? createShortUrl(tempUrl!)
-      : (setUrl(tempUrl!), setDashboardLink(tempUrl!));
-  }, [
-    allowShortUrl,
-    createShortUrl,
-    getSavedObjectUrl,
-    getSnapshotUrl,
-    objectType,
-    setDashboardLink,
-  ]);
+    const urlToCopy = allowShortUrl ? await createShortUrl() : tempUrl;
+    copyToClipboard(urlToCopy);
+    setUrl(urlToCopy);
+  }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl]);
 
   useEffect(() => {
     isMounted();
-    if (setIsClicked === true) setUrlHelper();
-    setIsNotSaved();
-  }, [objectType, setIsNotSaved, isDirty, isMounted, setUrlHelper, setIsClicked]);
+  }, [objectType, isDirty, isMounted, setUrlHelper]);
 
   const renderSaveState =
     objectType === 'lens' && isNotSaved() ? (
@@ -185,22 +180,41 @@ export const LinkContent = ({
     );
 
   return (
-    <EuiForm>
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <FormattedMessage
-          id="share.link.helpText"
-          defaultMessage="Share a direct link to this {objectType}."
-          values={{ objectType }}
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
-      {objectType !== 'dashboard' && (
-        <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-          {renderSaveState}
-        </EuiCodeBlock>
-      )}
-      <EuiSpacer />
-    </EuiForm>
+    <>
+      <EuiForm>
+        <EuiSpacer size="m" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="share.link.helpText"
+            defaultMessage="Share a direct link to this {objectType}."
+            values={{ objectType }}
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        {objectType !== 'dashboard' && (
+          <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
+            {renderSaveState}
+          </EuiCodeBlock>
+        )}
+        <EuiSpacer />
+      </EuiForm>
+      <EuiModalFooter>
+        <EuiCopy textToCopy={url}>
+          {() => (
+            <EuiButton
+              fill
+              data-test-subj="copyShareUrlButton"
+              color={isNotSaved() ? 'warning' : 'primary'}
+              data-share-url={url}
+              onClick={() => {
+                return url ? copyToClipboard(url) : setUrlHelper();
+              }}
+            >
+              <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
+            </EuiButton>
+          )}
+        </EuiCopy>
+      </EuiModalFooter>
+    </>
   );
 };

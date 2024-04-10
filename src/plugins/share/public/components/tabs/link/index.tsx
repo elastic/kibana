@@ -8,7 +8,6 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { copyToClipboard } from '@elastic/eui';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { useShareTabsContext } from '../../context';
 import { LinkContent } from './link_content';
@@ -113,14 +112,4 @@ export const linkTab: ILinkTab = {
   }),
   content: LinkTabContent,
   reducer: linkTabReducer,
-  modalActionBtn: {
-    id: 'link',
-    dataTestSubj: 'copyShareUrlButton',
-    label: i18n.translate('share.link.copyLinkButton', { defaultMessage: 'Copy link' }),
-    handler: ({ state }) => {
-      state.setIsClicked = true;
-      copyToClipboard(state.dashboardUrl);
-    },
-    style: ({ state }) => state.isNotSaved,
-  },
 };
