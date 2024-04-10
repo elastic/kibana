@@ -56,9 +56,7 @@ export const markdownRenderers = (
   refs: MutableRefObject<Map<string, HTMLDivElement | null>>
 ): TransformOptions['components'] => {
   return {
-    table: ({ children }) => (
-      <EuiTable className="euiEuiTable euiTable--responsive">{children}</EuiTable>
-    ),
+    table: ({ children }) => <EuiTable>{children}</EuiTable>,
     tr: ({ children }) => <EuiTableRow>{children}</EuiTableRow>,
     th: ({ children }) => <EuiTableHeaderCell>{children}</EuiTableHeaderCell>,
     td: ({ children }) => <EuiTableRowCell>{children}</EuiTableRowCell>,
