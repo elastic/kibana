@@ -17,3 +17,5 @@ export {
   getESQLWithSafeLimit,
   TextBasedLanguages,
 } from './src';
+
+export { ESQL_LATEST_VERSION } from './constants';
