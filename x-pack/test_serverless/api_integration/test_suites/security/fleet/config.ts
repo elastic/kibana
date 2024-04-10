@@ -18,7 +18,7 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/security/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.nlp.enabled=true'],
 
   kbnServerArgs,
 });

@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           'should display the stats bar and the analytics table with no trained models'
         );
-        await ml.trainedModels.assertStats(0);
-        await ml.trainedModelsTable.assertTableIsNotPopulated();
+        await ml.trainedModels.assertStats(1);
+        await ml.trainedModelsTable.assertTableIsPopulated();
       });
     });
   });
