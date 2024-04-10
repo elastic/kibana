@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';
+import { UUID, NonEmptyString } from '../conversations/common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
 export const BulkActionSkipReason = z.literal('ANONYMIZATION_FIELD_NOT_MODIFIED');
@@ -53,7 +53,6 @@ export const AnonymizationFieldResponse = z.object({
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
   createdBy: z.string().optional(),
-  users: z.array(User).optional(),
   /**
    * Kibana space
    */

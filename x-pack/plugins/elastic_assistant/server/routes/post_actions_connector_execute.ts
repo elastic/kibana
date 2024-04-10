@@ -38,6 +38,8 @@ import {
   getPluginNameFromRequest,
 } from './helpers';
 import { getLangSmithTracer } from './evaluate/utils';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -78,7 +80,11 @@ export const postActionsConnectorExecuteRoute = (
               body: `Authenticated user not found`,
             });
           }
-          const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
+          const conversationsDataClient =
+            await assistantContext.getAIAssistantConversationsDataClient();
+
+          const anonymizationFieldsDataClient =
+            await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
 
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
@@ -102,7 +108,7 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           if (conversationId) {
-            const conversation = await dataClient?.getConversation({
+            const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -112,14 +118,14 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            // messages are anonymized by dataClient
+            // messages are anonymized by conversationsDataClient
             prevMessages = conversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
 
             if (request.body.message) {
-              const res = await dataClient?.appendConversationMessages({
+              const res = await conversationsDataClient?.appendConversationMessages({
                 existingConversation: conversation,
                 messages: [
                   {
@@ -141,7 +147,7 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
             }
-            const updatedConversation = await dataClient?.getConversation({
+            const updatedConversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -157,7 +163,7 @@ export const postActionsConnectorExecuteRoute = (
               traceData: Message['traceData'] = {}
             ): Promise<void> => {
               if (updatedConversation) {
-                await dataClient?.appendConversationMessages({
+                await conversationsDataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
@@ -171,7 +177,7 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
               if (Object.keys(latestReplacements).length > 0) {
-                await dataClient?.updateConversation({
+                await conversationsDataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,
                     replacements: latestReplacements,
@@ -243,12 +249,19 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+          const anonymizationFieldsRes =
+            await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
+            });
+
           const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
             await callAgentExecutor({
               abortSignal,
               alertsIndexPattern: request.body.alertsIndexPattern,
-              allow: request.body.allow,
-              allowReplacement: request.body.allowReplacement,
+              anonymizationFields: anonymizationFieldsRes
+                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+                : undefined,
               actions,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
               assistantTools,

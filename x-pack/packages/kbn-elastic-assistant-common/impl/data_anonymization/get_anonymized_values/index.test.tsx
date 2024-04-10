@@ -10,14 +10,8 @@ import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 
 describe('getAnonymizedValues', () => {
   it('returns empty anonymizedValues and replacements when provided with empty raw data', () => {
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [],
-    };
     const result = getAnonymizedValues({
-      anonymizationFields,
+      anonymizationFields: [],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: jest.fn(),
@@ -35,15 +29,10 @@ describe('getAnonymizedValues', () => {
       'test.field': ['test1', 'test2'],
     };
 
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [{ id: 'test.field', field: 'test.field', allowed: true, anonymized: true }],
-    };
-
     const result = getAnonymizedValues({
-      anonymizationFields,
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: true },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -54,18 +43,14 @@ describe('getAnonymizedValues', () => {
   });
 
   it('returns the expected replacements', () => {
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [{ id: 'test.field', field: 'test.field', allowed: true, anonymized: true }],
-    };
     const rawData = {
       'test.field': ['test1', 'test2'],
     };
 
     const result = getAnonymizedValues({
-      anonymizationFields,
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: true },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -79,18 +64,14 @@ describe('getAnonymizedValues', () => {
   });
 
   it('returns non-anonymized values when the field is not a member of the `allowReplacementSet`', () => {
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [{ id: 'test.field', field: 'test.field', allowed: true, anonymized: false }],
-    };
     const rawData = {
       'test.field': ['test1', 'test2'],
     };
 
     const result = getAnonymizedValues({
-      anonymizationFields,
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: true, anonymized: false },
+      ],
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,
@@ -101,18 +82,14 @@ describe('getAnonymizedValues', () => {
   });
 
   it('does NOT allow a field to be included in `anonymizedValues` when the field is not a member of the `allowSet`', () => {
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [{ id: 'test.field', field: 'test.field', allowed: false, anonymized: true }],
-    };
     const rawData = {
       'test.field': ['test1', 'test2'],
     };
 
     const result = getAnonymizedValues({
-      anonymizationFields, // does NOT include `test.field`
+      anonymizationFields: [
+        { id: 'test.field', field: 'test.field', allowed: false, anonymized: true },
+      ], // does NOT include `test.field`
       currentReplacements: {},
       field: 'test.field',
       getAnonymizedValue: mockGetAnonymizedValue,

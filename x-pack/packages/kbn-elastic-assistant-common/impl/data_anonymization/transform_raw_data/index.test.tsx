@@ -10,15 +10,10 @@ import { transformRawData } from '.';
 
 describe('transformRawData', () => {
   it('returns non-anonymized data when rawData is a string', () => {
-    const anonymizationFields = {
-      total: 2,
-      page: 1,
-      perPage: 100,
-      data: [
-        { id: 'field1', field: 'field1', allowed: true, anonymized: true },
-        { id: 'field2', field: 'field2', allowed: false, anonymized: true },
-      ],
-    };
+    const anonymizationFields = [
+      { id: 'field1', field: 'field1', allowed: true, anonymized: true },
+      { id: 'field2', field: 'field2', allowed: false, anonymized: true },
+    ];
     const inputRawData = {
       anonymizationFields,
       promptContextId: 'abcd',
@@ -52,7 +47,7 @@ describe('transformRawData', () => {
     const onNewReplacements = jest.fn();
 
     transformRawData({
-      anonymizationFields: inputRawData.anonymizationFields,
+      anonymizationFields: inputRawData.anonymizationFields.data,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements,
@@ -79,7 +74,7 @@ describe('transformRawData', () => {
     };
 
     const result = transformRawData({
-      anonymizationFields: inputRawData.anonymizationFields,
+      anonymizationFields: inputRawData.anonymizationFields.data,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},
@@ -111,7 +106,7 @@ describe('transformRawData', () => {
     };
 
     const result = transformRawData({
-      anonymizationFields: inputRawData.anonymizationFields,
+      anonymizationFields: inputRawData.anonymizationFields.data,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
       onNewReplacements: () => {},

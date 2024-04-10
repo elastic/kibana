@@ -22,6 +22,7 @@ import {
 import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
 
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
@@ -109,6 +110,9 @@ const mockContext = {
       getConversation: jest.fn().mockResolvedValue(existingConversation),
       updateConversation: jest.fn().mockResolvedValue(existingConversation),
       appendConversationMessages: jest.fn().mockResolvedValue(existingConversation),
+    }),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
     }),
   },
   core: {
@@ -284,8 +288,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -320,8 +326,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -453,8 +461,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },

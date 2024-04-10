@@ -17,8 +17,6 @@ export interface FetchConnectorExecuteAction {
   conversationId: string;
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: ApiConfig;
@@ -44,8 +42,6 @@ export const fetchConnectorExecuteAction = async ({
   conversationId,
   isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
@@ -66,8 +62,6 @@ export const fetchConnectorExecuteAction = async ({
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
-    allow,
-    allowReplacement,
     size,
   });
 

@@ -22,8 +22,8 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
       const stringValue = `${rawValue}`;
 
       if (
-        isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field }) &&
-        isAnonymized({ anonymizationFields: anonymizationFields?.data ?? [], field })
+        isAllowed({ anonymizationFields: anonymizationFields ?? [], field }) &&
+        isAnonymized({ anonymizationFields: anonymizationFields ?? [], field })
       ) {
         const anonymizedValue = `${getAnonymizedValue({
           currentReplacements,
@@ -37,7 +37,7 @@ export const getAnonymizedValues: GetAnonymizedValues = ({
             [anonymizedValue]: stringValue,
           },
         };
-      } else if (isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field })) {
+      } else if (isAllowed({ anonymizationFields: anonymizationFields ?? [], field })) {
         return {
           anonymizedValues: [...acc.anonymizedValues, stringValue], // no anonymization for this value
           replacements: {

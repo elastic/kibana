@@ -45,15 +45,21 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { alertsIndexPattern, allow, esClient, onNewReplacements, replacements, size } =
-      params as OpenAndAcknowledgedAlertsToolParams;
+    const {
+      alertsIndexPattern,
+      anonymizationFields,
+      esClient,
+      onNewReplacements,
+      replacements,
+      size,
+    } = params as OpenAndAcknowledgedAlertsToolParams;
     return new DynamicTool({
       name: 'OpenAndAcknowledgedAlertsTool',
       description: OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
       func: async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
-          allow: allow ?? [],
+          anonymizationFields: anonymizationFields ?? [],
           size,
         });
 
@@ -71,7 +77,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         return JSON.stringify(
           result.hits?.hits?.map((x) =>
             transformRawData({
-              anonymizationFields: { total: 0, page: 1, perPage: 100, data: [] },
+              anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback
