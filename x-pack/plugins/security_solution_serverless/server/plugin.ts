@@ -75,7 +75,7 @@ export class SecuritySolutionServerlessPlugin
     }
 
     // Register telemetry events
-    telemetryEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     enableRuleActions({
       actions: pluginsSetup.actions,
