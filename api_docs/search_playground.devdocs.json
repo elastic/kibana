@@ -40,7 +40,9 @@
           "label": "PlaygroundProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<",
+            "PlaygroundProviderProps",
+            " & { children?: React.ReactNode; }>"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
