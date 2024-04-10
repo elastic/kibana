@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiText, EuiHighlight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
+import { map as _map, groupBy as _groupBy} from 'lodash';
 
 import {
   FieldValidateResponse,
@@ -28,9 +29,11 @@ import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../s
 
 export const extractProcessorDetails = flow(
   Object.entries,
-  map(([type, { label, forLicenseAtLeast }]) => ({
+  map(([type, { label, forLicenseAtLeast, category, typeDescription }]) => ({
     label,
     value: type,
+    category,
+    typeDescription,
     ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
   })),
   (arr) => arr.sort((a, b) => a.label.localeCompare(b.label))
@@ -42,15 +45,24 @@ interface ProcessorTypeAndLabel {
 }
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
-  return (
+  const filteredProcessors = (
     extractProcessorDetails(mapProcessorTypeToDescriptor)
       // Filter out any processors that are not available for the current license type
       .filter((option) => {
         return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
       })
-      // Convert to EuiComboBox options
-      .map(({ value, label }) => ({ label, value }))
+      // Pick properties we need to build the categories
+      .map(({ value, label, category, typeDescription }) => ({ label, value, category, typeDescription }))
   );
+
+  return _map(_groupBy(filteredProcessors, 'category'), (options, label) => ({
+    label,
+    options: _map(options, ({ label, value, typeDescription }) => ({
+      label,
+      value,
+      'data-description': typeDescription,
+    }))
+  }));
 };
 
 interface Props {
@@ -74,6 +86,21 @@ const typeConfig: FieldConfig<string> = {
       ),
     },
   ],
+};
+
+const renderOption = (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
+  const { label } = option;
+
+  console.log(contentClassName);
+
+  return (
+    <>
+      <strong><EuiHighlight search={searchValue}>{label}</EuiHighlight></strong>
+      <EuiText size="s" color="subdued">
+        <p>{option['data-description']}</p>
+      </EuiText>
+    </>
+  );
 };
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
@@ -142,6 +169,8 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
                 }
               )}
               options={processorOptions}
+              rowHeight={70}
+              renderOption={renderOption}
               selectedOptions={selectedOptions}
               onCreateOption={onCreateComboOption}
               onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
@@ -152,6 +181,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
               singleSelection={{
                 asPlainText: true,
               }}
+
               data-test-subj="input"
             />
           </EuiFormRow>
