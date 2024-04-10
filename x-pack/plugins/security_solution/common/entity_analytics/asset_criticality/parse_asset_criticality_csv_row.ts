@@ -62,7 +62,7 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.missingIdError', {
-        defaultMessage: 'Missing ID',
+        defaultMessage: 'Missing identifier',
       }),
     };
   }
@@ -71,7 +71,8 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     return {
       valid: false,
       error: i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.idTooLongError', {
-        defaultMessage: 'ID is too long, expected less than {maxChars} characters, got {idLength}',
+        defaultMessage:
+          'Identifier is too long, expected less than {maxChars} characters, got {idLength}',
         values: { maxChars: MAX_COLUMN_CHARS, idLength: idValue.length },
       }),
     };

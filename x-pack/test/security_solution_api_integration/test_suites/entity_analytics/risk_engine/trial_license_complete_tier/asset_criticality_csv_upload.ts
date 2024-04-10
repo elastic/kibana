@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           index: 2,
-          message: 'Missing ID',
+          message: 'Missing identifier',
         },
         {
           index: 3,
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         {
           index: 7,
-          message: `ID is too long, expected less than 1000 characters, got 1001`,
+          message: `Identifier is too long, expected less than 1000 characters, got 1001`,
         },
       ]);
     });

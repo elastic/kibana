@@ -66,7 +66,7 @@ describe('parseAssetCriticalityCsvRow', () => {
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
-    expect(result.error).toMatchInlineSnapshot(`"Missing ID"`);
+    expect(result.error).toMatchInlineSnapshot(`"Missing identifier"`);
   });
 
   it('should return valid false if the criticality level is missing', () => {
@@ -105,7 +105,7 @@ describe('parseAssetCriticalityCsvRow', () => {
 
     // @ts-ignore result can now only be InvalidRecord
     expect(result.error).toMatchInlineSnapshot(
-      `"ID is too long, expected less than 1000 characters, got 1001"`
+      `"Identifier is too long, expected less than 1000 characters, got 1001"`
     );
   });
 
