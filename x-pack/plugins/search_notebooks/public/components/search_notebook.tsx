@@ -53,6 +53,7 @@ export const SearchNotebook = ({ notebookId }: SearchNotebookProps) => {
       paddingSize="xl"
       hasShadow={false}
       style={{ display: 'flex', justifyContent: 'center' }}
+      data-test-subj={`console-embedded-notebook-view-panel-${notebookId}`}
     >
       <NotebookRenderer notebook={data.notebook} />
     </EuiPanel>

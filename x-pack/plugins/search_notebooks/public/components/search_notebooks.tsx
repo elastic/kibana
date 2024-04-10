@@ -43,6 +43,7 @@ export const SearchNotebooks = () => {
     <EuiResizableContainer
       style={{ height: '100%', width: '100%' }}
       onPanelWidthChange={onPanelWidthChange}
+      data-test-subj="consoleEmbeddedNotebooksContainer"
     >
       {(EuiResizablePanel, EuiResizableButton) => (
         <>
