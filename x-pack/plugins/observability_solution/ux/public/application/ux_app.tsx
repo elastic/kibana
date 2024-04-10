@@ -20,9 +20,10 @@ import {
   APP_WRAPPER_CLASS,
 } from '@kbn/core/public';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   KibanaContextProvider,
-  KibanaThemeProvider,
   useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 
@@ -129,51 +130,50 @@ export function UXAppRoot({
   spaceId: string;
 }) {
   const { history } = appMountParameters;
-  const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
 
   createCallApmApi(core);
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application: core.application,
-        }}
-      >
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            inspector,
-            observability,
-            observabilityShared,
-            observabilityAIAssistant,
-            embeddable,
-            exploratoryView,
-            data,
-            dataViews,
-            lens,
+    <KibanaRenderContextProvider {...core}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application: core.application,
           }}
         >
-          <KibanaThemeProvider
-            theme$={appMountParameters.theme$}
-            modify={{
-              breakpoint: {
-                xxl: 1600,
-                xxxl: 2000,
-              },
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+              inspector,
+              observability,
+              observabilityShared,
+              observabilityAIAssistant,
+              embeddable,
+              exploratoryView,
+              data,
+              dataViews,
+              lens,
             }}
           >
-            <PluginContext.Provider
-              value={{
-                appMountParameters,
-                exploratoryView,
-                observabilityShared,
-                spaceId,
+            <KibanaThemeProvider
+              theme={core.theme}
+              modify={{
+                breakpoint: {
+                  xxl: 1600,
+                  xxxl: 2000,
+                },
               }}
             >
-              <i18nCore.Context>
+              <PluginContext.Provider
+                value={{
+                  appMountParameters,
+                  exploratoryView,
+                  observabilityShared,
+                  spaceId,
+                }}
+              >
                 <RouterProvider history={history} router={uxRouter}>
                   <DatePickerContextProvider>
                     <InspectorContextProvider>
@@ -191,12 +191,12 @@ export function UXAppRoot({
                     </InspectorContextProvider>
                   </DatePickerContextProvider>
                 </RouterProvider>
-              </i18nCore.Context>
-            </PluginContext.Provider>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
-      </RedirectAppLinks>
-    </div>
+              </PluginContext.Provider>
+            </KibanaThemeProvider>
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 }
 

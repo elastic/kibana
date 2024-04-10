@@ -113,7 +113,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
     "@kbn/shared-ux-markdown",
-    "@kbn/core-http-request-handler-context-server"
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": ["target/**/*"]
 }
