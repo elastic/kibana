@@ -153,7 +153,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(screen.getByRole('table')).toHaveTextContent(
-        'Time ranRecent queriesLast durationTime ranMar. 25, 24 08:45:27Recent queriesfrom kibana_sample_data_flights | limit 10Last duration2ms'
+        'Time ranRecent queriesLast durationMar. 25, 24 08:45:27from kibana_sample_data_flights | limit 102ms'
       );
     });
   });

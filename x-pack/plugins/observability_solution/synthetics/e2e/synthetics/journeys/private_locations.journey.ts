@@ -118,8 +118,8 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('[data-test-subj="settings-page-link"]');
     await page.click('h1:has-text("Settings")');
     await page.click('text=Private Locations');
-    await page.waitForSelector('td:has-text("Monitors"):has-text("1")');
-    await page.waitForSelector('td:has-text("Location nam"):has-text("Test private")');
+    await page.waitForSelector('td:has-text("1")');
+    await page.waitForSelector('td:has-text("Test private")');
     await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');

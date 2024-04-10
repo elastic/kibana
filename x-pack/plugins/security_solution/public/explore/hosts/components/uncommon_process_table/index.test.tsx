@@ -67,7 +67,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(wrapper.find('tr.euiTableRow').at(0).find('td.euiTableRowCell').at(3).text()).toBe(
-        `Host names${getEmptyValue()}`
+        `${getEmptyValue()}`
       );
     });
 
@@ -79,7 +79,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(wrapper.find('tr.euiTableRow').at(1).find('td.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-world '
+        'hello-world '
       );
     });
 
@@ -103,7 +103,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(wrapper.find('tr.euiTableRow').at(2).find('td.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-worldhello-world-2 '
+        'hello-worldhello-world-2 '
       );
     });
 
@@ -126,7 +126,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(wrapper.find('tr.euiTableRow').at(3).find('td.euiTableRowCell').at(3).text()).toBe(
-        `Host names${getEmptyValue()}`
+        `${getEmptyValue()}`
       );
     });
 
@@ -148,7 +148,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(wrapper.find('tr.euiTableRow').at(4).find('td.euiTableRowCell').at(3).text()).toBe(
-        'Host nameshello-worldhello-world-2 '
+        'hello-worldhello-world-2 '
       );
     });
   });
