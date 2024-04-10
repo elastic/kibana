@@ -4356,7 +4356,7 @@ describe('create()', () => {
 
     test('should throw an error if the user does not have privileges to execute the action', async () => {
       actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
-        'Unauthorized to execute actions'
+        new Error('Unauthorized to execute actions')
       );
 
       const data = getMockData({
@@ -4380,7 +4380,7 @@ describe('create()', () => {
       });
 
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
-        `"Unauthorized to execute actions"`
+        `[Error: Unauthorized to execute actions]`
       );
     });
   });

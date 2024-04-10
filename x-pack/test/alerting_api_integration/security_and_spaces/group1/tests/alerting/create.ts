@@ -582,7 +582,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 403,
               });
               break;
-
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
