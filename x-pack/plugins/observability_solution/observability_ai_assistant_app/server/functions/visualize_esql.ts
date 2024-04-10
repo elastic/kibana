@@ -13,7 +13,7 @@ import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plug
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
 
-const getSystemMessage = (
+const getMessageForLLM = (
   intention: VisualizeESQLUserIntention,
   query: string,
   queryErrors: string[]
@@ -34,7 +34,10 @@ export function registerVisualizeESQLFunction({
   functions.registerFunction(
     visualizeESQLFunction,
     async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
+      // recomputing the errors here as the user might click the Visualize query button
+      // and call the function manually.
       const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
+        // setting this to true, we don't want to validate the index / fields existence
         ignoreOnMissingCallbacks: true,
       });
       const errorMessages = errors?.map((error) => {
@@ -61,12 +64,11 @@ export function registerVisualizeESQLFunction({
           meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
 
-      const message = getSystemMessage(intention, query, errorMessages);
+      const message = getMessageForLLM(intention, query, errorMessages);
 
       return {
         data: {
           columns,
-          errorMessages,
         },
         content: {
           message,
