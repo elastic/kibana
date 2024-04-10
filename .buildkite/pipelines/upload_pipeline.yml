@@ -2,4 +2,10 @@
 
 steps:
   - label: Upload tested pipeline
-    command: buildkite-agent pipeline upload ${TESTED_PIPELINE_PATH:-.buildkite/pipelines/pipeline_to_test.yml}
+    command: |
+      if [[ $TESTED_PIPELINE_PATH == *.yml ]]; then
+        echo "Uploading pipeline $TESTED_PIPELINE_PATH"
+        buildkite-agent pipeline upload $TESTED_PIPELINE_PATH
+      else
+        $TESTED_PIPELINE_PATH | buildkite-agent pipeline upload
+      fi
