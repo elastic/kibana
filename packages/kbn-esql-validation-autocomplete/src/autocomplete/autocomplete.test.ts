@@ -1093,6 +1093,8 @@ describe('autocomplete', () => {
       }
     }
 
+    testSuggestions('from a | eval var0 = auto_bucket(@timestamp,', []);
+
     describe('date math', () => {
       const dateSuggestions = timeLiterals.map(({ name }) => name);
       // If a literal number is detected then suggest also date period keywords
