@@ -243,6 +243,7 @@ describe('AlertsTable.BulkActions', () => {
     alertsCount: alerts.length,
     onSortChange: () => {},
     onPageChange: () => {},
+    fieldFormats: (value) => value,
   };
 
   const tablePropsWithBulkActions = {

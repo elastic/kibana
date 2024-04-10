@@ -315,6 +315,7 @@ describe('AlertsTable', () => {
     alertsCount: alerts.length,
     onSortChange: jest.fn(),
     onPageChange: jest.fn(),
+    fieldFormats: (value) => value,
   };
 
   const defaultBulkActionsState = {
