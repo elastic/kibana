@@ -267,5 +267,22 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.owner).toBe('cases');
       });
     });
+
+    describe('getKibanaPrivileges', () => {
+      it('constructs the correct privileges from the consumer', () => {
+        const adapter = getCasesConnectorAdapter();
+
+        expect(adapter.getKibanaPrivileges?.({ consumer: AlertConsumers.SIEM })).toEqual([
+          'cases:securitySolution/createCase',
+          'cases:securitySolution/updateCase',
+          'cases:securitySolution/deleteCase',
+          'cases:securitySolution/pushCase',
+          'cases:securitySolution/createComment',
+          'cases:securitySolution/updateComment',
+          'cases:securitySolution/deleteComment',
+          'cases:securitySolution/findConfigurations',
+        ]);
+      });
+    });
   });
 });

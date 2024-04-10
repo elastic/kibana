@@ -94,6 +94,10 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
 
       return { subAction: 'run', subActionParams };
     },
+    getKibanaPrivileges: ({ consumer }) => {
+      const owner = getOwnerFromRuleConsumer(consumer);
+      return constructRequiredKibanaPrivileges(owner);
+    },
   };
 };
 
