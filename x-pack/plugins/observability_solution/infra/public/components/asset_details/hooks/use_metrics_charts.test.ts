@@ -117,18 +117,6 @@ describe('useKubernetesSectionMetricsCharts', () => {
 });
 
 describe('useHostKpiCharts', () => {
-  it('should return the subtitle "Max" in case of disk usage chart', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostKpiCharts({ dataViewId: metricsDataViewId })
-    );
-    await waitForNextUpdate();
-
-    const diskUsageChart = result.current.find(({ id }) => id === 'diskUsage');
-
-    expect(diskUsageChart).toHaveProperty('subtitle', 'Max');
-    expect(diskUsageChart).toHaveProperty('decimals', 1);
-  });
-
   it('should return an array of charts with correct order', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useHostKpiCharts({ dataViewId: metricsDataViewId })

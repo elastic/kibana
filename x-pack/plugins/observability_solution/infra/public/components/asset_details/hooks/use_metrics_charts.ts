@@ -116,8 +116,8 @@ export const useKubernetesSectionMetricsCharts = ({
   return charts;
 };
 
-const getSubtitleFromChartValue = (value: string) =>
-  value.startsWith('max(')
+const getSubtitleFromFormula = (value: string) =>
+  value.startsWith('max')
     ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
     : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
         defaultMessage: 'Average',
@@ -145,7 +145,7 @@ export const useHostKpiCharts = ({
       decimals: 1,
       subtitle: options?.getSubtitle
         ? options?.getSubtitle(chart.value)
-        : getSubtitleFromChartValue(chart.value),
+        : getSubtitleFromFormula(chart.value),
       ...(dataViewId && {
         dataset: {
           index: dataViewId,
