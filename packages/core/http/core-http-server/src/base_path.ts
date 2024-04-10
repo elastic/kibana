@@ -40,7 +40,7 @@ export interface IBasePath {
    */
   set(
     request: KibanaRequest,
-    requestSpecificBasePath: string | { id: string; basePath: string }
+    requestSpecificBasePath: string | { id: string; basePath: string; index: number }
   ): void;
 
   /**

@@ -11,8 +11,16 @@ import { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
-const isObject = (obj?: string | Record<string, string>): obj is Record<string, string> =>
+interface BasePathCacheValue {
+  id: string;
+  basePath: string;
+  index: number;
+}
+
+const isBasePathCacheValue = (obj?: string | BasePathCacheValue): obj is BasePathCacheValue =>
   !!obj && typeof obj === 'object';
+
+const isObject = (obj?: any): obj is Record<string, any> => !!obj && typeof obj === 'object';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -20,7 +28,10 @@ const isObject = (obj?: string | Record<string, string>): obj is Record<string, 
  * @internal
  */
 export class BasePath implements IBasePath {
-  private readonly basePathCache = new WeakMap<Request, string | Record<string, string>>();
+  private readonly basePathCache = new WeakMap<
+    Request,
+    string | Record<string, BasePathCacheValue>
+  >();
 
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
@@ -33,19 +44,21 @@ export class BasePath implements IBasePath {
   public get = (request: KibanaRequest) => {
     const cacheValue = this.basePathCache.get(ensureRawRequest(request));
     const requestScopePath = isObject(cacheValue)
-      ? Object.values(cacheValue).join('')
+      ? Object.values(cacheValue)
+          .sort((a, b) => a.index - b.index)
+          .map((v) => v.basePath)
+          .join('')
       : cacheValue || '';
 
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  public set = (
-    request: KibanaRequest,
-    requestSpecificBasePath: string | { id: string; basePath: string }
-  ) => {
+  public set = (request: KibanaRequest, requestSpecificBasePath: string | BasePathCacheValue) => {
     const rawRequest = ensureRawRequest(request);
 
     const cached = this.basePathCache.get(rawRequest);
+    let updatedCache: Record<string, BasePathCacheValue> | string;
+
     if (cached) {
       if (typeof cached === 'string' || typeof requestSpecificBasePath === 'string') {
         throw new Error(
@@ -58,15 +71,17 @@ export class BasePath implements IBasePath {
         );
       }
     }
-    let updatedCache: Record<string, string> | string;
-    if (typeof cached === 'string' || typeof requestSpecificBasePath === 'string') {
-      updatedCache = requestSpecificBasePath;
-    } else {
+
+    if (isBasePathCacheValue(requestSpecificBasePath)) {
+      if (typeof cached === 'string') throw new Error('Request basePath was previously set.');
       updatedCache = {
         ...cached,
-        [requestSpecificBasePath.id]: requestSpecificBasePath.basePath,
+        [requestSpecificBasePath.id]: requestSpecificBasePath,
       };
+    } else {
+      updatedCache = requestSpecificBasePath;
     }
+
     this.basePathCache.set(rawRequest, updatedCache);
   };
 
