@@ -22,7 +22,7 @@ describe('<SemanticTextBanner /> with semantic_text enabled', () => {
 
   it('should contain content related to semantic_text', () => {
     expect(find('indexDetailsMappingsSemanticTextBanner').text()).toContain(
-      'semantic_text field type is now available!'
+      'semantic_text field type now available!'
     );
   });
 
