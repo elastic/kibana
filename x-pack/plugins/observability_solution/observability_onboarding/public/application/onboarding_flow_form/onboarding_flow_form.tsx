@@ -78,6 +78,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingUseCase' });
   const [selectedId, setSelectedId] = useState<string>();
   const customMargin = useCustomMargin();
+  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
+  const [integrationSearch, setIntegrationSearch] = useState('');
+
+  const createCollectionCardHandler = (query: string) => () => {
+    setIntegrationSearch(query);
+    if (packageListSearchBarRef.current) {
+      packageListSearchBarRef.current.focus();
+    }
+  };
 
   return (
     <EuiPanel hasBorder>
@@ -141,6 +150,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 url: 'https://azure.com',
                 version: '',
                 integration: '',
+                isCollectionCard: true,
+                onCardClick: createCollectionCardHandler('azure'),
               },
               {
                 id: 'aws-generated',
@@ -153,6 +164,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 url: 'https://aws.com',
                 version: '',
                 integration: '',
+                isCollectionCard: true,
+                onCardClick: createCollectionCardHandler('aws'),
               },
               {
                 id: 'gcp-generated',
@@ -162,9 +175,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 name: 'gcp',
                 categories: ['observability'],
                 icons: [],
-                url: 'https://gcp.com',
+                url: '',
                 version: '',
                 integration: '',
+                isCollectionCard: true,
+                onCardClick: createCollectionCardHandler('gcp'),
               },
             ]}
           />
@@ -178,7 +193,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }
             )}
           </EuiText>
-          <OnboardingFlowPackageList showSearchBar={true} />
+          <OnboardingFlowPackageList
+            showSearchBar={true}
+            searchQuery={integrationSearch}
+            setSearchQuery={setIntegrationSearch}
+            ref={packageListSearchBarRef}
+          />
         </>
       )}
     </EuiPanel>

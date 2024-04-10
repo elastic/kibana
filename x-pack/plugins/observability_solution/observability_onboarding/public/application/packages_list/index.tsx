@@ -38,6 +38,9 @@ interface Props {
    */
   selectedCategory?: string;
   showSearchBar?: boolean;
+  searchBarRef?: React.Ref<HTMLInputElement>;
+  searchQuery?: string;
+  setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 type WrapperProps = Props & {
@@ -52,8 +55,10 @@ const PackageListGridWrapper = ({
   showSearchBar = false,
   featuredCards: featuredCardNames,
   generatedCards,
+  searchBarRef,
+  searchQuery,
+  setSearchQuery,
 }: WrapperProps) => {
-  const [integrationSearch, setIntegrationSearch] = useState('');
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
   const availablePackages = useAvailablePackages({
@@ -66,6 +71,11 @@ const PackageListGridWrapper = ({
     featuredCardNames,
     generatedCards
   );
+  React.useEffect(() => {
+    if (isInitialHidden && searchQuery) {
+      setIsInitialHidden(false);
+    }
+  }, [searchQuery, isInitialHidden]);
   if (!isInitialHidden && availablePackages.isLoading) return <Loading />;
 
   const showPackageList =
@@ -81,19 +91,28 @@ const PackageListGridWrapper = ({
             `}
           >
             <EuiSearchBar
-              box={{ incremental: true }}
+              box={{
+                incremental: true,
+                inputRef: (ref: any) => {
+                  (
+                    searchBarRef as React.MutableRefObject<HTMLInputElement>
+                  ).current = ref;
+                },
+              }}
               onChange={(arg) => {
-                setIntegrationSearch(arg.queryText);
+                if (setSearchQuery) {
+                  setSearchQuery(arg.queryText);
+                }
                 setIsInitialHidden(false);
               }}
-              query={integrationSearch}
+              query={searchQuery}
             />
           </div>
         )}
         {showPackageList && (
           <PackageList
             list={list}
-            searchTerm={integrationSearch}
+            searchTerm={searchQuery ?? ''}
             showControls={false}
             showSearchTools={false}
             // we either don't need these properties (yet) or handle them upstream, but
@@ -111,66 +130,72 @@ const PackageListGridWrapper = ({
   );
 };
 
-const WithAvailablePackages = (props: Props) => {
-  const ref = useRef<AvailablePackagesHookType | null>(null);
-  const [reloadRetry, setReloadRetry] = useState(0);
-  const [errorLoading, setErrorLoading] = useState(false);
-  const [loadingModule, setLoadingModule] = React.useState(true);
+const WithAvailablePackages = React.forwardRef(
+  (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
+    const ref = useRef<AvailablePackagesHookType | null>(null);
+    const [reloadRetry, setReloadRetry] = useState(0);
+    const [errorLoading, setErrorLoading] = useState(false);
+    const [loadingModule, setLoadingModule] = React.useState(true);
 
-  useEffect(() => {
-    async function load() {
-      setErrorLoading(false);
-      setLoadingModule(true);
-      try {
-        ref.current = await fetchAvailablePackagesHook();
-      } catch (e) {
-        setErrorLoading(true);
-      } finally {
-        setLoadingModule(false);
+    useEffect(() => {
+      async function load() {
+        setErrorLoading(false);
+        setLoadingModule(true);
+        try {
+          ref.current = await fetchAvailablePackagesHook();
+        } catch (e) {
+          setErrorLoading(true);
+        } finally {
+          setLoadingModule(false);
+        }
       }
-    }
-    load();
-  }, [reloadRetry]);
+      load();
+    }, [reloadRetry]);
 
-  if (errorLoading)
-    return (
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.observability_onboarding.asyncLoadFailureCallout.title',
-          {
-            defaultMessage: 'Loading failure',
-          }
-        )}
-        color="warning"
-        iconType="cross"
-        size="m"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.observability_onboarding.asyncLoadFailureCallout.copy"
-            defaultMessage="Some required elements failed to load."
-          />
-        </p>
-        <EuiButton
+    if (errorLoading)
+      return (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.observability_onboarding.asyncLoadFailureCallout.title',
+            {
+              defaultMessage: 'Loading failure',
+            }
+          )}
           color="warning"
-          data-test-subj="xpack.observability_onboarding.asyncLoadFailureCallout.button"
-          onClick={() => {
-            if (!loadingModule) setReloadRetry(reloadRetry + 1);
-          }}
+          iconType="cross"
+          size="m"
         >
-          <FormattedMessage
-            id="xpack.observability_onboarding.asyncLoadFailureCallout.buttonContent"
-            defaultMessage="Retry"
-          />
-        </EuiButton>
-      </EuiCallOut>
+          <p>
+            <FormattedMessage
+              id="xpack.observability_onboarding.asyncLoadFailureCallout.copy"
+              defaultMessage="Some required elements failed to load."
+            />
+          </p>
+          <EuiButton
+            color="warning"
+            data-test-subj="xpack.observability_onboarding.asyncLoadFailureCallout.button"
+            onClick={() => {
+              if (!loadingModule) setReloadRetry(reloadRetry + 1);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.observability_onboarding.asyncLoadFailureCallout.buttonContent"
+              defaultMessage="Retry"
+            />
+          </EuiButton>
+        </EuiCallOut>
+      );
+
+    if (loadingModule || ref.current === null) return <Loading />;
+
+    return (
+      <PackageListGridWrapper
+        {...props}
+        useAvailablePackages={ref.current}
+        searchBarRef={searchBarRef}
+      />
     );
-
-  if (loadingModule || ref.current === null) return <Loading />;
-
-  return (
-    <PackageListGridWrapper {...props} useAvailablePackages={ref.current} />
-  );
-};
+  }
+);
 
 export { WithAvailablePackages as OnboardingFlowPackageList };
