@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
@@ -47,8 +47,6 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
 
   const { inferenceToModelIdMap } = state;
   const dispatch = useDispatch();
-
-  const [pendingDeployments, setPendingDeployments] = useState<string[]>([]);
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
     const inferenceModels = await api.getInferenceModels();
@@ -106,40 +104,33 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
     fetchInferenceModelsAndTrainedModelStats,
   ]);
 
-  const getInferenceIdsInPendingList = useCallback(() => {
+  const inferenceIdsInPendingList = useMemo(() => {
     const denormalizedFields = deNormalize(state.fields);
 
-    const inferenceIdsInPendingList: string[] = [];
+    const inferenceIds: string[] = [];
     for (const field of Object.values(denormalizedFields)) {
       if (field.type === 'semantic_text' && field.inference_id) {
-        inferenceIdsInPendingList.push(field.inference_id as string);
+        inferenceIds.push(field.inference_id as string);
       }
     }
 
-    return inferenceIdsInPendingList;
+    return inferenceIds;
   }, [state.fields]);
 
-  const getPendingDeployments = useCallback(() => {
-    const inferenceIdsInPendingList = getInferenceIdsInPendingList();
-    const notDeployedTrainedModelIds: string[] = [];
-
-    if (inferenceIdsInPendingList.length > 0) {
-      inferenceIdsInPendingList.forEach((inferenceId: string) => {
+  const pendingDeployments = useMemo(() => {
+    return inferenceIdsInPendingList
+      .map((inferenceId: string) => {
         const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';
-        if (trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed) {
-          notDeployedTrainedModelIds.push(trainedModelId);
-        }
-      });
-    }
-
-    return notDeployedTrainedModelIds;
-  }, [getInferenceIdsInPendingList, inferenceToModelIdMap]);
+        return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
+          ? trainedModelId
+          : undefined;
+      })
+      .filter((trainedModelId) => !!trainedModelId);
+  }, [inferenceIdsInPendingList, inferenceToModelIdMap]);
 
   return {
-    getPendingDeployments,
+    pendingDeployments,
     fetchInferenceToModelIdMap,
     fetchInferenceModelsAndTrainedModelStats,
-    pendingDeployments,
-    setPendingDeployments,
   };
 };
