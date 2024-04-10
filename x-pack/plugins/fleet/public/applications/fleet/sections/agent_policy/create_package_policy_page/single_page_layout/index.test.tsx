@@ -523,7 +523,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty name', async () => {
           await act(async () => {
-            fireEvent.change(renderResult.getByLabelText('Integration name'), {
+            fireEvent.change(renderResult.getByTestId('packagePolicyNameInput'), {
               target: { value: '' },
             });
           });
