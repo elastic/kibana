@@ -49,7 +49,14 @@ interface LogSearchMetricsOpts {
 }
 type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
 
-export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
+export interface WrappedScopedClusterClient {
+  client: () => IScopedClusterClient;
+  getMetrics: () => SearchMetrics;
+}
+
+export function createWrappedScopedClusterClientFactory(
+  opts: WrapScopedClusterClientFactoryOpts
+): WrappedScopedClusterClient {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;

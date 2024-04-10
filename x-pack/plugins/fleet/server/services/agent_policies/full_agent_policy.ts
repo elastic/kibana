@@ -10,6 +10,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
+import { set } from '@kbn/safer-lodash-set';
 
 import {
   getDefaultPresetForEsOutput,
@@ -31,9 +32,13 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
-import { DEFAULT_OUTPUT } from '../../constants';
-
+import {
+  dataTypes,
+  DEFAULT_OUTPUT,
+  kafkaCompressionType,
+  outputType,
+} from '../../../common/constants';
+import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
@@ -237,6 +242,14 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  const settingsValues = getSettingsValuesForAgentPolicy(
+    'AGENT_POLICY_ADVANCED_SETTINGS',
+    agentPolicy
+  );
+  Object.entries(settingsValues).forEach(([settingsKey, settingValue]) => {
+    set(fullAgentPolicy, settingsKey, settingValue);
+  });
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
@@ -494,10 +507,9 @@ export function transformOutputToFullPolicyOutput(
  * we use "default" for the default policy to avoid breaking changes
  */
 function getOutputIdForAgentPolicy(output: Output) {
-  if (output.is_default) {
+  if (output.is_default && output.type === outputType.Elasticsearch) {
     return DEFAULT_OUTPUT.name;
   }
-
   return output.id;
 }
 

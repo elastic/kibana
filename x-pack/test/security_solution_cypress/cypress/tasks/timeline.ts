@@ -130,11 +130,9 @@ export const addNameAndDescriptionToTimeline = (
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+export const goToNotesTab = () => {
   cy.get(NOTES_TAB_BUTTON).click();
-  cy.get(NOTES_TEXT_AREA).should('exist');
-
-  return cy.get(NOTES_TAB_BUTTON);
+  cy.get(NOTES_TEXT_AREA).should('be.visible');
 };
 
 export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);

@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
-import { CombinedField } from '../../../common/components/combined_fields';
+import type { CombinedField } from '../../../common/components/combined_fields';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {

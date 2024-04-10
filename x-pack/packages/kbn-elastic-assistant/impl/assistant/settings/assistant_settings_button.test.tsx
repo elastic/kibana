@@ -14,14 +14,17 @@ import { welcomeConvo } from '../../mock/conversation';
 import { CONVERSATIONS_TAB } from './assistant_settings';
 
 const setIsSettingsModalVisible = jest.fn();
-const setSelectedConversationId = jest.fn();
+const onConversationSelected = jest.fn();
+
 const testProps = {
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
-  setSelectedConversationId,
+  onConversationSelected,
+  conversations: {},
+  refetchConversationsState: jest.fn(),
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {

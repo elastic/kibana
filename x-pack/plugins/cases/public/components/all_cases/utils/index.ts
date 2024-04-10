@@ -33,7 +33,3 @@ export const stringToIntegerWithDefault = (
 
   return valueAsInteger && valueAsInteger > 0 ? valueAsInteger : defaultValue;
 };
-
-export const getLocalStorageKey = (localStorageKey: string, appId?: string) => {
-  return `${appId ?? ''}.${localStorageKey}`;
-};

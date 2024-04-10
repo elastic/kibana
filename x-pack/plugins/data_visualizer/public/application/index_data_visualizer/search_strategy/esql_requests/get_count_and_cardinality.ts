@@ -9,17 +9,18 @@ import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ESQLSearchReponse } from '@kbn/es-types';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
-import { AggregatableField } from '../../types/esql_data_visualizer';
-import { handleError, HandleErrorCallback } from './handle_error';
-import type { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
+import type { AggregatableField } from '../../types/esql_data_visualizer';
+import type { HandleErrorCallback } from './handle_error';
+import { handleError } from './handle_error';
 
 interface Field extends Column {
   aggregatable?: boolean;
@@ -37,7 +38,7 @@ const getESQLOverallStatsInChunk = async ({
   fields: Field[];
   esqlBaseQueryWithLimit: string;
   filter?: estypes.QueryDslQueryContainer;
-  limitSize?: ESQLDefaultLimitSizeOption;
+  limitSize: number;
   totalCount: number;
   onError?: HandleErrorCallback;
 }) => {
@@ -105,6 +106,7 @@ const getESQLOverallStatsInChunk = async ({
       params: {
         query,
         ...(filter ? { filter } : {}),
+        version: ESQL_LATEST_VERSION,
       },
     };
 
@@ -122,8 +124,7 @@ const getESQLOverallStatsInChunk = async ({
       }
       const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
 
-      const sampleCount =
-        limitSize === 'none' || !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
+      const sampleCount = !isDefined(limitSize) ? totalCount : limitSize;
       fieldsToFetch.forEach((field, idx) => {
         const count = esqlResultsResp.values[0][field.startIndex + aggToIndex.count] as number;
 
@@ -209,7 +210,7 @@ export const getESQLOverallStats = async ({
   fields: Column[];
   esqlBaseQueryWithLimit: string;
   filter?: estypes.QueryDslQueryContainer;
-  limitSize?: ESQLDefaultLimitSizeOption;
+  limitSize: number;
   totalCount: number;
   onError?: HandleErrorCallback;
 }) => {

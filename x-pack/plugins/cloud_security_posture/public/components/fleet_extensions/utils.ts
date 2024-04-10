@@ -42,6 +42,8 @@ import {
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
+import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from './gcp_credentials_form/gcp_credential_form';
+import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -227,6 +229,66 @@ export const getDefaultAwsCredentialsType = (
 
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
+
+export const getDefaultAzureCredentialsType = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): string => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
+  }
+
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
+  if (hasArmTemplateUrl) {
+    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
+  }
+
+  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
+};
+
+export const getDefaultGcpHiddenVars = (
+  packageInfo: PackageInfo,
+  setupTechnology?: SetupTechnology
+): Record<string, PackagePolicyConfigRecordEntry> => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return {
+      'gcp.credentials.type': {
+        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
+        type: 'text',
+      },
+      setup_access: {
+        value: GCP_SETUP_ACCESS.MANUAL,
+        type: 'text',
+      },
+    };
+  }
+
+  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
+  if (hasCloudShellUrl) {
+    return {
+      'gcp.credentials.type': {
+        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
+        type: 'text',
+      },
+      setup_access: {
+        value: GCP_SETUP_ACCESS.CLOUD_SHELL,
+        type: 'text',
+      },
+    };
+  }
+
+  return {
+    'gcp.credentials.type': {
+      value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
+      type: 'text',
+    },
+    setup_access: {
+      value: GCP_SETUP_ACCESS.MANUAL,
+      type: 'text',
+    },
+  };
+};
+
 /**
  * Input vars that are hidden from the user
  */
@@ -234,7 +296,7 @@ export const getPostureInputHiddenVars = (
   inputType: PostureInput,
   packageInfo: PackageInfo,
   setupTechnology: SetupTechnology
-) => {
+): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
@@ -243,6 +305,15 @@ export const getPostureInputHiddenVars = (
           type: 'text',
         },
       };
+    case 'cloudbeat/cis_azure':
+      return {
+        'azure.credentials.type': {
+          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
+          type: 'text',
+        },
+      };
+    case 'cloudbeat/cis_gcp':
+      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:
@@ -306,4 +377,21 @@ export const isBelowMinVersion = (version: string, minVersion: string) => {
   const semanticVersion = semverValid(version);
   const versionNumberOnly = semverCoerce(semanticVersion) || '';
   return semverLt(versionNumberOnly, minVersion);
+};
+
+/**
+ * Searches for a variable definition in a given packageInfo object based on a specified key.
+ * It navigates through nested arrays within the packageInfo object to locate the variable definition associated with the provided key.
+ * If found, it returns the variable definition object; otherwise, it returns undefined.
+ */
+export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
+  return packageInfo?.data_streams
+    ?.filter((datastreams) => datastreams !== undefined)
+    .map((ds) => ds.streams)
+    .filter((streams) => streams !== undefined)
+    .flat()
+    .filter((streams) => streams?.vars !== undefined)
+    .map((cis) => cis?.vars)
+    .flat()
+    .find((vars) => vars?.name === key);
 };

@@ -17,7 +17,7 @@ export {
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
 export { getDisplayedColumns } from './src/utils/columns';
-export { getTextBasedColumnTypes } from './src/utils/get_column_types';
+export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export { ROWS_HEIGHT_OPTIONS } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';

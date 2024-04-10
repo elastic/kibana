@@ -33,7 +33,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@serverless Alert User Assignment - Serverless', () => {
+  // Intentionally setting as @skipInQA, keeping tests running in MKI that should block release
+  describe('@serverless @skipInQA Alert User Assignment - Serverless', () => {
     before(async () => {
       await esArchiver.load(path);
     });

@@ -6,15 +6,16 @@
  */
 
 import { mlJobService } from '../services/job_service';
-import { Entity } from './components/entity_control/entity_control';
+import type { Entity } from './components/entity_control/entity_control';
 import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { MlEntity } from '../../embeddables';
 
 /**
  * Extracts entities from the detector configuration
  */
 export function getControlsForDetector(
   selectedDetectorIndex: number,
-  selectedEntities: Record<string, any>,
+  selectedEntities: MlEntity | undefined,
   selectedJobId: JobId,
   job?: CombinedJob
 ): Entity[] {

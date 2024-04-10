@@ -58,7 +58,7 @@ import type {
   ExternalReferenceSOAttachmentPayload,
 } from '../common/types/domain';
 
-export interface CasesPluginSetup {
+export interface CasesPublicSetupDependencies {
   files: FilesSetup;
   security: SecurityPluginSetup;
   serverless?: ServerlessPluginSetup;
@@ -66,13 +66,18 @@ export interface CasesPluginSetup {
   home?: HomePublicPluginSetup;
 }
 
-export interface CasesPluginStart {
+export interface CasesPublicStartDependencies {
   apm?: ApmBase;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
   lens: LensPublicStart;
+  /**
+   * Cases in used by other plugins. Plugins pass the
+   * service to their KibanaContext. ML does not pass
+   * the licensing service thus it is optional.
+   */
   licensing?: LicensingPluginStart;
   contentManagement: ContentManagementPublicStart;
   security: SecurityPluginStart;
@@ -89,23 +94,23 @@ export interface CasesPluginStart {
  * Leaving it out currently in lieu of RBAC changes
  */
 
-export type StartServices = CoreStart & CasesPluginStart;
+export type StartServices = CoreStart & CasesPublicStartDependencies;
 
 export interface RenderAppProps {
   mountParams: ManagementAppMountParams;
   coreStart: CoreStart;
-  pluginsStart: CasesPluginStart;
+  pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
-export interface CasesUiSetup {
+export interface CasesPublicSetup {
   attachmentFramework: AttachmentFramework;
 }
 
-export interface CasesUiStart {
+export interface CasesPublicStart {
   api: {
     getRelatedCases: (
       alertId: string,

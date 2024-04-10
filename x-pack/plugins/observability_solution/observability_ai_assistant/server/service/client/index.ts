@@ -20,10 +20,13 @@ import {
   lastValueFrom,
   Observable,
   shareReplay,
+  tap,
   toArray,
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { withTokenBudget } from '../../../common/utils/with_token_budget';
+import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -32,13 +35,17 @@ import {
   createTokenLimitReachedError,
   MessageAddEvent,
   StreamingChatResponseEventType,
+  TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
+  CompatibleJSONSchema,
   FunctionResponse,
   FunctionVisibility,
+} from '../../../common/functions/types';
+import {
   MessageRole,
-  type CompatibleJSONSchema,
+  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -46,6 +53,7 @@ import {
   type Message,
 } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { createFunctionResponseError } from '../../../common/utils/create_function_response_error';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -53,9 +61,10 @@ import {
   KnowledgeBaseService,
   RecalledEntry,
 } from '../knowledge_base_service';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
+import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
-import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { rejectTokenCountEvents } from '../util/reject_token_count_events';
+import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
@@ -101,10 +110,10 @@ export class ObservabilityAIAssistantClient {
     return response.hits.hits[0];
   };
 
-  private getConversationUpdateValues = (now: string) => {
+  private getConversationUpdateValues = (lastUpdated: string) => {
     return {
       conversation: {
-        last_updated: now,
+        last_updated: lastUpdated,
       },
       user: this.dependencies.user,
       namespace: this.dependencies.namespace,
@@ -134,33 +143,71 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = (
-    params: {
-      messages: Message[];
-      connectorId: string;
-      signal: AbortSignal;
-      functionClient: ChatFunctionClient;
-      persist: boolean;
-    } & ({ conversationId: string } | { title?: string })
-  ): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+  complete = (params: {
+    messages: Message[];
+    connectorId: string;
+    signal: AbortSignal;
+    functionClient: ChatFunctionClient;
+    persist: boolean;
+    responseLanguage?: string;
+    conversationId?: string;
+    title?: string;
+    instructions?: Array<string | UserInstruction>;
+  }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
         const { messages, connectorId, signal, functionClient, persist } = params;
 
-        let conversationId: string = '';
-        let title: string = '';
-        if ('conversationId' in params) {
-          conversationId = params.conversationId;
-        }
+        const conversationId = params.conversationId || '';
+        const title = params.title || '';
+        const responseLanguage = params.responseLanguage || 'English';
+        const requestInstructions = params.instructions || [];
 
-        if ('title' in params) {
-          title = params.title || '';
-        }
+        const tokenCountResult = {
+          prompt: 0,
+          completion: 0,
+          total: 0,
+        };
+
+        const chatWithTokenCountIncrement: ChatFn = async (...chatArgs) => {
+          const response$ = await this.chat(...chatArgs);
+
+          const incrementTokenCount = () => {
+            return <T extends ChatCompletionChunkEvent | TokenCountEvent>(
+              source: Observable<T>
+            ): Observable<T> => {
+              return source.pipe(
+                tap((event) => {
+                  if (event.type === StreamingChatResponseEventType.TokenCount) {
+                    tokenCountResult.prompt += event.tokens.prompt;
+                    tokenCountResult.completion += event.tokens.completion;
+                    tokenCountResult.total += event.tokens.total;
+                  }
+                })
+              );
+            };
+          };
+
+          return response$.pipe(incrementTokenCount(), rejectTokenCountEvents());
+        };
 
         let numFunctionsCalled: number = 0;
 
         const MAX_FUNCTION_CALLS = 5;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
+        const allFunctions = functionClient
+          .getFunctions()
+          .filter((fn) => {
+            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+            return (
+              visibility === FunctionVisibility.All ||
+              visibility === FunctionVisibility.AssistantOnly
+            );
+          })
+          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+
+        const allActions = functionClient.getActions();
 
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
@@ -202,27 +249,10 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS
-                ? []
-                : functionClient
-                    .getFunctions()
-                    .filter((fn) => {
-                      const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-                      return (
-                        visibility === FunctionVisibility.All ||
-                        visibility === FunctionVisibility.AssistantOnly
-                      );
-                    })
-                    .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
-
-            if (numFunctionsCalled >= MAX_FUNCTION_CALLS) {
-              this.dependencies.logger.debug(
-                `Max function calls exceeded, no longer sending over functions`
-              );
-            }
+              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
-              await this.chat(
+              await chatWithTokenCountIncrement(
                 lastMessage.message.name && lastMessage.message.name !== 'context'
                   ? 'function_response'
                   : 'user_message',
@@ -257,9 +287,37 @@ export class ObservabilityAIAssistantClient {
           }
 
           if (isAssistantMessageWithFunctionRequest) {
-            const span = apm.startSpan(
-              `execute_function ${lastMessage.message.function_call!.name}`
-            );
+            const functionCallName = lastMessage.message.function_call!.name;
+
+            if (functionClient.hasAction(functionCallName)) {
+              this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
+
+              // if validation fails, return the error to the LLM.
+              // otherwise, close the stream.
+
+              try {
+                functionClient.validate(
+                  functionCallName,
+                  JSON.parse(lastMessage.message.function_call!.arguments || '{}')
+                );
+              } catch (error) {
+                const functionResponseMessage = createFunctionResponseError({
+                  name: functionCallName,
+                  error,
+                });
+                nextMessages = nextMessages.concat(functionResponseMessage.message);
+
+                subscriber.next(functionResponseMessage);
+
+                return await next(nextMessages);
+              }
+
+              subscriber.complete();
+
+              return;
+            }
+
+            const span = apm.startSpan(`execute_function ${functionCallName}`);
 
             span?.addLabels({
               ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
@@ -275,8 +333,9 @@ export class ObservabilityAIAssistantClient {
                   }
                 : await functionClient
                     .executeFunction({
+                      chat: chatWithTokenCountIncrement,
                       connectorId,
-                      name: lastMessage.message.function_call!.name,
+                      name: functionCallName,
                       messages: nextMessages,
                       args: lastMessage.message.function_call!.arguments,
                       signal,
@@ -316,6 +375,7 @@ export class ObservabilityAIAssistantClient {
             numFunctionsCalled++;
 
             if (signal.aborted) {
+              span?.end();
               return;
             }
 
@@ -377,6 +437,16 @@ export class ObservabilityAIAssistantClient {
             return;
           }
 
+          this.dependencies.logger.debug(
+            `Token count for conversation: ${JSON.stringify(tokenCountResult)}`
+          );
+
+          apm.currentTransaction?.addLabels({
+            tokenCountPrompt: tokenCountResult.prompt,
+            tokenCountCompletion: tokenCountResult.completion,
+            tokenCountTotal: tokenCountResult.total,
+          });
+
           // store the updated conversation and close the stream
           if (conversationId) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
@@ -388,8 +458,32 @@ export class ObservabilityAIAssistantClient {
               return;
             }
 
+            const persistedTokenCount = conversation._source?.conversation.token_count;
+
             const updatedConversation = await this.update(
-              merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
+              conversationId,
+
+              merge(
+                {},
+
+                // base conversation without messages
+                omit(conversation._source, 'messages'),
+
+                // update messages
+                { messages: nextMessages },
+
+                // update token count
+                {
+                  conversation: {
+                    token_count: {
+                      prompt: (persistedTokenCount?.prompt || 0) + tokenCountResult.prompt,
+                      completion:
+                        (persistedTokenCount?.completion || 0) + tokenCountResult.completion,
+                      total: (persistedTokenCount?.total || 0) + tokenCountResult.total,
+                    },
+                  },
+                }
+              )
             );
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationUpdate,
@@ -405,6 +499,7 @@ export class ObservabilityAIAssistantClient {
               '@timestamp': new Date().toISOString(),
               conversation: {
                 title: generatedTitle || title || 'New conversation',
+                token_count: tokenCountResult,
               },
               messages: nextMessages,
               labels: {},
@@ -421,19 +516,30 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(messages).catch((error) => {
-          if (!signal.aborted) {
-            this.dependencies.logger.error(error);
-          }
-          subscriber.error(error);
-        });
+        this.resolveInstructions(requestInstructions)
+          .then((instructions) => {
+            return next(
+              extendSystemMessage(messages, [
+                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
+                instructions,
+              ])
+            );
+          })
+          .catch((error) => {
+            if (!signal.aborted) {
+              this.dependencies.logger.error(error);
+            }
+            subscriber.error(error);
+          });
 
         const titlePromise =
           !conversationId && !title && persist
             ? this.getGeneratedTitle({
+                chat: chatWithTokenCountIncrement,
                 messages,
                 connectorId,
                 signal,
+                responseLanguage,
               }).catch((error) => {
                 this.dependencies.logger.error(
                   'Could not generate title, falling back to default title'
@@ -457,11 +563,11 @@ export class ObservabilityAIAssistantClient {
     }: {
       messages: Message[];
       connectorId: string;
-      functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+      functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
     }
-  ): Promise<Observable<ChatCompletionChunkEvent>> => {
+  ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
 
     const spanId = (span?.ids['span.id'] || '').substring(0, 6);
@@ -475,22 +581,24 @@ export class ObservabilityAIAssistantClient {
 
       let adapter: LlmApiAdapter;
 
+      this.dependencies.logger.debug(`Creating "${connector.actionTypeId}" adapter`);
+
       switch (connector.actionTypeId) {
         case ObservabilityAIAssistantConnectorType.OpenAI:
           adapter = createOpenAiAdapter({
-            logger: this.dependencies.logger,
             messages,
-            functionCall,
             functions,
+            functionCall,
+            logger: this.dependencies.logger,
           });
           break;
 
         case ObservabilityAIAssistantConnectorType.Bedrock:
           adapter = createBedrockClaudeAdapter({
-            logger: this.dependencies.logger,
             messages,
-            functionCall,
             functions,
+            functionCall,
+            logger: this.dependencies.logger,
           });
           break;
 
@@ -539,28 +647,36 @@ export class ObservabilityAIAssistantClient {
 
       const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
 
-      response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
-        error: (error) => {
-          this.dependencies.logger.debug(`${loggerPrefix}: Error in chat response`);
-          this.dependencies.logger.debug(error);
-        },
-        next: (message) => {
-          this.dependencies.logger.debug(
-            `${loggerPrefix}: Received message:\n${JSON.stringify(message)}`
-          );
-        },
-      });
-
-      lastValueFrom(response$)
-        .then(() => {
-          span?.setOutcome('success');
-        })
-        .catch(() => {
-          span?.setOutcome('failure');
-        })
-        .finally(() => {
-          span?.end();
+      response$
+        .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
+        .subscribe({
+          error: (error) => {
+            this.dependencies.logger.debug('Error in chat response');
+            this.dependencies.logger.debug(error);
+            span?.setOutcome('failure');
+            span?.end();
+          },
+          next: (message) => {
+            this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
+          },
+          complete: () => {
+            span?.setOutcome('success');
+            span?.end();
+          },
         });
+
+      response$.subscribe({
+        next: (event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        },
+        error: () => {},
+      });
 
       return response$;
     } catch (error) {
@@ -595,10 +711,13 @@ export class ObservabilityAIAssistantClient {
     };
   };
 
-  update = async (conversation: ConversationUpdateRequest): Promise<Conversation> => {
-    const document = await this.getConversationWithMetaFields(conversation.conversation.id);
+  update = async (
+    conversationId: string,
+    conversation: ConversationUpdateRequest
+  ): Promise<Conversation> => {
+    const persistedConversation = await this.getConversationWithMetaFields(conversationId);
 
-    if (!document) {
+    if (!persistedConversation) {
       throw notFound();
     }
 
@@ -609,8 +728,8 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: document._id,
-      index: document._index,
+      id: persistedConversation._id,
+      index: persistedConversation._index,
       doc: updatedConversation,
       refresh: true,
     });
@@ -619,21 +738,27 @@ export class ObservabilityAIAssistantClient {
   };
 
   getGeneratedTitle = async ({
+    chat,
     messages,
     connectorId,
     signal,
+    responseLanguage,
   }: {
+    chat: (
+      ...chatParams: Parameters<InstanceType<typeof ObservabilityAIAssistantClient>['chat']>
+    ) => Promise<Observable<ChatCompletionChunkEvent>>;
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => {
-    const response$ = await this.chat('generate_title', {
+    const response$ = await chat('generate_title', {
       messages: [
         {
           '@timestamp': new Date().toString(),
           message: {
             role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
+            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
           },
         },
         {
@@ -662,6 +787,7 @@ export class ObservabilityAIAssistantClient {
           },
         },
       ],
+      functionCall: 'title_conversation',
       connectorId,
       signal,
     });
@@ -798,5 +924,30 @@ export class ObservabilityAIAssistantClient {
 
   deleteKnowledgeBaseEntry = async (id: string) => {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+  };
+
+  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
+    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+      this.dependencies.user,
+      this.dependencies.namespace
+    );
+
+    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
+      return '';
+    }
+
+    const priorityInstructions = requestInstructions.map((instruction) =>
+      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
+    );
+    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
+    const instructions = priorityInstructions.concat(
+      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
+    );
+
+    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
+
+    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
+
+    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
   };
 }

@@ -31,22 +31,23 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
+  const retryService = getService('retry');
 
   describe('Custom Threshold rule - P99 - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
-    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
+    const DATA_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     const MOCKED_AD_HOC_DATA_VIEW = {
       id: DATA_VIEW_ID,
-      title: DATE_VIEW_TITLE,
+      title: DATA_VIEW_TITLE,
       timeFieldName: '@timestamp',
       sourceFilters: [],
       fieldFormats: {},
       runtimeFieldMap: {},
       allowNoIndex: false,
-      name: DATE_VIEW_NAME,
+      name: DATA_VIEW_NAME,
       allowHidden: false,
     };
     let dataForgeConfig: PartialConfig;
@@ -60,8 +61,8 @@ export default function ({ getService }: FtrProviderContext) {
         schedule: [
           {
             template: 'good',
-            start: 'now-15m',
-            end: 'now',
+            start: 'now-10m',
+            end: 'now+5m',
             metrics: [{ name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 }],
           },
         ],
@@ -76,8 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
       logger.info(JSON.stringify(dataForgeIndices.join(',')));
       await waitForDocumentInIndex({
         esClient,
-        indexName: DATE_VIEW_TITLE,
+        indexName: DATA_VIEW_TITLE,
         docCountTarget: 270,
+        retryService,
+        logger,
       });
     });
 
@@ -102,10 +105,13 @@ export default function ({ getService }: FtrProviderContext) {
           supertest,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          logger,
         });
 
         const createdRule = await createRule({
           supertest,
+          logger,
+          esClient,
           tags: ['observability'],
           consumer: 'logs',
           name: 'Threshold rule',
@@ -163,6 +169,8 @@ export default function ({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
+          retryService,
+          logger,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -172,6 +180,8 @@ export default function ({ getService }: FtrProviderContext) {
           esClient,
           indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
+          retryService,
+          logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
 
@@ -227,6 +237,8 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
+          retryService,
+          logger,
         });
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
@@ -234,7 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `99th percentile of system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
+          `99th percentile of system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
 
@@ -244,9 +256,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATE_VIEW_TITLE,
+          dataset: DATA_VIEW_TITLE,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
+          filters: [],
         });
         expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });

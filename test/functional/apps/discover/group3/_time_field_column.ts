@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const monacoEditor = getService('monacoEditor');
+  const dataViews = getService('dataViews');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
   const docTable = getService('docTable');
@@ -65,9 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }) {
       // check in Discover
       expect(await dataGrid.getHeaderFields()).to.eql(
-        (hideTimeFieldColumnSetting && !isTextBased) || !hasTimeField
-          ? ['Document']
-          : ['@timestamp', 'Document']
+        hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
       );
       await PageObjects.discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -80,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getHeaderFields()).to.eql(
             !hasTimeField
               ? ['@timestamp']
-              : hideTimeFieldColumnSetting && !isTextBased
+              : hideTimeFieldColumnSetting
               ? ['Document'] // legacy behaviour
               : ['@timestamp', 'Document'] // legacy behaviour
           );
@@ -95,9 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
         await retry.try(async () => {
           expect(await dataGrid.getHeaderFields()).to.eql(
-            (hideTimeFieldColumnSetting && !isTextBased) || !hasTimeField
-              ? ['Document']
-              : ['@timestamp', 'Document']
+            hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
           );
         });
       }
@@ -112,9 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          (hideTimeFieldColumnSetting && !isTextBased) || !hasTimeField
-            ? ['Document']
-            : ['@timestamp', 'Document']
+          hideTimeFieldColumnSetting || !hasTimeField ? ['Document'] : ['@timestamp', 'Document']
         );
       });
 
@@ -130,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getHeaderFields()).to.eql(
             !hasTimeField
               ? ['@timestamp']
-              : hideTimeFieldColumnSetting && !isTextBased
+              : hideTimeFieldColumnSetting
               ? ['Document'] // legacy behaviour
               : ['@timestamp', 'Document'] // legacy behaviour
           );
@@ -182,12 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.clickMoveColumnLeft('@timestamp');
       await retry.try(async () => {
-        expect(await dataGrid.getHeaderFields()).to.eql(
-          // FIXME as a part of https://github.com/elastic/kibana/issues/174074
-          isTextBased && !hideTimeFieldColumnSetting
-            ? ['bytes', 'extension']
-            : ['@timestamp', 'bytes', 'extension']
-        );
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
       });
 
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
@@ -268,9 +258,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           describe('without a time field', () => {
             beforeEach(async () => {
-              await PageObjects.discover.createAdHocDataView('logs*', false);
+              await dataViews.createFromSearchBar({
+                name: 'logs*',
+                adHoc: true,
+                hasTimeField: false,
+              });
               await PageObjects.discover.waitUntilSearchingHasFinished();
-              await PageObjects.header.waitUntilLoadingHasFinished();
             });
 
             it('should render initial columns correctly', async () => {
@@ -357,7 +350,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
+            expect(await dataGrid.getHeaderFields()).to.eql(
               hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
             );
 
@@ -365,9 +358,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQLdrop`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Document'] : ['@timestamp', 'Document']
-            );
+            expect(await dataGrid.getHeaderFields()).to.eql(['Document']);
 
             // only @timestamp is selected
             await PageObjects.discover.loadSavedSearch(
@@ -388,8 +379,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', '@timestamp']
+            expect(await dataGrid.getHeaderFields()).to.eql(
+              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', 'Document']
             );
           });
 
@@ -415,11 +406,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting
-                ? ['bytes', 'extension']
-                : ['@timestamp', 'bytes', 'extension']
-            );
+            expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
 
             // with selected columns and @timestamp
             await PageObjects.discover.loadSavedSearch(
@@ -442,11 +429,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}ESQL`
             );
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting
-                ? ['bytes', 'extension', '@timestamp']
-                : ['@timestamp', 'bytes', 'extension', '@timestamp']
-            );
+            expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension', '@timestamp']);
           });
         });
       });

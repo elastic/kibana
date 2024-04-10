@@ -4,108 +4,103 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createSelector } from 'reselect';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { State } from '../types';
-import type {
-  SourcererDataView,
-  SourcererModel,
-  SourcererScope,
-  SourcererScopeName,
-} from './model';
-export const sourcererKibanaDataViewsSelector = ({
-  sourcerer,
-}: State): SourcererModel['kibanaDataViews'] => sourcerer.kibanaDataViews;
+import type { SourcererModel } from './model';
+import { SourcererScopeName } from './model';
 
-export const sourcererSignalIndexNameSelector = ({ sourcerer }: State): string | null =>
-  sourcerer.signalIndexName;
+const SOURCERER_SCOPE_MAX_SIZE = Object.keys(SourcererScopeName).length;
 
-export const sourcererDefaultDataViewSelector = ({
-  sourcerer,
-}: State): SourcererModel['defaultDataView'] => sourcerer.defaultDataView;
+const selectSourcerer = (state: State): SourcererModel => state.sourcerer;
 
-export const dataViewSelector = (
-  { sourcerer }: State,
-  id: string | null
-): SourcererDataView | undefined =>
-  sourcerer.kibanaDataViews.find((dataView) => dataView.id === id);
+export const sourcererScopes = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.sourcererScopes
+);
 
-export const sourcererScopeIdSelector = (
-  { sourcerer }: State,
-  scopeId: SourcererScopeName
-): SourcererScope => sourcerer.sourcererScopes[scopeId];
+export const sourcererScope = createSelector(
+  sourcererScopes,
+  (state: State, scopeId: SourcererScopeName) => scopeId,
+  (scopes, scopeId) => scopes[scopeId],
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
+export const sourcererScopeIsLoading = createSelector(sourcererScope, (scope) => scope.loading, {
+  memoizeOptions: {
+    maxSize: SOURCERER_SCOPE_MAX_SIZE,
+  },
+});
 
-export const kibanaDataViewsSelector = () =>
-  createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);
+export const sourcererScopeSelectedDataViewId = createSelector(
+  sourcererScope,
+  (scope) => scope.selectedDataViewId,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export const signalIndexNameSelector = () =>
-  createSelector(sourcererSignalIndexNameSelector, (signalIndexName) => signalIndexName);
+export const sourcererScopeSelectedPatterns = createSelector(
+  sourcererScope,
+  (scope) => scope.selectedPatterns,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export const defaultDataViewSelector = () =>
-  createSelector(sourcererDefaultDataViewSelector, (dataViews) => dataViews);
+export const sourcererScopeMissingPatterns = createSelector(
+  sourcererScope,
+  (scope) => scope.missingPatterns,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export const sourcererDataViewSelector = () =>
-  createSelector(dataViewSelector, (dataView) => dataView);
+export const kibanaDataViews = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.kibanaDataViews,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export interface SourcererScopeSelector extends Omit<SourcererModel, 'sourcererScopes'> {
-  selectedDataView: SourcererDataView | undefined;
-  sourcererScope: SourcererScope;
-}
+export const defaultDataView = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.defaultDataView,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-export const getSourcererDataViewsSelector = () => {
-  const getKibanaDataViewsSelector = kibanaDataViewsSelector();
-  const getDefaultDataViewSelector = defaultDataViewSelector();
-  const getSignalIndexNameSelector = signalIndexNameSelector();
-  return (state: State): Omit<SourcererModel, 'sourcererScopes'> => {
-    const kibanaDataViews = getKibanaDataViewsSelector(state);
-    const defaultDataView = getDefaultDataViewSelector(state);
-    const signalIndexName = getSignalIndexNameSelector(state);
+export const signalIndexName = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.signalIndexName,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
 
-    return {
-      defaultDataView,
-      kibanaDataViews,
-      signalIndexName,
-    };
-  };
-};
-
-/**
- * Attn Future Developer
- * Access sourcererScope.selectedPatterns from
- * hook useSourcererDataView in `common/containers/sourcerer/index`
- * in order to get exclude patterns for searches
- * Access sourcererScope.selectedPatterns
- * from this function for display purposes only
- * */
-export const getSourcererScopeSelector = () => {
-  const getDataViewsSelector = getSourcererDataViewsSelector();
-  const getSourcererDataViewSelector = sourcererDataViewSelector();
-  const getScopeSelector = scopeIdSelector();
-
-  return (state: State, scopeId: SourcererScopeName): SourcererScopeSelector => {
-    const dataViews = getDataViewsSelector(state);
-    const scope = getScopeSelector(state, scopeId);
-    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
-
-    return {
-      ...dataViews,
-      selectedDataView,
-      sourcererScope: scope,
-    };
-  };
-};
-
-export const getSelectedDataviewSelector = () => {
-  const getSourcererDataViewSelector = sourcererDataViewSelector();
-  const getScopeSelector = scopeIdSelector();
-
-  return (state: State, scopeId: SourcererScopeName): DataViewSpec | undefined => {
-    const scope = getScopeSelector(state, scopeId);
-    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
-
-    return selectedDataView?.dataView;
-  };
-};
+export const signalIndexMappingOutdated = createSelector(
+  selectSourcerer,
+  (sourcerer) => sourcerer.signalIndexMappingOutdated,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);

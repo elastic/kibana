@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(13);
     });
   });
 
@@ -330,6 +330,29 @@ describe('description_step', () => {
         expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
           mockQueryBar.queryBar.query.query
         );
+      });
+
+      test('returns correct field name when queryBar exist', () => {
+        const mockQueryBar = {
+          ruleType: 'eql',
+          queryBar: {
+            query: {
+              query: 'user.name: root or user.name: admin',
+              language: 'kuery',
+            },
+            filters: null,
+            saved_id: null,
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'queryBar',
+          'Query bar label',
+          mockQueryBar,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual(<>{i18n.EQL_QUERY_LABEL}</>);
       });
     });
 
@@ -536,8 +559,23 @@ describe('description_step', () => {
       });
     });
 
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
+      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning'];
       const suppressionFields = {
         groupByDuration: {
           unit: 'm',

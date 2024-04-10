@@ -26,11 +26,7 @@ import { LinksAttributes } from '../../common/content_management';
 import { extract, inject } from '../../common/embeddable';
 import { LinksStrings } from '../components/links_strings';
 import { getLinksAttributeService } from '../services/attribute_service';
-import {
-  coreServices,
-  presentationUtil,
-  untilPluginStartServicesReady,
-} from '../services/kibana_services';
+import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 import type { LinksEmbeddable } from './links_embeddable';
 import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from './types';
 
@@ -89,7 +85,7 @@ export class LinksFactoryDefinition
   }
 
   public canCreateNew() {
-    return presentationUtil.labsService.isProjectEnabled('labs:dashboard:linksPanel');
+    return true;
   }
 
   public getDefaultInput(): Partial<LinksInput> {

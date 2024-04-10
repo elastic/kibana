@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DatasetSelection,
-  DataViewSelection,
-  isDatasetSelection,
-} from '../../common/dataset_selection';
+import { DataSourceSelection, isDatasetSelection } from '../../common/data_source_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export interface DiscoverEsqlUrlProps {
@@ -23,23 +19,23 @@ export interface UseEsqlResult {
 }
 
 interface EsqlContextDeps {
-  datasetSelection: DatasetSelection | DataViewSelection;
+  dataSourceSelection: DataSourceSelection;
 }
 
-export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult => {
+export const useEsql = ({ dataSourceSelection }: EsqlContextDeps): UseEsqlResult => {
   const {
     services: { uiSettings, discover },
   } = useKibanaContextForPlugin();
 
   const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
 
+  const esqlPattern = isDatasetSelection(dataSourceSelection)
+    ? dataSourceSelection.selection.dataset.name
+    : dataSourceSelection.selection.dataView.title;
+
   const discoverLinkParams = {
     query: {
-      esql: `from ${
-        isDatasetSelection(datasetSelection)
-          ? datasetSelection.selection.dataset.name
-          : datasetSelection.selection.dataView.title
-      } | limit 10`,
+      esql: `from ${esqlPattern} | limit 10`,
     },
   };
 

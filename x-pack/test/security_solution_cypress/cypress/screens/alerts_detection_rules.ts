@@ -339,3 +339,6 @@ export const NEW_TERMS_WINDOW_SIZE_VALUE = '[data-test-subj^="newTermsWindowSize
 
 export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
 export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';
+
+export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffWrapper"]';
+export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';

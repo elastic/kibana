@@ -20,11 +20,7 @@ export function ExpViewActionMenuContent({
   timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }) {
-  const {
-    lens,
-    isDev,
-    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
-  } = useKibana().services;
+  const { lens, isDev } = useKibana().services;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
@@ -94,11 +90,6 @@ export function ExpViewActionMenuContent({
             })}
           </EuiButton>
         </EuiFlexItem>
-        {ObservabilityAIAssistantActionMenuItem ? (
-          <EuiFlexItem>
-            <ObservabilityAIAssistantActionMenuItem />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
 
       {isSaveOpen && lensAttributes && (

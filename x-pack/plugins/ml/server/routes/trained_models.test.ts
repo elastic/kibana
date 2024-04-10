@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { populateInferenceServicesProvider } from './trained_models';
 import { mlLog } from '../lib/log';
 

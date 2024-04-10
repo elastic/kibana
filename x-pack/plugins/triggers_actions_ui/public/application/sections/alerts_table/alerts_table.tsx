@@ -24,10 +24,18 @@ import {
   EuiDataGridRefProps,
   EuiFlexGroup,
   EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
+  EuiCodeBlock,
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -39,8 +47,8 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 import { AlertsTableQueryContext } from './contexts/alerts_table_context';
-
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
+
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
@@ -128,6 +136,44 @@ const CustomGridBody = memo(
   }
 );
 
+// Here we force the error callout to be the same height as the cell content
+// so that the error detail gets hidden in the overflow area and only shown in
+// the cell popover
+const errorCalloutStyles = css`
+  height: 1lh;
+`;
+
+/**
+ * An error callout that displays the error stack in a code block
+ */
+const ViewError = ({ error }: { error: Error }) => (
+  <>
+    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="error" color="danger" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText
+          color="subdued"
+          size="xs"
+          css={css`
+            line-height: unset;
+          `}
+        >
+          <strong>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertTable.viewError"
+              defaultMessage="An error occurred"
+            />
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer />
+    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
+  </>
+);
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const {
     visibleColumns,
@@ -167,10 +213,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 
-  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
-    useActionsColumn({
-      options: props.alertsTableConfiguration.useActionsColumn,
-    });
+  const {
+    renderCustomActionsRow: CustomActionsRow,
+    actionsColumnWidth,
+    getSetIsActionLoadingCallback,
+  } = useActionsColumn({
+    options: props.alertsTableConfiguration.useActionsColumn,
+  });
   const casesConfig = props.alertsTableConfiguration.cases;
   const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
@@ -253,7 +302,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       fieldBrowserOptions,
       getInspectQuery,
       showInspectButton,
-      toolbarVisiblityProp: props.toolbarVisibility,
+      toolbarVisibilityProp: props.toolbarVisibility,
     });
   }, [
     bulkActionsState,
@@ -279,7 +328,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const leadingControlColumns = useMemo(() => {
     let controlColumns = [...props.leadingControlColumns];
 
-    if (renderCustomActionsRow) {
+    if (CustomActionsRow) {
       controlColumns = [
         {
           id: 'expandColumn',
@@ -302,18 +351,18 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
             return (
               <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-                {renderCustomActionsRow({
-                  alert: alerts[visibleRowIndex],
-                  ecsAlert: ecsAlertsData[visibleRowIndex],
-                  nonEcsData: oldAlertsData[visibleRowIndex],
-                  rowIndex: visibleRowIndex,
-                  setFlyoutAlert: handleFlyoutAlert,
-                  id: props.id,
-                  cveProps,
-                  setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-                  refresh,
-                  clearSelection,
-                })}
+                <CustomActionsRow
+                  id={props.id}
+                  alert={alerts[visibleRowIndex]}
+                  ecsAlert={ecsAlertsData[visibleRowIndex]}
+                  nonEcsData={oldAlertsData[visibleRowIndex]}
+                  rowIndex={visibleRowIndex}
+                  setFlyoutAlert={handleFlyoutAlert}
+                  setIsActionLoading={getSetIsActionLoadingCallback(visibleRowIndex)}
+                  cveProps={cveProps}
+                  refresh={refresh}
+                  clearSelection={clearSelection}
+                />
               </EuiFlexGroup>
             );
           },
@@ -328,19 +377,19 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     return controlColumns;
   }, [
+    props.leadingControlColumns,
+    props.id,
+    CustomActionsRow,
+    isBulkActionsColumnActive,
     actionsColumnWidth,
+    ecsAlertsData,
     alerts,
     oldAlertsData,
-    ecsAlertsData,
-    getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
-    isBulkActionsColumnActive,
-    props.id,
-    props.leadingControlColumns,
-    renderCustomActionsRow,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
+    getBulkActionsLeadingControlColumn,
   ]);
 
   useEffect(() => {
@@ -375,50 +424,52 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const renderCellValue = useCallback(
     () =>
-      props.alertsTableConfiguration?.getRenderCellValue
-        ? props.alertsTableConfiguration?.getRenderCellValue({
-            setFlyoutAlert: handleFlyoutAlert,
-            context: renderCellContext,
-          })
-        : basicRenderCellValue,
+      props.alertsTableConfiguration?.getRenderCellValue?.({
+        setFlyoutAlert: handleFlyoutAlert,
+        context: renderCellContext,
+      }) ?? basicRenderCellValue,
     [handleFlyoutAlert, props.alertsTableConfiguration, renderCellContext]
   )();
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
-      // https://github.com/elastic/eui/issues/5811
-      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
-      const alert = alerts[idx];
-      // ecsAlert is needed for security solution
-      const ecsAlert = ecsAlertsData[idx];
-      if (alert) {
-        const data: Array<{ field: string; value: string[] }> = [];
-        Object.entries(alert ?? {}).forEach(([key, value]) => {
-          data.push({ field: key, value: value as string[] });
-        });
-        if (isSystemCell(_props.columnId)) {
-          return (
-            <SystemCellFactory
-              alert={alert}
-              columnId={_props.columnId}
-              isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
-              cases={cases}
-              maintenanceWindows={maintenanceWindows}
-              showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-              caseAppId={casesConfig?.appId}
-            />
-          );
-        }
+      try {
+        // https://github.com/elastic/eui/issues/5811
+        const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+        const alert = alerts[idx];
+        // ecsAlert is needed for security solution
+        const ecsAlert = ecsAlertsData[idx];
+        if (alert) {
+          const data: Array<{ field: string; value: string[] }> = [];
+          Object.entries(alert ?? {}).forEach(([key, value]) => {
+            data.push({ field: key, value: value as string[] });
+          });
+          if (isSystemCell(_props.columnId)) {
+            return (
+              <SystemCellFactory
+                alert={alert}
+                columnId={_props.columnId}
+                isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
+                cases={cases}
+                maintenanceWindows={maintenanceWindows}
+                showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+                caseAppId={casesConfig?.appId}
+              />
+            );
+          }
 
-        return renderCellValue({
-          ..._props,
-          data,
-          ecsData: ecsAlert,
-        });
-      } else if (isLoading) {
-        return <EuiSkeletonText lines={1} />;
+          return renderCellValue({
+            ..._props,
+            data,
+            ecsData: ecsAlert,
+          });
+        } else if (isLoading) {
+          return <EuiSkeletonText lines={1} />;
+        }
+        return null;
+      } catch (e) {
+        return <ViewError error={e} />;
       }
-      return null;
     },
     [
       alerts,
@@ -434,6 +485,36 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       renderCellValue,
       showAlertStatusWithFlapping,
     ]
+  );
+
+  const renderCellPopover = useMemo(
+    () =>
+      props.alertsTableConfiguration?.getRenderCellPopover?.({
+        context: renderCellContext,
+      }) ?? props.renderCellPopover,
+    [props.alertsTableConfiguration, props.renderCellPopover, renderCellContext]
+  );
+
+  const handleRenderCellPopover = useMemo(
+    () =>
+      renderCellPopover
+        ? (_props: EuiDataGridCellPopoverElementProps) => {
+            try {
+              const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+              const alert = alerts[idx];
+              if (alert) {
+                return renderCellPopover({
+                  ..._props,
+                  alert,
+                });
+              }
+              return null;
+            } catch (e) {
+              return <ViewError error={e} />;
+            }
+          }
+        : undefined,
+    [alerts, pagination.pageIndex, pagination.pageSize, renderCellPopover]
   );
 
   const dataGridPagination = useMemo(
@@ -454,6 +535,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         ecsData: ecsAlertsData,
         dataGridRef,
         pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
       })
     : getCellActionsStub;
 
@@ -563,6 +645,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onColumnResize={onColumnResize}
             ref={dataGridRef}
             renderCustomGridBody={props.dynamicRowHeight ? renderCustomGridBody : undefined}
+            renderCellPopover={handleRenderCellPopover}
           />
         )}
       </section>

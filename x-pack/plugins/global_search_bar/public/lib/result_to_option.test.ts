@@ -112,6 +112,7 @@ describe('resultToOption', () => {
           id: 'known',
           name: 'Known',
           description: 'Known',
+          managed: false,
           color: '#000000',
         };
       }
@@ -132,6 +133,7 @@ describe('resultToOption', () => {
               "color": "#000000",
               "description": "Known",
               "id": "known",
+              "managed": false,
               "name": "Known",
             },
           ]

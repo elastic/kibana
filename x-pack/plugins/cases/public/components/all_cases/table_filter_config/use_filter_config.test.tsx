@@ -99,7 +99,7 @@ describe('useFilterConfig', () => {
     const uiCustomFieldKey = `${CUSTOM_FIELD_KEY_PREFIX}${customFieldKey}`;
 
     localStorage.setItem(
-      'testAppId.cases.list.tableFiltersConfig',
+      'securitySolution.cases.list.tableFiltersConfig',
       JSON.stringify([{ key: uiCustomFieldKey, isActive: false }])
     );
 

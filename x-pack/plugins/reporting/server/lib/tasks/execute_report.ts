@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
@@ -37,6 +37,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
@@ -44,7 +45,7 @@ import {
   ReportingTaskStatus,
   TIME_BETWEEN_ATTEMPTS,
 } from '.';
-import { ExportTypesRegistry, getContentStream } from '..';
+import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import {
   isExecutionError,

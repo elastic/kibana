@@ -8,10 +8,12 @@
 
 import {
   isReferenceOrValueEmbeddable,
+  PanelIncompatibleError,
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
 } from '@kbn/embeddable-plugin/public';
-import { apiPublishesPanelTitle } from '@kbn/presentation-publishing';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
+import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { DashboardPanelState } from '../../../../common';
@@ -56,12 +58,10 @@ const duplicateReactEmbeddableInput = async (
   panelToClone: DashboardPanelState,
   idToDuplicate: string
 ) => {
-  const child = dashboard.reactEmbeddableChildren.value[idToDuplicate];
-  if (!child) throw new PanelNotFoundError();
+  const child = dashboard.children$.value[idToDuplicate];
+  if (!child || !apiHasSerializableState(child)) throw new PanelIncompatibleError();
 
-  const lastTitle = apiPublishesPanelTitle(child)
-    ? child.panelTitle.value ?? child.defaultPanelTitle?.value ?? ''
-    : '';
+  const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
   const serializedState = await child.serializeState();

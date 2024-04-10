@@ -62,6 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177390
   registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
@@ -75,7 +76,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     describe('when data is loaded', () => {
       it('returns timeseries for http requests chart', async () => {
-        const response = await getHttpRequestsChart({ serviceName: 'synth-android', offset: '1d' });
+        const response = await getHttpRequestsChart({
+          serviceName: 'synth-android',
+          offset: '1d',
+        });
 
         expect(response.status).to.be(200);
         expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(

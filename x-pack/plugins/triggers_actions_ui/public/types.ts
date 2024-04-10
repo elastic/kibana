@@ -7,55 +7,56 @@
 
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
-import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellAction,
-  EuiDataGridOnColumnResizeHandler,
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiSuperSelectOption,
   IconType,
   RecursivePartial,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
-import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
-  AlertHistoryDocumentTemplate,
-  AlertHistoryEsIndexConnectorId,
   AsApiContract,
 } from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  ActionVariable,
-  AlertingFrameworkHealth,
-  AlertStatus,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
+  ResolvedSanitizedRule,
+  RuleSystemAction,
+  RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
-  MaintenanceWindow,
+  AlertStatus,
   RawAlertInstance,
-  ResolvedSanitizedRule,
-  RuleAction,
-  RuleActionParam,
-  RuleLastRun,
+  AlertingFrameworkHealth,
   RuleNotifyWhenType,
-  RuleTaskState,
-  RuleTypeMetaData,
   RuleTypeParams,
-  SanitizedRule as AlertingSanitizedRule,
+  RuleTypeMetaData,
+  ActionVariable,
+  RuleLastRun,
+  MaintenanceWindow,
+  SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -64,6 +65,7 @@ import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import { TypeRegistry } from './application/type_registry';
@@ -72,23 +74,23 @@ import type { RuleTagFilterProps } from './application/sections/rules_list/compo
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type {
-  RuleTagBadgeOptions,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
 } from './application/sections/rules_list/components/rule_tag_badge';
 import type {
-  RuleEventLogListOptions,
   RuleEventLogListProps,
+  RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
 import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type {
-  BrowserFieldItem,
-  CreateFieldComponent,
   FieldBrowserOptions,
-  FieldBrowserProps,
+  CreateFieldComponent,
   GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
@@ -104,22 +106,31 @@ export {
   OPTIONAL_ACTION_VARIABLES,
 } from '@kbn/triggers-actions-ui-types';
 
+type RuleUiAction = RuleAction | RuleSystemAction;
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
-  'alertTypeId'
+  'alertTypeId' | 'actions' | 'systemActions'
 > & {
   ruleTypeId: AlertingSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+type ResolvedRule = Omit<
+  ResolvedSanitizedRule<RuleTypeParams>,
+  'alertTypeId' | 'actions' | 'systemActions'
+> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 
 export type {
   Rule,
   RuleAction,
+  RuleSystemAction,
+  RuleUiAction,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,
@@ -173,13 +184,11 @@ export interface ConnectorValidationError {
 }
 
 export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
-
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
-
 export interface ActionReadOnlyElementProps {
   connectorId: string;
   connectorName: string;
@@ -211,12 +220,10 @@ interface BulkOperationAttributesByIds {
   ids: string[];
   filter?: never;
 }
-
 interface BulkOperationAttributesByFilter {
   ids?: never;
   filter: KueryNode | null;
 }
-
 export type BulkOperationAttributesWithoutHttp =
   | BulkOperationAttributesByIds
   | BulkOperationAttributesByFilter;
@@ -286,12 +293,12 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
-  isBeta?: boolean;
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   hideInUi?: boolean;
   modalWidth?: number;
+  isSystemActionType?: boolean;
 }
 
 export interface GenericValidationResult<T> {
@@ -477,7 +484,6 @@ export interface RuleAddProps<
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-
 export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
   rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -512,7 +518,6 @@ export interface InspectQuery {
   request: string[];
   response: string[];
 }
-
 export type GetInspectQuery = () => InspectQuery;
 
 export type Alert = EcsFieldsResponse;
@@ -583,6 +588,7 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
@@ -601,7 +607,15 @@ export type GetRenderCellValue<T = unknown> = ({
   context?: T;
 }) => (
   props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+) => React.ReactNode | JSX.Element;
+
+export type GetRenderCellPopover<T = unknown> = ({
+  context,
+}: {
+  context?: T;
+}) => (
+  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
+) => React.ReactNode | JSX.Element;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -675,6 +689,7 @@ export type UseCellActions = (props: {
   dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
+  pageIndex: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
   getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
@@ -735,6 +750,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  getRenderCellPopover?: GetRenderCellPopover;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;

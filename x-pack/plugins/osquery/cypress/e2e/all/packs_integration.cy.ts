@@ -40,7 +40,9 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/180424
+// Failing: See https://github.com/elastic/kibana/issues/180424
+describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
@@ -104,7 +106,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176543
+  describe.skip('Load prebuilt packs', { tags: ['@ess', '@serverless'] }, () => {
     afterEach(() => {
       cleanupAllPrebuiltPacks();
     });
@@ -186,7 +189,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       navigateTo('/app/osquery/packs');
     });
 
-    describe('add proper shard to policies packs config', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/171279
+    describe.skip('add proper shard to policies packs config', () => {
       const globalPack = 'globalPack' + generateRandomStringName(1)[0];
       const agentPolicy = 'testGlobal' + generateRandomStringName(1)[0];
       let globalPackId: string;

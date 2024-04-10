@@ -13,11 +13,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 export const allowedExperimentalValues = Object.freeze({
   isMustacheAutocompleteOn: false,
-  // set to true to show tech preview badge on sentinel one connector
   sentinelOneConnectorOn: true,
-  // set to true to show beta badge on sentinel one connector
-  // TODO: set to true when 8.13 is ready
-  sentinelOneConnectorOnBeta: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

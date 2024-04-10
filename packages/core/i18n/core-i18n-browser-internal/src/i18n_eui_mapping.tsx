@@ -739,7 +739,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{count} available filters',
         values: { count },
       }),
-    'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
+    'euiFlyoutCloseButton.ariaLabel': i18n.translate('core.euiFlyoutCloseButton.ariaLabel', {
       defaultMessage: 'Close this dialog',
     }),
     'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
@@ -797,6 +797,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiHue.label': i18n.translate('core.euiHue.label', {
       defaultMessage: 'Select the HSV color mode "hue" value',
     }),
+    'euiIconTip.defaultAriaLabel': i18n.translate('core.euiIconTip.defaultAriaLabel', {
+      defaultMessage: 'Info',
+    }),
     'euiImageButton.openFullScreen': i18n.translate('core.euiImageButton.openFullScreen', {
       defaultMessage: 'Click to open this image in fullscreen mode',
     }),
@@ -828,9 +831,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '(opens in a new tab or window)',
       }
     ),
-    'euiLoadingChart.ariaLabel': i18n.translate('core.euiLoadingChart.ariaLabel', {
-      defaultMessage: 'Loading',
-    }),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
       defaultMessage: 'Loading',
     }),
@@ -1544,6 +1544,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Search for anything...',
       }
     ),
+    'euiSideNav.mobileToggleAriaLabel': i18n.translate('core.euiSideNav.mobileToggleAriaLabel', {
+      defaultMessage: 'Toggle navigation',
+    }),
     'euiStat.loadingText': i18n.translate('core.euiStat.loadingText', {
       defaultMessage: 'Statistic is loading',
     }),

@@ -274,7 +274,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'HEALTHY',
             message: '',
-            '@timestamp': '' + Date.parse('2023-11-29T14:25:31Z'),
+            '@timestamp': new Date(Date.now() - 1).toISOString(),
             output: defaultOutputId,
           },
         });
@@ -285,7 +285,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'DEGRADED',
             message: 'connection error',
-            '@timestamp': '' + Date.parse('2023-11-30T14:25:31Z'),
+            '@timestamp': new Date().toISOString(),
             output: defaultOutputId,
           },
         });
@@ -297,7 +297,7 @@ export default function (providerContext: FtrProviderContext) {
             state: 'HEALTHY',
             message: '',
             '@timestamp': '' + Date.parse('2023-11-31T14:25:31Z'),
-            output: 'remote2',
+            output: ESOutputId,
           },
         });
       });
@@ -309,6 +309,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(outputHealth.state).to.equal('DEGRADED');
         expect(outputHealth.message).to.equal('connection error');
         expect(outputHealth.timestamp).not.to.be.empty();
+      });
+      it('should not return output health if older than output last updated time', async () => {
+        const { body: outputHealth } = await supertest
+          .get(`/api/fleet/outputs/${ESOutputId}/health`)
+          .expect(200);
+
+        expect(outputHealth.state).to.equal('UNKNOWN');
       });
     });
 

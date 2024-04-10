@@ -136,6 +136,22 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * Returns custom description if set, otherwise undefined.
+   */
+
+  public get customDescription() {
+    return this.spec.customDescription;
+  }
+
+  /**
+   * Sets custom description for field, or unsets if passed undefined.
+   * @param customDescription custom label value
+   */
+  public set customDescription(customDescription) {
+    this.spec.customDescription = customDescription;
+  }
+
+  /**
    * Description of field type conflicts across different indices in the same index pattern.
    */
   public get conflictDescriptions() {
@@ -374,6 +390,7 @@ export class DataViewField implements DataViewFieldBase {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
       defaultFormatter: this.defaultFormatter,
     };
   }
@@ -401,6 +418,7 @@ export class DataViewField implements DataViewFieldBase {
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
       customLabel: this.customLabel,
+      customDescription: this.customDescription,
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
       isMapped: this.isMapped,

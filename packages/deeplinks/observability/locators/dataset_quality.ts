@@ -12,8 +12,8 @@ export const DATASET_QUALITY_LOCATOR_ID = 'DATASET_QUALITY_LOCATOR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type RefreshInterval = {
-  isPaused: boolean;
-  interval: number;
+  pause: boolean;
+  value: number;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

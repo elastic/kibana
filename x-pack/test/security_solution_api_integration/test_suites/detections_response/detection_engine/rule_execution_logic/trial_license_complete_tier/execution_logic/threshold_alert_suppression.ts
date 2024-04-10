@@ -21,11 +21,12 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
@@ -34,12 +35,19 @@ import {
   dataGeneratorFactory,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless Threshold type rules, alert suppression', () => {
     const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
@@ -49,10 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     before(async () => {
+      await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
+      await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
@@ -85,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
         interval: '30m',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toEqual(1);
 
       // suppression start equal to alert timestamp
@@ -99,9 +109,9 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-1',
             },
           ],
-          // suppression boundaries equal to alert time, since no alert been suppressed
-          [ALERT_SUPPRESSION_START]: suppressionStart,
-          [ALERT_SUPPRESSION_END]: suppressionStart,
+          // suppression boundaries equals to document timestamp, since both documents has same timestamp
+          [ALERT_SUPPRESSION_START]: firstTimestamp,
+          [ALERT_SUPPRESSION_END]: firstTimestamp,
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
           [TIMESTAMP]: suppressionStart,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
@@ -122,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
       await patchRule(supertest, log, { id: createdRule.id, enabled: false });
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
       const afterTimestamp = new Date();
-      const secondAlerts = await getOpenAlerts(
+      const secondAlerts = await getAlerts(
         supertest,
         log,
         es,
@@ -141,16 +151,11 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
-          [ALERT_SUPPRESSION_START]: suppressionStart, // suppression start is the same
+          [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
+          [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated by timestamp of the document suppressed in the second run
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
-      // suppression end value should be greater than second document timestamp, but lesser than current time
-      const suppressionEnd = new Date(
-        secondAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_END] as string
-      ).getTime();
-      expect(suppressionEnd).toBeLessThan(new Date().getTime());
-      expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
     });
 
     it('should NOT suppress and update an alert if the alert is closed', async () => {
@@ -182,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
         interval: '30m',
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
 
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
@@ -207,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
       await patchRule(supertest, log, { id: createdRule.id, enabled: false });
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
       const afterTimestamp = new Date();
-      const secondAlerts = await getOpenAlerts(
+      const secondAlerts = await getAlerts(
         supertest,
         log,
         es,
@@ -304,8 +309,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:45:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:45:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         })
       );
@@ -319,8 +324,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:30:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T06:15:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         })
       );
@@ -389,8 +394,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
     });
@@ -463,8 +468,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:45:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
       });
     });
@@ -535,8 +540,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // only one suppressed alert as expected
       });
     });
@@ -630,8 +635,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
       expect(previewAlerts[1]._source).toEqual({
@@ -649,8 +654,8 @@ export default ({ getService }: FtrProviderContext) => {
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
         [ALERT_LAST_DETECTED]: '2020-10-28T06:00:00.000Z',
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: timestamp,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // no suppressed alerts
       });
     });
@@ -724,8 +729,8 @@ export default ({ getService }: FtrProviderContext) => {
           [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
           [ALERT_ORIGINAL_TIME]: timestamp,
-          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:15:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
@@ -790,8 +795,8 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_ORIGINAL_TIME]: timestamp,
-        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+        [ALERT_SUPPRESSION_START]: timestamp,
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:10:00.000Z',
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
     });
@@ -858,6 +863,73 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         })
       );
+    });
+
+    describe('with host risk index', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+      });
+
+      it('should be enriched with host risk score', async () => {
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+          threshold: {
+            field: 'host.name',
+            value: 100,
+          },
+          alert_suppression: {
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Low');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(20);
+        expect(previewAlerts[1]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(previewAlerts[1]?._source?.host?.risk?.calculated_score_norm).toEqual(96);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+          threshold: {
+            field: 'host.name',
+            value: 100,
+          },
+          alert_suppression: {
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
+        const fullAlert = previewAlerts[0]?._source;
+
+        expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
+      });
     });
   });
 };

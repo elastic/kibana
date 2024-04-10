@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import supertestLib from 'supertest';
+import url from 'url';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
@@ -29,17 +32,23 @@ import {
   ALERT_GROUP_ID,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   getEqlRuleForAlertTesting,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
+  dataGeneratorFactory,
 } from '../../../../utils';
 import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -60,16 +69,24 @@ export default ({ getService }: FtrProviderContext) => {
 
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
+  const request = supertestLib(url.format(config.get('servers.kibana')));
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless EQL type rules', () => {
+    const { indexListOfDocuments } = dataGeneratorFactory({
+      es,
+      index: 'ecs_compliant',
+      log,
+    });
+
     before(async () => {
       await esArchiver.load(auditPath);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
@@ -77,6 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -88,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: specificQueryForTests,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
@@ -184,6 +202,42 @@ export default ({ getService }: FtrProviderContext) => {
           module: 'auditd',
         }),
       });
+    });
+
+    it('classifies verification_exception errors as user errors', async () => {
+      function getMetricsRequest(reset: boolean = false) {
+        return request
+          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200)
+          .then((response) => response.body);
+      }
+
+      await getMetricsRequest(true);
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForAlertTesting(['auditbeat-*']),
+        query: 'file where field.doesnt.exist == true',
+      };
+      const createdRule = await createRule(supertest, log, rule);
+      await waitForRuleFailure({ supertest, log, id: createdRule.id });
+
+      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
+      const response = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .query({ id: createdRule.id })
+        .expect(200);
+
+      const ruleResponse = response.body;
+      expect(
+        ruleResponse.execution_summary.last_execution.message.includes('verification_exception')
+      ).eql(true);
+
+      const metricsResponse = await getMetricsRequest();
+      expect(
+        metricsResponse.metrics.task_run.value.by_type['alerting:siem__eqlRule'].user_errors
+      ).eql(1);
     });
 
     it('generates up to max_alerts for non-sequence EQL queries', async () => {
@@ -532,6 +586,85 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    it('ensures common fields are present in generated shell alert', async () => {
+      const id = uuidv4();
+      const doc1 = {
+        id,
+        agent: {
+          name: 'agent-1',
+          type: 'auditbeat',
+          version: '8.13.0',
+        },
+        client: {
+          ip: ['127.0.0.1', '127.0.0.2'],
+        },
+        'host.name': 'host-0',
+      };
+
+      const doc2 = {
+        id,
+        agent: {
+          name: 'agent-0',
+          type: 'auditbeat',
+          version: '8.13.0',
+        },
+        client: {
+          ip: ['127.0.0.1', '127.0.0.3'],
+        },
+        'host.name': 'host-0',
+      };
+
+      await indexListOfDocuments([
+        { '@timestamp': '2020-10-28T06:15:00.000Z', ...doc1 },
+        { '@timestamp': '2020-10-28T06:16:00.000Z', ...doc2 },
+      ]);
+
+      const rule: EqlRuleCreateProps = {
+        ...getEqlRuleForAlertTesting(['ecs_compliant']),
+        query: `sequence [any where id == "${id}" ] [any where true]`,
+        from: 'now-35m',
+        interval: '30m',
+      };
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+      });
+
+      const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['agent.name'] });
+
+      expect(previewAlerts).to.have.length(3);
+
+      const buildingBlockAlerts = previewAlerts.filter(
+        (alert) => alert._source?.['kibana.alert.building_block_type']
+      );
+      const shellAlert = previewAlerts.filter(
+        (alert) => !alert._source?.['kibana.alert.building_block_type']
+      )[0];
+
+      // check building block alert retains all fields from source documents
+      // alerts sorted by agent.name, so we assert it against agent-0 document
+      expect(buildingBlockAlerts[0]._source).eql({
+        ...buildingBlockAlerts[0]._source,
+        ...doc2,
+      });
+
+      expect(buildingBlockAlerts[1]._source).eql({
+        ...buildingBlockAlerts[1]._source,
+        ...doc1,
+      });
+
+      // shell alert should have only common properties from building block alerts
+      expect(shellAlert._source?.agent).eql({
+        type: 'auditbeat',
+        version: '8.13.0',
+        // agent name is absent as this field is not common
+      });
+      // only common values in array are present
+      expect(shellAlert._source?.client).eql({ ip: ['127.0.0.1'] });
+      expect(shellAlert._source?.['host.name']).be('host-0');
+    });
+
     it('generates up to max_alerts with an EQL rule', async () => {
       const maxAlerts = 200;
       const rule: EqlRuleCreateProps = {
@@ -655,6 +788,138 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
         expect(fullAlert?.['host.asset.criticality']).to.eql('high_impact');
+      });
+    });
+
+    describe('using data with a @timestamp field', () => {
+      const expectedWarning =
+        'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
+
+      it('specifying only timestamp_field results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying only timestamp_override results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+
+      it('specifying both timestamp_override and timestamp_field results in alert creation with an expected warning', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['auditbeat-*']),
+          timestamp_field: 'event.created',
+          timestamp_override: 'event.created',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.eql([expectedWarning]);
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.be.greaterThan(0);
+      });
+    });
+
+    describe('using data without a @timestamp field', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/no_at_timestamp_field'
+        );
+      });
+
+      it('specifying only timestamp_field results in a warning, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_field: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.contain(
+          'The following indices are missing the timestamp field "@timestamp": ["no_at_timestamp_field"]'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying only timestamp_override results in an error, and no alerts are generated', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_override: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.contain(
+          'An error occurred during rule execution: message: "verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline -1:-1: Unknown column [@timestamp]"'
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).to.be.empty();
+      });
+
+      it('specifying both timestamp_override and timestamp_field results in alert creation with no warnings or errors', async () => {
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['no_at_timestamp_field']),
+          timestamp_field: 'event.ingested',
+          timestamp_override: 'event.ingested',
+        };
+
+        const {
+          previewId,
+          logs: [_log],
+        } = await previewRule({ supertest, rule });
+
+        expect(_log.errors).to.be.empty();
+        expect(_log.warnings).to.be.empty();
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts).to.have.length(3);
       });
     });
   });

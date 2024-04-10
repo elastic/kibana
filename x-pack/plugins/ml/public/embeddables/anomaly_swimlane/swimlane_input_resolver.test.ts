@@ -7,11 +7,12 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { MlStartDependencies } from '../../plugin';
-import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { MlStartDependencies } from '../../plugin';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 describe('useSwimlaneInputResolver', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;

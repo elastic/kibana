@@ -34,6 +34,8 @@ import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
 
+import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
+
 import {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
@@ -109,7 +111,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
             id: editData.id,
             name: editData.name,
             allowHidden: editData.getAllowHidden(),
-            ...(editData.timeFieldName
+            ...(editData.timeFieldName === noTimeFieldValue
+              ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
+              : editData.timeFieldName
               ? {
                   timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
                 }

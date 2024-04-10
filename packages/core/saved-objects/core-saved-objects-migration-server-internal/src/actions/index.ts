@@ -87,7 +87,7 @@ export { synchronizeMigrators } from './synchronize_migrators';
 
 export { createIndex } from './create_index';
 
-export { checkTargetMappings } from './check_target_mappings';
+export { checkTargetTypesMappings } from './check_target_mappings';
 
 export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);
 
@@ -108,7 +108,7 @@ import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type { ActualMappingsIncomplete, ComparedMappingsChanged } from './check_target_mappings';
+import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -182,8 +182,8 @@ export interface ActionErrorTypeMap {
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
   es_response_too_large: EsResponseTooLargeError;
   synchronization_failed: SynchronizationFailed;
-  actual_mappings_incomplete: ActualMappingsIncomplete;
-  compared_mappings_changed: ComparedMappingsChanged;
+  index_mappings_incomplete: IndexMappingsIncomplete;
+  types_changed: TypesChanged;
   operation_not_supported: OperationNotSupported;
 }
 

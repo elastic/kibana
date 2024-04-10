@@ -1,0 +1,10 @@
+steps:
+  - command: .buildkite/scripts/steps/esql_grammar_sync.sh
+    label: ES|QL Grammar Sync
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true

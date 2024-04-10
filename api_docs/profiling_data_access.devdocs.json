@@ -55,7 +55,7 @@
           "CloudSetupStateType",
           " | ",
           "SetupStateType",
-          ">; fetchFunction: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
+          ">; fetchFunctions: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
@@ -81,7 +81,9 @@
       "tags": [],
       "label": "ProfilingDataAccessPluginSetup",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/observability_solution/profiling_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -445,7 +447,9 @@
         "tags": [],
         "label": "COLLECTOR_PACKAGE_POLICY_NAME",
         "description": [],
-        "signature": ["\"elastic-universal-profiling-collector\""],
+        "signature": [
+          "\"elastic-universal-profiling-collector\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -458,7 +462,9 @@
         "tags": [],
         "label": "ELASTIC_CLOUD_APM_POLICY",
         "description": [],
-        "signature": ["\"elastic-cloud-apm\""],
+        "signature": [
+          "\"elastic-cloud-apm\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/common/get_apm_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -471,7 +477,9 @@
         "tags": [],
         "label": "MAX_BUCKETS",
         "description": [],
-        "signature": ["150000"],
+        "signature": [
+          "150000"
+        ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/common/cluster_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -484,7 +492,9 @@
         "tags": [],
         "label": "SYMBOLIZER_PACKAGE_POLICY_NAME",
         "description": [],
-        "signature": ["\"elastic-universal-profiling-symbolizer\""],
+        "signature": [
+          "\"elastic-universal-profiling-symbolizer\""
+        ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/common/fleet_policies.ts",
         "deprecated": false,
         "trackAdoption": false,

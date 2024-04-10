@@ -87,7 +87,7 @@ export interface TableListViewTableProps<
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
-  onClickTitle?: (item: T) => void;
+  getOnClickTitle?: (item: T) => (() => void) | undefined;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   /**
@@ -256,7 +256,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
-  onClickTitle,
+  getOnClickTitle,
   id: listingId = 'userContent',
   contentEditor = { enabled: false },
   titleColumnName,
@@ -269,9 +269,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     setPageDataTestSubject(`${entityName}LandingPage`);
   }, [entityName, setPageDataTestSubject]);
 
-  if (!getDetailViewLink && !onClickTitle) {
+  if (!getDetailViewLink && !getOnClickTitle) {
     throw new Error(
-      `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
+      `[TableListView] One o["getDetailViewLink" or "getOnClickTitle"] prop must be provided.`
     );
   }
 
@@ -443,19 +443,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
       if (item.managed) {
         ret[item.id] = {
-          ...ret[item.id],
-          delete: {
-            enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemNoDelete', {
-              defaultMessage: 'This item is managed by Elastic. It cannot be deleted.',
-            }),
-          },
           edit: {
             enabled: false,
             reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-              defaultMessage: 'This item is managed by Elastic. Clone it before making changes.',
+              defaultMessage: 'Elastic manages this item. Clone it to make changes.',
             }),
           },
+          ...ret[item.id],
         };
       }
 
@@ -517,7 +511,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               id={listingId}
               item={record}
               getDetailViewLink={getDetailViewLink}
-              onClickTitle={onClickTitle}
+              getOnClickTitle={getOnClickTitle}
               onClickTag={(tag, withModifierKey) => {
                 if (withModifierKey) {
                   addOrRemoveExcludeTagFilter(tag);
@@ -623,7 +617,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     contentEditor.enabled,
     listingId,
     getDetailViewLink,
-    onClickTitle,
+    getOnClickTitle,
     searchQuery.text,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,

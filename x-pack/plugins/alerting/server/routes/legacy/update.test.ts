@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen } from '../../../common';
+import { RuleNotifyWhen, RuleSystemAction } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -51,6 +51,15 @@ describe('updateAlertRoute', () => {
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
   };
 
   it('updates an alert with proper parameters', async () => {
@@ -249,10 +258,89 @@ describe('updateAlertRoute', () => {
 
     updateAlertRoute(router, licenseState, mockUsageCounter);
     const [, handler] = router.put.mock.calls[0];
+    rulesClient.update.mockResolvedValueOnce(mockedResponse);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('update', mockUsageCounter);
+  });
+
+  it('does not return system actions', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState);
+
+    const [config, handler] = router.put.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
+
+    rulesClient.update.mockResolvedValueOnce({ ...mockedResponse, systemActions: [systemAction] });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: {
+          throttle: null,
+          name: 'abc',
+          tags: ['bar'],
+          schedule: { interval: '12s' },
+          params: {
+            otherField: false,
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                baz: true,
+              },
+            },
+          ],
+          notifyWhen: 'onActionGroupChange',
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: mockedResponse });
+
+    expect(rulesClient.update).toHaveBeenCalledTimes(1);
+    expect(rulesClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data": Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "2",
+                "params": Object {
+                  "baz": true,
+                },
+              },
+            ],
+            "name": "abc",
+            "notifyWhen": "onActionGroupChange",
+            "params": Object {
+              "otherField": false,
+            },
+            "schedule": Object {
+              "interval": "12s",
+            },
+            "tags": Array [
+              "bar",
+            ],
+            "throttle": null,
+          },
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalled();
   });
 });

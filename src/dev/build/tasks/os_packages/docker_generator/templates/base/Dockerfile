@@ -160,6 +160,7 @@ COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serv
 # Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 RUN /usr/bin/echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
 RUN /usr/bin/echo '--diagnostic-dir=./data' >> config/node.options
+ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options

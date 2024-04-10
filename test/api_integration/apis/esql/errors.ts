@@ -11,6 +11,7 @@ import Path from 'path';
 import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import uniqBy from 'lodash/uniqBy';
 import { groupBy, mapValues } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -19,11 +20,8 @@ function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
     'packages',
-    'kbn-monaco',
+    'kbn-esql-validation-autocomplete',
     'src',
-    'esql',
-    'lib',
-    'ast',
     'validation'
   );
 }
@@ -77,7 +75,7 @@ function createIndexRequest(
 }
 
 interface JSONConfig {
-  testCases: Array<{ query: string; error: boolean }>;
+  testCases: Array<{ query: string; error: string[] }>;
   indexes: string[];
   policies: Array<{
     name: string;
@@ -126,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         path: '/_query',
         body: {
           query,
+          version: ESQL_LATEST_VERSION,
         },
       });
       return { resp, error: undefined };
@@ -240,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
             for (const { query, error } of queryToErrors) {
               const jsonBody = await sendESQLQuery(query);
 
-              const clientSideHasError = error;
+              const clientSideHasError = Boolean(error.length);
               const serverSideHasError = Boolean(jsonBody.error);
 
               if (clientSideHasError !== serverSideHasError) {

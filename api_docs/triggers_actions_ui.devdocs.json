@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly ruleFormV2: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -1092,7 +1092,7 @@
         "label": "loadActionTypes",
         "description": [],
         "signature": [
-          "({\n  http,\n  featureId,\n}: { http: ",
+          "({\n  http,\n  featureId,\n  includeSystemActions = false,\n}: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -1100,7 +1100,7 @@
             "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
-          "; featureId?: string | undefined; }) => Promise<",
+          "; featureId?: string | undefined; includeSystemActions?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -1119,7 +1119,7 @@
             "id": "def-public.loadActionTypes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  featureId,\n}",
+            "label": "{\n  http,\n  featureId,\n  includeSystemActions = false,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
             "deprecated": false,
@@ -1154,6 +1154,20 @@
                 "description": [],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadActionTypes.$1.includeSystemActions",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeSystemActions",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
                 "deprecated": false,
@@ -1371,6 +1385,73 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_summary.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.loadRuleTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "loadRuleTypes",
+        "description": [],
+        "signature": [
+          "({ http }: { http: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string>[]>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.loadRuleTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleTypes.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2006,13 +2087,7 @@
         "description": [],
         "signature": [
           "(actionItem: ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleAction",
-            "text": "RuleAction"
-          },
+          "RuleUiAction",
           ") => string | null"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
@@ -2022,18 +2097,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.validateActionFilterQuery.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "actionItem",
             "description": [],
             "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.RuleAction",
-                "text": "RuleAction"
-              }
+              "RuleUiAction"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
             "deprecated": false,
@@ -2888,20 +2957,6 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ActionTypeModel.isBeta",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isBeta",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ActionTypeModel.isExperimental",
             "type": "CompoundType",
             "tags": [],
@@ -2983,6 +3038,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.isSystemActionType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSystemActionType",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4051,143 +4120,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.RuleAction",
-        "type": "Interface",
-        "tags": [],
-        "label": "RuleAction",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.uuid",
-            "type": "string",
-            "tags": [],
-            "label": "uuid",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.group",
-            "type": "string",
-            "tags": [],
-            "label": "group",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.actionTypeId",
-            "type": "string",
-            "tags": [],
-            "label": "actionTypeId",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.params",
-            "type": "Object",
-            "tags": [],
-            "label": "params",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              }
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.frequency",
-            "type": "Object",
-            "tags": [],
-            "label": "frequency",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.RuleActionFrequency",
-                "text": "RuleActionFrequency"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.alertsFilter",
-            "type": "Object",
-            "tags": [],
-            "label": "alertsFilter",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertsFilter",
-                "text": "AlertsFilter"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleAction.useAlertDataForTemplate",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "useAlertDataForTemplate",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.RuleDefinitionProps",
         "type": "Interface",
         "tags": [],
@@ -4223,7 +4155,9 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
+              "<Params>, \"actions\" | \"alertTypeId\" | \"systemActions\"> & { ruleTypeId: string; actions: ",
+              "RuleUiAction",
+              "[]; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -5118,7 +5052,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"params\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5840,22 +5774,39 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.TriggersAndActionsUiServices.theme$",
+            "id": "def-public.TriggersAndActionsUiServices.i18n",
             "type": "Object",
             "tags": [],
-            "label": "theme$",
+            "label": "i18n",
             "description": [],
             "signature": [
-              "Observable",
-              "<",
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6307,7 +6258,11 @@
             "section": "def-common.AlertConsumers",
             "text": "AlertConsumers"
           },
-          "[] | undefined; } & Partial<Pick<",
+          "[] | undefined; renderCellPopover?: ((props: ",
+          "EuiDataGridCellPopoverElementProps",
+          " & { alert: ",
+          "EcsFieldsResponse",
+          "; }) => React.ReactNode | JSX.Element) | undefined; } & Partial<Pick<",
           "EuiDataGridProps",
           ", \"gridStyle\" | \"rowHeightsOptions\">>"
         ],
@@ -6495,7 +6450,9 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
+          "<Params>, \"actions\" | \"alertTypeId\" | \"systemActions\"> & { ruleTypeId: string; actions: ",
+          "RuleUiAction",
+          "[]; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6510,7 +6467,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
+          "\"alerts\" | \"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,
@@ -6665,6 +6622,37 @@
           ">) => void; has: (id: string) => boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.SanitizedRuleAction",
+        "type": "Type",
+        "tags": [],
+        "label": "SanitizedRuleAction",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAction",
+            "text": "RuleAction"
+          },
+          ", \"alertsFilter\"> & { alertsFilter?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedAlertsFilter",
+            "text": "SanitizedAlertsFilter"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7724,7 +7712,15 @@
           "signature": [
             "(props: Omit<",
             "ActionAccordionFormProps",
-            ", \"actionTypeRegistry\">) => React.ReactElement<",
+            ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleAction",
+              "text": "RuleAction"
+            },
+            "[]) => void; }) => React.ReactElement<",
             "ActionAccordionFormProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
@@ -7735,14 +7731,22 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getActionForm.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
                 "Omit<",
                 "ActionAccordionFormProps",
-                ", \"actionTypeRegistry\">"
+                ", \"actionTypeRegistry\" | \"setActions\"> & { setActions: (actions: ",
+                {
+                  "pluginId": "alerting",
+                  "scope": "common",
+                  "docId": "kibAlertingPluginApi",
+                  "section": "def-common.RuleAction",
+                  "text": "RuleAction"
+                },
+                "[]) => void; }"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7870,7 +7874,7 @@
             },
             ">(props: Omit<",
             "RuleAddProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7888,7 +7892,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7940,7 +7944,7 @@
             },
             ">(props: Omit<",
             "RuleEditProps",
-            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
             "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
@@ -7958,7 +7962,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"ruleTypeRegistry\" | \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8066,9 +8070,47 @@
           "label": "getAlertsStateTable",
           "description": [],
           "signature": [
-            "(props: ",
-            "AlertsTableStateProps",
-            " & ",
+            "(props: { alertsTableConfigurationRegistry: ",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.AlertsTableConfigurationRegistryContract",
+              "text": "AlertsTableConfigurationRegistryContract"
+            },
+            "; configurationId: string; id: string; featureIds: ",
+            {
+              "pluginId": "@kbn/rule-data-utils",
+              "scope": "common",
+              "docId": "kibKbnRuleDataUtilsPluginApi",
+              "section": "def-common.AlertConsumers",
+              "text": "AlertConsumers"
+            },
+            "[]; query: Pick<",
+            "QueryDslQueryContainer",
+            ", \"ids\" | \"bool\">; pageSize?: number | undefined; browserFields?: ",
+            {
+              "pluginId": "ruleRegistry",
+              "scope": "common",
+              "docId": "kibRuleRegistryPluginApi",
+              "section": "def-common.BrowserFields",
+              "text": "BrowserFields"
+            },
+            " | undefined; onUpdate?: ((args: ",
+            "TableUpdateHandlerArgs",
+            ") => void) | undefined; onLoaded?: (() => void) | undefined; runtimeMappings?: ",
+            "MappingRuntimeFields",
+            " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
+            "EuiDataGridToolBarVisibilityOptions",
+            " | undefined; shouldHighlightRow?: ((alert: ",
+            "EcsFieldsResponse",
+            ") => boolean) | undefined; dynamicRowHeight?: boolean | undefined; lastReloadRequestTime?: number | undefined; renderCellPopover?: ((props: ",
+            "EuiDataGridCellPopoverElementProps",
+            " & { alert: ",
+            "EcsFieldsResponse",
+            "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+            "EuiDataGridProps",
+            ">, \"renderCellPopover\"> & ",
             "LazyLoadProps",
             ") => React.ReactElement<",
             "AlertsTableStateProps",
@@ -8086,8 +8128,47 @@
               "label": "props",
               "description": [],
               "signature": [
-                "AlertsTableStateProps",
-                " & ",
+                "{ alertsTableConfigurationRegistry: ",
+                {
+                  "pluginId": "triggersActionsUi",
+                  "scope": "public",
+                  "docId": "kibTriggersActionsUiPluginApi",
+                  "section": "def-public.AlertsTableConfigurationRegistryContract",
+                  "text": "AlertsTableConfigurationRegistryContract"
+                },
+                "; configurationId: string; id: string; featureIds: ",
+                {
+                  "pluginId": "@kbn/rule-data-utils",
+                  "scope": "common",
+                  "docId": "kibKbnRuleDataUtilsPluginApi",
+                  "section": "def-common.AlertConsumers",
+                  "text": "AlertConsumers"
+                },
+                "[]; query: Pick<",
+                "QueryDslQueryContainer",
+                ", \"ids\" | \"bool\">; pageSize?: number | undefined; browserFields?: ",
+                {
+                  "pluginId": "ruleRegistry",
+                  "scope": "common",
+                  "docId": "kibRuleRegistryPluginApi",
+                  "section": "def-common.BrowserFields",
+                  "text": "BrowserFields"
+                },
+                " | undefined; onUpdate?: ((args: ",
+                "TableUpdateHandlerArgs",
+                ") => void) | undefined; onLoaded?: (() => void) | undefined; runtimeMappings?: ",
+                "MappingRuntimeFields",
+                " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
+                "EuiDataGridToolBarVisibilityOptions",
+                " | undefined; shouldHighlightRow?: ((alert: ",
+                "EcsFieldsResponse",
+                ") => boolean) | undefined; dynamicRowHeight?: boolean | undefined; lastReloadRequestTime?: number | undefined; renderCellPopover?: ((props: ",
+                "EuiDataGridCellPopoverElementProps",
+                " & { alert: ",
+                "EcsFieldsResponse",
+                "; }) => React.ReactNode | JSX.Element) | undefined; } & Omit<Partial<",
+                "EuiDataGridProps",
+                ">, \"renderCellPopover\"> & ",
                 "LazyLoadProps"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -10196,7 +10277,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly globalAlertsPage: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; readonly ruleKqlBar: boolean; readonly isMustacheAutocompleteOn: boolean; readonly showMustacheAutocompleteSwitch: boolean; readonly ruleFormV2: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -10275,7 +10356,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: true; readonly globalAlertsPage: false; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; }"
+          "{ readonly rulesListDatagrid: true; readonly globalAlertsPage: false; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly ruleFormV2: false; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
