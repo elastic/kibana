@@ -6,152 +6,128 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import {
-  useHostFlyoutViewMetricsCharts,
   useHostKpiCharts,
-  useHostPageViewMetricsCharts,
-  useKubernetesSectionMetricsCharts,
+  useHostCharts,
+  useKubernetesCharts,
+  type HostMetricTypes,
 } from './use_metrics_charts';
 
-const metricsDataViewId = 'metricsDataViewId';
-const logsDataViewId = 'logsDataViewId';
+const dataViewId = 'metricsDataViewId';
 
-describe('useHostFlyoutViewMetricsCharts', () => {
-  it('should return an array of charts with correct order', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostFlyoutViewMetricsCharts({ metricsDataViewId, logsDataViewId })
+describe('useHostCharts', () => {
+  describe('host charts', () => {
+    describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['logs']])(
+      '%s',
+      (item) => {
+        const getExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
+          switch (metric) {
+            case 'cpu':
+              return overview
+                ? ['cpuUsage', 'normalizedLoad1m']
+                : ['cpuUsage', 'cpuUsageBreakdown', 'normalizedLoad1m', 'loadBreakdown'];
+            case 'memory':
+              return overview ? ['memoryUsage'] : ['memoryUsage', 'memoryUsageBreakdown'];
+            case 'network':
+              return ['rxTx'];
+            case 'disk':
+              return overview
+                ? ['diskUsageByMountPoint', 'diskIOReadWrite']
+                : ['diskUsageByMountPoint', 'diskIOReadWrite', 'diskThroughputReadWrite'];
+            case 'logs':
+              return ['logRate'];
+            default:
+              return [];
+          }
+        };
+
+        test.each<[HostMetricTypes]>([[item]])(
+          'should return an array of charts with correct order for metric "%s"',
+          async (metric) => {
+            const expectedOrder = getExpectedOrder(metric, false);
+
+            const { result, waitForNextUpdate } = renderHook(() =>
+              useHostCharts({ dataViewId, metric })
+            );
+            await waitForNextUpdate();
+
+            const { charts } = result.current;
+
+            expect(charts).toHaveLength(expectedOrder.length);
+
+            charts.forEach((chart, index) => {
+              expect(chart).toHaveProperty('id', expectedOrder[index]);
+            });
+          }
+        );
+
+        test.each<[HostMetricTypes]>([[item]])(
+          'should return an array of charts with correct order for metric "%s" - overview',
+          async (metric) => {
+            const expectedOrder = getExpectedOrder(metric, true);
+
+            const { result, waitForNextUpdate } = renderHook(() =>
+              useHostCharts({ dataViewId, metric, options: { overview: true } })
+            );
+            await waitForNextUpdate();
+
+            const { charts } = result.current;
+
+            expect(charts).toHaveLength(expectedOrder.length);
+
+            charts.forEach((chart, index) => {
+              expect(chart).toHaveProperty('id', expectedOrder[index]);
+            });
+          }
+        );
+      }
     );
-    await waitForNextUpdate();
+  });
 
-    const expectedOrder = [
-      'cpuUsage',
-      'memoryUsage',
-      'normalizedLoad1m',
-      'logRate',
-      'diskSpaceUsageAvailable',
-      'diskUsageByMountPoint',
-      'diskThroughputReadWrite',
-      'diskIOReadWrite',
-      'rxTx',
-    ];
+  describe('kubernetes charts', () => {
+    it('should return an array of charts with correct order', async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useKubernetesCharts({ dataViewId }));
+      await waitForNextUpdate();
 
-    expect(result.current).toHaveLength(expectedOrder.length);
+      const expectedOrder = [
+        'nodeCpuCapacity',
+        'nodeMemoryCapacity',
+        'nodeDiskCapacity',
+        'nodePodCapacity',
+      ];
 
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
+      const { charts } = result.current;
+
+      expect(charts).toHaveLength(expectedOrder.length);
+
+      charts.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expectedOrder[index]);
+      });
     });
   });
 
-  it('should return a chart with id "logRate" using the logsDataViewId', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostFlyoutViewMetricsCharts({ metricsDataViewId, logsDataViewId })
-    );
-    await waitForNextUpdate();
+  describe('useHostKpiCharts', () => {
+    it('should return an array of charts with correct order and options', async () => {
+      const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
 
-    const logRateChart = result.current.find((chart) => chart.id === 'logRate') as LensXYConfig;
-    expect(logRateChart).toBeDefined();
-    expect(logRateChart.dataset).toHaveProperty('index', logsDataViewId);
-  });
-});
+      const options = {
+        seriesColor: 'blue',
+        subtitle: 'Custom Subtitle',
+      };
 
-describe('useHostPageViewMetricsCharts', () => {
-  it('should return an array of charts with correct order', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostPageViewMetricsCharts({ metricsDataViewId, logsDataViewId })
-    );
-    await waitForNextUpdate();
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useHostKpiCharts({ dataViewId, options })
+      );
+      await waitForNextUpdate();
 
-    const expectedOrder = [
-      'cpuUsage',
-      'cpuUsageBreakdown',
-      'memoryUsage',
-      'memoryUsageBreakdown',
-      'normalizedLoad1m',
-      'loadBreakdown',
-      'logRate',
-      'diskSpaceUsageAvailable',
-      'diskUsageByMountPoint',
-      'diskThroughputReadWrite',
-      'diskIOReadWrite',
-      'rxTx',
-    ];
+      expect(result.current).toHaveLength(expectedOrder.length);
 
-    expect(result.current).toHaveLength(expectedOrder.length);
-
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
-    });
-  });
-
-  it('should return a chart with id "logRate" using the logsDataViewId', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostPageViewMetricsCharts({ metricsDataViewId, logsDataViewId })
-    );
-    await waitForNextUpdate();
-
-    const logRateChart = result.current.find((chart) => chart.id === 'logRate') as LensXYConfig;
-    expect(logRateChart).toBeDefined();
-    expect(logRateChart.dataset).toHaveProperty('index', logsDataViewId);
-  });
-});
-
-describe('useKubernetesSectionMetricsCharts', () => {
-  it('should return an array of charts with correct order', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useKubernetesSectionMetricsCharts({ metricsDataViewId })
-    );
-    await waitForNextUpdate();
-
-    const expectedOrder = [
-      'nodeCpuCapacity',
-      'nodeMemoryCapacity',
-      'nodeDiskCapacity',
-      'nodePodCapacity',
-    ];
-
-    expect(result.current).toHaveLength(expectedOrder.length);
-
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
-    });
-  });
-});
-
-describe('useHostKpiCharts', () => {
-  it('should return an array of charts with correct order', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostKpiCharts({ dataViewId: metricsDataViewId })
-    );
-    await waitForNextUpdate();
-
-    const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
-
-    expect(result.current).toHaveLength(expectedOrder.length);
-
-    result.current.forEach((chart, index) => {
-      expect(chart).toHaveProperty('id', expectedOrder[index]);
-      expect(chart).toHaveProperty('subtitle', 'Average');
-      expect(chart).toHaveProperty('decimals', 1);
-    });
-  });
-
-  it('should return an array of charts with correct options', async () => {
-    const options = {
-      seriesColor: 'blue',
-      subtitle: 'Custom Subtitle',
-    };
-
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useHostKpiCharts({ dataViewId: metricsDataViewId, options })
-    );
-    await waitForNextUpdate();
-
-    expect(result.current).toHaveLength(4);
-
-    result.current.forEach((chart) => {
-      expect(chart).toHaveProperty('seriesColor', options.seriesColor);
-      expect(chart).toHaveProperty('subtitle', options.subtitle);
+      result.current.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expectedOrder[index]);
+        expect(chart).toHaveProperty('subtitle', options.subtitle);
+        expect(chart).toHaveProperty('decimals', 1);
+        expect(chart).toHaveProperty('seriesColor', options.seriesColor);
+      });
     });
   });
 });

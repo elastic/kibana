@@ -9,18 +9,28 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Logs, Metadata, Osquery, Overview, Processes, Profiling } from '../tabs';
+import {
+  Anomalies,
+  Logs,
+  Metadata,
+  Metrics,
+  Osquery,
+  Overview,
+  Processes,
+  Profiling,
+} from '../tabs';
 import { ContentTabIds } from '../types';
 
 export const Content = () => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <DatePickerWrapper
           visibleFor={[
             ContentTabIds.OVERVIEW,
             ContentTabIds.LOGS,
             ContentTabIds.METADATA,
+            ContentTabIds.METRICS,
             ContentTabIds.PROCESSES,
             ContentTabIds.ANOMALIES,
           ]}
@@ -38,6 +48,9 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.METADATA}>
           <Metadata />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.METRICS}>
+          <Metrics />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.OSQUERY}>
           <Osquery />

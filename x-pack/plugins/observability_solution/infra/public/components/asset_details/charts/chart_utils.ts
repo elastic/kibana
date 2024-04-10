@@ -8,7 +8,7 @@
 import { MultiValueClickContext } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common/expression_types';
-import type { OnFilterEvent } from '../../../../lens';
+import type { OnFilterEvent } from '../../lens';
 
 type ChartClickContextData = MultiValueClickContext['data']['data'];
 

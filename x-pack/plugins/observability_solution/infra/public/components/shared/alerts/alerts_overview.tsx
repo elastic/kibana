@@ -20,7 +20,7 @@ import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
 interface AlertsOverviewProps {
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
   onRangeSelection?: HostsStateUpdater;
@@ -29,7 +29,7 @@ interface AlertsOverviewProps {
 const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
 
 export const AlertsOverview = ({
-  assetName,
+  assetId,
   dateRange,
   onLoaded,
   onRangeSelection,
@@ -54,20 +54,20 @@ export const AlertsOverview = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetName],
+        hostNodeNames: [assetId],
         status: alertStatus,
       }),
-    [assetName, dateRange, alertStatus]
+    [assetId, dateRange, alertStatus]
   );
 
   const alertsEsQuery = useMemo(
     () =>
       createAlertsEsQuery({
         dateRange,
-        hostNodeNames: [assetName],
+        hostNodeNames: [assetId],
         status: ALERT_STATUS_ALL,
       }),
-    [assetName, dateRange]
+    [assetId, dateRange]
   );
 
   const summaryTimeRange = useSummaryTimeRange(dateRange);

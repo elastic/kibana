@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut, EuiLink } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { CollapsibleSection } from './section/collapsible_section';
-import { ServicesSectionTitle } from '../../components/section_titles';
+import { Section } from '../../components/section';
+import { ServicesSectionTitle } from './section_titles';
 import { useServices } from '../../hooks/use_services';
 import { HOST_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
@@ -48,12 +48,12 @@ export const ServicesContent = ({
   const hasServices = services?.length;
 
   return (
-    <CollapsibleSection
-      title={ServicesSectionTitle}
+    <Section
+      title={<ServicesSectionTitle />}
       collapsible
       data-test-subj="infraAssetDetailsServicesCollapsible"
       id="services"
-      extraAction={<LinkToApmServices assetName={hostName} apmField={APM_HOST_FILTER_FIELD} />}
+      extraAction={<LinkToApmServices assetId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
     >
       {error ? (
         <EuiCallOut
@@ -107,6 +107,6 @@ export const ServicesContent = ({
           />
         </p>
       )}
-    </CollapsibleSection>
+    </Section>
   );
 };

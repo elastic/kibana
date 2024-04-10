@@ -5,15 +5,5 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { css } from '@emotion/react';
-
-export const SectionSeparator = () => (
-  <EuiHorizontalRule
-    margin="m"
-    css={css`
-      margin-bottom: 0;
-    `}
-  />
-);
+export { HostCharts } from './host_charts';
+export { KubernetesCharts } from './kubernetes_charts';

@@ -13,18 +13,18 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ALERTS_PATH } from '../../shared/alerts/constants';
 
 export interface LinkToAlertsPageProps {
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
   queryField: string;
 }
 
-export const LinkToAlertsPage = ({ assetName, queryField, dateRange }: LinkToAlertsPageProps) => {
+export const LinkToAlertsPage = ({ assetId, queryField, dateRange }: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const linkToAlertsPage = http.basePath.prepend(
     `${ALERTS_PATH}?_a=${encode({
-      kuery: `${queryField}:"${assetName}"`,
+      kuery: `${queryField}:"${assetId}"`,
       rangeFrom: dateRange.from,
       rangeTo: dateRange.to,
       status: 'all',

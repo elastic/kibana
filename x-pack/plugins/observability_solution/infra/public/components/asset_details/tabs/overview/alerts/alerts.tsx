@@ -10,24 +10,24 @@ import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui'
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
-import { LinkToAlertsRule } from '../../links/link_to_alerts';
-import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
-import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
-import { useBoolean } from '../../../../hooks/use_boolean';
-import { AlertsSectionTitle } from '../../components/section_titles';
-import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { CollapsibleSection } from './section/collapsible_section';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
+import { LinkToAlertsRule } from '../../../links/link_to_alerts';
+import { LinkToAlertsPage } from '../../../links/link_to_alerts_page';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { useBoolean } from '../../../../../hooks/use_boolean';
+import { AlertsSectionTitle } from '../section_titles';
+import { useAssetDetailsRenderPropsContext } from '../../../hooks/use_asset_details_render_props';
+import { Section } from '../../../components/section';
 import { AlertsClosedContent } from './alerts_closed_content';
-import { type AlertsCount } from '../../../../hooks/use_alerts_count';
-import { AlertsOverview } from '../../../shared/alerts/alerts_overview';
+import { type AlertsCount } from '../../../../../hooks/use_alerts_count';
+import { AlertsOverview } from '../../../../shared/alerts/alerts_overview';
 
 export const AlertsSummaryContent = ({
-  assetName,
+  assetId,
   assetType,
   dateRange,
 }: {
-  assetName: string;
+  assetId: string;
   assetType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
@@ -46,10 +46,12 @@ export const AlertsSummaryContent = ({
     setActiveAlertsCount(alertsCount?.activeAlertCount);
   };
 
+  const assetFields = findInventoryFields(assetType);
+
   return (
     <>
-      <CollapsibleSection
-        title={AlertsSectionTitle}
+      <Section
+        title={<AlertsSectionTitle />}
         collapsible
         data-test-subj="infraAssetDetailsAlertsCollapsible"
         id="alerts"
@@ -64,19 +66,19 @@ export const AlertsSummaryContent = ({
             )}
             <EuiFlexItem grow={false}>
               <LinkToAlertsPage
-                assetName={assetName}
-                queryField={`${assetType}.name`}
+                assetId={assetId}
+                queryField={assetFields.id}
                 dateRange={dateRange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
-        <AlertsOverview onLoaded={onLoaded} dateRange={dateRange} assetName={assetName} />
-      </CollapsibleSection>
+        <AlertsOverview onLoaded={onLoaded} dateRange={dateRange} assetId={assetId} />
+      </Section>
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout
-          filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
+          filter={`${assetFields.id}: "${assetId}"`}
           nodeType={assetType}
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}

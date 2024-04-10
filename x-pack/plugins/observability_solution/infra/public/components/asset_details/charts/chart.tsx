@@ -8,45 +8,36 @@ import React, { useCallback, useMemo } from 'react';
 
 import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
-import { useDataView } from '../../../../../hooks/use_data_view';
-import { METRIC_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../../../lens';
-import { useDatePickerContext } from '../../../hooks/use_date_picker';
+import { useDataView } from '../../../hooks/use_data_view';
+import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
+import { buildCombinedHostsFilter } from '../../../utils/filters/build';
+import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
+import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
-import { useLoadingStateContext } from '../../../hooks/use_loading_state';
+import { useLoadingStateContext } from '../hooks/use_loading_state';
 
 export type ChartProps = LensConfig &
   Pick<LensChartProps, 'overrides'> & {
     id: string;
-    filterFieldName: string;
+    queryField: string;
     dateRange: TimeRange;
-    assetName: string;
-    ['data-test-subj']: string;
+    assetId: string;
   };
 
-export const Chart = ({
-  id,
-  filterFieldName,
-  overrides,
-  dateRange,
-  assetName,
-  ...props
-}: ChartProps) => {
+export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { searchSessionId } = useLoadingStateContext();
-  const { ['data-test-subj']: dataTestSubj, ...chartProps } = { ...props };
-  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
+  const { dataView } = useDataView({ index: (props.dataset as LensDataviewDataset)?.index });
 
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
-        field: filterFieldName,
-        values: [assetName],
+        field: queryField,
+        values: [assetId],
         dataView,
       }),
     ];
-  }, [assetName, dataView, filterFieldName]);
+  }, [assetId, dataView, queryField]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
@@ -76,8 +67,8 @@ export const Chart = ({
 
   return (
     <LensChart
-      {...chartProps}
-      id={`${dataTestSubj}${id}`}
+      {...props}
+      id={`infraAssetDetailsHostMetricsChart${id}`}
       borderRadius="m"
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
