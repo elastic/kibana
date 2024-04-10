@@ -37,7 +37,7 @@ export function getDataViewAppState(
     );
   }
 
-  const isTextBasedQueryMode = !!query && isOfAggregateQueryType(query);
+  const isTextBasedQueryMode = isOfAggregateQueryType(query);
 
   if (isTextBasedQueryMode) {
     columns = [];
