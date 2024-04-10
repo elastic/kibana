@@ -141,6 +141,7 @@ export class DashboardContainer
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
+  public lastReloadRequestTime$ = new BehaviorSubject<string | undefined>(undefined);
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
   public reload$ = new Subject<void>();
   public timeRestore$: BehaviorSubject<boolean | undefined>;
@@ -290,6 +291,10 @@ export class DashboardContainer
       [number, number] | undefined,
       DashboardContainerInput
     >(this.publishingSubscription, this, 'timeslice');
+    this.lastReloadRequestTime$ = embeddableInputToSubject<
+      string | undefined,
+      DashboardContainerInput
+    >(this.publishingSubscription, this, 'lastReloadRequestTime');
   }
 
   public getAppContext() {

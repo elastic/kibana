@@ -10,7 +10,7 @@ import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import { combineLatest, distinctUntilChanged, merge, Observable, skip } from 'rxjs';
 import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiPublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
 
@@ -56,6 +56,13 @@ export function newSession$(api: unknown) {
     }
   }
 
+  // TODO replace lastReloadRequestTime$ with reload$
+  if ((api as { lastReloadRequestTime$?: PublishingSubject<string | undefined> }).lastReloadRequestTime$) {
+    observables.push((api as { lastReloadRequestTime$: PublishingSubject<string | undefined> }).lastReloadRequestTime$);
+  }
+
   const combine$ = combineLatest(observables).pipe(skip(1));
-  return apiPublishesReload(api) ? merge(api.reload$, combine$) : combine$;
+  return combine$;
+  // TODO replace lastReloadRequestTime$ with reload$
+  //return apiPublishesReload(api) ? merge(api.reload$, combine$) : combine$;
 }
