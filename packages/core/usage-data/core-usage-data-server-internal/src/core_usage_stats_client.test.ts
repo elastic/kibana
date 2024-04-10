@@ -70,7 +70,7 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('Request-batching', () => {
-    [
+    it.each([
       { triggerName: 'timer-based', triggerFn: async () => await jest.runOnlyPendingTimersAsync() },
       {
         triggerName: 'forced-flush',
@@ -79,46 +79,44 @@ describe('CoreUsageStatsClient', () => {
           usageStatsClient['flush$'].next();
         },
       },
-    ].map(({ triggerName, triggerFn }) => {
-      it(`batches multiple increments into one (${triggerName})`, async () => {
-        const { usageStatsClient, repositoryMock } = setup();
+    ])('batches multiple increments into one ($triggerName)', async ({ triggerFn }) => {
+      const { usageStatsClient, repositoryMock } = setup();
 
-        // First request
-        const request = httpServerMock.createKibanaRequest();
-        await usageStatsClient.incrementSavedObjectsBulkCreate({
-          request,
-        } as BaseIncrementOptions);
+      // First request
+      const request = httpServerMock.createKibanaRequest();
+      await usageStatsClient.incrementSavedObjectsBulkCreate({
+        request,
+      } as BaseIncrementOptions);
 
-        // Second request
-        const kibanaRequest = httpServerMock.createKibanaRequest({
-          headers: firstPartyRequestHeaders,
-        });
-        await usageStatsClient.incrementSavedObjectsBulkCreate({
-          request: kibanaRequest,
-        } as BaseIncrementOptions);
-
-        // Run trigger
-        await triggerFn(usageStatsClient);
-
-        expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
-        expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
-          CORE_USAGE_STATS_TYPE,
-          CORE_USAGE_STATS_ID,
-          [
-            { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 2 },
-            { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 2 },
-            {
-              fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
-              incrementBy: 1,
-            },
-            {
-              fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
-              incrementBy: 1,
-            },
-          ],
-          incrementOptions
-        );
+      // Second request
+      const kibanaRequest = httpServerMock.createKibanaRequest({
+        headers: firstPartyRequestHeaders,
       });
+      await usageStatsClient.incrementSavedObjectsBulkCreate({
+        request: kibanaRequest,
+      } as BaseIncrementOptions);
+
+      // Run trigger
+      await triggerFn(usageStatsClient);
+
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 2 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 2 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+            incrementBy: 1,
+          },
+        ],
+        incrementOptions
+      );
     });
   });
 
