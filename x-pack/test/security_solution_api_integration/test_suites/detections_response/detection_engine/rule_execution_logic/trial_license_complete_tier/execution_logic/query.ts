@@ -51,7 +51,7 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 import {
   createExceptionList,
   createExceptionListItem,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   getSimpleRule,
   previewRule,
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: `_id:${ID}`,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).greaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
     });
@@ -811,7 +811,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
           expect(alerts.hits.hits.length).eql(1);
           expect(alerts.hits.hits[0]._source).to.eql({
             ...alerts.hits.hits[0]._source,
@@ -841,7 +841,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenAlerts(
+          const secondAlerts = await getAlerts(
             supertest,
             log,
             es,
@@ -892,7 +892,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
 
           // Close the alert. Subsequent rule executions should ignore this closed alert
           // for suppression purposes.
@@ -917,7 +917,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenAlerts(
+          const secondAlerts = await getAlerts(
             supertest,
             log,
             es,
@@ -2357,7 +2357,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
-        const alertsAfterEnable = await getOpenAlerts(supertest, log, es, ruleBody, 'succeeded');
+        const alertsAfterEnable = await getAlerts(supertest, log, es, ruleBody, 'succeeded');
         expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });
