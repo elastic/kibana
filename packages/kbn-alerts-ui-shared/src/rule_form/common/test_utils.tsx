@@ -13,24 +13,27 @@ import { render, waitFor, screen } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
 import { HttpStart } from '@kbn/core-http-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ContextsProvider } from '../contexts';
-import type { PreloadedState } from '../store';
 import {
   RuleFormAppContext,
   RuleTypeParams,
   RuleTypeModel,
   RuleTypeModelFromRegistry,
   RuleTypeParamsExpressionProps,
+  RuleFormRule,
 } from '../types';
-import { BASE_ALERTING_API_PATH, DEFAULT_VALID_CONSUMERS } from './constants';
+import {
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
+  DEFAULT_VALID_CONSUMERS,
+} from './constants';
 import { IncompleteError, InvalidError } from './validation_error';
 
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
   registeredRuleTypeModel?: RuleTypeModelFromRegistry;
   isEdit?: boolean;
   ruleId?: string;
-  preloadedState?: PreloadedState;
   authorizedConsumers?: RuleCreationValidConsumer[];
   appContext?: RuleFormAppContext;
 }
@@ -65,6 +68,33 @@ export const mockRuleType: RuleTypeModel<MockRuleTypeParams> = {
     owo: 'hewwo',
     uwu: 621,
   },
+  authorizedConsumers: {
+    [AlertConsumers.LOGS]: { read: true, all: true },
+    [AlertConsumers.STACK_ALERTS]: { read: true, all: true },
+    [AlertConsumers.APM]: { read: false, all: false },
+    [AlertConsumers.SIEM]: { read: false, all: false },
+    [AlertConsumers.INFRASTRUCTURE]: { read: false, all: false },
+    [AlertConsumers.UPTIME]: { read: false, all: false },
+    [AlertConsumers.ML]: { read: false, all: false },
+    [AlertConsumers.OBSERVABILITY]: { read: false, all: false },
+    [AlertConsumers.MONITORING]: { read: false, all: false },
+    [AlertConsumers.SLO]: { read: false, all: false },
+    [AlertConsumers.EXAMPLE]: { read: false, all: false },
+  },
+};
+
+export const mockExistingRule: RuleFormRule = {
+  id: 'test-existing-rule-id',
+  name: 'Existing rule',
+  tags: ['test'],
+  consumer: 'alerts',
+  schedule: { interval: '10h' },
+  params: {
+    owo: 'hiiii',
+    uwu: 123,
+  },
+  ruleTypeId: 'test',
+  actions: [],
 };
 
 const mockHttp = {
@@ -74,13 +104,22 @@ const mockHttp = {
         {
           id: mockRuleType.id,
           name: mockRuleType.name,
-          authorized_consumers: {
-            logs: { all: true },
-            stackAlerts: { all: true },
-            alerts: { all: true },
-          },
+          authorized_consumers: mockRuleType.authorizedConsumers,
+        },
+        {
+          id: ES_QUERY_ID,
+          name: 'ES Query type mock',
+          authorized_consumers: mockRuleType.authorizedConsumers,
         },
       ]);
+    }
+    if (
+      url ===
+      `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(
+        'test-existing-rule-id'
+      )}/_resolve`
+    ) {
+      return Promise.resolve(mockExistingRule);
     }
   }),
 } as unknown as HttpStart;
@@ -104,7 +143,6 @@ export function renderWithProviders(
     ) as RuleTypeModelFromRegistry,
     isEdit = false,
     ruleId = '',
-    preloadedState = {},
     authorizedConsumers = DEFAULT_VALID_CONSUMERS,
     appContext = {},
     ...renderOptions

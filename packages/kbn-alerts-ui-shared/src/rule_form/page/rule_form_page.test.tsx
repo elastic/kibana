@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 import { RuleFormPage } from './rule_form_page';
-import { renderWithProviders, waitForFormToLoad, mockRuleType } from '../common/test_utils';
+import {
+  renderWithProviders,
+  waitForFormToLoad,
+  mockRuleType,
+  mockExistingRule,
+} from '../common/test_utils';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { RuleFormAppContext, RuleTypeModelFromRegistry } from '../types';
 
 const docLinksMock = docLinksServiceMock.createStartContract();
 const expressionPluginsMock = {
@@ -19,6 +27,12 @@ const expressionPluginsMock = {
   data: jest.fn(),
   dataViews: jest.fn(),
   unifiedSearch: jest.fn(),
+};
+
+const createAppContext: RuleFormAppContext = {
+  consumer: 'stackAlerts',
+  validConsumers: ['logs', 'stackAlerts', 'infrastructure'],
+  canShowConsumerSelection: true,
 };
 
 describe('Create rule form full page', () => {
@@ -29,7 +43,9 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
-      />
+        canShowConsumerSelection
+      />,
+      { appContext: createAppContext }
     );
     await waitForFormToLoad();
 
@@ -58,7 +74,9 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
-      />
+        canShowConsumerSelection
+      />,
+      { appContext: createAppContext }
     );
     await waitForFormToLoad();
 
@@ -74,7 +92,9 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
-      />
+        canShowConsumerSelection
+      />,
+      { appContext: createAppContext }
     );
     await waitForFormToLoad();
 
@@ -90,7 +110,9 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
-      />
+        canShowConsumerSelection
+      />,
+      { appContext: createAppContext }
     );
     await waitForFormToLoad();
 
@@ -114,7 +136,9 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
-      />
+        canShowConsumerSelection
+      />,
+      { appContext: createAppContext }
     );
     await waitForFormToLoad();
 
@@ -134,8 +158,10 @@ describe('Create rule form full page', () => {
         onSaveRule={jest.fn()}
         docLinks={docLinksMock}
         expressionPlugins={expressionPluginsMock}
+        canShowConsumerSelection
       />,
       {
+        appContext: createAppContext,
         registeredRuleTypeModel: {
           ...mockRuleType,
           defaultRuleParams: undefined,
@@ -158,5 +184,56 @@ describe('Create rule form full page', () => {
     await fireEvent.click(screen.getByTestId('zeroUwu'));
 
     expect(screen.getByTestId('ruleDefinitionStep')).toHaveTextContent('Step 1 has errors');
+  });
+
+  it('shows the consumer selector for rules that can be created for multiple consumers', async () => {
+    renderWithProviders(
+      <RuleFormPage
+        onClickReturn={jest.fn()}
+        onSaveRule={jest.fn()}
+        docLinks={docLinksMock}
+        expressionPlugins={expressionPluginsMock}
+        canShowConsumerSelection
+      />,
+      {
+        appContext: createAppContext,
+        registeredRuleTypeModel: {
+          ...omit(mockRuleType, 'name', 'authorizedConsumers'),
+          id: ES_QUERY_ID,
+        } as RuleTypeModelFromRegistry,
+      }
+    );
+    await waitForFormToLoad();
+
+    expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
+  });
+});
+
+describe('Edit rule form full page', () => {
+  it('loads an existing rule into the form', async () => {
+    renderWithProviders(
+      <RuleFormPage
+        onClickReturn={jest.fn()}
+        onSaveRule={jest.fn()}
+        docLinks={docLinksMock}
+        expressionPlugins={expressionPluginsMock}
+        isEdit
+      />,
+      {
+        ruleId: 'test-existing-rule-id',
+        isEdit: true,
+        appContext: {
+          canShowConsumerSelection: false,
+        },
+      }
+    );
+    await waitForFormToLoad();
+
+    expect(screen.getByTestId('ruleFormTitle')).toHaveTextContent(mockExistingRule.name);
+    expect(screen.getByTestId('ruleNameField')).toHaveValue(mockExistingRule.name);
+    expect(screen.getByTestId('intervalInput')).toHaveValue(10);
+    expect(screen.getByTestId('intervalInputUnit')).toHaveValue('h');
+
+    expect(screen.getByTestId('saveRuleButton')).not.toHaveAttribute('disabled');
   });
 });
