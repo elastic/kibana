@@ -138,16 +138,9 @@ export const LinkContent = ({
         : (await urlService.shortUrls.get(null).createFromLongUrl(tempUrl)).url;
       setShortUrlCache(shortUrl as string);
       setUrl(shortUrl as string);
-      return allowShortUrl ? setDashboardLink(shortUrl as string) : setDashboardLink(tempUrl);
+      return setDashboardLink(shortUrl as string);
     },
-    [
-      allowShortUrl,
-      setDashboardLink,
-      isMounted,
-      shareableUrlLocatorParams,
-      urlService.shortUrls,
-      shortUrlCache,
-    ]
+    [setDashboardLink, isMounted, shareableUrlLocatorParams, urlService.shortUrls, shortUrlCache]
   );
 
   const setUrlHelper = useCallback(() => {
@@ -158,8 +151,17 @@ export const LinkContent = ({
     } else if ('lens') {
       tempUrl = getSavedObjectUrl();
     }
-    return allowShortUrl ? createShortUrl(tempUrl!) : setUrl(tempUrl!);
-  }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType]);
+    return allowShortUrl
+      ? createShortUrl(tempUrl!)
+      : (setUrl(tempUrl!), setDashboardLink(tempUrl!));
+  }, [
+    allowShortUrl,
+    createShortUrl,
+    getSavedObjectUrl,
+    getSnapshotUrl,
+    objectType,
+    setDashboardLink,
+  ]);
 
   useEffect(() => {
     isMounted();
