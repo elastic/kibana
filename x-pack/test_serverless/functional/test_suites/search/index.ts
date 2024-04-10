@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./console_notebooks'));
 
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./pipelines/list_page'));
   });
 }
