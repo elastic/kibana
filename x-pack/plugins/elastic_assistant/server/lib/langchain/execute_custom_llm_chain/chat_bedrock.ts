@@ -24,24 +24,21 @@ export const getMessageContentAndRole = (prompt: string) => ({
 });
 
 export interface CustomChatModelInput extends BaseChatModelParams {
-  n: number;
   actions: ActionsPluginStart;
   connectorId: string;
   logger: Logger;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 }
 
-export class ChatBedrock extends SimpleChatModel {
-  n: number;
+export class ActionsClientChatBedrock extends SimpleChatModel {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #traceId: string;
 
-  constructor({ actions, connectorId, n, logger, request }: CustomChatModelInput) {
+  constructor({ actions, connectorId, logger, request }: CustomChatModelInput) {
     super({});
-    this.n = n;
 
     this.#actions = actions;
     this.#connectorId = connectorId;
@@ -69,9 +66,9 @@ export class ChatBedrock extends SimpleChatModel {
     const prompt = messages[0].content;
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
-      `ActionsClientLlm#_call\ntraceId: ${this.#traceId}\nassistantMessage:\n${JSON.stringify(
-        assistantMessage
-      )} `
+      `ActionsClientChatBedrock#_call\ntraceId: ${
+        this.#traceId
+      }\nassistantMessage:\n${JSON.stringify(assistantMessage)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
