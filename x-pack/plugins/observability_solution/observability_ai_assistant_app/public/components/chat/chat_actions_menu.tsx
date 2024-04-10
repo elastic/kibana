@@ -7,14 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { getSettingsHref } from '../../utils/get_settings_href';
@@ -33,16 +26,10 @@ export function ChatActionsMenu({
   onCopyConversationClick: () => void;
 }) {
   const {
-    application: { navigateToUrl, navigateToApp },
+    application: { navigateToUrl },
     http,
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleNavigateToConnectors = () => {
-    navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
-  };
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -152,18 +139,6 @@ export function ChatActionsMenu({
             content: (
               <EuiPanel>
                 <ConnectorSelectorBase {...connectors} />
-
-                <EuiButtonEmpty
-                  flush="left"
-                  size="xs"
-                  data-test-subj="settingsTabGoToConnectorsButton"
-                  onClick={handleNavigateToConnectors}
-                >
-                  {i18n.translate(
-                    'xpack.observabilityAiAssistant.settingsPage.goToConnectorsButtonLabel',
-                    { defaultMessage: 'Manage connectors' }
-                  )}
-                </EuiButtonEmpty>
               </EuiPanel>
             ),
           },
