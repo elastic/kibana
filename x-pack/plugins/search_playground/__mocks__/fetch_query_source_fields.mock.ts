@@ -1082,3 +1082,397 @@ export const ELSER_PASSAGE_CHUNKED_TWO_INDICES = {
     },
   },
 };
+
+export const DENSE_PASSAGE_FIRST_SINGLE_INDEX_FIELD_CAPS = {
+  indices: ['search-example-main'],
+  fields: {
+    'page_content_key.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    page_content_ner: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    page_content_key: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'page_content_ner.entities.end_pos': {
+      integer: {
+        type: 'integer',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'label.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_content_ner.entities.class_name': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_content_e5_embbeding.model_id': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    title: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'page_content_ner.entities.entity': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_content_e5_embbeding.predicted_value': {
+      dense_vector: {
+        type: 'dense_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'title.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    page_id: {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    page_content_e5_embbeding: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    category_id: {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_content_ner.entities.start_pos': {
+      integer: {
+        type: 'integer',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'main_button.button_title': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'main_button.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'main_button.button_title.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'bread_crumbs.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    main_button: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'page_content_ner.entities': {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    page_notification: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    buttons: {
+      object: {
+        type: 'object',
+        metadata_field: false,
+        searchable: false,
+        aggregatable: false,
+      },
+    },
+    'buttons.button_title.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'main_button.button_new_tab': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    label: {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    bread_crumbs: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'page_content_ner.predicted_value': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    url: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'url.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    page_content_text: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'buttons.button_title': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'page_content_e5_embbeding.model_id.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_notification.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'page_content_ner.model_id': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    filter_list: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'buttons.button_link': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'page_content_ner.entities.class_probability': {
+      float: {
+        type: 'float',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'buttons.button_new_tab': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    title_text: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'main_button.button_link': {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    page_content: {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    updated_date: {
+      date: {
+        type: 'date',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+    'buttons.button_link.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
+};
+
+export const DENSE_PASSAGE_FIRST_SINGLE_INDEX_DOC = {
+  _index: 'search-example-main',
+  _id: 'id',
+  _version: 1,
+  _seq_no: 2,
+  _primary_term: 1,
+  found: true,
+  _source: {
+    page_notification: '-',
+    'main_button.button_new_tab': '-',
+    page_content_key: '',
+    label: '',
+    bread_crumbs: 'breadcrumbs',
+    title: 'title',
+    type: '11',
+    url: '/',
+    page_content_text: 'page_content_text',
+    page_id: '2,061',
+    'buttons.button_title': '-',
+    page_content_e5_embbeding: {
+      predicted_value: [0.09232209622859955],
+      model_id: '.multilingual-e5-small_linux-x86_64',
+    },
+    category_id: 'category_id',
+    filter_list: 'filter',
+    'buttons.button_link': '-',
+    'buttons.button_new_tab': '-',
+    'main_button.button_title': '-',
+    title_text: 'title_text',
+    'main_button.button_link': '-',
+    page_content: 'bla',
+    updated_date: '2024-03-21T11:23:12.503000',
+    title_keyword: 'title_keyword',
+  },
+};

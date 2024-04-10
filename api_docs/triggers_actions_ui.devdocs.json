@@ -5774,22 +5774,39 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.TriggersAndActionsUiServices.theme$",
+            "id": "def-public.TriggersAndActionsUiServices.i18n",
             "type": "Object",
             "tags": [],
-            "label": "theme$",
+            "label": "i18n",
             "description": [],
             "signature": [
-              "Observable",
-              "<",
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
-              ">"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
