@@ -25,7 +25,7 @@ import { ContentTabIds } from '../types';
 
 export const Content = () => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <DatePickerWrapper
           visibleFor={[
