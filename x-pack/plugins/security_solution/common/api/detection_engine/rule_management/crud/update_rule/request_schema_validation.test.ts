@@ -79,7 +79,7 @@ describe('Update rule request schema, additional validation', () => {
     expect(errors).toEqual(['max_signals must be greater than 0']);
   });
 
-  test('does validate when max_signals is undefiend', () => {
+  test('does validate when max_signals is undefined', () => {
     const schema: RuleUpdateProps = {
       ...getUpdateRulesSchemaMock(),
       max_signals: undefined,

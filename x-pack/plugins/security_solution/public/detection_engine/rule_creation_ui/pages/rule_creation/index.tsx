@@ -73,6 +73,7 @@ import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
   DEFAULT_THREAT_INDEX_KEY,
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
@@ -125,6 +126,7 @@ const CreateRulePageComponent: React.FC = () => {
   const {
     application,
     data: { dataViews },
+    alerting: { getMaxAlertsPerRun },
   } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
@@ -141,7 +143,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
-
+  const maxAlertsPerRun = useMemo(() => getMaxAlertsPerRun(), [getMaxAlertsPerRun]);
   const defineStepDefault = useMemo(
     () => ({
       ...stepDefineDefaultValue,
@@ -150,6 +152,16 @@ const CreateRulePageComponent: React.FC = () => {
     }),
     [indicesConfig, threatIndicesConfig]
   );
+  const aboutStepDefault = useMemo(() => {
+    const defaultMaxSignals =
+      maxAlertsPerRun !== undefined && maxAlertsPerRun < DEFAULT_MAX_SIGNALS
+        ? maxAlertsPerRun
+        : DEFAULT_MAX_SIGNALS;
+    return {
+      ...stepAboutDefaultValue,
+      maxSignals: defaultMaxSignals,
+    };
+  }, [maxAlertsPerRun]);
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -178,7 +190,7 @@ const CreateRulePageComponent: React.FC = () => {
     setEqlOptionsSelected,
   } = useRuleForms({
     defineStepDefault,
-    aboutStepDefault: stepAboutDefaultValue,
+    aboutStepDefault,
     scheduleStepDefault: defaultSchedule,
     actionsStepDefault,
   });

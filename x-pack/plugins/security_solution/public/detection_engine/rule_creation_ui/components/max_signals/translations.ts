@@ -14,12 +14,13 @@ export const GREATER_THAN_ERROR = i18n.translate(
   }
 );
 
-export const LESS_THAN_ERROR = (maxNumber: number) =>
+export const LESS_THAN_WARNING = (maxNumber: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanError',
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning',
     {
       values: { maxNumber },
-      defaultMessage: 'Max alerts must be less than {maxNumber}.',
+      defaultMessage:
+        'Rule will only generate a maximum of {maxNumber} {maxNumber, plural, =1 {alert} other {alerts}}',
     }
   );
 

@@ -7,8 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-
+import { EuiTextColor, EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/css';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
@@ -37,15 +36,16 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
   const maxAlertsPerRun = alerting.getMaxAlertsPerRun() ?? 1000; // Defaults to 1000 in the alerting framework config
 
   const [isInvalid, error] = useMemo(() => {
-    if (typeof value === 'number' && !isNaN(value)) {
-      if (value <= 0) {
-        return [true, i18n.GREATER_THAN_ERROR];
-      } else if (value > maxAlertsPerRun) {
-        return [true, i18n.LESS_THAN_ERROR(maxAlertsPerRun)];
-      }
+    if (typeof value === 'number' && !isNaN(value) && value <= 0) {
+      return [true, i18n.GREATER_THAN_ERROR];
     }
     return [false];
-  }, [maxAlertsPerRun, value]);
+  }, [value]);
+
+  const hasWarning = useMemo(
+    () => typeof value === 'number' && !isNaN(value) && value > maxAlertsPerRun,
+    [maxAlertsPerRun, value]
+  );
 
   const handleMaxSignalsChange: EuiFieldNumberProps['onChange'] = useCallback(
     (e) => {
@@ -57,10 +57,17 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
   );
 
   const helpText = useMemo(() => {
+    const textToRender = [];
+    if (hasWarning) {
+      textToRender.push(
+        <EuiTextColor color="warning">{i18n.LESS_THAN_WARNING(maxAlertsPerRun)}</EuiTextColor>
+      );
+    }
     const defaultToNumber =
       maxAlertsPerRun < DEFAULT_MAX_SIGNALS ? maxAlertsPerRun : DEFAULT_MAX_SIGNALS;
-    return i18n.MAX_SIGNALS_HELP_TEXT(defaultToNumber);
-  }, [maxAlertsPerRun]);
+    textToRender.push(i18n.MAX_SIGNALS_HELP_TEXT(defaultToNumber));
+    return textToRender;
+  }, [hasWarning, maxAlertsPerRun]);
 
   return (
     <EuiFormRow
@@ -79,6 +86,11 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
       error={error}
     >
       <EuiFieldNumber
+        // This css is need until https://github.com/elastic/eui/pull/7666 gets merged in and kibana is updated to the new version of Eui
+        css={css`
+          padding-right: 40px;
+          padding-left: 12px;
+        `}
         isInvalid={isInvalid}
         value={value as EuiFieldNumberProps['value']}
         onChange={handleMaxSignalsChange}
@@ -86,6 +98,8 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
         data-test-subj="input"
         placeholder={placeholder}
         disabled={isDisabled}
+        // @ts-ignore This is need until https://github.com/elastic/eui/pull/7666 gets merged in and kibana is updated to the new version of Eui
+        icon={hasWarning ? { side: 'right', type: 'warning', color: 'warning' } : undefined}
       />
     </EuiFormRow>
   );
