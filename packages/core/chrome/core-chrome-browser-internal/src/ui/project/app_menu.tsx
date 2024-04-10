@@ -28,7 +28,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={css`
         z-index: ${zIndex};
-        background: ${euiTheme.colors.emptyShade};
+        background: ${euiTheme.colors.body};
         border-bottom: ${euiTheme.border.thin};
         display: flex;
         justify-content: end;
