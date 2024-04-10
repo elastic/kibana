@@ -23,7 +23,17 @@ import {
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
-import { bufferWhen, exhaustMap, filter, interval, map, merge, Subject, takeUntil } from 'rxjs';
+import {
+  bufferWhen,
+  exhaustMap,
+  filter,
+  interval,
+  map,
+  merge,
+  skip,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
@@ -78,6 +88,13 @@ const ALL_COUNTER_FIELDS = [
 ];
 const SPACE_CONTEXT_REGEX = /^\/s\/([a-z0-9_\-]+)/;
 
+// Buffering up to 10k events because:
+// - ALL_COUNTER_FIELDS has 125 fields, so that's the max request we can expect after grouping the keys.
+// - A typical counter reports 3 fields, so taking 10k events, means around 30k fields (to be later grouped into max 125 fields).
+// - Taking into account the longest possible string, this queue can use 15MB max.
+const MAX_BUFFER_SIZE = 10_000;
+const DEFAULT_BUFFER_TIME_MS = 10_000;
+
 /** @internal */
 export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   private readonly fieldsToIncrement$ = new Subject<string[]>();
@@ -88,13 +105,19 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
     private readonly basePath: IBasePath,
     private readonly repositoryPromise: Promise<ISavedObjectsRepository>,
     stop$: Subject<void>,
-    bufferTimeMs: number = 10_000
+    bufferTimeMs: number = DEFAULT_BUFFER_TIME_MS
   ) {
     this.fieldsToIncrement$
       .pipe(
         takeUntil(stop$),
-        // Buffer until either the timer or a forced flush occur
-        bufferWhen(() => merge(interval(bufferTimeMs), this.flush$)),
+        // Buffer until either the timer, a forced flush occur, or there are too many queued fields
+        bufferWhen(() =>
+          merge(
+            interval(bufferTimeMs),
+            this.flush$,
+            this.fieldsToIncrement$.pipe(skip(MAX_BUFFER_SIZE))
+          )
+        ),
         map((listOfFields) => {
           const fieldsMap = listOfFields.flat().reduce((acc, fieldName) => {
             const incrementCounterField: Required<SavedObjectsIncrementCounterField> = acc.get(

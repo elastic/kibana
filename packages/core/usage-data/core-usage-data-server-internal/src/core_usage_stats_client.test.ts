@@ -118,6 +118,56 @@ describe('CoreUsageStatsClient', () => {
         incrementOptions
       );
     });
+
+    it('triggers when the queue is too large', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+
+      // Trigger enough requests to overflow the queue
+      const request = httpServerMock.createKibanaRequest();
+      await Promise.all(
+        [...new Array(10_001).keys()].map(() =>
+          usageStatsClient.incrementSavedObjectsBulkCreate({
+            request,
+          } as BaseIncrementOptions)
+        )
+      );
+
+      // It sends all elements in the max batch
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 10_000 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 10_000 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 10_000,
+          },
+        ],
+        incrementOptions
+      );
+
+      // After timer, it sends the remainder event
+      await jest.runOnlyPendingTimersAsync();
+
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.total`, incrementBy: 1 },
+          { fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.total`, incrementBy: 1 },
+          {
+            fieldName: `${BULK_CREATE_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+            incrementBy: 1,
+          },
+        ],
+        incrementOptions
+      );
+    });
   });
 
   describe('#getUsageStats', () => {
