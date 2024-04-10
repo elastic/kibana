@@ -131,11 +131,7 @@ export const useHostIsolationAction = ({
 
   const isIsolationActionDisabled = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      return (
-        !sentinelOneAgentStatus ||
-        sentinelOneAgentStatus?.isUninstalled ||
-        sentinelOneAgentStatus?.isPendingUninstall
-      );
+      return !sentinelOneAgentStatus || sentinelOneAgentStatus?.status === HostStatus.UNENROLLED;
     }
 
     return agentStatus === HostStatus.UNENROLLED;

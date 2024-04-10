@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getAgentStatus } from '../../services/agent/agent_status';
+import { getAgentStatusClient } from '../../services';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -38,7 +38,7 @@ export const registerAgentStatusRoute = (
       },
       withEndpointAuthz(
         { all: ['canReadSecuritySolution'] },
-        endpointContext.logFactory.get('actionStatusRoute'),
+        endpointContext.logFactory.get('agentStatusRoute'),
         getAgentStatusRouteHandler(endpointContext)
       )
     );
@@ -58,30 +58,17 @@ export const getAgentStatusRouteHandler = (
     const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
     const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
-    // Note: because our API schemas are defined as module static variables (as opposed to a
+    // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
-    //        `agent_type` is included in the schema independent of the feature flag
+    //        `agentType` is included in the schema independent of the feature flag
     if (
-      agentType === 'sentinel_one' &&
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
+      agentType === 'sentinel_one'
     ) {
       return errorHandler(
         logger,
         response,
-        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
-      );
-    }
-
-    // TEMPORARY:
-    // For v8.13 we only support SentinelOne on this API due to time constraints
-    if (agentType !== 'sentinel_one') {
-      return errorHandler(
-        logger,
-        response,
-        new CustomHttpRequestError(
-          `[${agentType}] agent type is not currently supported by this API`,
-          400
-        )
+        new CustomHttpRequestError(`[request query.agentType]: feature is disabled`, 400)
       );
     }
 
@@ -89,15 +76,16 @@ export const getAgentStatusRouteHandler = (
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
 
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const agentStatusClient = getAgentStatusClient(agentType, {
+      esClient,
+      endpointService: endpointContext.service,
+    });
+
     try {
       return response.ok({
         body: {
-          data: await getAgentStatus({
-            agentType,
-            agentIds,
-            logger,
-            connectorActionsClient: (await context.actions).getActionsClient(),
-          }),
+          data: await agentStatusClient.getAgentStatuses(agentIds),
         },
       });
     } catch (e) {
