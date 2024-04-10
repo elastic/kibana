@@ -21,9 +21,10 @@ import {
   EuiAccordion,
   EuiPanel,
   EuiSpacer,
+  EuiErrorBoundary,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useState, useCallback } from 'react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
   RuleCreationValidConsumer,
@@ -58,9 +59,13 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   canShowConsumerSelection = false,
   validConsumers = [],
 }) => {
+  const [metadata, setMetadata] = useState();
+  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+
   const ruleId = useRuleFormSelector((state) => state.ruleDefinition.id);
   const ruleParams = useRuleFormSelector((state) => state.ruleDefinition.params);
   const ruleParamsErrors = useValidation().ruleDefinition.errors.params;
+  const ruleInterval = useRuleFormSelector((state) => state.ruleDefinition.schedule.interval);
   const ruleTypeModel = useRuleType();
   const dispatch = useRuleFormDispatch();
 
@@ -119,36 +124,43 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
-        <Suspense
-          fallback={
-            <EuiEmptyPrompt
-              title={<EuiLoadingSpinner size="xl" />}
-              body={i18n.translate('alertsUIShared.ruleForm.ruleDefinition.loadingRuleTypeParams', {
-                defaultMessage: 'Loading rule type params',
-              })}
-            />
-          }
-        >
-          <RuleParamsExpressionComponent
-            id={ruleId}
-            ruleParams={ruleParams}
-            ruleInterval={'1m'}
-            ruleThrottle={''}
-            alertNotifyWhen={'onActionGroupChange'}
-            errors={ruleParamsErrors}
-            setRuleParams={(key, value) => dispatch(setParam([key, value]))}
-            setRuleProperty={(_, value) => {
-              /* setRuleProperty is only ever used to replace all params */
-              /* Deprecated in favor of defining default parameters */
-              dispatch(replaceParams(value));
-            }}
-            defaultActionGroupId={'default'}
-            actionGroups={[{ id: 'default', name: 'Default' }]}
-            metadata={{}}
-            onChangeMetaData={() => {}}
-            {...expressionPlugins}
-          />
-        </Suspense>
+        {RuleParamsExpressionComponent && (
+          <Suspense
+            fallback={
+              <EuiEmptyPrompt
+                title={<EuiLoadingSpinner size="xl" />}
+                body={i18n.translate(
+                  'alertsUIShared.ruleForm.ruleDefinition.loadingRuleTypeParams',
+                  {
+                    defaultMessage: 'Loading rule type params',
+                  }
+                )}
+              />
+            }
+          >
+            <EuiErrorBoundary>
+              <RuleParamsExpressionComponent
+                id={ruleId}
+                ruleParams={ruleParams}
+                ruleInterval={ruleInterval}
+                ruleThrottle={''}
+                alertNotifyWhen={'onActionGroupChange'}
+                errors={ruleParamsErrors}
+                setRuleParams={(key, value) => dispatch(setParam([key, value]))}
+                setRuleProperty={(_, value) => {
+                  /* setRuleProperty is only ever used to replace all params */
+                  /* Deprecated in favor of defining default parameters */
+                  dispatch(replaceParams(value));
+                }}
+                defaultActionGroupId={'default'}
+                actionGroups={[{ id: 'default', name: 'Default' }]}
+                metadata={metadata}
+                onChangeMetaData={onChangeMetaData}
+                {...expressionPlugins}
+              />
+            </EuiErrorBoundary>
+          </Suspense>
+        )}
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner style={{ borderTop: `1px solid ${euiTheme.colors.lightShade}` }}>
         <EuiDescribedFormGroup

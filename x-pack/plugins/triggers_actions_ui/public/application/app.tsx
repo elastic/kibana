@@ -52,6 +52,7 @@ import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 import { CreateRulePage } from './sections/create_rule';
 import { EditRulePage } from './sections/edit_rule';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -123,8 +124,6 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     application: { navigateToApp },
   } = useKibana().services;
 
-  console.log('EDIT RULE ROUTE', editRuleRoute);
-
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
       <Routes>
@@ -132,8 +131,12 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
-        <Route path={editRuleRoute} component={EditRulePage} />
-        <Route path={createRuleRoute} component={CreateRulePage} />
+        {getIsExperimentalFeatureEnabled('ruleFormV2') && (
+          <>
+            <Route path={editRuleRoute} component={EditRulePage} />
+            <Route path={createRuleRoute} component={CreateRulePage} />
+          </>
+        )}
         <Route
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
