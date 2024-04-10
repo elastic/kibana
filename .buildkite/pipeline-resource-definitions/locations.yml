@@ -8,6 +8,8 @@ spec:
   type: url
   targets:
     - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml'
+    - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-serverless-snapshots.yml'
+    - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml'
     - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-esql-grammar-sync.yml'
     - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-flaky.yml'
     - 'https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-migration-staging.yml'
