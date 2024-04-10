@@ -16,7 +16,7 @@ describe('<TrainedModelsDeploymentModal /> with semantic_text enabled', () => {
   const setup = registerTestBed(TrainedModelsDeploymentModal, {
     defaultProps: {
       isSemanticTextEnabled: true,
-      pendingDeployments: new Set('.elser-test-3'),
+      pendingDeployments: ['.elser-test-3'],
       setIsModalVisible,
       refreshModal,
     },
