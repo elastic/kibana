@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { useSetInitialValue } from './use_set_initial_value';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
@@ -24,6 +25,19 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     },
   } = useServicesContext();
   const { settings } = useEditorReadContext();
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const resizeChecker = useRef<ResizeChecker | null>(null);
+
+  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    resizeChecker.current = new ResizeChecker(divRef.current!);
+    resizeChecker.current.on('resize', () => {
+      editor.layout();
+    });
+  }, []);
+
+  const editorWillUnmountCallback = useCallback(() => {
+    resizeChecker.current!.destroy();
+  }, []);
 
   const [value, setValue] = useState(initialTextValue);
 
@@ -38,6 +52,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       css={css`
         width: 100%;
       `}
+      ref={divRef}
     >
       <CodeEditor
         languageId={CONSOLE_LANG_ID}
@@ -45,6 +60,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         onChange={setValue}
         fullWidth={true}
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
+        editorDidMount={editorDidMountCallback}
+        editorWillUnmount={editorWillUnmountCallback}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',

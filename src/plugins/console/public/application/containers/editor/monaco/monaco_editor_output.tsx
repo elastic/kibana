@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
+import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
@@ -30,6 +31,19 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   } = useRequestReadContext();
   const [value, setValue] = useState('');
   const [mode, setMode] = useState('text');
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const resizeChecker = useRef<ResizeChecker | null>(null);
+
+  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    resizeChecker.current = new ResizeChecker(divRef.current!);
+    resizeChecker.current.on('resize', () => {
+      editor.layout();
+    });
+  }, []);
+
+  const editorWillUnmountCallback = useCallback(() => {
+    resizeChecker.current!.destroy();
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -69,6 +83,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       css={css`
         width: 100%;
       `}
+      ref={divRef}
     >
       <EuiScreenReaderOnly>
         <label htmlFor={'ConAppOutputTextarea'}>
@@ -81,10 +96,13 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         languageId={mode}
         value={value}
         fullWidth={true}
+        editorDidMount={editorDidMountCallback}
+        editorWillUnmount={editorWillUnmountCallback}
         options={{
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: mode === CONSOLE_OUTPUT_LANG_ID ? CONSOLE_OUTPUT_THEME_ID : undefined,
+          automaticLayout: true,
         }}
       />
     </div>
