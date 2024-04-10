@@ -5595,6 +5595,21 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSearchPlaygroundConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GenerativeAIForSearchPlaygroundConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"generativeAIForSearchPlayground\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.GenerativeAIForSecurityConnectorFeatureId",
         "type": "string",
         "tags": [],
@@ -5969,6 +5984,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSearchPlaygroundFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForSearchPlaygroundFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSearchPlaygroundFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSearchPlaygroundFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSearchPlaygroundFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",
