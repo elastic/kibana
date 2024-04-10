@@ -101,9 +101,8 @@ export const ResultsStep: Story<void> = () => {
                 errors: [],
                 stats: {
                   total: 10,
-                  updated: 5,
-                  created: 5,
-                  errors: 0,
+                  successful: 10,
+                  failed: 0,
                 },
               }}
             />
@@ -125,9 +124,8 @@ export const ResultsStep: Story<void> = () => {
                 ],
                 stats: {
                   total: 5,
-                  updated: 0,
-                  created: 2,
-                  errors: 3,
+                  successful: 2,
+                  failed: 3,
                 },
               }}
             />

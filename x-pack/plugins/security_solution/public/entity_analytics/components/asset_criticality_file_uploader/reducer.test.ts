@@ -37,9 +37,8 @@ describe('reducer', () => {
       errors: [],
       stats: {
         total: 10,
-        updated: 5,
-        created: 5,
-        errors: 0,
+        successful: 10,
+        failed: 0,
       },
     };
     const action: ReducerAction = { type: 'fileUploaded', payload: { response } };

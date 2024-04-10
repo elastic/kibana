@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
+import { useKibana } from '../../common/lib/kibana';
 
 export const AssetCriticalityUploadPage = () => {
   const { docLinks } = useKibana().services;
