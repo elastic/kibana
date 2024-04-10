@@ -135,6 +135,21 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageNames).to.contain('experimental');
         expect(packageNames.length).to.be(3);
       });
+      it('Returns human readable titles for datastreams from their manifest files', async () => {
+        const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
+        const apachePackage = res.body.items.find((pkg: any) => pkg.name === 'apache');
+        const apacheDataStreams = apachePackage.dataStreams;
+        expect(apacheDataStreams[0]).to.eql({
+          name: 'logs-apache.access-*',
+          title: 'access',
+          humanReadableTitle: 'Apache access logs',
+        });
+        expect(apacheDataStreams[1]).to.eql({
+          name: 'logs-apache.error-*',
+          title: 'error',
+          humanReadableTitle: 'Apache error logs',
+        });
+      });
       it('Can be limited with perPage', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed?perPage=2`).expect(200);
         const packages = res.body.items;

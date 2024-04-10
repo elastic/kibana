@@ -216,12 +216,20 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const integrationsWithManifestContent = integrations.map((integration) => {
     const { name, version } = integration;
     const integrationAsset = integrationManifests.get(`${name}-${version}/manifest.yml`);
-
     return {
       ...integration,
       title: integrationAsset?.title ?? undefined,
       description: integrationAsset?.description ?? undefined,
       icons: integrationAsset?.icons ?? undefined,
+      dataStreams: integration.dataStreams.map((dataStream) => {
+        const dataStreamAsset = integrationManifests.get(
+          `${name}-${version}/data_stream/${dataStream.title}/manifest.yml`
+        );
+        return {
+          ...dataStream,
+          humanReadableTitle: dataStreamAsset?.title,
+        };
+      }),
     };
   });
 
@@ -346,7 +354,8 @@ export async function getInstalledPackageManifests(
   savedObjectsClient: SavedObjectsClientContract,
   installedPackages: InstalledPackage[]
 ) {
-  const pathFilters = installedPackages.map((installedPackage) => {
+  // Integration manifests
+  const topLevelManifestPathFilters = installedPackages.map((installedPackage) => {
     const { name, version } = installedPackage;
     return nodeBuilder.is(
       `${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path`,
@@ -354,20 +363,48 @@ export async function getInstalledPackageManifests(
     );
   });
 
-  const result = await savedObjectsClient.find<PackageAsset>({
+  const topLevelIntegrationManifests = await savedObjectsClient.find<PackageAsset>({
     type: ASSETS_SAVED_OBJECT_TYPE,
-    filter: nodeBuilder.or(pathFilters),
+    filter: nodeBuilder.or(topLevelManifestPathFilters),
   });
 
-  const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
-    (acc, asset) => {
-      acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
-      return acc;
-    },
-    new Map()
-  );
+  const parsedTopLevelIntegrationManifests = topLevelIntegrationManifests.saved_objects.reduce<
+    Map<string, PackageSpecManifest>
+  >((acc, asset) => {
+    acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+    return acc;
+  }, new Map());
 
-  for (const savedObject of result.saved_objects) {
+  // Datastream manifests
+  const dataStreamManifestPathFilters = installedPackages
+    .map((installedPackage) => {
+      const { name, version } = installedPackage;
+      return installedPackage.dataStreams.map((dataStream) => {
+        return nodeBuilder.is(
+          `${ASSETS_SAVED_OBJECT_TYPE}.attributes.asset_path`,
+          `${name}-${version}/data_stream/${dataStream.title}/manifest.yml`
+        );
+      });
+    })
+    .flat();
+
+  const dataStreamManifests = await savedObjectsClient.find<PackageAsset>({
+    type: ASSETS_SAVED_OBJECT_TYPE,
+    filter: nodeBuilder.or(dataStreamManifestPathFilters),
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  const parsedDataStreamManifests = dataStreamManifests.saved_objects.reduce<
+    Map<string, PackageSpecManifest>
+  >((acc, asset) => {
+    acc.set(asset.attributes.asset_path, yaml.load(asset.attributes.data_utf8));
+    return acc;
+  }, new Map());
+
+  for (const savedObject of [
+    ...topLevelIntegrationManifests.saved_objects,
+    ...dataStreamManifests.saved_objects,
+  ]) {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -375,7 +412,7 @@ export async function getInstalledPackageManifests(
     });
   }
 
-  return parsedManifests;
+  return new Map([...parsedTopLevelIntegrationManifests, ...parsedDataStreamManifests]);
 }
 
 function getInstalledPackageSavedObjectDataStreams(

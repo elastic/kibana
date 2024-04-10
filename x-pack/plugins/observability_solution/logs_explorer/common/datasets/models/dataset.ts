@@ -38,9 +38,7 @@ export class Dataset {
   }
 
   getFullTitle(): string {
-    return this.parentIntegration?.title
-      ? `[${this.parentIntegration.title}] ${this.title}`
-      : this.title;
+    return this.title;
   }
 
   getDatasetWildcard(): IndexPattern {
@@ -67,8 +65,8 @@ export class Dataset {
   }
 
   public static create(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
-    const datasetTitle = dataset.title || dataset.name.split('-')[1];
-
+    const datasetTitle =
+      (dataset.humanReadableTitle ?? dataset.title) || dataset.name.split('-')[1];
     return new Dataset({ ...dataset, title: datasetTitle }, parentIntegration);
   }
 

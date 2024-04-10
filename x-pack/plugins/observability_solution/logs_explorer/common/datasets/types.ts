@@ -15,6 +15,7 @@ export const datasetRT = rt.exact(
     }),
     rt.partial({
       title: rt.string,
+      humanReadableTitle: rt.string,
     }),
   ])
 );

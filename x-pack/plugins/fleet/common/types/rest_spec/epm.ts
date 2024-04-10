@@ -59,6 +59,7 @@ export interface InstalledPackage {
   dataStreams: Array<{
     name: string;
     title: string;
+    humanReadableTitle?: string;
   }>;
 }
 export interface GetInstalledPackagesResponse {
