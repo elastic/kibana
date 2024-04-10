@@ -17,6 +17,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
+import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   BulkCreate,
   WrapHits,
@@ -63,6 +64,7 @@ interface EqlExecutorParams {
   alertTimestampOverride: Date | undefined;
   alertWithSuppression: SuppressedAlertService;
   isAlertSuppressionActive: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const eqlExecutor = async ({
@@ -84,6 +86,7 @@ export const eqlExecutor = async ({
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
+  experimentalFeatures,
 }: EqlExecutorParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
@@ -141,6 +144,7 @@ export const eqlExecutor = async ({
             wrapSuppressedHits,
             alertTimestampOverride,
             alertWithSuppression,
+            experimentalFeatures,
           });
         } else {
           newSignals = wrapHits(events, buildReasonMessageForEqlAlert);

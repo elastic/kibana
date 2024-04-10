@@ -126,6 +126,7 @@ export const createEqlAlertType = (
         alertTimestampOverride,
         alertWithSuppression,
         isAlertSuppressionActive: isNonSeqAlertSuppressionActive,
+        experimentalFeatures,
       });
       return { ...result, state };
     },
