@@ -79,7 +79,7 @@ export abstract class CaseConnector<Config, Secrets>
     incidentId: string;
     incident: Record<string, unknown>;
   }): Promise<ExternalServiceIncidentResponse>;
-  public abstract getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse>;
+  public abstract getIncident({ id }: { id: string }): Promise<Record<string, unknown>>;
 
   public async pushToService(params: PushToServiceParams) {
     const { incident, comments } = params;
@@ -93,7 +93,7 @@ export abstract class CaseConnector<Config, Secrets>
         incident: rest,
       });
     } else {
-      res = await this.createIncident(rest);
+      res = await this.createIncident({ incident: rest });
     }
 
     if (comments && Array.isArray(comments) && comments.length > 0) {

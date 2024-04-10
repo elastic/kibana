@@ -44,7 +44,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
+  id: schema.string(),
 });
 
 // Reserved for future implementation
@@ -52,33 +52,6 @@ export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
 export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
-
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('incidentTypes'),
-    subActionParams: ExecutorSubActionGetIncidentTypesParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('severity'),
-    subActionParams: ExecutorSubActionGetSeverityParamsSchema,
-  }),
-]);
 
 const ArrayOfValuesSchema = schema.arrayOf(
   schema.object(
@@ -116,30 +89,10 @@ export const ExternalServiceFieldsSchema = schema.object(
 );
 
 export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
-export const GetIncidentResponseSchema = schema.object(
-  {
-    id: schema.number(),
-    name: schema.string(),
-    description: schema.object(
-      {
-        content: schema.string(),
-      },
-      { unknowns: 'allow' }
-    ),
-    inc_last_modified_date: schema.number(),
-  },
-  { unknowns: 'allow' }
-);
 
 export const ExternalServiceIncidentResponseSchema = schema.object({
   id: schema.string(),
   title: schema.string(),
   url: schema.string(),
   pushedDate: schema.string(),
-});
-
-export const ExternalServiceCommentResponseSchema = schema.object({
-  commentId: schema.string(),
-  pushedDate: schema.string(),
-  externalCommentId: schema.nullable(schema.string()),
 });

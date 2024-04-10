@@ -13,7 +13,6 @@ export enum SUB_ACTION {
   INCIDENT_TYPES = 'incidentTypes',
   INCIDENT = 'getIncident',
   HANDSHAKE = 'handshake',
-  PUSH_TO_SERVICE = 'pushToService',
   RUN = 'run',
   TEST = 'test',
 }

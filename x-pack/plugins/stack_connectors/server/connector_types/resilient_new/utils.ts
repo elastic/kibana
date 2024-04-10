@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExternalServiceParams, GetValueTextContentResponse, UpdateIncidentRequest } from './types';
+import { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
 
 export const getValueTextContent = (
   field: string,
@@ -40,9 +40,12 @@ export const getValueTextContent = (
 export const formatUpdateRequest = ({
   oldIncident,
   newIncident,
-}: ExternalServiceParams): UpdateIncidentRequest => {
+}: {
+  oldIncident: Record<string, unknown>;
+  newIncident: Record<string, unknown>;
+}): UpdateIncidentRequest => {
   return {
-    changes: Object.keys(newIncident as Record<string, unknown>).map((key) => {
+    changes: Object.keys(newIncident).map((key) => {
       let name = key;
 
       if (key === 'incidentTypes') {
@@ -55,15 +58,13 @@ export const formatUpdateRequest = ({
 
       return {
         field: { name },
-        // TODO: Fix ugly casting
         old_value: getValueTextContent(
           key,
-          (oldIncident as Record<string, unknown>)[name] as string
+          name === 'description'
+            ? (oldIncident as { description: { content: string } }).description.content
+            : (oldIncident[name] as string | number | number[])
         ),
-        new_value: getValueTextContent(
-          key,
-          (newIncident as Record<string, unknown>)[key] as string
-        ),
+        new_value: getValueTextContent(key, newIncident[key] as string),
       };
     }),
   };

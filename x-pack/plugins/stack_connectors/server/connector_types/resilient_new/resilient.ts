@@ -7,21 +7,15 @@
 
 import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { CaseConnector, ServiceParams } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
-  CreateCommentParams,
   CreateIncidentData,
-  CreateIncidentParams,
   ExternalServiceIncidentResponse,
-  ExternalServiceParams,
-  GetCommonFieldsResponse,
   GetIncidentTypesResponse,
   GetSeverityResponse,
   Incident,
-  PushToServiceApiHandlerArgs,
-  PushToServiceResponse,
   ResilientConfig,
   ResilientSecrets,
   UpdateIncidentParams,
@@ -34,10 +28,7 @@ import {
   ExecutorSubActionGetIncidentTypesParamsSchema,
   ExecutorSubActionGetSeverityParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExternalServiceCommentResponseSchema,
   GetCommonFieldsResponseSchema,
-  GetIncidentResponseSchema,
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
 } from './schema';
@@ -45,7 +36,7 @@ import { formatUpdateRequest } from './utils';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
-export class ResilientConnector extends SubActionConnector<ResilientConfig, ResilientSecrets> {
+export class ResilientConnector extends CaseConnector<ResilientConfig, ResilientSecrets> {
   private urls: {
     incidentTypes: string;
     incident: string;
@@ -102,12 +93,6 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.PUSH_TO_SERVICE,
-      method: 'pushToService',
-      schema: ExecutorSubActionPushParamsSchema,
-    });
-
-    this.registerSubAction({
       name: SUB_ACTION.HANDSHAKE,
       method: 'handshake',
       schema: ExecutorSubActionHandshakeParamsSchema,
@@ -138,36 +123,37 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
   }
 
-  private async createIncident({
+  public async createIncident({
     incident,
-  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> {
+  }: Record<string, unknown>): Promise<ExternalServiceIncidentResponse> {
     try {
+      const incidentData = incident as Incident;
       let data: CreateIncidentData = {
-        name: incident.name,
+        name: incidentData?.name,
         discovered_date: Date.now(),
       };
 
-      if (incident.description) {
+      if (incidentData?.description) {
         data = {
           ...data,
           description: {
             format: 'html',
-            content: incident.description ?? '',
+            content: incidentData.description ?? '',
           },
         };
       }
 
-      if (incident.incidentTypes) {
+      if (incidentData?.incidentTypes) {
         data = {
           ...data,
-          incident_type_ids: incident.incidentTypes.map((id) => ({ id })),
+          incident_type_ids: incidentData.incidentTypes.map((id: number) => ({ id })),
         };
       }
 
-      if (incident.severityCode) {
+      if (incidentData?.severityCode) {
         data = {
           ...data,
-          severity_code: { id: incident.severityCode },
+          severity_code: { id: incidentData.severityCode },
         };
       }
       const res = await this.request({
@@ -175,17 +161,22 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         method: 'POST',
         data,
         headers: this.getAuthHeaders(),
-        responseSchema: schema.object({
-          id: schema.string(),
-          create_date: schema.string(),
-        }),
+        responseSchema: schema.object(
+          {
+            id: schema.number(),
+            create_date: schema.number(),
+          },
+          { unknowns: 'allow' }
+        ),
       });
 
+      const { id, create_date } = res.data;
+
       return {
-        title: `${res.data.id}`,
-        id: `${res.data.id}`,
-        pushedDate: new Date(res.data.create_date).toISOString(),
-        url: this.getIncidentViewURL(res.data.id),
+        title: `${id}`,
+        id: `${id}`,
+        pushedDate: new Date(create_date).toISOString(),
+        url: this.getIncidentViewURL(id.toString()),
       };
     } catch (error) {
       throw new Error(
@@ -194,12 +185,12 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     }
   }
 
-  private async updateIncident({
+  public async updateIncident({
     incidentId,
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> {
     try {
-      const latestIncident = await this.getIncident({ externalId: incidentId });
+      const latestIncident = await this.getIncident({ id: incidentId });
 
       // Remove null or undefined values. Allowing null values sets the field in IBM Resilient to empty.
       const newIncident = omitBy(isNil, incident);
@@ -210,51 +201,77 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
         url: `${this.urls.incident}/${incidentId}`,
         data,
         headers: this.getAuthHeaders(),
-        responseSchema: schema.object({
-          success: schema.boolean(),
-          message: schema.string(),
-        }),
+        responseSchema: schema.object({ success: schema.boolean() }, { unknowns: 'allow' }),
       });
 
       if (!res.data.success) {
-        throw new Error(res.data.message);
+        throw new Error('Error while updating incident');
       }
 
-      const updatedIncident = await this.getIncident({ externalId: incidentId });
+      const updatedIncident = await this.getIncident({ id: incidentId });
 
       return {
         title: `${updatedIncident.id}`,
         id: `${updatedIncident.id}`,
         pushedDate: new Date(updatedIncident.inc_last_modified_date).toISOString(),
-        url: this.getIncidentViewURL(updatedIncident.id),
+        url: this.getIncidentViewURL(updatedIncident.id.toString()),
       };
     } catch (error) {
       throw new Error(`Unable to update incident with id ${incidentId}. Error: ${error.message}`);
     }
   }
 
-  private async createComment({ incidentId, comment }: CreateCommentParams) {
+  public async addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
     try {
       const res = await this.request({
         method: 'POST',
         url: this.urls.comment.replace('{inc_id}', incidentId),
-        data: { text: { format: 'text', content: comment.comment } },
+        data: { text: { format: 'text', content: comment } },
         headers: this.getAuthHeaders(),
-        responseSchema: schema.object({
-          id: schema.string(),
-          create_date: schema.string(),
-          comment: ExternalServiceCommentResponseSchema,
-        }),
+        responseSchema: schema.object(
+          {
+            id: schema.number(),
+            create_date: schema.number(),
+            comment: schema.object({}, { unknowns: 'allow' }),
+          },
+          { unknowns: 'allow' }
+        ),
       });
 
       return {
-        commentId: comment.commentId,
+        comment: comment,
         externalCommentId: res.data.id,
         pushedDate: new Date(res.data.create_date).toISOString(),
       };
     } catch (error) {
       throw new Error(
         `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}.`
+      );
+    }
+  }
+
+  public async getIncident({ id }: { id: string }) {
+    try {
+      const res = await this.request({
+        method: 'GET',
+        url: `${this.urls.incident}/${id}`,
+        params: {
+          text_content_output_format: 'objects_convert',
+        },
+        headers: this.getAuthHeaders(),
+        responseSchema: schema.object(
+          {
+            id: schema.number(),
+            inc_last_modified_date: schema.number(),
+          },
+          { unknowns: 'allow' }
+        ),
+      });
+
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}.`)
       );
     }
   }
@@ -302,7 +319,7 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     }
   }
 
-  public async getFields(): Promise<GetCommonFieldsResponse> {
+  public async getFields() {
     try {
       const res = await this.request({
         method: 'GET',
@@ -325,69 +342,6 @@ export class ResilientConnector extends SubActionConnector<ResilientConfig, Resi
     } catch (error) {
       throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
     }
-  }
-
-  public async getIncident(params: { externalId: string }): Promise<ExternalServiceParams> {
-    try {
-      const res = await this.request({
-        method: 'GET',
-        url: `${this.urls.incident}/${params.externalId}`,
-        params: {
-          text_content_output_format: 'objects_convert',
-        },
-        headers: this.getAuthHeaders(),
-        responseSchema: GetIncidentResponseSchema,
-      });
-
-      return { ...res.data, description: res.data?.description?.content ?? '' };
-    } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get incident with id ${params.externalId}. Error: ${error.message}.`
-        )
-      );
-    }
-  }
-
-  public async pushToService({
-    params,
-  }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> {
-    const { comments } = params;
-    let res: PushToServiceResponse;
-    const { externalId, ...rest } = params.incident;
-    const incident: Incident = rest;
-
-    if (externalId != null) {
-      res = await this.updateIncident({
-        incidentId: externalId,
-        incident,
-      });
-    } else {
-      res = await this.createIncident({
-        incident,
-      });
-    }
-
-    if (comments && Array.isArray(comments) && comments.length > 0) {
-      res.comments = [];
-      for (const currentComment of comments) {
-        const comment = await this.createComment({
-          incidentId: res.id,
-          comment: currentComment,
-        });
-        res.comments = [
-          ...(res.comments ?? []),
-          {
-            commentId: comment.commentId,
-            pushedDate: comment.pushedDate,
-            externalCommentId: comment.externalCommentId ?? null,
-          },
-        ];
-      }
-    }
-
-    return res;
   }
 
   public async handshake() {}
