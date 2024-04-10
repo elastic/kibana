@@ -23,33 +23,36 @@ import { getColumns } from '../common/get_columns';
 export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
-): AlertsTableConfigurationRegistry => ({
-  id: observabilityFeatureId,
-  cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
-  columns: getColumns({ showRuleName: true }),
-  getRenderCellValue,
-  sort: [
-    {
-      [ALERT_START]: {
-        order: 'desc' as SortOrder,
+): AlertsTableConfigurationRegistry => {
+  const renderCustomActionsRow = (props: RenderCustomActionsRowArgs) => {
+    return (
+      <AlertActions
+        {...props}
+        config={config}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+      />
+    );
+  };
+  return {
+    id: observabilityFeatureId,
+    cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
+    columns: getColumns({ showRuleName: true }),
+    getRenderCellValue,
+    sort: [
+      {
+        [ALERT_START]: {
+          order: 'desc' as SortOrder,
+        },
       },
+    ],
+    useActionsColumn: () => ({
+      renderCustomActionsRow,
+    }),
+    useInternalFlyout: () => {
+      const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
+      return { header, body, footer };
     },
-  ],
-  useActionsColumn: () => ({
-    renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
-      return (
-        <AlertActions
-          {...props}
-          config={config}
-          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-        />
-      );
-    },
-  }),
-  useInternalFlyout: () => {
-    const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
-    return { header, body, footer };
-  },
-  ruleTypeIds: observabilityRuleTypeRegistry.list(),
-  showInspectButton: true,
-});
+    ruleTypeIds: observabilityRuleTypeRegistry.list(),
+    showInspectButton: true,
+  };
+};

@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiCode,
   EuiCopy,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
@@ -187,6 +188,8 @@ const AlertsTableState = memo((props: AlertsTableStateProps) => {
 
 AlertsTableState.displayName = 'AlertsTableState';
 
+const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
+
 const AlertsTableStateWithQueryProvider = memo(
   ({
     alertsTableConfigurationRegistry,
@@ -195,11 +198,10 @@ const AlertsTableStateWithQueryProvider = memo(
     featureIds,
     query,
     pageSize,
-    leadingControlColumns,
+    leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
     trailingControlColumns,
     rowHeightsOptions,
     cellContext,
-    renderCellPopover,
     columns: propColumns,
     gridStyle,
     browserFields: propBrowserFields,
@@ -456,7 +458,6 @@ const AlertsTableStateWithQueryProvider = memo(
         featureIds,
         isInitializing,
         pagination,
-        renderCellPopover,
         sort,
         isLoading,
         alerts,
@@ -493,7 +494,6 @@ const AlertsTableStateWithQueryProvider = memo(
         dynamicRowHeight,
         featureIds,
         cellContext,
-        renderCellPopover,
         isInitializing,
         pagination,
         sort,

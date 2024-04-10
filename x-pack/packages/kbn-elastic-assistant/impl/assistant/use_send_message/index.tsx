@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
@@ -22,6 +22,7 @@ interface SendMessageProps {
 }
 
 interface UseSendMessage {
+  abortStream: () => void;
   isLoading: boolean;
   sendMessage: ({
     apiConfig,
@@ -37,9 +38,10 @@ export const useSendMessage = (): UseSendMessage => {
     defaultAllow,
     defaultAllowReplacement,
     knowledgeBase,
+    traceOptions,
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
-
+  const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
     async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
@@ -57,22 +59,30 @@ export const useSendMessage = (): UseSendMessage => {
           http,
           message,
           replacements,
+          signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
+          traceOptions,
         });
       } finally {
         setIsLoading(false);
       }
     },
     [
-      alertsIndexPattern,
-      assistantStreamingEnabled,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase.isEnabledRAGAlerts,
       knowledgeBase.isEnabledKnowledgeBase,
       knowledgeBase.latestAlerts,
+      alertsIndexPattern,
+      defaultAllow,
+      defaultAllowReplacement,
+      assistantStreamingEnabled,
+      traceOptions,
     ]
   );
 
-  return { isLoading, sendMessage };
+  const cancelRequest = useCallback(() => {
+    abortController.current.abort();
+    abortController.current = new AbortController();
+  }, []);
+
+  return { isLoading, sendMessage, abortStream: cancelRequest };
 };

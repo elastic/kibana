@@ -51,8 +51,8 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 import { AlertsTableQueryContext } from './contexts/alerts_table_context';
-
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
+
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
@@ -184,6 +184,44 @@ const useFieldBrowserOptionsOrDefault = (
   return useFieldBrowserOptions(args);
 };
 
+// Here we force the error callout to be the same height as the cell content
+// so that the error detail gets hidden in the overflow area and only shown in
+// the cell popover
+const errorCalloutStyles = css`
+  height: 1lh;
+`;
+
+/**
+ * An error callout that displays the error stack in a code block
+ */
+const ViewError = ({ error }: { error: Error }) => (
+  <>
+    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="error" color="danger" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText
+          color="subdued"
+          size="xs"
+          css={css`
+            line-height: unset;
+          `}
+        >
+          <strong>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertTable.viewError"
+              defaultMessage="An error occurred"
+            />
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer />
+    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
+  </>
+);
+
 const Row = styled.div`
   display: flex;
   min-width: fit-content;
@@ -238,44 +276,6 @@ const CustomGridBody = memo(
       </>
     );
   }
-);
-
-// Here we force the error callout to be the same height as the cell content
-// so that the error detail gets hidden in the overflow area and only shown in
-// the cell popover
-const errorCalloutStyles = css`
-  height: 1lh;
-`;
-
-/**
- * An error callout that displays the error stack in a code block
- */
-const ViewError = ({ error }: { error: Error }) => (
-  <>
-    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="error" color="danger" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText
-          color="subdued"
-          size="xs"
-          css={css`
-            line-height: unset;
-          `}
-        >
-          <strong>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertTable.viewError"
-              defaultMessage="An error occurred"
-            />
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
-  </>
 );
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: AlertsTableProps) => {
@@ -392,6 +392,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsTableConfiguration.useFieldBrowserOptions ?? fieldBrowserStub,
     onToggleColumn
   );
+
   const toolbarVisibilityArgs = useMemo(() => {
     return {
       bulkActions,
@@ -504,6 +505,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       refresh,
       clearSelection,
       renderCustomActionsRow,
+      'test-test-custom-attribute': 'ello cool api',
     };
   }, [
     passedCellContext,
@@ -582,6 +584,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
           ecsData: ecsAlertsData,
           dataGridRef,
           pageSize: pagination.pageSize,
+          pageIndex: pagination.pageIndex,
         })
       : getCellActionsStub;
 
