@@ -107,7 +107,7 @@ export function AddCisIntegrationFormPageProvider({
       const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
       await integrationList[0].click();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
+      const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
       return fieldValue;
     },
   };

@@ -16,11 +16,11 @@ const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'text', 'content'];
+const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'page_content_text', 'text', 'content'];
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text'];
+const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text', 'page_content_text'];
 
 interface Matches {
   queryMatches: any[];
@@ -135,13 +135,19 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        throw new Error('No source fields found');
+      }
+
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
       );
 
+      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
+
       return {
         ...acc,
-        [index]: suggested,
+        [index]: fields,
       };
     },
     {}
