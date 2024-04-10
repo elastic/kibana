@@ -1058,10 +1058,11 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      // Skipped for now because we can't delete managed policies from the API, so these tests leave behind
-      // policy objects, which causes enrollment keys to be created during Fleet Setup in other tests.
-      describe.skip('managed policies', () => {
+      describe('managed policies', () => {
         it('should store secrets if additional fleet server does not meet minimum version, but is inactive + managed', async () => {
+          // Ensure default output exists
+          await callFleetSetup();
+
           const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy({
             isManaged: true,
           });
@@ -1078,9 +1079,15 @@ export default function (providerContext: FtrProviderContext) {
           expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
             true
           );
+
+          // Managed policies can't be deleted easily, so we have to nuke SO's instead
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
         it('should store secrets if fleet server does not meet minimum version, but is offline + managed', async () => {
+          // Ensure default output exists
+          await callFleetSetup();
+
           const { fleetServerAgentPolicy } = await createFleetServerAgentPolicy({
             isManaged: true,
           });
@@ -1099,14 +1106,8 @@ export default function (providerContext: FtrProviderContext) {
             packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef
           ).to.eql(true);
 
-          // Managed policies can't be deleted easily, so just unload + reload the archive
-          await getService('esArchiver').unload(
-            'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-          );
-
-          await getService('esArchiver').load(
-            'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-          );
+          // Managed policies can't be deleted easily, so we have to nuke SO's instead
+          await kibanaServer.savedObjects.cleanStandardList();
         });
       });
     });
