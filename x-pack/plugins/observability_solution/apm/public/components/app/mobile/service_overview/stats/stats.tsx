@@ -73,9 +73,7 @@ export function MobileStats({
       return (
         <span>
           {value && comparisonEnabled
-            ? `${previousPeriodLabel}: ${
-                Number.isInteger(value) ? value : value.toFixed(2)
-              }`
+            ? `${previousPeriodLabel}: ${value}`
             : null}
         </span>
       );
@@ -134,7 +132,7 @@ export function MobileStats({
           : valueFormatter(Number(value.toFixed(1)), 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries ?? [],
       extra: getComparisonValueFormatter(
-        data?.previousPeriod.launchTimes?.value
+        data?.previousPeriod.launchTimes?.value?.toFixed(1)
       ),
       trendShape: MetricTrendShape.Area,
     },
