@@ -14,6 +14,7 @@ import type {
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Tier } from '../../types';
 import { ProductTier } from '../../../common/product';
+import { NLP_CLEANUP_TASK_EVENT } from '../../telemetry/event_based_telemetry';
 
 export const NLPCleanupTaskConstants = {
   TITLE: 'Serverless NLP Cleanup Task',
@@ -138,20 +139,23 @@ export class NLPCleanupTask {
 
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
+    let totalInstalled = 0;
+    let failedDeletes = 0;
 
     try {
       const trainedModels = await esClient.ml.getTrainedModels();
       const pytorchModels = trainedModels.trained_model_configs.filter(
         (config) => config.model_type === 'pytorch'
       );
+      totalInstalled = pytorchModels.length;
 
-      if (pytorchModels.length === 0) {
+      if (totalInstalled === 0) {
         this.logger.info('No pytorch models found, exiting task');
         return { state: {} };
       }
 
       this.logger.info(
-        `[${pytorchModels.length}] pytorch model(s) found. Stopping, then deleting models/aliases`
+        `[${totalInstalled}] pytorch model(s) found. Stopping, then deleting models/aliases`
       );
 
       // First attempt to stop all models, use force=true to ensure any linked pipelines don't get in the way
@@ -173,13 +177,25 @@ export class NLPCleanupTask {
         )
       );
       const successfulDeletes = deleteResponses.filter((r) => r.acknowledged).length;
-      const failedDeletes = deleteResponses.length - successfulDeletes;
-      this.logger.info(
-        `[${successfulDeletes}] model(s) successfully deleted, [${failedDeletes}] model(s) failed to delete`
-      );
+      failedDeletes = deleteResponses.length - successfulDeletes;
+      const outputMessage = `[${successfulDeletes}] model(s) successfully deleted, [${failedDeletes}] model(s) failed to delete`;
+      this.logger.info(outputMessage);
+
+      core.analytics.reportEvent(NLP_CLEANUP_TASK_EVENT.eventType, {
+        failedToDeleteCount: failedDeletes,
+        message: outputMessage,
+        productTier: this.productTier,
+        totalInstalledCount: totalInstalled,
+      });
 
       // TODO: Any manual cleanup around aliases? They appear to be deleted with the model...
     } catch (err) {
+      core.analytics.reportEvent(NLP_CLEANUP_TASK_EVENT.eventType, {
+        failedToDeleteCount: failedDeletes,
+        message: err.message,
+        productTier: this.productTier,
+        totalInstalledCount: totalInstalled,
+      });
       this.logger.error(`Failed to fetch and cleanup models: ${err}`);
       return;
     }

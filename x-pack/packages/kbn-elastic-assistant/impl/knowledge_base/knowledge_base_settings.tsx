@@ -67,7 +67,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isESQLAvailable =
       knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
     // Prevent enabling if elser doesn't exist, but always allow to disable
-    const isSwitchDisabled = false; // !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
+    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
 
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';

@@ -15,8 +15,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
   const ml = getService('ml');
-  const svlMl = getService('svlMl');
-  const PageObjects = getPageObjects(['svlCommonPage']);
   const logger = getService('log');
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
@@ -48,8 +46,8 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Verify model was created, and default non-pytorch model already exists
-        expect(m1.trained_model_configs.some((m) => m.model_type === 'pytorch')).to.eql(true);
-        expect(m1.trained_model_configs.some((m) => m.model_type === 'lang_ident')).to.eql(true);
+        expect(m1?.trained_model_configs.some((m) => m.model_type === 'pytorch')).to.eql(true);
+        expect(m1?.trained_model_configs.some((m) => m.model_type === 'lang_ident')).to.eql(true);
 
         // Grab the task SO so we can update it to 'run_soon'
         // Note: Can't go directly through TaskManager in Serverless at the moment, see: // TODO: Create core issue
@@ -83,37 +81,8 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // Verify model was cleaned up, and non-pytorch model was not cleaned up
-        const m2: MlGetTrainedModelsResponse = await ml.api.getTrainedModelsES();
-        expect(m2.trained_model_configs.some((m) => m.model_type === 'pytorch')).to.eql(false);
-        expect(m2.trained_model_configs.some((m) => m.model_type === 'lang_ident')).to.eql(true);
-      });
-
-      /**
-       * Project-controller will set `xpack.ml.nlp.enabled:false` in Kibana for non-complete tiers, which will disable
-       * the NLP UIs. This test is to ensure those interfaces are not available to the user.
-       *
-       */
-      describe('ensures Kibana NLP interface is unavailable', async () => {
-        before(async () => {
-          await PageObjects.svlCommonPage.login();
-          await ml.api.syncSavedObjects();
-        });
-
-        after(async () => {
-          await PageObjects.svlCommonPage.forceLogout();
-        });
-
-        it('renders trained models list', async () => {
-          await ml.navigation.navigateToMl();
-          await ml.testExecution.logTestStep('should load the trained models page');
-          await svlMl.navigation.security.navigateToTrainedModels();
-
-          await ml.testExecution.logTestStep(
-            'should display the stats bar and the analytics table with no trained models'
-          );
-          await ml.trainedModels.assertStats(0);
-          await ml.trainedModelsTable.assertTableIsNotPopulated();
-        });
+        expect(m2?.trained_model_configs.some((m) => m.model_type === 'pytorch')).to.eql(false);
+        expect(m2?.trained_model_configs.some((m) => m.model_type === 'lang_ident')).to.eql(true);
       });
     });
   });

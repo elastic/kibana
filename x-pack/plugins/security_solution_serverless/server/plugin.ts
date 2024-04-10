@@ -34,6 +34,7 @@ import {
 } from './endpoint/services';
 import { enableRuleActions } from './rules/enable_rule_actions';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
+import { telemetryEvents } from './telemetry/event_based_telemetry';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -72,6 +73,9 @@ export class SecuritySolutionServerlessPlugin
       );
       pluginsSetup.securitySolution.setProductFeaturesConfigurator(productFeaturesConfigurator);
     }
+
+    // Register telemetry events
+    telemetryEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     enableRuleActions({
       actions: pluginsSetup.actions,
