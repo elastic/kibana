@@ -73,7 +73,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           </li>
           <li>
             <FormattedMessage
-              defaultMessage="You can upload file up to {maxFileSize}"
+              defaultMessage="You can upload files up to {maxFileSize}"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.uploadFileSizeLimit"
               values={{
                 maxFileSize: formatBytes(CRITICALITY_CSV_MAX_SIZE_BYTES),
@@ -95,7 +95,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
         <ul className={listStyle}>
           <li>
             <FormattedMessage
-              defaultMessage="Resource Type: Indicate whether the resource is a {host} or a {user}."
+              defaultMessage="Resource type: Indicate whether the resource is a {host} or a {user}."
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
               values={{
                 host: <b>{'host'}</b>,
@@ -106,7 +106,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <li>
             {
               <FormattedMessage
-                defaultMessage="Identifier: The unique identifier for each asset {hostName} or {userName}."
+                defaultMessage="Identifier: The unique identifier for each asset's {hostName} or {userName}."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetIdentifierDescription"
                 values={{
                   hostName: <b>{'Host.name'}</b>,
@@ -117,7 +117,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           </li>
           <li>
             <FormattedMessage
-              defaultMessage="Criticality label: Use any of these labels: {labels}"
+              defaultMessage="Criticality label: Use any one of {labels}"
               id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetCriticalityLabels"
               values={{
                 labels: <b>{ValidCriticalityLevels.join(', ')}</b>,
