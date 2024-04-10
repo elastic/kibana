@@ -31,7 +31,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { createRuleRoute, editRuleRoute, ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -46,6 +46,8 @@ import {
   legacyRouteToRuleDetails,
   routeToConnectors,
   legacyRouteToAlerts,
+  createRuleRoute,
+  editRuleRoute,
 } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';

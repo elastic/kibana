@@ -135,3 +135,8 @@ export const MULTI_CONSUMER_RULE_TYPE_IDS = [
 export const ALERT_TABLE_GENERIC_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-generic-alerts-table`;
 
 export const ALERT_TABLE_GLOBAL_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-global-alerts-table`;
+
+// TODO: Move this to `packages/kbn-rule-data-utils/src/routes/stack_rule_paths.ts` when
+// adding rule form v2 to observability
+export const createRuleRoute = '/rule/create/:ruleTypeId' as const;
+export const editRuleRoute = '/rule/edit/:ruleId' as const;
