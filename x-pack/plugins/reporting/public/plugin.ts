@@ -48,7 +48,6 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
-  intl: InjectedIntl;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -119,7 +118,7 @@ export class ReportingPublicPlugin
 
   public setup(
     core: CoreSetup<ReportingPublicPluginStartDependencies>,
-    setupDeps: ReportingPublicPluginSetupDependencies
+    setupDeps: ReportingPublicPluginSetupDependencies & { intl: InjectedIntl }
   ) {
     const { getStartServices, uiSettings } = core;
     const {

@@ -265,6 +265,16 @@ export const reportingExportModalProvider = ({
 
     const requiresSavedState = sharingData.locatorParams === null;
 
+    const relativePathPDF = apiClient.getReportingPublicJobPath(
+      'printablePdfV2',
+      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'printablePdfV2')())
+    );
+
+    const relativePathPNG = apiClient.getReportingPublicJobPath(
+      'pngV2',
+      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
+    );
+
     const generateReportPDF = () => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
@@ -464,6 +474,7 @@ export const reportingExportModalProvider = ({
       theme,
       renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
+      absoluteUrl: new URL(relativePathPDF, window.location.href).toString(),
     });
 
     shareActions.push({
@@ -493,6 +504,7 @@ export const reportingExportModalProvider = ({
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,
+      absoluteUrl: new URL(relativePathPNG, window.location.href).toString(),
     });
 
     return shareActions;
