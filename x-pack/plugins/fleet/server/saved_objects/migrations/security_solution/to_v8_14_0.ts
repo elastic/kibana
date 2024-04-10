@@ -35,3 +35,24 @@ export const migratePackagePolicyToV8140: SavedObjectModelDataBackfillFn<
 
   return { attributes: updatedPackagePolicyDoc.attributes };
 };
+
+export const migratePackagePolicyAddAntivirusRegistrationModeToV8140: SavedObjectModelDataBackfillFn<
+  PackagePolicy,
+  PackagePolicy
+> = (packagePolicyDoc) => {
+  if (packagePolicyDoc.attributes.package?.name !== 'endpoint') {
+    return { attributes: packagePolicyDoc.attributes };
+  }
+
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
+
+  const input = updatedPackagePolicyDoc.attributes.inputs[0];
+
+  if (input && input.config) {
+    const antivirusRegistration = input.config.policy.value.windows.antivirus_registration;
+
+    antivirusRegistration.mode ??= antivirusRegistration.enabled ? 'enabled' : 'disabled';
+  }
+
+  return { attributes: updatedPackagePolicyDoc.attributes };
+};
