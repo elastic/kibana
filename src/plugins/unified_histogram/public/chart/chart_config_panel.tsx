@@ -31,7 +31,7 @@ export function ChartConfigPanel({
   setIsFlyoutVisible,
   isPlainRecord,
   query,
-  onSuggestionContextChange,
+  onSuggestionContextEdit,
 }: {
   services: UnifiedHistogramServices;
   visContext: UnifiedHistogramVisContext;
@@ -42,9 +42,10 @@ export function ChartConfigPanel({
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionContextChange: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
+  onSuggestionContextEdit: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
+  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
 
@@ -56,14 +57,14 @@ export function ChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       };
-      onSuggestionContextChange({
+      onSuggestionContextEdit({
         ...currentSuggestionContext,
         suggestion: updatedSuggestion,
       });
-      // console.log('updatePanelState', datasourceState, visualizationState, updatedSuggestion);
     },
-    [currentSuggestionContext, onSuggestionContextChange]
+    [currentSuggestionContext, onSuggestionContextEdit]
   );
+
   const updateSuggestion = useCallback(
     (attributes) => {
       const updatedSuggestion = deriveLensSuggestionFromLensAttributes({
@@ -71,15 +72,14 @@ export function ChartConfigPanel({
           ...visContext,
           attributes,
         },
-        queryParams: null, // skip query matching
+        queryParams: null, // skip validation for matching query
       });
-      onSuggestionContextChange({
+      onSuggestionContextEdit({
         type: UnifiedHistogramSuggestionType.lensSuggestion,
         suggestion: updatedSuggestion,
       });
-      // console.log('updateSuggestion', attributes, updatedSuggestion);
     },
-    [onSuggestionContextChange, visContext]
+    [onSuggestionContextEdit, visContext]
   );
 
   const currentSuggestion = currentSuggestionContext.suggestion;
@@ -110,20 +110,22 @@ export function ChartConfigPanel({
         />
       );
       setEditLensConfigPanel(panel);
+      previousSuggestion.current = currentSuggestion;
       previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
     }
+    const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
     // rerender the component if the data has changed
-    if (isPlainRecord && (dataHasChanged || !isFlyoutVisible)) {
+    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
     visContext.attributes,
     services.lens,
-    updateSuggestion,
     updatePanelState,
+    updateSuggestion,
     isPlainRecord,
     currentSuggestion,
     query,

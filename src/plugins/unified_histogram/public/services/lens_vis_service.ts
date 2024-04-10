@@ -230,10 +230,17 @@ export class LensVisService {
     let currentSuggestion: Suggestion | undefined;
 
     // takes lens suggestions if provided
-    const availableSuggestionsWithType = allSuggestions.map((lensSuggestion) => ({
-      suggestion: lensSuggestion,
-      type: UnifiedHistogramSuggestionType.lensSuggestion,
-    }));
+    const availableSuggestionsWithType: Array<{
+      suggestion: UnifiedHistogramSuggestionContext['suggestion'];
+      type: UnifiedHistogramSuggestionType;
+    }> = [];
+
+    if (allSuggestions.length) {
+      availableSuggestionsWithType.push({
+        suggestion: allSuggestions[0],
+        type: UnifiedHistogramSuggestionType.lensSuggestion,
+      });
+    }
 
     if (queryParams.isPlainRecord) {
       // appends an ES|QL histogram

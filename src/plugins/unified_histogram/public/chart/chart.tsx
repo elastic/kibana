@@ -395,7 +395,7 @@ export function Chart({
             isPlainRecord,
             query,
             currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
-            onSuggestionContextChange: onSuggestionContextEdit,
+            onSuggestionContextEdit,
           }}
         />
       )}

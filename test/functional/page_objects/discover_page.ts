@@ -245,7 +245,7 @@ export class DiscoverPageObject extends FtrService {
     });
     await this.testSubjects.click('lensSuggestionsPanelToggleButton');
 
-    const suggestionTestSubj = `lnsSuggestion-${suggestionType.toLowerCase()}`;
+    const suggestionTestSubj = `lnsSuggestion-${suggestionType}`;
     await this.retry.waitFor('suggestion option', async () => {
       return await this.testSubjects.exists(suggestionTestSubj);
     });

@@ -12,7 +12,10 @@ import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import {
+  canImportVisContext,
+  UnifiedHistogramVisContext,
+} from '@kbn/unified-histogram-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -334,7 +337,10 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
       return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
-    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+    const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
+    const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
+
+    const isSame = isEqual(prevValue, nextValue);
 
     if (!isSame) {
       addLog('[savedSearch] difference between initial and changed version', {
@@ -381,6 +387,22 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   addLog('[savedSearch] no difference between initial and changed version');
 
   return true;
+}
+
+function getSavedSearchFieldForComparison(
+  savedSearch: Omit<SavedSearch, 'searchSource'>,
+  fieldName: keyof Omit<SavedSearch, 'searchSource'>
+) {
+  if (fieldName === 'visContext') {
+    const visContext = cloneDeep(savedSearch.visContext);
+    if (canImportVisContext(visContext) && visContext?.attributes?.title) {
+      // ignore differences in title as it sometimes does not match the actual vis type/shape
+      visContext.attributes.title = 'same';
+    }
+    return visContext;
+  }
+
+  return savedSearch[fieldName];
 }
 
 function getSearchSourceFieldValueForComparison(

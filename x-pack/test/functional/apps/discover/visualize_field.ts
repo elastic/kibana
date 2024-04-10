@@ -154,7 +154,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await PageObjects.discover.chooseLensSuggestion('Donut');
+      await PageObjects.discover.chooseLensSuggestion('donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
@@ -169,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.chooseLensSuggestion('Bar vertical stacked');
+      await PageObjects.discover.chooseLensSuggestion('barVerticalStacked');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
@@ -232,7 +232,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensSuggestion('Bar vertical stacked');
+      await PageObjects.discover.chooseLensSuggestion('barVerticalStacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -313,7 +313,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensSuggestion('Bar vertical stacked');
+      await PageObjects.discover.chooseLensSuggestion('barVerticalStacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
