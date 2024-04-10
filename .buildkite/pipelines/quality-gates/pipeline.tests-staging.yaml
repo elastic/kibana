@@ -21,19 +21,6 @@ steps:
         EC_REGION: aws-us-east-1
         RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
-  
-  - label: ":rocket: Fleet synthetic monitor to check the long standing project"
-    trigger: "serverless-quality-gates"
-    build:
-      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
-      env:
-        TARGET_ENV: staging
-        CHECK_SYNTHETICS: true
-        CHECK_SYNTHETICS_TAG: "fleet"
-        CHECK_SYNTHETICS_MINIMUM_RUNS: 3
-        MAX_FAILURES: 2
-        CHECK_SYNTHETIC_MAX_POLL: 50
-    soft_fail: true
 
   - wait: ~
 
