@@ -103,7 +103,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
       }
 
       const roleMappingsWithKibanaUserRole = Object.entries(roleMappings).filter(([, mapping]) =>
-        mapping.roles.includes(KIBANA_USER_ROLE_NAME)
+        mapping.roles?.includes(KIBANA_USER_ROLE_NAME)
       );
 
       if (roleMappingsWithKibanaUserRole.length === 0) {

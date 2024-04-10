@@ -70,6 +70,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       archives: manifestEntries,
     };
 
+    const projectRoot = process.cwd();
     const manifestJSON = JSON.stringify(manifest, null, 2);
     fs.writeFileSync(`${destination}/manifest.json`, manifestJSON);
 
@@ -80,6 +81,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       set -euo pipefail
 
       echo '--- Upload files to GCS'
+      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
       cd "${destination}"
       gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
