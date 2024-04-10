@@ -8,20 +8,11 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { AsApiContract, RewriteResponseCase } from '@kbn/actions-types';
-import { Rule, RuleUpdates } from '../../types';
+import { RuleFormRule } from '../../types';
 import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { transformRule } from '../common_transformations';
 
-type RuleCreateBody = Omit<
-  RuleUpdates,
-  | 'createdBy'
-  | 'updatedBy'
-  | 'muteAll'
-  | 'mutedInstanceIds'
-  | 'executionStatus'
-  | 'lastRun'
-  | 'nextRun'
->;
+export type RuleCreateBody = Omit<RuleFormRule, 'id'>;
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
@@ -30,7 +21,9 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  actions: actions.map((action) => {
+  actions: [],
+  /* Enable this in the next PR which adds action support *
+  actions.map((action) => {
     const { id, params } = action;
     return {
       ...('group' in action && action.group ? { group: action.group } : {}),
@@ -56,6 +49,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         : {}),
     };
   }),
+  */
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
@@ -65,8 +59,8 @@ export async function createRule({
 }: {
   http: HttpSetup;
   rule: RuleCreateBody;
-}): Promise<Rule> {
-  const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
+}): Promise<RuleFormRule> {
+  const res = await http.post<AsApiContract<RuleFormRule>>(`${BASE_ALERTING_API_PATH}/rule`, {
     body: JSON.stringify(rewriteBodyRequest(rule)),
   });
   return transformRule(res);

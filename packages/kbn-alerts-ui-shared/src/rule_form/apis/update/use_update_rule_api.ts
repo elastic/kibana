@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo, useCallback } from 'react';
-import { updateRule } from './update_rule';
+import { RuleUpdatesBody, updateRule } from './update_rule';
 import { parseRuleCircuitBreakerErrorMessage } from '../../../common/helpers';
 import { useKibanaServices } from '../../contexts';
 import { useRuleFormSelector } from '../../hooks';
@@ -18,7 +18,7 @@ export const useUpdateRuleApi = () => {
   const ruleDefinition = useRuleFormSelector((state) => state.ruleDefinition);
   const ruleDetails = useRuleFormSelector((state) => state.ruleDetails);
 
-  const rule = useMemo(
+  const rule: RuleUpdatesBody & { id: string } = useMemo(
     () => ({
       ...ruleDetails,
       ...ruleDefinition,

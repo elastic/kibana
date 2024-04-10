@@ -14,6 +14,20 @@ import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils'
 import { ValidationStatus } from './common/constants';
 import { RuleDefinitionValidation, RuleDetailsValidation } from './features';
 
+export interface RuleFormRule {
+  id: string;
+  name: string;
+  tags: string[];
+  consumer: AlertConsumers | 'alerts' | null;
+  schedule: { interval: string };
+  params: RuleTypeParams;
+  alertDelay?: {
+    active: number;
+  };
+  actions: [];
+  ruleTypeId: string;
+}
+
 export interface RuleFormKibanaServices {
   http: HttpStart;
   toasts: ToastsStart;
@@ -30,6 +44,11 @@ export interface RuleTypeParamsExpressionPlugins {
   unifiedSearch: unknown;
 }
 
+export interface ActionGroup<ActionGroupIds extends string> {
+  id: ActionGroupIds;
+  name: string;
+}
+
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
@@ -39,14 +58,13 @@ export interface RuleTypeParamsExpressionProps<
   ruleParams: Params;
   ruleInterval: string;
   ruleThrottle: string;
-  alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
   /**
    * @deprecated Use setRuleParams instead
    */
-  setRuleProperty: <Prop extends keyof Rule>(
+  setRuleProperty: <Prop extends keyof RuleFormRule>(
     key: 'params',
-    value: SanitizedRule<Params>[Prop] | null
+    value: RuleFormRule[Prop] | null
   ) => void;
   onChangeMetaData: (metadata: MetaData) => void;
   errors: RuleFormValidationErrorObject | RuleFormValidationErrorList | IErrorObject;

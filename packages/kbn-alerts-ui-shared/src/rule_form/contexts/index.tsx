@@ -17,7 +17,7 @@ import {
   RuleTypeModelFromRegistry,
   RuleFormKibanaServices,
 } from '../types';
-import { InitialRuleProvider } from './initial_rule_context';
+import { InitialRuleProvider, type OnLoadRuleSuccess } from './initial_rule_context';
 
 export { useRuleType } from './rule_type_context';
 export { useConfig } from './config_context';
@@ -28,7 +28,7 @@ interface ContextsProviderProps extends RuleFormKibanaServices {
   config?: RuleFormConfig;
   appContext: RuleFormAppContext;
   registeredRuleTypeModel: RuleTypeModelFromRegistry | null;
-  onLoadRuleSuccess: (ruleTypeId: string, ruleName: string) => void;
+  onLoadRuleSuccess: OnLoadRuleSuccess;
   isRuleTypeModelPending: boolean;
   isEdit?: boolean;
   ruleId?: string;

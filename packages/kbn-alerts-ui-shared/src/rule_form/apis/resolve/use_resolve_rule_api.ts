@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../../contexts';
+import { RuleFormRule } from '../../types';
 import { resolveRule } from './resolve_rule';
 
 export const useResolveRuleApi = ({
@@ -17,7 +18,7 @@ export const useResolveRuleApi = ({
   onSuccess,
 }: {
   ruleId: string;
-  onSuccess: (rule: ResolvedRule) => void;
+  onSuccess: (rule: RuleFormRule) => void;
   enabled?: boolean;
 }) => {
   const { http, toasts } = useKibanaServices();

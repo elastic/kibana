@@ -9,23 +9,25 @@
 import React, { createContext, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { Rule } from '../types';
+import { RuleFormRule } from '../types';
 import { useResolveRuleApi } from '../apis';
 
-const InitialRuleContext = createContext<Rule | null>(null);
+const InitialRuleContext = createContext<RuleFormRule | undefined>(undefined);
+
+export type OnLoadRuleSuccess = (ruleTypeId: string, ruleName: string) => void;
 
 const EditRuleProvider: React.FC<{
   ruleId: string;
-  onLoadRuleSuccess: (ruleTypeId: string, ruleName: string) => void;
+  onLoadRuleSuccess: OnLoadRuleSuccess;
 }> = ({ ruleId, onLoadRuleSuccess, children }) => {
   const [hasLoaded, setHasLoaded] = useState(false);
 
   const { rule, isSuccess, isLoading } = useResolveRuleApi({
     ruleId,
     enabled: !hasLoaded,
-    onSuccess: (rule: ResolvedRule) => {
+    onSuccess: (loadedRule: RuleFormRule) => {
       setHasLoaded(true);
-      onLoadRuleSuccess(rule.ruleTypeId, rule.name);
+      onLoadRuleSuccess(loadedRule.ruleTypeId, loadedRule.name);
     },
   });
 
@@ -73,10 +75,10 @@ const EditRuleProvider: React.FC<{
 export const InitialRuleProvider: React.FC<{
   ruleId: string;
   isEdit?: boolean;
-  onLoadRuleSuccess: (ruleTypeId: string) => void;
+  onLoadRuleSuccess: OnLoadRuleSuccess;
 }> = ({ ruleId, isEdit, onLoadRuleSuccess, children }) => {
   if (!isEdit) {
-    return <InitialRuleContext.Provider value={null}>{children}</InitialRuleContext.Provider>;
+    return <InitialRuleContext.Provider value={undefined}>{children}</InitialRuleContext.Provider>;
   } else
     return (
       <EditRuleProvider ruleId={ruleId} onLoadRuleSuccess={onLoadRuleSuccess}>

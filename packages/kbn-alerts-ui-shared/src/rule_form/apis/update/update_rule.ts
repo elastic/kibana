@@ -10,12 +10,12 @@ import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
 import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../common/constants';
-import { Rule, RuleUpdates } from '../../../types';
+import { RuleFormRule } from '../../types';
 import { transformRule } from '../common_transformations';
 
-type RuleUpdatesBody = Pick<
-  RuleUpdates,
-  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen' | 'alertDelay'
+export type RuleUpdatesBody = Pick<
+  RuleFormRule,
+  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'alertDelay'
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
   actions,
@@ -23,7 +23,9 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
   ...res
 }): any => ({
   ...res,
-  actions: actions.map((action) => {
+  actions: [],
+  /* Enable this in the next PR which adds action support *
+  actions.map((action) => {
     const { id, params, uuid } = action;
     return {
       ...('group' in action ? { group: action.group } : {}),
@@ -48,6 +50,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
       ...(uuid && { uuid }),
     };
   }),
+  */
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
@@ -57,10 +60,10 @@ export async function updateRule({
   id,
 }: {
   http: HttpSetup;
-  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'alertDelay'>;
+  rule: Pick<RuleFormRule, 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'alertDelay'>;
   id: string;
-}): Promise<Rule> {
-  const res = await http.put<AsApiContract<Rule>>(
+}): Promise<RuleFormRule> {
+  const res = await http.put<AsApiContract<RuleFormRule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(

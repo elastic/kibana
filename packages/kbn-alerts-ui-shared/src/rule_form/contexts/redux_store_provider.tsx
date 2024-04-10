@@ -11,7 +11,7 @@ import { combineReducers } from '@reduxjs/toolkit';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useStore } from '../store';
 import { useAuthorizedConsumers } from '../hooks';
-import type { RuleFormAppContext } from '../types';
+import type { RuleFormAppContext, RuleFormRule } from '../types';
 import { useRuleType } from './rule_type_context';
 import { useInitialRule } from './initial_rule_context';
 import { ruleDefinitionSlice, ruleDetailsSlice } from '../features';
@@ -21,7 +21,7 @@ interface ReduxStoreProviderProps {
   appContext: RuleFormAppContext;
 }
 
-const initialRuleToInitialState = (initialRule: ResolvedRule) => {
+const initialRuleToInitialState = (initialRule: RuleFormRule) => {
   // Call combineReducers inside a function to avoid Webpack import order problems
   const initialStateReducer = combineReducers({
     ruleDefinition: ruleDefinitionSlice.reducer,

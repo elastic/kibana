@@ -12,6 +12,7 @@ import {
   RuleCreationValidConsumer,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
+import { RuleFormRule } from '../types';
 
 export const ALERTING_FEATURE_ID = 'alerts';
 
@@ -33,4 +34,4 @@ export enum ValidationStatus {
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 
-export const hydrateState = createAction<ResolveRule>('hydrateState');
+export const hydrateState = createAction<RuleFormRule>('hydrateState');

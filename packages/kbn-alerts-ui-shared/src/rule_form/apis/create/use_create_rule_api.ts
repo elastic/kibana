@@ -9,7 +9,7 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useMemo, useCallback } from 'react';
-import { createRule } from './create_rule';
+import { createRule, RuleCreateBody } from './create_rule';
 import { parseRuleCircuitBreakerErrorMessage } from '../../../common/helpers';
 import { useRuleType, useKibanaServices } from '../../contexts';
 import { useRuleFormSelector } from '../../hooks';
@@ -20,7 +20,7 @@ export const useCreateRuleApi = () => {
   const ruleDefinition = useRuleFormSelector((state) => state.ruleDefinition);
   const ruleDetails = useRuleFormSelector((state) => state.ruleDetails);
 
-  const rule = useMemo(
+  const rule: RuleCreateBody = useMemo(
     () => ({
       ...ruleDetails,
       ...omit(ruleDefinition, 'id'),

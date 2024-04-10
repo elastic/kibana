@@ -8,9 +8,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { ResolvedRule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../common/constants';
 import { transformResolvedRule } from '../common_transformations';
+import { RuleFormRule } from '../../types';
 
 export async function resolveRule({
   http,
@@ -18,8 +18,8 @@ export async function resolveRule({
 }: {
   http: HttpSetup;
   ruleId: string;
-}): Promise<ResolvedRule> {
-  const res = await http.get<AsApiContract<ResolvedRule>>(
+}): Promise<RuleFormRule> {
+  const res = await http.get<AsApiContract<RuleFormRule>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}/_resolve`
   );
   return transformResolvedRule(res);
