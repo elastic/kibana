@@ -13,14 +13,26 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-export type RuleRegistrySearchRequest = IEsSearchRequest & {
-  featureIds: ValidFeatureId[];
+interface RuleRegistrySearchRequestTemp extends IEsSearchRequest {
   fields?: QueryDslFieldAndFormat[];
   query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
   runtimeMappings?: MappingRuntimeFields;
-};
+}
+
+export type RuleRegistrySearchRequest = RuleRegistrySearchRequestTemp &
+  (
+    | {
+        // @deprecated should use ruleTypeIds
+        featureIds: ValidFeatureId[];
+        ruleTypeIds?: never;
+      }
+    | {
+        featureIds?: never;
+        ruleTypeIds: string[];
+      }
+  );
 
 export interface RuleRegistrySearchRequestPagination {
   pageIndex: number;

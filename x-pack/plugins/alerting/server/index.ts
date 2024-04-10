@@ -52,6 +52,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+export type { AuthorizationOptions } from './authorization';
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,

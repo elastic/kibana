@@ -76,7 +76,6 @@ export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
-  featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   browserFields?: BrowserFields;
@@ -95,7 +94,18 @@ export type AlertsTableStateProps = {
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
   renderCellPopover?: AlertsTableProps['renderCellPopover'];
-} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
+} & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'> &
+  (
+    | {
+        // @deprecated should use ruleTypeIds
+        featureIds: ValidFeatureId[];
+        ruleTypeIds?: never;
+      }
+    | {
+        featureIds?: never;
+        ruleTypeIds: string[];
+      }
+  );
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -195,6 +205,7 @@ const AlertsTableStateWithQueryProvider = ({
   browserFields: propBrowserFields,
   onUpdate,
   onLoaded,
+  ruleTypeIds,
   runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
@@ -254,6 +265,14 @@ const AlertsTableStateWithQueryProvider = ({
     pageSize: pageSize ?? DefaultPagination.pageSize,
   });
 
+  const columnsProps = {
+    featureIds,
+    storageAlertsTable,
+    storage,
+    id,
+    defaultColumns: columnConfigByClient,
+    initialBrowserFields: propBrowserFields,
+  };
   const {
     columns,
     browserFields,
@@ -264,19 +283,22 @@ const AlertsTableStateWithQueryProvider = ({
     onChangeVisibleColumns,
     onColumnResize,
     fields,
-  } = useColumns({
-    featureIds,
-    storageAlertsTable,
-    storage,
-    id,
-    defaultColumns: columnConfigByClient,
-    initialBrowserFields: propBrowserFields,
-  });
+  } = useColumns(featureIds ? { ...columnsProps, featureIds } : { ...columnsProps, ruleTypeIds });
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
   }, []);
 
+  const fetchAlertParams = {
+    fields,
+    query,
+    pagination,
+    onPageChange,
+    onLoaded,
+    runtimeMappings,
+    sort,
+    skip: false,
+  };
   const [
     isLoading,
     {
@@ -289,17 +311,9 @@ const AlertsTableStateWithQueryProvider = ({
       totalAlerts: alertsCount,
       updatedAt,
     },
-  ] = useFetchAlerts({
-    fields,
-    featureIds,
-    query,
-    pagination,
-    onPageChange,
-    onLoaded,
-    runtimeMappings,
-    sort,
-    skip: false,
-  });
+  ] = useFetchAlerts(
+    featureIds ? { ...fetchAlertParams, featureIds } : { ...fetchAlertParams, ruleTypeIds }
+  );
 
   const { data: mutedAlerts } = useGetMutedAlerts([
     ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),

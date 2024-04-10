@@ -26,6 +26,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
             t.partial({
               aggs: t.record(t.string, t.intersection([metricsAggsSchemas, bucketAggsSchemas])),
               feature_ids: t.union([t.array(t.string), t.undefined]),
+              rule_type_ids: t.union([t.array(t.string), t.undefined]),
               index: t.string,
               query: t.object,
               search_after: t.union([t.array(t.number), t.array(t.string), t.undefined]),
@@ -48,6 +49,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           feature_ids: featureIds,
           index,
           query,
+          rule_type_ids: ruleTypeIds,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           search_after,
           size,
@@ -56,11 +58,17 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           track_total_hits,
           _source,
         } = request.body;
+
+        if (featureIds && ruleTypeIds) {
+          throw new Error(
+            `The find alert API is unable to accommodate requests containing feature IDs and rule type IDs.`
+          );
+        }
+
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const alerts = await alertsClient.find({
+        const findAttrs = {
           aggs,
-          featureIds,
           index,
           query,
           search_after,
@@ -68,7 +76,18 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           sort: sort as SortOptions[],
           track_total_hits,
           _source,
-        });
+        };
+        const alerts = featureIds
+          ? await alertsClient.find({
+              ...findAttrs,
+              featureIds,
+            })
+          : ruleTypeIds
+          ? await alertsClient.find({
+              ...findAttrs,
+              ruleTypeIds,
+            })
+          : null;
         if (alerts == null) {
           return response.notFound({
             body: { message: `alerts with query and index ${index} not found` },

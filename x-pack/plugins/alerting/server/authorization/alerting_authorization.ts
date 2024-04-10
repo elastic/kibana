@@ -69,6 +69,15 @@ interface HasPrivileges {
   all: boolean;
 }
 type AuthorizedConsumers = Record<string, HasPrivileges>;
+export type AuthorizationOptions =
+  | {
+      featureIds?: Set<string>;
+      ruleTypeIds?: never;
+    }
+  | {
+      featureIds?: never;
+      ruleTypeIds?: Set<string>;
+    };
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
 }
@@ -211,7 +220,7 @@ export class AlertingAuthorization {
   public async getFindAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,
-    featuresIds?: Set<string>
+    options: AuthorizationOptions
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -220,19 +229,19 @@ export class AlertingAuthorization {
       authorizationEntity,
       filterOpts,
       ReadOperations.Find,
-      featuresIds
+      options
     );
   }
 
   public async getAuthorizedRuleTypes(
     authorizationEntity: AlertingAuthorizationEntity,
-    featuresIds?: Set<string>
+    { featureIds, ruleTypeIds }: AuthorizationOptions
   ): Promise<RegistryAlertTypeWithAuth[]> {
     const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-      this.ruleTypeRegistry.list(),
+      this.getRuleTypes(ruleTypeIds),
       [ReadOperations.Find],
       authorizationEntity,
-      featuresIds
+      featureIds
     );
     return Array.from(authorizedRuleTypes);
   }
@@ -241,17 +250,17 @@ export class AlertingAuthorization {
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,
     operation: WriteOperations | ReadOperations,
-    featuresIds?: Set<string>
+    { featureIds, ruleTypeIds }: AuthorizationOptions
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-        this.ruleTypeRegistry.list(),
+        this.getRuleTypes(ruleTypeIds),
         [operation],
         authorizationEntity,
-        featuresIds
+        featureIds
       );
 
       if (!authorizedRuleTypes.size) {
@@ -307,6 +316,19 @@ export class AlertingAuthorization {
       authorizationEntity
     );
     return authorizedRuleTypes;
+  }
+
+  private getRuleTypes(ruleTypeIds?: Set<string>): Set<RegistryRuleType> {
+    let ruleTypes = this.ruleTypeRegistry.list();
+    if (ruleTypeIds) {
+      ruleTypes = new Set();
+      this.ruleTypeRegistry.list().forEach((rtr) => {
+        if (ruleTypeIds.has(rtr.id)) {
+          ruleTypes.add(rtr);
+        }
+      });
+    }
+    return ruleTypes;
   }
 
   private async augmentRuleTypesWithAuthorization(

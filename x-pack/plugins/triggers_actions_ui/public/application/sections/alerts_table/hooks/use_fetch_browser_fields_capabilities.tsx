@@ -13,10 +13,19 @@ import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
-export interface FetchAlertsArgs {
-  featureIds: ValidFeatureId[];
+export type FetchAlertsArgs = {
   initialBrowserFields?: BrowserFields;
-}
+} & (
+  | {
+      // @deprecated should use ruleTypeIds
+      featureIds: ValidFeatureId[];
+      ruleTypeIds?: never;
+    }
+  | {
+      featureIds?: never;
+      ruleTypeIds: string[];
+    }
+);
 
 export interface FetchAlertResp {
   alerts: Alerts;
@@ -28,6 +37,7 @@ const INVALID_FEATURE_ID = 'siem';
 
 export const useFetchBrowserFieldCapabilities = ({
   featureIds,
+  ruleTypeIds,
   initialBrowserFields,
 }: FetchAlertsArgs): [boolean | undefined, BrowserFields, unknown[]] => {
   const {
@@ -43,7 +53,8 @@ export const useFetchBrowserFieldCapabilities = ({
 
   const getBrowserFieldInfo = useCallback(
     async (
-      validFeatureId: ValidFeatureId[]
+      validFeatureId?: ValidFeatureId[],
+      validRuleTypeIds?: string[]
     ): Promise<{
       browserFields: BrowserFields;
       fields: FieldDescriptor[];
@@ -54,7 +65,7 @@ export const useFetchBrowserFieldCapabilities = ({
         return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
           `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
           {
-            query: { featureIds: validFeatureId },
+            query: { featureIds: validFeatureId, ruleTypeIds: validRuleTypeIds },
           }
         );
       } catch (e) {
@@ -72,11 +83,12 @@ export const useFetchBrowserFieldCapabilities = ({
       setBrowserFields(initialBrowserFields);
       return;
     }
-    const validFeatureIdTmp = featureIds.filter((fid) => isValidFeatureId(fid));
+    const validFeatureIdTmp = featureIds?.filter((fid) => isValidFeatureId(fid)) ?? [];
     if (
       isLoading !== undefined ||
-      featureIds.includes(INVALID_FEATURE_ID) ||
-      validFeatureIdTmp.length === 0
+      (featureIds && featureIds.includes(INVALID_FEATURE_ID)) ||
+      (featureIds && validFeatureIdTmp.length === 0) ||
+      (ruleTypeIds && ruleTypeIds.length === 0)
     ) {
       return;
     }
@@ -85,14 +97,15 @@ export const useFetchBrowserFieldCapabilities = ({
 
     const callApi = async (validFeatureId: ValidFeatureId[]) => {
       const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo(
-        validFeatureId
+        validFeatureId,
+        ruleTypeIds
       );
       setFields(newFields);
       setBrowserFields(browserFieldsInfo);
       setIsLoading(false);
     };
     callApi(validFeatureIdTmp);
-  }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
+  }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields, ruleTypeIds]);
 
   return [isLoading, browserFields, fields];
 };

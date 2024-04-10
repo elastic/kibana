@@ -6,12 +6,12 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_feature_id';
+import { getBrowserFields } from './get_browser_fields';
 import { requestContextMock } from './__mocks__/request_context';
 import { getO11yBrowserFields } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
-describe('getBrowserFieldsByFeatureId', () => {
+describe('getBrowserFields', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   const path = `${BASE_RAC_ALERTS_API_PATH}/browser_fields`;
@@ -23,11 +23,11 @@ describe('getBrowserFieldsByFeatureId', () => {
 
   describe('when racClient returns o11y indices', () => {
     beforeEach(() => {
-      clients.rac.getAuthorizedAlertsIndices.mockResolvedValue([
+      clients.rac.getAuthorizedAlertsIndicesByFeatureIds.mockResolvedValue([
         '.alerts-observability.logs.alerts-default',
       ]);
 
-      getBrowserFieldsByFeatureId(server.router);
+      getBrowserFields(server.router);
     });
 
     test('route registered', async () => {
@@ -52,7 +52,9 @@ describe('getBrowserFieldsByFeatureId', () => {
     });
 
     test('returns error status if rac client "getAuthorizedAlertsIndices" fails', async () => {
-      clients.rac.getAuthorizedAlertsIndices.mockRejectedValue(new Error('Unable to get index'));
+      clients.rac.getAuthorizedAlertsIndicesByFeatureIds.mockRejectedValue(
+        new Error('Unable to get index')
+      );
       const response = await server.inject(getO11yBrowserFields(), context);
 
       expect(response.status).toEqual(500);

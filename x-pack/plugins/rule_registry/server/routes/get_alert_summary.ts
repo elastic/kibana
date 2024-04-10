@@ -27,11 +27,13 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
               t.type({
                 gte: t.string,
                 lte: t.string,
-                featureIds: t.array(t.string),
               })
             ),
             t.exact(
               t.partial({
+                // @deprecated use rule_type_ids
+                featureIds: t.array(t.string),
+                rule_type_ids: t.array(t.string),
                 fixed_interval: t.string,
                 filter: t.array(t.object),
               })
@@ -47,7 +49,14 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { gte, lte, featureIds, filter, fixed_interval: fixedInterval } = request.body;
+        const {
+          gte,
+          lte,
+          featureIds,
+          filter,
+          fixed_interval: fixedInterval,
+          rule_type_ids: ruleTypeIds,
+        } = request.body;
         if (
           !(
             moment(gte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid() &&
@@ -63,13 +72,24 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           );
         }
 
-        const aggs = await alertsClient.getAlertSummary({
+        if (featureIds && ruleTypeIds) {
+          throw new Error(
+            `The alert summary API is unable to accommodate requests containing feature IDs and rule type IDs.`
+          );
+        }
+
+        const alertSummaryParams = {
           gte,
           lte,
-          featureIds,
           filter: filter as estypes.QueryDslQueryContainer[],
           fixedInterval,
-        });
+        };
+        const aggs = featureIds
+          ? await alertsClient.getAlertSummary({ ...alertSummaryParams, featureIds })
+          : ruleTypeIds
+          ? await alertsClient.getAlertSummary({ ...alertSummaryParams, ruleTypeIds })
+          : {};
+
         return response.ok({
           body: aggs,
         });

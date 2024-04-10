@@ -11,6 +11,7 @@ import {
   AlertingAuthorization,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
+  AuthorizationOptions,
 } from '@kbn/alerting-plugin/server';
 import {
   ALERT_RULE_CONSUMER,
@@ -20,7 +21,7 @@ import {
 export async function getAuthzFilter(
   authorization: PublicMethodsOf<AlertingAuthorization>,
   operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
-  featuresIds?: Set<string>
+  options: AuthorizationOptions
 ) {
   const { filter } = await authorization.getAuthorizationFilter(
     AlertingAuthorizationEntity.Alert,
@@ -29,7 +30,7 @@ export async function getAuthzFilter(
       fieldNames: { consumer: ALERT_RULE_CONSUMER, ruleTypeId: ALERT_RULE_TYPE_ID },
     },
     operation,
-    featuresIds
+    options
   );
   return filter;
 }
