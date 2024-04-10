@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
+import { useKibana } from '../../common/lib/kibana';
 
 export const AssetCriticalityUploadPage = () => {
   const { docLinks } = useKibana().services;
@@ -66,7 +67,7 @@ export const AssetCriticalityUploadPage = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.title"
-                  defaultMessage="What is asset criticality??"
+                  defaultMessage="What is asset criticality?"
                 />
               </h3>
             </EuiTitle>

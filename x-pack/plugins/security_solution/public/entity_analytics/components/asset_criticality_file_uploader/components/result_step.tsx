@@ -49,7 +49,7 @@ export const AssetCriticalityResultStep: React.FC<{
     );
   }
 
-  if (result.stats.errors === 0) {
+  if (result.stats.failed === 0) {
     return (
       <>
         <EuiCallOut
@@ -94,14 +94,14 @@ export const AssetCriticalityResultStep: React.FC<{
           <FormattedMessage
             defaultMessage="{assignedCount, plural, one {# asset criticality assignment succeeded.} other {# asset criticality assignments succeeded.}}"
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.partialError.assignedEntities"
-            values={{ assignedCount: result.stats.created + result.stats.updated }}
+            values={{ assignedCount: result.stats.successful }}
           />
         </p>
         <p>
           <FormattedMessage
             defaultMessage="{failedCount, plural, one {# asset criticality assignment failed.} other {# asset criticality assignments failed.}}"
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.partialError.failedEntities"
-            values={{ failedCount: result.stats.errors }}
+            values={{ failedCount: result.stats.failed }}
           />
         </p>
 
