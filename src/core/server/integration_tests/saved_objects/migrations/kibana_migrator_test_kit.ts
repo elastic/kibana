@@ -434,15 +434,18 @@ export const createBaseline = async () => {
 };
 
 interface GetMutatedMigratorParams {
+  logFilePath?: string;
   kibanaVersion?: string;
   settings?: Record<string, any>;
 }
 
 export const getIdenticalMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes,
     kibanaVersion,
     settings,
@@ -450,10 +453,12 @@ export const getIdenticalMappingsMigrator = async ({
 };
 
 export const getNonDeprecatedMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types: baselineTypes.filter((type) => type.name !== 'deprecated'),
     kibanaVersion,
     settings,
@@ -461,6 +466,7 @@ export const getNonDeprecatedMappingsMigrator = async ({
 };
 
 export const getCompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   filterDeprecated = false,
   kibanaVersion = nextMinor,
   settings = {},
@@ -499,6 +505,7 @@ export const getCompatibleMappingsMigrator = async ({
     });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
@@ -506,6 +513,7 @@ export const getCompatibleMappingsMigrator = async ({
 };
 
 export const getIncompatibleMappingsMigrator = async ({
+  logFilePath = defaultLogFilePath,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
@@ -544,6 +552,7 @@ export const getIncompatibleMappingsMigrator = async ({
   });
 
   return await getKibanaMigratorTestKit({
+    logFilePath,
     types,
     kibanaVersion,
     settings,
