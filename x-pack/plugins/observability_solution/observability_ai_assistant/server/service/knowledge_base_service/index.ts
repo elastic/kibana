@@ -14,7 +14,7 @@ import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
-import { KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -490,6 +490,45 @@ export class KnowledgeBaseService {
     return {
       entries: returnedEntries,
     };
+  };
+
+  getInstructions = async (
+    namespace: string,
+    user?: { name: string }
+  ): Promise<UserInstruction[]> => {
+    try {
+      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+        index: this.dependencies.resources.aliases.kb,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'labels.category.keyword': {
+                    value: 'instruction',
+                  },
+                },
+              },
+            ],
+            filter: getAccessQuery({
+              user,
+              namespace,
+            }),
+          },
+        },
+        size: 500,
+        _source: ['doc_id', 'text'],
+      });
+
+      return response.hits.hits.map((hit) => ({
+        doc_id: hit._source?.doc_id ?? '',
+        text: hit._source?.text ?? '',
+      }));
+    } catch (error) {
+      this.dependencies.logger.error('Failed to load instructions from knowledge base');
+      this.dependencies.logger.error(error);
+      return [];
+    }
   };
 
   getEntries = async ({
