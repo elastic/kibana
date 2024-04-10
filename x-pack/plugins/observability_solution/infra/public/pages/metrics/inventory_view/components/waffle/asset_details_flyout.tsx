@@ -12,7 +12,7 @@ import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { AssetDetails } from '../../../../../components/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
+import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
   assetName: string;
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const flyoutTabs = [
-  ...commonFlyoutTabs,
+  ...hostDetailsTabs,
   {
     id: ContentTabIds.LINK_TO_APM,
     name: i18n.translate('xpack.infra.nodeDetails.tabs.linkToApm', {

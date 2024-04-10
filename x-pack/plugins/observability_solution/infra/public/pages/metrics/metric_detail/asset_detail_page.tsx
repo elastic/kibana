@@ -14,7 +14,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { AssetDetails } from '../../../components/asset_details';
 import { MetricsPageTemplate } from '../page_template';
-import { commonFlyoutTabs } from '../../../common/asset_details_config/asset_details_tabs';
+import { assetDetailsTabs } from '../../../common/asset_details_config/asset_details_tabs';
 
 export const AssetDetailPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
@@ -43,7 +43,7 @@ export const AssetDetailPage = () => {
     <AssetDetails
       assetId={nodeId}
       assetType={nodeType}
-      tabs={commonFlyoutTabs}
+      tabs={assetDetailsTabs(nodeType)}
       renderMode={{
         mode: 'page',
       }}

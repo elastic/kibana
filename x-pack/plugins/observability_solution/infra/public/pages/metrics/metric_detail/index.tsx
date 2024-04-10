@@ -20,7 +20,7 @@ export const NodeDetail = () => {
 
   return (
     <EuiErrorBoundary>
-      {nodeType === 'host' ? (
+      {nodeType === 'host' || nodeType === 'container' ? (
         <AssetDetailPage />
       ) : (
         <MetricsTimeProvider>
