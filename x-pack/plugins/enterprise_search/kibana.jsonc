@@ -13,11 +13,12 @@
     "requiredPlugins": [
       "features",
       "licensing",
-      "data",
+      "logsShared",
       "esUiShared",
     ],
     "optionalPlugins": [
       "customIntegrations",
+      "data",
       "globalSearch",
       "home",
       "indexManagement",
@@ -37,8 +38,7 @@
       "share",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "logsShared"
+      "kibanaReact"
     ]
   }
 }
