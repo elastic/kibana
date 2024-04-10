@@ -111,7 +111,6 @@ export {
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
-  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,

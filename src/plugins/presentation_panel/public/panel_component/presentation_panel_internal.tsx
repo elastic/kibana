@@ -12,7 +12,7 @@ import {
   apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -57,7 +57,7 @@ export const PresentationPanelInternal = <
     defaultPanelTitle,
     rawViewMode,
     parentHidePanelTitle,
-  ] = useBatchedOptionalPublishingSubjects(
+  ] = useBatchedPublishingSubjects(
     api?.dataLoading,
     api?.blockingError,
     api?.panelTitle,
