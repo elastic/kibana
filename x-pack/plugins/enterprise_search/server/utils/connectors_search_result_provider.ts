@@ -19,6 +19,8 @@ import { fetchConnectors } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
+import { calculateScore } from './calculate_search_score';
+
 export function getConnectorsSearchResultProvider(
   staticAssets: IStaticAssets
 ): GlobalSearchResultProvider {
@@ -31,19 +33,7 @@ export function getConnectorsSearchResultProvider(
         const connectorData = await fetchConnectors(client.asCurrentUser, undefined, false, term);
         const searchResults: GlobalSearchProviderResult[] = connectorData
           .map(({ name, id }) => {
-            let score = 0;
-            const searchTerm = (term || '').toLowerCase();
-            const searchName = name.toLowerCase();
-            if (!searchTerm) {
-              score = 80;
-            } else if (searchName === searchTerm) {
-              score = 100;
-            } else if (searchName.startsWith(searchTerm)) {
-              score = 90;
-            } else if (searchName.includes(searchTerm)) {
-              score = 75;
-            }
-
+            const score = calculateScore(term, name);
             return {
               icon: staticAssets.getPluginAssetHref('images/connector.svg'),
               id: name,
