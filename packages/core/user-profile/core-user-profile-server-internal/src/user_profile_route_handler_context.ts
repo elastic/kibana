@@ -21,9 +21,11 @@ export class CoreUserProfileRouteHandlerContext implements UserProfileRequestHan
     private readonly request: KibanaRequest
   ) {}
 
-  getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
-    dataPath?: string
-  ): Promise<UserProfileWithSecurity<D, L> | null> {
+  getCurrent<D extends UserProfileData, L extends UserProfileLabels>({
+    dataPath,
+  }: {
+    dataPath?: string;
+  } = {}): Promise<UserProfileWithSecurity<D, L> | null> {
     return this.userProfileStart.getCurrent({ request: this.request, dataPath });
   }
 }
