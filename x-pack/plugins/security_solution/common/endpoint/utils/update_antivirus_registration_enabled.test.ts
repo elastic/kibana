@@ -96,8 +96,18 @@ describe('Update antivirus registration enabled', () => {
     expect(input.enabled).toBe(false);
   });
 
-  it('should fallback to disabling antivirus registration if `mode` field is missing', () => {
+  it('should not modify (disable) registration if `mode` field is missing', () => {
     input.enabled = true;
+    delete (input as { mode?: string }).mode;
+    inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
+
+    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+
+    expect(input.enabled).toBe(true);
+  });
+
+  it('should not modify (enable) registration if `mode` field is missing', () => {
+    input.enabled = false;
     delete (input as { mode?: string }).mode;
     inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
 

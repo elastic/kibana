@@ -135,4 +135,28 @@ describe('Policy Form Antivirus Registration Card', () => {
       expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
     });
   });
+
+  describe('when antivirus_registration.mode is not available (serverless rollout)', () => {
+    beforeEach(() => {
+      delete formProps.policy.windows.antivirus_registration.mode;
+    });
+
+    it('should show disabled if `antivirus_registration.enabled` is false', () => {
+      formProps.policy.windows.antivirus_registration.enabled = false;
+      render();
+
+      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(true);
+      expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
+      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+    });
+
+    it('should show enabled if `antivirus_registration.enabled` is true', () => {
+      formProps.policy.windows.antivirus_registration.enabled = true;
+      render();
+
+      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
+      expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(true);
+      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+    });
+  });
 });

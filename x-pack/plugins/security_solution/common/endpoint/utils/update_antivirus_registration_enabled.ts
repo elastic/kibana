@@ -17,7 +17,10 @@ export const updateAntivirusRegistrationEnabledInPlace = (policy: PolicyConfig):
 
   const antivirusRegistrationMode = policy.windows.antivirus_registration.mode;
 
-  policy.windows.antivirus_registration.enabled = modeToEnabled[antivirusRegistrationMode] ?? false;
-
+  if (antivirusRegistrationMode) {
+    // calculate only if `mode` exists
+    policy.windows.antivirus_registration.enabled =
+      modeToEnabled[antivirusRegistrationMode] ?? false;
+  }
   return policy;
 };
