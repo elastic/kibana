@@ -34,10 +34,6 @@ import {
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
-const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
-  defaultMessage: 'technical preview',
-});
-
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -321,7 +317,7 @@ export const getUiSettings: (
     value: true,
     description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
+        'This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on {link}',
       values: {
         link:
           `<a href="https://discuss.elastic.co/c/elastic-stack/kibana" target="_blank" rel="noopener">` +
@@ -329,7 +325,6 @@ export const getUiSettings: (
             defaultMessage: 'discuss.elastic.co/c/elastic-stack/kibana',
           }) +
           '</a>',
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },
     }),
     requiresPageReload: true,
