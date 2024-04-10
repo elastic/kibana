@@ -226,7 +226,6 @@ export function AlertDetailsAppSection({
               start={historicalRange.start}
               end={historicalRange.end}
               transactionType={transactionType}
-              transactionName={transactionName}
               latencyAggregationType={latencyAggregationType}
               environment={environment}
               timeZone={timeZone}

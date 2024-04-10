@@ -47,7 +47,6 @@ interface LatencyAlertsHistoryChartProps {
   start: string;
   end: string;
   transactionType?: string;
-  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
@@ -59,7 +58,6 @@ export function LatencyAlertsHistoryChart({
   start,
   end,
   transactionType,
-  transactionName,
   latencyAggregationType,
   environment,
   timeZone,
@@ -95,7 +93,7 @@ export function LatencyAlertsHistoryChart({
                 start,
                 end,
                 transactionType,
-                transactionName,
+                transactionName: undefined,
                 latencyAggregationType,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 documentType: preferred.source.documentType,
@@ -115,7 +113,6 @@ export function LatencyAlertsHistoryChart({
       latencyAggregationType,
       serviceName,
       start,
-      transactionName,
       transactionType,
       preferred,
     ]
