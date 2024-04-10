@@ -75,7 +75,7 @@ class ConversationalChainFn {
     const question = messages[messages.length - 1]!.content;
     const retrievedDocs: Document[] = [];
 
-    let retrievalChain: Runnable = RunnableLambda.from((input) => '');
+    let retrievalChain: Runnable = RunnableLambda.from(() => '');
 
     if (this.options.rag) {
       const retriever = new ElasticsearchRetriever({
@@ -107,11 +107,15 @@ class ConversationalChainFn {
       retrievalChain = retriever.pipe(buildContext);
     }
 
-    const standaloneQuestionChain = RunnableSequence.from([
-      condenseQuestionPrompt,
-      this.options.model,
-      new StringOutputParser(),
-    ]);
+    let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => input.question);
+
+    if (previousMessages.length > 0) {
+      standaloneQuestionChain = RunnableSequence.from([
+        condenseQuestionPrompt,
+        this.options.model,
+        new StringOutputParser(),
+      ]);
+    }
 
     const prompt = ChatPromptTemplate.fromTemplate(this.options.prompt);
 

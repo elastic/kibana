@@ -5,6 +5,25 @@
     "functions": [
       {
         "parentPluginId": "fleet",
+        "id": "def-public.AvailablePackagesHook",
+        "type": "Function",
+        "tags": [],
+        "label": "AvailablePackagesHook",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/hooks/use_available_packages",
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CustomAssetsAccordion",
         "type": "Function",
         "tags": [],
@@ -90,6 +109,25 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackageList",
+        "type": "Function",
+        "tags": [],
+        "label": "PackageList",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index",
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -21095,6 +21133,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_executed_state",
+            "type": "Object",
+            "tags": [],
+            "label": "latest_executed_state",
+            "description": [],
+            "signature": [
+              "InstallLatestExecutedState",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21139,7 +21192,8 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"installed\" | \"already_installed\" | undefined"
+              "InstallResultStatus",
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false,
@@ -21684,6 +21738,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.advanced_settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "advanced_settings",
             "description": [],
             "signature": [
               "{ [key: string]: any; } | null | undefined"
