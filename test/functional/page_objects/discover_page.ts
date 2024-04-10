@@ -16,7 +16,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
+  private readonly dataViews = this.ctx.getService('dataViews');
   private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
@@ -482,27 +482,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async clickAddNewField() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('indexPattern-add-field');
-      await this.find.byClassName('indexPatternFieldEditor__form');
-    });
-  }
-
-  async createAdHocDataView(name: string, hasTimeField = false) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
-    await this.retry.waitFor('flyout to get closed', async () => {
-      return !(await this.testSubjects.exists('indexPatternEditor__form'));
-    });
-  }
-
-  async clickAddField() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.existOrFail('indexPattern-add-field');
-    await this.testSubjects.click('indexPattern-add-field');
-  }
-
   public async hasNoResults() {
     return await this.testSubjects.exists('discoverNoResults');
   }
@@ -552,23 +531,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
-  public async isAdHocDataViewSelected() {
-    const dataView = await this.getCurrentlySelectedDataView();
-    await this.testSubjects.click('discover-dataView-switch-link');
-    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
-    await this.testSubjects.click('discover-dataView-switch-link');
-    return hasBadge;
-  }
-
   public async selectIndexPattern(
     indexPattern: string,
     waitUntilLoadingHasFinished: boolean = true
   ) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
-    await this.find.clickByCssSelector(
-      `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
-    );
+    await this.dataViews.switchTo(indexPattern);
     if (waitUntilLoadingHasFinished) {
       await this.header.waitUntilLoadingHasFinished();
     }
@@ -711,12 +678,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getCurrentlySelectedDataView() {
-    await this.testSubjects.existOrFail('discover-sidebar');
-    const button = await this.testSubjects.find('discover-dataView-switch-link');
-    return button.getAttribute('title');
-  }
-
   /**
    * Validates if data view references in the URL are equal.
    */
@@ -755,7 +716,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async addRuntimeField(name: string, script: string, type?: string) {
-    await this.clickAddField();
+    await this.dataViews.clickAddFieldFromSearchBar();
     await this.fieldEditor.setName(name);
     if (type) {
       await this.fieldEditor.setFieldType(type);

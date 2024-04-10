@@ -56,6 +56,7 @@ export const createEventSignal = async ({
   completeRule,
   sortOrder = 'desc',
   isAlertSuppressionActive,
+  experimentalFeatures,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
@@ -159,6 +160,7 @@ export const createEventSignal = async ({
         alertTimestampOverride: runOpts.alertTimestampOverride,
         alertWithSuppression: runOpts.alertWithSuppression,
         alertSuppression: completeRule.ruleParams.alertSuppression,
+        experimentalFeatures,
       });
     } else {
       createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

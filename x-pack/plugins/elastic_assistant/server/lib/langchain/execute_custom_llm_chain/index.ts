@@ -145,12 +145,16 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     let didEnd = false;
 
-    const handleStreamEnd = (finalResponse: string) => {
+    const handleStreamEnd = (finalResponse: string, isError = false) => {
       if (onLlmResponse) {
-        onLlmResponse(finalResponse, {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
-        });
+        onLlmResponse(
+          finalResponse,
+          {
+            transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
+            traceId: streamingSpan?.ids?.['trace.id'],
+          },
+          isError
+        );
       }
       streamEnd();
       didEnd = true;
@@ -179,8 +183,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                   message += payload;
                 }
               },
-              handleChainEnd(llmResult) {
-                handleStreamEnd(llmResult.output);
+              handleChainEnd(outputs, runId, parentRunId) {
+                // if parentRunId is undefined, this is the end of the stream
+                if (!parentRunId) {
+                  handleStreamEnd(outputs.output);
+                }
               },
             },
             apmTracer,
@@ -202,7 +209,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         }
         logger.error(`Error streaming from LangChain: ${error.message}`);
         push({ payload: error.message, type: 'content' });
-        handleStreamEnd(error.message);
+        handleStreamEnd(error.message, true);
       });
 
     return responseWithHeaders;
