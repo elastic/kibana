@@ -125,6 +125,3 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     />
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default AnomalySwimLane;
