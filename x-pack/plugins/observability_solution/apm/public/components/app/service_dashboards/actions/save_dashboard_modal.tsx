@@ -282,7 +282,7 @@ function getEditSuccessToastLabels(dashboardName: string) {
       }
     ),
     text: i18n.translate('xpack.apm.serviceDashboards.editSuccess.toast.text', {
-      defaultMessage: 'Your dashboard link has been updated',
+      defaultMessage: 'Your dashboard link have been updated',
     }),
   };
 }

@@ -51,10 +51,4 @@ export const commonFlyoutTabs: Tab[] = [
       defaultMessage: 'Osquery',
     }),
   },
-  {
-    id: ContentTabIds.DASHBOARDS,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.tabs.dashboards', {
-      defaultMessage: 'Dashboards',
-    }),
-  },
 ];

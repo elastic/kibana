@@ -48,7 +48,6 @@ import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assis
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -91,7 +90,6 @@ export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
-  dashboard: DashboardStart;
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;

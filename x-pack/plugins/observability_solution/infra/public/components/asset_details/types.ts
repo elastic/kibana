@@ -26,7 +26,6 @@ export enum ContentTabIds {
   OSQUERY = 'osquery',
   LOGS = 'logs',
   LINK_TO_APM = 'linkToApm',
-  DASHBOARDS = 'dashboards',
 }
 
 export type TabIds = `${ContentTabIds}`;

@@ -7,13 +7,10 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import {
-  enableInfrastructureAssetCustomDashboards,
-  enableInfrastructureHostsView,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -124,9 +121,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
 
-  const setCustomDashboardsEnabled = (value: boolean = true) =>
-    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
-
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
@@ -195,7 +189,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
-        await setCustomDashboardsEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -322,16 +315,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
-          });
-        });
-
-        describe('Dashboards Tab', () => {
-          before(async () => {
-            await pageObjects.assetDetails.clickDashboardsTab();
-          });
-
-          it('should render dashboards tab splash screen with option to add dashboard', async () => {
-            await pageObjects.assetDetails.addDashboardExists();
           });
         });
 

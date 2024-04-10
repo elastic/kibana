@@ -17,7 +17,7 @@ export const useSavedViewsNotifier = () => {
       title:
         message ||
         i18n.translate('xpack.infra.savedView.errorOnDelete.title', {
-          defaultMessage: `An error occurred deleting the view.`,
+          defaultMessage: `An error occured deleting the view.`,
         }),
     });
   };
@@ -39,7 +39,7 @@ export const useSavedViewsNotifier = () => {
       title:
         message ||
         i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
-          defaultMessage: `An error occurred saving view.`,
+          defaultMessage: `An error occured saving view.`,
         }),
     });
   };

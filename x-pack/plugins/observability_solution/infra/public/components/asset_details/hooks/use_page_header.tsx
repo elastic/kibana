@@ -12,8 +12,6 @@ import {
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { capitalize } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -113,17 +111,13 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
   const isProfilingEnabled = useProfilingIntegrationSetting();
-  const isInfrastructureAssetCustomDashboardsEnabled = useUiSetting<boolean>(
-    enableInfrastructureAssetCustomDashboards
-  );
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
       [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
       [ContentTabIds.PROFILING]: isProfilingEnabled,
-      [ContentTabIds.DASHBOARDS]: isInfrastructureAssetCustomDashboardsEnabled,
     }),
-    [featureFlags.osqueryEnabled, isInfrastructureAssetCustomDashboardsEnabled, isProfilingEnabled]
+    [featureFlags.osqueryEnabled, isProfilingEnabled]
   );
 
   const isTabEnabled = useCallback(
