@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { flatten } from 'lodash';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
@@ -46,40 +47,6 @@ export const mocksSource = {
     },
   ],
 };
-
-export const mockIndexFields = [
-  {
-    aggregatable: true,
-    name: '@timestamp',
-    searchable: true,
-    type: 'date',
-    readFromDocValues: true,
-  },
-  { aggregatable: true, name: 'agent.ephemeral_id', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'agent.hostname', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'agent.id', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'agent.name', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'auditd.data.a0', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'auditd.data.a1', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'auditd.data.a2', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'client.address', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'client.bytes', searchable: true, type: 'number' },
-  { aggregatable: true, name: 'client.domain', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'client.geo.country_iso_code', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'cloud.account.id', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'cloud.availability_zone', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'container.id', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'container.image.name', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'container.image.tag', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'destination.address', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'destination.bytes', searchable: true, type: 'number' },
-  { aggregatable: true, name: 'destination.domain', searchable: true, type: 'string' },
-  { aggregatable: true, name: 'destination.ip', searchable: true, type: 'ip' },
-  { aggregatable: true, name: 'destination.port', searchable: true, type: 'long' },
-  { aggregatable: true, name: 'source.ip', searchable: true, type: 'ip' },
-  { aggregatable: true, name: 'source.port', searchable: true, type: 'long' },
-  { aggregatable: true, name: 'event.end', searchable: true, type: 'date' },
-];
 
 export const mockBrowserFields: BrowserFields = {
   agent: {
@@ -575,7 +542,25 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+
+  process: {
+    fields: {
+      'process.args': {
+        name: 'process.args',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        format: '',
+      },
+    },
+  },
 };
+
+export const mockIndexFields = flatten(
+  Object.values(mockBrowserFields).map((fieldItem) => Object.values(fieldItem.fields ?? {}))
+);
 
 const runTimeType: MappingRuntimeFieldType = 'keyword' as const;
 
