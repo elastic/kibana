@@ -98,6 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/180495
     // FLAKY: https://github.com/elastic/kibana/issues/180496
     // FLAKY: https://github.com/elastic/kibana/issues/180497
     describe.skip('bulk schedule', function () {
