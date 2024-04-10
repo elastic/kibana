@@ -22,9 +22,11 @@ export const AgentActivityBadge: React.FunctionComponent<{
       content={
         <FormattedMessage
           id="xpack.fleet.agentList.agentActivityBadge.tooltip"
-          defaultMessage="There are {N} new agent activity errors. Click to view."
+          defaultMessage={`There ${
+            recentErrors > 1 ? 'are' : 'is'
+          } {recentErrors} new agent activity error${recentErrors > 1 ? 's' : ''}. Click to view.`}
           values={{
-            N: recentErrors,
+            recentErrors,
           }}
         />
       }

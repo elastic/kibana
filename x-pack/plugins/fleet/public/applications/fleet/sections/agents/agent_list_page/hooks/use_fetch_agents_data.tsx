@@ -29,7 +29,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../con
 
 import { getKuery } from '../utils/get_kuery';
 
-const REFRESH_INTERVAL_MS = 30000;
+const REFRESH_INTERVAL_MS = 10000;
 const MAX_AGENT_ACTIONS = 100;
 
 export function useFetchAgentsData() {
@@ -109,7 +109,7 @@ export function useFetchAgentsData() {
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
 
-  const [latestAgentActionErrors, setLatestAgentActionErrors] = useState(0);
+  const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -166,7 +166,7 @@ export function useFetchAgentsData() {
               showInactive,
             }),
             sendGetActionStatus({
-              latest: REFRESH_INTERVAL_MS,
+              latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
               perPage: MAX_AGENT_ACTIONS,
             }),
           ]);
@@ -246,12 +246,14 @@ export function useFetchAgentsData() {
             );
           }
 
-          const newAgentActionsErrors = actionStatusResponse.data?.items.filter(
-            (action) => action.latestErrors?.length ?? 0 > 1
-          );
-          setLatestAgentActionErrors(
-            latestAgentActionErrors + (newAgentActionsErrors?.length ?? 0)
-          );
+          const actionErrors =
+            actionStatusResponse.data?.items
+              .filter((action) => action.latestErrors?.length ?? 0 > 1)
+              .map((action) => action.actionId) || [];
+          const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
+          if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
+            setLatestAgentActionErrors(allRecentActionErrors);
+          }
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -273,8 +275,8 @@ export function useFetchAgentsData() {
       showUpgradeable,
       displayAgentMetrics,
       allTags,
-      notifications.toasts,
       latestAgentActionErrors,
+      notifications.toasts,
     ]
   );
 

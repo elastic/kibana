@@ -75,6 +75,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const {
@@ -269,7 +270,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const onClickAgentActivity = useCallback(() => {
     setAgentActivityFlyoutOpen(true);
-    setLatestAgentActionErrors(0);
+    setLatestAgentActionErrors([]);
   }, [setAgentActivityFlyoutOpen, setLatestAgentActionErrors]);
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
@@ -429,7 +430,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
-        latestAgentActionErrors={latestAgentActionErrors}
+        latestAgentActionErrors={latestAgentActionErrors.length}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
