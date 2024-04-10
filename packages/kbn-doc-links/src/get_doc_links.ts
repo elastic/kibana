@@ -483,6 +483,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         hostRiskScore: `${SECURITY_SOLUTION_DOCS}host-risk-score.html`,
         userRiskScore: `${SECURITY_SOLUTION_DOCS}user-risk-score.html`,
         entityRiskScoring: `${SECURITY_SOLUTION_DOCS}entity-risk-scoring.html`,
+        assetCriticality: `${SECURITY_SOLUTION_DOCS}asset-criticality.html`,
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
     },

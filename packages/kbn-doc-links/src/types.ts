@@ -358,6 +358,7 @@ export interface DocLinks {
       readonly hostRiskScore: string;
       readonly userRiskScore: string;
       readonly entityRiskScoring: string;
+      readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
   };

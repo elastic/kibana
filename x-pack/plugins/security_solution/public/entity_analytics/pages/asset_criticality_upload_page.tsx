@@ -19,9 +19,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AssetCriticalityFileUploader } from '../components/asset_criticality_file_uploader/asset_criticality_file_uploader';
 
 export const AssetCriticalityUploadPage = () => {
+  const { docLinks } = useKibana().services;
+  const entityAnalyticsLinks = docLinks.links.securitySolution.entityAnalytics;
   return (
     <>
       <EuiPageHeader
@@ -85,16 +88,16 @@ export const AssetCriticalityUploadPage = () => {
             </EuiTitle>
             <EuiSpacer size="xs" />
 
-            <EuiLink>
+            <EuiLink
+              target="_blank"
+              rel="noopener nofollow noreferrer"
+              href={entityAnalyticsLinks.assetCriticality}
+            >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.documentationLink"
                 defaultMessage="Asset criticality documentation"
               />
             </EuiLink>
-            <EuiText size="xs" color={'danger'}>
-              {/* // TODO fix link */}
-              {'broken link'}
-            </EuiText>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
