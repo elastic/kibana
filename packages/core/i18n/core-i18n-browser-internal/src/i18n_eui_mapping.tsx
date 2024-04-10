@@ -739,7 +739,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{count} available filters',
         values: { count },
       }),
-    'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
+    'euiFlyoutCloseButton.ariaLabel': i18n.translate('core.euiFlyoutCloseButton.ariaLabel', {
       defaultMessage: 'Close this dialog',
     }),
     'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
@@ -831,9 +831,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '(opens in a new tab or window)',
       }
     ),
-    'euiLoadingChart.ariaLabel': i18n.translate('core.euiLoadingChart.ariaLabel', {
-      defaultMessage: 'Loading',
-    }),
     'euiLoadingStrings.ariaLabel': i18n.translate('core.euiLoadingStrings.ariaLabel', {
       defaultMessage: 'Loading',
     }),
