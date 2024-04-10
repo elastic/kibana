@@ -6,7 +6,6 @@
  */
 
 import { filter, lastValueFrom } from 'rxjs';
-import parse from 'joi-to-json';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -17,7 +16,6 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { ParamsSchema as SlackConnectorParamsSchema } from '@kbn/stack-connectors-plugin/server/connector_types/slack';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -185,7 +183,11 @@ async function executor(
                     if (connector.actionTypeId === '.slack') {
                       return {
                         ...connector,
-                        params: parse(SlackConnectorParamsSchema.getSchema(), 'json').properties,
+                        // TODO: figure out how to parse ParamsSchema at
+                        // x-pack/plugins/stack_connectors/server/connector_types/slack/index.ts
+                        params: {
+                          message: 'string',
+                        },
                       };
                     }
 
