@@ -6,9 +6,9 @@
  */
 
 import type {
-  ExceptionListItemSchema,
-  CreateExceptionListSchema,
   CreateExceptionListItemSchema,
+  CreateExceptionListSchema,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
@@ -19,6 +19,10 @@ import { EVENT_FILTER_LIST_DEFINITION } from '@kbn/security-solution-plugin/publ
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/host_isolation_exceptions/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public/management/pages/blocklist/constants';
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
+import {
+  InternalManifestSchema,
+  InternalUnifiedManifestBaseSchema,
+} from '@kbn/security-solution-plugin/server/endpoint/schemas';
 import { FtrService } from '../../functional/ftr_provider_context';
 import { InternalManifestSchemaResponseType } from '../apps/integrations/mocks';
 import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations_feature_flag/mocks';
@@ -123,12 +127,7 @@ export class EndpointArtifactsTestResources extends FtrService {
     return this.createExceptionItem(blocklist);
   }
 
-  async getArtifacts(): Promise<
-    Pick<
-      InternalManifestSchemaResponseType['_source']['endpoint:user-artifact-manifest'],
-      'artifacts'
-    >
-  > {
+  async getArtifacts(): Promise<InternalManifestSchema[]> {
     const {
       hits: { hits: manifestResults },
     } = await this.esClient.search({
@@ -138,14 +137,10 @@ export class EndpointArtifactsTestResources extends FtrService {
     });
 
     const manifestResult = manifestResults[0] as InternalManifestSchemaResponseType;
-    const artifacts = manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
-
-    return artifacts;
+    return manifestResult._source['endpoint:user-artifact-manifest'].artifacts;
   }
 
-  async getArtifactsFromUnifiedManifestSO(): Promise<
-    Array<Pick<InternalManifestSchemaResponseType['_source'], 'endpoint:user-artifact-manifest'>>
-  > {
+  async getArtifactsFromUnifiedManifestSO(): Promise<InternalUnifiedManifestBaseSchema[]> {
     const {
       hits: { hits: manifestResults },
     } = await this.esClient.search({
@@ -155,11 +150,9 @@ export class EndpointArtifactsTestResources extends FtrService {
       },
     });
 
-    const artifacts = manifestResults.map((result) => {
+    return manifestResults.map((result) => {
       const _source = result._source as InternalUnifiedManifestSchemaResponseType['_source'];
       return _source[ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE];
     });
-
-    return artifacts;
   }
 }
