@@ -27,25 +27,29 @@ import {
 } from '../../common';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+import { ChatFunctionClient } from '../service/chat_function_client';
 
 const ParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
 });
 
+const RuleSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  ruleUrl: schema.nullable(schema.string()),
+});
+
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
-  rule: schema.object({
-    id: schema.string(),
-    name: schema.string(),
-    tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    ruleUrl: schema.nullable(schema.string()),
-  }),
+  rule: RuleSchema,
 });
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
+type RuleType = TypeOf<typeof RuleSchema>;
 
 export type ObsAIAssistantConnectorType = ConnectorType<{}, {}, ConnectorParamsType, unknown>;
 
@@ -111,17 +115,11 @@ async function executor(
     client,
     screenContexts: [],
   });
-
-  let systemMessage = functionClient.getContexts().find((def) => def.name === 'core')?.description;
-  systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
-    execOptions.params.rule
-  )} just fired.`;
-  systemMessage += ` As a background process you are not interacting with a user. Only generate a single answer and wrap all your findings in that answer.`;
-  systemMessage += ` If available, include the link to the conversation at the end of your answer.`;
-
   const actionsClient = await (
     await resources.plugins.actions.start()
   ).getActionsClientWithRequest(request);
+
+  const systemMessage = buildSystemMessage(functionClient, execOptions.params.rule);
 
   await lastValueFrom(
     client
@@ -216,3 +214,14 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
     },
   };
 };
+
+function buildSystemMessage(functionClient: ChatFunctionClient, rule: RuleType) {
+  let systemMessage = functionClient.getContexts().find((def) => def.name === 'core')?.description;
+  systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
+    rule
+  )} just fired.`;
+  systemMessage += ` As a background process you are not interacting with a user. Only generate a single answer and wrap all your findings in that answer.`;
+  systemMessage += ` If available, include the link to the conversation at the end of your answer.`;
+
+  return systemMessage;
+}
