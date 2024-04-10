@@ -114,7 +114,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           ],
         }
       }
-      responsive={true}
       searchFormat="eql"
       tableLayout="fixed"
     />

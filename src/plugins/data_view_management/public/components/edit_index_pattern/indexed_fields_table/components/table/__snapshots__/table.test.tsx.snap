@@ -57,7 +57,6 @@ exports[`Table render conflict summary modal  1`] = `
             token="euiBasicTable.noItemsMessage"
           />
         }
-        responsive={true}
         rowHeader="firstName"
         tableCaption="Demo of EuiBasicTable"
         tableLayout="auto"
@@ -304,7 +303,6 @@ exports[`Table should render normally 1`] = `
       ],
     }
   }
-  responsive={true}
   searchFormat="eql"
   sorting={
     Object {

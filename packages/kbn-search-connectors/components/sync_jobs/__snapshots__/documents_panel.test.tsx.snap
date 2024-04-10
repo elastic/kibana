@@ -38,7 +38,6 @@ exports[`DocumentsPanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
 </FlyoutPanel>

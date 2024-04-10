@@ -227,7 +227,6 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
           "totalItemCount": 3,
         }
       }
-      responsive={true}
       rowProps={[Function]}
       selection={
         Object {
@@ -467,7 +466,6 @@ exports[`Table should render normally 1`] = `
           "totalItemCount": 3,
         }
       }
-      responsive={true}
       rowProps={[Function]}
       selection={
         Object {
