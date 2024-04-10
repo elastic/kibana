@@ -7,8 +7,11 @@
 
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { EntityRiskInput } from '../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
+import type {
+  EntityRiskInput,
+  RiskScoreEntity,
+} from '../../../common/entity_analytics/risk_engine';
+
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 
@@ -58,25 +61,22 @@ export const useRiskContributingAlerts = ({
     queryName: ALERTS_QUERY_NAMES.BY_ID,
   });
 
+  const inputs = getInputs(riskScore);
+
   useEffect(() => {
     if (!riskScore) return;
     setQuery({
       query: {
         ids: {
-          values: getInputs(riskScore).map((input) => input.id),
+          values: inputs.map((input) => input.id),
         },
       },
     });
-  }, [riskScore, setQuery]);
+  }, [riskScore, inputs, setQuery]);
 
   const error = !loading && data === undefined;
 
-  const inputs =
-    entityType === RiskScoreEntity.user
-      ? (riskScore as UserRiskScore)?.user.risk.inputs
-      : (riskScore as HostRiskScore)?.host.risk.inputs;
-
-  const alerts = inputs?.map((input) => ({
+  const alerts = inputs.map((input) => ({
     _id: input.id,
     input,
     alert: (data?.hits.hits.find((alert) => alert._id === input.id)?._source || {}) as AlertData,

@@ -14,7 +14,10 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
-import type { InputAlert } from '../../../../hooks/use_risk_contributing_alerts';
+import type {
+  InputAlert,
+  UseRiskContributingAlertsResult,
+} from '../../../../hooks/use_risk_contributing_alerts';
 import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../../common/constants';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
@@ -160,16 +163,6 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     );
   }
 
-  const totals = !riskScore
-    ? { count: 0, score: 0 }
-    : isUserRiskScore(riskScore)
-    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
-    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
-
-  const displayed = {
-    count: alerts.data?.length || 0,
-    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
-  };
   const riskInputsAlertSection = (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
@@ -193,7 +186,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         itemId="_id"
       />
       <EuiSpacer size="s" />
-      <AlertInputMessage totals={totals} inputs={displayed} />
+      <ExtraAlertsMessage riskScore={riskScore} alerts={alerts} />
     </>
   );
 
@@ -316,23 +309,28 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
   },
 ];
 
-interface AlertInputMessageProps {
-  totals: {
-    count: number;
-    score: number;
-  };
-  inputs: {
-    count: number;
-    score: number;
-  };
+interface ExtraAlertsMessageProps {
+  riskScore?: UserRiskScore | HostRiskScore;
+  alerts: UseRiskContributingAlertsResult;
 }
-const AlertInputMessage: React.FC<AlertInputMessageProps> = ({ totals, inputs }) => {
-  const leftover = {
-    count: totals.count - inputs.count,
-    score: (totals.score - inputs.score).toFixed(2),
+const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, alerts }) => {
+  const totals = !riskScore
+    ? { count: 0, score: 0 }
+    : isUserRiskScore(riskScore)
+    ? { count: riskScore.user.risk.category_1_count, score: riskScore.user.risk.category_1_score }
+    : { count: riskScore.host.risk.category_1_count, score: riskScore.host.risk.category_1_score };
+
+  const displayed = {
+    count: alerts.data?.length || 0,
+    score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
   };
 
-  if (inputs.count >= totals.count) {
+  const leftover = {
+    count: totals.count - displayed.count,
+    score: (totals.score - displayed.score).toFixed(2),
+  };
+
+  if (displayed.count >= totals.count) {
     return null;
   }
   return (

@@ -49,6 +49,7 @@ import type {
   RiskScoreBucket,
 } from '../types';
 import {
+  MAX_INPUTS_COUNT,
   RISK_SCORING_INPUTS_COUNT_MAX,
   RISK_SCORING_SUM_MAX,
   RISK_SCORING_SUM_VALUE,
@@ -143,7 +144,7 @@ const buildReduceScript = ({
     for (int i = 0; i < num_inputs_to_score; i++) {
       current_score = inputs[i].weighted_score / Math.pow(i + 1, params.p);
 
-      if (i < 10) {
+      if (i < ${MAX_INPUTS_COUNT}) {
         inputs[i]["contribution"] = 100 * current_score / params.risk_cap;
         risk_inputs.add(inputs[i]);
       }
