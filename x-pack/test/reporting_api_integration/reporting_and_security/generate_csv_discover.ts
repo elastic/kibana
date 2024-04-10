@@ -686,6 +686,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+        await reportingAPI.deleteAllReports();
       });
 
       // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
