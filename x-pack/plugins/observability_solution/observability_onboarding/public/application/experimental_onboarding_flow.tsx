@@ -13,29 +13,24 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
 import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
 import { Header } from './header/header';
-import { SystemLogsModal } from './quickstart_flows/system_logs';
-import { CustomLogsModal } from './quickstart_flows/custom_logs';
+import { SystemLogsPanel } from './quickstart_flows/system_logs';
+import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 
 export function ExperimentalOnboardingFlow() {
   const history = useHistory();
 
   return (
     <>
-      <Route path="/systemLogs">
-        <SystemLogsModal onClose={() => history.push('/')} />
-      </Route>
-      <Route path="/customLogs">
-        <CustomLogsModal onClose={() => history.push('/')} />
-      </Route>
       {/* Test buttons to be removed once integrations selector has been implemented */}
       <EuiPageTemplate.Section grow={false} color="accent" restrictWidth>
         <EuiFlexGroup>
@@ -81,7 +76,19 @@ export function ExperimentalOnboardingFlow() {
         <Header />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
-        <OnboardingFlowForm />
+        <Routes>
+          <Route path="/systemLogs">
+            <BackButton />
+            <SystemLogsPanel />
+          </Route>
+          <Route path="/customLogs">
+            <BackButton />
+            <CustomLogsPanel />
+          </Route>
+          <Route>
+            <OnboardingFlowForm />
+          </Route>
+        </Routes>
         <EuiSpacer size="xl" />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
@@ -91,3 +98,23 @@ export function ExperimentalOnboardingFlow() {
     </>
   );
 }
+
+const BackButton = () => {
+  const history = useHistory();
+  return (
+    <>
+      <EuiButtonEmpty
+        data-test-subj="observabilityOnboardingExperimentalOnboardingFlowBackToSelectionButton"
+        iconType="arrowLeft"
+        flush="left"
+        onClick={() => history.push('/')}
+      >
+        {i18n.translate(
+          'xpack.observability_onboarding.experimentalOnboardingFlow.button.backToSelectionLabel',
+          { defaultMessage: 'Back to selection' }
+        )}
+      </EuiButtonEmpty>
+      <EuiSpacer size="m" />
+    </>
+  );
+};

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiModal, type EuiModalProps } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import {
@@ -54,12 +54,10 @@ const {
 
 export { Provider, useWizard, systemLogsRoutes };
 
-export type SystemLogsModalProps = Omit<EuiModalProps, 'children'>;
-
-export const SystemLogsModal: React.FC<SystemLogsModalProps> = (props) => {
+export const SystemLogsPanel: React.FC = () => {
   return (
     <Provider>
-      <EuiModal {...props}>
+      <EuiPanel hasBorder>
         {Object.keys(systemLogsRoutes).map((key) => {
           const path = key as keyof typeof systemLogsRoutes;
           const { handler, exact } = systemLogsRoutes[path];
@@ -67,7 +65,7 @@ export const SystemLogsModal: React.FC<SystemLogsModalProps> = (props) => {
             <Route key={path} path={path} exact={exact} component={handler} />
           );
         })}
-      </EuiModal>
+      </EuiPanel>
     </Provider>
   );
 };

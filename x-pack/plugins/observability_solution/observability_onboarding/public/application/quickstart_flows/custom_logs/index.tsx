@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiModal, type EuiModalProps } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { CustomIntegrationOptions } from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
@@ -86,12 +86,10 @@ const {
 
 export { Provider, useWizard, customLogsRoutes };
 
-export type CustomLogsModalProps = Omit<EuiModalProps, 'children'>;
-
-export const CustomLogsModal: React.FC<CustomLogsModalProps> = (props) => {
+export const CustomLogsPanel: React.FC = () => {
   return (
     <Provider>
-      <EuiModal {...props}>
+      <EuiPanel hasBorder>
         {Object.keys(customLogsRoutes).map((key) => {
           const path = key as keyof typeof customLogsRoutes;
           const { handler, exact } = customLogsRoutes[path];
@@ -99,7 +97,7 @@ export const CustomLogsModal: React.FC<CustomLogsModalProps> = (props) => {
             <Route key={path} path={path} exact={exact} component={handler} />
           );
         })}
-      </EuiModal>
+      </EuiPanel>
     </Provider>
   );
 };
