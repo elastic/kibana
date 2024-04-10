@@ -85,6 +85,7 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
 }));
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
+const appendConversationMessages = jest.fn();
 const mockContext = {
   elasticAssistant: {
     actions: {
@@ -109,7 +110,8 @@ const mockContext = {
     getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
       getConversation: jest.fn().mockResolvedValue(existingConversation),
       updateConversation: jest.fn().mockResolvedValue(existingConversation),
-      appendConversationMessages: jest.fn().mockResolvedValue(existingConversation),
+      appendConversationMessages:
+        appendConversationMessages.mockResolvedValue(existingConversation),
     }),
     getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
       findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
@@ -131,6 +133,7 @@ const mockRequest = {
     actionTypeId: '.gen-ai',
     isEnabledKnowledgeBase: true,
     isEnabledRAGAlerts: false,
+    replacements: {},
   },
   events: {
     aborted$: NEVER,
@@ -482,6 +485,41 @@ describe('postActionsConnectorExecuteRoute', () => {
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
               });
+            }),
+          };
+        }),
+      },
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('Adds error to conversation history', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        conversationId: '99999',
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+              expect(appendConversationMessages.mock.calls[1][0].messages[0]).toEqual(
+                expect.objectContaining({
+                  content: 'simulated error',
+                  isError: true,
+                  role: 'assistant',
+                })
+              );
             }),
           };
         }),

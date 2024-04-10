@@ -21,8 +21,9 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-
-import { getMaxSignalsWarning } from '../utils/utils';
+import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../utils/utils';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
 
@@ -47,6 +48,7 @@ interface MultiTermsCompositeArgsBase {
   runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
+  isAlertSuppressionActive: boolean;
 }
 
 interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
@@ -72,7 +74,10 @@ const multiTermsCompositeNonRetryable = async ({
   afterKey,
   createAlertsHook,
   batchSize,
-}: MultiTermsCompositeArgs) => {
+  isAlertSuppressionActive,
+}: MultiTermsCompositeArgs): Promise<
+  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
+> => {
   const {
     ruleExecutionLogger,
     tuple,
@@ -183,15 +188,15 @@ const multiTermsCompositeNonRetryable = async ({
       const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
       if (bulkCreateResult.alertsWereTruncated) {
-        result.warningMessages.push(getMaxSignalsWarning());
-        return result;
+        result.warningMessages.push(
+          isAlertSuppressionActive ? getSuppressionMaxSignalsWarning() : getMaxSignalsWarning()
+        );
+        return bulkCreateResult;
       }
     }
 
     internalAfterKey = batch[batch.length - 1]?.key;
   }
-
-  return result;
 };
 
 /**
@@ -199,10 +204,14 @@ const multiTermsCompositeNonRetryable = async ({
  * We will try to reduce it in twice per each request, three times, up until 125
  * Per ES documentation, max_clause_count min value is 1,000 - so with 125 we should be able execute query below max_clause_count value
  */
-export const multiTermsComposite = async (args: MultiTermsCompositeArgsBase): Promise<void> => {
+export const multiTermsComposite = async (
+  args: MultiTermsCompositeArgsBase
+): Promise<
+  Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> | undefined
+> => {
   let retryBatchSize = BATCH_SIZE;
   const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
-  await pRetry(
+  return pRetry(
     async (retryCount) => {
       try {
         const res = await multiTermsCompositeNonRetryable({ ...args, batchSize: retryBatchSize });
@@ -218,7 +227,7 @@ export const multiTermsComposite = async (args: MultiTermsCompositeArgsBase): Pr
           ].some((errMessage) => e.message.includes(errMessage))
         ) {
           args.result.errors.push(e.message);
-          return args.result;
+          return;
         }
 
         retryBatchSize = retryBatchSize / 2;
