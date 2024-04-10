@@ -232,9 +232,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
+          it('should render 8 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+            expect(hosts.length).to.equal(8);
           });
 
           it('should show all section as collapsible', async () => {
@@ -440,7 +440,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '35.7%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -465,9 +465,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
-        it('should load 12 lens metric charts', async () => {
+        it('should load 11 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(12);
+          expect(metricCharts.length).to.equal(11);
         });
 
         it('should have an option to open the chart in lens', async () => {
@@ -601,7 +601,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.9%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '17.5%' },
-              { metric: 'diskUsage', value: '17.2%' },
+              { metric: 'diskUsage', value: '35.7%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue =
