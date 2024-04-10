@@ -22,7 +22,9 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.index[0]).toBe('Data view is required.');
+    expect(validateExpression(initialParams).errors.index[0].toString()).toBe(
+      'Data view is required.'
+    );
   });
 
   test('if geoField property is invalid should return proper error message', () => {
@@ -38,7 +40,9 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.geoField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.geoField[0]).toBe('Geo field is required.');
+    expect(validateExpression(initialParams).errors.geoField[0].toString()).toBe(
+      'Geo field is required.'
+    );
   });
 
   test('if entity property is invalid should return proper error message', () => {
@@ -54,7 +58,9 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.entity.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.entity[0]).toBe('Entity is required.');
+    expect(validateExpression(initialParams).errors.entity[0].toString()).toBe(
+      'Entity is required.'
+    );
   });
 
   test('if dateField property is invalid should return proper error message', () => {
@@ -70,7 +76,9 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.dateField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.dateField[0]).toBe('Date field is required.');
+    expect(validateExpression(initialParams).errors.dateField[0].toString()).toBe(
+      'Date field is required.'
+    );
   });
 
   test('if boundaryType property is invalid should return proper error message', () => {
@@ -86,7 +94,7 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.boundaryType.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.boundaryType[0]).toBe(
+    expect(validateExpression(initialParams).errors.boundaryType[0].toString()).toBe(
       'Boundary type is required.'
     );
   });
@@ -104,7 +112,7 @@ describe('expression params validation', () => {
       boundaryGeoField: 'testField',
     };
     expect(validateExpression(initialParams).errors.boundaryIndexTitle.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.boundaryIndexTitle[0]).toBe(
+    expect(validateExpression(initialParams).errors.boundaryIndexTitle[0].toString()).toBe(
       'Boundary data view is required.'
     );
   });
@@ -122,7 +130,7 @@ describe('expression params validation', () => {
       boundaryGeoField: '',
     };
     expect(validateExpression(initialParams).errors.boundaryGeoField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.boundaryGeoField[0]).toBe(
+    expect(validateExpression(initialParams).errors.boundaryGeoField[0].toString()).toBe(
       'Boundary geo field is required.'
     );
   });

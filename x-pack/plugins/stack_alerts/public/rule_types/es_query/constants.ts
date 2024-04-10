@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleFormValidationError } from '@kbn/alerts-ui-shared';
 import { COMPARATORS } from '@kbn/triggers-actions-ui-plugin/public';
 
 export const DEFAULT_VALUES = {
@@ -27,35 +28,35 @@ export const DEFAULT_VALUES = {
 };
 
 export const COMMON_EXPRESSION_ERRORS = {
-  searchType: new Array<string>(),
-  threshold0: new Array<string>(),
-  threshold1: new Array<string>(),
-  timeWindowSize: new Array<string>(),
-  size: new Array<string>(),
-  aggField: new Array<string>(),
-  aggType: new Array<string>(),
-  groupBy: new Array<string>(),
-  termSize: new Array<string>(),
-  termField: new Array<string>(),
-  sourceFields: new Array<string>(),
+  searchType: new Array<RuleFormValidationError>(),
+  threshold0: new Array<RuleFormValidationError>(),
+  threshold1: new Array<RuleFormValidationError>(),
+  timeWindowSize: new Array<RuleFormValidationError>(),
+  size: new Array<RuleFormValidationError>(),
+  aggField: new Array<RuleFormValidationError>(),
+  aggType: new Array<RuleFormValidationError>(),
+  groupBy: new Array<RuleFormValidationError>(),
+  termSize: new Array<RuleFormValidationError>(),
+  termField: new Array<RuleFormValidationError>(),
+  sourceFields: new Array<RuleFormValidationError>(),
 };
 
 export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {
-  searchConfiguration: new Array<string>(),
-  timeField: new Array<string>(),
+  searchConfiguration: new Array<RuleFormValidationError>(),
+  timeField: new Array<RuleFormValidationError>(),
 };
 
 export const ONLY_ES_QUERY_EXPRESSION_ERRORS = {
-  index: new Array<string>(),
-  esQuery: new Array<string>(),
-  timeField: new Array<string>(),
+  index: new Array<RuleFormValidationError>(),
+  esQuery: new Array<RuleFormValidationError>(),
+  timeField: new Array<RuleFormValidationError>(),
 };
 
 export const ONLY_ESQL_QUERY_EXPRESSION_ERRORS = {
-  esqlQuery: new Array<string>(),
-  timeField: new Array<string>(),
-  thresholdComparator: new Array<string>(),
-  threshold0: new Array<string>(),
+  esqlQuery: new Array<RuleFormValidationError>(),
+  timeField: new Array<RuleFormValidationError>(),
+  thresholdComparator: new Array<RuleFormValidationError>(),
+  threshold0: new Array<RuleFormValidationError>(),
 };
 
 const ALL_EXPRESSION_ERROR_ENTRIES = {

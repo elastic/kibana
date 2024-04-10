@@ -7,6 +7,7 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { IncompleteError, InvalidError } from '@kbn/alerts-ui-shared';
 import {
   ValidationResult,
   builtInComparators,
@@ -44,9 +45,11 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
 
   if (!('index' in ruleParams) && !ruleParams.searchType) {
     errors.searchType.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
-        defaultMessage: 'Query type is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
+          defaultMessage: 'Query type is required.',
+        })
+      )
     );
 
     return errors;
@@ -54,9 +57,11 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
 
   if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
     errors.aggField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredAggFieldText', {
-        defaultMessage: 'Aggregation field is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredAggFieldText', {
+          defaultMessage: 'Aggregation field is required.',
+        })
+      )
     );
   }
 
@@ -67,9 +72,11 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     !termSize
   ) {
     errors.termSize.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
-        defaultMessage: 'Term size is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
+          defaultMessage: 'Term size is required.',
+        })
+      )
     );
   }
 
@@ -80,9 +87,11 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     (!termField || termField.length <= 0)
   ) {
     errors.termField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
-        defaultMessage: 'Term field is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
+          defaultMessage: 'Term field is required.',
+        })
+      )
     );
   }
 
@@ -95,18 +104,22 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     termField.length > MAX_SELECTABLE_GROUP_BY_TERMS
   ) {
     errors.termField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
-        defaultMessage: `Cannot select more than {max} terms`,
-        values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
-      })
+      InvalidError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
+          defaultMessage: `Cannot select more than {max} terms`,
+          values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
+        })
+      )
     );
   }
 
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold 0 is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold0Text', {
+          defaultMessage: 'Threshold 0 is required.',
+        })
+      )
     );
   }
   if (
@@ -117,39 +130,49 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
       (threshold && threshold.length < builtInComparators[thresholdComparator!].requiredValues))
   ) {
     errors.threshold1.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold1Text', {
-        defaultMessage: 'Threshold 1 is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredThreshold1Text', {
+          defaultMessage: 'Threshold 1 is required.',
+        })
+      )
     );
   }
   if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
     errors.threshold1.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text', {
-        defaultMessage: 'Threshold 1 must be > Threshold 0.',
-      })
+      InvalidError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text', {
+          defaultMessage: 'Threshold 1 must be > Threshold 0.',
+        })
+      )
     );
   }
   if (!timeWindowSize) {
     errors.timeWindowSize.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeWindowSizeText', {
-        defaultMessage: 'Time window size is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeWindowSizeText', {
+          defaultMessage: 'Time window size is required.',
+        })
+      )
     );
   }
 
   if (isNil(size)) {
     errors.size.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSizeText', {
-        defaultMessage: 'Size is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSizeText', {
+          defaultMessage: 'Size is required.',
+        })
+      )
     );
   }
   if ((size && size < 0) || size > 10000) {
     errors.size.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
-        defaultMessage: 'Size must be between 0 and {max, number}.',
-        values: { max: 10000 },
-      })
+      InvalidError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
+          defaultMessage: 'Size must be between 0 and {max, number}.',
+          values: { max: 10000 },
+        })
+      )
     );
   }
 
@@ -159,10 +182,12 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
     sourceFields.length > MAX_SELECTABLE_SOURCE_FIELDS
   ) {
     errors.sourceFields.push(
-      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
-        defaultMessage: `Cannot select more than {max} fields`,
-        values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
-      })
+      InvalidError(
+        i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
+          defaultMessage: `Cannot select more than {max} fields`,
+          values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
+        })
+      )
     );
   }
 
@@ -177,29 +202,38 @@ const validateSearchSourceParams = (ruleParams: EsQueryRuleParams<SearchType.sea
 
   if (!ruleParams.searchConfiguration) {
     errors.searchConfiguration.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration', {
-        defaultMessage: 'Search source configuration is required.',
-      })
+      IncompleteError(
+        i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
+          {
+            defaultMessage: 'Search source configuration is required.',
+          }
+        )
+      )
     );
     return errors;
   }
 
   if (!ruleParams.searchConfiguration.index) {
     errors.searchConfiguration.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
-        defaultMessage: 'Data view is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
+          defaultMessage: 'Data view is required.',
+        })
+      )
     );
     return errors;
   }
 
   if (!ruleParams.timeField) {
     errors.timeField.push(
-      i18n.translate(
-        'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
-        {
-          defaultMessage: 'Data view should have a time field.',
-        }
+      IncompleteError(
+        i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
+          {
+            defaultMessage: 'Data view should have a time field.',
+          }
+        )
       )
     );
     return errors;
@@ -216,41 +250,51 @@ const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>
 
   if (!ruleParams.index || ruleParams.index.length === 0) {
     errors.index.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
-        defaultMessage: 'Index is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredIndexText', {
+          defaultMessage: 'Index is required.',
+        })
+      )
     );
   }
 
   if (!ruleParams.timeField) {
     errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeFieldText', {
+          defaultMessage: 'Time field is required.',
+        })
+      )
     );
   }
 
   if (!ruleParams.esQuery) {
     errors.esQuery.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'Elasticsearch query is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredQueryText', {
+          defaultMessage: 'Elasticsearch query is required.',
+        })
+      )
     );
   } else {
     try {
       const parsedQuery = JSON.parse(ruleParams.esQuery);
       if (!parsedQuery.query) {
         errors.esQuery.push(
-          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
-            defaultMessage: `Query field is required.`,
-          })
+          IncompleteError(
+            i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredEsQueryText', {
+              defaultMessage: `Query field is required.`,
+            })
+          )
         );
       }
     } catch (err) {
       errors.esQuery.push(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
-          defaultMessage: 'Query must be valid JSON.',
-        })
+        InvalidError(
+          i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.jsonQueryText', {
+            defaultMessage: 'Query must be valid JSON.',
+          })
+        )
       );
     }
   }
@@ -264,33 +308,41 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
   );
   if (!ruleParams.esqlQuery) {
     errors.esqlQuery.push(
-      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'ES|QL query is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+          defaultMessage: 'ES|QL query is required.',
+        })
+      )
     );
   }
   if (!ruleParams.timeField) {
     errors.timeField.push(
-      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
-        defaultMessage: 'Time field is required.',
-      })
+      IncompleteError(
+        i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
+          defaultMessage: 'Time field is required.',
+        })
+      )
     );
   }
   if (ruleParams.thresholdComparator !== COMPARATORS.GREATER_THAN) {
     errors.thresholdComparator.push(
-      i18n.translate(
-        'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
-        {
-          defaultMessage: 'Threshold comparator is required to be greater than.',
-        }
+      InvalidError(
+        i18n.translate(
+          'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
+          {
+            defaultMessage: 'Threshold comparator is required to be greater than.',
+          }
+        )
       )
     );
   }
   if (ruleParams.threshold && ruleParams.threshold[0] !== 0) {
     errors.threshold0.push(
-      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
-        defaultMessage: 'Threshold is required to be 0.',
-      })
+      InvalidError(
+        i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
+          defaultMessage: 'Threshold is required to be 0.',
+        })
+      )
     );
   }
 

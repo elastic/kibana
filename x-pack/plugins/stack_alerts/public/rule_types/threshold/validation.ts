@@ -44,6 +44,12 @@ export const validateExpression = (alertParams: IndexThresholdRuleParams): Valid
   };
   validationResult.errors = errors;
 
+  /* TODO: Remove this comment when ruleFormV2 feature flag reaches GA
+   * RuleFormValidationError, which includes InvalidError and IncompleteError, is a part of
+   * the new V2 Rule Form. This type extends the string primitive and adds a status property, so it is
+   * safe to use in V1.
+   */
+
   if (!!filterKuery) {
     try {
       toElasticsearchQuery(fromKueryExpression(filterKuery as string));
