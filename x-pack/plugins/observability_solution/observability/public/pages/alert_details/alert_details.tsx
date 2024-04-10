@@ -29,6 +29,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
+import { omit } from 'lodash';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -96,7 +97,7 @@ export function AlertDetails() {
         {
           name: 'alert_fields',
           description: 'The fields and values for the alert',
-          value: alertDetail.formatted.fields,
+          value: getRelevantAlertFields(alertDetail),
         },
       ],
     });
@@ -263,7 +264,7 @@ export function getScreenDescription(alertDetail: AlertData) {
   }
 
   The alert details are:
-  ${Object.entries(alertDetail.formatted.fields)
+  ${Object.entries(getRelevantAlertFields(alertDetail))
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  
 
@@ -271,4 +272,19 @@ export function getScreenDescription(alertDetail: AlertData) {
   Please suggestion root causes if possible.
   Suggest next steps for the user to take.
   `);
+}
+
+function getRelevantAlertFields(alertDetail: AlertData) {
+  return omit(alertDetail.formatted.fields, [
+    'kibana.alert.rule.revision',
+    'kibana.alert.rule.execution.uuid',
+    'kibana.alert.flapping_history',
+    'kibana.alert.uuid',
+    'kibana.alert.rule.uuid',
+    'event.action',
+    'event.kind',
+    'kibana.alert.rule.tags',
+    'kibana.alert.maintenance_window_ids',
+    'kibana.alert.consecutive_matches',
+  ]);
 }
