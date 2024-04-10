@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -71,7 +71,6 @@ export interface ChartProps {
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
-  isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
@@ -105,7 +104,6 @@ export function Chart({
   input$: originalInput$,
   lensAdapters,
   lensEmbeddableOutput$,
-  isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
@@ -365,14 +363,6 @@ export function Chart({
             css={histogramCss}
             data-test-subj="unifiedHistogramRendered"
           >
-            {isChartLoading && (
-              <EuiProgress
-                size="xs"
-                color="accent"
-                position="absolute"
-                data-test-subj="unifiedHistogramProgressBar"
-              />
-            )}
             <HistogramMemoized
               abortController={abortController}
               services={services}
