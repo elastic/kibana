@@ -28,7 +28,10 @@ export type { ExpandableFlyoutApi };
 /**
  * This hook allows you to interact with the flyout, open panels and previews etc.
  */
-export const useExpandableFlyoutApi = () => {
+export const useExpandableFlyoutApi = (onClose?: () => void) => {
+  if (onClose) {
+    console.log('useExpandableFlyoutApi - onClose', onClose);
+  }
   const dispatch = useDispatch();
 
   const { urlKey } = useExpandableFlyoutContext();
@@ -63,10 +66,9 @@ export const useExpandableFlyoutApi = () => {
     [dispatch, id]
   );
 
-  const closeRightPanel = useCallback(
-    () => dispatch(closeRightPanelAction({ id })),
-    [dispatch, id]
-  );
+  const closeRightPanel = useCallback(() => {
+    dispatch(closeRightPanelAction({ id }));
+  }, [dispatch, id]);
 
   const closeLeftPanel = useCallback(() => dispatch(closeLeftPanelAction({ id })), [dispatch, id]);
 
@@ -80,7 +82,13 @@ export const useExpandableFlyoutApi = () => {
     [dispatch, id]
   );
 
-  const closePanels = useCallback(() => dispatch(closePanelsAction({ id })), [dispatch, id]);
+  const closePanels = useCallback(() => {
+    dispatch(closePanelsAction({ id }));
+    if (onClose) {
+      console.log('closePanels - onClose', onClose);
+      onClose();
+    }
+  }, [dispatch, id, onClose]);
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({
