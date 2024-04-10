@@ -13,78 +13,60 @@ import type {
   OnPreRoutingToolkit,
 } from '@kbn/core/server';
 
-const solutionContextRegex = /\/n\/([a-z0-9_\-]+)/;
-
+import { addSolutionIdToPath, getSolutionIdFromPath, stripSolutionIdFromPath } from '../../common';
+import type { NavigationConfig } from '../config';
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
+  defaultSolution: NavigationConfig['solutionNavigation']['defaultSolution'];
 }
 
-export function initSolutionOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
+export function initSolutionOnRequestInterceptor({
+  http,
+  defaultSolution,
+}: OnRequestInterceptorDeps) {
   http.registerOnPreRouting(async function solutionOnPreRoutingHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
     toolkit: OnPreRoutingToolkit
   ) {
     const serverBasePath = http.basePath.serverBasePath;
-    const path = request.url.pathname;
+    let path = request.url.pathname;
 
     // If navigating within the context of a solution, then we store the Solution's URL Context on the request,
     // and rewrite the request to not include the solution identifier in the URL.
-    const { solutionId, pathHasExplicitSolutionIdentifier } = getSolutionIdFromPath(
+    let { solutionId, pathHasExplicitSolutionIdentifier } = getSolutionIdFromPath(
       path,
       serverBasePath
     );
 
+    let redirectUrl: string | null = null;
+
+    // To avoid a double full page reload (1) after logging in and (2) to set the default solution
+    // in the base path, we proactively redirect to the default solution
+    if (!pathHasExplicitSolutionIdentifier && path.includes('spaces/space_selector')) {
+      solutionId = defaultSolution;
+      path = addSolutionIdToPath('/', solutionId, path);
+      pathHasExplicitSolutionIdentifier = true;
+      redirectUrl = `${serverBasePath}${path}`;
+    }
+
     if (pathHasExplicitSolutionIdentifier) {
       const reqBasePath = `/n/${solutionId}`;
 
-      http.basePath.set(request, { id: 'solutions', basePath: reqBasePath });
+      const indexBasePath = path.indexOf(reqBasePath);
+      const newPathname = stripSolutionIdFromPath(path) || '/';
 
-      const indexPath = path.indexOf(reqBasePath);
-      const otherBasePaths = indexPath > 0 ? path.slice(0, indexPath) : '';
-      const newPathname = path.slice(indexPath + reqBasePath.length) || '/';
+      http.basePath.set(request, { id: 'solutions', basePath: reqBasePath, index: indexBasePath });
 
-      return toolkit.rewriteUrl(`${otherBasePaths}${newPathname}${request.url.search}`);
+      if (redirectUrl) {
+        return response.redirected({
+          headers: { location: redirectUrl },
+        });
+      }
+
+      return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
     }
 
     return toolkit.next();
   });
-}
-
-function getSolutionIdFromPath(
-  requestBasePath?: string | null,
-  serverBasePath?: string | null
-): { solutionId: string | null; pathHasExplicitSolutionIdentifier: boolean } {
-  if (requestBasePath == null) requestBasePath = '/';
-  if (serverBasePath == null) serverBasePath = '/';
-  const pathToCheck: string = stripServerBasePath(requestBasePath, serverBasePath);
-
-  // Look for `/n/solution-url-context` in the base path
-  const matchResult = pathToCheck.match(solutionContextRegex);
-
-  if (!matchResult || matchResult.length === 0) {
-    return {
-      solutionId: null,
-      pathHasExplicitSolutionIdentifier: false,
-    };
-  }
-
-  // Ignoring first result, we only want the capture group result at index 1
-  const [, solutionId] = matchResult;
-
-  if (!solutionId) {
-    throw new Error(`Unable to determine Solution ID from request path: ${requestBasePath}`);
-  }
-
-  return {
-    solutionId,
-    pathHasExplicitSolutionIdentifier: true,
-  };
-}
-
-function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
-  if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
-    return requestBasePath.slice(serverBasePath.length);
-  }
-  return requestBasePath;
 }
