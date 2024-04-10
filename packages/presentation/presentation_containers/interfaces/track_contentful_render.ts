@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('navigation app', function () {
-    loadTestFile(require.resolve('./_solution_nav_switcher'));
-  });
+export interface TrackContentfulRender {
+  /**
+   * A way to report that the contentful render has been completed
+   */
+  trackContentfulRender: () => void;
 }
+
+export const canTrackContentfulRender = (root: unknown): root is TrackContentfulRender => {
+  return root !== null && typeof root === 'object' && 'trackContentfulRender' in root;
+};
