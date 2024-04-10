@@ -10,9 +10,14 @@ import { encode } from 'gpt-tokenizer';
 export function withTokenBudget<T extends unknown>(
   items: T[],
   budget: number,
-  contentAccessor: (item: T) => string = asStringAccessor,
-  allowSingleBreach: boolean = false
+  options?: {
+    contentAccessor?: (item: T) => string;
+    maximizeBudget?: boolean;
+  }
 ) {
+  const contentAccessor = options?.contentAccessor ?? asStringAccessor;
+  const maximizeBudget = options?.maximizeBudget ?? false;
+
   const itemsWithinBudget: T[] = [];
   let usedBudget = 0;
 
@@ -24,10 +29,9 @@ export function withTokenBudget<T extends unknown>(
     if (fitsInBudget) {
       itemsWithinBudget.push(item);
       usedBudget += tokenCount;
+    } else if (maximizeBudget) {
+      continue;
     } else {
-      if (allowSingleBreach) {
-        itemsWithinBudget.push(item);
-      }
       break;
     }
   }
@@ -35,7 +39,7 @@ export function withTokenBudget<T extends unknown>(
   return itemsWithinBudget;
 }
 
-export function asStringAccessor(item: unknown) {
+function asStringAccessor(item: unknown) {
   if (typeof item === 'string') {
     return item;
   }
