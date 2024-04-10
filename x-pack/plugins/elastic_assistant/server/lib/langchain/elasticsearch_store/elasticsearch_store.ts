@@ -402,11 +402,11 @@ export class ElasticsearchStore extends VectorStore {
       this.logger.debug(`modelId: ${modelId}`);
       this.logger.debug(`getResponse: ${JSON.stringify(getResponse, null, 2)}`);
 
+      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
       const isReadyESS = (stats: MlTrainedModelStats) =>
         stats.deployment_stats?.state === 'started' &&
         stats.deployment_stats?.allocation_status.state === 'fully_allocated';
 
-      // TODO: Open issue for standardized way of checking deployment status
       const isReadyServerless = (stats: MlTrainedModelStats) =>
         (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
           (node) => node.routing_state.routing_state === 'started'

@@ -19,6 +19,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('New Complete Deployment', () => {
       it('registers, runs and immediately deletes NLP Cleanup Task', async () => {
         try {
+          // When running on CI, the task may not have run and been disabled, so wait for a moment for it to be cleaned up
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+
           const task = await kibanaServer.savedObjects.get({
             type: 'task',
             id: TASK_ID,
@@ -28,6 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
           // TODO: Better way to check if task doesn't exist? savedObjects.find() is paginated and returned tasks > pageSize...
           // Maybe query event log, or `.kibana_task_manager` index directly?
           expect(e.message).to.eql('Request failed with status code 404');
+
           return;
         }
         throw new Error('Task should not exist!');

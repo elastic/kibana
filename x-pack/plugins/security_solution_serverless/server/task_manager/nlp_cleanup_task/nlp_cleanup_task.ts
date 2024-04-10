@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Tier } from '../../types';
+import { ProductTier } from '../../../common/product';
 
 export const NLPCleanupTaskConstants = {
   TITLE: 'Serverless NLP Cleanup Task',
@@ -75,9 +76,9 @@ export class NLPCleanupTask {
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
               run: async () => {
-                if (this.productTier === 'complete') {
+                if (this.productTier === ProductTier.complete) {
                   throwUnrecoverableError(
-                    new Error('Task no longer needed for current productTier')
+                    new Error('Task no longer needed for current productTier, disabling...')
                   );
                 }
                 return this.runTask(taskInstance, core);
@@ -110,7 +111,7 @@ export class NLPCleanupTask {
         params: { version: NLPCleanupTaskConstants.VERSION },
       });
 
-      if (this.productTier !== 'complete') {
+      if (this.productTier !== ProductTier.complete) {
         // In case the task was previously ran and is scheduled for later in the future, run now
         this.logger.info('Scheduling for immediate run');
         await taskManager.runSoon(this.taskId);
