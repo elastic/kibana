@@ -11,12 +11,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-
     // Required from './kibana.json'
     "@kbn/actions-plugin",
     "@kbn/rule-registry-plugin",
@@ -68,7 +66,6 @@
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/index-management-plugin",
     "@kbn/rison",
     "@kbn/core-application-browser",
     "@kbn/react-kibana-context-render",
