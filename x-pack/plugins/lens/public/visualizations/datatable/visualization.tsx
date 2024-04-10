@@ -516,13 +516,11 @@ export const getDatatableVisualization = ({
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
       fitRowToContent: state.rowHeight === 'auto',
-      headerRowHeight: state.headerRowHeight ?? 'single',
+      headerRowHeight: state.headerRowHeight ?? 'custom',
       rowHeightLines:
         !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
       headerRowHeightLines:
-        !state.headerRowHeight || state.headerRowHeight === 'single'
-          ? 1
-          : state.headerRowHeightLines ?? 2,
+        state.headerRowHeight === 'single' ? 1 : state.headerRowHeightLines ?? 3,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
     }).toAst();
 

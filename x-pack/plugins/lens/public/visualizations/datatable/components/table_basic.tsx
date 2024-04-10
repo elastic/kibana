@@ -294,8 +294,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [props.data, isNumericMap, columnConfig]);
 
-  const headerRowHeight = props.args.headerRowHeight ?? 'single';
-  const headerRowLines = props.args.headerRowHeightLines ?? 1;
+  const headerRowHeight = props.args.headerRowHeight ?? 'custom';
+  const headerRowLines = props.args.headerRowHeightLines ?? 3;
 
   const columns: EuiDataGridColumn[] = useMemo(
     () =>

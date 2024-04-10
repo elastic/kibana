@@ -17,9 +17,13 @@ import { DEFAULT_PAGE_SIZE } from './table_basic';
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
   const onChangeHeight = useCallback(
-    (newHeightMode, heightProperty, heightLinesProperty) => {
+    (newHeightMode, heightProperty, heightLinesProperty, defaultHeightLinesValue = 2) => {
       const rowHeightLines =
-        newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
+        newHeightMode === 'single'
+          ? 1
+          : newHeightMode !== 'auto'
+          ? defaultHeightLinesValue
+          : undefined;
       setState({
         ...state,
         [heightProperty]: newHeightMode,
@@ -59,13 +63,13 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
       >
         <RowHeightSettings
-          rowHeight={state.headerRowHeight}
-          rowHeightLines={state.headerRowHeightLines}
+          rowHeight={state.headerRowHeight ?? 'custom'}
+          rowHeightLines={state.headerRowHeightLines ?? 3}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
             defaultMessage: 'Header row height',
           })}
           onChangeRowHeight={(mode) =>
-            onChangeHeight(mode, 'headerRowHeight', 'headerRowHeightLines')
+            onChangeHeight(mode, 'headerRowHeight', 'headerRowHeightLines', 3)
           }
           onChangeRowHeightLines={(lines) => {
             onChangeHeightLines(lines, 'headerRowHeightLines');

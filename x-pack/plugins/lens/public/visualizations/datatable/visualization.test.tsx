@@ -798,14 +798,15 @@ describe('Datatable Visualization', () => {
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      // should fallback to 3 lines in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
-      ).toEqual([1]);
+      ).toEqual([3]);
 
-      // should fallback to single in case it's not set
+      // should fallback to custom in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
-      ).toEqual(['single']);
+      ).toEqual(['custom']);
 
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
@@ -820,13 +821,13 @@ describe('Datatable Visualization', () => {
         }).headerRowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 3 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           headerRowHeight: 'custom',
         }).headerRowHeightLines
-      ).toEqual([2]);
+      ).toEqual([3]);
     });
 
     it('sets alignment correctly', () => {

@@ -260,10 +260,11 @@ export const createGridColumns = (
       }
     }
     const currentAlignment = alignments && alignments[field];
-    const hasMultipleRows = headerRowHeight === 'auto' || headerRowHeight === 'custom';
+    const hasMultipleRows =
+      headerRowHeight === 'auto' || headerRowHeight === 'custom' || headerRowHeight === undefined;
 
     const columnStyle = css({
-      ...(headerRowHeight === 'custom' && {
+      ...((headerRowHeight === 'custom' || headerRowHeight === undefined) && {
         WebkitLineClamp: headerRowLines,
       }),
       ...(hasMultipleRows && {
