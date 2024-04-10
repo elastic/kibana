@@ -106,8 +106,8 @@ export const getPolicySettingsFormTestSubjects = (
       lockedCard: attackSurfaceTestSubj('locked'),
       lockedCardTitle: attackSurfaceTestSubj('locked-title'),
       enableDisableSwitch: attackSurfaceTestSubj('enableDisableSwitch'),
+      switchLabel: attackSurfaceTestSubj('switchLabel'),
       osValues: attackSurfaceTestSubj('osValues'),
-      viewModeValue: attackSurfaceTestSubj('valueLabel'),
     },
 
     windowsEvents: {
@@ -144,8 +144,8 @@ export const getPolicySettingsFormTestSubjects = (
     antivirusRegistration: {
       card: antivirusTestSubj(),
       enableDisableSwitch: antivirusTestSubj('switch'),
+      switchLabel: antivirusTestSubj('label'),
       osValueContainer: antivirusTestSubj('osValueContainer'),
-      viewOnlyValue: antivirusTestSubj('value'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),
@@ -168,12 +168,14 @@ export const getPolicySettingsFormTestSubjects = (
   };
 };
 
-export const expectIsViewOnly = (ele: HTMLElement): void => {
-  expect(
-    ele.querySelectorAll(
+export const expectIsViewOnly = (elem: HTMLElement): void => {
+  elem
+    .querySelectorAll(
       'button:not(.euiLink, [data-test-subj*="advancedSection-showButton"]),input,select,textarea'
     )
-  ).toHaveLength(0);
+    .forEach((inputElement) => {
+      expect(inputElement).toHaveAttribute('disabled');
+    });
 };
 
 /**
