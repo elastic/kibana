@@ -65,6 +65,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
@@ -388,6 +389,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
+  userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
 }

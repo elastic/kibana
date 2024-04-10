@@ -113,71 +113,85 @@ export const eqlExecutor = async ({
     }
     const eqlSignalSearchStart = performance.now();
 
-    const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
-      request
-    );
+    try {
+      const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
+        request
+      );
 
-    const eqlSignalSearchEnd = performance.now();
-    const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
-    result.searchAfterTimes = [eqlSearchDuration];
+      const eqlSignalSearchEnd = performance.now();
+      const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
+      result.searchAfterTimes = [eqlSearchDuration];
 
-    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
+      let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
-    const { events, sequences } = response.hits;
+      const { events, sequences } = response.hits;
 
-    if (events) {
-      if (isAlertSuppressionActive) {
-        await bulkCreateSuppressedAlertsInMemory({
-          enrichedEvents: events,
-          toReturn: result,
-          wrapHits,
-          bulkCreate,
-          services,
-          buildReasonMessage: buildReasonMessageForEqlAlert,
-          ruleExecutionLogger,
-          tuple,
-          alertSuppression: completeRule.ruleParams.alertSuppression,
-          wrapSuppressedHits,
-          alertTimestampOverride,
-          alertWithSuppression,
-        });
+      if (events) {
+        if (isAlertSuppressionActive) {
+          await bulkCreateSuppressedAlertsInMemory({
+            enrichedEvents: events,
+            toReturn: result,
+            wrapHits,
+            bulkCreate,
+            services,
+            buildReasonMessage: buildReasonMessageForEqlAlert,
+            ruleExecutionLogger,
+            tuple,
+            alertSuppression: completeRule.ruleParams.alertSuppression,
+            wrapSuppressedHits,
+            alertTimestampOverride,
+            alertWithSuppression,
+          });
+        } else {
+          newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
+        }
+      } else if (sequences) {
+        if (isAlertSuppressionActive && completeRule.ruleParams.alertSuppression) {
+          result.warningMessages.push(
+            'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
+          );
+        }
+        newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
       } else {
-        newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
-      }
-    } else if (sequences) {
-      if (isAlertSuppressionActive && completeRule.ruleParams.alertSuppression) {
-        result.warningMessages.push(
-          'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
+        throw new Error(
+          'eql query response should have either `sequences` or `events` but had neither'
         );
       }
-      newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
-    } else {
-      throw new Error(
-        'eql query response should have either `sequences` or `events` but had neither'
-      );
+
+      if (newSignals?.length) {
+        const createResult = await bulkCreate(
+          newSignals,
+          undefined,
+          createEnrichEventsFunction({
+            services,
+            logger: ruleExecutionLogger,
+          })
+        );
+        addToSearchAfterReturn({ current: result, next: createResult });
+      }
+
+      if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
+        const maxSignalsWarning =
+          isAlertSuppressionActive && events?.length
+            ? getSuppressionMaxSignalsWarning()
+            : getMaxSignalsWarning();
+
+        result.warningMessages.push(maxSignalsWarning);
+      }
+
+      return result;
+    } catch (error) {
+      if (
+        typeof error.message === 'string' &&
+        (error.message as string).includes('verification_exception')
+      ) {
+        // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
+        // so SLO dashboards can show less noise around system outages
+        result.userError = true;
+      }
+      result.errors.push(error.message);
+      result.success = false;
+      return result;
     }
-
-    if (newSignals?.length) {
-      const createResult = await bulkCreate(
-        newSignals,
-        undefined,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
-      );
-      addToSearchAfterReturn({ current: result, next: createResult });
-    }
-
-    if (response.hits.total && response.hits.total.value >= ruleParams.maxSignals) {
-      const maxSignalsWarning =
-        isAlertSuppressionActive && events?.length
-          ? getSuppressionMaxSignalsWarning()
-          : getMaxSignalsWarning();
-
-      result.warningMessages.push(maxSignalsWarning);
-    }
-
-    return result;
   });
 };
