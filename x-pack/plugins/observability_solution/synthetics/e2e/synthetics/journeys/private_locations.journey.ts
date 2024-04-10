@@ -120,7 +120,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('text=Private Locations');
     await page.waitForSelector('td:has-text("1")');
     await page.waitForSelector('td:has-text("Test private")');
-    await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
+    await page.click('.euiTableRowCell .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');
     await page.click(
@@ -128,7 +128,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     );
     await page.click('text=Test private');
 
-    await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
+    await page.click('.euiTableRowCell .euiToolTipAnchor');
 
     await page.locator(byTestId(`deleteLocation-${locationId}`)).isDisabled();
 
