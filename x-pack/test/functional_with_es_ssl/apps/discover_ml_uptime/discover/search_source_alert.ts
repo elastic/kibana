@@ -13,14 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects([
-    'settings',
-    'common',
-    'header',
-    'discover',
-    'timePicker',
-    'dashboard',
-  ]);
+  const PageObjects = getPageObjects(['settings', 'common', 'header', 'discover', 'timePicker']);
   const deployment = getService('deployment');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -33,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -210,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
-    await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+    await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
 
     let ruleId: string;
     if (type === 'name') {
@@ -263,7 +257,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
-    const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+    const selectedDataView = await dataViews.getSelectedName();
     const { valid } = await PageObjects.discover.validateDataViewReffsEquality();
     expect(valid).to.equal(true);
     expect(selectedDataView).to.be.equal(dataView);
@@ -350,7 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.selectIndexPattern(SOURCE_DATA_VIEW);
+      await dataViews.switchToAndValidate(SOURCE_DATA_VIEW);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
       await openDiscoverAlertFlyout();
@@ -424,7 +418,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should display actual state after rule params update on clicking viewInApp link', async () => {
       await clickViewInApp(RULE_NAME);
 
-      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal(SOURCE_DATA_VIEW);
 
       await checkUpdatedRuleParamsState();
@@ -470,8 +464,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate to alert results via link provided in notification using adhoc data view', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.createAdHocDataView('search-source-', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dataViews.createFromSearchBar({
+        name: 'search-source-',
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
       await PageObjects.discover.addRuntimeField('runtime-message-field', `emit('mock-message')`);
@@ -484,7 +481,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await openAlertResults(ADHOC_RULE_NAME);
 
-      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
       const documentCell = await dataGrid.getCellElement(0, 3);
@@ -498,7 +495,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigate to discover using view in app link
       await clickViewInApp(ADHOC_RULE_NAME);
 
-      const selectedDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+      const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
       const documentCell = await dataGrid.getCellElement(0, 3);
@@ -507,7 +504,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display results after data view removal on clicking prev generated link', async () => {
-      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
       await deleteDataView(sourceDataViewId);
 
       await openAlertResults(RULE_NAME);
@@ -527,7 +524,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display results after rule removal on following generated link', async () => {
-      await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+      await dataViews.switchToAndValidate(OUTPUT_DATA_VIEW);
       const [{ id: firstAlertId }] = await getAlertsByName(RULE_NAME);
       await deleteAlerts([firstAlertId]);
 
