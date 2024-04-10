@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EuiDataGridCellProps, EuiDataGridCustomBodyProps } from '@elastic/eui';
-import { useEuiTheme, logicalCSS } from '@elastic/eui';
-import { css } from '@emotion/css';
+import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 
@@ -44,36 +44,33 @@ export const RenderCustomBody: FC<RenderCustomBodyProps> = (props) => {
   );
 };
 
-type RenderCustomSingleRowProps = Partial<EuiDataGridCellProps> & {
+const CustomGridRow = styled.div.attrs<{
+  className?: string;
+}>((props) => ({
+  className: `euiDataGridRow ${props.className ?? ''}`,
+  role: 'row',
+}))`
+  width: fit-content;
+  border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
+`;
+
+/* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
+const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper', role: 'row' })`
+  display: flex;
+`;
+
+type RenderCustomSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
 } & Pick<RenderCustomBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
 
 const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
   const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
-  const { euiTheme } = useEuiTheme();
 
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
-
-  const styles = useMemo(
-    () => ({
-      row: css`
-        ${logicalCSS('width', 'fit-content')};
-        ${logicalCSS('border-bottom', euiTheme.border.thin)};
-      `,
-      rowCellsWrapper: css`
-        display: flex;
-      `,
-      rowDetailsWrapper: css`
-        text-align: center;
-        background-color: ${euiTheme.colors.primary};
-      `,
-    }),
-    [euiTheme]
-  );
 
   // removes the border between the actual row and Additional row
   // which renders the AdditionalRow
@@ -88,13 +85,11 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
   );
 
   return (
-    <div
-      role="row"
-      className={`euiDataGridRow ${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
-      css={styles.row}
+    <CustomGridRow
+      className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
       key={rowIndex}
     >
-      <div className="rowCellWrapper " css={styles.rowCellsWrapper}>
+      <CustomGridRowCellWrapper>
         {visibleColumns.map((column, colIndex) => {
           // Skip the row details cell - we'll render it manually outside of the flex wrapper
           if (column.id !== 'additional-row-details') {
@@ -109,13 +104,13 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
           }
           return null;
         })}
-      </div>
+      </CustomGridRowCellWrapper>
       {canShowRowRenderer ? (
         <Cell
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
           visibleRowIndex={rowIndex}
         />
       ) : null}
-    </div>
+    </CustomGridRow>
   );
 };
