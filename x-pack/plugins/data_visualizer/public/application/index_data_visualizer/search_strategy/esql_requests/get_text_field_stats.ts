@@ -8,6 +8,7 @@
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import type { FieldExamples, FieldStatsError } from '../../../../../common/types/field_stats';
 
@@ -39,6 +40,7 @@ export const getESQLExampleFieldValues = async ({
             `| KEEP ${textFields.map((f) => f.name).join(',')}
            | LIMIT 10`,
           ...(filter ? { filter } : {}),
+          version: ESQL_LATEST_VERSION,
         },
       };
       const textFieldsResp = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });

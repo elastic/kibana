@@ -11,6 +11,7 @@ import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import {
+  type PublishingSubject,
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
@@ -35,6 +36,7 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { TrackContentfulRender } from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -121,7 +123,7 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi
+  implements DashboardExternallyAccessibleApi, TrackContentfulRender
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -136,6 +138,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+  public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
   public searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -153,6 +156,7 @@ export class DashboardContainer
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+  private hadContentfulRender = false;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -161,6 +165,13 @@ export class DashboardContainer
   private theme$;
   private chrome;
   private customBranding;
+
+  public trackContentfulRender() {
+    if (!this.hadContentfulRender && this.analyticsService) {
+      this.analyticsService.reportEvent('dashboard_loaded_with_data', {});
+    }
+    this.hadContentfulRender = true;
+  }
 
   private trackPanelAddMetric:
     | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
@@ -236,6 +247,11 @@ export class DashboardContainer
         this.savedObjectId.next(this.getDashboardSavedObjectId());
       })
     );
+    this.publishingSubscription.add(
+      this.savedObjectId.subscribe(() => {
+        this.hadContentfulRender = false;
+      })
+    );
 
     this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
     this.publishingSubscription.add(
@@ -244,7 +260,26 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
+
     this.startAuditingReactEmbeddableChildren();
+
+    this.settings = {
+      syncColors$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncColors'
+      ),
+      syncCursor$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncCursor'
+      ),
+      syncTooltips$: embeddableInputToSubject<boolean | undefined, DashboardContainerInput>(
+        this.publishingSubscription,
+        this,
+        'syncTooltips'
+      ),
+    };
     this.timeslice$ = embeddableInputToSubject<
       [number, number] | undefined,
       DashboardContainerInput

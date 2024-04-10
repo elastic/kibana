@@ -28,7 +28,9 @@ export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
+  UnifiedHistogramVisContext,
 } from './types';
-export { UnifiedHistogramFetchStatus } from './types';
+export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export { canImportVisContext } from './utils/external_vis_context';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();
