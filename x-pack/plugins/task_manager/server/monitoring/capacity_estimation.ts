@@ -80,9 +80,10 @@ export function estimateCapacity(
   /**
    * Given the current configuration how much task capacity do we have?
    */
-  const capacityPerMinutePerKibana = Math.round(
-    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * maxWorkers
-  );
+  const capacity = (60 * 1000) / (averagePollIntervalsPerExecution * pollInterval);
+  const capacityPerMinutePerKibana = Math.round(capacity * maxWorkers);
+  const lowerCapacityPerMinutePerKibana = Math.round(capacity * (maxWorkers - 1));
+  const upperCapacityPerMinutePerKibana = Math.round(capacity * (maxWorkers + 1));
 
   /**
    * If our assumption about the number of Kibana is correct - how much capacity do we have available?
@@ -188,6 +189,8 @@ export function estimateCapacity(
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
+    lowerCapacityPerMinutePerKibana,
+    upperCapacityPerMinutePerKibana,
   });
   return {
     status,
@@ -230,6 +233,8 @@ interface GetHealthStatusParams {
   assumedRequiredThroughputPerMinutePerKibana: number;
   assumedAverageRecurringRequiredThroughputPerMinutePerKibana: number;
   capacityPerMinutePerKibana: number;
+  lowerCapacityPerMinutePerKibana: number;
+  upperCapacityPerMinutePerKibana: number;
 }
 
 function getHealthStatus(
@@ -240,8 +245,13 @@ function getHealthStatus(
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
+    lowerCapacityPerMinutePerKibana,
+    upperCapacityPerMinutePerKibana,
   } = params;
-  if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
+  if (
+    assumedRequiredThroughputPerMinutePerKibana > lowerCapacityPerMinutePerKibana &&
+    assumedRequiredThroughputPerMinutePerKibana < upperCapacityPerMinutePerKibana
+  ) {
     return { status: HealthStatus.OK };
   }
 
@@ -251,7 +261,7 @@ function getHealthStatus(
     return { status: HealthStatus.Warning, reason };
   }
 
-  const reason = `setting HealthStatus.Warning because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+  const reason = `setting HealthStatus.Warning because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) is outside the range of capacityPerMinutePerKibana +/- 1 (${lowerCapacityPerMinutePerKibana} - ${upperCapacityPerMinutePerKibana})`;
   logger.debug(reason);
   return { status: HealthStatus.Warning, reason };
 }

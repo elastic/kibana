@@ -580,7 +580,7 @@ describe('estimateCapacity', () => {
             owner_ids: 1,
             overdue_non_recurring: 0,
             capacity_requirements: {
-              per_minute: 175,
+              per_minute: 180,
               per_hour: 0,
               per_day: 0,
             },
@@ -632,7 +632,7 @@ describe('estimateCapacity', () => {
     });
   });
 
-  test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
+  test('marks estimated capacity as Warning state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
         logger,
