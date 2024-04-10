@@ -325,11 +325,6 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
     score: alerts.data?.reduce((sum, { input }) => sum + (input.contribution_score || 0), 0) || 0,
   };
 
-  const leftover = {
-    count: totals.count - displayed.count,
-    score: (totals.score - displayed.score).toFixed(2),
-  };
-
   if (displayed.count >= totals.count) {
     return null;
   }
@@ -340,7 +335,10 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
         <FormattedMessage
           id="xpack.securitySolution.flyout.entityDetails.riskInputs.extraAlertsMessage"
           defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
-          values={leftover}
+          values={{
+            count: totals.count - displayed.count,
+            score: (totals.score - displayed.score).toFixed(2),
+          }}
         />
       }
       iconType="annotation"
