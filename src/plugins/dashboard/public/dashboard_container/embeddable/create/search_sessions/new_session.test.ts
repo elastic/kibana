@@ -101,7 +101,7 @@ describe('newSession$', () => {
     });
   });
 
-  /*describe('reload$', () => {
+  /* describe('reload$', () => {
     test('should fire on reload', async () => {
       let count = 0;
       const subscription = newSession$(api).subscribe(() => {
