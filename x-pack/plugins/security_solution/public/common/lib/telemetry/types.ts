@@ -53,6 +53,7 @@ import type {
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
+export * from './events/insights/types';
 export * from './events/data_quality/types';
 export type {
   ReportEntityAlertsClickedParams,
