@@ -17,7 +17,7 @@ describe('PY_LANG_CLIENT function', () => {
     const formValues = {
       elasticsearch_query: { query: {} },
       indices: ['index1', 'index2'],
-      docSize: 10,
+      doc_size: 10,
       source_fields: { index1: ['field1'], index2: ['field2'] },
       prompt: 'Your prompt',
       citations: true,

@@ -37,6 +37,7 @@ import {
   getMessageFromRawResponse,
   getPluginNameFromRequest,
 } from './helpers';
+import { getLangSmithTracer } from './evaluate/utils';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -69,6 +70,7 @@ export const postActionsConnectorExecuteRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        let onLlmResponse;
 
         try {
           const authenticatedUser = assistantContext.getCurrentUser();
@@ -84,11 +86,12 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          let onLlmResponse;
           let prevMessages;
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
+          const langSmithProject = request.body.langSmithProject;
+          const langSmithApiKey = request.body.langSmithApiKey;
 
           // if message is undefined, it means the user is regenerating a message from the stored conversation
           if (request.body.message) {
@@ -151,7 +154,8 @@ export const postActionsConnectorExecuteRoute = (
 
             onLlmResponse = async (
               content: string,
-              traceData: Message['traceData'] = {}
+              traceData: Message['traceData'] = {},
+              isError = false
             ): Promise<void> => {
               if (updatedConversation) {
                 await dataClient?.appendConversationMessages({
@@ -163,6 +167,7 @@ export const postActionsConnectorExecuteRoute = (
                         replacements: latestReplacements,
                       }),
                       traceData,
+                      isError,
                     }),
                   ],
                 });
@@ -269,6 +274,14 @@ export const postActionsConnectorExecuteRoute = (
               replacements: request.body.replacements,
               size: request.body.size,
               telemetry,
+              traceOptions: {
+                projectName: langSmithProject,
+                tracers: getLangSmithTracer({
+                  apiKey: langSmithApiKey,
+                  projectName: langSmithProject,
+                  logger,
+                }),
+              },
             });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
@@ -288,6 +301,9 @@ export const postActionsConnectorExecuteRoute = (
         } catch (err) {
           logger.error(err);
           const error = transformError(err);
+          if (onLlmResponse) {
+            onLlmResponse(error.message, {}, true);
+          }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
