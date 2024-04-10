@@ -51,7 +51,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/data-plugin",
     "@kbn/ai-assistant-management-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/management-settings-ids",
+    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }
