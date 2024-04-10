@@ -56,13 +56,13 @@ export const AssetCriticalityResultStep: React.FC<{
           data-test-subj="asset-criticality-result-step-success"
           title={i18n.translate(
             'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle',
-            { defaultMessage: 'Great success' }
+            { defaultMessage: 'Success' }
           )}
           color="success"
           iconType="checkInCircleFilled"
         >
           <FormattedMessage
-            defaultMessage="Your asset's criticality has been successfully mapped."
+            defaultMessage="Your asset criticality assignments have been successfully mapped."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
         </EuiCallOut>
@@ -82,7 +82,7 @@ export const AssetCriticalityResultStep: React.FC<{
         data-test-subj="asset-criticality-result-step-warning"
         title={
           <FormattedMessage
-            defaultMessage="Some criticalities could not be assigned due to errors."
+            defaultMessage="Some asset criticality assignments were unsuccessful due to errors."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.partialError.title"
           />
         }
@@ -92,14 +92,14 @@ export const AssetCriticalityResultStep: React.FC<{
         <EuiSpacer size="s" />
         <p>
           <FormattedMessage
-            defaultMessage="{assignedCount, plural, one {# asset criticality assignment succeeded.} other {# asset criticalities assignments succeeded.}}"
+            defaultMessage="{assignedCount, plural, one {# asset criticality assignment succeeded.} other {# asset criticality assignments succeeded.}}"
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.partialError.assignedEntities"
             values={{ assignedCount: result.stats.created + result.stats.updated }}
           />
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="{failedCount, plural, one {# asset criticality assignment failed.} other {# asset criticalities assignments failed.}}"
+            defaultMessage="{failedCount, plural, one {# asset criticality assignment failed.} other {# asset criticality assignments failed.}}"
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.partialError.failedEntities"
             values={{ failedCount: result.stats.errors }}
           />

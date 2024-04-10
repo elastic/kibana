@@ -66,7 +66,7 @@ export const AssetCriticalityUploadPage = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.title"
-                  defaultMessage="What is assets criticality?"
+                  defaultMessage="What is asset criticality??"
                 />
               </h3>
             </EuiTitle>
@@ -74,7 +74,7 @@ export const AssetCriticalityUploadPage = () => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.information.description"
-                defaultMessage="Categorizes assets based on their value and impact on business operations, guiding prioritization for protection and resource allocation."
+                defaultMessage="Allows you to classify assets based on their value and impact on business operations, to guide prioritization for alert triaging, threat-hunting, and investigation activities."
               />
             </EuiText>
             <EuiHorizontalRule />
