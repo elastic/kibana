@@ -52,10 +52,11 @@ export const validateParsedContent = (
 export const validateFile = (
   file: File,
   formatBytes: (bytes: number) => string
-): { valid: false; errorMessage: string } | { valid: true } => {
+): { valid: false; errorMessage: string; code: string } | { valid: true } => {
   if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
     return {
       valid: false,
+      code: 'unsupported_file_type',
       errorMessage: i18n.translate(
         'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.unsupportedFileTypeError',
         {
@@ -69,6 +70,7 @@ export const validateFile = (
   if (file.size === 0) {
     return {
       valid: false,
+      code: 'empty_file',
       errorMessage: i18n.translate(
         'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.emptyFileErrorMessage',
         {
@@ -81,6 +83,7 @@ export const validateFile = (
   if (file.size > CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE) {
     return {
       valid: false,
+      code: 'file_size_exceeds_limit',
       errorMessage: i18n.translate(
         'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileSizeExceedsLimitErrorMessage',
         {

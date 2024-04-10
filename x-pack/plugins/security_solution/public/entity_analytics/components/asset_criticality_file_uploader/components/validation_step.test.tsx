@@ -6,23 +6,37 @@
  */
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { AssetCriticalityValidationStep } from './validation_step';
+import {
+  AssetCriticalityValidationStep,
+  type AssetCriticalityValidationStepProps,
+} from './validation_step';
 import { TestProviders } from '../../../../common/mock';
 
 import { downloadBlob } from '../../../../common/utils/download_blob';
 
 jest.mock('../../../../common/utils/download_blob');
 
+jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
+  useKibana: () => ({
+    services: {
+      telemetry: {
+        reportAssetCriticalityCsvImported: jest.fn(),
+      },
+    },
+  }),
+}));
+
 describe('AssetCriticalityValidationStep', () => {
   const mockOnConfirm = jest.fn();
   const mockOnReturn = jest.fn();
 
-  const defaultProps = {
+  const defaultProps: AssetCriticalityValidationStepProps = {
     validLinesCount: 10,
     invalidLinesCount: 5,
     validLinesAsText: 'Valid lines as text',
     invalidLinesAsText: 'Invalid lines as text',
     fileName: 'test.csv',
+    fileSize: 100,
     onConfirm: mockOnConfirm,
     onReturn: mockOnReturn,
     invalidLinesErrors: [],

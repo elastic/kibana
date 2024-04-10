@@ -21,13 +21,15 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import type { RowValidationErrors } from '../validations';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
-interface AssetCriticalityValidationStepProps {
+export interface AssetCriticalityValidationStepProps {
   validLinesCount: number;
   invalidLinesCount: number;
   validLinesAsText?: string;
   invalidLinesAsText?: string;
   fileName: string;
+  fileSize: number;
   onConfirm: () => void;
   onReturn: () => void;
   invalidLinesErrors: RowValidationErrors[];
@@ -42,16 +44,26 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
   validLinesAsText,
   invalidLinesAsText,
   fileName,
+  fileSize,
   onConfirm,
   onReturn,
   invalidLinesErrors,
 }) => {
   const { euiTheme } = useEuiTheme();
-
+  const { telemetry } = useKibana().services;
   const annotations = invalidLinesErrors.reduce<Record<number, string>>((acc, e) => {
     acc[e.index] = e.error;
     return acc;
   }, {});
+
+  const onConfirmClick = () => {
+    telemetry.reportAssetCriticalityCsvImported({
+      file: {
+        size: fileSize,
+      },
+    });
+    onConfirm();
+  };
 
   return (
     <>

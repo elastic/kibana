@@ -68,6 +68,7 @@ export const ValidationStep: Story<void> = () => {
               validLinesCount={5}
               invalidLinesCount={3}
               fileName="test.csv"
+              fileSize={100}
               onConfirm={() => {}}
               onReturn={() => {}}
               validLinesAsText={validLinesAsText}

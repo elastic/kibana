@@ -35,11 +35,11 @@ describe('validateParsedContent', () => {
       errors: [
         {
           error:
-            'Invalid criticality level invalid_criticality expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
           index: 1,
         },
         {
-          error: 'Expected 3 columns got 4',
+          error: 'Expected 3 columns, got 4',
           index: 2,
         },
       ],

@@ -12,9 +12,13 @@ import { useCallback } from 'react';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
 import type { RowValidationErrors } from './validations';
 import { validateParsedContent, validateFile } from './validations';
-
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 export interface OnCompleteParams {
   fileName: string;
+  fileSize: number;
+  processingStartTime: string;
+  processingEndTime: string;
+  tookMs: number;
   validLinesAsText: string;
   invalidLinesAsText: string;
   invalidLinesErrors: RowValidationErrors[];
@@ -29,25 +33,62 @@ interface UseFileChangeCbParams {
 
 export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams) => {
   const formatBytes = useFormatBytes();
+  const { telemetry } = useKibana().services;
+
+  const onErrorWrapper = useCallback(
+    (
+      error: {
+        message: string;
+        code?: string;
+      },
+      file: File
+    ) => {
+      telemetry.reportAssetCriticalityFileSelected({
+        valid: false,
+        errorCode: error.code,
+        file: {
+          size: file.size,
+        },
+      });
+      onError(error.message, file);
+    },
+    [onError, telemetry]
+  );
 
   return useCallback(
     (file: File) => {
+      const processingStartTime = Date.now();
       const fileValidation = validateFile(file, formatBytes);
       if (!fileValidation.valid) {
-        onError(fileValidation.errorMessage, file);
+        onErrorWrapper(
+          {
+            message: fileValidation.errorMessage,
+            code: fileValidation.code,
+          },
+          file
+        );
         return;
       }
+
+      telemetry.reportAssetCriticalityFileSelected({
+        valid: true,
+        file: {
+          size: file.size,
+        },
+      });
 
       const parserConfig: ParseConfig = {
         dynamicTyping: true,
         skipEmptyLines: true,
         complete(parsedFile, returnedFile) {
           if (parsedFile.data.length === 0) {
-            onError(
-              i18n.translate(
-                'xpack.securitySolution.entityAnalytics.assetCriticalityFileUploader.emptyFileError',
-                { defaultMessage: 'The file is empty' }
-              ),
+            onErrorWrapper(
+              {
+                message: i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.assetCriticalityFileUploader.emptyFileError',
+                  { defaultMessage: 'The file is empty' }
+                ),
+              },
               file
             );
             return;
@@ -56,9 +97,14 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
           const { invalid, valid, errors } = validateParsedContent(parsedFile.data);
           const validLinesAsText = unparse(valid);
           const invalidLinesAsText = unparse(invalid);
-
+          const processingEndTime = Date.now();
+          const tookMs = processingEndTime - processingStartTime;
           onComplete({
             fileName: returnedFile?.name ?? '',
+            fileSize: returnedFile?.size ?? 0,
+            processingStartTime: new Date(processingStartTime).toISOString(),
+            processingEndTime: new Date(processingEndTime).toISOString(),
+            tookMs,
             validLinesAsText,
             invalidLinesAsText,
             invalidLinesErrors: errors,
@@ -67,12 +113,12 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
           });
         },
         error(parserError) {
-          onError(parserError.message, file);
+          onErrorWrapper({ message: parserError.message }, file);
         },
       };
 
       parse(file, parserConfig);
     },
-    [formatBytes, onError, onComplete]
+    [formatBytes, telemetry, onErrorWrapper, onComplete]
   );
 };

@@ -28,9 +28,12 @@ import type {
   ReportToggleRiskSummaryClickedParams,
   ReportDetailsFlyoutOpenedParams,
   ReportDetailsFlyoutTabClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAddRiskInputToTimelineClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
-import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -106,6 +109,22 @@ export class TelemetryClient implements TelemetryClientStart {
       entity,
       selectedSeverity,
     });
+  };
+
+  public reportAssetCriticalityCsvPreviewGenerated = (
+    params: ReportAssetCriticalityCsvPreviewGeneratedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated, params);
+  };
+
+  public reportAssetCriticalityFileSelected = (
+    params: ReportAssetCriticalityFileSelectedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityFileSelected, params);
+  };
+
+  public reportAssetCriticalityCsvImported = (params: ReportAssetCriticalityCsvImportedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvImported, params);
   };
 
   public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {
