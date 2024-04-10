@@ -7,15 +7,11 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+  enableInfrastructureAssetCustomDashboards,
+  enableInfrastructureHostsView,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -26,6 +22,7 @@ import {
   DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -110,6 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -123,19 +121,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Helpers
 
-  const getKibanaServerUrl = () => {
-    const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-    const kibanaServerUrlWithAuth = url
-      .format({
-        ...url.parse(kibanaServerUrl),
-        auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-      })
-      .slice(0, -1);
-    return kibanaServerUrlWithAuth;
-  };
-
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
+
+  const setCustomDashboardsEnabled = (value: boolean = true) =>
+    kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
@@ -156,17 +146,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
-      const kibanaClient = new ApmSynthtraceKibanaClient({
-        target: getKibanaServerUrl(),
-        logger: createLogger(LogLevel.debug),
-      });
-      const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-      await kibanaClient.installApmPackage(kibanaVersion);
-      synthtraceApmClient = new ApmSynthtraceEsClient({
+      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
+      synthtraceApmClient = await getApmSynthtraceEsClient({
         client: esClient,
-        logger: createLogger(LogLevel.info),
-        version: kibanaVersion,
-        refreshAfterIndex: true,
+        packageVersion: version,
       });
 
       const services = generateAddServicesToExistingHost({
@@ -183,12 +166,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
-        kibanaServer.savedObjects.cleanStandardList(),
       ]);
     });
 
     after(async () => {
       return Promise.all([
+        apmSynthtraceKibanaClient.uninstallApmPackage(),
         synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
@@ -212,6 +195,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('#Single Host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
+        await setCustomDashboardsEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -348,6 +332,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('Dashboards Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickDashboardsTab();
+          });
+
+          it('should render dashboards tab splash screen with option to add dashboard', async () => {
+            await pageObjects.assetDetails.addDashboardExists();
           });
         });
 

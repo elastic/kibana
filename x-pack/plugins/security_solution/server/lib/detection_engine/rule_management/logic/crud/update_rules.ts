@@ -62,7 +62,7 @@ export const updateRules = async ({
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,
-      setup: existingRule.params.setup,
+      setup: ruleUpdate.setup,
       severity: ruleUpdate.severity,
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],

@@ -60,6 +60,7 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
+  rt.literal(ContentTabIds.DASHBOARDS),
 ]);
 
 const AlertStatusRT = rt.union([
@@ -97,6 +98,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   logsSearch: rt.string,
   profilingSearch: rt.string,
   alertStatus: AlertStatusRT,
+  dashboardId: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
