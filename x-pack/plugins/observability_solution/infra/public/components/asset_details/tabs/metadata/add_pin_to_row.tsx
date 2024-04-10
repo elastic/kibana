@@ -6,8 +6,9 @@
  */
 
 import React, { Dispatch } from 'react';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, useEuiTheme, euiCanAnimate } from '@elastic/eui';
 import type { Field } from './utils';
 
 interface AddMetadataPinToRowProps {
@@ -25,6 +26,8 @@ export const AddMetadataPinToRow = ({
   pinnedItems,
   onPinned,
 }: AddMetadataPinToRowProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const handleAddPin = () => {
     onPinned([...pinnedItems, fieldName]);
   };
@@ -58,8 +61,22 @@ export const AddMetadataPinToRow = ({
     );
   }
 
+  // Custom table show on hover CSS, since this button is not technically in an action column
+  // Potential EUI TODO - multiple action columns and `align`ed actions are not currently supported
+  const showOnRowHoverCss = css`
+    opacity: 0;
+    ${euiCanAnimate} {
+      transition: opacity ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+    }
+
+    .euiTableRow:hover &,
+    &:focus-within {
+      opacity: 1;
+    }
+  `;
+
   return (
-    <span className="euiTableCellContent__hoverItem expandedItemActions__completelyHide">
+    <span className={showOnRowHoverCss}>
       <EuiToolTip content={PIN_FIELD}>
         <EuiButtonIcon
           color="primary"
