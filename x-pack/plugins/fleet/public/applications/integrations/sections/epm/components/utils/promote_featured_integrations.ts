@@ -8,7 +8,7 @@ import partition from 'lodash/partition';
 
 import { FEATURED_INTEGRATIONS_BY_CATEGORY } from '@kbn/custom-integrations-plugin/common';
 
-import type { PackageListGridProps } from '../package_list_grid';
+import type { Props as PackageListGridProps } from '../package_list_grid';
 
 type Category = PackageListGridProps['selectedCategory'];
 

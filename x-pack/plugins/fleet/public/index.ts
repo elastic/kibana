@@ -65,10 +65,6 @@ export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/
 
 export type { DynamicPagePathValues } from './constants';
 
-export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
-export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
-export type { IntegrationCardItem } from './applications/integrations/sections/epm/screens/home';
-
 export const PackageList = () => {
   return import('./applications/integrations/sections/epm/components/package_list_grid');
 };

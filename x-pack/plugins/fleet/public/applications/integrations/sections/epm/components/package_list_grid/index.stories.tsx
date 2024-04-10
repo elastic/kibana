@@ -9,7 +9,7 @@ import React from 'react';
 
 import { action } from '@storybook/addon-actions';
 
-import type { PackageListGridProps } from '.';
+import type { Props } from '.';
 import { PackageListGrid } from '.';
 
 export default {
@@ -18,7 +18,7 @@ export default {
 };
 
 type Args = Pick<
-  PackageListGridProps,
+  Props,
   'title' | 'isLoading' | 'showMissingIntegrationMessage' | 'showControls' | 'showSearchTools'
 >;
 

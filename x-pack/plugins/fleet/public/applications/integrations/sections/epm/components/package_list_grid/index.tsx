@@ -48,7 +48,7 @@ const StickySidebar = styled(EuiFlexItem)`
   top: 120px;
 `;
 
-export interface PackageListGridProps {
+export interface Props {
   isLoading?: boolean;
   controls?: ReactNode | ReactNode[];
   list: IntegrationCardItem[];
@@ -71,7 +71,7 @@ export interface PackageListGridProps {
   showSearchTools?: boolean;
 }
 
-export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
+export const PackageListGrid: FunctionComponent<Props> = ({
   isLoading,
   controls,
   title,
