@@ -8,6 +8,7 @@
 import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { QuickFilterButtonTypes } from '../../../services/ml/job_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -97,22 +98,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with model snapshot should display correctly', async () => {
-      await ml.testExecution.logTestStep(
-        'open model snapshot management and verify the action buttons are present'
-      );
       await ml.expandedJobDetails.assertModelSnapshotManagement(jobId);
     });
 
     it('multi-selection with one opened job should only present the opened job when job list is filtered by the Opened button', async () => {
       await ml.expandedJobDetails.selectAllJobs();
       await ml.expandedJobDetails.assertJobListMultiSelectionText('2 jobs selected');
-      await ml.expandedJobDetails.assertColumnState('Opened', 'opened');
+      await ml.jobTable.filterByState(QuickFilterButtonTypes.Opened);
       await ml.expandedJobDetails.assertColumnId(jobId);
       await ml.expandedJobDetails.assertJobListMultiSelectionText('1 job selected');
     });
 
     it('multi-selection with one closed job should only present the closed job when job list is filtered by the Closed button', async () => {
-      await ml.expandedJobDetails.assertColumnState('Closed', 'closed');
+      await ml.jobTable.filterByState(QuickFilterButtonTypes.Closed);
       await ml.expandedJobDetails.assertColumnId(jobsSummaryId);
       await ml.jobStatsBar.assertJobStatsBarItem('closed jobs', 1);
     });

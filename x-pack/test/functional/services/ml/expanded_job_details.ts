@@ -15,7 +15,6 @@ export function MachineLearningExpandedJobDetailsProvider(
   jobTable: MlADJobTable
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async assertJobRowCalendars(
@@ -126,12 +125,6 @@ export function MachineLearningExpandedJobDetailsProvider(
     async assertJobListMultiSelectionText(expectedMsg: string): Promise<void> {
       const visibleText = await testSubjects.getVisibleText('~mlADJobListMultiSelectActionsArea');
       expect(visibleText).to.be(expectedMsg);
-    },
-
-    async assertColumnState(buttonText: string, columnJobState: string): Promise<void> {
-      await find.clickByButtonText(buttonText);
-      const visibleText = await testSubjects.getVisibleText('mlJobListColumnJobState');
-      expect(visibleText).to.be(columnJobState);
     },
 
     async assertColumnId(expectedId: string): Promise<void> {

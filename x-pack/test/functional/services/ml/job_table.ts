@@ -40,6 +40,12 @@ export interface OtherUrlConfig {
   url: string;
 }
 
+export enum QuickFilterButtonTypes {
+  Opened = 'opened',
+  Closed = 'closed',
+  Started = 'started',
+  Stopped = 'stopped',
+}
 export function MachineLearningJobTableProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -48,8 +54,24 @@ export function MachineLearningJobTableProvider(
   const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   return new (class MlJobTable {
+    public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
+      await find.clickByCssSelector(
+        `[data-test-subj="mlJobListSearchBar"] span[data-text="${capitalizeFirst(
+          quickFilterButton
+        )}"]`
+      );
+
+      const visibleText = await testSubjects.getVisibleText('mlJobListColumnJobState');
+      expect(visibleText).to.be(quickFilterButton);
+
+      function capitalizeFirst(str: string): string {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+    }
+
     public async clickJobRowCalendarWithAssertion(
       jobId: string,
       calendarId: string
