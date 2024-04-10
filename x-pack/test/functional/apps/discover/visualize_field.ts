@@ -230,7 +230,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensSuggestion('barVerticalStacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -311,7 +310,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensSuggestion('barVerticalStacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
