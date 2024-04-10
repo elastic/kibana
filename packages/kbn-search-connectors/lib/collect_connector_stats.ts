@@ -362,6 +362,8 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
   let idle = 0;
   let running = 0;
   let duration = 0;
+  const errors = new Map<string, number>();
+  let topErrors: string[] = [];
 
   for (const syncJob of syncJobs) {
     completed += syncJob.status === SyncStatus.COMPLETED ? 1 : 0;
@@ -386,6 +388,18 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
         duration += Math.floor((completedAt.getTime() - startedAt.getTime()) / 1000);
       }
     }
+    if (syncJob.status === SyncStatus.ERROR && syncJob.error) {
+      errors.set(syncJob.error, (errors.get(syncJob.error) ?? 0) + 1);
+    }
+  }
+
+  if (errors.size <= 5) {
+    topErrors = [...errors.keys()];
+  } else {
+    topErrors = [...errors.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map((a) => a[0])
+      .slice(0, 5);
   }
 
   return {
@@ -399,5 +413,6 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
     idle,
     running,
     totalDurationSeconds: duration,
+    topErrors,
   } as SyncJobStatsByState;
 }
