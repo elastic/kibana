@@ -38,6 +38,34 @@ const getCustomInferenceIdMap = (
   }, {});
 };
 
+const getTrainedModelStats = (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
+  const deploymentStatsByModelId =
+    modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
+      if (modelStat.model_id) {
+        acc[modelStat.model_id] =
+          modelStat?.deployment_stats?.state === 'started' ? 'deployed' : 'not_deployed';
+      }
+      return acc;
+    }, {}) ?? {};
+
+  return deploymentStatsByModelId;
+};
+
+const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) => {
+  return {
+    elser_model_2: {
+      trainedModelId: '.elser_model_2',
+      isDeployed: deploymentStatsByModelId['.elser_model_2'] === 'deployed',
+      defaultInferenceEndpoint: true,
+    },
+    e5: {
+      trainedModelId: '.multilingual-e5-small',
+      isDeployed: deploymentStatsByModelId['.multilingual-e5-small'] === 'deployed',
+      defaultInferenceEndpoint: true,
+    },
+  };
+};
+
 export const useDetailsPageMappingsModelManagement = (state: State) => {
   const {
     plugins: { ml },
@@ -55,37 +83,6 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
     return { inferenceModels, trainedModelStats };
   }, [api, ml]);
 
-  const getTrainedModelStats = useCallback(
-    (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
-      const deploymentStatsByModelId =
-        modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
-          if (modelStat.model_id) {
-            acc[modelStat.model_id] =
-              modelStat?.deployment_stats?.state === 'started' ? 'deployed' : 'not_deployed';
-          }
-          return acc;
-        }, {}) ?? {};
-
-      return deploymentStatsByModelId;
-    },
-    []
-  );
-
-  const getDefaultInferenceIds = useCallback((deploymentStatsByModelId: DeploymentStatusType) => {
-    return {
-      elser_model_2: {
-        trainedModelId: '.elser_model_2',
-        isDeployed: deploymentStatsByModelId['.elser_model_2'] === 'deployed',
-        defaultInferenceEndpoint: true,
-      },
-      e5: {
-        trainedModelId: '.multilingual-e5-small',
-        isDeployed: deploymentStatsByModelId['.multilingual-e5-small'] === 'deployed',
-        defaultInferenceEndpoint: true,
-      },
-    };
-  }, []);
-
   const fetchInferenceToModelIdMap = useCallback(async () => {
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
 
@@ -97,12 +94,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
       type: 'inferenceToModelIdMap.update',
       value: { inferenceToModelIdMap: { ...defaultInferenceIds, ...modelIdMap } },
     });
-  }, [
-    getDefaultInferenceIds,
-    getTrainedModelStats,
-    dispatch,
-    fetchInferenceModelsAndTrainedModelStats,
-  ]);
+  }, [dispatch, fetchInferenceModelsAndTrainedModelStats]);
 
   const inferenceIdsInPendingList = useMemo(() => {
     const denormalizedFields = deNormalize(state.fields);
