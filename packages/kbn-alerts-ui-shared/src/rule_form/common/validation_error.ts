@@ -8,22 +8,33 @@
 
 import { ValidationStatus } from './constants';
 import {
-  RuleFormValidationError,
   RuleFormValidationErrorList,
   RuleFormValidationErrorObject,
   RuleFormStateValidation,
   IErrorObject,
 } from '../types';
 
-export const IncompleteError: (errorText: string) => RuleFormValidationError = (errorText) => ({
-  text: errorText,
-  status: ValidationStatus.INCOMPLETE,
-});
+// Extend string primitive for maximum backwards compatibility with various expression components,
+// and simplified rendering when passing errors to React components
+export class RuleFormValidationError extends String {
+  public status: ValidationStatus;
+  constructor({ text, status }: { text: string; status: ValidationStatus }) {
+    super(text);
+    this.status = status;
+  }
+}
 
-export const InvalidError: (errorText: string) => RuleFormValidationError = (errorText) => ({
-  text: errorText,
-  status: ValidationStatus.INVALID,
-});
+export const IncompleteError: (errorText: string) => RuleFormValidationError = (errorText) =>
+  new RuleFormValidationError({
+    text: errorText,
+    status: ValidationStatus.INCOMPLETE,
+  });
+
+export const InvalidError: (errorText: string) => RuleFormValidationError = (errorText) =>
+  new RuleFormValidationError({
+    text: errorText,
+    status: ValidationStatus.INVALID,
+  });
 
 export const getStatusFromErrorList = (
   errorList: RuleFormValidationErrorList | string[]
@@ -89,23 +100,9 @@ export const flattenErrorObject = (
   const errors: RuleFormValidationErrorList = [];
   for (const value of Object.values(errorObject)) {
     if (isValidationErrorList(value) || Array.isArray(value)) {
-      errors.push(...value.map((error) => (typeof error === 'string' ? error : error.text)));
+      errors.push(...value);
     } else {
       errors.push(...flattenErrorObject(value));
-    }
-  }
-  return errors;
-};
-
-export const convertValidationErrorObjectToIErrorObject = (
-  errorObject: RuleFormValidationErrorObject
-) => {
-  const errors: IErrorObject = {};
-  for (const [key, value] of Object.entries(errorObject)) {
-    if (isValidationErrorList(value)) {
-      errors[key] = value.map((error) => (typeof error === 'string' ? error : error.text));
-    } else {
-      errors[key] = convertValidationErrorObjectToIErrorObject(value);
     }
   }
   return errors;

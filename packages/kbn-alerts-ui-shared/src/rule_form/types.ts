@@ -11,7 +11,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { ValidationStatus } from './common/constants';
+import type { RuleFormValidationError } from './common/validation_error';
 import { RuleDefinitionValidation, RuleDetailsValidation } from './features';
 
 export interface RuleFormRule {
@@ -104,11 +104,7 @@ export interface RuleFormAppContext {
   canShowConsumerSelection?: boolean;
 }
 
-export interface RuleFormValidationError {
-  text: string;
-  status: ValidationStatus;
-}
-
+export type { RuleFormValidationError };
 export type RuleFormValidationErrorList = RuleFormValidationError[];
 export interface RuleFormValidationErrorObject {
   [key: string]: RuleFormValidationErrorList | RuleFormValidationErrorObject;

@@ -42,10 +42,7 @@ import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleAlertDelayField } from './rule_alert_delay_field';
 import { expressionFocus } from '../../store/meta_slice';
 import { ValidationStatus } from '../../common/constants';
-import {
-  convertValidationErrorObjectToIErrorObject,
-  flattenErrorObject,
-} from '../../common/validation_error';
+import { flattenErrorObject } from '../../common/validation_error';
 
 interface RuleDefinitionProps {
   expressionPlugins: RuleTypeParamsExpressionPlugins;
@@ -104,15 +101,6 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   );
 
   const advancedOptionsInitialIsOpen = useSelectAreAdvancedOptionsSet();
-
-  /* TODO: Refactor expression components to take advantage of validation statuses.
-   * For now, most existing rule types will break if passed error objects that don't contain
-   * pure strings, so strip the validation states from them
-   */
-  const ruleParamsIErrorObject = useMemo(
-    () => convertValidationErrorObjectToIErrorObject(ruleParamsErrors),
-    [ruleParamsErrors]
-  );
 
   const ruleParamsErrorList = useMemo(() => {
     if (ruleDefinitionValidationStatus === ValidationStatus.INVALID) {
@@ -186,7 +174,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                   ruleParams={ruleParams}
                   ruleInterval={ruleInterval}
                   ruleThrottle={''}
-                  errors={ruleParamsIErrorObject}
+                  errors={ruleParamsErrors}
                   setRuleParams={(key, value) => dispatch(setParam([key, value]))}
                   setRuleProperty={(_, value) => {
                     /* setRuleProperty is only ever used to replace all params */
