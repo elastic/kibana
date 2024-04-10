@@ -67,7 +67,7 @@ export const registerReactEmbeddableSavedObject = <
   if (registry.has(embeddableType)) {
     throw new Error(
       i18n.translate('embeddableApi.embeddableSavedObjectRegistry.keyAlreadyExistsError', {
-        defaultMessage: `Embeddable type {type} already exists in the registry.`,
+        defaultMessage: `Embeddable type {embeddableType} already exists in the registry.`,
         values: { embeddableType },
       })
     );
