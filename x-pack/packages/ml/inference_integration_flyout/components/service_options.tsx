@@ -24,10 +24,10 @@ export const ServiceOptions: React.FC<{
   setNumberOfThreads: (value: number) => void;
   numberOfThreads: number;
 }> = ({ id, setNumberOfAllocations, numberOfAllocations, setNumberOfThreads, numberOfThreads }) => {
-  const min = 1;
   return (
     <EuiAccordion
       id={id}
+      initialIsOpen
       data-test-subj="serviceOptions"
       aria-label={i18n.translate(
         'xpack.ml.addInferenceEndpoint.elasticsearchModels.serviceOptions.accordion.ariaLabel',
@@ -75,7 +75,7 @@ export const ServiceOptions: React.FC<{
         <EuiFormRow>
           <EuiFieldNumber
             value={numberOfAllocations}
-            min={min}
+            min={1}
             onChange={(e) => setNumberOfAllocations(e.target.valueAsNumber)}
             aria-label={i18n.translate(
               'xpack.ml.addInferenceEndpoint.elasticsearchModels.serviceOptions.allocationNumberField.ariaLabel',
@@ -113,7 +113,8 @@ export const ServiceOptions: React.FC<{
         <EuiFormRow>
           <EuiFieldNumber
             value={numberOfThreads}
-            min={min}
+            min={1}
+            max={32}
             onChange={(e) => setNumberOfThreads(e.target.valueAsNumber)}
             aria-label={i18n.translate(
               'xpack.ml.addInferenceEndpoint.elasticsearchModels.serviceOptions.threadsNumberField.ariaLabel',

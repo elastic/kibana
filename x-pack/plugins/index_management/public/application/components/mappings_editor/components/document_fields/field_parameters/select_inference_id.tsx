@@ -38,7 +38,18 @@ interface Props {
   'data-test-subj'?: string;
 }
 export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
-  const { docLinks } = useAppContext();
+  const {
+    core: { application },
+    docLinks,
+    url,
+  } = useAppContext();
+
+  const getMlTrainedModelPageUrl = useCallback(async () => {
+    return await url?.locators.get('ML_APP_LOCATOR')?.getUrl({
+      page: 'trained_models',
+    });
+  }, [url]);
+
   const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
 
@@ -55,9 +66,10 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
     const inferenceIdOptions =
-      models?.map((model: InferenceAPIConfigResponse) => ({
+      models?.inferenceModels?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
       })) || [];
+
     return inferenceIdOptions;
   }, [models]);
 
@@ -155,7 +167,12 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
             icon="gear"
             size="s"
             data-test-subj="manageInferenceEndpointButton"
-            onClick={() => {}}
+            onClick={async () => {
+              const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
+              if (typeof mlTrainedPageUrl === 'string') {
+                application.navigateToUrl(mlTrainedPageUrl);
+              }
+            }}
           >
             {i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
@@ -200,7 +217,10 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
               ),
             }}
             options={options}
-            onChange={(newOptions) => setOptions(newOptions)}
+            onChange={(newOptions) => {
+              setOptions(newOptions);
+              setIsInferencePopoverVisible(!isInferencePopoverVisible);
+            }}
           >
             {(list, search) => (
               <>
