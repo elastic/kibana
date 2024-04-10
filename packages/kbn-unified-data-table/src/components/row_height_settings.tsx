@@ -11,13 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+export enum RowHeight {
+  Auto = 'auto',
+  Single = 'single',
+  Custom = 'custom',
+}
 export interface RowHeightSettingsProps {
-  rowHeight?: 'auto' | 'single' | 'custom';
+  rowHeight?: RowHeight;
   rowHeightLines?: number;
   maxRowHeight?: number;
   label: string;
   compressed?: boolean;
-  onChangeRowHeight: (newHeightMode: 'auto' | 'single' | 'custom' | undefined) => void;
+  onChangeRowHeight: (newHeightMode: RowHeight | undefined) => void;
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
 }
@@ -67,14 +72,14 @@ export function RowHeightSettings({
             legend={label}
             buttonSize="compressed"
             options={rowHeightModeOptions}
-            idSelected={`${idPrefix}${rowHeight ?? 'single'}`}
+            idSelected={`${idPrefix}${rowHeight ?? RowHeight.Single}`}
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
             }}
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />
-          {rowHeight === 'custom' ? (
+          {rowHeight === RowHeight.Custom ? (
             <EuiRange
               compressed
               fullWidth

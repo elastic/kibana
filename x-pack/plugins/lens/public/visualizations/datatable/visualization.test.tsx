@@ -23,6 +23,7 @@ import {
   VisualizationDimensionGroupConfig,
   VisualizationConfigProps,
 } from '../../types';
+import { RowHeight } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -746,17 +747,17 @@ describe('Datatable Visualization', () => {
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: RowHeight.Single })
           .fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'custom' })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: RowHeight.Custom })
           .fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'auto' })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: RowHeight.Auto })
           .fitRowToContent
       ).toEqual([true]);
     });
@@ -767,7 +768,7 @@ describe('Datatable Visualization', () => {
       );
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: RowHeight.Single })
           .rowHeightLines
       ).toEqual([1]);
 
@@ -775,7 +776,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'single',
+          rowHeight: RowHeight.Single,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([1]);
@@ -783,7 +784,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeight.Custom,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([5]);
@@ -792,7 +793,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeight.Custom,
         }).rowHeightLines
       ).toEqual([2]);
     });
@@ -806,17 +807,19 @@ describe('Datatable Visualization', () => {
       // should fallback to custom in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
-      ).toEqual(['custom']);
+      ).toEqual([RowHeight.Custom]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
-          .headerRowHeightLines
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: RowHeight.Single,
+        }).headerRowHeightLines
       ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeight.Custom,
           headerRowHeightLines: 5,
         }).headerRowHeightLines
       ).toEqual([5]);
@@ -825,7 +828,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeight.Custom,
         }).headerRowHeightLines
       ).toEqual([3]);
     });

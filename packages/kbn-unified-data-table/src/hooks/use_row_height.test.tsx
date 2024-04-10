@@ -9,6 +9,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { createLocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { useRowHeight } from './use_row_height';
+import { RowHeight } from '../components/row_height_settings';
 
 const CONFIG_ROW_HEIGHT = 3;
 
@@ -51,7 +52,7 @@ describe('useRowHeightsOptions', () => {
     const {
       hook: { result },
     } = renderRowHeightHook({ rowHeightState: 2 });
-    expect(result.current.rowHeight).toEqual('custom');
+    expect(result.current.rowHeight).toEqual(RowHeight.Custom);
     expect(result.current.rowHeightLines).toEqual(2);
   });
 
@@ -59,7 +60,7 @@ describe('useRowHeightsOptions', () => {
     const {
       hook: { result },
     } = renderRowHeightHook();
-    expect(result.current.rowHeight).toEqual('custom');
+    expect(result.current.rowHeight).toEqual(RowHeight.Custom);
     expect(result.current.rowHeightLines).toEqual(5);
   });
 
@@ -70,7 +71,7 @@ describe('useRowHeightsOptions', () => {
       previousRowHeight: undefined,
       previousConfigRowHeight: undefined,
     });
-    expect(result.current.rowHeight).toEqual('custom');
+    expect(result.current.rowHeight).toEqual(RowHeight.Custom);
     expect(result.current.rowHeightLines).toEqual(CONFIG_ROW_HEIGHT);
   });
 
@@ -80,7 +81,7 @@ describe('useRowHeightsOptions', () => {
     } = renderRowHeightHook({
       previousConfigRowHeight: 4,
     });
-    expect(result.current.rowHeight).toEqual('custom');
+    expect(result.current.rowHeight).toEqual(RowHeight.Custom);
     expect(result.current.rowHeightLines).toEqual(3);
   });
 
@@ -105,19 +106,19 @@ describe('useRowHeightsOptions', () => {
       storage,
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });
-    result.current.onChangeRowHeight?.('auto');
+    result.current.onChangeRowHeight?.(RowHeight.Auto);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: -1,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
     });
     expect(onUpdateRowHeight).toHaveBeenLastCalledWith(-1);
-    result.current.onChangeRowHeight?.('single');
+    result.current.onChangeRowHeight?.(RowHeight.Single);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: 0,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
     });
     expect(onUpdateRowHeight).toHaveBeenLastCalledWith(0);
-    result.current.onChangeRowHeight?.('custom');
+    result.current.onChangeRowHeight?.(RowHeight.Custom);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: CONFIG_ROW_HEIGHT,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
@@ -141,13 +142,13 @@ describe('useRowHeightsOptions', () => {
 
   it('should convert provided rowHeightState to rowHeight and rowHeightLines', () => {
     const { hook, initialProps } = renderRowHeightHook({ rowHeightState: -1 });
-    expect(hook.result.current.rowHeight).toEqual('auto');
+    expect(hook.result.current.rowHeight).toEqual(RowHeight.Auto);
     expect(hook.result.current.rowHeightLines).toEqual(-1);
     hook.rerender({ ...initialProps, rowHeightState: 0 });
-    expect(hook.result.current.rowHeight).toEqual('single');
+    expect(hook.result.current.rowHeight).toEqual(RowHeight.Single);
     expect(hook.result.current.rowHeightLines).toEqual(0);
     hook.rerender({ ...initialProps, rowHeightState: 3 });
-    expect(hook.result.current.rowHeight).toEqual('custom');
+    expect(hook.result.current.rowHeight).toEqual(RowHeight.Custom);
     expect(hook.result.current.rowHeightLines).toEqual(3);
   });
 });

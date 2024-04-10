@@ -9,7 +9,8 @@ import { EuiDataGridColumnCellAction, EuiDataGridColumnCellActionProps } from '@
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { shallow } from 'enzyme';
 import { ReactNode } from 'react';
-import { FormatFactory } from '../../../../common/types';
+import { RowHeight } from '../../../../common/types';
+import type { FormatFactory } from '../../../../common/types';
 import type { LensCellValueAction } from '../../../types';
 import { createGridColumns } from './columns';
 
@@ -67,7 +68,7 @@ const callCreateGridColumns = (
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
     params.alignments ?? {},
-    params.headerRowHeight ?? 'auto',
+    params.headerRowHeight ?? RowHeight.Auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),

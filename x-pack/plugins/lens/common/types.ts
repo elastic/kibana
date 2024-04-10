@@ -95,3 +95,9 @@ export interface LegacyMetricState {
   size?: string;
   textAlign?: 'left' | 'right' | 'center';
 }
+
+export enum RowHeight {
+  Auto = 'auto',
+  Single = 'single',
+  Custom = 'custom',
+}

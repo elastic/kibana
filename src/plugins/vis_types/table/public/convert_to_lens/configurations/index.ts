@@ -10,6 +10,7 @@ import {
   CollapseFunction,
   Column,
   PagingState,
+  RowHeight,
   TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
@@ -48,8 +49,8 @@ const getRowHeight = (
 ): Pick<TableVisConfiguration, 'rowHeight' | 'headerRowHeight'> => {
   const { autoFitRowToContent } = params;
   return {
-    rowHeight: autoFitRowToContent ? 'auto' : 'single',
-    headerRowHeight: autoFitRowToContent ? 'auto' : 'single',
+    rowHeight: autoFitRowToContent ? RowHeight.Auto : RowHeight.Single,
+    headerRowHeight: autoFitRowToContent ? RowHeight.Auto : RowHeight.Single,
   };
 };
 
