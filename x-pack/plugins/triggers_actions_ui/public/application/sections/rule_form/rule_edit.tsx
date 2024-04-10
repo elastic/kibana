@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
@@ -138,6 +138,8 @@ export const RuleEdit = <
   const {
     http,
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -223,7 +225,8 @@ export const RuleEdit = <
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });

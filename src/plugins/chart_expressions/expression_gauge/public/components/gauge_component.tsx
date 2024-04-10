@@ -14,7 +14,11 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
-import { findAccessor, isVisDimension } from '@kbn/visualizations-plugin/common/utils';
+import {
+  findAccessor,
+  getFormatByAccessor,
+  isVisDimension,
+} from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
 import {
   GaugeRenderProps,
@@ -307,10 +311,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
     ? metricColumn?.meta?.params
     : undefined;
 
-  const defaultMetricFormatParams = {
+  const defaultMetricFormatParams = (args.metric &&
+    getFormatByAccessor(args.metric, data.columns)) || {
     id: 'number',
     params: {
-      pattern: max - min > 5 ? `0,0` : `0,0.0`,
+      pattern: max - min > 5 ? '0,0' : '0,0.0',
     },
   };
 

@@ -8,10 +8,8 @@
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 import { setDataViewsService } from '../common/lib/data_apis';
@@ -29,23 +27,18 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, theme, theme$ } = deps;
-  const isDarkMode = theme.getTheme().darkMode;
+  const { dataViews, i18n, theme } = deps;
 
   setDataViewsService(dataViews);
   return (
-    <I18nProvider>
-      <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...deps }}>
-            <Router history={deps.history}>
-              <Routes>
-                <Route path={`/`} component={suspendedComponentWithProps(GlobalAlertsPage, 'xl')} />
-              </Routes>
-            </Router>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </EuiThemeProvider>
-    </I18nProvider>
+    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+      <KibanaContextProvider services={{ ...deps }}>
+        <Router history={deps.history}>
+          <Routes>
+            <Route path={`/`} component={suspendedComponentWithProps(GlobalAlertsPage, 'xl')} />
+          </Routes>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
