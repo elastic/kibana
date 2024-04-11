@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { FunctionComponent } from 'react';
 import {
   EuiCheckableCard,
@@ -23,6 +23,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 
 interface UseCaseOption {
   id: string;
@@ -76,10 +77,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingUseCase' });
-  const [selectedId, setSelectedId] = useState<string>();
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const { euiTheme } = useEuiTheme();
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <EuiPanel hasBorder>
@@ -113,14 +115,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   </EuiText>
                 </>
               }
-              checked={selectedId === option.id}
-              onChange={() => setSelectedId(option.id)}
+              checked={option.id === searchParams.get('category')}
+              onChange={() =>
+                setSearchParams({ category: option.id }, { replace: true })
+              }
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-
-      {selectedId && (
+      {searchParams.get('category') && (
         <>
           <EuiSpacer />
           <TitleWithIcon
@@ -140,9 +143,9 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               <EuiCard
                 key={index}
                 layout="horizontal"
-                title={selectedId!}
+                title={searchParams.get('category')!}
                 titleSize="xs"
-                description={selectedId!}
+                description={searchParams.get('category')!}
                 icon={<EuiIcon type="logoObservability" size="l" />}
                 betaBadgeProps={
                   index === 0

@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { useSearchParams, useNavigate } from 'react-router-dom-v5-compat';
 import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
 import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
@@ -29,6 +30,9 @@ import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 export function ExperimentalOnboardingFlow() {
   const history = useHistory();
 
+  const [queryParams] = useSearchParams();
+  const queryString = queryParams.size ? `?${queryParams.toString()}` : '';
+
   return (
     <>
       {/* Test buttons to be removed once integrations selector has been implemented */}
@@ -37,7 +41,7 @@ export function ExperimentalOnboardingFlow() {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="observabilityOnboardingExperimentalOnboardingFlowSystemLogsButton"
-              {...reactRouterNavigate(history, '/systemLogs')}
+              {...reactRouterNavigate(history, `/systemLogs/${queryString}`)}
               color="accent"
             >
               {i18n.translate(
@@ -49,7 +53,7 @@ export function ExperimentalOnboardingFlow() {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="observabilityOnboardingExperimentalOnboardingFlowCustomLogsButton"
-              {...reactRouterNavigate(history, '/customLogs')}
+              {...reactRouterNavigate(history, `/customLogs/${queryString}`)}
               color="accent"
             >
               {i18n.translate(
@@ -100,14 +104,17 @@ export function ExperimentalOnboardingFlow() {
 }
 
 const BackButton = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const [queryParams] = useSearchParams();
+  const queryString = queryParams.size ? `?${queryParams.toString()}` : '';
+
   return (
     <>
       <EuiButtonEmpty
         data-test-subj="observabilityOnboardingExperimentalOnboardingFlowBackToSelectionButton"
         iconType="arrowLeft"
         flush="left"
-        onClick={() => history.push('/')}
+        onClick={() => navigate(`../${queryString}`)}
       >
         {i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.button.backToSelectionLabel',
