@@ -36,26 +36,30 @@ export async function stepDeletePreviousPipelines(context: InstallContext) {
     installedPkg
   ) {
     logger.debug(`Package install - installType ${installType} Deleting previous ingest pipelines`);
-    updatedESReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
-      deletePreviousPipelines(
-        esClient,
-        savedObjectsClient,
-        pkgName,
-        installedPkg!.attributes.version,
-        esReferences || []
-      )
+    updatedESReferences = await withPackageSpan(
+      'Delete previous ingest pipelines with installType update or reupdate',
+      () =>
+        deletePreviousPipelines(
+          esClient,
+          savedObjectsClient,
+          pkgName,
+          installedPkg!.attributes.version,
+          esReferences || []
+        )
     );
   } else if (installType === 'rollback' && installedPkg) {
     // pipelines from a different version may have been installed during a failed update
     logger.debug(`Package install - installType ${installType} Deleting previous ingest pipelines`);
-    updatedESReferences = await withPackageSpan('Delete previous ingest pipelines', () =>
-      deletePreviousPipelines(
-        esClient,
-        savedObjectsClient,
-        pkgName,
-        installedPkg!.attributes.install_version,
-        esReferences || []
-      )
+    updatedESReferences = await withPackageSpan(
+      'Delete previous ingest pipelines with installType rollback',
+      () =>
+        deletePreviousPipelines(
+          esClient,
+          savedObjectsClient,
+          pkgName,
+          installedPkg!.attributes.install_version,
+          esReferences || []
+        )
     );
   } else {
     // if none of the previous cases, return the original esReferences

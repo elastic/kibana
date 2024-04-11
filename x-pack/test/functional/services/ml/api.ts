@@ -67,6 +67,11 @@ export const SUPPORTED_TRAINED_MODELS = {
     description: 'Tiny/Dummy PyTorch model (zero_shot)',
     modelTypes: ['pytorch', 'zero_shot'],
   },
+  TINY_ELSER: {
+    name: 'pt_tiny_elser',
+    description: 'Tiny ELSER model',
+    modelTypes: ['pytorch'],
+  },
 } as const;
 export type SupportedTrainedModelNamesType =
   typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];

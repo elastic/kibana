@@ -9,14 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'common',
-    'header',
-    'timePicker',
-    'unifiedFieldList',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'timePicker', 'header']);
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -25,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   describe('lens fields list tests', () => {
     for (const datasourceType of ['form-based', 'ad-hoc', 'ad-hoc-no-timefield']) {
@@ -34,14 +28,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.visualize.clickVisType('lens');
 
           if (datasourceType !== 'form-based') {
-            await PageObjects.lens.createAdHocDataView(
-              '*stash*',
-              datasourceType !== 'ad-hoc-no-timefield'
-            );
-            retry.try(async () => {
-              const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-              expect(selectedPattern).to.eql('*stash*');
+            await dataViews.createFromSearchBar({
+              name: '*stash*',
+              adHoc: true,
+              hasTimeField: datasourceType !== 'ad-hoc-no-timefield',
             });
+            await dataViews.waitForSwitcherToBe('*stash*');
           }
 
           if (datasourceType !== 'ad-hoc-no-timefield') {
@@ -49,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
 
           await retry.try(async () => {
-            await PageObjects.lens.clickAddField();
+            await dataViews.clickAddFieldFromSearchBar();
             await fieldEditor.setName('runtime_string');
             await fieldEditor.enableValue();
             await fieldEditor.typeScript("emit('abc')");
@@ -254,11 +246,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickVisType('lens');
         await PageObjects.timePicker.setCommonlyUsedTime('This_week');
 
-        await PageObjects.lens.createAdHocDataView('field-update-test', true);
-        await retry.try(async () => {
-          const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-          expect(selectedPattern).to.eql('field-update-test*');
+        await dataViews.createFromSearchBar({
+          name: 'field-update-test',
+          adHoc: true,
+          hasTimeField: true,
         });
+        await dataViews.waitForSwitcherToBe('field-update-test*');
       });
       after(async () => {
         await es.transport.request({
