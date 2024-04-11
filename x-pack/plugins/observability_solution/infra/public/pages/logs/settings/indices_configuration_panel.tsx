@@ -188,7 +188,7 @@ export const IndicesConfigurationPanel = React.memo<{
             />
             <EuiSpacer size="s" />
             <EuiLink
-              data-test-subj="infraIndicesConfigurationPanelViewAffectedRulesLink"
+              data-test-subj="logIndicesViewAffectedRulesLink"
               href={viewAffectedRulesLink}
               target="_blank"
             >

@@ -162,7 +162,7 @@ export const IndicesConfigurationPanel = ({
               />
               <EuiSpacer size="s" />
               <EuiLink
-                data-test-subj="infraIndicesConfigurationPanelViewAffectedRulesLink"
+                data-test-subj="metricIndicesViewAffectedRulesLink"
                 href={viewAffectedRulesLink}
                 target="_blank"
               >
