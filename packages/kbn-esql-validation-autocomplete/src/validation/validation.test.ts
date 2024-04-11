@@ -221,7 +221,12 @@ function generateIncorrectlyTypedParameters(
     ({ name: _name, constantOnly, literalOptions, type, ...rest }, i) => {
       // this thing is complex enough, let's not make it harder for constants
       if (constantOnly) {
-        return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+        return {
+          name: literalValues[type as keyof typeof literalValues],
+          type,
+          wrong: false,
+          ...rest,
+        };
       }
       const canBeFieldButNotString = Boolean(
         fieldTypes.filter((t) => t !== 'string').includes(type) &&
@@ -238,7 +243,7 @@ function generateIncorrectlyTypedParameters(
           : canBeFieldButNotNumber
           ? values.numberField
           : values.booleanField;
-      return { name: nameValue, type, ...rest };
+      return { name: nameValue, type, wrong: true, ...rest };
     }
   );
 
@@ -248,10 +253,25 @@ function generateIncorrectlyTypedParameters(
     [values.booleanField]: 'boolean',
   };
 
-  const signatureToUse = signatures.find(({ params: fnParams }) =>
-    // check that all params are of the same type
-    fnParams.every(({ type }, i) => type === currentParams[i].type)
-  )!;
+  // Try to predict which signature will be used to generate the errors
+  // in the validation engine. The validator currently uses the signature
+  // which generates the fewest errors.
+  //
+  // Approximate this by finding the signature that best matches the INCORRECT field mapping
+  //
+  // This is not future-proof...
+  const misMatchesBySignature = signatures.map(({ params: fnParams }) => {
+    const typeMatches = fnParams.map(({ type }, i) => {
+      if (wrongFieldMapping[i].wrong) {
+        const typeFromIncorrectMapping = generatedFieldTypes[wrongFieldMapping[i].name];
+        return type === typeFromIncorrectMapping;
+      }
+      return type === wrongFieldMapping[i].type;
+    });
+    return typeMatches.filter((t) => !t).length;
+  })!;
+  const signatureToUse =
+    signatures[misMatchesBySignature.indexOf(Math.min(...misMatchesBySignature))]!;
 
   const expectedErrors = signatureToUse.params
     .filter(({ constantOnly }) => !constantOnly)

@@ -5332,34 +5332,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where st_centroid([1, 2, 3])",
-      "error": [
-        "WHERE does not support function st_centroid"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where st_centroid([1, 2, 3]) > 0",
-      "error": [
-        "WHERE does not support function st_centroid"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where st_centroid(geoPointField)",
-      "error": [
-        "WHERE does not support function st_centroid"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where st_centroid(geoPointField) > 0",
-      "error": [
-        "WHERE does not support function st_centroid"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where abs(numberField) > 0",
       "error": [],
       "warning": []
@@ -6922,28 +6894,28 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid([1, 2, 3])",
+      "query": "from a_index | eval var = st_centroid(cartesianPointField)",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid([1, 2, 3]) > 0",
+      "query": "from a_index | eval var = st_centroid(cartesianPointField) > 0",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid([1, 2, 3])",
+      "query": "from a_index | eval st_centroid(cartesianPointField)",
       "error": [
         "EVAL does not support function st_centroid"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid([1, 2, 3]) > 0",
+      "query": "from a_index | eval st_centroid(cartesianPointField) > 0",
       "error": [
         "EVAL does not support function st_centroid"
       ],
@@ -12324,53 +12296,33 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid([1, 2, 3])",
+      "query": "from a_index | stats var = st_centroid(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid([1, 2, 3])",
+      "query": "from a_index | stats st_centroid(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = round(st_centroid([1, 2, 3]))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(st_centroid([1, 2, 3]))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(st_centroid([1, 2, 3])) + st_centroid([1, 2, 3])",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(st_centroid([1, 2, 3])) + st_centroid([1, 2, 3])",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = st_centroid([1, 2, 3])",
+      "query": "from a_index | stats var = st_centroid(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid([1, 2, 3])",
+      "query": "from a_index | stats st_centroid(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(booleanField)",
+      "query": "from a_index | stats st_centroid(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [number[]], found value [booleanField] type [boolean]"
+        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
@@ -12408,7 +12360,7 @@
     {
       "query": "from a_index | stats st_centroid(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [geo_point], found value [stringField] type [string]"
+        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
