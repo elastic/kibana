@@ -61,12 +61,14 @@ const createMockConfig = () => ({});
 
 const createAppClientMock = () => ({});
 
+const license = licensingMock.createLicense({ license: { type: 'platinum' } });
 const createRequestContextMock = (
   clients: MockClients = createMockClients()
 ): ElasticAssistantRequestHandlerContextMock => {
   return {
     core: clients.core,
     elasticAssistant: createElasticAssistantRequestContextMock(clients),
+    licensing: licensingMock.createRequestHandlerContext({ license }),
   };
 };
 
