@@ -1861,6 +1861,190 @@
       "warning": []
     },
     {
+      "query": "row var = st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_disjoint(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = st_within(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -9151,6 +9335,246 @@
       "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField, extraArg)",
       "error": [
         "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_disjoint(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(stringField, stringField)",
+      "error": [
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_disjoint] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
       ],
       "warning": []
     },

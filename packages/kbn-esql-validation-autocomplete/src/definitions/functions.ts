@@ -1276,7 +1276,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1290,7 +1290,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1304,7 +1304,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1318,7 +1318,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1332,7 +1332,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1346,7 +1346,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1360,7 +1360,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
       },
       {
         params: [
@@ -1374,7 +1374,127 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           },
         ],
         returnType: 'boolean',
-        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+    ],
+  },
+  {
+    name: 'st_disjoint',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stDisjointDoc', {
+      defaultMessage: 'Returns whether the two geometries or geometry columns are disjoint.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
       },
     ],
   },
