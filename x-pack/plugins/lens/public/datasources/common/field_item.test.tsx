@@ -22,7 +22,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
+import * as loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
 import { FieldIcon } from '@kbn/field-utils';
 import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
