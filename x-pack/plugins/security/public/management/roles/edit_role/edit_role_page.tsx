@@ -443,7 +443,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
     if (isEditingExistingRole && !isRoleReadOnly) {
       return (
         <EuiFlexItem grow={false}>
-          <DeleteRoleButton canDelete={true} onDelete={handleDeleteRole} />
+          <DeleteRoleButton
+            roleName={role.name}
+            canDelete={true}
+            onDelete={handleDeleteRole}
+            buildFlavor={buildFlavor}
+          />
         </EuiFlexItem>
       );
     }
@@ -709,12 +714,44 @@ export const EditRolePage: FunctionComponent<Props> = ({
       return;
     }
 
-    notifications.toasts.addSuccess(
-      i18n.translate(
-        'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
-        { defaultMessage: 'Deleted role' }
-      )
-    );
+    if (buildFlavor === 'serverless') {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.roles.deleteRolesSuccessTitle', {
+          defaultMessage:
+            '{numberOfCustomRoles, plural, one {# custom role} other {# custom roles}} deleted',
+          values: { numberOfCustomRoles: 1 },
+        }),
+        text: toMountPoint(
+          <>
+            <p>
+              {i18n.translate('xpack.security.management.roles.deleteRolesSuccessMessage', {
+                defaultMessage: `The deleted role will still appear listed on the user profile in Organization
+                  Management and on the User Profile for those that don't have admin access.`,
+              })}
+            </p>
+
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={cloudOrgUrl}>
+                  Manage Members
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>,
+          {
+            i18n: i18nStart,
+            theme,
+          }
+        ),
+      });
+    } else {
+      notifications.toasts.addSuccess(
+        i18n.translate(
+          'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
+          { defaultMessage: 'Deleted role' }
+        )
+      );
+    }
 
     backToRoleList();
   };

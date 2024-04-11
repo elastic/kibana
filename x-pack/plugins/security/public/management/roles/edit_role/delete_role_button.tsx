@@ -8,11 +8,14 @@
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { BuildFlavor } from '@kbn/config';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
+  roleName: string;
   canDelete: boolean;
   onDelete: () => void;
+  buildFlavor?: BuildFlavor;
 }
 
 interface State {
@@ -43,16 +46,25 @@ export class DeleteRoleButton extends Component<Props, State> {
   }
 
   public maybeShowModal = () => {
+    const { buildFlavor, roleName } = this.props;
     if (!this.state.showModal) {
       return null;
     }
     return (
       <EuiConfirmModal
         title={
-          <FormattedMessage
-            id="xpack.security.management.editRole.deleteRoleButton.deleteRoleTitle"
-            defaultMessage="Delete Role"
-          />
+          buildFlavor !== 'serverless' ? (
+            <FormattedMessage
+              id="xpack.security.management.editRole.deleteRoleButton.deleteRoleTitle"
+              defaultMessage="Delete Role"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.security.management.editCustomRole.deleteRoleButton.deleteRoleTitle"
+              defaultMessage="Delete Role {roleName}?"
+              values={{ roleName }}
+            />
+          )
         }
         onCancel={this.closeModal}
         onConfirm={this.onConfirmDelete}
@@ -71,10 +83,18 @@ export class DeleteRoleButton extends Component<Props, State> {
         buttonColor={'danger'}
       >
         <p>
-          <FormattedMessage
-            id="xpack.security.management.editRole.deleteRoleButton.deletingRoleConfirmationText"
-            defaultMessage="Are you sure you want to delete this role?"
-          />
+          {buildFlavor !== 'serverless' ? (
+            <FormattedMessage
+              id="xpack.security.management.editRole.deleteRoleButton.deletingRoleConfirmationText"
+              defaultMessage="Are you sure you want to delete this role?"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.security.management.roles.confirmDelete.serverless.removingSingleRoleDescription"
+              defaultMessage="Users with the {roleName} role assigned will lose access to the project."
+              values={{ roleName }}
+            />
+          )}
         </p>
         <p>
           <FormattedMessage
