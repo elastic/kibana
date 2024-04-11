@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -20,10 +20,12 @@ export function UnlinkDashboard({
   currentDashboard,
   onRefresh,
   assetType,
+  canDeleteCustomDashboard,
 }: {
   currentDashboard: DashboardItemWithTitle;
   onRefresh: () => void;
   assetType: InfraCustomDashboardAssetType;
+  canDeleteCustomDashboard: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { notifications } = useKibana();
@@ -85,17 +87,33 @@ export function UnlinkDashboard({
 
   return (
     <>
-      <EuiButtonEmpty
-        color="danger"
-        size="s"
-        iconType="unlink"
-        data-test-subj="infraUnLinkCustomDashboardMenu"
-        onClick={onClick}
+      <EuiToolTip
+        position="top"
+        content={
+          !canDeleteCustomDashboard
+            ? i18n.translate(
+                'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
+                {
+                  defaultMessage:
+                    'You do not have permission to use this feature. Please ask your administrator for access.',
+                }
+              )
+            : undefined
+        }
       >
-        {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
-          defaultMessage: 'Unlink dashboard',
-        })}
-      </EuiButtonEmpty>
+        <EuiButtonEmpty
+          color="danger"
+          size="s"
+          iconType="unlink"
+          data-test-subj="infraUnLinkDashboardMenu"
+          onClick={onClick}
+          disabled={!canDeleteCustomDashboard}
+        >
+          {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
+            defaultMessage: 'Unlink dashboard',
+          })}
+        </EuiButtonEmpty>
+      </EuiToolTip>
       {isModalVisible && (
         <EuiConfirmModal
           title={i18n.translate(

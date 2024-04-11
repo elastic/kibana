@@ -100,6 +100,7 @@ const tableEntries = [
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
+  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const find = getService('find');
@@ -120,6 +121,58 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
+
+  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
+    await security.role.create('global_hosts_read_privileges_role', {
+      elasticsearch: {
+        indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
+      },
+      kibana: [
+        {
+          feature: {
+            infrastructure: ['read'],
+            advancedSettings: ['read'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    await security.user.create('global_hosts_read_privileges_user', {
+      password: 'global_hosts_read_privileges_user-password',
+      roles: ['global_hosts_read_privileges_role'],
+      full_name: 'test user',
+    });
+
+    await pageObjects.security.forceLogout();
+
+    await pageObjects.security.login(
+      'global_hosts_read_privileges_user',
+      'global_hosts_read_privileges_user-password',
+      {
+        expectSpaceSelector: false,
+      }
+    );
+
+    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+    await pageObjects.header.waitUntilLoadingHasFinished();
+    await pageObjects.timePicker.setAbsoluteRange(
+      START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+      END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+    );
+
+    await waitForPageToLoad();
+
+    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+  };
+
+  const logoutAndDeleteReadOnlyUser = async () => {
+    await pageObjects.security.forceLogout();
+    await Promise.all([
+      security.role.delete('global_hosts_read_privileges_role'),
+      security.user.delete('global_hosts_read_privileges_user'),
+    ]);
+  };
 
   const setHostViewEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
@@ -758,6 +811,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
           expect(hostDataLastPage).to.eql(tableEntries[0]);
+        });
+      });
+    });
+
+    describe('#Permissions: Read Only User - Single Host Flyout', () => {
+      describe('Dashboards Tab', () => {
+        before(async () => {
+          await setCustomDashboardsEnabled(true);
+          await loginWithReadOnlyUserAndNavigateToHostsFlyout();
+          await pageObjects.assetDetails.clickDashboardsTab();
+        });
+
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+          });
+          await logoutAndDeleteReadOnlyUser();
+        });
+
+        it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
+          await pageObjects.assetDetails.addDashboardExists();
+          const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
+          await retry.try(async () => {
+            await elementToHover.moveMouseTo();
+            await testSubjects.existOrFail('infraCannotAddDashboardTooltip');
+          });
+        });
+
+        it('should not render dashboards tab if the feature is disabled', async () => {
+          await setCustomDashboardsEnabled(false);
+          await pageObjects.assetDetails.clickOverviewTab();
+          await browser.refresh();
+          await !pageObjects.assetDetails.dashboardsTabExists();
         });
       });
     });

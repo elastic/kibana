@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import type {
@@ -18,11 +18,13 @@ export function LinkDashboard({
   newDashboardButton = false,
   customDashboards,
   assetType,
+  canLinkOrEditCustomDashboard,
 }: {
   onRefresh: () => void;
   newDashboardButton?: boolean;
   customDashboards?: DashboardItemWithTitle[];
   assetType: InfraCustomDashboardAssetType;
+  canLinkOrEditCustomDashboard: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -31,25 +33,47 @@ export function LinkDashboard({
 
   return (
     <>
-      {newDashboardButton ? (
-        <EuiButtonEmpty
-          color="text"
-          size="s"
-          iconType="plusInCircle"
-          data-test-subj="infraLinkDashboardMenu"
-          onClick={onClick}
-        >
-          {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
-            defaultMessage: 'Link new dashboard',
-          })}
-        </EuiButtonEmpty>
-      ) : (
-        <EuiButton data-test-subj="infraAddDashboard" onClick={onClick}>
-          {i18n.translate('xpack.infra.assetDetails.dashboards.linkButtonLabel', {
-            defaultMessage: 'Link dashboard',
-          })}
-        </EuiButton>
-      )}
+      <EuiToolTip
+        position="top"
+        content={
+          !canLinkOrEditCustomDashboard ? (
+            <p data-test-subj="infraCannotAddDashboardTooltip">
+              {i18n.translate(
+                'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
+                {
+                  defaultMessage:
+                    'You do not have permission to use this feature. Please ask your administrator for access.',
+                }
+              )}
+            </p>
+          ) : undefined
+        }
+      >
+        {newDashboardButton ? (
+          <EuiButtonEmpty
+            color="text"
+            size="s"
+            iconType="plusInCircle"
+            data-test-subj="infraLinkDashboardMenu"
+            onClick={onClick}
+            disabled={!canLinkOrEditCustomDashboard}
+          >
+            {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
+              defaultMessage: 'Link new dashboard',
+            })}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButton
+            data-test-subj="infraAddDashboard"
+            onClick={onClick}
+            disabled={!canLinkOrEditCustomDashboard}
+          >
+            {i18n.translate('xpack.infra.assetDetails.dashboards.linkButtonLabel', {
+              defaultMessage: 'Link dashboard',
+            })}
+          </EuiButton>
+        )}
+      </EuiToolTip>
       {isModalVisible && (
         <SaveDashboardModal
           onClose={onClose}
