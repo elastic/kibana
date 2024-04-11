@@ -411,6 +411,7 @@
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
+    "@kbn/discover-features-registry": "link:packages/kbn-discover-features-registry",
     "@kbn/discover-plugin": "link:src/plugins/discover",
     "@kbn/discover-shared-plugin": "link:src/plugins/discover_shared",
     "@kbn/discover-utils": "link:packages/kbn-discover-utils",
