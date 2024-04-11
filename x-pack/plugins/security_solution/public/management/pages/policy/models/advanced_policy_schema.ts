@@ -1665,7 +1665,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
           'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
       }
     ),
-  },    
+  },
   {
     key: 'windows.advanced.flags',
     first_supported_version: '8.13.0',
