@@ -6,14 +6,12 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessageProps {
-  allow?: string[];
-  allowReplacement?: string[];
   apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
@@ -22,6 +20,7 @@ interface SendMessageProps {
 }
 
 interface UseSendMessage {
+  abortStream: () => void;
   isLoading: boolean;
   sendMessage: ({
     apiConfig,
@@ -31,15 +30,10 @@ interface UseSendMessage {
 }
 
 export const useSendMessage = (): UseSendMessage => {
-  const {
-    alertsIndexPattern,
-    assistantStreamingEnabled,
-    defaultAllow,
-    defaultAllowReplacement,
-    knowledgeBase,
-  } = useAssistantContext();
+  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
+    useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
-
+  const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
     async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
@@ -49,15 +43,15 @@ export const useSendMessage = (): UseSendMessage => {
           conversationId,
           isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
           alertsIndexPattern,
-          allow: defaultAllow,
-          allowReplacement: defaultAllowReplacement,
           apiConfig,
           isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
           message,
           replacements,
+          signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
+          traceOptions,
         });
       } finally {
         setIsLoading(false);
@@ -66,13 +60,17 @@ export const useSendMessage = (): UseSendMessage => {
     [
       alertsIndexPattern,
       assistantStreamingEnabled,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase.isEnabledRAGAlerts,
       knowledgeBase.isEnabledKnowledgeBase,
       knowledgeBase.latestAlerts,
+      traceOptions,
     ]
   );
 
-  return { isLoading, sendMessage };
+  const cancelRequest = useCallback(() => {
+    abortController.current.abort();
+    abortController.current = new AbortController();
+  }, []);
+
+  return { isLoading, sendMessage, abortStream: cancelRequest };
 };

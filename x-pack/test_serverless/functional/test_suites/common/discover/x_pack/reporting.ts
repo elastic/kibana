@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .perform();
         await browser.getActions().keyDown('v').perform();
 
-        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
+        const reportURL = decodeURIComponent((await textInput.getAttribute('value')) ?? '');
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =

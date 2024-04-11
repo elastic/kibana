@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__jest__/**/*",
@@ -9,7 +9,7 @@
     "public/**/*",
     "server/**/*",
     "test/**/*",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -24,8 +24,8 @@
     "@kbn/runtime-fields-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n",
+    "@kbn/ml-trained-models-utils",
     "@kbn/analytics",
-    "@kbn/utility-types",
     "@kbn/i18n-react",
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
@@ -41,13 +41,14 @@
     "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/ui-theme",
-    "@kbn/core-application-browser",
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/console-plugin",
     "@kbn/shared-ux-utility",
+    "@kbn/index-management",
+    "@kbn/utility-types"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

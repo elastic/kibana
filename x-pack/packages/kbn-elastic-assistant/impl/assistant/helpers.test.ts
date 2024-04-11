@@ -13,28 +13,27 @@ import {
 } from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { AIConnector } from '../connectorland/connector_selector';
-
+const defaultConversation = {
+  id: 'conversation_id',
+  category: 'assistant',
+  theme: {},
+  messages: [],
+  apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
+  replacements: {},
+  title: 'conversation_id',
+};
 describe('helpers', () => {
   describe('isAssistantEnabled = false', () => {
     const isAssistantEnabled = false;
     it('When no conversation history, return only enterprise messaging', () => {
-      const conversation = {
-        id: 'conversation_id',
-        category: 'assistant',
-        theme: {},
-        messages: [],
-        apiConfig: { connectorId: '123' },
-        replacements: {},
-        title: 'conversation_id',
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
       expect(result.messages.length).toEqual(1);
     });
 
     it('When conversation history and the last message is not enterprise messaging, appends enterprise messaging to conversation', () => {
       const conversation = {
-        id: 'conversation_id',
+        ...defaultConversation,
         messages: [
           {
             role: 'user' as const,
@@ -46,10 +45,6 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: { connectorId: '123' },
-        replacements: {},
-        category: 'assistant',
-        title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
@@ -57,12 +52,8 @@ describe('helpers', () => {
 
     it('returns the conversation without changes when the last message is enterprise messaging', () => {
       const conversation = {
-        id: 'conversation_id',
-        title: 'conversation_id',
+        ...defaultConversation,
         messages: enterpriseMessaging,
-        apiConfig: { connectorId: '123' },
-        replacements: {},
-        category: 'assistant',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(1);
@@ -71,9 +62,7 @@ describe('helpers', () => {
 
     it('returns the conversation with new enterprise message when conversation has enterprise messaging, but not as the last message', () => {
       const conversation = {
-        id: 'conversation_id',
-        title: 'conversation_id',
-        category: 'assistant',
+        ...defaultConversation,
         messages: [
           ...enterpriseMessaging,
           {
@@ -86,8 +75,6 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: { connectorId: '123' },
-        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
@@ -97,22 +84,12 @@ describe('helpers', () => {
   describe('isAssistantEnabled = true', () => {
     const isAssistantEnabled = true;
     it('when no conversation history, returns the welcome conversation', () => {
-      const conversation = {
-        id: 'conversation_id',
-        title: 'conversation_id',
-        category: 'assistant',
-        messages: [],
-        apiConfig: { connectorId: '123' },
-        replacements: {},
-      };
-      const result = getBlockBotConversation(conversation, isAssistantEnabled);
+      const result = getBlockBotConversation(defaultConversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(3);
     });
     it('returns a conversation history with the welcome conversation appended', () => {
       const conversation = {
-        id: 'conversation_id',
-        title: 'conversation_id',
-        category: 'assistant',
+        ...defaultConversation,
         messages: [
           {
             role: 'user' as const,
@@ -124,8 +101,6 @@ describe('helpers', () => {
             },
           },
         ],
-        apiConfig: { connectorId: '123' },
-        replacements: {},
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(4);
@@ -133,6 +108,21 @@ describe('helpers', () => {
   });
 
   describe('getDefaultConnector', () => {
+    const defaultConnector: AIConnector = {
+      actionTypeId: '.gen-ai',
+      isPreconfigured: false,
+      isDeprecated: false,
+      referencedByCount: 0,
+      isMissingSecrets: false,
+      isSystemAction: false,
+      secrets: {},
+      id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
+      name: 'OpenAI',
+      config: {
+        apiProvider: 'OpenAI',
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+      },
+    };
     it('should return undefined if connectors array is undefined', () => {
       const connectors = undefined;
       const result = getDefaultConnector(connectors);
@@ -148,23 +138,7 @@ describe('helpers', () => {
     });
 
     it('should return the connector id if there is only one connector', () => {
-      const connectors: AIConnector[] = [
-        {
-          actionTypeId: '.gen-ai',
-          isPreconfigured: false,
-          isDeprecated: false,
-          referencedByCount: 0,
-          isMissingSecrets: false,
-          isSystemAction: false,
-          secrets: {},
-          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
-          name: 'OpenAI',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: 'https://api.openai.com/v1/chat/completions',
-          },
-        },
-      ];
+      const connectors: AIConnector[] = [defaultConnector];
       const result = getDefaultConnector(connectors);
 
       expect(result).toBe(connectors[0]);
@@ -172,29 +146,9 @@ describe('helpers', () => {
 
     it('should return undefined if there are multiple connectors', () => {
       const connectors: AIConnector[] = [
+        defaultConnector,
         {
-          actionTypeId: '.gen-ai',
-          isPreconfigured: false,
-          isDeprecated: false,
-          referencedByCount: 0,
-          isMissingSecrets: false,
-          isSystemAction: false,
-          secrets: {},
-          id: 'c5f91dc0-2197-11ee-aded-897192c5d6f5',
-          name: 'OpenAI',
-          config: {
-            apiProvider: 'OpenAI 1',
-            apiUrl: 'https://api.openai.com/v1/chat/completions',
-          },
-        },
-        {
-          actionTypeId: '.gen-ai',
-          isPreconfigured: false,
-          isDeprecated: false,
-          referencedByCount: 0,
-          isMissingSecrets: false,
-          isSystemAction: false,
-          secrets: {},
+          ...defaultConnector,
           id: 'c7f91dc0-2197-11ee-aded-897192c5d633',
           name: 'OpenAI',
           config: {
@@ -213,8 +167,6 @@ describe('helpers', () => {
       const params = {
         isEnabledRAGAlerts: false, // <-- false
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
       };
 
@@ -227,8 +179,6 @@ describe('helpers', () => {
       const params = {
         isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
       };
 
@@ -236,22 +186,7 @@ describe('helpers', () => {
 
       expect(result).toEqual({
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
-      });
-    });
-
-    it('should return (only) the optional request params that are defined when some optional params are not provided', () => {
-      const params = {
-        isEnabledRAGAlerts: true,
-        allow: ['a', 'b', 'c'], // all the others are undefined
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({
-        allow: ['a', 'b', 'c'],
       });
     });
   });
@@ -265,7 +200,7 @@ describe('helpers', () => {
       messages,
       category: 'assistant',
       theme: {},
-      apiConfig: { connectorId: '123' },
+      apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
       replacements: {},
     };
     const baseConversations = {
