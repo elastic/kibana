@@ -478,6 +478,7 @@ src/plugins/image_embeddable @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
+x-pack/packages/index-management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
@@ -588,9 +589,9 @@ test/common/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
-x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-knowledge-team
-x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-knowledge-team
-x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-ai-assistant
+x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-ai-assistant
+x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
@@ -692,6 +693,7 @@ x-pack/plugins/search_connectors @elastic/enterprise-search-frontend
 packages/kbn-search-errors @elastic/kibana-data-discovery
 examples/search_examples @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/enterprise-search-frontend
+x-pack/plugins/search_notebooks @elastic/enterprise-search-frontend
 x-pack/plugins/search_playground @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
@@ -794,6 +796,7 @@ packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
+packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
@@ -1108,6 +1111,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-infra_services-team
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
+/x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-infra_services-team
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
@@ -1428,6 +1432,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management

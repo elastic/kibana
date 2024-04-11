@@ -988,7 +988,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
-      annotationFromLibraryTitle?: string
+      annotationFromLibraryTitle?: string,
+      seriesType = 'bar_stacked'
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1003,6 +1004,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'data') {
+          await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+        }
         if (layerType === 'annotations') {
           if (!annotationFromLibraryTitle) {
             await testSubjects.click('lnsAnnotationLayer_new');
@@ -1037,13 +1041,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchFirstLayerIndexPattern(dataViewTitle: string) {
       await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-    },
-
-    /**
-     * Returns the current index pattern of the data panel
-     */
-    async getDataPanelIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
     },
 
     /**
@@ -1129,7 +1126,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
       const el = await this.getDatatableCell(rowIndex, colIndex);
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1141,7 +1138,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
       const el = await (await this.getDatatableCell(rowIndex, colIndex)).findByCssSelector('span');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1320,7 +1317,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
-      const styleString = await el.getAttribute('style');
+      const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
         if (prop && value) {
@@ -1481,17 +1478,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
-    },
-
-    async clickAddField() {
-      await testSubjects.click('lns-dataView-switch-link');
-      await testSubjects.existOrFail('indexPattern-add-field');
-      await testSubjects.click('indexPattern-add-field');
-    },
-
-    async createAdHocDataView(name: string, hasTimeField?: boolean) {
-      await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.createNewDataView(name, true, hasTimeField);
     },
 
     async switchToTextBasedLanguage(language: string) {
@@ -1806,7 +1792,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return parent.getAttribute('data-test-subj');
+          return (await parent.getAttribute('data-test-subj')) ?? '';
         })
       );
     },
@@ -1871,6 +1857,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
+      if (!url) {
+        throw Error('No data-share-url attribute found');
+      }
       return url;
     },
 

@@ -2825,6 +2825,19 @@
             "path": "packages/core/http/core-http-server/src/csp.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.ICspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [
+              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy-Report-Only` header."
+            ],
+            "path": "packages/core/http/core-http-server/src/csp.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3821,38 +3834,6 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
               {
@@ -3869,7 +3850,11 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3881,7 +3866,39 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/inference_models/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -4438,6 +4455,14 @@
               {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
+              },
+              {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
+              },
+              {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -6391,6 +6416,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
               },
               {
@@ -6400,6 +6429,18 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -6448,22 +6489,6 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/templates/register_simulate_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8221,23 +8246,11 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -8245,7 +8258,19 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_update_mapping_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -11138,7 +11163,7 @@
             "label": "access",
             "description": [],
             "signature": [
-              "\"public\" | \"internal\""
+              "\"internal\" | \"public\""
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -12242,7 +12267,7 @@
               "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
-              "\"public\" | \"internal\" | undefined"
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -14505,7 +14530,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -14784,7 +14809,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15763,7 +15788,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15890,7 +15915,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -16145,7 +16170,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -18673,7 +18698,7 @@
             "section": "def-common.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+          "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -18741,7 +18766,7 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+              "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
