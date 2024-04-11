@@ -50,6 +50,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
+    const isEditMode = mode === 'edit';
 
     let currentMode: AntivirusRegistrationModes;
     if (policy.windows.antivirus_registration.mode) {
@@ -89,7 +90,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
                 )}
               />
             </EuiText>
-            <EuiText color="subdued" size="xs">
+            <EuiText color={isEditMode ? 'subdued' : undefined} size="xs">
               {i18n.translate(
                 'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
                 {
@@ -105,10 +106,8 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
           </>
         ),
       }),
-      [policy]
+      [isEditMode, policy]
     );
-
-    const isEditMode = mode === 'edit';
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
       const updatedPolicy = cloneDeep(policy);
