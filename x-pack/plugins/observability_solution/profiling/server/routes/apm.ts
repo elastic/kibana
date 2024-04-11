@@ -6,7 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { keyBy } from 'lodash';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -15,8 +16,8 @@ import { getClient } from './compat';
 const querySchema = schema.object({
   timeFrom: schema.number(),
   timeTo: schema.number(),
-  startIndex: schema.number(),
-  endIndex: schema.number(),
+  // startIndex: schema.number(),
+  // endIndex: schema.number(),
   functionName: schema.string(),
   serviceNames: schema.arrayOf(schema.string()),
 });
@@ -28,6 +29,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
   logger,
   dependencies: {
     start: { profilingDataAccess },
+    setup: { apmDataAccess },
   },
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
@@ -39,57 +41,76 @@ export function registerTopNFunctionsAPMTransactionsRoute({
     },
     async (context, request, response) => {
       try {
+        if (!apmDataAccess) {
+          return response.ok({
+            body: [],
+          });
+        }
         const core = await context.core;
+        const { transaction: transactionIndices } = await apmDataAccess.getApmIndices(
+          core.savedObjects.client
+        );
+
+        const esClient = await getClient(context);
 
         const {
           timeFrom,
           timeTo,
-          startIndex,
-          endIndex,
+          // startIndex,
+          // endIndex,
           functionName,
           serviceNames,
         }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
-        const esClient = await getClient(context);
-
-        const query = {
-          bool: {
-            filter: [
-              ...termQuery('service.name', serviceNames[0]),
-              {
-                range: {
-                  ['@timestamp']: {
-                    gte: String(startSecs),
-                    lt: String(endSecs),
-                    format: 'epoch_second',
-                  },
+        const transactionsPerService = await Promise.all(
+          serviceNames.map(async (serviceName) => {
+            const apmFunctions = await profilingDataAccess.services.fetchESFunctions({
+              core,
+              esClient,
+              query: {
+                bool: {
+                  filter: [
+                    ...termQuery('service.name', serviceName),
+                    {
+                      range: {
+                        ['@timestamp']: {
+                          gte: String(startSecs),
+                          lt: String(endSecs),
+                          format: 'epoch_second',
+                        },
+                      },
+                    },
+                  ],
                 },
               },
-            ],
-          },
-        };
+              aggregationField: 'transaction.name',
+              indices: transactionIndices.split(','),
+              stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+            });
+            const apmFunction = apmFunctions.TopN.find(
+              (topNFunction) => topNFunction.Frame.FunctionName === functionName
+            );
 
-        const [topNFunctions, newtopNFunctions] = await Promise.all([
-          profilingDataAccess.services.fetchFunctions({
-            core,
-            esClient,
-            startIndex,
-            endIndex,
-            totalSeconds: endSecs - startSecs,
-            query,
-          }),
-          profilingDataAccess.services.fetchESFunctions({
-            core,
-            esClient,
-            query,
-            aggregationField: 'service.name',
-          }),
-        ]);
+            return { serviceName, transactionNames: Object.keys(apmFunction?.subGroups || {}) };
+          })
+        );
+
+        const transactionsGroupedByService = keyBy(transactionsPerService, 'serviceName');
 
         return response.ok({
-          body: newtopNFunctions,
+          body: serviceNames.flatMap(
+            (serviceName): Array<{ serviceName: string; transactionName: string | null }> => {
+              const transactionsFromService = transactionsGroupedByService[serviceName];
+              return !!transactionsFromService?.transactionNames.length
+                ? transactionsFromService.transactionNames.map((transactionName) => ({
+                    serviceName,
+                    transactionName,
+                  }))
+                : [{ serviceName, transactionName: null }];
+            }
+          ),
         });
       } catch (error) {
         return handleRouteHandlerError({
