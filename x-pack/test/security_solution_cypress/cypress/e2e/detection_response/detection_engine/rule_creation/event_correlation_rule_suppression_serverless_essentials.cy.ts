@@ -26,7 +26,7 @@ import { DEFINITION_DETAILS, SUPPRESS_BY_DETAILS } from '../../../../screens/rul
 const SUPPRESS_BY_FIELDS = ['agent.type'];
 
 describe(
-  'Detection rules, Event Correlation, Alert Suppression',
+  'Detection Rule Creation - EQL Rules - With Alert Suppression  - Serverless Essentials License',
   {
     tags: ['@serverless'],
     // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
@@ -56,21 +56,24 @@ describe(
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
-    it('creates rule with per rule execution suppression for essentials license for non-sequence based alerts', () => {
-      visit(CREATE_RULE_URL);
-      selectEqlRuleType();
-      fillDefineEqlRule(rule);
 
-      // selecting only suppression fields, the rest options would be default
-      fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
-      continueFromDefineStep();
+    describe('with non-sequence queries', () => {
+      it('creates a rule with a "per rule execution" suppression duration', () => {
+        visit(CREATE_RULE_URL);
+        selectEqlRuleType();
+        fillDefineEqlRule(rule);
 
-      fillAboutRuleMinimumAndContinue(rule);
-      skipScheduleRuleAction();
-      createRuleWithoutEnabling();
+        // selecting only suppression fields, the rest options would be default
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+        continueFromDefineStep();
 
-      cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+        fillAboutRuleMinimumAndContinue(rule);
+        skipScheduleRuleAction();
+        createRuleWithoutEnabling();
+
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+        });
       });
     });
   }

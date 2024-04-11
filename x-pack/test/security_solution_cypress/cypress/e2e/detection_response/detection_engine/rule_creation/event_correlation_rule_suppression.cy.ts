@@ -35,7 +35,7 @@ import {
 const SUPPRESS_BY_FIELDS = ['agent.type'];
 
 describe(
-  'Detection rules, Event Correlation, Alert Suppression',
+  'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
     tags: ['@ess', '@serverless'],
     // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
@@ -50,7 +50,7 @@ describe(
     },
   },
   () => {
-    describe('Non-sequence based Alerts', () => {
+    describe('with non-sequence queries', () => {
       const rule = getEqlRule();
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
@@ -67,7 +67,7 @@ describe(
         cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
       });
 
-      it('creates rule with per rule execution suppression', () => {
+      it('creates a rule with a "per rule execution" suppression duration', () => {
         // selecting only suppression fields, the rest options would be default
         fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
         continueFromDefineStep();
@@ -99,7 +99,7 @@ describe(
         });
       });
 
-      it('creates rule rule with time interval suppression', () => {
+      it('creates a rule with a "per time interval" suppression duration', () => {
         const expectedSuppressByFields = SUPPRESS_BY_FIELDS.slice(0, 1);
 
         // fill suppress by fields and select non-default suppression options

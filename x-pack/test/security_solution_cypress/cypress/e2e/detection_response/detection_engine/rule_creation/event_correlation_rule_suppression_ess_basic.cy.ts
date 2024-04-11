@@ -32,7 +32,7 @@ import { ruleDetailsUrl } from '../../../../urls/rule_details';
 const SUPPRESS_BY_FIELDS = ['agent.type'];
 
 describe(
-  'Detection rules, Event Correlation, Alert Suppression',
+  'Detection Rule Creation - EQL Rules - With Alert Suppression - Basic License',
   {
     tags: ['@ess'],
     // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
@@ -57,7 +57,7 @@ describe(
       cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
-    it('can not create rule with rule execution suppression on basic license for non-sequence based alerts', () => {
+    it('cannot create a rule with "per rule execution" suppression durations', () => {
       selectEqlRuleType();
 
       cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
@@ -67,7 +67,7 @@ describe(
       cy.get(TOOLTIP).contains('Platinum license');
     });
 
-    it('shows upselling message on rule details with suppression on basic license', () => {
+    it('shows an upselling message on rule suppression details', () => {
       const rule = getEqlRule();
 
       createRule({

@@ -13,10 +13,13 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { fillDefineEqlRule, selectEqlRuleType } from '../../../../tasks/create_new_rule';
 
 import { TOOLTIP } from '../../../../screens/common';
-import { ALERT_SUPPRESSION_FIELDS } from '../../../../screens/create_new_rule';
+import {
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+} from '../../../../screens/create_new_rule';
 
 describe(
-  'Detection rules, Event Correlation,Disable Sequence Alert Suppression',
+  'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
     tags: ['@ess', '@serverless'],
     // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
@@ -31,7 +34,7 @@ describe(
     },
   },
   () => {
-    describe('sequence based Alerts', () => {
+    describe('with sequence queries ', () => {
       const rule = getEqlSequenceRule();
 
       beforeEach(() => {
@@ -43,7 +46,9 @@ describe(
         fillDefineEqlRule(rule);
       });
 
-      it('should disable the suppression fields incase of eql sequence query', () => {
+      it('disables the suppression fields and presents an informative tooltip', () => {
+        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+
         cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
         cy.get(TOOLTIP).contains('Suppression is not supported for EQL sequence queries.');
       });
