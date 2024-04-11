@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { SloSettings } from '@kbn/slo-schema';
+import { GetSLOSettingsResponse } from '@kbn/slo-schema';
+import { useQuery } from '@tanstack/react-query';
+import { useKibana } from '../../utils/kibana_react';
 
 export const useGetSettings = () => {
   const { http } = useKibana().services;
+  const { isLoading, data } = useQuery({
+    queryKey: ['getSloSettings'],
+    queryFn: async ({ signal }) => {
+      try {
+        return http.get<GetSLOSettingsResponse>('/internal/slo/settings', { signal });
+      } catch (error) {
+        return defaultSettings;
+      }
+    },
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
 
-  const { data: currentSettings } = useFetcher(() => {
-    return http?.get<SloSettings>('/internal/slo/settings');
-  }, [http]);
-  return currentSettings ?? defaultSettings;
+  return { isLoading, data };
 };
 
-const defaultSettings = {
+const defaultSettings: GetSLOSettingsResponse = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
 };

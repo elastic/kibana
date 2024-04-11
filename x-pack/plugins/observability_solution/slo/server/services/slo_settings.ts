@@ -24,7 +24,7 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return {
-        useAllRemoteClusters: true,
+        useAllRemoteClusters: false,
         selectedRemoteClusters: [],
       };
     }

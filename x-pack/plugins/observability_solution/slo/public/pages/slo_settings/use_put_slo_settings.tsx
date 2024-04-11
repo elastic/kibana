@@ -7,8 +7,8 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { SloSettings } from '@kbn/slo-schema';
-import { QueryKey, useMutation } from '@tanstack/react-query';
+import { PutSLOSettingsParams, PutSLOSettingsResponse } from '@kbn/slo-schema';
+import { useMutation } from '@tanstack/react-query';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -21,16 +21,11 @@ export function usePutSloSettings() {
     notifications: { toasts },
   } = useKibana().services;
 
-  return useMutation<
-    SloSettings,
-    ServerError,
-    { settings: SloSettings },
-    { previousData?: SloSettings; queryKey?: QueryKey }
-  >(
+  return useMutation<PutSLOSettingsResponse, ServerError, { settings: PutSLOSettingsParams }>(
     ['putSloSettings'],
     ({ settings }) => {
       const body = JSON.stringify(settings);
-      return http.put<SloSettings>(`/internal/slo/settings`, { body });
+      return http.put<PutSLOSettingsResponse>(`/internal/slo/settings`, { body });
     },
     {
       onSuccess: (data, { settings }) => {

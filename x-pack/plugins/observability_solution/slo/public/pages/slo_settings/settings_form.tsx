@@ -31,13 +31,12 @@ export function SettingsForm() {
 
   const { http } = useKibana().services;
 
+  const { data: currentSettings } = useGetSettings();
   const { mutateAsync: updateSettings } = usePutSloSettings();
 
   const { data, loading } = useFetcher(() => {
     return http?.get<Array<{ name: string }>>('/api/remote_clusters');
   }, [http]);
-
-  const currentSettings = useGetSettings();
 
   useEffect(() => {
     if (currentSettings) {

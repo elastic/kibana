@@ -15,6 +15,7 @@ const putSLOSettingsResponseSchema = sloSettingsSchema;
 
 type PutSLOSettingsParams = t.TypeOf<typeof putSLOSettingsParamsSchema.props.body>;
 type PutSLOSettingsResponse = t.OutputOf<typeof putSLOSettingsResponseSchema>;
+type GetSLOSettingsResponse = t.OutputOf<typeof sloSettingsSchema>;
 
 export { putSLOSettingsParamsSchema, putSLOSettingsResponseSchema };
-export type { PutSLOSettingsParams, PutSLOSettingsResponse };
+export type { PutSLOSettingsParams, PutSLOSettingsResponse, GetSLOSettingsResponse };

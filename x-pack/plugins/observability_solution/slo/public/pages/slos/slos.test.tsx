@@ -136,8 +136,11 @@ describe('SLOs Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useGetSettingsMock.mockReturnValue({
-      useAllRemoteClusters: false,
-      selectedRemoteClusters: [],
+      isLoading: false,
+      data: {
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
+      },
     });
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
     jest

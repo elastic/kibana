@@ -25,9 +25,9 @@ export function SloListSearchBar() {
   } = useKibana().services;
 
   const { state, onStateChange } = useUrlSearchState();
-  const loading = useSloCrudLoading();
+  const isSloCrudLoading = useSloCrudLoading();
 
-  const { dataView } = useSloSummaryDataView();
+  const { isLoading: isDataViewLoading, data: dataView } = useSloSummaryDataView();
 
   useEffect(() => {
     const sub = query.state$.subscribe(() => {
@@ -47,12 +47,12 @@ export function SloListSearchBar() {
         appName={observabilityAppId}
         placeholder={PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
-        isDisabled={loading}
+        isDisabled={isSloCrudLoading}
         renderQueryInputAppend={() => (
           <QuickFilters
             dataView={dataView}
             initialState={state}
-            loading={loading}
+            loading={isSloCrudLoading || isDataViewLoading}
             onStateChange={onStateChange}
           />
         )}

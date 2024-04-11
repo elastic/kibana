@@ -30,8 +30,10 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
   const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
   const groupBy = state.groupBy;
 
-  const { useAllRemoteClusters, selectedRemoteClusters } = useGetSettings();
-  const hasRemoteEnabled = useAllRemoteClusters || selectedRemoteClusters.length > 0;
+  const { data: settings } = useGetSettings();
+
+  const hasRemoteEnabled =
+    settings && (settings.useAllRemoteClusters || settings.selectedRemoteClusters.length > 0);
 
   const handleChangeGroupBy = (value: GroupByField) => {
     onStateChange({

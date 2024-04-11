@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SloSettings } from '@kbn/slo-schema';
+import { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 export const getListOfSloSummaryIndices = (
-  settings: SloSettings,
+  settings: GetSLOSettingsResponse,
   clustersByName: Array<{ name: string; isConnected: boolean }>
 ) => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
