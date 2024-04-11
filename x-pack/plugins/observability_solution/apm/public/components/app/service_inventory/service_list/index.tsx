@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -153,9 +154,27 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.HealthStatus,
-            name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-              defaultMessage: 'Health',
-            }),
+            name: (
+              <>
+                {i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
+                  defaultMessage: 'Health',
+                })}{' '}
+                <EuiIconTip
+                  iconProps={{
+                    className: 'eui-alignTop',
+                  }}
+                  position="right"
+                  color="subdued"
+                  content={i18n.translate(
+                    'xpack.apm.servicesTable.healthColumnLabel.tooltip',
+                    {
+                      defaultMessage:
+                        'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
+                    }
+                  )}
+                />
+              </>
+            ),
             width: `${unit * 6}px`,
             sortable: true,
             render: (_, { healthStatus }) => {

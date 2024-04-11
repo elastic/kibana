@@ -3839,5 +3839,42 @@ describe('update()', () => {
         `[Error: Error validating actions - [actions.0.group]: expected value of type [string] but got [undefined]]`
       );
     });
+
+    test('should throw an error if the user does not have privileges to execute the action', async () => {
+      actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error('Unauthorized to execute actions')
+      );
+
+      await expect(() =>
+        rulesClient.update({
+          id: '1',
+          data: {
+            schedule: { interval: '1m' },
+            name: 'abc',
+            tags: ['foo'],
+            params: {
+              bar: true,
+            },
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+            actions: [
+              {
+                group: 'default',
+                id: '1',
+                params: {
+                  foo: true,
+                },
+              },
+            ],
+            systemActions: [
+              {
+                id: 'system_action-id',
+                params: {},
+              },
+            ],
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute actions]`);
+    });
   });
 });

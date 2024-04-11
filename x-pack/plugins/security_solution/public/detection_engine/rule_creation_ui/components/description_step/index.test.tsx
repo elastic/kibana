@@ -575,7 +575,7 @@ describe('description_step', () => {
     });
 
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
+      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning'];
       const suppressionFields = {
         groupByDuration: {
           unit: 'm',
