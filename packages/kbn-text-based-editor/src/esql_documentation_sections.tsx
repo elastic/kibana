@@ -1787,6 +1787,40 @@ The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearc
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        {
+          defaultMessage: 'MV_LAST',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            {
+              defaultMessage: `### MV_LAST
+Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
+  
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_LAST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | baz
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
@@ -1928,6 +1962,39 @@ Returning:
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction',
+        {
+          defaultMessage: 'MV_SORT',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction.markdown',
+            {
+              defaultMessage: `### MV_SORT
+Sorts a multivalue expression in lexicographical order.
+
+Example:
+
+\`\`\`
+ROW a = [4, 2, -3, 2]
+| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+\`\`\`
+
+
+Valid order options are \`ASC\` and \`DESC\`, default is \`ASC\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction',
         {
           defaultMessage: 'MV_SUM',
@@ -1954,40 +2021,6 @@ Returning:
 
 NOTE: The input type can be any number and the output type is the same as the input type.
               `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
-        {
-          defaultMessage: 'MV_LAST',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
-            {
-              defaultMessage: `### MV_LAST
-Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
-  
-\`\`\`
-ROW a="foo;bar;baz" 
-| EVAL first_a = MV_LAST(SPLIT(a, ";"))
-\`\`\`
-
-Returning:
-
-\`\`\`
-foo;bar;baz | baz
-\`\`\`
-            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
