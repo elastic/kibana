@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
-
-export const ExportJobsFlyout = dynamic(async () => ({
-  default: (await import('./export_jobs_flyout')).ExportJobsFlyout,
-}));
+export const Y_AXIS_LABEL_WIDTH = 170;
+export const Y_AXIS_LABEL_PADDING = 8;
+export const SWIM_LANE_LABEL_WIDTH = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;

@@ -8,28 +8,28 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
-import { TimeSeriesExplorer } from '../../timeseriesexplorer';
-import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
-import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { TimeSeriesExplorerUrlStateManager } from './state_manager';
+import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
+import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
-jest.mock('../../services/toast_notification_service');
+jest.mock('../../../services/toast_notification_service');
 
-jest.mock('../../timeseriesexplorer', () => ({
+jest.mock('../../../timeseriesexplorer', () => ({
   TimeSeriesExplorer: jest.fn(() => {
     return null;
   }),
 }));
 
-jest.mock('../../timeseriesexplorer/timeseriesexplorer_page', () => ({
+jest.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => ({
   TimeSeriesExplorerPage: jest.fn(({ children }) => {
     return <>{children}</>;
   }),
 }));
 
-jest.mock('../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => ({
+jest.mock('../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => ({
   TimeseriesexplorerNoJobsFound: jest.fn(() => {
     return null;
   }),
@@ -90,13 +90,13 @@ jest.mock('@kbn/ml-url-state', () => {
   };
 });
 
-jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
+jest.mock('../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
-jest.mock('../../components/help_menu', () => ({
+jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
 
-jest.mock('../../contexts/kibana/kibana_context', () => {
+jest.mock('../../../contexts/kibana/kibana_context', () => {
   return {
     useMlKibana: () => {
       return {
