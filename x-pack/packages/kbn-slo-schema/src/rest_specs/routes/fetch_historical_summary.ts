@@ -18,7 +18,6 @@ import {
   summarySchema,
 } from '../../schema/common';
 
-// TODO Kevin: Check if we can remove the extra parameters and find the remote SLO from indices
 const fetchHistoricalSummaryParamsSchema = t.type({
   body: t.type({
     list: t.array(

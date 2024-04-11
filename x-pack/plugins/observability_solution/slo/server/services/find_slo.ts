@@ -45,7 +45,6 @@ export class FindSLO {
   }
 }
 
-// TODO Kevin: Infered type is not working on this function. Refactor/introduced type needed.
 function mergeSloWithSummary(
   localSloDefinitions: SLODefinition[],
   summaryResults: SummaryResult[]

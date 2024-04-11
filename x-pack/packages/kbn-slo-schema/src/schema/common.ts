@@ -59,7 +59,6 @@ const metaSchema = t.partial({
   }),
 });
 
-// TODO Kevin: add spaceId and change kibanaUrl to be optionally defined instead of backfilling it with an empty string?
 const remoteSchema = t.type({
   remoteName: t.string,
   kibanaUrl: t.string,

@@ -16,7 +16,7 @@ import { SloListError } from '../slo_list_error';
 import { SloListItem } from './slo_list_item';
 
 export interface Props {
-  sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type
+  sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
 }

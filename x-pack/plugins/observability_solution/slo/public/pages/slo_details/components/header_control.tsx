@@ -35,7 +35,6 @@ export interface Props {
   isLoading: boolean;
 }
 
-// TODO Kevin: Refactor the need to check slo undefined. We can probably simplify everything here.
 export function HeaderControl({ isLoading, slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },
@@ -132,7 +131,6 @@ export function HeaderControl({ isLoading, slo }: Props) {
     [navigateToUrl]
   );
 
-  // TODO Kevin: Should we centralize this business logic to avoid scattering the same logic everywhere?
   const isRemote = !!slo?.remote;
   const hasUndefinedRemoteKibanaUrl = !!slo?.remote && slo?.remote?.kibanaUrl === '';
 

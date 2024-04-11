@@ -37,7 +37,7 @@ import { SloCardItemBadges } from './slo_card_item_badges';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
-  slo: SLOWithSummaryResponse; // TODO Kevin: wrong type
+  slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;

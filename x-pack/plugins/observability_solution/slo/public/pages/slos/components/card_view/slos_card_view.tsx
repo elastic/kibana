@@ -21,7 +21,7 @@ import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloCardItem } from './slo_card_item';
 
 export interface Props {
-  sloList: SLOWithSummaryResponse[]; // TODO Kevin: wrong type
+  sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
 }

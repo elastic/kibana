@@ -18,8 +18,6 @@ import {
   createRemoteSloEditUrl,
 } from '../../../utils/slo/remote_slo_urls';
 
-// TODO Kevin: Refactor: can we remove the undefined check somehow?
-// TODO Kevin: Refactor remote url generation
 export const useSloActions = ({
   slo,
   rules,
@@ -57,7 +55,6 @@ export const useSloActions = ({
       const locator = locators.get<RulesParams>(rulesLocatorID);
       if (!locator) return undefined;
 
-      // TODO Kevin: Extract this into remote_slo_urls maybe?
       if (slo.remote && slo.remote.kibanaUrl !== '') {
         const basePath = http.basePath.get(); // "/kibana/s/my-space"
         const url = await locator.getUrl({ params: { sloId: slo.id } }); // "/kibana/s/my-space/app/rules/123"

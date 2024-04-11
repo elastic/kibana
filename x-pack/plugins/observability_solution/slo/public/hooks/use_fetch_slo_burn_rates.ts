@@ -49,7 +49,7 @@ export function useFetchSloBurnRates({
             {
               body: JSON.stringify({
                 windows,
-                instanceId: slo.instanceId ?? ALL_VALUE, // TODO Kevin: We should always have an instanceId since we backfill it from the find and get APIs
+                instanceId: slo.instanceId ?? ALL_VALUE,
                 remoteName: slo.remote?.remoteName,
               }),
               signal,

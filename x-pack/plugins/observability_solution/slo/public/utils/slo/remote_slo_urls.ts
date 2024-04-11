@@ -10,8 +10,6 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
 
-// TODO Kevin: Add spaceId in remote schema?
-// TODO Kevin: Change remote.kibanaUrl to be optional? (since some summary document may not have it until kibana upgrade)
 export function createRemoteSloDetailsUrl(
   slo: SLOWithSummaryResponse,
   spaceId: string = 'default'

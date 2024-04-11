@@ -132,7 +132,6 @@ const createSLORoute = createSloServerRoute({
   },
 });
 
-// TODO Kevin: Create Response type for inspect routes, so we can type correctly the corresponding hook.
 const inspectSLORoute = createSloServerRoute({
   endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
   options: {

@@ -58,8 +58,6 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
             <SloSelector
               singleSelection={true}
               hasError={hasError}
-              // TODO Kevin: double check onSelected function params type: array or uniq SLO? We seems to handle only the case with on SLO here.
-              // Also, why are we checking id in slo?
               onSelected={(slo) => {
                 setHasError(slo === undefined);
                 if (slo && 'id' in slo) {

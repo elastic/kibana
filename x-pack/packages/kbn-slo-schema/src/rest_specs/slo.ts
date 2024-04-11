@@ -19,14 +19,14 @@ const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
   t.type({ summary: summarySchema, groupings: groupingsSchema }),
   t.partial({
-    instanceId: allOrAnyString, // TODO Kevin: can be moved to t.type() since we always backfill it with '*'
+    instanceId: allOrAnyString,
     meta: metaSchema,
     remote: remoteSchema,
   }),
 ]);
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>; // TODO Kevin: returned from some APIs: put, reset, get_definition, inspect
-type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>; // TODO Kevin: Find a better name... We include more things than just the Summary.
+type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionSchema>;
+type SLOWithSummaryResponse = t.OutputOf<typeof sloWithDataResponseSchema>;
 
 export { sloWithDataResponseSchema };
 export type { SLODefinitionResponse, SLOWithSummaryResponse };

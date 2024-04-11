@@ -21,7 +21,7 @@ export interface UseFetchHistoricalSummaryResponse {
 }
 
 export interface Params {
-  sloList: SLOWithSummaryResponse[]; // TODO Kevin: NOT THE CORRECT TYPE
+  sloList: SLOWithSummaryResponse[];
   shouldRefetch?: boolean;
 }
 
@@ -31,7 +31,6 @@ export function useFetchHistoricalSummary({
 }: Params): UseFetchHistoricalSummaryResponse {
   const { http } = useKibana().services;
 
-  // TODO Kevin: Check if we want to have an API using partial SLO model
   const list = sloList.map((slo) => ({
     sloId: slo.id,
     instanceId: slo.instanceId ?? ALL_VALUE,

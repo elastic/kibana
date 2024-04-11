@@ -74,7 +74,6 @@ export function SloItemActions({
   const { hasWriteCapabilities } = useCapabilities();
   const navigateToClone = useCloneSlo();
 
-  // TODO Kevin: Should we make useSloActions consistent? Either return an URL for all actions, or return directly the handlers.
   const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, sloDetailsUrl } = useSloActions({
     slo,
     rules,
@@ -131,7 +130,6 @@ export function SloItemActions({
     />
   );
 
-  // TODO Kevin: Should we centralize this business logic to avoid scattering the same logic everywhere?
   const isRemote = !!slo.remote;
   const hasUndefinedRemoteKibanaUrl = !!slo.remote && slo.remote.kibanaUrl === '';
 

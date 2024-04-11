@@ -28,7 +28,6 @@ export const emptySloList: FindSLOResponse = {
 
 const now = '2022-12-29T10:11:12.000Z';
 
-// TODO Kevin: This is partially incorrect depending on the endpoint.
 const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   name: 'super important level service',
   description: 'some description useful',
