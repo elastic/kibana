@@ -8,14 +8,11 @@ import './slo_group_filters.scss';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import { SLOGroupWithSummaryResponse } from '@kbn/slo-schema';
-
 import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useFetchSloGroups } from '../../../hooks/use_fetch_slo_groups';
 import { SLI_OPTIONS } from '../../../pages/slo_edit/constants';
-// import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
@@ -49,38 +46,24 @@ export const groupByOptions: Option[] = [
 
 interface Props {
   onSelected: (prop: string, value: string | Array<string | undefined>) => void;
-  selectedFilters: GroupFilters; // TODO fix type
+  selectedFilters: GroupFilters;
 }
 
-export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
-  const mapSelectedGroupsToOptions = (groups: string[] | undefined) =>
-    groups?.map((group) => {
-      const selectedGroupBy = selectedFilters.groupBy;
-      let label = group;
-      if (selectedGroupBy === 'status') {
-        label = group.toLowerCase();
-      } else if (selectedGroupBy === 'slo.indicator.type') {
-        label = SLI_OPTIONS.find((option) => option.value === group)!.text ?? group;
-      }
-      return {
-        label,
-        value: group,
-      };
-    }) ?? [];
-  const mapGroupsToOptions = (items: SLOGroupWithSummaryResponse[] | undefined) =>
-    items?.map((item) => {
-      let label = item.group;
-      if (item.groupBy === 'status') {
-        label = item.group.toLowerCase();
-      } else if (item.groupBy === 'slo.indicator.type') {
-        label = SLI_OPTIONS.find((option) => option.value === item.group)!.text ?? item.group;
-      }
-      return {
-        label,
-        value: item.group,
-      };
-    }) ?? [];
+const mapGroupsToOptions = (groups: string[] | undefined, selectedGroupBy: string) =>
+  groups?.map((group) => {
+    let label = group;
+    if (selectedGroupBy === 'status') {
+      label = group.toLowerCase();
+    } else if (selectedGroupBy === 'slo.indicator.type') {
+      label = SLI_OPTIONS.find((option) => option.value === group)!.text ?? group;
+    }
+    return {
+      label,
+      value: group,
+    };
+  }) ?? [];
 
+export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -97,7 +80,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
-  >(mapSelectedGroupsToOptions(selectedFilters.groups));
+  >(mapGroupsToOptions(selectedFilters.groups, selectedGroupBy));
   const [searchValue, setSearchValue] = useState<string>('');
   const sliTypeSearch = SLI_OPTIONS.find((option) =>
     option.text.toLowerCase().includes(searchValue.toLowerCase())
@@ -113,7 +96,10 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   useEffect(() => {
     const isLoadedWithData = !isLoading && data?.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? mapGroupsToOptions(data?.results)
+      ? mapGroupsToOptions(
+          data?.results.map((item) => item.group),
+          selectedGroupBy
+        )
       : [];
     setGroupOptions(opts);
 
@@ -169,6 +155,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
             setSelectedGroupBy(e.target.value as GroupBy);
             onSelected('groupBy', e.target.value);
             setSelectedGroupOptions([]);
+            onSelected('groups', []);
           }}
         />
       </EuiFormRow>
