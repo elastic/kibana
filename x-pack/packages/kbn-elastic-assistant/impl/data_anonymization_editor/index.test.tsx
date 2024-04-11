@@ -15,8 +15,25 @@ import { DataAnonymizationEditor } from '.';
 
 describe('DataAnonymizationEditor', () => {
   const mockSelectedPromptContext: SelectedPromptContext = {
-    allow: ['field1', 'field2'],
-    allowReplacement: ['field1'],
+    contextAnonymizationFields: {
+      total: 0,
+      page: 1,
+      perPage: 1000,
+      data: [
+        {
+          id: 'field1',
+          field: 'field1',
+          anonymized: true,
+          allowed: true,
+        },
+        {
+          id: 'field2',
+          field: 'field2',
+          anonymized: false,
+          allowed: true,
+        },
+      ],
+    },
     promptContextId: 'test-id',
     rawData: 'test-raw-data',
   };
