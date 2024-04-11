@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
-  describe('@ess @serverless EQL type rules, alert suppression', () => {
+  describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -72,231 +72,316 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('non-sequence queries', () => {
-      // First test creates a real rule - remaining tests use preview API
-      it('should suppress alert for 2 times rule executions with a suppression duration exceeding the rule execution', async () => {
-        const id = uuidv4();
-        const firstTimestamp = new Date().toISOString();
+      describe('with "per time interval" suppression duration', () => {
+        it('suppresses alerts across two rule executions when the suppression duration exceeds the rule interval', async () => {
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
 
-        const firstDocument = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-        await indexListOfSourceDocuments([firstDocument]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: {
+              name: 'host-a',
             },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-        expect(alerts.hits.hits.length).toEqual(1);
+          };
+          await indexListOfSourceDocuments([firstDocument]);
 
-        // suppression start equal to alert timestamp
-        const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
-
-        expect(alerts.hits.hits[0]._source).toEqual(
-          expect.objectContaining({
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'host.name',
-                value: ['host-a'],
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
               },
-            ],
-            // suppression boundaries equal to original event time, since no alert been suppressed
-            [ALERT_SUPPRESSION_START]: firstTimestamp,
-            [ALERT_SUPPRESSION_END]: firstTimestamp,
-            [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [TIMESTAMP]: suppressionStart,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-          })
-        );
-
-        const secondTimestamp = new Date().toISOString();
-        const secondDocument = {
-          id,
-          '@timestamp': secondTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-
-        // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
-        // trigger an update to the existing alert without changing the timestamp
-        await indexListOfSourceDocuments([secondDocument, secondDocument]);
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp = new Date();
-        const secondAlerts = await getOpenAlerts(
-          supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp
-        );
-        expect(secondAlerts.hits.hits.length).toEqual(1);
-        expect(secondAlerts.hits.hits[0]._source).toEqual(
-          expect.objectContaining({
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'host.name',
-                value: ['host-a'],
-              },
-            ],
-            [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
-            [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
-            [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 2, // 2 alerts from second rule run, that's why 2 suppressed
-          })
-        );
-        // suppression end value should be greater than second document timestamp, but lesser than current time
-        const suppressionEnd = new Date(
-          secondAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_END] as string
-        ).getTime();
-        expect(suppressionEnd).toBeLessThan(new Date().getTime());
-        expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
-      });
-
-      it('should NOT suppress and update an alert if the alert is closed', async () => {
-        const id = uuidv4();
-        const firstTimestamp = new Date().toISOString();
-
-        const firstDocument = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-        await indexListOfSourceDocuments([firstDocument]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
+              missing_fields_strategy: 'suppress',
             },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-        const createdRule = await createRule(supertest, log, rule);
-        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+            from: 'now-35m',
+            interval: '30m',
+          };
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          expect(alerts.hits.hits.length).toEqual(1);
 
-        // Close the alert. Subsequent rule executions should ignore this closed alert
-        // for suppression purposes.
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+          // suppression start equal to alert timestamp
+          const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
 
-        await supertest
-          .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(setAlertStatus({ alertIds, status: 'closed' }))
-          .expect(200);
+          expect(alerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              // suppression boundaries equal to original event time, since no alert been suppressed
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [TIMESTAMP]: suppressionStart,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
 
-        const secondTimestamp = new Date().toISOString();
-        const secondDocument = {
-          id,
-          '@timestamp': secondTimestamp,
-          agent: {
-            name: 'agent-1',
-          },
-        };
-        // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
-        // trigger a new alert since the first one is now closed.
-        await indexListOfSourceDocuments([secondDocument]);
-
-        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
-        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
-        const afterTimestamp = new Date();
-        await getOpenAlerts(
-          supertest,
-          log,
-          es,
-          createdRule,
-          RuleExecutionStatusEnum.succeeded,
-          undefined,
-          afterTimestamp
-        );
-
-        expect(alerts.hits.hits[0]._source).toEqual(
-          expect.objectContaining({
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'host.name',
-                value: ['host-a'],
-              },
-            ],
-            [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-          })
-        );
-      });
-
-      it('should NOT suppress alerts when suppression period is less than rule interval', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:15:00.000Z';
-
-        const firstRunDoc = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: {
-            name: 'host-a',
-          },
-        };
-        const secondRunDoc = {
-          ...firstRunDoc,
-          '@timestamp': secondTimestamp,
-        };
-
-        await indexListOfSourceDocuments([firstRunDoc, secondRunDoc]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 20,
-              unit: 'm',
+          const secondTimestamp = new Date().toISOString();
+          const secondDocument = {
+            id,
+            '@timestamp': secondTimestamp,
+            host: {
+              name: 'host-a',
             },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
+          };
+
+          // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
+          // trigger an update to the existing alert without changing the timestamp
+          await indexListOfSourceDocuments([secondDocument, secondDocument]);
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const afterTimestamp = new Date();
+          const secondAlerts = await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            afterTimestamp
+          );
+          expect(secondAlerts.hits.hits.length).toEqual(1);
+          expect(secondAlerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
+              [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
+              [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2, // 2 alerts from second rule run, that's why 2 suppressed
+            })
+          );
+          // suppression end value should be greater than second document timestamp, but lesser than current time
+          const suppressionEnd = new Date(
+            secondAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_END] as string
+          ).getTime();
+          expect(suppressionEnd).toBeLessThan(new Date().getTime());
+          expect(suppressionEnd).toBeGreaterThan(new Date(secondTimestamp).getDate());
         });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: [ALERT_ORIGINAL_TIME],
+
+        it('does not suppress a new alert and update the original alert if the original alert is closed', async () => {
+          const id = uuidv4();
+          const firstTimestamp = new Date().toISOString();
+
+          const firstDocument = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: {
+              name: 'host-a',
+            },
+          };
+          await indexListOfSourceDocuments([firstDocument]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+          const createdRule = await createRule(supertest, log, rule);
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          // Close the alert. Subsequent rule executions should ignore this closed alert
+          // for suppression purposes.
+          const alertIds = alerts.hits.hits.map((alert) => alert._id);
+
+          await supertest
+            .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send(setAlertStatus({ alertIds, status: 'closed' }))
+            .expect(200);
+
+          const secondTimestamp = new Date().toISOString();
+          const secondDocument = {
+            id,
+            '@timestamp': secondTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
+          // trigger a new alert since the first one is now closed.
+          await indexListOfSourceDocuments([secondDocument]);
+
+          await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+          await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+          const afterTimestamp = new Date();
+          await getOpenAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum.succeeded,
+            undefined,
+            afterTimestamp
+          );
+
+          expect(alerts.hits.hits[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
         });
-        expect(previewAlerts.length).toBe(2);
-        expect(previewAlerts[0]._source).toEqual(
-          expect.objectContaining({
+
+        it('does not suppress alerts when suppression duration is less than rule interval', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:15:00.000Z';
+
+          const firstRunDoc = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: {
+              name: 'host-a',
+            },
+          };
+          const secondRunDoc = {
+            ...firstRunDoc,
+            '@timestamp': secondTimestamp,
+          };
+
+          await indexListOfSourceDocuments([firstRunDoc, secondRunDoc]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 20,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toBe(2);
+          expect(previewAlerts[0]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+
+          expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            })
+          );
+        });
+
+        it('suppresses alerts across three rule executions', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:15:00.000Z';
+          const thirdTimestamp = '2020-10-28T06:45:00.000Z';
+          const firstRunDoc = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+          };
+          const secondRunDoc = {
+            ...firstRunDoc,
+            '@timestamp': secondTimestamp,
+          };
+          const thirdRunDoc = {
+            ...firstRunDoc,
+            '@timestamp': thirdTimestamp,
+          };
+
+          await indexListOfSourceDocuments([
+            firstRunDoc,
+            firstRunDoc,
+            secondRunDoc,
+            secondRunDoc,
+            thirdRunDoc,
+          ]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+            invocationCount: 3,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
@@ -304,408 +389,324 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
+            [ALERT_START]: '2020-10-28T06:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
             [ALERT_SUPPRESSION_START]: firstTimestamp,
-            [ALERT_SUPPRESSION_END]: firstTimestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-          })
-        );
+            [ALERT_SUPPRESSION_END]: thirdTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
+          });
+        });
 
-        expect(previewAlerts[1]._source).toEqual(
-          expect.objectContaining({
+        it('suppresses alerts when using a timestamp override', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+          const docWithoutOverride = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+            event: {
+              ingested: firstTimestamp,
+            },
+          };
+          const docWithOverride = {
+            ...docWithoutOverride,
+            // This doc simulates a very late arriving doc
+            '@timestamp': '2020-10-28T03:00:00.000Z',
+            event: {
+              ingested: secondTimestamp,
+            },
+          };
+
+          await indexListOfSourceDocuments([docWithoutOverride, docWithOverride]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+            timestamp_override: 'event.ingested',
+          };
+          // 1 alert should be suppressed, based on event.ingested value of a document
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['host.name', ALERT_ORIGINAL_TIME],
+          });
+
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
                 value: ['host-a'],
               },
             ],
-            [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
-            [ALERT_SUPPRESSION_START]: secondTimestamp,
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
             [ALERT_SUPPRESSION_END]: secondTimestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-          })
-        );
-      });
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+        });
 
-      it('should suppress alerts in the time window that covers 3 rule executions', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:15:00.000Z';
-        const thirdTimestamp = '2020-10-28T06:45:00.000Z';
-        const firstRunDoc = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: { name: 'host-a' },
-        };
-        const secondRunDoc = {
-          ...firstRunDoc,
-          '@timestamp': secondTimestamp,
-        };
-        const thirdRunDoc = {
-          ...firstRunDoc,
-          '@timestamp': thirdTimestamp,
-        };
+        it('ignores duplicate alerts while suppressing new ones', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+          const doc1 = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+          };
 
-        await indexListOfSourceDocuments([
-          firstRunDoc,
-          firstRunDoc,
-          secondRunDoc,
-          secondRunDoc,
-          thirdRunDoc,
-        ]);
+          const doc2 = {
+            ...doc1,
+            '@timestamp': secondTimestamp,
+          };
 
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
+          // 4 alert should be suppressed
+          await indexListOfSourceDocuments([doc1, doc1, doc2, doc2, doc2]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
             },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
+            // large look-back time covers all docs
+            from: 'now-1h',
+            interval: '30m',
+          };
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
-          invocationCount: 3,
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['host.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: ['host-a'],
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
+          });
         });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: [ALERT_ORIGINAL_TIME],
-        });
-        expect(previewAlerts.length).toEqual(1);
-        expect(previewAlerts[0]._source).toEqual({
-          ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: ['host-a'],
+
+        it('suppress alerts with missing fields when rule is configured to do so', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+          const docWithMissingField1 = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+          };
+
+          const doc1 = {
+            ...docWithMissingField1,
+            agent: { name: 'agent-1' },
+          };
+
+          const docWithMissingField2 = {
+            ...docWithMissingField1,
+            '@timestamp': secondTimestamp,
+          };
+
+          const doc2 = {
+            ...doc1,
+            '@timestamp': secondTimestamp,
+          };
+
+          // 4 alert should be suppressed: 2 for agent.name: 'agent-1' and 2 for missing agent.name
+          await indexListOfSourceDocuments([
+            doc1,
+            doc1,
+            docWithMissingField1,
+            docWithMissingField1,
+            docWithMissingField2,
+            doc2,
+          ]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
             },
-          ],
-          [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
-          [ALERT_START]: '2020-10-28T06:00:00.000Z',
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: thirdTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: ['agent-1'],
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          });
+
+          expect(previewAlerts[1]._source).toEqual({
+            ...previewAlerts[1]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: null,
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          });
         });
-      });
 
-      it('should correctly suppress when using a timestamp override', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:10:00.000Z';
-        const docWithoutOverride = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: { name: 'host-a' },
-          event: {
-            ingested: firstTimestamp,
-          },
-        };
-        const docWithOverride = {
-          ...docWithoutOverride,
-          // This doc simulates a very late arriving doc
-          '@timestamp': '2020-10-28T03:00:00.000Z',
-          event: {
-            ingested: secondTimestamp,
-          },
-        };
+        it('does not suppress alerts with missing fields if configured as such', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+          const docWithMissingField1 = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+          };
 
-        await indexListOfSourceDocuments([docWithoutOverride, docWithOverride]);
+          const doc1 = {
+            ...docWithMissingField1,
+            agent: { name: 'agent-1' },
+          };
 
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
+          const docWithMissingField2 = {
+            ...docWithMissingField1,
+            '@timestamp': secondTimestamp,
+          };
+
+          const doc2 = {
+            ...doc1,
+            '@timestamp': secondTimestamp,
+          };
+
+          // 2 alert should be suppressed: 2 for agent.name: 'agent-1' and not any for missing agent.name
+          await indexListOfSourceDocuments([
+            doc1,
+            doc1,
+            docWithMissingField1,
+            docWithMissingField1,
+            docWithMissingField2,
+            doc2,
+          ]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'doNotSuppress',
             },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-          timestamp_override: 'event.ingested',
-        };
-        // 1 alert should be suppressed, based on event.ingested value of a document
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: ['host.name', ALERT_ORIGINAL_TIME],
-        });
+            from: 'now-35m',
+            interval: '30m',
+          };
 
-        expect(previewAlerts.length).toEqual(1);
-        expect(previewAlerts[0]._source).toEqual({
-          ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: ['host-a'],
-            },
-          ],
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
-        });
-      });
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(4);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: ['agent-1'],
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          });
 
-      it('should deduplicate multiple alerts while suppressing new ones', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:10:00.000Z';
-        const doc1 = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: { name: 'host-a' },
-        };
-
-        const doc2 = {
-          ...doc1,
-          '@timestamp': secondTimestamp,
-        };
-
-        // 4 alert should be suppressed
-        await indexListOfSourceDocuments([doc1, doc1, doc2, doc2, doc2]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-            missing_fields_strategy: 'suppress',
-          },
-          // large look-back time covers all docs
-          from: 'now-1h',
-          interval: '30m',
-        };
-
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: ['host.name', ALERT_ORIGINAL_TIME],
-        });
-        expect(previewAlerts.length).toEqual(1);
-        expect(previewAlerts[0]._source).toEqual({
-          ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'host.name',
-              value: ['host-a'],
-            },
-          ],
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
-        });
-      });
-
-      it('should suppress alerts with missing fields', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:10:00.000Z';
-        const docWithMissingField1 = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: { name: 'host-a' },
-        };
-
-        const doc1 = {
-          ...docWithMissingField1,
-          agent: { name: 'agent-1' },
-        };
-
-        const docWithMissingField2 = {
-          ...docWithMissingField1,
-          '@timestamp': secondTimestamp,
-        };
-
-        const doc2 = {
-          ...doc1,
-          '@timestamp': secondTimestamp,
-        };
-
-        // 4 alert should be suppressed: 2 for agent.name: 'agent-1' and 2 for missing agent.name
-        await indexListOfSourceDocuments([
-          doc1,
-          doc1,
-          docWithMissingField1,
-          docWithMissingField1,
-          docWithMissingField2,
-          doc2,
-        ]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-            missing_fields_strategy: 'suppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: ['agent.name', ALERT_ORIGINAL_TIME],
-        });
-        expect(previewAlerts.length).toEqual(2);
-        expect(previewAlerts[0]._source).toEqual({
-          ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'agent.name',
-              value: ['agent-1'],
-            },
-          ],
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
-        });
-
-        expect(previewAlerts[1]._source).toEqual({
-          ...previewAlerts[1]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'agent.name',
-              value: null,
-            },
-          ],
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+          // rest of alerts are not suppressed and do not have suppress properties
+          previewAlerts.slice(1).forEach((previewAlert) => {
+            const source = previewAlert._source;
+            expect(source).toHaveProperty('id', id);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+            expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          });
         });
       });
 
-      it('should NOT suppress alerts with missing fields if configured so', async () => {
-        const id = uuidv4();
-        const firstTimestamp = '2020-10-28T05:45:00.000Z';
-        const secondTimestamp = '2020-10-28T06:10:00.000Z';
-        const docWithMissingField1 = {
-          id,
-          '@timestamp': firstTimestamp,
-          host: { name: 'host-a' },
-        };
-
-        const doc1 = {
-          ...docWithMissingField1,
-          agent: { name: 'agent-1' },
-        };
-
-        const docWithMissingField2 = {
-          ...docWithMissingField1,
-          '@timestamp': secondTimestamp,
-        };
-
-        const doc2 = {
-          ...doc1,
-          '@timestamp': secondTimestamp,
-        };
-
-        // 2 alert should be suppressed: 2 for agent.name: 'agent-1' and not any for missing agent.name
-        await indexListOfSourceDocuments([
-          doc1,
-          doc1,
-          docWithMissingField1,
-          docWithMissingField1,
-          docWithMissingField2,
-          doc2,
-        ]);
-
-        const rule: EqlRuleCreateProps = {
-          ...getEqlRuleForAlertTesting(['ecs_compliant']),
-          query: getQuery(id),
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: {
-              value: 300,
-              unit: 'm',
-            },
-            missing_fields_strategy: 'doNotSuppress',
-          },
-          from: 'now-35m',
-          interval: '30m',
-        };
-
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          sort: ['agent.name', ALERT_ORIGINAL_TIME],
-        });
-        expect(previewAlerts.length).toEqual(4);
-        expect(previewAlerts[0]._source).toEqual({
-          ...previewAlerts[0]._source,
-          [ALERT_SUPPRESSION_TERMS]: [
-            {
-              field: 'agent.name',
-              value: ['agent-1'],
-            },
-          ],
-          [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_START]: firstTimestamp,
-          [ALERT_SUPPRESSION_END]: secondTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
-        });
-
-        // rest of alerts are not suppressed and do not have suppress properties
-        previewAlerts.slice(1).forEach((previewAlert) => {
-          const source = previewAlert._source;
-          expect(source).toHaveProperty('id', id);
-          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
-          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
-          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
-          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
-        });
-      });
-
-      describe('rule execution only', () => {
-        it('should suppress alerts during rule execution only', async () => {
+      describe('with "per rule execution" suppression duration', () => {
+        it('only suppresses alerts within the rule execution', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
           const laterTimestamp = '2020-10-28T06:50:00.000Z';
@@ -761,7 +762,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should suppress alerts during rule execution only for array field', async () => {
+        it('suppresses alerts on a field with array values', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
           const doc1 = {
@@ -811,7 +812,79 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
+        it('suppresses alerts with missing fields', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:45:00.000Z';
+          const doc1 = {
+            id,
+            '@timestamp': timestamp,
+            host: { name: 'host-a' },
+          };
+
+          const doc2 = {
+            ...doc1,
+            agent: { name: 'agent-1' },
+          };
+
+          // 2 alert should be suppressed: 1 doc and 1 doc2
+          await indexListOfSourceDocuments([doc1, doc1, doc2, doc2]);
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['agent.name'],
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+            invocationCount: 1,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: ['agent-1'],
+              },
+            ],
+            [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: timestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+
+          expect(previewAlerts[1]._source).toEqual({
+            ...previewAlerts[1]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: null,
+              },
+            ],
+            [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: timestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+        });
+
+        it('suppresses alerts with missing fields and multiple suppress by fields', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
           const noMissingFieldsDoc = {
@@ -932,79 +1005,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should suppress alerts with missing fields during rule execution only', async () => {
-          const id = uuidv4();
-          const timestamp = '2020-10-28T06:45:00.000Z';
-          const doc1 = {
-            id,
-            '@timestamp': timestamp,
-            host: { name: 'host-a' },
-          };
-
-          const doc2 = {
-            ...doc1,
-            agent: { name: 'agent-1' },
-          };
-
-          // 2 alert should be suppressed: 1 doc and 1 doc2
-          await indexListOfSourceDocuments([doc1, doc1, doc2, doc2]);
-          const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForAlertTesting(['ecs_compliant']),
-            query: getQuery(id),
-            alert_suppression: {
-              group_by: ['agent.name'],
-              missing_fields_strategy: 'suppress',
-            },
-            from: 'now-35m',
-            interval: '30m',
-          };
-
-          const { previewId } = await previewRule({
-            supertest,
-            rule,
-            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
-            invocationCount: 1,
-          });
-          const previewAlerts = await getPreviewAlerts({
-            es,
-            previewId,
-            sort: ['agent.name', ALERT_ORIGINAL_TIME],
-          });
-          expect(previewAlerts.length).toEqual(2);
-          expect(previewAlerts[0]._source).toEqual({
-            ...previewAlerts[0]._source,
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'agent.name',
-                value: ['agent-1'],
-              },
-            ],
-            [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
-            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-            [ALERT_ORIGINAL_TIME]: timestamp,
-            [ALERT_SUPPRESSION_START]: timestamp,
-            [ALERT_SUPPRESSION_END]: timestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
-          });
-
-          expect(previewAlerts[1]._source).toEqual({
-            ...previewAlerts[1]._source,
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'agent.name',
-                value: null,
-              },
-            ],
-            [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
-            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
-            [ALERT_ORIGINAL_TIME]: timestamp,
-            [ALERT_SUPPRESSION_START]: timestamp,
-            [ALERT_SUPPRESSION_END]: timestamp,
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
-          });
-        });
-
-        it('should NOT suppress alerts with missing fields during rule execution only if configured so', async () => {
+        it('does not suppress alerts with missing fields if configured as such', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
           const doc1 = {
@@ -1070,7 +1071,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should NOT suppress alerts with missing fields during rule execution only if configured so for multiple suppress by fields', async () => {
+        it('does not suppress alerts with missing fields and multiple suppress by fields if configured as such', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
           const noMissingFieldsDoc = {
@@ -1157,7 +1158,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should deduplicate multiple alerts while suppressing on rule interval only', async () => {
+        it('deduplicates multiple alerts while suppressing on rule interval only', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1228,7 +1229,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should deduplicate single alert while suppressing new ones on rule execution', async () => {
+        it('deduplicates a single alert while suppressing new ones', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1298,7 +1299,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should create and suppress alert on rule execution when alert created on previous execution', async () => {
+        it('creates and suppresses an alert into alert created on previous execution', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1367,122 +1368,122 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
           });
         });
+      });
 
-        // Given that EQL rules have a maximum size for querying documents up to 100,
-        // even increasing the suppressed alerts limit by five times
-        // the suppression max signals won't have an effect
-        it('should NOT suppress more than the limited size', async () => {
-          const id = uuidv4();
+      // Given that EQL rules have a maximum size for querying documents up to 100,
+      // even increasing the suppressed alerts limit by five times
+      // the suppression max signals won't have an effect
+      it('does not suppress more than the EQL query size limit of 100', async () => {
+        const id = uuidv4();
 
-          await indexGeneratedSourceDocuments({
-            docsCount: 150, // the eql query max size is 100
-            seed: (index) => ({
-              id,
-              '@timestamp': `2020-10-28T06:50:00.${index}Z`,
-              host: {
-                name: `host-a`,
-              },
-              agent: { name: 'agent-a' },
-            }),
-          });
-
-          const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForAlertTesting(['ecs_compliant']),
-            query: getQuery(id),
-            alert_suppression: {
-              group_by: ['agent.name'],
-              missing_fields_strategy: 'suppress',
+        await indexGeneratedSourceDocuments({
+          docsCount: 150, // the eql query max size is 100
+          seed: (index) => ({
+            id,
+            '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+            host: {
+              name: `host-a`,
             },
-            from: 'now-35m',
-            interval: '30m',
-          };
-
-          const { previewId, logs } = await previewRule({
-            supertest,
-            rule,
-            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
-            invocationCount: 1,
-          });
-
-          expect(logs[0].warnings).toEqual(
-            expect.arrayContaining([getSuppressionMaxAlertsWarning()])
-          );
-
-          const previewAlerts = await getPreviewAlerts({
-            es,
-            previewId,
-            sort: ['agent.name', ALERT_ORIGINAL_TIME],
-          });
-          expect(previewAlerts.length).toEqual(1);
-          expect(previewAlerts[0]._source).toEqual({
-            ...previewAlerts[0]._source,
-            [ALERT_SUPPRESSION_TERMS]: [
-              {
-                field: 'agent.name',
-                value: ['agent-a'],
-              },
-            ],
-            [ALERT_SUPPRESSION_DOCS_COUNT]: 99,
-          });
+            agent: { name: 'agent-a' },
+          }),
         });
 
-        it('should generate to max_signals alerts', async () => {
-          const id = uuidv4();
-          const firstTimestamp = '2020-10-28T06:05:00.000Z';
-          const secondTimestamp = '2020-10-28T06:10:00.000Z';
-          await Promise.all(
-            [firstTimestamp, secondTimestamp].map((t) =>
-              indexGeneratedSourceDocuments({
-                docsCount: 115,
-                seed: (index) => ({
-                  id,
-                  '@timestamp': t,
-                  host: {
-                    name: `host-a`,
-                  },
-                  'agent.name': `agent-${index}`,
-                }),
-              })
-            )
-          );
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
 
-          const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForAlertTesting(['ecs_compliant']),
-            query: getQuery(id),
-            alert_suppression: {
-              group_by: ['agent.name'],
-              duration: {
-                value: 300,
-                unit: 'm',
-              },
-              missing_fields_strategy: 'suppress',
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
             },
-            from: 'now-35m',
-            interval: '30m',
-          };
-
-          const { previewId, logs } = await previewRule({
-            supertest,
-            rule,
-            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-            invocationCount: 1,
-          });
-
-          expect(logs[0].warnings).toEqual(
-            expect.arrayContaining([getSuppressionMaxAlertsWarning()])
-          );
-
-          const previewAlerts = await getPreviewAlerts({
-            es,
-            previewId,
-            size: 1000,
-            sort: ['agent.name', ALERT_ORIGINAL_TIME],
-          });
-          expect(previewAlerts.length).toEqual(100);
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 99,
         });
       });
 
-      it('adds to rule execution state', async () => {
+      it('generates up to max_signals alerts', async () => {
+        const id = uuidv4();
+        const firstTimestamp = '2020-10-28T06:05:00.000Z';
+        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+        await Promise.all(
+          [firstTimestamp, secondTimestamp].map((t) =>
+            indexGeneratedSourceDocuments({
+              docsCount: 115,
+              seed: (index) => ({
+                id,
+                '@timestamp': t,
+                host: {
+                  name: `host-a`,
+                },
+                'agent.name': `agent-${index}`,
+              }),
+            })
+          )
+        );
+
+        const rule: EqlRuleCreateProps = {
+          ...getEqlRuleForAlertTesting(['ecs_compliant']),
+          query: getQuery(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 1,
+        });
+
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(100);
+      });
+
+      it('adds execution values to rule execution state', async () => {
         const eventId = uuidv4();
         await indexGeneratedSourceDocuments({
           docsCount: 10,
