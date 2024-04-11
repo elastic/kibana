@@ -38,8 +38,9 @@ export default ({ getService }: FtrProviderContext): void => {
         let m1: MlGetTrainedModelsResponse = { count: 0, trained_model_configs: [] };
         await waitFor(
           async () => {
-            ({ body: m1 } = await esSupertest.get(`/_ml/trained_models`).expect(200));
-            return m1.count > 0;
+            const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+            m1 = body;
+            return status === 200 && m1.count > 0;
           },
           'waitForModelToBeImported',
           logger
@@ -73,8 +74,11 @@ export default ({ getService }: FtrProviderContext): void => {
         let m2: MlGetTrainedModelsResponse = { count: 0, trained_model_configs: [] };
         await waitFor(
           async () => {
-            ({ body: m2 } = await esSupertest.get(`/_ml/trained_models`).expect(200));
-            return !m2.trained_model_configs.some((m) => m.model_type === 'pytorch');
+            const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+            m2 = body;
+            return (
+              status === 200 && !m2.trained_model_configs.some((m) => m.model_type === 'pytorch')
+            );
           },
           'waitForModelToBeDeleted',
           logger
