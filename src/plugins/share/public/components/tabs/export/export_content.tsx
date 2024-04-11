@@ -231,7 +231,6 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes }: ExportPr
       return (
         <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
           <EuiRadioGroup
-            // @ts-ignore
             options={getRadioOptions()}
             onChange={(id) => {
               setSelectedRadio(id as AllowedExports);

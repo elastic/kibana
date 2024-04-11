@@ -37,7 +37,6 @@ import {
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
