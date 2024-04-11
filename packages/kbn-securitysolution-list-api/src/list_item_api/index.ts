@@ -71,7 +71,7 @@ const findListItems = async ({
   });
 };
 
-const findListItemssWithValidation = async ({
+const findListItemsWithValidation = async ({
   cursor,
   http,
   pageIndex,
@@ -98,7 +98,7 @@ const findListItemssWithValidation = async ({
     flow(toPromise)
   );
 
-export { findListItemssWithValidation as findListItems };
+export { findListItemsWithValidation as findListItems };
 
 const deleteListItem = async ({
   http,

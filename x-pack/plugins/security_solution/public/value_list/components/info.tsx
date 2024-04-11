@@ -7,13 +7,14 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 const info = css`
-  margin-right: 8px;
+  margin-right: ${euiThemeVars.euiSizeS};
 `;
 
 const infoLabel = css`
-  margin-right: 4px;
+  margin-right: ${euiThemeVars.euiSizeXS};
 `;
 
 export const Info = ({ label, value }: { value: React.ReactNode; label: string }) => (

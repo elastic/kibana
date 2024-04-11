@@ -6,7 +6,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useListsPrivileges } from '../../detections/containers/detection_engine/lists/use_lists_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ValueListModal } from './value_list_modal';
@@ -24,7 +24,8 @@ export const ShowValueListModal = ({
   const { canWriteIndex, canReadIndex, loading } = useListsPrivileges();
   const isValueItemsListModalEnabled = useIsExperimentalFeatureEnabled('valueListItemsModal');
 
-  const onCloseModal = () => setShowModal(false);
+  const onCloseModal = useCallback(() => setShowModal(false), []);
+  const onShowModal = useCallback(() => setShowModal(true), []);
 
   if (loading) return null;
 
@@ -34,10 +35,7 @@ export const ShowValueListModal = ({
 
   return (
     <>
-      <EuiLink
-        data-test-subj={`show-value-list-modal-${listId}`}
-        onClick={() => setShowModal(true)}
-      >
+      <EuiLink data-test-subj={`show-value-list-modal-${listId}`} onClick={onShowModal}>
         {children}
       </EuiLink>
       {showModal && (

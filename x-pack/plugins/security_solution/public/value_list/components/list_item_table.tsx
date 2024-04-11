@@ -10,6 +10,7 @@ import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { InlineEditListItemValue } from './inline_edit_list_item_value';
 import { DeleteListItem } from './delete_list_item';
 import { FormattedDate } from '../../common/components/formatted_date';
+import { LIST_ITEM_FIELDS } from '../types';
 import type { ListItemTableProps, ListItemTableColumns } from '../types';
 import {
   COLUMN_VALUE,
@@ -33,23 +34,23 @@ export const ListItemTable = ({
 }: ListItemTableProps) => {
   const columns: ListItemTableColumns = [
     {
-      field: 'value',
+      field: LIST_ITEM_FIELDS.value,
       name: COLUMN_VALUE,
       render: (value, item) =>
         canWriteIndex ? <InlineEditListItemValue listItem={item} key={value} /> : value,
       sortable: list.type !== 'text',
     },
     {
-      field: 'updated_at',
+      field: LIST_ITEM_FIELDS.updatedAt,
       name: COLUMN_UPDATED_AT,
-      render: (value: ListItemSchema['updated_at']) => (
-        <FormattedDate value={value} fieldName="updated_at" />
+      render: (value: ListItemSchema[LIST_ITEM_FIELDS.updatedAt]) => (
+        <FormattedDate value={value} fieldName={LIST_ITEM_FIELDS.updatedAt} />
       ),
       width: '25%',
       sortable: true,
     },
     {
-      field: 'updated_by',
+      field: LIST_ITEM_FIELDS.updatedBy,
       name: COLUMN_UPDATED_BY,
       width: '15%',
     },

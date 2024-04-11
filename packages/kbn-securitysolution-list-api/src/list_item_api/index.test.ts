@@ -7,7 +7,6 @@
  */
 
 import { createListItem, deleteListItem, findListItems, patchListItem } from '.';
-import { HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
   getFoundListSchemaMock,
@@ -80,7 +79,7 @@ describe('Value list item API', () => {
             value: '123',
             list_id: 'list_id',
           }),
-        } as HttpFetchOptions)
+        })
       );
     });
 
@@ -119,7 +118,7 @@ describe('Value list item API', () => {
             id: 'item_id',
             value: '123',
           }),
-        } as HttpFetchOptions)
+        })
       );
     });
 
@@ -155,7 +154,7 @@ describe('Value list item API', () => {
         expect.objectContaining({
           method: 'DELETE',
           query: { id: 'item_id', refresh: 'true' },
-        } as HttpFetchOptions)
+        })
       );
     });
 

@@ -12,13 +12,13 @@ import {
   EuiModalHeaderTitle,
   EuiFlexItem,
   EuiFlexGroup,
-  useEuiPaddingSize,
   EuiText,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSearchBar,
 } from '@elastic/eui';
 import { useFindListItems, useGetListById } from '@kbn/securitysolution-list-hooks';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedDate } from '../../common/components/formatted_date';
 import { useKibana } from '../../common/lib/kibana';
 import { AddListItemPopover } from './add_list_item_popover';
@@ -33,6 +33,11 @@ import {
   INFO_TOTAL_ITEMS,
   getInfoTotalItems,
 } from '../translations';
+
+const modalBodyStyle = css`
+  overflow: hidden;
+  padding: ${euiThemeVars.euiSize};
+`;
 
 const modalWindow = css`
   min-height: 90vh;
@@ -80,11 +85,6 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     }
   };
 
-  const modalBodyStyle = css`
-    overflow: hidden;
-    padding: ${useEuiPaddingSize('m')};
-  `;
-
   const sorting: Sorting = {
     sort: {
       field: sortField,
@@ -104,7 +104,7 @@ export const ValueListModal = ({ listId, onCloseModal, canWriteIndex }: ValueLis
     setFilter(params.queryText);
   }, []);
 
-  const isListExist = !(isListLoading || !list);
+  const isListExist = !isListLoading && !!list;
 
   return (
     <EuiModal maxWidth={false} className={modalWindow} onClose={onCloseModal}>

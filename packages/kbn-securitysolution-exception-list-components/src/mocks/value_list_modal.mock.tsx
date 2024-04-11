@@ -9,7 +9,7 @@
 import React from 'react';
 
 export const mockShowValueListModal = jest.fn();
-export const MockedShowValueListModal = (props: unknown & { children: React.ReactNode }) => {
+export const MockedShowValueListModal = (props: { children: React.ReactNode }) => {
   mockShowValueListModal(props);
   return <>{props.children}</>;
 };

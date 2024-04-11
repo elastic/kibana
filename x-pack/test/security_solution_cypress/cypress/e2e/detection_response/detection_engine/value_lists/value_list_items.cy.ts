@@ -23,7 +23,7 @@ import {
   checkTotalItems,
   deleteListItem,
   clearSearchValueListItemsModal,
-  sortByValue,
+  sortValueListItemsTableByValue,
   updateListItem,
   addListItem,
   selectValueListsItemsFile,
@@ -95,7 +95,7 @@ describe(
       getValueListItemsTableRow().should('have.length', perPage);
 
       // sort working
-      sortByValue();
+      sortValueListItemsTableByValue();
       getValueListItemsTableRow().first().contains('a');
 
       // delete item
@@ -119,7 +119,7 @@ describe(
       checkTotalItems(totalItems + totalItems);
     });
 
-    it('error to find', () => {
+    it("displays an error message when list items can't be retrieved", () => {
       mockFetchListItemsError();
       openValueListItemsModal(KNOWN_VALUE_LIST_FILES.TEXT);
       cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).contains(
@@ -127,7 +127,7 @@ describe(
       );
     });
 
-    it('errors to actions with list items elements', () => {
+    it('displays a toaster error when list item actions fail', () => {
       mockCreateListItemError();
       mockUpdateListItemError();
       mockDeleteListItemError();
@@ -136,7 +136,7 @@ describe(
       cy.get(TOASTER_BODY).contains('error to create list item');
       closeErrorToast();
 
-      sortByValue();
+      sortValueListItemsTableByValue();
 
       deleteListItem('a');
       cy.get(TOASTER_BODY).contains('error to delete list item');

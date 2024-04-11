@@ -195,7 +195,7 @@ export const deleteListItem = (value: string) => {
   return cy.get(getValueListDeleteItemButton(value)).click();
 };
 
-export const sortByValue = () => {
+export const sortValueListItemsTableByValue = () => {
   cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).find('thead tr th').eq(0).click();
 };
 

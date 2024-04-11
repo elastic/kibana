@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useDeleteListItemMutation } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -31,10 +31,14 @@ export const DeleteListItem = ({ id, value }: { id: string; value: string }) => 
     },
   });
 
+  const deleteListItem = useCallback(() => {
+    deleteListItemMutation.mutate({ id, http });
+  }, [deleteListItemMutation, id, http]);
+
   return (
     <EuiButtonIcon
       color={'danger'}
-      onClick={() => deleteListItemMutation.mutate({ id, http })}
+      onClick={deleteListItem}
       iconType="trash"
       isLoading={deleteListItemMutation.isLoading}
       data-test-subj={`delete-list-item-${value}`}

@@ -35,3 +35,9 @@ export interface ValueListModalProps {
 }
 
 export type ListItemTableColumns = Array<EuiBasicTableColumn<ListItemSchema>>;
+
+export enum LIST_ITEM_FIELDS {
+  value = 'value',
+  updatedAt = 'updated_at',
+  updatedBy = 'updated_by',
+}

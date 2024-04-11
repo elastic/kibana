@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButton, EuiFilePicker, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useImportList, useInvalidateListItemQuery } from '@kbn/securitysolution-list-hooks';
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type as ListType } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import {
@@ -31,7 +31,7 @@ const uploadStyle = css`
   min-width: 300px;
 `;
 
-export const UploadListItem = ({ listId, type }: { listId: string; type: Type }) => {
+export const UploadListItem = ({ listId, type }: { listId: string; type: ListType }) => {
   const [file, setFile] = useState<File | null>(null);
   const { http } = useKibana().services;
   const ctrl = useRef(new AbortController());
@@ -77,6 +77,8 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
     invalidateListItemQuery,
   ]);
 
+  const isDisabled = file == null || !fileIsValid || importState.loading;
+
   return (
     <>
       <EuiToolTip position="bottom" content={UPLOAD_TOOLTIP}>
@@ -94,7 +96,7 @@ export const UploadListItem = ({ listId, type }: { listId: string; type: Type })
       </EuiToolTip>
       <EuiButton
         onClick={handleImport}
-        disabled={file == null || !fileIsValid || importState.loading}
+        disabled={isDisabled}
         data-test-subj="value-list-items-upload"
       >
         {UPLOAD_LIST_ITEM}
