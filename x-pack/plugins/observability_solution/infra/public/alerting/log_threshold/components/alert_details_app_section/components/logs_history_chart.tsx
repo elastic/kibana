@@ -28,8 +28,17 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { type PartialCriterion } from '../../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../../expression_editor/criterion_preview_chart';
 import { PartialRuleParams } from '../../../../../../common/alerting/logs/log_threshold';
+import type { Group } from '../types';
 
-const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
+const LogsHistoryChart = ({
+  rule,
+  instanceId,
+  groups,
+}: {
+  rule: Rule<PartialRuleParams>;
+  instanceId?: string;
+  groups?: Group[];
+}) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   // Show the Logs History Chart ONLY if we have one criteria
   // So always pull the first criteria
@@ -42,6 +51,7 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
   const executionTimeRange = {
     gte: DateMath.parse(dateRange.from)!.valueOf(),
     lte: DateMath.parse(dateRange.to, { roundUp: true })!.valueOf(),
+    buckets: 30,
   };
 
   const {
@@ -53,6 +63,7 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
     featureIds: [AlertConsumers.LOGS],
     ruleId: rule.id,
     dateRange,
+    instanceId,
   });
 
   if (isError) {
@@ -180,11 +191,12 @@ const LogsHistoryChart = ({ rule }: { rule: Rule<PartialRuleParams> }) => {
             markerPosition={Position.Top}
           />,
         ]}
-        ruleParams={rule.params}
+        ruleParams={{ ...rule.params, timeSize: 1, timeUnit: 'd' }}
         logViewReference={rule.params.logView}
         chartCriterion={criteria as PartialCriterion}
         showThreshold={true}
         executionTimeRange={executionTimeRange}
+        filterSeriesByGroupName={groups?.map((group) => group.value).join(', ')}
       />
     </EuiPanel>
   );

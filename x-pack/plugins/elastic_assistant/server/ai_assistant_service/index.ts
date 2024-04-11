@@ -11,6 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
+import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
@@ -300,30 +301,57 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      let conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
+      const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
         spaceId
       );
       if (!conversationsIndexName) {
-        conversationsIndexName = await this.conversationsDataStream.installSpace(spaceId);
+        await this.conversationsDataStream.installSpace(spaceId);
       }
 
-      let promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
+      const promptsIndexName = await this.promptsDataStream.getInstalledSpaceName(spaceId);
       if (!promptsIndexName) {
-        promptsIndexName = await this.promptsDataStream.installSpace(spaceId);
+        await this.promptsDataStream.installSpace(spaceId);
       }
 
-      let anonymizationFieldsIndexName =
+      const anonymizationFieldsIndexName =
         await this.anonymizationFieldsDataStream.getInstalledSpaceName(spaceId);
+
       if (!anonymizationFieldsIndexName) {
-        anonymizationFieldsIndexName = await this.anonymizationFieldsDataStream.installSpace(
-          spaceId
-        );
+        await this.anonymizationFieldsDataStream.installSpace(spaceId);
+        this.createDefaultAnonymizationFields(spaceId);
       }
     } catch (error) {
       this.options.logger.error(
         `Error initializing AI assistant namespace level resources: ${error.message}`
       );
       throw error;
+    }
+  }
+
+  private async createDefaultAnonymizationFields(spaceId: string) {
+    const dataClient = new AIAssistantDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResorceName: this.resourceNames.aliases.anonymizationFields,
+      currentUser: null,
+    });
+
+    const existingAnonymizationFields = await (
+      await dataClient?.getReader()
+    ).search({
+      body: {
+        size: 1,
+      },
+      allow_no_indices: true,
+    });
+    if (existingAnonymizationFields.hits.total.value === 0) {
+      const writer = await dataClient?.getWriter();
+      const res = await writer?.bulk({
+        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+      });
+      this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
   }
 }
