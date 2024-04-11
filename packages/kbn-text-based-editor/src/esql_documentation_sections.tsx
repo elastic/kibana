@@ -106,6 +106,16 @@ Also, similar to the index fields, once an aggregation is performed, a metadata 
 FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
+
+The \`OPTIONS\` directive of the FROM command allows you to configure the way ES|QL accesses the data to be queried. The argument passed to this directive is a comma-separated list of option name-value pairs, with the option name and the corresponding value double-quoted.
+
+For example:
+
+\`\`\`
+FROM index_pattern [OPTIONS "option1"="value1"[,...[,"optionN"="valueN"]]]
+\`\`\`
+
+Learn more about the \`OPTIONS\` directive in the [main documentation page](https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-index-options.html#esql-index-options).
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
