@@ -11,24 +11,31 @@ export function getAccessQuery({
   user?: { name: string; id?: string };
   namespace?: string;
 }) {
+  const visibilityConditions: Array<
+    { term: { public: boolean } } | { term: { 'user.name': string } }
+  > = [
+    {
+      term: {
+        public: true,
+      },
+    },
+  ];
+
+  if (user) {
+    visibilityConditions.push({
+      term: {
+        'user.name': user.name,
+      },
+    });
+  }
+
   return [
     {
       bool: {
         filter: [
           {
             bool: {
-              should: [
-                {
-                  term: {
-                    'user.name': user?.name,
-                  },
-                },
-                {
-                  term: {
-                    public: true,
-                  },
-                },
-              ],
+              should: visibilityConditions,
               minimum_should_match: 1,
             },
           },
