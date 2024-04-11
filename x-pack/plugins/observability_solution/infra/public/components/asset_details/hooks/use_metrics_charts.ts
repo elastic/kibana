@@ -89,9 +89,15 @@ export const useHostKpiCharts = ({
   options?: { seriesColor: string; getSubtitle?: (formulaValue: string) => string };
 }) => {
   const { value: charts = [] } = useAsync(async () => {
-    const kpiCharts = await getHostsCharts({ metric: 'kpi' });
+    const model = findInventoryModel('host');
+    const { cpu, memory, disk } = await model.metrics.getCharts();
 
-    return kpiCharts.map((chart) => ({
+    return [
+      cpu.metric.cpuUsage,
+      cpu.metric.normalizedLoad1m,
+      memory.metric.memoryUsage,
+      disk.metric.diskUsage,
+    ].map((chart) => ({
       ...chart,
       seriesColor: options?.seriesColor,
       decimals: 1,
@@ -129,7 +135,6 @@ const getHostsCharts = async ({
             cpu.xy.normalizedLoad1m,
             cpu.xy.loadBreakdown,
           ];
-
     case 'memory':
       return options?.overview
         ? [memory.xy.memoryUsage]
@@ -142,13 +147,6 @@ const getHostsCharts = async ({
         : [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite, disk.xy.diskThroughputReadWrite];
     case 'log':
       return [logs.xy.logRate];
-    case 'kpi':
-      return [
-        cpu.metric.cpuUsage,
-        cpu.metric.normalizedLoad1m,
-        memory.metric.memoryUsage,
-        disk.metric.diskUsage,
-      ];
     default:
       return [];
   }

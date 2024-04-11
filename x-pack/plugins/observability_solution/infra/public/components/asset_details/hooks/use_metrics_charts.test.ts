@@ -14,36 +14,35 @@ import {
 } from './use_metrics_charts';
 
 const dataViewId = 'metricsDataViewId';
+const getHostChartsExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
+  switch (metric) {
+    case 'cpu':
+      return overview
+        ? ['cpuUsage', 'normalizedLoad1m']
+        : ['cpuUsage', 'cpuUsageBreakdown', 'normalizedLoad1m', 'loadBreakdown'];
+    case 'memory':
+      return overview ? ['memoryUsage'] : ['memoryUsage', 'memoryUsageBreakdown'];
+    case 'network':
+      return ['rxTx'];
+    case 'disk':
+      return overview
+        ? ['diskUsageByMountPoint', 'diskIOReadWrite']
+        : ['diskUsageByMountPoint', 'diskIOReadWrite', 'diskThroughputReadWrite'];
+    case 'log':
+      return ['logRate'];
+    default:
+      return [];
+  }
+};
 
 describe('useHostCharts', () => {
   describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['log']])(
     '%s',
     (item) => {
-      const getExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
-        switch (metric) {
-          case 'cpu':
-            return overview
-              ? ['cpuUsage', 'normalizedLoad1m']
-              : ['cpuUsage', 'cpuUsageBreakdown', 'normalizedLoad1m', 'loadBreakdown'];
-          case 'memory':
-            return overview ? ['memoryUsage'] : ['memoryUsage', 'memoryUsageBreakdown'];
-          case 'network':
-            return ['rxTx'];
-          case 'disk':
-            return overview
-              ? ['diskUsageByMountPoint', 'diskIOReadWrite']
-              : ['diskUsageByMountPoint', 'diskIOReadWrite', 'diskThroughputReadWrite'];
-          case 'log':
-            return ['logRate'];
-          default:
-            return [];
-        }
-      };
-
       test.each<[HostMetricTypes]>([[item]])(
         'should return an array of charts with correct order for metric "%s"',
         async (metric) => {
-          const expectedOrder = getExpectedOrder(metric, false);
+          const expectedOrder = getHostChartsExpectedOrder(metric, false);
 
           const { result, waitForNextUpdate } = renderHook(() =>
             useHostCharts({ dataViewId, metric })
@@ -63,7 +62,7 @@ describe('useHostCharts', () => {
       test.each<[HostMetricTypes]>([[item]])(
         'should return an array of charts with correct order for metric "%s" - overview',
         async (metric) => {
-          const expectedOrder = getExpectedOrder(metric, true);
+          const expectedOrder = getHostChartsExpectedOrder(metric, true);
 
           const { result, waitForNextUpdate } = renderHook(() =>
             useHostCharts({ dataViewId, metric, options: { overview: true } })
