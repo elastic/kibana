@@ -190,7 +190,7 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
 }
 
-export enum RowHeight {
+enum RowHeight {
   Auto = 'auto',
   Single = 'single',
   Custom = 'custom',

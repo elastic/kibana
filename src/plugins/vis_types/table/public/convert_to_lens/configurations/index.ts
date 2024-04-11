@@ -10,10 +10,15 @@ import {
   CollapseFunction,
   Column,
   PagingState,
-  RowHeight,
   TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
+
+enum RowHeight {
+  Auto = 'auto',
+  Single = 'single',
+  Custom = 'custom',
+}
 
 const getColumns = (
   params: TableVisParams,
