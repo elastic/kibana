@@ -606,7 +606,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
               es_index_patterns: {
                 dynamic: false,
                 properties: {
-                  pattern: { type: 'keyword' },
+                  title: { type: 'keyword' },
                   name: { type: 'keyword' },
                 },
               },
