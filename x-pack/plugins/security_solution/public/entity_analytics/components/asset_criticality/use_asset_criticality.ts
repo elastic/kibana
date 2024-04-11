@@ -8,10 +8,7 @@
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import type {
-  CriticalityLevel,
-  CriticalityLevelWithUnassigned,
-} from '../../../../common/entity_analytics/asset_criticality/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -69,11 +66,10 @@ export const useAssetCriticalityData = ({
         return deleteAssetCriticality({ idField: params.idField, idValue: params.idValue });
       }
 
-      const critialityLevel = params.criticalityLevel as CriticalityLevel;
       return createAssetCriticality({
         idField: params.idField,
         idValue: params.idValue,
-        criticalityLevel: critialityLevel,
+        criticalityLevel: params.criticalityLevel,
       });
     },
     onSuccess: (data) => {
