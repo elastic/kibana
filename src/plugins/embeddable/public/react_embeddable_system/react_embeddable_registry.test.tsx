@@ -10,7 +10,6 @@ import {
   registerReactEmbeddableFactory,
   reactEmbeddableRegistryHasKey,
   getReactEmbeddableFactory,
-  getReactEmbeddableFactories,
 } from './react_embeddable_registry';
 import { ReactEmbeddableFactory } from './types';
 
@@ -37,15 +36,5 @@ describe('react embeddable registry', () => {
   it('can check if a factory is registered', () => {
     expect(reactEmbeddableRegistryHasKey('test')).toBe(true);
     expect(reactEmbeddableRegistryHasKey('notRegistered')).toBe(false);
-  });
-
-  it('can return all registered factories', () => {
-    const anotherFactory = {
-      type: 'test2',
-      deserializeState: jest.fn(),
-      buildEmbeddable: jest.fn(),
-    };
-    registerReactEmbeddableFactory(anotherFactory);
-    expect(getReactEmbeddableFactories()).toEqual([testEmbeddableFactory, anotherFactory]);
   });
 });

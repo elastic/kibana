@@ -52,7 +52,3 @@ export const getReactEmbeddableFactory = async <
     );
   return registry[key]();
 };
-
-export const getReactEmbeddableFactories = () => {
-  return Object.values(registry);
-};
