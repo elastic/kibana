@@ -5,76 +5,68 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
-import { useAssistantContext } from '../../../assistant_context';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { PerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
-import { updateDefaults } from '../../../data_anonymization_editor/helpers';
-import { AllowedStat } from '../../../data_anonymization_editor/stats/allowed_stat';
-import { AnonymizedStat } from '../../../data_anonymization_editor/stats/anonymized_stat';
 import * as i18n from './translations';
 
-const StatFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeL};
-`;
-
 export interface Props {
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
-  pageSize?: number;
-  setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
+  defaultPageSize?: number;
+  anonymizationFields: FindAnonymizationFieldsResponse;
+  anonymizationFieldsBulkActions: PerformBulkActionRequestBody;
+  setAnonymizationFieldsBulkActions: React.Dispatch<
+    React.SetStateAction<PerformBulkActionRequestBody>
+  >;
+  setUpdatedAnonymizationData: React.Dispatch<
+    React.SetStateAction<FindAnonymizationFieldsResponse>
+  >;
 }
 
 const AnonymizationSettingsComponent: React.FC<Props> = ({
-  defaultAllow,
-  defaultAllowReplacement,
-  pageSize,
-  setUpdatedDefaultAllow,
-  setUpdatedDefaultAllowReplacement,
+  defaultPageSize,
+  anonymizationFields,
+  anonymizationFieldsBulkActions,
+  setAnonymizationFieldsBulkActions,
+  setUpdatedAnonymizationData,
 }) => {
-  const { baseAllow, baseAllowReplacement } = useAssistantContext();
-
   const onListUpdated = useCallback(
-    (updates: BatchUpdateListItem[]) => {
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow: setUpdatedDefaultAllow,
-        setDefaultAllowReplacement: setUpdatedDefaultAllowReplacement,
-        updates,
+    async (updates: BatchUpdateListItem[]) => {
+      const updatedFieldsKeys = updates.map((u) => u.field);
+
+      const updatedFields = updates.map((u) => ({
+        ...(anonymizationFields.data.find((f) => f.field === u.field) ?? { id: '', field: '' }),
+        ...(u.update === 'allow' || u.update === 'defaultAllow'
+          ? { allowed: u.operation === 'add' }
+          : {}),
+        ...(u.update === 'allowReplacement' || u.update === 'defaultAllowReplacement'
+          ? { anonymized: u.operation === 'add' }
+          : {}),
+      }));
+      setAnonymizationFieldsBulkActions({
+        ...anonymizationFieldsBulkActions,
+        // Only update makes sense now, as long as we don't have an add new field design/UX
+        update: [...(anonymizationFieldsBulkActions?.update ?? []), ...updatedFields],
+      });
+      setUpdatedAnonymizationData({
+        ...anonymizationFields,
+        data: [
+          ...anonymizationFields.data.filter((f) => !updatedFieldsKeys.includes(f.field)),
+          ...updatedFields,
+        ],
       });
     },
     [
-      defaultAllow,
-      defaultAllowReplacement,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
+      anonymizationFields,
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
     ]
   );
-
-  const onReset = useCallback(() => {
-    setUpdatedDefaultAllow(baseAllow);
-    setUpdatedDefaultAllowReplacement(baseAllowReplacement);
-  }, [baseAllow, baseAllowReplacement, setUpdatedDefaultAllow, setUpdatedDefaultAllowReplacement]);
-
-  const anonymized: number = useMemo(() => {
-    const allowSet = new Set(defaultAllow);
-
-    return defaultAllowReplacement.reduce((acc, field) => (allowSet.has(field) ? acc + 1 : acc), 0);
-  }, [defaultAllow, defaultAllowReplacement]);
-
   return (
     <>
       <EuiTitle size={'s'}>
@@ -86,24 +78,16 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
       <EuiHorizontalRule margin={'s'} />
 
       <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
-        <StatFlexItem grow={false}>
-          <AllowedStat allowed={defaultAllow.length} total={defaultAllow.length} />
-        </StatFlexItem>
-
-        <StatFlexItem grow={false}>
-          <AnonymizedStat anonymized={anonymized} isDataAnonymizable={true} />
-        </StatFlexItem>
+        <Stats isDataAnonymizable={true} anonymizationFields={anonymizationFields.data} />
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
       <ContextEditor
-        allow={defaultAllow}
-        allowReplacement={defaultAllowReplacement}
+        anonymizationFields={anonymizationFields}
         onListUpdated={onListUpdated}
-        onReset={onReset}
         rawData={null}
-        pageSize={pageSize}
+        pageSize={defaultPageSize}
       />
     </>
   );

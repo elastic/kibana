@@ -167,8 +167,6 @@ describe('helpers', () => {
       const params = {
         isEnabledRAGAlerts: false, // <-- false
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
       };
 
@@ -181,8 +179,6 @@ describe('helpers', () => {
       const params = {
         isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
       };
 
@@ -190,22 +186,7 @@ describe('helpers', () => {
 
       expect(result).toEqual({
         alertsIndexPattern: 'indexPattern',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         size: 10,
-      });
-    });
-
-    it('should return (only) the optional request params that are defined when some optional params are not provided', () => {
-      const params = {
-        isEnabledRAGAlerts: true,
-        allow: ['a', 'b', 'c'], // all the others are undefined
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({
-        allow: ['a', 'b', 'c'],
       });
     });
   });
