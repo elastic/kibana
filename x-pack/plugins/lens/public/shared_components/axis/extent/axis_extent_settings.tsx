@@ -42,8 +42,8 @@ export function AxisBoundsControl({
   const { extent, hasBarOrArea, setExtent, dataBounds, testSubjPrefix, scaleType } = props;
   const { errorMsg, helpMsg } = validateExtent(hasBarOrArea, extent, scaleType);
   // Bucket type does not have the "full" mode
-  const modeForNiceValues = type === 'metric' ? 'full' : 'dataBounds';
-  const canShowNiceValues = canHaveNiceValues && extent.mode === modeForNiceValues;
+  const allowedModeForNiceDomain = type === 'metric' ? ['full', 'custom'] : ['dataBounds'];
+  const canShowNiceValues = canHaveNiceValues && allowedModeForNiceDomain.includes(extent.mode);
 
   const canShowCustomRanges =
     extent?.mode === 'custom' && (type === 'bucket' || !disableCustomRange);
@@ -52,32 +52,6 @@ export function AxisBoundsControl({
     type === 'metric' ? MetricAxisBoundsControl : BucketAxisBoundsControl;
   return (
     <ModeAxisBoundsControl {...props} disableCustomRange={disableCustomRange}>
-      {canShowNiceValues ? (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.fullExtent.niceValues', {
-            defaultMessage: 'Round to nice values',
-          })}
-          display="columnCompressedSwitch"
-          fullWidth
-        >
-          <EuiSwitch
-            showLabel={false}
-            label={i18n.translate('xpack.lens.fullExtent.niceValues', {
-              defaultMessage: 'Round to nice values',
-            })}
-            data-test-subj={`${testSubjPrefix}_axisExtent_niceValues`}
-            checked={extent.niceValues == null || extent.niceValues}
-            onChange={({ target: { checked: niceValues } }) => {
-              setExtent({
-                ...extent,
-                mode: modeForNiceValues,
-                niceValues,
-              });
-            }}
-            compressed
-          />
-        </EuiFormRow>
-      ) : null}
       {canShowCustomRanges ? (
         <RangeInputField
           isInvalid={Boolean(errorMsg)}
@@ -122,6 +96,31 @@ export function AxisBoundsControl({
             }
           }}
         />
+      ) : null}
+      {canShowNiceValues ? (
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.fullExtent.niceValues', {
+            defaultMessage: 'Round to nice values',
+          })}
+          display="columnCompressedSwitch"
+          fullWidth
+        >
+          <EuiSwitch
+            showLabel={false}
+            label={i18n.translate('xpack.lens.fullExtent.niceValues', {
+              defaultMessage: 'Round to nice values',
+            })}
+            data-test-subj={`${testSubjPrefix}_axisExtent_niceValues`}
+            checked={extent.niceValues == null || extent.niceValues}
+            onChange={({ target: { checked: niceValues } }) => {
+              setExtent({
+                ...extent,
+                niceValues,
+              });
+            }}
+            compressed
+          />
+        </EuiFormRow>
       ) : null}
     </ModeAxisBoundsControl>
   );
