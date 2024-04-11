@@ -23,7 +23,6 @@ steps:
     label: 'Quick Checks'
     agents:
       queue: n2-2-spot
-    key: quick_checks
     timeout_in_minutes: 60
     retry:
       automatic:
