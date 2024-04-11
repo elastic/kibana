@@ -198,7 +198,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export interface FullValidationConfig<P, Q, B> {
+export interface VersionedRouteValidation<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @public
@@ -228,7 +228,7 @@ export interface AddVersionOpts<P, Q, B> {
    * Validation for this version of a route
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B> | (() => FullValidationConfig<P, Q, B>); // Provide a way to lazily load validation schemas
+  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**
