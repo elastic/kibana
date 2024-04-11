@@ -9,48 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import { ShareMenuItem } from '../../../types';
 import { ExportContent } from './export_content';
 import { useShareTabsContext } from '../../context';
 
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose, toasts } = useShareTabsContext()!;
+  const { shareMenuItems, objectType, isDirty, onClose } = useShareTabsContext()!;
 
-  const aggregateReportTypes: ShareMenuItem[] = [];
-
-  shareMenuItems.map((shareMenuItem) => {
-    const {
-      helpText,
-      generateReportButton,
-      downloadCSVLens,
-      reportType,
-      renderLayoutOptionSwitch,
-      label,
-      generateReport,
-      generateReportForPrinting,
-      layoutOption,
-      absoluteUrl,
-      generateCopyUrl,
-      renderCopyURLButton,
-    } = shareMenuItem;
-
-    aggregateReportTypes.push({
-      reportType,
-      label,
-      generateReport,
-      generateReportButton,
-      helpText,
-      downloadCSVLens,
-      renderLayoutOptionSwitch,
-      layoutOption,
-      generateReportForPrinting,
-      absoluteUrl,
-      generateCopyUrl,
-      renderCopyURLButton,
-    });
-  });
+  const aggregateReportTypes = shareMenuItems;
 
   return (
     <ExportContent
@@ -58,7 +25,6 @@ const ExportTabContent = () => {
         objectType,
         isDirty,
         onClose,
-        toasts,
         aggregateReportTypes,
       }}
     />
