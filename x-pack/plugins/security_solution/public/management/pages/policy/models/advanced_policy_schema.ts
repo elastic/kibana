@@ -1656,6 +1656,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.memory_scan',
+    first_supported_version: '8.14.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
+      {
+        defaultMessage:
+          'On behavior alerts, this feature enables an additional scan of identified memory regions against well-known malware signatures. Default: true',
+      }
+    ),
+  },    
+  {
     key: 'windows.advanced.flags',
     first_supported_version: '8.13.0',
     documentation: i18n.translate(
