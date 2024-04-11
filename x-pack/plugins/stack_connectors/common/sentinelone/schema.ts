@@ -165,6 +165,24 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   osTypes: schema.nullable(schema.string()),
 });
 
+export const SentinelOneGetAgentFilesParamsSchema = schema.object({
+  agentUUID: schema.string({ minLength: 1 }),
+  zipPassCode: schema.string({ minLength: 1 }),
+  files: schema.arrayOf(schema.string({ minLength: 1 })),
+});
+
+export const SentinelOneGetAgentFilesResponseSchema = schema.object({
+  errors: schema.nullable(schema.arrayOf(schema.string())),
+  data: schema.maybe(
+    schema.object(
+      {
+        success: schema.boolean(),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
+});
+
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
 
 export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({

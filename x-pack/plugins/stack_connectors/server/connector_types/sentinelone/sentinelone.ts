@@ -34,8 +34,11 @@ import {
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
   SentinelOneKillProcessParamsSchema,
+  SentinelOneGetAgentFilesParamsSchema,
+  SentinelOneGetAgentFilesResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import { SentinelOneGetAgentFilesParams } from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
@@ -76,6 +79,12 @@ export class SentinelOneConnector extends SubActionConnector<
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.GET_AGENT_FILES,
+      method: 'getAgentFiles',
+      schema: SentinelOneGetAgentFilesParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
       method: 'getRemoteScriptStatus',
       schema: SentinelOneGetRemoteScriptStatusParamsSchema,
@@ -109,6 +118,27 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.EXECUTE_SCRIPT,
       method: 'executeScript',
       schema: SentinelOneExecuteScriptParamsSchema,
+    });
+  }
+
+  public async getAgentFiles({ files, agentUUID, zipPassCode }: SentinelOneGetAgentFilesParams) {
+    const agent = await this.getAgents({ uuid: agentUUID });
+    const agentId = agent.data[0]?.id;
+
+    if (!agentId) {
+      throw new Error(`No agent found for UUID ${agentUUID}`);
+    }
+
+    return this.sentinelOneApiRequest({
+      url: `${this.urls.agents}/${agentId}/actions/fetch-files`,
+      method: 'post',
+      data: {
+        data: {
+          password: zipPassCode,
+          files,
+        },
+      },
+      responseSchema: SentinelOneGetAgentFilesResponseSchema,
     });
   }
 

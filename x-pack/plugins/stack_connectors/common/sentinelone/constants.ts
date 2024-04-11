@@ -18,4 +18,5 @@ export enum SUB_ACTION {
   GET_REMOTE_SCRIPTS = 'getRemoteScripts',
   GET_REMOTE_SCRIPT_STATUS = 'getRemoteScriptStatus',
   GET_REMOTE_SCRIPT_RESULTS = 'getRemoteScriptResults',
+  GET_AGENT_FILES = 'getAgentFiles',
 }
