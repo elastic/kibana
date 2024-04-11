@@ -249,6 +249,19 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     }
   };
 
+  const getHelpText = () => {
+    if (objectType === 'lens' && generateReport !== undefined) {
+      return helpText;
+    } else {
+      return (
+        <FormattedMessage
+          id="share.helpText.goldLicense.roleNotPDFPNG"
+          defaultMessage="Export a CSV of this visualization."
+        />
+      );
+    }
+  };
+
   const styling =
     selectedRadio === 'printablePdfV2' &&
     (objectType === 'dashboard' || objectType === 'visualizations')
@@ -259,7 +272,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     <>
       <EuiForm>
         <EuiSpacer size="l" />
-        {helpText}
+        {getHelpText()}
         <EuiSpacer size="m" />
         {renderRadioOptions()}
         <EuiSpacer size="xl" />

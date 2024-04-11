@@ -401,6 +401,7 @@ export class LensPlugin {
             startServices()
               .plugins.licensing?.license$.pipe(take(1))
               .subscribe((license) => {
+                // need to make sure user has correct license and permissions to see PDF/PNG
                 isGold = license.hasAtLeast('gold');
               });
             return isGold;
