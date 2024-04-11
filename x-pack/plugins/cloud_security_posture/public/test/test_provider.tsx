@@ -22,7 +22,6 @@ import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { sessionStorageMock } from '@kbn/core-http-server-mocks';
-import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {
@@ -47,18 +46,15 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   children,
 } = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
-  const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
 
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>
-            <FleetAppWrapper>
-              <Routes>
-                <Route path="*" render={() => <>{children}</>} />
-              </Routes>
-            </FleetAppWrapper>
+            <Routes>
+              <Route path="*" render={() => <>{children}</>} />
+            </Routes>
           </I18nProvider>
         </Router>
       </QueryClientProvider>
