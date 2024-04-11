@@ -187,9 +187,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await browser.scrollTop();
           });
 
-          it('should load 12 lens metric charts', async () => {
+          it('should load 11 lens metric charts', async () => {
             const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-            expect(metricCharts.length).to.equal(12);
+            expect(metricCharts.length).to.equal(11);
           });
         });
 

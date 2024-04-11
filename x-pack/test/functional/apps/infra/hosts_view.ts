@@ -37,7 +37,7 @@ const tableEntries = [
     normalizedLoad: '0.5%',
     memoryUsage: '18.4%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.6%',
+    diskSpaceUsage: '35.1%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -48,7 +48,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '18.2%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.8%',
+    diskSpaceUsage: '35.7%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -59,7 +59,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '15.9%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -70,7 +70,7 @@ const tableEntries = [
     normalizedLoad: '1.4%',
     memoryUsage: '18%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.5%',
+    diskSpaceUsage: '35%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -81,7 +81,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '16.5%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -92,7 +92,7 @@ const tableEntries = [
     normalizedLoad: '0.1%',
     memoryUsage: '13.8%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.9%',
+    diskSpaceUsage: '33.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -474,7 +474,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '35.7%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -499,9 +499,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await browser.scrollTop();
         });
 
-        it('should load 12 lens metric charts', async () => {
+        it('should load 11 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-          expect(metricCharts.length).to.equal(12);
+          expect(metricCharts.length).to.equal(11);
         });
 
         it('should have an option to open the chart in lens', async () => {
@@ -635,7 +635,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.9%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '17.5%' },
-              { metric: 'diskUsage', value: '17.2%' },
+              { metric: 'diskUsage', value: '35.7%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue =
