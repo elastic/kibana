@@ -17,16 +17,12 @@ type IExportTab = IModalTabDeclaration;
 const ExportTabContent = () => {
   const { shareMenuItems, objectType, isDirty, onClose } = useShareTabsContext()!;
 
-  const aggregateReportTypes = shareMenuItems;
-
   return (
     <ExportContent
-      {...{
-        objectType,
-        isDirty,
-        onClose,
-        aggregateReportTypes,
-      }}
+      objectType={objectType}
+      isDirty={isDirty}
+      onClose={onClose}
+      aggregateReportTypes={shareMenuItems}
     />
   );
 };
