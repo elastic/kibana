@@ -814,28 +814,13 @@
     "misc": [
       {
         "parentPluginId": "navigation",
-        "id": "def-public.SolutionNavigationOptInStatus",
-        "type": "Type",
-        "tags": [],
-        "label": "SolutionNavigationOptInStatus",
-        "description": [],
-        "signature": [
-          "\"hidden\" | \"visible\" | \"ask\""
-        ],
-        "path": "src/plugins/navigation/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "navigation",
         "id": "def-public.SolutionType",
         "type": "Type",
         "tags": [],
         "label": "SolutionType",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"oblt\""
+          "\"security\" | \"analytics\" | \"es\" | \"oblt\""
         ],
         "path": "src/plugins/navigation/public/types.ts",
         "deprecated": false,
@@ -1138,21 +1123,6 @@
     "misc": [
       {
         "parentPluginId": "navigation",
-        "id": "def-common.DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_SOLUTION_NAV_UI_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"solutionNav:default\""
-        ],
-        "path": "src/plugins/navigation/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "navigation",
         "id": "def-common.ENABLE_SOLUTION_NAV_UI_SETTING_ID",
         "type": "string",
         "tags": [],
@@ -1168,13 +1138,13 @@
       },
       {
         "parentPluginId": "navigation",
-        "id": "def-common.OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "id": "def-common.SOLUTION_NAV_FEATURE_FLAG_NAME",
         "type": "string",
         "tags": [],
-        "label": "OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID",
+        "label": "SOLUTION_NAV_FEATURE_FLAG_NAME",
         "description": [],
         "signature": [
-          "\"solutionNav:optInStatus\""
+          "\"navigation.solutionNavEnabled\""
         ],
         "path": "src/plugins/navigation/common/constants.ts",
         "deprecated": false,
