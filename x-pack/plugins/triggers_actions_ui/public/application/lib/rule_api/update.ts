@@ -13,9 +13,18 @@ import { transformRule } from './common_transformations';
 
 type RuleUpdatesBody = Pick<
   RuleUpdates,
-  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen' | 'alertDelay'
+  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'alertDelay'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
+export const UPDATE_FIELDS: Array<keyof RuleUpdatesBody> = [
+  'name',
+  'tags',
+  'schedule',
+  'params',
+  'actions',
+  'alertDelay',
+];
+
+export const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
   actions,
   alertDelay,
   ...res
@@ -55,17 +64,13 @@ export async function updateRule({
   id,
 }: {
   http: HttpSetup;
-  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'alertDelay'>;
+  rule: RuleUpdatesBody;
   id: string;
 }): Promise<Rule> {
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
-      body: JSON.stringify(
-        rewriteBodyRequest(
-          pick(rule, ['name', 'tags', 'schedule', 'params', 'actions', 'alertDelay'])
-        )
-      ),
+      body: JSON.stringify(rewriteBodyRequest(pick(rule, UPDATE_FIELDS))),
     }
   );
   return transformRule(res);
