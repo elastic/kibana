@@ -18,12 +18,18 @@ import { SerializedPanelState } from '@kbn/presentation-containers';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { inject, extract } from '../../common/embeddable/search_inject_extract';
-import { SavedSearchAttributeService } from '../services/saved_searches';
+import {
+  SavedSearch,
+  SavedSearchAttributeService,
+  SavedSearchUnwrapResult,
+} from '../services/saved_searches';
 
 export const getSearchEmbeddableFactory = ({
   attributeService,
+  getSavedSearch,
 }: {
   attributeService: SavedSearchAttributeService;
+  getSavedSearch: (id: string | undefined, result: SavedSearchUnwrapResult) => Promise<SavedSearch>;
 }) => {
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
@@ -34,8 +40,6 @@ export const getSearchEmbeddableFactory = ({
       if (!state.rawState) return {};
       const serializedState = state.rawState as EmbeddableStateWithType;
       const deserializedState = inject(serializedState, state.references ?? []);
-      console.log('deserializeState', deserializedState);
-
       return deserializedState;
     },
     buildEmbeddable: async (initialState, buildApi, uuid) => {
@@ -43,7 +47,7 @@ export const getSearchEmbeddableFactory = ({
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const { searchEmbeddableApi, searchEmbeddableComparators, serializeSearchEmbeddable } =
-        await initializeSearchEmbeddableApi(initialState, attributeService);
+        await initializeSearchEmbeddableApi(initialState, attributeService, getSavedSearch);
 
       const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
         const { state: rawState, references } = extract({
@@ -60,6 +64,7 @@ export const getSearchEmbeddableFactory = ({
       const embeddable = buildApi(
         {
           ...titlesApi,
+          ...searchEmbeddableApi,
           dataLoading: dataLoading$,
           getSavedSearch: () => {
             return undefined;
@@ -70,10 +75,9 @@ export const getSearchEmbeddableFactory = ({
           },
           canUnlinkFromLibrary: async () => Boolean(searchEmbeddableApi.savedObjectId$.getValue()),
           saveToLibrary: async (title: string) => {
-            // @ts-ignore Fix this later
             const savedObjectId = await attributeService.saveMethod({
-              title,
               ...searchEmbeddableApi.attributes$.getValue(),
+              title,
             });
             return savedObjectId;
           },
@@ -82,8 +86,12 @@ export const getSearchEmbeddableFactory = ({
               savedObjectId,
             };
           },
-          // @ts-ignore Fix this later
-          checkForDuplicateTitle: attributeService.checkForDuplicateTitle,
+          checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
+            attributeService.checkForDuplicateTitle({
+              newTitle,
+              isTitleDuplicateConfirmed,
+              onTitleDuplicate,
+            }),
           getByValueState: () => {
             const { savedObjectId, ...byValueState } = serializeState().rawState ?? {};
             return {

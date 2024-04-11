@@ -33,5 +33,5 @@ export {
   SEARCH_EMBEDDABLE_TYPE, // TODO: Move this too
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
+export { loadSharingDataHelpers, getSortForEmbeddable } from './utils';
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';

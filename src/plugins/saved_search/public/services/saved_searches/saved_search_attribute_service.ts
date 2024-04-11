@@ -70,7 +70,9 @@ export const splitReferences = (attributes: SavedSearchByValueAttributes) => {
 export interface SavedSearchAttributeService {
   saveMethod: (attributes: SavedSearchByValueAttributes, savedObjectId?: string) => Promise<string>;
   unwrapMethod: (savedObjectId: string) => Promise<SavedSearchUnwrapResult>;
-  checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
+  checkForDuplicateTitle: (
+    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+  ) => Promise<void>;
 }
 
 export const getSavedSearchAttributeService = (
@@ -100,7 +102,9 @@ export const getSavedSearchAttributeService = (
       },
     };
   },
-  checkForDuplicateTitle: (props: OnSaveProps) => {
+  checkForDuplicateTitle: (
+    props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
+  ) => {
     return checkForDuplicateTitle({
       title: props.newTitle,
       isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,

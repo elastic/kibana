@@ -22,7 +22,7 @@ export type {
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
 export { VIEW_MODE } from '../common';
 export type { SavedSearchPublicPluginStart } from './plugin';
-export { HasSavedSearch, apiHasSavedSearch } from './embeddable';
+export { type HasSavedSearch, apiHasSavedSearch } from './embeddable';
 
 export function plugin() {
   return new SavedSearchPublicPlugin();

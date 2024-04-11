@@ -162,7 +162,12 @@ export class SavedSearchPublicPlugin
       const { getSearchEmbeddableFactory } = await import(
         './embeddable/get_search_embeddable_factory'
       );
-      return getSearchEmbeddableFactory({ attributeService: getSavedSearchAttributeService(deps) });
+      return getSearchEmbeddableFactory({
+        attributeService: getSavedSearchAttributeService(deps),
+        getSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
+          return toSavedSearch(id, result, deps);
+        },
+      });
     });
 
     return {

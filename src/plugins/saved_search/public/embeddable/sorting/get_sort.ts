@@ -8,27 +8,30 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { getDefaultSort, getSortArray, SortInput } from '../../../common/utils/sorting';
+import { getDefaultSort, getSortArray, SortInput } from '@kbn/discover-utils/src';
+import { SortOrder } from '../../../common/types';
+import { SavedSearch } from '../../services/saved_searches';
 
 /**
  * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid
  */
-// TODO: Delete this?
 export function getSortForEmbeddable(
+  savedSearch: SavedSearch,
   sort: SortInput | undefined,
-  dataView: DataView | undefined,
-  uiSettings: IUiSettingsClient | undefined,
-  isEsqlMode: boolean
+  uiSettings: IUiSettingsClient | undefined
 ): SortOrder[] {
+  const dataView = savedSearch.searchSource.getField('index');
+
+  const isTextBasedQuery = savedSearch.isTextBasedQuery ?? true; // TODO: FIX????
+
   if (!sort || !sort.length || !dataView) {
     if (!uiSettings) {
       return [];
     }
     const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
     const hidingTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
-    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isEsqlMode);
+    return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isTextBasedQuery);
   }
-  return getSortArray(sort, dataView, isEsqlMode);
+  return getSortArray(sort, dataView, isTextBasedQuery);
 }

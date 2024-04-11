@@ -23,7 +23,10 @@ import {
 export type SearchInput = SearchByValueInput | SearchByReferenceInput; // TODO: Delete
 
 export type SearchEmbeddableSerializedState = SerializedTitles & {
+  // by value
   attributes?: SavedSearchByValueAttributes;
+
+  // by reference
   savedObjectId?: string;
 };
 
