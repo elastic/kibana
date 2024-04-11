@@ -168,7 +168,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: error validating url: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -257,9 +257,9 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                retry: true,
+                message: 'an error occurred while running the action',
+                service_message: `Sub action "non-supported" is not registered. Connector id: ${simulatedActionId}. Connector name: IBM Resilient. Connector type: .resilient`,
                 errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
@@ -276,9 +276,10 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                retry: true,
+                message: 'an error occurred while running the action',
+                service_message:
+                  "Cannot destructure property 'externalId' of 'incident' as it is undefined.",
                 errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
@@ -303,10 +304,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
+                message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.name]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                service_message:
+                  '[Action][IBM Resilient]: Unable to create incident. Error: Status code: 404. Message: API Error: Not Found.',
               });
             });
         });
@@ -331,10 +333,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
+                message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                service_message:
+                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });
             });
         });
@@ -359,10 +362,11 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 connector_id: simulatedActionId,
                 status: 'error',
-                retry: false,
+                retry: true,
+                message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [incidentTypes]\n- [5.subAction]: expected value to equal [severity]',
+                service_message:
+                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
               });
             });
         });
