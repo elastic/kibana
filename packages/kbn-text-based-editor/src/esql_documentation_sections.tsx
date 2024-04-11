@@ -3676,6 +3676,48 @@ FROM employees
         />
       ),
     },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction',
+        {
+          defaultMessage: 'VALUES',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction.markdown',
+            {
+              defaultMessage: `### VALUES
+
+_**WARNING:** Do not use \`VALUES\` on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features._
+
+Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use \`MV_SORT\`.
+
+Accepts an expression of any type except \`geo_point\`, \`cartesian_point\`, \`geo_shape\`, or \`cartesian_shape\`.
+
+
+Example:
+
+\`\`\`
+  FROM employees
+| EVAL first_letter = SUBSTRING(first_name, 0, 1)
+| STATS first_name=MV_SORT(VALUES(first_name)) BY first_letter
+| SORT first_letter
+\`\`\`
+
+> _**WARNING:** This can use a significant amount of memory and ES|QL doesn’t yet grow aggregations beyond memory. So this aggregation will work until it is used to collect more values than can fit into memory. Once it collects too many values it will fail the query with a [Circuit Breaker Error](https://www.elastic.co/guide/en/elasticsearch/reference/current/circuit-breaker-errors.html)._
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
   ],
 };
 
