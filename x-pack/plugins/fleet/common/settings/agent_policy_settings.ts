@@ -37,4 +37,29 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     schema: z.number().int().min(0).default(0),
   },
+  {
+    name: 'agent.monitoring.http',
+    api_field: {
+      name: 'agent_monitoring_http',
+    },
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle', {
+      defaultMessage: 'Agent HTTP monitoring',
+    }),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription',
+      {
+        defaultMessage: 'Agent HTTP monitoring settings',
+      }
+    ),
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
+    schema: z
+      .object({
+        enabled: z.boolean().default(false),
+        host: z.string().default('localhost'),
+        port: z.number().min(0).max(65353).default(6791),
+        'buffer.enabled': z.boolean().default(false),
+      })
+      .default({}),
+  },
 ];

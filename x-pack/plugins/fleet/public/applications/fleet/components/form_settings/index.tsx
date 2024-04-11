@@ -11,8 +11,11 @@ import {
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiLink,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
@@ -22,6 +25,113 @@ export const settingComponentRegistry = new Map<
   string,
   (settingsconfig: SettingsConfig) => React.ReactElement
 >();
+
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, (settingsConfig) => {
+  const agentPolicyFormContext = useAgentPolicyFormContext();
+
+  const shape = settingsConfig.schema._def.innerType._def.shape();
+  return (
+    <SettingsFieldWrapper
+      settingsConfig={settingsConfig}
+      typeName={ZodFirstPartyTypeKind.ZodString}
+      renderItem={({}: any) => (
+        <EuiFlexGroup direction="column">
+          {Object.keys(shape).map((key) => {
+            const field = shape[key];
+            const fieldKey = `configuredSetting-${settingsConfig.name}-${key}`;
+            const defaultValue: number =
+              field instanceof z.ZodDefault ? field._def.defaultValue() : undefined;
+            const coercedSchema = field as z.ZodString;
+            const fieldValue =
+              agentPolicyFormContext?.agentPolicy.advanced_settings?.[
+                settingsConfig.api_field.name
+              ]?.[key] ?? defaultValue;
+            const type = getInnerType(field);
+            const [error, setError] = useState('');
+
+            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+              const newValue = convertValue(e.target.value, type);
+              updateFieldValue(newValue);
+            };
+
+            const updateFieldValue = (newValue: any) => {
+              const validationError = validateSchema(coercedSchema, newValue);
+
+              if (validationError) {
+                setError(validationError);
+                agentPolicyFormContext?.updateAdvancedSettingsHasErrors(true);
+              } else {
+                setError('');
+                agentPolicyFormContext?.updateAdvancedSettingsHasErrors(false);
+              }
+
+              const newApiFieldValue = {
+                ...agentPolicyFormContext?.agentPolicy.advanced_settings?.[
+                  settingsConfig.api_field.name
+                ],
+                [key]: newValue,
+              };
+
+              const newAdvancedSettings = {
+                ...(agentPolicyFormContext?.agentPolicy.advanced_settings ?? {}),
+                [settingsConfig.api_field.name]: newApiFieldValue,
+              };
+
+              agentPolicyFormContext?.updateAgentPolicy({ advanced_settings: newAdvancedSettings });
+            };
+
+            const getFormField = () => {
+              switch (type) {
+                case ZodFirstPartyTypeKind.ZodNumber:
+                  return (
+                    <EuiFieldNumber
+                      fullWidth
+                      data-test-subj={fieldKey}
+                      value={fieldValue}
+                      onChange={handleChange}
+                      isInvalid={!!error}
+                      min={(field as z.ZodNumber).minValue ?? undefined}
+                      max={(field as z.ZodNumber).maxValue ?? undefined}
+                    />
+                  );
+                case ZodFirstPartyTypeKind.ZodString:
+                  return (
+                    <EuiFieldText
+                      fullWidth
+                      data-test-subj={fieldKey}
+                      value={fieldValue}
+                      onChange={handleChange}
+                      isInvalid={!!error}
+                    />
+                  );
+                case ZodFirstPartyTypeKind.ZodBoolean:
+                  return (
+                    <EuiSwitch
+                      label={''}
+                      checked={fieldValue}
+                      onChange={(e) => {
+                        updateFieldValue(e.target.checked);
+                      }}
+                    />
+                  );
+                default:
+                  return <></>;
+              }
+            };
+
+            return (
+              <EuiFlexItem key={`flexItem-${fieldKey}`}>
+                <EuiFormRow fullWidth key={fieldKey} label={key} error={error} isInvalid={!!error}>
+                  {getFormField()}
+                </EuiFormRow>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      )}
+    />
+  );
+});
 
 settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, (settingsConfig) => {
   return (
@@ -61,6 +171,24 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
   );
 });
 
+const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
+  if (type === ZodFirstPartyTypeKind.ZodNumber) {
+    if (value === '') {
+      return 0;
+    }
+    return parseInt(value, 10);
+  }
+  return value;
+};
+
+const validateSchema = (coercedSchema: z.ZodString, newValue: any): string | undefined => {
+  const validationResults = coercedSchema.safeParse(newValue);
+
+  if (!validationResults.success) {
+    return validationResults.error.issues[0].message;
+  }
+};
+
 const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
   typeName: keyof typeof ZodFirstPartyTypeKind;
@@ -76,22 +204,12 @@ const SettingsFieldWrapper: React.FC<{
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
-  const convertValue = (value: string, type: keyof typeof ZodFirstPartyTypeKind): any => {
-    if (type === ZodFirstPartyTypeKind.ZodNumber) {
-      if (value === '') {
-        return 0;
-      }
-      return parseInt(value, 10);
-    }
-    return value;
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = convertValue(e.target.value, typeName);
-    const validationResults = coercedSchema.safeParse(newValue);
+    const validationError = validateSchema(coercedSchema, newValue);
 
-    if (!validationResults.success) {
-      setError(validationResults.error.issues[0].message);
+    if (validationError) {
+      setError(validationError);
       agentPolicyFormContext?.updateAdvancedSettingsHasErrors(true);
     } else {
       setError('');
@@ -130,6 +248,14 @@ const SettingsFieldWrapper: React.FC<{
   );
 };
 
+const getInnerType = (schema: z.ZodType<any, any>) => {
+  return schema instanceof z.ZodDefault
+    ? schema._def.innerType._def.typeName === 'ZodEffects'
+      ? schema._def.innerType._def.schema._def.typeName
+      : schema._def.innerType._def.typeName
+    : schema._def.typeName;
+};
+
 export function ConfiguredSettings({
   configuredSettings,
 }: {
@@ -138,13 +264,7 @@ export function ConfiguredSettings({
   return (
     <>
       {configuredSettings.map((configuredSetting) => {
-        const Component = settingComponentRegistry.get(
-          configuredSetting.schema instanceof z.ZodDefault
-            ? configuredSetting.schema._def.innerType._def.typeName === 'ZodEffects'
-              ? configuredSetting.schema._def.innerType._def.schema._def.typeName
-              : configuredSetting.schema._def.innerType._def.typeName
-            : configuredSetting.schema._def.typeName
-        );
+        const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
         if (!Component) {
           throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
