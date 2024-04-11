@@ -91,7 +91,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'disk', chartsCount: 2 },
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it(`should render ${chartsCount} ${metric} chart`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
               const charts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });

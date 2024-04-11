@@ -500,7 +500,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should render alerts count for a host inside a flyout', async () => {
             await pageObjects.assetDetails.clickOverviewTab();
 
-            retry.tryForTime(30 * 1000, async () => {
+            await retry.tryForTime(30 * 1000, async () => {
               await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
             });
 
@@ -562,7 +562,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'kubernetes', chartsCount: 2 },
             ].forEach(({ metric, chartsCount }) => {
               it(`should render ${chartsCount} ${metric} chart`, async () => {
-                retry.tryForTime(30 * 1000, async () => {
+                await retry.try(async () => {
                   const charts = await (metric === 'kubernetes'
                     ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
                     : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
@@ -587,13 +587,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'kubernetes', chartsCount: 4 },
             ].forEach(({ metric, chartsCount }) => {
               it(`should show ${metric} charts group`, async () => {
-                retry.tryForTime(30 * 1000, async () => {
+                await retry.try(async () => {
                   await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
                 });
               });
 
-              it(`should render ${chartsCount} ${metric} chart`, async () => {
-                retry.tryForTime(30 * 1000, async () => {
+              it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+                retry.try(async () => {
                   const charts = await (metric === 'kubernetes'
                     ? pageObjects.assetDetails.getMetricsTabKubernetesCharts()
                     : pageObjects.assetDetails.getMetricsTabHostCharts(metric));
@@ -603,7 +603,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
 
               it(`should render quick access items for ${metric}`, async () => {
-                retry.tryForTime(30 * 1000, async () => {
+                await retry.try(async () => {
                   await pageObjects.assetDetails.quickAccessItemExists(metric);
                 });
               });

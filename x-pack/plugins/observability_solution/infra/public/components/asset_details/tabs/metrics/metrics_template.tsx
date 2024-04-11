@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../hooks/use_kibana_header';
-import { HOST_METRIC_GROUP_TITLES } from '../../translations';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 
@@ -39,32 +38,32 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const initialScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const quickAccessItemsRef = useRef<Set<string>>(new Set());
+    const quickAccessItemsRef = useRef<Map<string, string | undefined>>(new Map());
     const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
     const quickAccessRef = useRef<HTMLDivElement | null>(null);
 
     const isLargeScreen = useIsWithinBreakpoints(['xl'], true);
     const listGroupDimensions = useResizeObserver(quickAccessRef.current);
 
-    const offsetTop =
+    const kibanaHeaderOffset =
       renderMode.mode === 'flyout'
         ? `0px`
         : `calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0))`;
 
-    const offsetScrollMarginTop = `calc(${offsetTop} + ${euiTheme.size.xs} + ${
-      isLargeScreen ? '0' : listGroupDimensions.height
-    }px)`;
+    const quickAccessHorizontalOffset = isLargeScreen ? 0 : listGroupDimensions.height;
+    const quickAccessOffset = `calc(${kibanaHeaderOffset} + ${euiTheme.size.xs} + ${quickAccessHorizontalOffset}px)`;
 
     const setContentRef = useCallback((contentRef: HTMLDivElement | null) => {
-      const metric = contentRef?.getAttribute('data-section-id');
-      if (!metric) {
+      const sectionId = contentRef?.getAttribute('data-section-id');
+      const label = contentRef?.innerText;
+      if (!sectionId) {
         return;
       }
 
-      contentRefs.current[metric] = contentRef;
+      contentRefs.current[sectionId] = contentRef;
 
-      if (!quickAccessItemsRef.current.has(metric)) {
-        quickAccessItemsRef.current.add(metric);
+      if (!quickAccessItemsRef.current.has(sectionId)) {
+        quickAccessItemsRef.current.set(sectionId, label);
       }
     }, []);
 
@@ -95,7 +94,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     useEffect(() => {
       if (scrollTo) {
-        // Wait for the calculation of offsetScrollMarginTop
+        // Wait for the calculation of quickAccessOffset
         initialScrollTimeoutRef.current = setTimeout(() => scrollToSection(scrollTo), 100);
       }
     }, [scrollTo, scrollToSection]);
@@ -127,7 +126,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
           grow={false}
           css={css`
             position: sticky;
-            top: ${offsetTop};
+            top: ${kibanaHeaderOffset};
             background: ${euiTheme.colors.emptyShade};
             min-width: 100px;
             z-index: ${euiTheme.levels.navigation};
@@ -150,11 +149,11 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
                 }
               `}
             >
-              {quickAccessItems.map((item) => (
+              {quickAccessItems.map(([sectionId, label]) => (
                 <EuiListGroupItem
-                  data-test-subj={`infraMetricsQuickAccessItem${item}`}
-                  onClick={() => onQuickAccessItemClick(item)}
-                  label={HOST_METRIC_GROUP_TITLES[item]}
+                  data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
+                  onClick={() => onQuickAccessItemClick(sectionId)}
+                  label={label}
                   size="s"
                 />
               ))}
@@ -170,7 +169,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
                 margin-top: ${euiTheme.size.s};
               }
               & > [data-section-id] {
-                scroll-margin-top: ${offsetScrollMarginTop};
+                scroll-margin-top: ${quickAccessOffset};
               }
             `}
           >
