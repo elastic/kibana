@@ -1714,7 +1714,7 @@ export default ({ getService }: FtrProviderContext) => {
         timestamp_override_fallback_disabled: false,
       });
 
-      it.only('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
+      it('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
         const id = uuidv4();
 
         await indexListOfSourceDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
