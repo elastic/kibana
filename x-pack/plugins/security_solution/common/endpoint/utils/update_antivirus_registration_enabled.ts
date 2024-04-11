@@ -19,7 +19,7 @@ export const updateAntivirusRegistrationEnabled = (policy: PolicyConfig) => {
   const modeToEnabled: Record<AntivirusRegistrationModes, boolean> = {
     [AntivirusRegistrationModes.enabled]: true,
     [AntivirusRegistrationModes.disabled]: false,
-    [AntivirusRegistrationModes.sync]: policy.windows.malware.mode === ProtectionModes.prevent,
+    [AntivirusRegistrationModes.sync]: shouldEnableAntivirusRegistrationForSync(policy),
   };
 
   const antivirusRegistrationMode = policy.windows.antivirus_registration.mode;
@@ -30,3 +30,6 @@ export const updateAntivirusRegistrationEnabled = (policy: PolicyConfig) => {
       modeToEnabled[antivirusRegistrationMode] ?? false;
   }
 };
+
+export const shouldEnableAntivirusRegistrationForSync = (policy: PolicyConfig): boolean =>
+  policy.windows.malware.mode === ProtectionModes.prevent;
