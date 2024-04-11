@@ -36,10 +36,8 @@ export enum ReadOperations {
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
   RunSoon = 'runSoon',
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
-  ScheduleBackfill = 'scheduleBackfill',
   GetBackfill = 'getBackfill',
   FindBackfill = 'findBackfill',
-  DeleteBackfill = 'deleteBackfill',
 }
 
 export enum WriteOperations {
@@ -59,6 +57,8 @@ export enum WriteOperations {
   BulkEnable = 'bulkEnable',
   BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
+  ScheduleBackfill = 'scheduleBackfill',
+  DeleteBackfill = 'deleteBackfill',
 }
 
 export interface EnsureAuthorizedOpts {

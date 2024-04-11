@@ -18,7 +18,7 @@ import {
 } from '../../../../rules_client/common/constants';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type {
   ScheduleBackfillParam,
@@ -99,7 +99,7 @@ export async function scheduleBackfill(
         await context.authorization.ensureAuthorized({
           ruleTypeId: ruleType,
           consumer,
-          operation: ReadOperations.ScheduleBackfill,
+          operation: WriteOperations.ScheduleBackfill,
           entity: AlertingAuthorizationEntity.Rule,
         });
       } catch (error) {

@@ -172,6 +172,13 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               break;
             // User has read privileges in this space
             case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized by "alertsFixture" to scheduleBackfill "test.patternFiringAutoRecoverFalse" rule`,
+                statusCode: 403,
+              });
+              break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
@@ -458,6 +465,13 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               break;
             // User has read privileges in this space
             case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized by "alertsFixture" to scheduleBackfill "test.patternFiringAutoRecoverFalse" rule`,
+                statusCode: 403,
+              });
+              break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything
@@ -939,6 +953,13 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
               break;
             // User has read privileges in this space
             case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized by "alertsFixture" to scheduleBackfill "test.patternFiringAutoRecoverFalse" rule`,
+                statusCode: 403,
+              });
+              break;
             // User doesn't have access to actions but that doesn't matter for backfill jobs
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything

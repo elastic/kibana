@@ -145,6 +145,8 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             case 'no_kibana_privileges at space1':
             // User has no privileges in this space
             case 'space_1_all at space2':
+            // User has read privileges in this space
+            case 'global_read at space1':
               expect(deleteResponse1.statusCode).to.eql(403);
               expect(deleteResponse1.body).to.eql({
                 error: 'Forbidden',
@@ -158,8 +160,6 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
                 statusCode: 403,
               });
               break;
-            // User has read privileges in this space
-            case 'global_read at space1':
             // User doesn't have access to actions but that doesn't matter for backfill jobs
             case 'space_1_all_alerts_none_actions at space1':
             // Superuser has access to everything

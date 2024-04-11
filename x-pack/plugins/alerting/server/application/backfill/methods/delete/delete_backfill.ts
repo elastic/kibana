@@ -10,7 +10,7 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { RulesClientContext } from '../../../../rules_client';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import {
   AdHocRunAuditAction,
   adHocRunAuditEvent,
@@ -48,7 +48,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       await context.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.rule.alertTypeId,
         consumer: result.attributes.rule.consumer,
-        operation: ReadOperations.DeleteBackfill,
+        operation: WriteOperations.DeleteBackfill,
         entity: AlertingAuthorizationEntity.Rule,
       });
     } catch (error) {
