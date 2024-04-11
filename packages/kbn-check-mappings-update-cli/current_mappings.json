@@ -937,7 +937,8 @@
         "dynamic": false,
         "properties": {
           "title": { "type": "keyword" },
-          "name": { "type": "keyword" }
+          "name": { "type": "keyword" },
+          "display_name": { "type": "text" }
         }
       },
       "experimental_data_stream_features": {
@@ -1017,6 +1018,7 @@
       "name": {
         "type": "keyword"
       },
+      "display_name": { "type": "text" },
       "package_assets": {
         "dynamic": false,
         "properties": {}

@@ -112,12 +112,12 @@ export const optimisticallyAddEsAssetReferences = async (
       ({ type, id }) => `${type}-${id}`
     );
 
-    const deduplicatedIndexPatterns: Record<string, string> = {};
+    const deduplicatedIndexPatterns: Record<string, EsIndexPattern> = {};
     (so.attributes.es_index_patterns ?? []).forEach((p) => {
-      deduplicatedIndexPatterns[p.name] = p.title;
+      deduplicatedIndexPatterns[p.name] = p;
     });
     (esIndexPatterns ?? []).forEach((p) => {
-      deduplicatedIndexPatterns[p.name] = p.title;
+      deduplicatedIndexPatterns[p.name] = p;
     });
 
     auditLoggingService.writeCustomSoAuditLog({
@@ -133,10 +133,7 @@ export const optimisticallyAddEsAssetReferences = async (
       pkgName,
       {
         installed_es: deduplicatedAssets,
-        es_index_patterns: Object.entries(deduplicatedIndexPatterns).map(([title, name]) => ({
-          title,
-          name,
-        })),
+        es_index_patterns: Object.values(deduplicatedIndexPatterns).map((pattern) => pattern),
       },
       {
         version: so.version,
