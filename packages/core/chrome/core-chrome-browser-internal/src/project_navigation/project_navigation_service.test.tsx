@@ -1006,15 +1006,15 @@ describe('solution navigations', () => {
   });
 
   it('should change the active solution if no node match the current Location', async () => {
-    const { projectNavigation, navLinksService } = setup({
+    const { projectNavigation, application } = setup({
       locationPathName: '/app/app3', // we are on app3 which only exists in solution3
       navLinkIds: ['app1', 'app2', 'app3'],
     });
 
     const getActiveDefinition = () =>
-      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
+      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
 
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
 
     {
       const definition = await getActiveDefinition();
@@ -1022,14 +1022,36 @@ describe('solution navigations', () => {
     }
 
     // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
-    projectNavigation.changeActiveSolutionNavigation('2');
+    projectNavigation.changeActiveSolutionNavigation('solution2');
 
     {
       const definition = await getActiveDefinition();
       expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
+      expect(application.navigateToUrl).not.toHaveBeenCalled(); // NO redirect
     }
+  });
 
-    navLinksService.get.mockReset();
+  it('should change the active solution if no node match and redirect with URL containing solutionId', async () => {
+    const { projectNavigation, application } = setup({
+      locationPathName: '/app/app3', // we are on app3 which only exists in solution3
+      navLinkIds: ['app1', 'app2', 'app3'],
+    });
+
+    const getActiveDefinition = () =>
+      firstValueFrom(projectNavigation.getActiveSolutionNavDefinition$());
+
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
+    // Provide handler to add the solutionId to the path, which will trigger a redirect
+    projectNavigation.setAddSolutionIdToUrlPath((solutionId, url) => `/n/${solutionId}${url}`);
+
+    // Change to solution 2, but we are on '/app/app3' which only exists in solution3
+    projectNavigation.changeActiveSolutionNavigation('solution2');
+
+    {
+      const definition = await getActiveDefinition();
+      expect(definition?.id).toBe('solution2'); // Still on solution2, we will be redirected
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/n/solution3/app/app3'); // Redirect
+    }
   });
 
   it('should add the solution to the solution home path if handler provided', async () => {
