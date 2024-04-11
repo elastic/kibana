@@ -327,7 +327,7 @@ export const reportingExportModalProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: { __html: error.body.message } as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };
