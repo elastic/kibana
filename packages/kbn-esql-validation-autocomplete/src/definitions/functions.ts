@@ -1651,6 +1651,35 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'st_y',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stYDoc', {
+      defaultMessage:
+        'Extracts the y coordinate from the supplied point. If the points is of type geo_point this is equivalent to extracting the latitude value.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_y(point)'],
+      },
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_y(point)'],
+      },
+    ],
+  },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({

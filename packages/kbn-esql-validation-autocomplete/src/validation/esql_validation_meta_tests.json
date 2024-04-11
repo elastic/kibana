@@ -2457,6 +2457,50 @@
       "warning": []
     },
     {
+      "query": "row var = st_y(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_y(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(\"a\")",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_y(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_y(\"a\")",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = starts_with(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -10355,6 +10399,78 @@
       "query": "from a_index | eval var = st_x(*)",
       "error": [
         "Using wildcards (*) in st_x is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(stringField)",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(geoPointField, extraArg)",
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(*)",
+      "error": [
+        "Using wildcards (*) in st_y is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(stringField)",
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_y(cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_y(*)",
+      "error": [
+        "Using wildcards (*) in st_y is not allowed"
       ],
       "warning": []
     },
