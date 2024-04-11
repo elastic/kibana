@@ -173,12 +173,12 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
         ),
       });
 
-      const { id, create_date } = res.data;
+      const { id, create_date: createDate } = res.data;
 
       return {
         title: `${id}`,
         id: `${id}`,
-        pushedDate: new Date(create_date).toISOString(),
+        pushedDate: new Date(createDate).toISOString(),
         url: this.getIncidentViewURL(id.toString()),
       };
     } catch (error) {
@@ -247,7 +247,7 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
       });
 
       return {
-        comment: comment,
+        comment,
         externalCommentId: res.data.id,
         pushedDate: new Date(res.data.create_date).toISOString(),
       };

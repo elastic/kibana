@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
-
 export const resilientFields = [
   {
     id: 17,
@@ -273,126 +271,41 @@ export const resilientFields = [
   },
 ];
 
-const createMock = (): jest.Mocked<ExternalService> => {
-  const service = {
-    getFields: jest.fn().mockImplementation(() => Promise.resolve(resilientFields)),
-    getIncident: jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        id: '1',
-        name: 'title from ibm resilient',
-        description: 'description from ibm resilient',
-        discovered_date: 1589391874472,
-        create_date: 1591192608323,
-        inc_last_modified_date: 1591192650372,
-      })
-    ),
-    createIncident: jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        id: '1',
-        title: '1',
-        pushedDate: '2020-06-03T15:09:13.606Z',
-        url: 'https://resilient.elastic.co/#incidents/1',
-      })
-    ),
-    updateIncident: jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        id: '1',
-        title: '1',
-        pushedDate: '2020-06-03T15:09:13.606Z',
-        url: 'https://resilient.elastic.co/#incidents/1',
-      })
-    ),
-    createComment: jest.fn(),
-    findIncidents: jest.fn(),
-    getIncidentTypes: jest.fn().mockImplementation(() => [
-      { id: 17, name: 'Communication error (fax; email)' },
-      { id: 1001, name: 'Custom type' },
-    ]),
-    getSeverity: jest.fn().mockImplementation(() => [
-      {
-        id: 4,
-        name: 'Low',
-      },
-      {
-        id: 5,
-        name: 'Medium',
-      },
-      {
-        id: 6,
-        name: 'High',
-      },
-    ]),
-  };
+export const fieldsMock = resilientFields.map((field) => ({
+  name: field.name,
+  input_type: field.input_type,
+  read_only: field.read_only,
+  required: field.required,
+  text: field.text,
+}));
 
-  service.createComment.mockImplementationOnce(() =>
-    Promise.resolve({
-      commentId: 'case-comment-1',
-      pushedDate: '2020-06-03T15:09:13.606Z',
-      externalCommentId: '1',
-    })
-  );
-
-  service.createComment.mockImplementationOnce(() =>
-    Promise.resolve({
-      commentId: 'case-comment-2',
-      pushedDate: '2020-06-03T15:09:13.606Z',
-      externalCommentId: '2',
-    })
-  );
-
-  return service;
-};
-
-const externalServiceMock = {
-  create: createMock,
-};
-
-const executorParams: ExecutorSubActionPushParams = {
-  incident: {
-    externalId: 'incident-3',
-    name: 'Incident title',
-    description: 'Incident description',
-    incidentTypes: [1001],
-    severityCode: 6,
-  },
-  comments: [
+export const incidentTypes = {
+  id: 16,
+  name: 'incident_type_ids',
+  text: 'Incident Type',
+  values: [
     {
-      commentId: 'case-comment-1',
-      comment: 'A comment',
+      value: 17,
+      label: 'Communication error (fax; email)',
+      enabled: true,
+      properties: null,
+      uuid: '4a8d22f7-d89e-4403-85c7-2bafe3b7f2ae',
+      hidden: false,
+      default: false,
     },
     {
-      commentId: 'case-comment-2',
-      comment: 'Another comment',
+      value: 1001,
+      label: 'Custom type',
+      enabled: true,
+      properties: null,
+      uuid: '3b51c8c2-9758-48f8-b013-bd141f1d2ec9',
+      hidden: false,
+      default: false,
     },
   ],
 };
 
-const apiParams: PushToServiceApiParams = {
-  ...executorParams,
-};
-
-const incidentTypes = [
-  {
-    value: 17,
-    label: 'Communication error (fax; email)',
-    enabled: true,
-    properties: null,
-    uuid: '4a8d22f7-d89e-4403-85c7-2bafe3b7f2ae',
-    hidden: false,
-    default: false,
-  },
-  {
-    value: 1001,
-    label: 'Custom type',
-    enabled: true,
-    properties: null,
-    uuid: '3b51c8c2-9758-48f8-b013-bd141f1d2ec9',
-    hidden: false,
-    default: false,
-  },
-];
-
-const severity = [
+export const severity = [
   {
     value: 4,
     label: 'Low',
@@ -421,5 +334,3 @@ const severity = [
     default: false,
   },
 ];
-
-export { externalServiceMock, executorParams, apiParams, incidentTypes, severity };
