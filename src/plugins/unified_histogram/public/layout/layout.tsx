@@ -353,6 +353,7 @@ export const UnifiedHistogramLayout = ({
           request={request}
           hits={hits}
           lensVisService={lensVisService}
+          isChartLoading={isChartLoading}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
