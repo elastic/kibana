@@ -29,59 +29,61 @@ export const getSolutionNavSwitcherBreadCrumb = ({
   return {
     text,
     'data-test-subj': 'solutionNavSwitcher',
-    popoverContent: (closePopover) => (
-      <>
-        <EuiTitle size="xxxs">
-          <h3>
-            {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.title', {
-              defaultMessage: 'Solution view',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiListGroup bordered size="s">
-          {Object.values(definitions).map(({ id, title, icon = 'gear' }) => [
-            <EuiListGroupItem
-              key={id}
-              label={title}
-              isActive={id === activeId}
-              iconType={icon as string}
-              data-test-subj={`solutionNavSwitcher-${id}`}
-              onClick={() => {
-                onChange(id);
-                closePopover();
-              }}
-            />,
-          ])}
-        </EuiListGroup>
+    popoverContent: function SolutionSwitcher(closePopover) {
+      return (
+        <>
+          <EuiTitle size="xxxs">
+            <h3>
+              {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.title', {
+                defaultMessage: 'Solution view',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiListGroup bordered size="s">
+            {Object.values(definitions).map(({ id, title, icon = 'gear' }) => [
+              <EuiListGroupItem
+                key={id}
+                label={title}
+                isActive={id === activeId}
+                iconType={icon as string}
+                data-test-subj={`solutionNavSwitcher-${id}`}
+                onClick={() => {
+                  onChange(id);
+                  closePopover();
+                }}
+              />,
+            ])}
+          </EuiListGroup>
 
-        <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-        {cloudLinks.deployment && (
-          <EuiButtonEmpty
-            href={cloudLinks.deployment.href}
-            color="text"
-            iconType="gear"
-            data-test-subj="manageDeploymentBtn"
-          >
-            {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
-              defaultMessage: 'Manage this deployment',
-            })}
-          </EuiButtonEmpty>
-        )}
+          {cloudLinks.deployment && (
+            <EuiButtonEmpty
+              href={cloudLinks.deployment.href}
+              color="text"
+              iconType="gear"
+              data-test-subj="manageDeploymentBtn"
+            >
+              {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
+                defaultMessage: 'Manage this deployment',
+              })}
+            </EuiButtonEmpty>
+          )}
 
-        {cloudLinks.deployments && (
-          <EuiButtonEmpty
-            href={cloudLinks.deployments.href}
-            color="text"
-            iconType="spaces"
-            data-test-subj="viewDeploymentsBtn"
-          >
-            {cloudLinks.deployments.title}
-          </EuiButtonEmpty>
-        )}
-      </>
-    ),
+          {cloudLinks.deployments && (
+            <EuiButtonEmpty
+              href={cloudLinks.deployments.href}
+              color="text"
+              iconType="spaces"
+              data-test-subj="viewDeploymentsBtn"
+            >
+              {cloudLinks.deployments.title}
+            </EuiButtonEmpty>
+          )}
+        </>
+      );
+    },
     popoverProps: {
       panelPaddingSize: 'm',
       zIndex: 6000,
