@@ -47,6 +47,7 @@ interface LatencyAlertsHistoryChartProps {
   start: string;
   end: string;
   transactionType?: string;
+  transactionName?: string;
   latencyAggregationType: LatencyAggregationType;
   environment: string;
   timeZone: string;
@@ -58,6 +59,7 @@ export function LatencyAlertsHistoryChart({
   start,
   end,
   transactionType,
+  transactionName,
   latencyAggregationType,
   environment,
   timeZone,
@@ -69,7 +71,7 @@ export function LatencyAlertsHistoryChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.ServiceTransactionMetric,
+    type: ApmDocumentType.TransactionMetric,
   });
   const { http, notifications } = useKibana().services;
   const { data, status } = useFetcher(
@@ -93,7 +95,7 @@ export function LatencyAlertsHistoryChart({
                 start,
                 end,
                 transactionType,
-                transactionName: undefined,
+                transactionName,
                 latencyAggregationType,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 documentType: preferred.source.documentType,
@@ -113,6 +115,7 @@ export function LatencyAlertsHistoryChart({
       latencyAggregationType,
       serviceName,
       start,
+      transactionName,
       transactionType,
       preferred,
     ]
