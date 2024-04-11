@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { SloSettings } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
-import type { SloSettings } from '../server/domain/models';
 
 export const getListOfSloSummaryIndices = (
   settings: SloSettings,

@@ -8,11 +8,11 @@ import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } fr
 import React from 'react';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
-import type { SortDirection } from '../slo_list_search_bar';
 import { SLOView } from '../toggle_slo_view';
 import { SloGroupListEmpty } from './group_list_empty';
 import { SloGroupListError } from './group_list_error';
 import { GroupListView } from './group_list_view';
+import type { SortDirection } from '../../hooks/use_url_search_state';
 
 interface Props {
   groupBy: string;

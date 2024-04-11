@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { SloSettings } from '../../../server/domain/models';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { SloSettings } from '@kbn/slo-schema';
 
 export const useGetSettings = () => {
   const { http } = useKibana().services;

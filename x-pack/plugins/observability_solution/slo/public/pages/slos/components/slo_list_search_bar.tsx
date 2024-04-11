@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Query } from '@kbn/es-query';
-import { observabilityAppId } from '@kbn/observability-plugin/public';
-import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
 import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
+import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { QuickFilters } from './common/quick_filters';
-
-export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
-export type SortDirection = 'asc' | 'desc';
-
-export type Item<T> = EuiSelectableOption & {
-  label: string;
-  type: T;
-  checked?: EuiSelectableOptionCheckedType;
-};
-
-export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar() {
   const {

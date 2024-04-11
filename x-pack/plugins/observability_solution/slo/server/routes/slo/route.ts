@@ -20,16 +20,11 @@ import {
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
+  putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
-  sloSettingsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
-import * as t from 'io-ts';
-
-import { getSloSettings } from '../../services/slo_settings';
-import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../../saved_objects/slo_settings';
 import type { IndicatorTypes } from '../../domain/models';
-import { SloSettings } from '../../domain/models';
 import {
   CreateSLO,
   DefaultSummaryClient,
@@ -38,10 +33,10 @@ import {
   DeleteSLO,
   DeleteSLOInstances,
   FindSLO,
+  FindSLOGroups,
   GetSLO,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
-  FindSLOGroups,
 } from '../../services';
 import { FetchHistoricalSummary } from '../../services/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/find_slo_definitions';
@@ -52,21 +47,22 @@ import { GetSLOInstances } from '../../services/get_slo_instances';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { ManageSLO } from '../../services/manage_slo';
 import { ResetSLO } from '../../services/reset_slo';
+import { SloDefinitionClient } from '../../services/slo_definition_client';
+import { getSloSettings, storeSloSettings } from '../../services/slo_settings';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
-  SyntheticsAvailabilityTransformGenerator,
   HistogramTransformGenerator,
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
+  SyntheticsAvailabilityTransformGenerator,
   TimesliceMetricTransformGenerator,
   TransformGenerator,
 } from '../../services/transform_generators';
 import type { SloRequestHandlerContext } from '../../types';
 import { createSloServerRoute } from '../create_slo_server_route';
-import { SloDefinitionClient } from '../../services/slo_definition_client';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -617,18 +613,12 @@ const putSloSettings = createSloServerRoute({
     tags: ['access:slo_write'],
     access: 'internal',
   },
-  params: t.type({
-    body: sloSettingsSchema,
-  }),
+  params: putSLOSettingsParamsSchema,
   handler: async ({ context, params }) => {
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
-    const object = await soClient.create<SloSettings>(SO_SLO_SETTINGS_TYPE, params.body, {
-      id: sloSettingsObjectId,
-      overwrite: true,
-    });
-    return object.attributes;
+    return await storeSloSettings(soClient, params.body);
   },
 });
 

@@ -19,3 +19,4 @@ export * from './reset';
 export * from './manage';
 export * from './delete_instance';
 export * from './fetch_historical_summary';
+export * from './put_settings';

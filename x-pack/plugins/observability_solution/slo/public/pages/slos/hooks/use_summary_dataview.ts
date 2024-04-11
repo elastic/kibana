@@ -10,7 +10,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { getListOfSloSummaryIndices } from '../../../../common/summary_indices';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { useGetSettings } from '../../slo_settings/use_get_settings';
 
 export const useSloSummaryDataView = () => {
@@ -23,7 +23,7 @@ export const useSloSummaryDataView = () => {
 
   const { data: index } = useFetcher(async () => {
     if (!hasRemoteClusters) {
-      return SLO_SUMMARY_DESTINATION_INDEX_NAME;
+      return SLO_SUMMARY_DESTINATION_INDEX_PATTERN;
     }
     const remoteClusters = await fetchRemoteClusters(http);
     return getListOfSloSummaryIndices(settings, remoteClusters);
@@ -32,6 +32,7 @@ export const useSloSummaryDataView = () => {
   const { dataView } = useCreateDataView({
     indexPatternString: index,
   });
+
   return { dataView };
 };
 

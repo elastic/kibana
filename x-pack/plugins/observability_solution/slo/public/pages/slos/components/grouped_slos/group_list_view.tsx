@@ -30,8 +30,8 @@ import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 import { SlosView } from '../slos_view';
-import type { SortDirection } from '../slo_list_search_bar';
 import { SLOView } from '../toggle_slo_view';
+import type { SortDirection } from '../../hooks/use_url_search_state';
 
 interface Props {
   group: string;

@@ -52,6 +52,8 @@ export function QuickFilters({
     return null;
   }
 
+  console.dir(dataView);
+
   return (
     <Container>
       <ControlGroupRenderer

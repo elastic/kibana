@@ -10,6 +10,7 @@ import {
   budgetingMethodSchema,
   groupSummarySchema,
   objectiveSchema,
+  sloSettingsSchema,
   timeWindowTypeSchema,
 } from '../schema';
 
@@ -17,5 +18,6 @@ type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
 type TimeWindowType = t.OutputOf<typeof timeWindowTypeSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type Objective = t.OutputOf<typeof objectiveSchema>;
+type SloSettings = t.OutputOf<typeof sloSettingsSchema>;
 
-export type { BudgetingMethod, Objective, TimeWindowType, GroupSummary };
+export type { BudgetingMethod, Objective, TimeWindowType, GroupSummary, SloSettings };

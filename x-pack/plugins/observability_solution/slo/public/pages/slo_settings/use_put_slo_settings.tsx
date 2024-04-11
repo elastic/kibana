@@ -6,9 +6,9 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { QueryKey, useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
-import type { SloSettings } from '../../../server/domain/models';
+import { SloSettings } from '@kbn/slo-schema';
+import { QueryKey, useMutation } from '@tanstack/react-query';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 
