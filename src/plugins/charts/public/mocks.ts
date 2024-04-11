@@ -12,6 +12,8 @@ import { activeCursorMock } from './services/active_cursor/mock';
 import { colorsServiceMock } from './services/legacy_colors/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
 
+export { MOCK_SPARKLINE_THEME } from './services/theme/mock';
+
 export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 
