@@ -12,7 +12,7 @@ import type {
   UserProfileLabels,
   UserProfileWithSecurity,
   UserProfile,
-} from '@kbn/security-plugin-types-common';
+} from '@kbn/core-user-profile-common';
 
 /**
  * A set of methods to work with Kibana user profiles.

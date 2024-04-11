@@ -240,7 +240,7 @@ describe('#userProfile', () => {
       const coreStart = createCoreRouteHandlerContextParamsMock();
       const context = new CoreRouteHandlerContext(coreStart, request);
 
-      context.userProfile?.getCurrent('/data-path');
+      context.userProfile?.getCurrent({ dataPath: '/data-path' });
       expect(coreStart.userProfile.getCurrent).toHaveBeenCalledTimes(1);
       expect(coreStart.userProfile.getCurrent).toHaveBeenCalledWith({
         request,
