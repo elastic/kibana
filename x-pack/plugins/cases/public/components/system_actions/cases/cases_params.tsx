@@ -46,9 +46,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const parsedTimeWindowSize = timeWindow.slice(0, timeWindow.length - 1);
   const parsedTimeWindowUnit = timeWindow.slice(-1);
+
   const timeWindowSize = isNaN(parseInt(parsedTimeWindowSize, 10))
     ? DEFAULT_TIME_WINDOW[0]
     : parsedTimeWindowSize.toString();
+
   const timeWindowUnit = Object.values(TIME_UNITS).includes(parsedTimeWindowUnit as TIME_UNITS)
     ? parsedTimeWindowUnit
     : DEFAULT_TIME_WINDOW[1];

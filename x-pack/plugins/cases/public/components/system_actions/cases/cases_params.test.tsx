@@ -214,10 +214,10 @@ describe('CasesParamsFields renders', () => {
       expect(await screen.findByTestId('time-window-unit-select')).toBeInTheDocument();
 
       fireEvent.change(await screen.findByTestId('time-window-unit-select'), {
-        target: { value: 'M' },
+        target: { value: 'd' },
       });
 
-      expect(editAction.mock.calls[0][1].timeWindow).toEqual('6M');
+      expect(editAction.mock.calls[0][1].timeWindow).toEqual('6d');
     });
 
     it('updates reopenClosedCases', async () => {

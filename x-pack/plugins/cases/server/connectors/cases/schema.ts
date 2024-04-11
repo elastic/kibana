@@ -39,9 +39,9 @@ const TimeWindowSchema = schema.string({
      * Acceptable format:
      * - First character should be a digit from 1 to 9
      * - All next characters should be a digit from 0 to 9
-     * - The last character should be d (day) or w (week) or M (month) or Y (year)
+     * - The last character should be d (day) or w (week)
      *
-     * Example: 20d, 2w, 1M, etc
+     * Example: 20d, 2w, etc
      */
     const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
 

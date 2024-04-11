@@ -23,9 +23,5 @@ export const getTimeUnitLabels = (timeUnit = TIME_UNITS.DAYS, timeValue = '0') =
       return i18n.DAYS(timeValue);
     case TIME_UNITS.WEEKS:
       return i18n.WEEKS(timeValue);
-    case TIME_UNITS.MONTHS:
-      return i18n.MONTHS(timeValue);
-    case TIME_UNITS.YEARS:
-      return i18n.YEARS(timeValue);
   }
 };
