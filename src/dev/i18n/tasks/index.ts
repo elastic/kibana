@@ -7,6 +7,7 @@
  */
 
 export { extractDefaultMessages } from './extract_default_translations';
+export { extractMessageDescriptorsTask } from './extract_message_descriptors_task';
 export { extractUntrackedMessages } from './extract_untracked_translations';
 export { checkCompatibility } from './check_compatibility';
 export { mergeConfigs } from './merge_configs';

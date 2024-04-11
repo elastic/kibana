@@ -15,3 +15,5 @@ export { serializeToJson, serializeToJson5 } from './serializers';
 export type { I18nConfig } from './config';
 export { filterConfigPaths, assignConfigFromPath, checkConfigNamespacePrefix } from './config';
 export { integrateLocaleFiles } from './integrate_locale_files';
+
+export { extractI18nMessageDescriptors } from './extract_message_descriptors';

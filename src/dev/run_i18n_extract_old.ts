@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ErrorReporter, serializeToJson, serializeToJson5, writeFileAsync } from './i18n';
-import { extractDefaultMessages, mergeConfigs, extractMessageDescriptorsTask } from './i18n/tasks';
+import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 
 run(
   async ({
@@ -47,7 +47,22 @@ run(
         {
           title: 'Extracting Default Messages',
           task: ({ config }) =>
-            new Listr(extractMessageDescriptorsTask(config, srcPaths), { exitOnError: true }),
+            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+        },
+        {
+          title: 'Writing to file',
+          enabled: (ctx) => outputDir && ctx.messages.size,
+          task: async (ctx) => {
+            const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
+              key1.localeCompare(key2)
+            );
+            await writeFileAsync(
+              resolve(outputDir, 'en.json'),
+              outputFormat === 'json5'
+                ? serializeToJson5(sortedMessages)
+                : serializeToJson(sortedMessages)
+            );
+          },
         },
       ],
       {

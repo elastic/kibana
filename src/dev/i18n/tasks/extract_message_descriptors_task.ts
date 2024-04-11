@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import chalk from 'chalk';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ErrorReporter, filterConfigPaths, I18nConfig, extractI18nMessageDescriptors } from '..';
+
+export function extractMessageDescriptorsTask(config: I18nConfig, inputPaths: string[]) {
+  const filteredPaths = filterConfigPaths(inputPaths, config) as string[];
+  if (filteredPaths.length === 0) {
+    throw createFailError(
+      `${chalk.white.bgRed(
+        ' I18N ERROR '
+      )} None of input paths is covered by the mappings in .i18nrc.json.`
+    );
+  }
+  return [{
+    task: async (context: {
+      messages: Map<string, { message: string }>;
+      reporter: ErrorReporter;
+    }) => {
+      const { messages, reporter } = context;
+      const initialErrorsNumber = reporter.errors.length;
+
+      // Return result if no new errors were reported for this path.
+      const result = await extractI18nMessageDescriptors();
+      if (reporter.errors.length === initialErrorsNumber) {
+        return result;
+      }
+
+      throw reporter;
+    },
+    title: 'ONE TIME',
+  }]
+
+  return filteredPaths.map((filteredPath) => ({
+    task: async (context: {
+      messages: Map<string, { message: string }>;
+      reporter: ErrorReporter;
+    }) => {
+      const { messages, reporter } = context;
+      const initialErrorsNumber = reporter.errors.length;
+
+      // Return result if no new errors were reported for this path.
+      const result = await extractI18nMessageDescriptors(filteredPath, messages, config, reporter);
+      if (reporter.errors.length === initialErrorsNumber) {
+        return result;
+      }
+
+      throw reporter;
+    },
+    title: filteredPath,
+  }));
+}
