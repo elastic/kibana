@@ -1184,9 +1184,16 @@ export class Embeddable
     }
 
     const hasData = Object.values(this.activeData).some((table) => {
-      const count = table.meta?.statistics?.totalCount || table.rows.length;
-
-      return count > 0;
+      if (
+        table.meta &&
+        table.meta.statistics &&
+        typeof table.meta.statistics.totalCount === 'number'
+      ) {
+        // if totalCount is set, refer to total count
+        return table.meta.statistics.totalCount > 0;
+      }
+      // if not, fall back to check the rows of the table
+      return table.rows.length > 0;
     });
 
     if (hasData) {
