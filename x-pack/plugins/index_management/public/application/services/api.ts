@@ -7,12 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
-import {
-  IndicesStatsResponse,
-  InferenceGetModelResponse,
-  InferenceModelConfig,
-  InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesStatsResponse, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {

@@ -18,7 +18,7 @@ import type {
 import { Service, ElasticsearchModelDefaultOptions } from '../types';
 
 export const elasticsearchModelsOptions: Array<
-  EuiSuperSelectOption<ElasticsearchModelDefaultOptions>
+  EuiSuperSelectOption<ElasticsearchModelDefaultOptions | string>
 > = [
   {
     value: ElasticsearchModelDefaultOptions.elser,

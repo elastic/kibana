@@ -24,11 +24,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import {
+  InferenceAPIConfigResponse,
+  SUPPORTED_PYTORCH_TASKS,
+  TRAINED_MODEL_TYPE,
+} from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
+import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
@@ -41,20 +46,47 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   const {
     core: { application },
     docLinks,
-    url,
+    plugins: { ml },
   } = useAppContext();
 
   const getMlTrainedModelPageUrl = useCallback(async () => {
-    return await url?.locators.get('ML_APP_LOCATOR')?.getUrl({
+    return await ml?.locator?.getUrl({
       page: 'trained_models',
     });
-  }, [url]);
+  }, [ml]);
 
   const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [inferenceAddError, setInferenceAddError] = useState<string | undefined>(undefined);
+  const [availableTrainedModels, setAvailableTrainedModels] = useState<
+    TrainedModelConfigResponse[]
+  >([]);
+  const onFlyoutClose = useCallback(() => {
+    setInferenceAddError(undefined);
+    setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+  }, [isInferenceFlyoutVisible]);
+  useEffect(() => {
+    const fetchAvailableTrainedModels = async () => {
+      setAvailableTrainedModels((await ml?.mlApi?.trainedModels?.getTrainedModels()) ?? []);
+    };
+    fetchAvailableTrainedModels();
+  }, [ml]);
+
+  const trainedModels = useMemo(() => {
+    const availableTrainedModelsList = availableTrainedModels
+      .filter(
+        (model: TrainedModelConfigResponse) =>
+          model.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+          (model?.inference_config
+            ? Object.keys(model.inference_config).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING)
+            : {})
+      )
+      .map((model: TrainedModelConfigResponse) => model.model_id);
+
+    return availableTrainedModelsList;
+  }, [availableTrainedModels]);
 
   const fieldConfigModelId = getFieldConfig('inference_id');
   const defaultInferenceIds: EuiSelectableOption[] = useMemo(() => {
@@ -66,7 +98,7 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
     const inferenceIdOptions =
-      models?.inferenceModels?.map((model: InferenceAPIConfigResponse) => ({
+      models?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
       })) || [];
 
@@ -76,21 +108,26 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
   useEffect(() => {
     setOptions([...defaultInferenceIds, ...inferenceIdOptionsFromModels]);
   }, [inferenceIdOptionsFromModels, defaultInferenceIds]);
+  const [isCreateInferenceApiLoading, setIsCreateInferenceApiLoading] = useState(false);
 
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
+      setIsCreateInferenceApiLoading(true);
       try {
         const { error } = await createInferenceEndpoint(inferenceId, taskType, modelConfig);
 
         if (!error) {
           setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-
+          setIsCreateInferenceApiLoading(false);
+          setInferenceAddError(undefined);
           resendRequest();
         } else {
           setInferenceAddError(error.message);
+          setIsCreateInferenceApiLoading(false);
         }
       } catch (exception) {
         setInferenceAddError(exception.message);
+        setIsCreateInferenceApiLoading(false);
       }
     },
     [isInferenceFlyoutVisible, resendRequest]
@@ -268,11 +305,13 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
                   </EuiFlexItem>
                 )
               }
+              trainedModels={trainedModels}
               onSaveInferenceEndpoint={onSaveInferenceCallback}
-              onFlyoutClose={setIsInferenceFlyoutVisible}
+              onFlyoutClose={onFlyoutClose}
               isInferenceFlyoutVisible={isInferenceFlyoutVisible}
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
+              isCreateInferenceApiLoading={isCreateInferenceApiLoading}
             />
           )}
         </EuiFlexItem>

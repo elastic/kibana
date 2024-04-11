@@ -89,6 +89,7 @@ export function getIndexManagementDependencies({
       share: startDependencies.share,
       cloud,
       console: startDependencies.console,
+      ml: startDependencies.ml,
     },
     services: {
       httpService,

@@ -19,6 +19,7 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import { ExtensionsSetup } from './services/extensions_service';
 import { PublicApiServiceSetup } from './services/public_api_service';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 
 export interface IndexManagementPluginSetup {
   apiService: PublicApiServiceSetup;
@@ -47,6 +48,7 @@ export interface StartDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  ml?: MlPluginStart;
 }
 
 export interface Index {

@@ -101,7 +101,7 @@ export const ServiceOptions: React.FC<{
           </EuiTitle>
         }
         description={
-          <EuiText color="subdued">
+          <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.ml.addInferenceEndpoint.elasticsearchModels.serviceOptions.threadsDescription"
               defaultMessage="The number of threads to use by each model allocation."

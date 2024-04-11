@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { InferenceFlyoutProps, InferenceFlyoutWrapper } from './inference_flyout_wrapper';
+import type { InferenceFlyoutProps } from './inference_flyout_wrapper';
+import { InferenceFlyoutWrapper } from './inference_flyout_wrapper';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 export const DEFAULT_VALUES: InferenceFlyoutProps = {
@@ -17,6 +18,8 @@ export const DEFAULT_VALUES: InferenceFlyoutProps = {
   isInferenceFlyoutVisible: false,
   onFlyoutClose: jest.fn(),
   onSaveInferenceEndpoint: jest.fn(),
+  trainedModels: [],
+  isCreateInferenceApiLoading: false,
 };
 describe('<InferenceFlyoutWrapper />', () => {
   beforeEach(() => {

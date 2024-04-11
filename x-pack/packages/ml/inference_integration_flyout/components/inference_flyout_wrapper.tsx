@@ -77,6 +77,7 @@ export interface SaveMappingOnClick {
     taskType: InferenceTaskType,
     modelConfig: ModelConfig
   ) => void;
+  isCreateInferenceApiLoading: boolean;
 }
 export interface DocumentationProps {
   elserv2documentationUrl?: string;
@@ -88,6 +89,7 @@ export interface InferenceFlyoutProps extends SaveMappingOnClick, DocumentationP
   onFlyoutClose: (value: boolean) => void;
   isInferenceFlyoutVisible: boolean;
   errorCallout?: JSX.Element | '';
+  trainedModels: string[];
 }
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   onSaveInferenceEndpoint,
@@ -98,6 +100,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   supportedNlpModels = '',
   nlpImportModel = '',
   errorCallout,
+  trainedModels = [],
+  isCreateInferenceApiLoading,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.elasticsearch_models);
   const tabToInferenceContentMap: Record<TabType, React.ReactNode> = {
@@ -107,12 +111,15 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
         e5documentationUrl={e5documentationUrl}
         elserv2documentationUrl={elserv2documentationUrl}
         onSaveInferenceEndpoint={onSaveInferenceEndpoint}
+        isCreateInferenceApiLoading={isCreateInferenceApiLoading}
+        trainedModels={trainedModels}
       />
     ),
     connect_to_api: (
       <ConnectToApi
         description={flyoutHeaderDescriptions[activeTab].description}
         onSaveInferenceEndpoint={onSaveInferenceEndpoint}
+        isCreateInferenceApiLoading={isCreateInferenceApiLoading}
       />
     ),
     eland_python_client: (

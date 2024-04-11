@@ -108,8 +108,7 @@ export class IndexMgmtUIPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
-    const { fleet, usageCollection, cloud, share, console } = plugins;
-
+    const { fleet, usageCollection, cloud, share, console, ml } = plugins;
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -130,6 +129,7 @@ export class IndexMgmtUIPlugin
             share,
             cloud,
             console,
+            ml,
           },
           services: {
             extensionsService: this.extensionsService,

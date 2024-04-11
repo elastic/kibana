@@ -77,13 +77,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   jsonData,
   refetchMapping,
   showAboutMappings,
-  isSemanticTextEnabled = false,
+  isSemanticTextEnabled = true,
 }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
-
   const state = useMappingsState();
   const dispatch = useDispatch();
 

@@ -36,6 +36,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
   onSaveInferenceEndpoint,
   isSaveButtonEmpty = false,
   service,
+  isCreateInferenceApiLoading,
 }) => {
   const [inferenceEndpointId, setInferenceEndpointId] = useState<string>('');
 
@@ -99,6 +100,7 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
             taskType={serviceTypeMap[service]}
             modelConfig={modelConfig}
             onSaveInferenceEndpoint={onSaveInferenceEndpoint}
+            isCreateInferenceApiLoading={isCreateInferenceApiLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

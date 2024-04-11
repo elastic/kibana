@@ -19,7 +19,11 @@ import { OpenaiForm } from './service_forms/openai_form';
 interface Props extends SaveMappingOnClick {
   description: string;
 }
-export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndpoint }) => {
+export const ConnectToApi: React.FC<Props> = ({
+  description,
+  onSaveInferenceEndpoint,
+  isCreateInferenceApiLoading,
+}) => {
   const defaultOpenaiUrl = 'https://api.openai.com/v1/embeddings';
   const defaultCohereModelId = 'embed-english-v2.0';
 
@@ -165,6 +169,7 @@ export const ConnectToApi: React.FC<Props> = ({ description, onSaveInferenceEndp
         service={selectedModelType}
         modelConfig={modelConfig}
         isSaveButtonEmpty={isSaveButtonEmpty}
+        isCreateInferenceApiLoading={isCreateInferenceApiLoading}
       />
     </>
   );

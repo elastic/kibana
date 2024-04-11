@@ -26,11 +26,13 @@ export const SaveInferenceEndpoint: React.FC<SaveInferenceEndpointProps> = ({
   modelConfig,
   onSaveInferenceEndpoint,
   isSaveButtonDisabled,
+  isCreateInferenceApiLoading,
 }) => {
   return (
     <EuiButton
       isDisabled={isSaveButtonDisabled}
       fill
+      isLoading={isCreateInferenceApiLoading}
       onClick={() => onSaveInferenceEndpoint(inferenceId, taskType, modelConfig)}
       type="submit"
     >

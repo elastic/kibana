@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiTitle,
@@ -12,10 +13,11 @@ import {
   EuiLink,
   EuiSpacer,
   useGeneratedHtmlId,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import type { ElasticsearchModelDescriptions, ElasticsearchService, ModelConfig } from '../types';
 import { ElasticsearchModelDefaultOptions, Service } from '../types';
 import type { DocumentationProps, SaveMappingOnClick } from './inference_flyout_wrapper';
@@ -26,13 +28,17 @@ interface ElasticsearchModelsProps
   extends Omit<DocumentationProps, 'supportedNlpModels' | 'nlpImportModel'>,
     SaveMappingOnClick {
   description: string;
+  trainedModels: string[];
 }
 export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   description,
   elserv2documentationUrl = '',
   e5documentationUrl = '',
   onSaveInferenceEndpoint,
+  trainedModels,
+  isCreateInferenceApiLoading,
 }) => {
+  const [options, setOptions] = useState(elasticsearchModelsOptions);
   const [selectedModelType, setSelectedModelType] = useState(elasticsearchModelsOptions[0].value);
   const [numberOfAllocations, setNumberOfAllocations] = useState<number>(1);
   const [numberOfThreads, setNumberOfThreads] = useState<number>(1);
@@ -61,7 +67,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   }, [numberOfAllocations, numberOfThreads, serviceType]);
 
   const elasticSearchModelTypesDescriptions: Record<
-    ElasticsearchModelDefaultOptions,
+    ElasticsearchModelDefaultOptions | string,
     ElasticsearchModelDescriptions
   > = {
     [ElasticsearchModelDefaultOptions.elser]: {
@@ -93,67 +99,93 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
     },
   };
 
+  useEffect(() => {
+    const elasticsearchModelsOptionsList: Array<
+      EuiSuperSelectOption<ElasticsearchModelDefaultOptions | string>
+    > = [];
+    const defaultOptions: string[] = Object.values(ElasticsearchModelDefaultOptions);
+
+    trainedModels.map((model) => {
+      if (!defaultOptions.includes(model)) {
+        elasticsearchModelsOptionsList.push({
+          value: model,
+          inputDisplay: model,
+          'data-test-subj': `serviceType-${model}`,
+        });
+      }
+    });
+    const modelOptionsList = elasticsearchModelsOptions.concat(elasticsearchModelsOptionsList);
+    setOptions(modelOptionsList);
+    setSelectedModelType(modelOptionsList[0].value);
+  }, [trainedModels]);
+  const serviceOptionsId = useGeneratedHtmlId({ prefix: 'serviceOptions' });
   const inferenceComponent = (
     <>
       <EuiFlexItem grow={false}>
         <EuiSuperSelect
           fullWidth
-          options={elasticsearchModelsOptions}
+          options={options}
           valueOfSelected={selectedModelType}
           onChange={(value) => setSelectedModelType(value)}
         />
       </EuiFlexItem>
       <EuiSpacer />
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h6>
-            <FormattedMessage
-              id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelTitle"
-              defaultMessage="{title}"
-              values={{
-                title: elasticSearchModelTypesDescriptions[selectedModelType].title,
-              }}
+      {Object.keys(elasticSearchModelTypesDescriptions).includes(selectedModelType) ? (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h6>
+                <FormattedMessage
+                  id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelTitle"
+                  defaultMessage="{title}"
+                  values={{
+                    title: elasticSearchModelTypesDescriptions[selectedModelType].title,
+                  }}
+                />
+              </h6>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDescription"
+                defaultMessage="{description}"
+                values={{
+                  description: elasticSearchModelTypesDescriptions[selectedModelType].description,
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem>
+            <p>
+              <EuiLink
+                href={elasticSearchModelTypesDescriptions[selectedModelType].documentation}
+                external
+                target={'_blank'}
+              >
+                <FormattedMessage
+                  id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDocumentation"
+                  defaultMessage="View documentation"
+                />
+              </EuiLink>
+            </p>
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem>
+            <ServiceOptions
+              id={serviceOptionsId}
+              numberOfAllocations={numberOfAllocations}
+              setNumberOfAllocations={setNumberOfAllocations}
+              setNumberOfThreads={setNumberOfThreads}
+              numberOfThreads={numberOfThreads}
             />
-          </h6>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiSpacer />
-      <EuiFlexItem>
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDescription"
-            defaultMessage="{description}"
-            values={{
-              description: elasticSearchModelTypesDescriptions[selectedModelType].description,
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiSpacer />
-      <EuiFlexItem>
-        <p>
-          <EuiLink
-            href={elasticSearchModelTypesDescriptions[selectedModelType].documentation}
-            external
-            target={'_blank'}
-          >
-            <FormattedMessage
-              id="xpack.ml.addInferenceEndpoint.elasticsearchModels.modelDocumentation"
-              defaultMessage="View documentation"
-            />
-          </EuiLink>
-        </p>
-      </EuiFlexItem>
-      <EuiSpacer />
-      <EuiFlexItem>
-        <ServiceOptions
-          id={useGeneratedHtmlId({ prefix: 'serviceOptions' })}
-          numberOfAllocations={numberOfAllocations}
-          setNumberOfAllocations={setNumberOfAllocations}
-          setNumberOfThreads={setNumberOfThreads}
-          numberOfThreads={numberOfThreads}
-        />
-      </EuiFlexItem>
+          </EuiFlexItem>
+        </>
+      ) : (
+        <EuiHorizontalRule margin="none" />
+      )}
     </>
   );
   return (
@@ -165,6 +197,7 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
         inferenceComponent={inferenceComponent}
         modelConfig={modelConfig}
         isSaveButtonEmpty={false}
+        isCreateInferenceApiLoading={isCreateInferenceApiLoading}
       />
     </>
   );

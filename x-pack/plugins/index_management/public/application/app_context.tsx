@@ -25,6 +25,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -45,6 +46,7 @@ export interface AppDependencies {
     share: SharePluginStart;
     cloud?: CloudSetup;
     console?: ConsolePluginStart;
+    ml?: MlPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
