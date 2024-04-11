@@ -1727,12 +1727,12 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useBatchedPublishingSubjects",
+        "id": "def-common.useBatchedOptionalPublishingSubjects",
         "type": "Function",
         "tags": [],
-        "label": "useBatchedPublishingSubjects",
+        "label": "useBatchedOptionalPublishingSubjects",
         "description": [
-          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nYou should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay."
+          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` may not be defined on initial component render.\n"
         ],
         "signature": [
           "<SubjectsType extends ",
@@ -1747,12 +1747,59 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useBatchedPublishingSubjects.$1",
+            "id": "def-common.useBatchedOptionalPublishingSubjects.$1",
             "type": "Object",
             "tags": [],
             "label": "subjects",
             "description": [
               "Publishing subjects array.\nWhen 'subjects' is expected to change, 'subjects' must be part of component react state."
+            ],
+            "signature": [
+              "[...SubjectsType]"
+            ],
+            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useBatchedPublishingSubjects",
+        "type": "Function",
+        "tags": [],
+        "label": "useBatchedPublishingSubjects",
+        "description": [
+          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` are static and do not change over the lifetime of the component.\n"
+        ],
+        "signature": [
+          "<SubjectsType extends ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<any>[]>(...subjects_0: SubjectsType) => ",
+          "UnwrapPublishingSubjectTuple",
+          "<SubjectsType>"
+        ],
+        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useBatchedPublishingSubjects.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subjects",
+            "description": [
+              "Publishing subjects array."
             ],
             "signature": [
               "[...SubjectsType]"
