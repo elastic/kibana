@@ -9,6 +9,7 @@ import { DEFAULT_DEGRADED_DOCS } from '../constants';
 import { DataStreamType } from '../types';
 import { indexNameToDataStreamParts } from '../utils';
 import { Integration } from './integration';
+import { DegradedDocsStat } from './malformed_docs_stat';
 import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
@@ -55,6 +56,31 @@ export class DataStreamStat {
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
+    };
+
+    return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static fromDegradedDocStat({
+    degradedDocStat,
+    integrationMap,
+  }: {
+    degradedDocStat: DegradedDocsStat;
+    integrationMap: Record<string, { integration: Integration; title: string }>;
+  }) {
+    const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
+
+    const dataStreamStatProps = {
+      rawName: degradedDocStat.dataset,
+      type,
+      name: dataset,
+      title: integrationMap[dataset]?.title || dataset,
+      namespace,
+      integration: integrationMap[dataset]?.integration,
+      degradedDocs: {
+        percentage: degradedDocStat.percentage,
+        count: degradedDocStat.count,
+      },
     };
 
     return new DataStreamStat(dataStreamStatProps);

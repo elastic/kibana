@@ -70,7 +70,7 @@ export const useDatasetQualityFilters = () => {
 
   const integrationItems: IntegrationItem[] = useMemo(
     () =>
-      integrations.map((integration) => ({
+      (integrations ?? []).map((integration) => ({
         ...integration,
         label: integration.title,
         checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,

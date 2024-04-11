@@ -84,7 +84,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
-  WithIntegrations;
+  Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -116,6 +116,10 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'datasets.loaded';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'integrations.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {

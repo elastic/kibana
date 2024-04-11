@@ -45,7 +45,16 @@ export const useDatasetQualityTable = () => {
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
-  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loading = useSelector(
+    service,
+    (state) =>
+      state.matches('datasets.fetching') ||
+      state.matches('integrations.fetching') ||
+      state.matches('degradedDocs.fetching')
+  );
+  const loadingDataStreamStats = useSelector(service, (state) =>
+    state.matches('datasets.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
@@ -104,6 +113,7 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         selectedDataset: flyout?.dataset,
         openFlyout,
+        loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
@@ -112,6 +122,7 @@ export const useDatasetQualityTable = () => {
       fieldFormats,
       flyout?.dataset,
       openFlyout,
+      loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
       isActive,

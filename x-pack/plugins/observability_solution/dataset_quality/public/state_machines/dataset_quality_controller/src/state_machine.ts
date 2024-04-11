@@ -8,18 +8,20 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
   DashboardType,
   DataStreamDetails,
-  DataStreamStatServiceResponse,
+  DataStreamStat,
   GetDataStreamsStatsQuery,
+  GetIntegrationsParams,
 } from '../../../../common/data_streams_stats';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
-import { mergeDegradedStatsIntoDataStreams } from '../../../utils';
+import { generateDatasets } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   fetchDatasetDetailsFailedNotifier,
@@ -93,7 +95,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
             UPDATE_INTEGRATIONS: {
               target: 'datasets.loaded',
-              actions: ['storeIntegrations'],
+              actions: ['storeIntegrationsFilter'],
             },
             UPDATE_NAMESPACES: {
               target: 'datasets.loaded',
@@ -129,6 +131,34 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
             REFRESH_DATA: {
               target: 'degradedDocs.fetching',
+            },
+          },
+        },
+        integrations: {
+          initial: 'fetching',
+          states: {
+            fetching: {
+              invoke: {
+                src: 'loadIntegrations',
+                onDone: {
+                  target: 'loaded',
+                  actions: ['storeIntegrations', 'storeDatasets'],
+                },
+                onError: {
+                  target: 'loaded',
+                  actions: ['notifyFetchIntegrationsFailed'],
+                },
+              },
+            },
+            loaded: {},
+          },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'integrations.fetching',
+              actions: ['storeTimeRange'],
+            },
+            REFRESH_DATA: {
+              target: 'integrations.fetching',
             },
           },
         },
@@ -259,7 +289,7 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
-        storeIntegrations: assign((context, event) => {
+        storeIntegrationsFilter: assign((context, event) => {
           return 'integrations' in event
             ? {
                 filters: {
@@ -310,8 +340,7 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDataStreamStats: assign((_context, event) => {
           return 'data' in event
             ? {
-                dataStreamStats: (event.data as DataStreamStatServiceResponse).dataStreamStats,
-                integrations: (event.data as DataStreamStatServiceResponse).integrations,
+                dataStreamStats: event.data as DataStreamStat[],
               }
             : {};
         }),
@@ -332,6 +361,13 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeIntegrations: assign((_context, event) => {
+          return 'data' in event
+            ? {
+                integrations: event.data as Integration[],
+              }
+            : {};
+        }),
         storeIntegrationDashboards: assign((context, event) => {
           return 'data' in event && 'dashboards' in event.data
             ? {
@@ -349,16 +385,15 @@ export const createPureDatasetQualityControllerStateMachine = (
             : {};
         }),
         storeDatasets: assign((context, _event) => {
-          return context.dataStreamStats && context.degradedDocStats
+          return context.integrations && (context.dataStreamStats || context.degradedDocStats)
             ? {
-                datasets: mergeDegradedStatsIntoDataStreams(
+                datasets: generateDatasets(
                   context.dataStreamStats,
-                  context.degradedDocStats
+                  context.degradedDocStats,
+                  context.integrations
                 ),
               }
-            : context.dataStreamStats
-            ? { datasets: context.dataStreamStats }
-            : { datasets: [] };
+            : {};
         }),
       },
     }
@@ -402,6 +437,11 @@ export const createDatasetQualityControllerStateMachine = ({
           datasetQuery: context.filters.query,
           start,
           end,
+        });
+      },
+      loadIntegrations: (context) => {
+        return dataStreamStatsClient.getIntegrations({
+          type: context.type as GetIntegrationsParams['query']['type'],
         });
       },
       loadDataStreamDetails: (context) => {

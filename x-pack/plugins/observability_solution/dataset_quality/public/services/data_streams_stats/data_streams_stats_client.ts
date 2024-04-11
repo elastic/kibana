@@ -7,14 +7,14 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { find, merge } from 'lodash';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamsEstimatedDataInBytesResponseRt,
+  getIntegrationsResponseRt,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE, NONE } from '../../../common/constants';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -24,6 +24,8 @@ import {
   GetDataStreamsStatsResponse,
   GetDataStreamsEstimatedDataInBytesParams,
   GetDataStreamsEstimatedDataInBytesResponse,
+  GetIntegrationsParams,
+  IntegrationsResponse,
 } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from './types';
@@ -42,27 +44,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
       });
 
-    const { dataStreamsStats, integrations } = decodeOrThrow(
+    const { dataStreamsStats } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
         new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    const mergedDataStreamsStats = dataStreamsStats.map((statsItem) => {
-      const integration = find(integrations, { name: statsItem.integration });
-
-      return merge({}, statsItem, { integration });
-    });
-
-    const uncategorizedDatasets = dataStreamsStats.some((dataStream) => !dataStream.integration);
-
-    return {
-      dataStreamStats: mergedDataStreamsStats.map(DataStreamStat.create),
-      integrations: (uncategorizedDatasets
-        ? [...integrations, { name: NONE, title: 'None' }]
-        : integrations
-      ).map(Integration.create),
-    };
+    return dataStreamsStats.map(DataStreamStat.create);
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {
@@ -116,5 +104,25 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return dataStreamsEstimatedDataInBytes;
+  }
+
+  public async getIntegrations(
+    params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
+  ): Promise<IntegrationsResponse> {
+    const response = await this.http
+      .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/integrations', {
+        query: params,
+      })
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(`Failed to fetch integrations: ${error}`);
+      });
+
+    const { integrations } = decodeOrThrow(
+      getIntegrationsResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(`Failed to decode integrations response: ${message}`)
+    )(response);
+
+    return integrations.map(Integration.create);
   }
 }
