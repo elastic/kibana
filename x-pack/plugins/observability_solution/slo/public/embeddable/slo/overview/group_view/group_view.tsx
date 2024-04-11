@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 import { SLOView } from '../../../../pages/slos/components/toggle_slo_view';
 import { SloEmbeddableInput } from '../types';
 import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
+import { buildCombinedKqlQuery } from './helpers/build_kql_query';
 
 interface Props {
   groupBy: string;
@@ -35,28 +36,8 @@ export function GroupSloView({
   const [filters, setFilters] = useState(initialFilters);
   const [groups, setGroups] = useState(initialGroups);
 
-  let groupsKqlQuery = '';
-  if (groups.length > 0) {
-    groupsKqlQuery += `(`;
+  const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });
 
-    groups.map((group, index) => {
-      const shouldAddOr = index < groups.length - 1;
-      groupsKqlQuery += `${groupBy}:"${group}"`;
-      if (shouldAddOr) {
-        groupsKqlQuery += ' or ';
-      }
-    });
-    groupsKqlQuery += `)`;
-  }
-
-  let combinedKqlQuery = '';
-  if (kqlQuery && groupsKqlQuery) {
-    combinedKqlQuery = `${groupsKqlQuery} and ${kqlQuery}`;
-  } else if (groupsKqlQuery) {
-    combinedKqlQuery = groupsKqlQuery;
-  } else if (kqlQuery) {
-    combinedKqlQuery = kqlQuery;
-  }
   useEffect(() => {
     const subs = reloadGroupSubject?.subscribe((input) => {
       if (input) {
