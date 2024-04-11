@@ -5,9 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiDataGridColumnCellAction, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import {
+  EuiButtonEmptyProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridColumnCellActionProps,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
 import { RowHeight } from '../../../../common/types';
 import type { FormatFactory } from '../../../../common/types';
@@ -86,10 +91,12 @@ const renderCellAction = (
     {
       rowIndex: 0,
       columnId: 'a',
-      Component: () => <></>,
-    } as unknown as EuiDataGridColumnCellActionProps
+      Component: (props: EuiButtonEmptyProps) => <EuiButtonEmpty {...props} />,
+      isExpanded: false,
+      colIndex: 0,
+    }
   );
-  return shallow(<div>{cellAction}</div>);
+  return render(<>{cellAction}</>);
 };
 
 describe('getContentData', () => {
@@ -139,8 +146,8 @@ describe('getContentData', () => {
         columnFilterable: [true],
         columnCellValueActions: [[cellValueAction]],
       });
-      const wrapper = renderCellAction(cellActions, 0);
-      expect(wrapper?.find('Component').prop('data-test-subj')).toEqual('lensDatatableFilterFor');
+      renderCellAction(cellActions, 0);
+      expect(screen.getByRole('button')).toHaveTextContent('Filter for');
     });
 
     it('should render filterOut as second action', () => {
@@ -149,8 +156,8 @@ describe('getContentData', () => {
         columnFilterable: [true],
         columnCellValueActions: [[cellValueAction]],
       });
-      const wrapper = renderCellAction(cellActions, 1);
-      expect(wrapper?.find('Component').prop('data-test-subj')).toEqual('lensDatatableFilterOut');
+      renderCellAction(cellActions, 1);
+      expect(screen.getByRole('button')).toHaveTextContent('Filter out');
     });
 
     it('should render cellValue actions at the end', () => {
@@ -159,10 +166,8 @@ describe('getContentData', () => {
         columnFilterable: [true],
         columnCellValueActions: [[cellValueAction]],
       });
-      const wrapper = renderCellAction(cellActions, 2);
-      expect(wrapper?.find('Component').prop('data-test-subj')).toEqual(
-        'lensDatatableCellAction-test'
-      );
+      renderCellAction(cellActions, 2);
+      expect(screen.getByRole('button')).toHaveTextContent('Test');
     });
   });
 });

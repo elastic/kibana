@@ -32,12 +32,14 @@ export function SettingWithSiblingFlyout({
   title = DEFAULT_TITLE,
   isInlineEditing,
   SettingTrigger,
+  dataTestSubj = 'lns-settingWithSiblingFlyout',
 }: {
   title?: string;
   siblingRef: MutableRefObject<HTMLDivElement | null>;
   SettingTrigger: ({ onClick }: { onClick: () => void }) => JSX.Element;
   children?: React.ReactElement | React.ReactElement[];
   isInlineEditing?: boolean;
+  dataTestSubj?: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -62,7 +64,13 @@ export function SettingWithSiblingFlyout({
   }, [isInlineEditing, isFlyoutOpen]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} css={{ cursor: 'pointer' }}>
+    <EuiFlexGroup
+      className="blabla"
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      css={{ cursor: 'pointer' }}
+    >
       <SettingTrigger onClick={toggleFlyout} />
       {isFlyoutOpen && siblingRef.current && (
         <EuiPortal insert={{ sibling: siblingRef.current, position: 'after' }}>
@@ -71,7 +79,7 @@ export function SettingWithSiblingFlyout({
               <div
                 role="dialog"
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
-                data-test-subj="lns-indexPattern-SettingWithSiblingFlyout"
+                data-test-subj={dataTestSubj}
                 className="lnsSettingWithSiblingFlyout"
               >
                 <EuiFlyoutHeader hasBorder className="lnsSettingWithSiblingFlyout__header">
