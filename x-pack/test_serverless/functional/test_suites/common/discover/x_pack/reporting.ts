@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
     const url = await PageObjects.reporting.getReportURL(60000);
@@ -89,13 +89,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
         await advOpt.click();
         const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);

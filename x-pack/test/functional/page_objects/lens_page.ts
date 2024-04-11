@@ -988,7 +988,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
-      annotationFromLibraryTitle?: string
+      annotationFromLibraryTitle?: string,
+      seriesType = 'bar_stacked'
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1003,6 +1004,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'data') {
+          await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+        }
         if (layerType === 'annotations') {
           if (!annotationFromLibraryTitle) {
             await testSubjects.click('lnsAnnotationLayer_new');
@@ -1037,13 +1041,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchFirstLayerIndexPattern(dataViewTitle: string) {
       await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-    },
-
-    /**
-     * Returns the current index pattern of the data panel
-     */
-    async getDataPanelIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
     },
 
     /**
@@ -1795,7 +1792,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return parent.getAttribute('data-test-subj');
+          return (await parent.getAttribute('data-test-subj')) ?? '';
         })
       );
     },
@@ -1856,6 +1853,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
+      if (!url) {
+        throw Error('No data-share-url attribute found');
+      }
       return url;
     },
 
