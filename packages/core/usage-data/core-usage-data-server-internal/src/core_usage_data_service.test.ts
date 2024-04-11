@@ -86,6 +86,10 @@ describe('CoreUsageDataService', () => {
     service = new CoreUsageDataService(coreContext);
   });
 
+  afterEach(() => {
+    service.stop();
+  });
+
   describe('setup', () => {
     it('creates internal repository', async () => {
       const http = httpServiceMock.createInternalSetupContract();
