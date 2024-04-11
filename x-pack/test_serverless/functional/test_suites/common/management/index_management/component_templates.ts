@@ -18,10 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   const TEST_COMPONENT_TEMPLATE = '.a_test_component_template';
-  // failsOnMKI, see https://github.com/elastic/kibana/issues/180568
   describe('Index component templates', function () {
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
