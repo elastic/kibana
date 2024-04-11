@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isArray } from 'lodash';
 import { GetValueTextContentResponse, UpdateIncidentRequest } from './types';
 
 export const getValueTextContent = (
@@ -15,25 +16,28 @@ export const getValueTextContent = (
     return {
       textarea: {
         format: 'html',
-        content: value as string,
+        content: value.toString(),
       },
     };
   }
 
   if (field === 'incidentTypes') {
+    if (isArray(value)) {
+      return { ids: value.map((item) => Number(item)) };
+    }
     return {
-      ids: value as number[],
+      ids: [],
     };
   }
 
   if (field === 'severityCode') {
     return {
-      id: value as number,
+      id: Number(value),
     };
   }
 
   return {
-    text: value as string,
+    text: value.toString(),
   };
 };
 
