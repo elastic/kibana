@@ -42,8 +42,10 @@ export function initSolutionOnRequestInterceptor({
 
     let redirectUrl: string | null = null;
 
-    // To avoid a double full page reload (1) after logging in and (2) to set the default solution
-    // in the base path, we proactively redirect to the default solution
+    // To avoid a double full page reload in case no solutionId is in the base path when accessing
+    // the first Kibana app (or the space selector screen), we proactively redirect to the default solution.
+    // The client has a detection mechanism that will redirect to the correct solution if the current
+    // page does not belong to this default solution.
     if (
       !pathHasExplicitSolutionIdentifier &&
       (path.includes('spaces/space_selector') || isRequestingApplication)
