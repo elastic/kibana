@@ -38,6 +38,7 @@ import { isTextBasedQuery } from '../../application/main/utils/is_text_based_que
 import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import './_discover_grid_flyout.scss';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -234,6 +235,7 @@ export function DiscoverGridFlyout({
         css={{
           maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
         }}
+        className="dscGridFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
@@ -245,7 +247,7 @@ export function DiscoverGridFlyout({
           >
             <EuiFlexItem grow={false}>
               <EuiTitle
-                size="s"
+                size="xs"
                 data-test-subj="docTableRowDetailsTitle"
                 css={css`
                   white-space: nowrap;

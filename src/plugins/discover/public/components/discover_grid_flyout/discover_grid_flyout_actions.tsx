@@ -115,12 +115,10 @@ function FlyoutActions({
     >
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          <strong>
-            {i18n.translate('discover.grid.tableRow.actionsLabel', {
-              defaultMessage: 'Actions',
-            })}
-            :
-          </strong>
+          {i18n.translate('discover.grid.tableRow.actionsLabel', {
+            defaultMessage: 'Actions',
+          })}
+          :
         </EuiText>
       </EuiFlexItem>
       {visibleFlyoutActions.map((action) => (
