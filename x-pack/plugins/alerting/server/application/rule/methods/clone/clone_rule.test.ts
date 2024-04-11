@@ -12,18 +12,18 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { getBeforeSetup } from './lib';
-import { RuleDomain } from '../../application/rule/types';
-import { ConstructorOptions, RulesClient } from '../rules_client';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { RuleDomain } from '../../types';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -126,7 +126,10 @@ describe('clone', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(rule);
       unsecuredSavedObjectsClient.create.mockResolvedValue(rule);
 
-      const res = await rulesClient.clone('test-rule', { newId: 'test-rule-2' });
+      const res = await rulesClient.clone({
+        id: 'test-rule',
+        newId: 'test-rule-2',
+      });
 
       expect(res.actions).toEqual([
         {
@@ -148,7 +151,10 @@ describe('clone', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(rule);
       unsecuredSavedObjectsClient.create.mockResolvedValue(rule);
 
-      await rulesClient.clone('test-rule', { newId: 'test-rule-2' });
+      await rulesClient.clone({
+        id: 'test-rule',
+        newId: 'test-rule-2',
+      });
       const results = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
 
       expect(results.actions).toMatchInlineSnapshot(`

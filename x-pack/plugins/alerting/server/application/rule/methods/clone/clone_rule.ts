@@ -10,37 +10,50 @@ import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule, SanitizedRule, RuleTypeParams } from '../../types';
-import { getDefaultMonitoring } from '../../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { parseDuration } from '../../../common/parse_duration';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { getRuleExecutionStatusPendingAttributes } from '../../lib/rule_execution_status';
-import { isDetectionEngineAADRuleType } from '../../saved_objects/migrations/utils';
-import { createNewAPIKeySet, createRuleSavedObject } from '../lib';
-import { RulesClientContext } from '../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { SanitizedRule, RawRule } from '../../../../types';
+import { getDefaultMonitoring } from '../../../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { parseDuration } from '../../../../../common/parse_duration';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { getRuleExecutionStatusPendingAttributes } from '../../../../lib/rule_execution_status';
+import { isDetectionEngineAADRuleType } from '../../../../saved_objects/migrations/utils';
+import { createNewAPIKeySet, createRuleSavedObject } from '../../../../rules_client/lib';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { CloneRuleParams } from './types';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { RuleDomain, RuleParams } from '../../types';
+import { getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { ruleDomainSchema } from '../../schemas';
+import { cloneRuleParamsSchema } from './schemas';
 
-export type CloneArguments = [string, { newId?: string }];
-
-export async function clone<Params extends RuleTypeParams = never>(
+export async function cloneRule<Params extends RuleParams = never>(
   context: RulesClientContext,
-  id: string,
-  { newId }: { newId?: string }
+  params: CloneRuleParams
 ): Promise<SanitizedRule<Params>> {
-  let ruleSavedObject: SavedObject<RawRule>;
+  const { id, newId } = params;
+
+  try {
+    cloneRuleParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating clone data - ${error.message}`);
+  }
+
+  let ruleSavedObject: SavedObject<RuleAttributes>;
 
   try {
     ruleSavedObject = await withSpan(
       { name: 'encryptedSavedObjectsClient.getDecryptedAsInternalUser', type: 'rules' },
-      () =>
-        context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-          RULE_SAVED_OBJECT_TYPE,
+      () => {
+        return getDecryptedRuleSo({
           id,
-          {
+          encryptedSavedObjectsClient: context.encryptedSavedObjectsClient,
+          savedObjectsGetOptions: {
             namespace: context.namespace,
-          }
-        )
+          },
+        });
+      }
     );
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
@@ -50,7 +63,12 @@ export async function clone<Params extends RuleTypeParams = never>(
     // Still attempt to load the object using SOC
     ruleSavedObject = await withSpan(
       { name: 'unsecuredSavedObjectsClient.get', type: 'rules' },
-      () => context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id)
+      () => {
+        return getRuleSo({
+          id,
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+        });
+      }
     );
   }
 
@@ -60,7 +78,8 @@ export async function clone<Params extends RuleTypeParams = never>(
    * functionality until we resolve our difference
    */
   if (
-    isDetectionEngineAADRuleType(ruleSavedObject) ||
+    // TODO (http-versioning): Remove this cast to RawRule
+    isDetectionEngineAADRuleType(ruleSavedObject as SavedObject<RawRule>) ||
     ruleSavedObject.attributes.consumer === AlertConsumers.SIEM
   ) {
     throw Boom.badRequest(
@@ -107,7 +126,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     errorMessage: 'Error creating rule: could not create API key',
   });
 
-  const rawRule: RawRule = {
+  const ruleAttributes: RuleAttributes = {
     ...ruleSavedObject.attributes,
     name: ruleName,
     ...apiKeyAttributes,
@@ -120,7 +139,10 @@ export async function clone<Params extends RuleTypeParams = never>(
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: getRuleExecutionStatusPendingAttributes(lastRunTimestamp.toISOString()),
-    monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    // TODO (http-versioning): Remove this cast to RuleAttributes
+    monitoring: getDefaultMonitoring(
+      lastRunTimestamp.toISOString()
+    ) as RuleAttributes['monitoring'],
     revision: 0,
     scheduledTaskId: null,
     running: false,
@@ -134,12 +156,41 @@ export async function clone<Params extends RuleTypeParams = never>(
     })
   );
 
-  return await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
-    createRuleSavedObject(context, {
-      intervalInMs: parseDuration(rawRule.schedule.interval),
-      rawRule,
-      references: ruleSavedObject.references,
-      ruleId,
-    })
+  const clonedRuleAttributes = await withSpan(
+    { name: 'createRuleSavedObject', type: 'rules' },
+    () =>
+      createRuleSavedObject(context, {
+        intervalInMs: parseDuration(ruleAttributes.schedule.interval),
+        rawRule: ruleAttributes,
+        references: ruleSavedObject.references,
+        ruleId,
+        returnRuleAttributes: true,
+      })
   );
+
+  // Convert ES RuleAttributes back to domain rule object
+  const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
+    clonedRuleAttributes.attributes,
+    {
+      id: clonedRuleAttributes.id,
+      logger: context.logger,
+      ruleType: context.ruleTypeRegistry.get(clonedRuleAttributes.attributes.alertTypeId),
+      references: clonedRuleAttributes.references,
+    },
+    (connectorId: string) => context.isSystemAction(connectorId)
+  );
+
+  // Try to validate created rule, but don't throw.
+  try {
+    ruleDomainSchema.validate(ruleDomain);
+  } catch (e) {
+    context.logger.warn(`Error validating created rule domain object for id: ${id}, ${e}`);
+  }
+
+  // Convert domain rule to rule (Remove certain properties)
+  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: false });
+
+  // TODO (http-versioning): Remove this cast, this enables us to move forward
+  // without fixing all of other solution types
+  return rule as SanitizedRule<Params>;
 }

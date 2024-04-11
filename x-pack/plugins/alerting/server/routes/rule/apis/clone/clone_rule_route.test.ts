@@ -7,16 +7,16 @@
 
 import { pick } from 'lodash';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { cloneRuleRoute } from './clone_rule';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../types';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { cloneRuleRoute } from './clone_rule_route';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -95,13 +95,13 @@ describe('cloneRuleRoute', () => {
     updated_by: mockedRule.updatedBy,
     api_key_owner: mockedRule.apiKeyOwner,
     muted_alert_ids: mockedRule.mutedInstanceIds,
-    created_at: mockedRule.createdAt,
-    updated_at: mockedRule.updatedAt,
+    created_at: mockedRule.createdAt.toISOString(),
+    updated_at: mockedRule.updatedAt.toISOString(),
     id: mockedRule.id,
     revision: 0,
     execution_status: {
       status: mockedRule.executionStatus.status,
-      last_execution_date: mockedRule.executionStatus.lastExecutionDate,
+      last_execution_date: mockedRule.executionStatus.lastExecutionDate.toISOString(),
     },
     actions: [
       {

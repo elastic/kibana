@@ -43,7 +43,7 @@ import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
 import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rules_route';
-import { cloneRuleRoute } from './clone_rule';
+import { cloneRuleRoute } from './rule/apis/clone/clone_rule_route';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';

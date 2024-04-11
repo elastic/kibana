@@ -10,7 +10,7 @@ import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
-import { clone, CloneArguments } from './methods/clone';
+import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
@@ -121,8 +121,8 @@ export class RulesClient {
 
   public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
     aggregateRules<T>(this.context, params);
-  public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
-    clone<Params>(this.context, ...args);
+  public clone = <Params extends RuleTypeParams = never>(params: CloneRuleParams) =>
+    cloneRule<Params>(this.context, params);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
     createRule<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
