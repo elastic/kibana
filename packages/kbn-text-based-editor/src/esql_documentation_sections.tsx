@@ -1995,6 +1995,38 @@ Valid order options are \`ASC\` and \`DESC\`, default is \`ASC\`.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction',
+        {
+          defaultMessage: 'MV_SLICE',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction.markdown',
+            {
+              defaultMessage: `### MV_SLICE
+Returns a subset of the multivalued field using the start and end index values.
+
+
+Example:
+
+\`\`\`
+ROW a = [1, 2, 2, 3]
+| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
+\`\`\`
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction',
         {
           defaultMessage: 'MV_SUM',
@@ -2020,38 +2052,6 @@ Returning:
 \`\`\`
 
 NOTE: The input type can be any number and the output type is the same as the input type.
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction',
-        {
-          defaultMessage: 'MV_SLICE',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction.markdown',
-            {
-              defaultMessage: `### MV_SLICE
-Returns a subset of the multivalued field using the start and end index values.
-
-
-Example:
-
-\`\`\`
-ROW a = [1, 2, 2, 3]
-| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
-\`\`\`
-
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
