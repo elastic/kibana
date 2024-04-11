@@ -124,7 +124,7 @@ describe('useDetailsPageMappingsModelManagement', () => {
 
     await result.current.fetchInferenceToModelIdMap();
 
-    const expectedValue = {
+    const expectedMap = {
       type: 'inferenceToModelIdMap.update',
       value: {
         inferenceToModelIdMap: {
@@ -141,6 +141,6 @@ describe('useDetailsPageMappingsModelManagement', () => {
         },
       },
     };
-    expect(mockDispatch).toHaveBeenCalledWith(expectedValue);
+    expect(mockDispatch).toHaveBeenCalledWith(expectedMap);
   });
 });
