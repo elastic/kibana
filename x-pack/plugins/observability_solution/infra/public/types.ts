@@ -135,6 +135,7 @@ export interface InfraHttpError extends IHttpFetchError {
 export interface ExecutionTimeRange {
   gte: number;
   lte: number;
+  buckets?: number;
 }
 
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
