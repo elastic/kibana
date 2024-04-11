@@ -239,6 +239,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async chooseLensSuggestion(suggestionType: string) {
+    await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips which might hide the edit button
     await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
     await this.retry.waitFor('flyout', async () => {
       return await this.testSubjects.exists('lensSuggestionsPanelToggleButton');

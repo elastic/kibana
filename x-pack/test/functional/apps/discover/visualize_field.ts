@@ -152,7 +152,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips
       await PageObjects.discover.chooseLensSuggestion('donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
