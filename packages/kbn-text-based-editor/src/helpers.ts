@@ -199,11 +199,9 @@ export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart
     pattern: '*:*',
     isRollupIndex: () => false,
   });
-  const indicesWithNoAliases = indices.filter((source) => !Boolean(source.item.indices));
-
-  const finalIndicesList = indicesWithNoAliases.filter((source) => {
+  const finalIndicesList = indices.filter((source) => {
     const [_, index] = source.name.split(':');
-    return !index.startsWith('.');
+    return !index.startsWith('.') && !Boolean(source.item.indices);
   });
 
   return finalIndicesList.map((source) => ({ name: source.name, hidden: false }));
