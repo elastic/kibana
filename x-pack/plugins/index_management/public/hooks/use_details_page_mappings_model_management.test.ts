@@ -61,92 +61,86 @@ jest.mock('../application/components/mappings_editor/mappings_state_context', ()
   useDispatch: () => mockDispatch,
 }));
 const mockDispatch = jest.fn();
+const fields = {
+  byId: {
+    '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+      id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+      isMultiField: false,
+      source: {
+        name: 'title',
+        type: 'text',
+        copy_to: ['semantic'],
+      },
+      path: ['title'],
+      nestedDepth: 0,
+      childFieldsName: 'fields',
+      canHaveChildFields: false,
+      hasChildFields: false,
+      canHaveMultiFields: true,
+      hasMultiFields: false,
+      isExpanded: false,
+    },
+    'c5d86c82-ea07-4457-b469-3ffd4b96db81': {
+      id: 'c5d86c82-ea07-4457-b469-3ffd4b96db81',
+      isMultiField: false,
+      source: {
+        name: 'semantic',
+        inference_id: 'elser_model_2',
+        type: 'semantic_text',
+      },
+      path: ['semantic'],
+      nestedDepth: 0,
+      childFieldsName: 'fields',
+      canHaveChildFields: false,
+      hasChildFields: false,
+      canHaveMultiFields: true,
+      hasMultiFields: false,
+      isExpanded: false,
+    },
+  },
+  aliases: {},
+  rootLevelFields: ['88ebcfdb-19b7-4458-9ea2-9488df54453d', 'c5d86c82-ea07-4457-b469-3ffd4b96db81'],
+  maxNestedDepth: 2,
+} as NormalizedFields;
+
+const inferenceToModelIdMap = {
+  elser_model_2: {
+    trainedModelId: '.elser_model_2',
+    isDeployed: true,
+    defaultInferenceEndpoint: false,
+  },
+  e5: {
+    trainedModelId: '.multilingual-e5-small',
+    isDeployed: true,
+    defaultInferenceEndpoint: false,
+  },
+} as InferenceToModelIdMap;
 
 describe('useDetailsPageMappingsModelManagement', () => {
-  describe('useDetailsPageMappingsModelManagement', () => {
-    it('should call the dispatch with correct parameters', async () => {
-      const fields = {
-        byId: {
-          '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
-            id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
-            isMultiField: false,
-            source: {
-              name: 'title',
-              type: 'text',
-              copy_to: ['semantic'],
-            },
-            path: ['title'],
-            nestedDepth: 0,
-            childFieldsName: 'fields',
-            canHaveChildFields: false,
-            hasChildFields: false,
-            canHaveMultiFields: true,
-            hasMultiFields: false,
-            isExpanded: false,
+  it('should call the dispatch with correct parameters', async () => {
+    const { result } = renderHook(() =>
+      useDetailsPageMappingsModelManagement(fields, inferenceToModelIdMap)
+    );
+
+    await result.current.fetchInferenceToModelIdMap();
+
+    const expectedValue = {
+      type: 'inferenceToModelIdMap.update',
+      value: {
+        inferenceToModelIdMap: {
+          e5: {
+            defaultInferenceEndpoint: false,
+            isDeployed: false,
+            trainedModelId: '.multilingual-e5-small',
           },
-          'c5d86c82-ea07-4457-b469-3ffd4b96db81': {
-            id: 'c5d86c82-ea07-4457-b469-3ffd4b96db81',
-            isMultiField: false,
-            source: {
-              name: 'semantic',
-              inference_id: 'elser_model_2',
-              type: 'semantic_text',
-            },
-            path: ['semantic'],
-            nestedDepth: 0,
-            childFieldsName: 'fields',
-            canHaveChildFields: false,
-            hasChildFields: false,
-            canHaveMultiFields: true,
-            hasMultiFields: false,
-            isExpanded: false,
+          elser_model_2: {
+            defaultInferenceEndpoint: true,
+            isDeployed: true,
+            trainedModelId: '.elser_model_2',
           },
         },
-        aliases: {},
-        rootLevelFields: [
-          '88ebcfdb-19b7-4458-9ea2-9488df54453d',
-          'c5d86c82-ea07-4457-b469-3ffd4b96db81',
-        ],
-        maxNestedDepth: 2,
-      } as NormalizedFields;
-
-      const inferenceToModelIdMap = {
-        elser_model_2: {
-          trainedModelId: '.elser_model_2',
-          isDeployed: true,
-          defaultInferenceEndpoint: false,
-        },
-        e5: {
-          trainedModelId: '.multilingual-e5-small',
-          isDeployed: true,
-          defaultInferenceEndpoint: false,
-        },
-      } as InferenceToModelIdMap;
-
-      const { result } = renderHook(() =>
-        useDetailsPageMappingsModelManagement(fields, inferenceToModelIdMap)
-      );
-
-      await result.current.fetchInferenceToModelIdMap();
-
-      const expectedAction = {
-        type: 'inferenceToModelIdMap.update',
-        value: {
-          inferenceToModelIdMap: {
-            e5: {
-              defaultInferenceEndpoint: false,
-              isDeployed: false,
-              trainedModelId: '.multilingual-e5-small',
-            },
-            elser_model_2: {
-              defaultInferenceEndpoint: true,
-              isDeployed: true,
-              trainedModelId: '.elser_model_2',
-            },
-          },
-        },
-      };
-      expect(mockDispatch).toHaveBeenCalledWith(expectedAction);
-    });
+      },
+    };
+    expect(mockDispatch).toHaveBeenCalledWith(expectedValue);
   });
 });
