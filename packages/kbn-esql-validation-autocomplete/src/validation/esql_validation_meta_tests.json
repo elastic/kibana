@@ -33,8 +33,16 @@
       "type": "cartesian_point"
     },
     {
+      "name": "cartesianShapeField",
+      "type": "cartesian_shape"
+    },
+    {
       "name": "geoPointField",
       "type": "geo_point"
+    },
+    {
+      "name": "geoShapeField",
+      "type": "geo_shape"
     },
     {
       "name": "any#Char$Field",
@@ -1665,6 +1673,190 @@
       "query": "row var = sqrt(\"a\")",
       "error": [
         "Argument of [sqrt] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_contains(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [\"a\"] type [string]"
       ],
       "warning": []
     },
@@ -5153,6 +5345,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where cartesianShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where cartesianShapeField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where geoPointField IS NULL",
       "error": [],
       "warning": []
@@ -5189,6 +5421,46 @@
     },
     {
       "query": "from a_index | where geoPointField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where geoShapeField Is nOt NuLL",
       "error": [],
       "warning": []
     },
@@ -6158,6 +6430,41 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval cartesianShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cartesianShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval geoPointField IS NULL",
       "error": [],
       "warning": []
@@ -6189,6 +6496,41 @@
     },
     {
       "query": "from a_index | eval geoPointField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval geoShapeField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -8385,6 +8727,246 @@
       "query": "from a_index | eval var = sqrt(*)",
       "error": [
         "Using wildcards (*) in sqrt is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_contains(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(stringField, stringField)",
+      "error": [
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_contains] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
       ],
       "warning": []
     },
