@@ -51,7 +51,7 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-}: ExportPanelShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+}: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -202,8 +202,7 @@ export const reportingExportModalProvider = ({
   usesUiCapabilities,
   theme,
   i18n: i18nStart,
-  intl,
-}: ExportModalShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -275,7 +274,7 @@ export const reportingExportModalProvider = ({
       apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
     );
 
-    const generateReportPDF = () => {
+    const generateReportPDF = ({ intl }: { intl: InjectedIntl }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
@@ -332,7 +331,7 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPDFForPrinting = () => {
+    const generateReportPDFForPrinting = ({ intl }: { intl: InjectedIntl }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
@@ -388,7 +387,7 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateReportPNG = () => {
+    const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };

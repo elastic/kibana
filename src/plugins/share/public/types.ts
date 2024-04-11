@@ -92,6 +92,7 @@ export interface ShareMenuItem {
   renderCopyURLButton?: boolean;
 }
 
+type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -101,7 +102,7 @@ export interface ShareMenuItem {
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
+  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
 }
 
 interface UrlParamExtensionProps {

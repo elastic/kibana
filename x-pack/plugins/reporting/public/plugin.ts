@@ -37,7 +37,6 @@ import {
   reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
-import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 
@@ -115,7 +114,7 @@ export class ReportingPublicPlugin
 
   public setup(
     core: CoreSetup<ReportingPublicPluginStartDependencies>,
-    setupDeps: ReportingPublicPluginSetupDependencies & { intl: InjectedIntl }
+    setupDeps: ReportingPublicPluginSetupDependencies
   ) {
     const { getStartServices, uiSettings } = core;
     const {
@@ -245,7 +244,6 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               i18n: i18nStart,
-              intl: setupDeps.intl,
             })
           );
 
@@ -259,7 +257,6 @@ export class ReportingPublicPlugin
                 usesUiCapabilities,
                 theme: core.theme,
                 i18n: i18nStart,
-                intl: setupDeps.intl,
               })
             );
           }

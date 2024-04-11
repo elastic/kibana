@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem } from '@kbn/share-plugin/public';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
@@ -25,8 +25,7 @@ export const reportingCsvShareProvider = ({
   usesUiCapabilities,
   i18n: i18nStart,
   theme,
-  intl,
-}: ExportModalShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+}: ExportModalShareOpts) => {
   const getShareMenuItems = ({ objectType, sharingData, onClose, toasts }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
@@ -83,7 +82,7 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
-    const generateReportingJobCSV = () => {
+    const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
         .createReportingJob(reportType, decoratedJobParams)
