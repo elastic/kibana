@@ -39,6 +39,8 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onChangePage,
     activeTab,
     updatedAt,
+    renderCustomGridBody,
+    trailingControlColumns,
   } = props;
 
   const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
@@ -83,6 +85,8 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}
+            renderCustomGridBody={renderCustomGridBody}
+            trailingControlColumns={trailingControlColumns}
           />
         </RootDragDropProvider>
       </StyledTableFlexItem>

@@ -63,7 +63,15 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-} & Pick<UnifiedDataTableProps, 'onSort' | 'onSetColumns' | 'sort' | 'onFilter'>;
+} & Pick<
+  UnifiedDataTableProps,
+  | 'onSort'
+  | 'onSetColumns'
+  | 'sort'
+  | 'onFilter'
+  | 'renderCustomGridBody'
+  | 'trailingControlColumns'
+>;
 
 interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
@@ -93,6 +101,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
+    renderCustomGridBody,
+    trailingControlColumns,
   }) {
     const dispatch = useDispatch();
 
@@ -337,6 +347,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
+            renderCustomGridBody={renderCustomGridBody}
+            trailingControlColumns={trailingControlColumns}
           />
           {showExpandedDetails && (
             <DetailsPanel

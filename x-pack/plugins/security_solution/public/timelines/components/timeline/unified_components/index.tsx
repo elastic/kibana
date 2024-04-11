@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiDataGridProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
@@ -114,6 +115,8 @@ interface Props {
   updatedAt: number;
   isTextBasedQuery?: boolean;
   dataView: DataView;
+  renderCustomGridBody?: EuiDataGridProps['renderCustomGridBody'];
+  trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -135,6 +138,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   updatedAt,
   isTextBasedQuery,
   dataView,
+  renderCustomGridBody,
+  trailingControlColumns,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -385,6 +390,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
+                      renderCustomGridBody={renderCustomGridBody}
                       totalCount={totalCount}
                       onEventClosed={onEventClosed}
                       expandedDetail={expandedDetail}
@@ -394,6 +400,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}
                       onFilter={onAddFilter as DocViewFilterFn}
+                      trailingControlColumns={trailingControlColumns}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

@@ -70,7 +70,7 @@ import {
 import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 
-const memoizedGetColumnHeaders: (
+export const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields,
   isEventRenderedView: boolean
