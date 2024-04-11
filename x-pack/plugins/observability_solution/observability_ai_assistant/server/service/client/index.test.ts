@@ -1407,10 +1407,6 @@ describe('Observability AI Assistant client', () => {
       await llmSimulator.complete();
 
       await finished(stream);
-
-      // console.log(
-      //   ...dataHandler.mock.calls.map((call) => JSON.stringify(JSON.parse(call), null, 4))
-      // );
     });
 
     it('executes the context function', async () => {
