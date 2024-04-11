@@ -6,7 +6,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-// import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
@@ -14,9 +14,9 @@ import { BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimlaneEmbeddableCustomInput,
-  // AnomalySwimLaneEmbeddableState,
+  AnomalySwimLaneEmbeddableState,
 } from '../embeddables';
-// import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
   id?: string;
@@ -37,15 +37,15 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
 }) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
-  // const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
-  //   return {
-  //     jobIds,
-  //     swimlaneType,
-  //     refreshConfig,
-  //     viewBy,
-  //     timeRange,
-  //   };
-  // }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
+  const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {
+    return {
+      jobIds,
+      swimlaneType,
+      refreshConfig,
+      viewBy,
+      timeRange,
+    };
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
 
   useEffect(
     function syncState() {
@@ -111,22 +111,19 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     [filters, query, parentApi]
   );
 
-  // FIXME
-  return <div />;
-
-  // return (
-  //   <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
-  //     maybeId={id}
-  //     type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-  //     state={{
-  //       rawState,
-  //     }}
-  //     parentApi={parentApi}
-  //     onApiAvailable={(api) => {
-  //       embeddableApi.current = api;
-  //     }}
-  //   />
-  // );
+  return (
+    <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
+      maybeId={id}
+      type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
+      state={{
+        rawState,
+      }}
+      parentApi={parentApi}
+      onApiAvailable={(api) => {
+        embeddableApi.current = api;
+      }}
+    />
+  );
 };
 
 // eslint-disable-next-line import/no-default-export
