@@ -34,23 +34,26 @@ export class NavigationServerPlugin
     core: CoreSetup<NavigationServerStartDependencies>,
     plugins: NavigationServerSetupDependencies
   ) {
-    if (plugins.cloud?.isCloudEnabled && !this.isServerless()) {
-      const config = this.initializerContext.config.get<NavigationConfig>();
+    const config = this.initializerContext.config.get<NavigationConfig>();
+    const isSolutionNavExperiementEnabled = plugins.cloud?.isCloudEnabled && !this.isServerless();
 
+    if (isSolutionNavExperiementEnabled) {
       core.getStartServices().then(([coreStart, deps]) => {
-        deps.cloudExperiments?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).then((value) => {
-          if (value) {
-            core.uiSettings.registerGlobal(getUiSettings(config));
-          } else {
-            this.removeUiSettings(coreStart, getUiSettings(config));
-          }
-        });
+        deps.cloudExperiments
+          ?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+          .then((enabled) => {
+            if (enabled) {
+              core.uiSettings.registerGlobal(getUiSettings(config));
+              initSolutionOnRequestInterceptor({
+                http: core.http,
+                defaultSolution: config.solutionNavigation.defaultSolution,
+              });
+            } else {
+              this.removeUiSettings(coreStart, getUiSettings(config));
+            }
+          });
       });
     }
-
-    initSolutionOnRequestInterceptor({
-      http: core.http,
-    });
 
     return {};
   }

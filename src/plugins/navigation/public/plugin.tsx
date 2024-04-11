@@ -34,7 +34,12 @@ import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import { definition as analyticsDefinition } from '@kbn/solution-nav-analytics';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
-import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
+import {
+  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
+  SOLUTION_NAV_FEATURE_FLAG_NAME,
+  getSolutionIdFromPath,
+  addSolutionIdToPath,
+} from '../common';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -176,6 +181,7 @@ export class NavigationPublicPlugin
       if (!isFeatureEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
+      chrome.project.setAddSolutionIdToUrlPath(this.addSolutionIdToUrlPath.bind(this));
       this.addDefaultSolutionNavigation({ chrome });
       this.susbcribeToSolutionNavUiSettings({ core, security, defaultSolution });
     });
@@ -216,13 +222,15 @@ export class NavigationPublicPlugin
     security?: SecurityPluginStart;
   }) {
     const chrome = core.chrome as InternalChromeStart;
+    let initialized = false;
 
     combineLatest([
       core.settings.globalClient.get$<boolean>(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
       this.userProfileOptOut$,
+      core.application.currentLocation$,
     ])
       .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, userOptedOut]) => {
+      .subscribe(([enabled, userOptedOut, currentLocation]) => {
         if (enabled) {
           // Add menu item in the user profile menu to opt in/out of the new navigation
           this.addOptInOutUserProfile({ core, security, userOptedOut });
@@ -235,7 +243,24 @@ export class NavigationPublicPlugin
           chrome.project.changeActiveSolutionNavigation(null);
           chrome.setChromeStyle('classic');
         } else {
-          chrome.project.changeActiveSolutionNavigation(defaultSolution, { onlyIfNotSet: true });
+          if (initialized) return;
+
+          // Read solution from URL
+          const requestBasePath = core.http.basePath.get();
+          const { serverBasePath } = core.http.basePath;
+          const { solutionId } = getSolutionIdFromPath(requestBasePath, serverBasePath);
+
+          if (!solutionId) {
+            const http = this.coreStart?.http;
+            const serializedUrl = http?.basePath.remove(currentLocation) ?? currentLocation;
+            const urlWithSolutionId = this.addSolutionIdToUrlPath(defaultSolution, serializedUrl);
+            // We force a page refresh with the defaultSolution in the URL
+            this.coreStart?.application.navigateToUrl(urlWithSolutionId);
+            return;
+          }
+
+          chrome.project.changeActiveSolutionNavigation(solutionId);
+          initialized = true;
         }
       });
   }
@@ -320,5 +345,15 @@ export class NavigationPublicPlugin
 
     security.navControlService.addUserMenuLinks([menuLink]);
     this.userProfileMenuItemAdded = true;
+  }
+
+  private addSolutionIdToUrlPath(solutionId: string, url: string): string {
+    const http = this.coreStart?.http;
+
+    if (!http) {
+      throw new Error('Http service is not available');
+    }
+
+    return addSolutionIdToPath(http.basePath.get(), solutionId, url);
   }
 }
