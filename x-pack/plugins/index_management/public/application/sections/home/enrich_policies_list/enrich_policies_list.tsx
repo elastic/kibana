@@ -12,8 +12,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Location } from 'history';
 import { parse } from 'query-string';
 
+import type { SerializedEnrichPolicy } from '@kbn/index-management';
 import { APP_WRAPPER_CLASS, useExecutionContext } from '../../../../shared_imports';
-import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useAppContext } from '../../../app_context';
 import { useRedirectPath } from '../../../hooks/redirect_path';
 
