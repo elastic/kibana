@@ -36,7 +36,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import { AuthenticationService } from './authentication';
 import { AuthorizationService } from './authorization';
-import { buildSecurityApi } from './build_security_api';
+import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
@@ -144,6 +144,9 @@ export class SecurityPlugin
     });
 
     core.security.registerSecurityApi(buildSecurityApi({ authc: this.authc }));
+    core.userProfile.registerUserProfileDelegate(
+      buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
+    );
 
     if (management) {
       this.managementService.setup({

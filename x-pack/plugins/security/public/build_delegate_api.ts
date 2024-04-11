@@ -6,7 +6,11 @@
  */
 
 import type { CoreSecurityContract } from '@kbn/core-security-browser';
-import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
+import type {
+  AuthenticationServiceSetup,
+  UserProfileAPIClient,
+} from '@kbn/security-plugin-types-public';
 
 export const buildSecurityApi = ({
   authc,
@@ -18,4 +22,12 @@ export const buildSecurityApi = ({
       getCurrentUser: () => authc.getCurrentUser(),
     },
   };
+};
+
+export const buildUserProfileApi = ({
+  userProfile,
+}: {
+  userProfile: UserProfileAPIClient;
+}): CoreUserProfileDelegateContract => {
+  return userProfile;
 };
