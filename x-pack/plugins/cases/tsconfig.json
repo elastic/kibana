@@ -11,12 +11,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-
     // Required from './kibana.json'
     "@kbn/actions-plugin",
     "@kbn/rule-registry-plugin",
@@ -68,16 +66,15 @@
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/core-logging-server-mocks",
+    "@kbn/rison",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
     "@kbn/datemath",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-logging-browser-mocks",
     "@kbn/index-management-plugin",
-    "@kbn/rison",
-    "@kbn/core-application-browser",
-    "@kbn/react-kibana-context-render",
     "@kbn/data-views-plugin",
-    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",
