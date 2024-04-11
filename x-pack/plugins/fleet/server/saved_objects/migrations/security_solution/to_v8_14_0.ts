@@ -36,6 +36,33 @@ export const migratePackagePolicyToV8140: SavedObjectModelDataBackfillFn<
   return { attributes: updatedPackagePolicyDoc.attributes };
 };
 
+export const migratePackagePolicyEnableCapsToV8140: SavedObjectModelDataBackfillFn<
+  PackagePolicy,
+  PackagePolicy
+> = (packagePolicyDoc) => {
+  if (packagePolicyDoc.attributes.package?.name !== 'endpoint') {
+    return { attributes: packagePolicyDoc.attributes };
+  }
+
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = packagePolicyDoc;
+
+  const input = updatedPackagePolicyDoc.attributes.inputs[0];
+
+  if (input && input.config) {
+    const policy = input.config.policy.value;
+
+    policy.linux.advanced = {
+      ...policy.linux.advanced,
+      events: {
+        enable_caps: true,
+        ...policy.linux.advanced?.events, // this comes second, so existing value is not overwritten by backfill
+      },
+    };
+  }
+
+  return { attributes: updatedPackagePolicyDoc.attributes };
+};
+
 export const migratePackagePolicyAddAntivirusRegistrationModeToV8140: SavedObjectModelDataBackfillFn<
   PackagePolicy,
   PackagePolicy
