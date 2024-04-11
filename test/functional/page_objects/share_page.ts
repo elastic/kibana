@@ -52,7 +52,7 @@ export class SharePageObject extends FtrService {
 
   async getSharedUrl() {
     await this.openPermaLinks();
-    return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
+    return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url')) ?? '';
   }
 
   async createShortUrlExistOrFail() {
