@@ -7,7 +7,7 @@
 
 import { policyFactory } from '../models/policy_config';
 import { AntivirusRegistrationModes, ProtectionModes, type PolicyConfig } from '../types';
-import { updateAntivirusRegistrationEnabledInPlace } from './update_antivirus_registration_enabled';
+import { updateAntivirusRegistrationEnabled } from './update_antivirus_registration_enabled';
 
 describe('Update antivirus registration enabled', () => {
   let inputPolicyConfig: PolicyConfig;
@@ -27,7 +27,7 @@ describe('Update antivirus registration enabled', () => {
     input.mode = AntivirusRegistrationModes.enabled;
     input.enabled = false;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(true);
   });
@@ -36,7 +36,7 @@ describe('Update antivirus registration enabled', () => {
     input.mode = AntivirusRegistrationModes.enabled;
     input.enabled = false;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expected.mode = AntivirusRegistrationModes.enabled;
     expected.enabled = true;
@@ -47,7 +47,7 @@ describe('Update antivirus registration enabled', () => {
     input.mode = AntivirusRegistrationModes.enabled;
     input.enabled = false;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(true);
   });
@@ -56,7 +56,7 @@ describe('Update antivirus registration enabled', () => {
     input.mode = AntivirusRegistrationModes.disabled;
     input.enabled = true;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(false);
   });
@@ -67,7 +67,7 @@ describe('Update antivirus registration enabled', () => {
       input.enabled = false;
       inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
 
-      updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+      updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
       expect(input.enabled).toBe(true);
     });
@@ -79,7 +79,7 @@ describe('Update antivirus registration enabled', () => {
         input.enabled = false;
         inputPolicyConfig.windows.malware.mode = malwareMode;
 
-        updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+        updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
         expect(input.enabled).toBe(false);
       }
@@ -91,7 +91,7 @@ describe('Update antivirus registration enabled', () => {
     input.enabled = true;
     inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(false);
   });
@@ -101,7 +101,7 @@ describe('Update antivirus registration enabled', () => {
     delete (input as { mode?: string }).mode;
     inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(true);
   });
@@ -111,7 +111,7 @@ describe('Update antivirus registration enabled', () => {
     delete (input as { mode?: string }).mode;
     inputPolicyConfig.windows.malware.mode = ProtectionModes.prevent;
 
-    updateAntivirusRegistrationEnabledInPlace(inputPolicyConfig);
+    updateAntivirusRegistrationEnabled(inputPolicyConfig);
 
     expect(input.enabled).toBe(false);
   });

@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { updateAntivirusRegistrationEnabledInPlace } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
+import { updateAntivirusRegistrationEnabled } from '../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
 import { AntivirusRegistrationCard } from './components/cards/antivirus_registration_card';
 import { LinuxEventCollectionCard } from './components/cards/linux_event_collection_card';
@@ -42,7 +42,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   const onChangeProxy: PolicySettingsFormProps['onChange'] = ({ isValid, updatedPolicy }) => {
     // perform tasks that synchronises changes between settings
-    updateAntivirusRegistrationEnabledInPlace(updatedPolicy);
+    updateAntivirusRegistrationEnabled(updatedPolicy);
 
     props.onChange({ isValid, updatedPolicy });
   };

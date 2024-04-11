@@ -29,7 +29,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
-import { updateAntivirusRegistrationEnabledInPlace } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
+import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
@@ -270,7 +270,7 @@ export const getPackagePolicyUpdateCallback = (
         ensureOnlyEventCollectionIsAllowed(newEndpointPackagePolicy);
     }
 
-    updateAntivirusRegistrationEnabledInPlace(newEndpointPackagePolicy);
+    updateAntivirusRegistrationEnabled(newEndpointPackagePolicy);
 
     return endpointIntegrationData;
   };

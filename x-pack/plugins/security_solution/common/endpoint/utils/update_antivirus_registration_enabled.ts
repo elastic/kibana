@@ -8,7 +8,14 @@
 import type { PolicyConfig } from '../types';
 import { ProtectionModes, AntivirusRegistrationModes } from '../types';
 
-export const updateAntivirusRegistrationEnabledInPlace = (policy: PolicyConfig): PolicyConfig => {
+/** Calculates and updates Antivirus Registration `enabled` state based on the `mode` set by user
+ * and by malware protection level in case antivirus registration mode is set to sync with malware.
+ *
+ * It updates the input parameter in place, i.e. mutates it.
+ *
+ * @param policy
+ */
+export const updateAntivirusRegistrationEnabled = (policy: PolicyConfig) => {
   const modeToEnabled: Record<AntivirusRegistrationModes, boolean> = {
     [AntivirusRegistrationModes.enabled]: true,
     [AntivirusRegistrationModes.disabled]: false,
@@ -22,5 +29,4 @@ export const updateAntivirusRegistrationEnabledInPlace = (policy: PolicyConfig):
     policy.windows.antivirus_registration.enabled =
       modeToEnabled[antivirusRegistrationMode] ?? false;
   }
-  return policy;
 };
