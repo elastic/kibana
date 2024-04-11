@@ -41,11 +41,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
     ...rest
   } = props;
 
-  const [selectedOptions, setSelectedOptions] = React.useState(activeField ? [activeField] : []);
-
-  React.useEffect(() => {
-    setSelectedOptions(activeField ? [activeField] : []);
-  }, [activeField]);
+  const [selectedOption, setSelectedOption] = React.useState(activeField);
 
   let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
@@ -97,7 +93,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       })}
       options={styledOptions}
       isInvalid={fieldIsInvalid}
-      selectedOptions={selectedOptions}
+      selectedOptions={selectedOption ? [selectedOption] : []}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
       inputPopoverProps={{
@@ -105,25 +101,24 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
         anchorPosition: 'downRight',
       }}
       onBlur={() => {
-        if (selectedOptions?.length === 0) {
-          setSelectedOptions(activeField ? [activeField] : []);
+        if (!selectedOption) {
+          setSelectedOption(activeField);
         }
       }}
       onChange={(choices) => {
-        if (choices.length === 0) {
-          setSelectedOptions([]);
+        const firstChoice = choices.at(0);
+        if (!firstChoice) {
+          setSelectedOption(undefined);
           onDelete?.();
           return;
         }
-        if (choices[0] && choices[0]?.value !== activeField?.value) {
-          setSelectedOptions([
-            {
-              label: choices[0].label,
-              value: choices[0].value,
-            },
-          ]);
+        if (firstChoice.value !== activeField?.value) {
+          setSelectedOption({
+            label: firstChoice.label,
+            value: firstChoice.value,
+          });
         }
-        onChoose(choices[0].value);
+        onChoose(firstChoice.value);
       }}
       {...rest}
     />
