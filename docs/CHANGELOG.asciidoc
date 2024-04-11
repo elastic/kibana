@@ -168,6 +168,16 @@ For more information, refer to ({kibana-issue}179498[#179498]).
 For more information, refer to ({kibana-issue}179940[#179940]).
 ====
 
+[discrete]
+[[known-180613]]
+.In Dashboard, controls cannot be created or edited when using fields with custom labels
+[%collapsible]
+====
+*Details* +
+For more information, refer to ({kibana-issue}180613[#180613]).
+====
+
+
 [float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
