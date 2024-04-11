@@ -97,15 +97,14 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.getBySel('saveIntegration').click();
       cy.contains(`Successfully updated '${integrationName}'`);
-      policyContainsIntegration(integrationName, policyName);
+      // should include streams on edit (upgrade)
+      policyContainsIntegration(integrationName, policyName, true);
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-
   describe('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
-
     beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
@@ -136,6 +135,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');
+      policyContainsIntegration(integrationName, policyName);
       cy.visit(OSQUERY);
       cy.contains('Live queries history');
     });

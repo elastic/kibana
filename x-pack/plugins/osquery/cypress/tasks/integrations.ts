@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import satisfies from 'semver/functions/satisfies';
 import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
@@ -43,16 +44,34 @@ export const addCustomIntegration = (integrationName: string, policyName: string
   cy.getBySel('confirmModalCancelButton').click();
 };
 
-export const policyContainsIntegration = (integrationName: string, policyName: string) => {
+export const policyContainsIntegration = (
+  integrationName: string,
+  policyName: string,
+  containStreams?: boolean
+) => {
   cy.visit('app/fleet/policies');
   cy.contains(policyName).click();
-  integrationExistsWithinPolicyDetails(integrationName);
+  integrationExistsWithinPolicyDetails(integrationName, containStreams);
 };
 
-export const integrationExistsWithinPolicyDetails = (integrationName: string) => {
+export const integrationExistsWithinPolicyDetails = (
+  integrationName: string,
+  containStreams?: boolean
+) => {
   cy.contains('Actions').click();
   cy.contains('View policy').click();
   cy.contains(`name: ${integrationName}`);
+  cy.getBySel('PackagePoliciesTableLink')
+    .invoke('text')
+    .then((text) => {
+      const version = extractSemanticVersion(text) as string;
+      const isVersionWithStreams = satisfies(version, '>=1.12.0');
+      if (containStreams || isVersionWithStreams) {
+        cy.contains('dataset: osquery_manager.result').should('exist');
+      } else {
+        cy.contains('dataset: osquery_manager.result').should('not.exist');
+      }
+    });
 };
 
 export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
@@ -144,4 +163,13 @@ export const installPackageWithVersion = (integration: string, version: string) 
     body: '{ "force": true }',
     method: 'POST',
   });
+};
+
+const extractSemanticVersion = (str: string) => {
+  const match = str.match(/(\d+\.\d+\.\d+)/);
+  if (match && match[1]) {
+    return match[1];
+  } else {
+    return null; // Return null if no match found
+  }
 };
