@@ -107,40 +107,41 @@ export function createScenarios(
     await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
   };
   const tryDiscoverCsvFail = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
   const tryDiscoverCsvNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-CSVReports');
+    await testSubjects.missingOrFail('Export');
   };
   const tryDiscoverCsvSuccess = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
     PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`sharePanel-PDFReports`);
+    await testSubjects.missingOrFail(`Export`);
   };
   const tryGeneratePdfSuccess = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportTab();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePngSuccess = async () => {
-    await PageObjects.reporting.openPngReportingPanel();
+    await PageObjects.reporting.openExportTab();
+    await testSubjects.click('PngReportOption');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-Reports');
+    await testSubjects.missingOrFail('Export');
   };
 
   return {

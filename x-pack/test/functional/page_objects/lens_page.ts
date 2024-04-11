@@ -988,8 +988,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
-      annotationFromLibraryTitle?: string,
-      seriesType = 'bar_stacked'
+      annotationFromLibraryTitle?: string
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1004,9 +1003,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
-        if (layerType === 'data') {
-          await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
-        }
         if (layerType === 'annotations') {
           if (!annotationFromLibraryTitle) {
             await testSubjects.click('lnsAnnotationLayer_new');
@@ -1041,6 +1037,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchFirstLayerIndexPattern(dataViewTitle: string) {
       await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Returns the current index pattern of the data panel
+     */
+    async getDataPanelIndexPattern() {
+      return await PageObjects.unifiedSearch.getSelectedDataView('lns-dataView-switch-link');
     },
 
     /**
@@ -1792,7 +1795,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return Promise.all(
         allFieldsForType.map(async (el) => {
           const parent = await el.findByXpath('./..');
-          return (await parent.getAttribute('data-test-subj')) ?? '';
+          return parent.getAttribute('data-test-subj');
         })
       );
     },
@@ -1805,20 +1808,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(action: 'Export' | 'Links') {
       switch (action) {
-        case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
-        case 'permalinks':
-          return await testSubjects.isEnabled('sharePanel-Permalinks');
+        case 'Links':
+          return await testSubjects.isEnabled('Links');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(action);
       }
     },
 
-    async ensureShareMenuIsOpen(
-      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
-    ) {
+    async ensureShareMenuIsOpen(action: 'Export' | 'Links') {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1830,8 +1829,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openPermalinkShare() {
-      await this.ensureShareMenuIsOpen('permalinks');
-      await testSubjects.click('sharePanel-Permalinks');
+      await this.ensureShareMenuIsOpen('Links');
+      await testSubjects.click('Links');
     },
 
     async getAvailableUrlSharingOptions() {
@@ -1857,15 +1856,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(testSubFrom);
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
-      if (!url) {
-        throw Error('No data-share-url attribute found');
-      }
       return url;
     },
 
     async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      await this.ensureShareMenuIsOpen('Export');
+      await testSubjects.click('Export');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1875,8 +1871,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+      await this.ensureShareMenuIsOpen(`Export`);
+      await testSubjects.click(`Export`);
     },
 
     async getCSVContent() {
