@@ -46,6 +46,7 @@ describe('ExplorerChart', () => {
   const originalGetBBox = SVGElement.prototype.getBBox;
   beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
+  jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => 500);
 
   test('Initialize', () => {
     const mockTooltipService = {
@@ -156,7 +157,7 @@ describe('ExplorerChart', () => {
     expect(+selectedInterval.getAttribute('height')).toBe(166);
 
     const xAxisTicks = wrapper.getDOMNode().querySelector('.x').querySelectorAll('.tick');
-    expect([...xAxisTicks]).toHaveLength(140);
+    expect([...xAxisTicks]).toHaveLength(6);
     const yAxisTicks = wrapper.getDOMNode().querySelector('.y').querySelectorAll('.tick');
     expect([...yAxisTicks]).toHaveLength(5);
     const emphasizedAxisLabel = wrapper
