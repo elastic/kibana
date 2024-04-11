@@ -42,19 +42,25 @@ function flattenAccum(
 ) {
   console.log('fklatten');
 
-  for (const [k, val] of Object.entries(obj)) {
-    const key = keyPrefix + k;
+  // for (const [k, val] of Object.entries(obj)) {
+  for (const k in obj) {
+    if (!obj.hasOwnProperty(k)) {
+      continue;
+    }
+    const val = obj[k];
 
+    const key = keyPrefix + k;
     const field = indexPattern?.fields.getByName(key);
 
     if (params?.shallow === false) {
       const isNestedField = field?.type === 'nested';
       if (Array.isArray(val) && !isNestedField) {
-        val.forEach((v) => {
+        for (let i = 0; i < val.length; i++) {
+          const v = val[i];
           if (isPlainObject(v)) {
             flattenAccum(flat, v, key + '.', indexPattern, params);
           }
-        });
+        }
         continue;
       }
     } else if (flat[key] !== undefined) {
@@ -103,7 +109,11 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
     // merged them both together. We do not merge this (even if enabled) in case source has been
     // merged, since we would otherwise duplicate values, since ignore_field_values and _source
     // contain the same values.
-    Object.entries(hit.ignored_field_values).forEach(([fieldName, fieldValue]) => {
+    for (const fieldName in hit.ignored_field_values) {
+      if (!hit.ignored_field_values.hasOwnProperty(fieldName)) {
+        continue;
+      }
+      const fieldValue = hit.ignored_field_values[fieldName];
       if (flat[fieldName]) {
         // If there was already a value from the fields API, make sure we're merging both together
         if (Array.isArray(flat[fieldName])) {
@@ -115,7 +125,7 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
         // If no previous value was assigned we can simply use the value from `ignored_field_values` as it is
         flat[fieldName] = fieldValue;
       }
-    });
+    }
   }
 
   // Merge all valid meta fields into the flattened object
@@ -133,8 +143,8 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
   return makeProxy(flat, indexPattern);
 }
 
-function makeProxy(flat, indexPattern?) {
-  function comparator(a, b) {
+function makeProxy(flat: Record<string, any>, indexPattern?: DataView) {
+  function comparator(a: string | symbol, b: string | symbol) {
     const aIsMeta = indexPattern?.metaFields?.includes(String(a));
     const bIsMeta = indexPattern?.metaFields?.includes(String(b));
     if (aIsMeta && bIsMeta) {
@@ -151,7 +161,6 @@ function makeProxy(flat, indexPattern?) {
 
   return new Proxy(flat, {
     ownKeys: (target) => {
-      console.log('own keys');
       return Reflect.ownKeys(target).sort(comparator);
     },
   });
