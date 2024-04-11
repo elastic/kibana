@@ -153,9 +153,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       truncateText: false,
       valign: 'middle',
       css: {
-        // Extra specificity needed here to override Sass styles
-        // TODO: Can be removed once EuiTable has been converted to Emotion
-        ['&.euiTableCellContent']: { display: 'block', padding: 0 },
+        '.euiTableCellContent': { display: 'block', padding: 0 },
       },
       render: (annotation: ChangePointAnnotation) => {
         return (
