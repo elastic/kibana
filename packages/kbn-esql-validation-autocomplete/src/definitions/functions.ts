@@ -1622,6 +1622,35 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'st_x',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stXDoc', {
+      defaultMessage:
+        'Extracts the x coordinate from the supplied point. If the points is of type geo_point this is equivalent to extracting the longitude value.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_x(point)'],
+      },
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_x(point)'],
+      },
+    ],
+  },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
