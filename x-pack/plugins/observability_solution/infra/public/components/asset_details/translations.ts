@@ -24,7 +24,7 @@ export const HOST_METRIC_GROUP_TITLES: Record<string, string> = {
   disk: i18n.translate('xpack.infra.metricsGroup.disk', {
     defaultMessage: 'Disk',
   }),
-  logs: i18n.translate('xpack.infra.metricsGroup.logs', {
+  log: i18n.translate('xpack.infra.metricsGroup.log', {
     defaultMessage: 'Log Rate',
   }),
   kubernetes: i18n.translate('xpack.infra.metricsGroup.kubernetes', {

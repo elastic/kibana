@@ -25,7 +25,7 @@ export const MetricsContent = ({ assetType, ...props }: Props) => {
       case 'host':
         return <HostMetrics {...props} />;
       default:
-        return <></>;
+        return null;
     }
   }, [assetType, props]);
 

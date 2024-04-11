@@ -17,7 +17,7 @@ const dataViewId = 'metricsDataViewId';
 
 describe('useHostCharts', () => {
   describe('host charts', () => {
-    describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['logs']])(
+    describe.each<[HostMetricTypes]>([['cpu'], ['memory'], ['network'], ['disk'], ['log']])(
       '%s',
       (item) => {
         const getExpectedOrder = (metric: HostMetricTypes, overview: boolean): string[] => {
@@ -34,7 +34,7 @@ describe('useHostCharts', () => {
               return overview
                 ? ['diskUsageByMountPoint', 'diskIOReadWrite']
                 : ['diskUsageByMountPoint', 'diskIOReadWrite', 'diskThroughputReadWrite'];
-            case 'logs':
+            case 'log':
               return ['logRate'];
             default:
               return [];

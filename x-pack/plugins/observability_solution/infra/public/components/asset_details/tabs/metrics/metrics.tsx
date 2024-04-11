@@ -15,6 +15,6 @@ export const Metrics = () => {
     case 'host':
       return <HostMetrics />;
     default:
-      return <></>;
+      return null;
   }
 };

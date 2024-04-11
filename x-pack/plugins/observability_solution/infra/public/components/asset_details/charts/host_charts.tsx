@@ -27,6 +27,8 @@ interface Props {
   onShowAll?: (metric: string) => void;
 }
 
+const FRAGMENT_BASE = 'key-metrics';
+
 export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
   ({ assetId, dataView, dateRange, metric, onShowAll, overview = false }, ref) => {
     const { charts } = useHostCharts({
@@ -49,7 +51,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
                     link: (
                       <EuiLink
                         data-test-subj="hostsViewMetricsDocumentationLink"
-                        href={`${HOST_METRICS_DOC_HREF}#key-metrics-${metric}`}
+                        href={`${HOST_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                       >
                         <FormattedMessage

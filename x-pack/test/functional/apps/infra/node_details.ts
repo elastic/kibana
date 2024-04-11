@@ -383,7 +383,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memory', chartsCount: 2 },
             { metric: 'disk', chartsCount: 3 },
             { metric: 'network', chartsCount: 1 },
-            { metric: 'logs', chartsCount: 1 },
+            { metric: 'log', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should show ${metric} charts group the in metrics section`, async () => {
               await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
@@ -583,7 +583,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'memory', chartsCount: 2 },
               { metric: 'disk', chartsCount: 3 },
               { metric: 'network', chartsCount: 1 },
-              { metric: 'logs', chartsCount: 1 },
+              { metric: 'log', chartsCount: 1 },
               { metric: 'kubernetes', chartsCount: 4 },
             ].forEach(({ metric, chartsCount }) => {
               it(`should show ${metric} charts group`, async () => {

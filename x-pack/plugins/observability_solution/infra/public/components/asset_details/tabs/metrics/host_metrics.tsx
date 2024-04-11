@@ -19,7 +19,7 @@ const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
   'memory',
   'network',
   'disk',
-  'logs',
+  'log',
 ];
 
 export const HostMetrics = () => {
@@ -36,7 +36,7 @@ export const HostMetrics = () => {
         <HostCharts
           key={metric}
           assetId={asset.id}
-          dataView={metric === 'logs' ? logs.dataView : metrics.dataView}
+          dataView={metric === 'log' ? logs.dataView : metrics.dataView}
           dateRange={state.dateRange}
           metric={metric}
         />

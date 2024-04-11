@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 
-export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'logs' | 'kpi';
+export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
 interface UseHostChartsOptions {
   overview?: boolean;
 }
@@ -125,7 +125,7 @@ const getHostsCharts = async ({
       return options?.overview
         ? [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite]
         : [disk.xy.diskUsageByMountPoint, disk.xy.diskIOReadWrite, disk.xy.diskThroughputReadWrite];
-    case 'logs':
+    case 'log':
       return [logs.xy.logRate];
     case 'kpi':
       return [
