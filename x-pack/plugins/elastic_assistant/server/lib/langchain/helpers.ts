@@ -33,15 +33,7 @@ export const getLangChainMessages = (
 export const requestHasRequiredAnonymizationParams = (
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>
 ): boolean => {
-  const { allow, allowReplacement, replacements } = request?.body ?? {};
-
-  const allowIsValid =
-    Array.isArray(allow) &&
-    allow.length > 0 && // at least one field must be in the allow list
-    allow.every((item) => typeof item === 'string');
-
-  const allowReplacementIsValid =
-    Array.isArray(allowReplacement) && allowReplacement.every((item) => typeof item === 'string');
+  const { replacements } = request?.body ?? {};
 
   const replacementsIsValid =
     typeof replacements === 'object' &&
@@ -49,5 +41,5 @@ export const requestHasRequiredAnonymizationParams = (
       (key) => typeof key === 'string' && typeof replacements[key] === 'string'
     );
 
-  return allowIsValid && allowReplacementIsValid && replacementsIsValid;
+  return replacementsIsValid;
 };
