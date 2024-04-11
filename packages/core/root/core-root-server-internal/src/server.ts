@@ -184,7 +184,6 @@ export class Server {
       environment: environmentPreboot,
       node: nodePreboot,
     });
-    this.i18n.init(this.discoveredPlugins.preboot.pluginPaths);
 
     if (!disablePreboot) {
       // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also

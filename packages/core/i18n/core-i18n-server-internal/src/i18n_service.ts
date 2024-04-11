@@ -38,9 +38,6 @@ export class I18nService {
     this.log = coreContext.logger.get('i18n');
     this.configService = coreContext.configService;
   }
-  public async init(pluginPaths: string[]) {
-    await this.initTranslations(pluginPaths);
-  }
 
   public async preboot({ pluginPaths, http }: PrebootDeps) {
     const { locale } = await this.initTranslations(pluginPaths);
