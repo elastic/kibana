@@ -31,7 +31,7 @@ export const useFetchPageContext: PreFetchPageContext<RenderCellValueContext> = 
       profileUidColumns.forEach((columnId) => {
         if (columns.find((column) => column.id === columnId) != null) {
           const userUids = alert[columnId];
-          userUids?.forEach((uid) => uids.add(uid as string));
+          userUids?.forEach((uid) => ids.add(uid as string));
         }
       });
     });
