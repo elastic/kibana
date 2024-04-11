@@ -183,6 +183,13 @@ export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
   ),
 });
 
+export const SentinelOneDownloadAgentFileParamsSchema = schema.object({
+  agentUUID: schema.string({ minLength: 1 }),
+  activityId: schema.string({ minLength: 1 }),
+});
+
+export const SentinelOneDownloadAgentFileResponseSchema = schema.stream();
+
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
 
 export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({

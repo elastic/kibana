@@ -36,9 +36,14 @@ import {
   SentinelOneKillProcessParamsSchema,
   SentinelOneFetchAgentFilesParamsSchema,
   SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneDownloadAgentFileResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import { SentinelOneFetchAgentFilesParams } from '../../../common/sentinelone/types';
+import {
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+} from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
@@ -82,6 +87,12 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.FETCH_AGENT_FILES,
       method: 'fetchAgentFiles',
       schema: SentinelOneFetchAgentFilesParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.DOWNLOAD_AGENT_FILE,
+      method: 'downloadAgentFile',
+      schema: SentinelOneDownloadAgentFileParamsSchema,
     });
 
     this.registerSubAction({
@@ -143,6 +154,22 @@ export class SentinelOneConnector extends SubActionConnector<
         },
       },
       responseSchema: SentinelOneFetchAgentFilesResponseSchema,
+    });
+  }
+
+  public async downloadAgentFile({ agentUUID, activityId }: SentinelOneDownloadAgentFileParams) {
+    const agent = await this.getAgents({ uuid: agentUUID });
+    const agentId = agent.data[0]?.id;
+
+    if (!agentId) {
+      throw new Error(`No agent found for UUID ${agentUUID}`);
+    }
+
+    return this.sentinelOneApiRequest({
+      url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
+      method: 'get',
+      responseType: 'stream',
+      responseSchema: SentinelOneDownloadAgentFileResponseSchema,
     });
   }
 
