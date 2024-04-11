@@ -194,7 +194,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
 
   return (
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
-      <EuiModalHeader css={{ paddingBottom: 0 }}>
+      <EuiModalHeader css={{ paddingBottom: 0, paddingRight: '24px' }}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <EuiModalHeaderTitle>
