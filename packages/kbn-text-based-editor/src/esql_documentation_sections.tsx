@@ -870,7 +870,7 @@ ROW y=12.9, x=.6
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
         {
-          defaultMessage: 'AUTO_BUCKET',
+          defaultMessage: 'BUCKET',
         }
       ),
       description: (
@@ -879,14 +879,14 @@ ROW y=12.9, x=.6
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
             {
-              defaultMessage: `### AUTO_BUCKET
-Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`AUTO_BUCKET\`with \`STATS ... BY\` to create a date histogram.
+              defaultMessage: `### BUCKET
+Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`BUCKET\`with \`STATS ... BY\` to create a date histogram.
 
 You provide a target number of buckets, a start date, and an end date, and it picks an appropriate bucket size to generate the target number of buckets or fewer. For example, this asks for at most 20 buckets over a whole year, which picks monthly buckets:
 
 \`\`\`
 ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=AUTO_BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket=BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 \`\`\`
 
 Returning:
@@ -898,12 +898,12 @@ The goal isn't to provide *exactly* the target number of buckets, it's to pick a
 range that people are comfortable with that provides at most the target number of
 buckets.
 
-If you ask for more buckets then \`AUTO_BUCKET\` can pick a smaller range. For example,
+If you ask for more buckets then \`BUCKET\` can pick a smaller range. For example,
 asking for at most 100 buckets in a year will get you week long buckets:
 
 \`\`\`
 ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=AUTO_BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket=BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 \`\`\`
 
 Returning:
@@ -911,14 +911,14 @@ Returning:
 1985-07-09T00:00:00.000Z | 1985-07-08T00:00:00.000Z
 \`\`\`
 
-\`AUTO_BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`AUTO_BUCKET\` with \`WHERE\` to filter rows.
+\`BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`BUCKET\` with \`WHERE\` to filter rows.
 
 A more complete example might look like:
 
 \`\`\`
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 | STATS AVG(salary) BY bucket
 | SORT bucket
 \`\`\`
@@ -933,7 +933,7 @@ Returning:
 54539.75 | 1985-11-01T00:00:00.000
 \`\`\`
 
-NOTE: \`AUTO_BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
+NOTE: \`BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
