@@ -236,7 +236,7 @@ describe('Observability AI Assistant client', () => {
         });
 
       stream = observableIntoStream(
-        await client.complete({
+        client.complete({
           connectorId: 'foo',
           messages: [system('This is a system message'), user('How many alerts do I have?')],
           functionClient: functionClientMock,
@@ -1355,6 +1355,73 @@ describe('Observability AI Assistant client', () => {
       expect(firstBody.tools.length).toBe(1);
 
       expect(body.tools).toBeUndefined();
+    });
+  });
+
+  describe('when context has not been injected since last user message', () => {
+    it('does append the context request message', async () => {
+      client = createClient();
+      actionsClientMock.execute.mockImplementationOnce(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.hasFunction.mockReturnValue(true);
+      functionClientMock.executeFunction.mockImplementationOnce(async () => {
+        return {
+          content: [
+            {
+              id: 'my_document',
+              text: 'My document',
+            },
+          ],
+        };
+      });
+
+      const stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          persist: false,
+        })
+      );
+
+      const dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      await waitForNextWrite(stream);
+
+      await llmSimulator.next({
+        content: 'Hello',
+      });
+
+      await llmSimulator.complete();
+
+      await finished(stream);
+
+      expect(JSON.parse(dataHandler.mock.calls[0])).toEqual({
+        type: StreamingChatResponseEventType.MessageAdd,
+        id: expect.any(String),
+        message: {
+          '@timestamp': expect.any(String),
+          message: {
+            content: '',
+            role: MessageRole.Assistant,
+            function_call: {
+              name: 'context',
+              arguments: JSON.stringify({ queries: [], categories: [] }),
+              trigger: MessageRole.Assistant,
+            },
+          },
+        },
+      });
     });
   });
 

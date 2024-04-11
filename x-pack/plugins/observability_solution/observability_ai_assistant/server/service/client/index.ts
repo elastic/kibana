@@ -220,9 +220,10 @@ export class ObservabilityAIAssistantClient {
 
           const shouldInjectContext =
             indexOfLastUserMessage !== -1 &&
-            nextMessages.slice(indexOfLastUserMessage).every(({ message }) => {
-              return message.function_call?.name !== 'context';
-            });
+            nextMessages
+              .slice(indexOfLastUserMessage)
+              .every(({ message }) => message.function_call?.name !== 'context') &&
+            functionClient.hasFunction('context');
 
           if (shouldInjectContext) {
             const contextFunctionRequest = {
@@ -287,13 +288,10 @@ export class ObservabilityAIAssistantClient {
             );
           }
 
-          const isAssistantMessageWithFunctionRequest =
-            lastMessage?.message.role === MessageRole.Assistant &&
-            !!lastMessage?.message.function_call?.name;
+          const functionCallName = lastMessage?.message.function_call?.name;
+          const isAssistantMessage = lastMessage?.message.role === MessageRole.Assistant;
 
-          if (isAssistantMessageWithFunctionRequest) {
-            const functionCallName = lastMessage.message.function_call!.name;
-
+          if (isAssistantMessage && functionCallName) {
             if (functionClient.hasAction(functionCallName)) {
               this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
 
