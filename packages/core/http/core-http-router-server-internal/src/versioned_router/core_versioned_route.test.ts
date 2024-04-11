@@ -6,38 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { hapiMocks } from '@kbn/hapi-mocks';
-import { schema } from '@kbn/config-schema';
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { Router } from '../router';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
-import { CoreKibanaRequest } from '../request';
 import { Method } from './types';
-import { Router } from '../router';
-
-const createRequest = (
-  {
-    version,
-    body,
-    params,
-    query,
-  }: { version: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
-    version: '1',
-  }
-) =>
-  CoreKibanaRequest.from(
-    hapiMocks.createRequest({
-      payload: body,
-      params,
-      query,
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: version },
-      app: { requestId: 'fakeId' },
-    }),
-    passThroughValidation
-  );
+import { createFooValidation, createRequest } from './core_versioned_route.test.utils';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -58,6 +34,13 @@ describe('Versioned route', () => {
       })),
     } as any;
     router = createRouter();
+  });
+
+  const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
+    createFooValidation();
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('can register multiple handlers', () => {
@@ -174,65 +157,17 @@ describe('Versioned route', () => {
     ).not.toThrow();
   });
 
-  describe('when in dev', () => {
-    // NOTE: Temporary test to ensure single public API version is enforced
-    it('only allows "2023-10-31" as public route versions', () => {
-      expect(() =>
-        CoreVersionedRouter.from({ router, isDev: true })
-          .get({ access: 'public', path: '/foo' })
-          .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
-      ).toThrow(/Invalid public version/);
-    });
-
-    it('runs request AND response validations', async () => {
+  it.each([['static' as const], ['lazy' as const]])(
+    'runs %s request validations',
+    async (staticOrDynamic) => {
       let handler: RequestHandler;
 
-      let validatedBody = false;
-      let validatedParams = false;
-      let validatedQuery = false;
-      let validatedOutputBody = false;
-
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      const versionedRouter = CoreVersionedRouter.from({ router });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
-          validate: {
-            request: {
-              body: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedBody = true;
-                  },
-                }),
-              }),
-              params: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedParams = true;
-                  },
-                }),
-              }),
-              query: schema.object({
-                foo: schema.number({
-                  validate: () => {
-                    validatedQuery = true;
-                  },
-                }),
-              }),
-            },
-            response: {
-              200: {
-                body: schema.object({
-                  foo: schema.number({
-                    validate: () => {
-                      validatedOutputBody = true;
-                    },
-                  }),
-                }),
-              },
-            },
-          },
+          validate: staticOrDynamic === 'static' ? fooValidation : () => fooValidation,
         },
         handlerFn
       );
@@ -249,10 +184,52 @@ describe('Versioned route', () => {
       );
 
       expect(kibanaResponse.status).toBe(200);
-      expect(validatedBody).toBe(true);
-      expect(validatedParams).toBe(true);
-      expect(validatedQuery).toBe(true);
-      expect(validatedOutputBody).toBe(true);
+      expect(validateBodyFn).toHaveBeenCalledTimes(1);
+      expect(validateParamsFn).toHaveBeenCalledTimes(1);
+      expect(validateQueryFn).toHaveBeenCalledTimes(1);
+      expect(validateOutputFn).toHaveBeenCalledTimes(0); // does not call this in non-dev
+    }
+  );
+
+  describe('when in dev', () => {
+    // NOTE: Temporary test to ensure single public API version is enforced
+    it('only allows "2023-10-31" as public route versions', () => {
+      expect(() =>
+        CoreVersionedRouter.from({ router, isDev: true })
+          .get({ access: 'public', path: '/foo' })
+          .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
+      ).toThrow(/Invalid public version/);
+    });
+
+    it('also runs response validations', async () => {
+      let handler: RequestHandler;
+
+      (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+      const versionedRouter = CoreVersionedRouter.from({ router, isDev: true });
+      versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+        {
+          version: '1',
+          validate: fooValidation,
+        },
+        handlerFn
+      );
+
+      const kibanaResponse = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+
+      expect(kibanaResponse.status).toBe(200);
+      expect(validateBodyFn).toHaveBeenCalledTimes(1);
+      expect(validateParamsFn).toHaveBeenCalledTimes(1);
+      expect(validateQueryFn).toHaveBeenCalledTimes(1);
+      expect(validateOutputFn).toHaveBeenCalledTimes(1);
     });
   });
 
