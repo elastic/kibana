@@ -603,12 +603,12 @@ owner: elastic`,
                 attributes: {
                   es_index_patterns: [
                     {
-                      name: 'apm_server_logs',
-                      pattern: 'logs-elastic_agent.apm_server-*',
+                      title: 'apm_server_logs',
+                      name: 'logs-elastic_agent.apm_server-*',
                     },
                     {
-                      name: 'apm_server_metrics',
-                      pattern: 'metrics-elastic_agent.apm_server-*',
+                      title: 'apm_server_metrics',
+                      name: 'metrics-elastic_agent.apm_server-*',
                     },
                   ],
                   name: 'elastic_agent',
@@ -751,12 +751,12 @@ owner: elastic`,
                 attributes: {
                   es_index_patterns: [
                     {
-                      name: 'apm_server_logs',
-                      pattern: 'logs-elastic_agent.apm_server-*',
+                      title: 'apm_server_logs',
+                      name: 'logs-elastic_agent.apm_server-*',
                     },
                     {
-                      name: 'apm_server_metrics',
-                      pattern: 'metrics-elastic_agent.apm_server-*',
+                      title: 'apm_server_metrics',
+                      name: 'metrics-elastic_agent.apm_server-*',
                     },
                   ],
                   name: 'elastic_agent',

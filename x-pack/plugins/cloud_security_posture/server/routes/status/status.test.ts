@@ -13,7 +13,7 @@ const mockInstallation: Installation = {
   installed_kibana: [],
   installed_es: [],
   package_assets: [],
-  es_index_patterns: [{ name: 'findings', pattern: 'logs-cloud_security_posture.findings-*' }],
+  es_index_patterns: [{ title: 'findings', name: 'logs-cloud_security_posture.findings-*' }],
   name: 'cloud_security_posture',
   version: '1.2.13',
   install_version: '1.2.13',
