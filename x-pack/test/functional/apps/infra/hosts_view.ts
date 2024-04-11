@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe.only('Hosts View', function () {
+  describe('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
@@ -348,7 +348,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('#Page Content', () => {
+    describe('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
