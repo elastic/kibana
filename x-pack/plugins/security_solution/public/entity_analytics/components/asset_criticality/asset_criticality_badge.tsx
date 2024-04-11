@@ -24,12 +24,11 @@ export const AssetCriticalityBadge: React.FC<{
   className?: string;
   dataTestSubj?: string;
 }> = ({
-  criticalityLevel: maybeCriticalityLevel,
+  criticalityLevel = 'unassigned',
   style,
   dataTestSubj = 'asset-criticality-badge',
   className,
 }) => {
-  const criticalityLevel = maybeCriticalityLevel ?? 'unassigned';
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
