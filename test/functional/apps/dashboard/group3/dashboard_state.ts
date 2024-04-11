@@ -83,6 +83,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.share.closeShareModal(); // close modal
+        return await testSubjects.exists('shareTopNavButton');
+      });
+    });
 
     it('Overriding colors on an area chart is preserved', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -214,6 +220,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setHistoricalDataRange();
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {

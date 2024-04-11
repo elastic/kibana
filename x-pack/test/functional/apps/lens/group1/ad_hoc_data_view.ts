@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
@@ -73,6 +74,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens ad hoc data view tests', () => {
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await find.clickByCssSelector('[data-test-subj="shareContextModal"] .euiModal__closeIcon'); // close modal
+        return await testSubjects.exists('lnsApp_shareButton');
+      });
+    });
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
       await PageObjects.lens.configureDimension({

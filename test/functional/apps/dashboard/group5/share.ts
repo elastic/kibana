@@ -50,6 +50,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('share dashboard', () => {
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.share.closeShareModal(); // close modal
+        return await testSubjects.exists('shareTopNavButton');
+      });
+    });
     const testFilterState = async () => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl()).to.not.contain('filters');

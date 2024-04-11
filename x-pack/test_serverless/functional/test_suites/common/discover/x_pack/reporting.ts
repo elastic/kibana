@@ -73,6 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
@@ -99,6 +105,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reportingAPI.initEcommerce();
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       after(async () => {
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
@@ -271,6 +283,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
+
       after(async () => {
         // TODO: Manually unloading logs archive and logs SOs in Serverless
         // instead of using `reportingAPI.teardownLogs()` since the original
@@ -331,6 +350,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.reporting.checkForReportingToasts();
         }
         checkForReportingToasts = true;
+
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('generates a report with data', async () => {

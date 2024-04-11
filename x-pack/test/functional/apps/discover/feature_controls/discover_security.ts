@@ -53,7 +53,12 @@ export default function (ctx: FtrProviderContext) {
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
-
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.share.closeShareModal(); // close modal
+        return await testSubjects.exists('shareTopNavButton');
+      });
+    });
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
@@ -97,7 +102,12 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('logstash-*');
       });
-
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       after(async () => {
         await security.role.delete('global_discover_all_role');
         await security.user.delete('global_discover_all_user');
@@ -158,7 +168,12 @@ export default function (ctx: FtrProviderContext) {
           }
         );
       });
-
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       after(async () => {
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
@@ -221,6 +236,12 @@ export default function (ctx: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+      });
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       after(async () => {
@@ -286,7 +307,12 @@ export default function (ctx: FtrProviderContext) {
           }
         );
       });
-
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       after(async () => {
         await security.role.delete('global_discover_visualize_read_role');
         await security.user.delete('global_discover_visualize_read_user');
@@ -338,6 +364,13 @@ export default function (ctx: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       after(async () => {
@@ -407,6 +440,12 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       after(async () => {
         await kibanaServer.uiSettings.unset('defaultIndex');
         await esSupertest

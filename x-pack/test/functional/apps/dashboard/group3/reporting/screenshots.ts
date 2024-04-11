@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -25,6 +25,7 @@ export default function ({
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const retry = getService('retry');
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
@@ -72,6 +73,12 @@ export default function ({
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
       ]);
     });
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.share.closeShareModal(); // close modal
+        return await testSubjects.exists('shareTopNavButton');
+      });
+    });
     after('clean up archives', async () => {
       await unloadEcommerce();
       await es.deleteByQuery({
@@ -83,6 +90,12 @@ export default function ({
     });
 
     describe('Print PDF button', () => {
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -104,6 +117,12 @@ export default function ({
       });
       after(async () => {
         await unloadEcommerce();
+      });
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('downloads a PDF file', async function () {
@@ -131,6 +150,12 @@ export default function ({
       after(async () => {
         await unloadEcommerce();
       });
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
 
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
@@ -153,6 +178,12 @@ export default function ({
       });
       after(async () => {
         await unloadEcommerce();
+      });
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
@@ -215,6 +246,13 @@ export default function ({
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('PNG file matches the baseline image', async function () {
