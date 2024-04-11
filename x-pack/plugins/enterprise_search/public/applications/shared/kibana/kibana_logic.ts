@@ -77,7 +77,7 @@ export interface KibanaValues {
   cloud: CloudSetup | null;
   config: ClientConfigType;
   connectorTypes: ConnectorDefinition[];
-  consolePlugin: Partial<ConsolePluginStart> | null;
+  consolePlugin: ConsolePluginStart | null;
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
   guidedOnboarding: GuidedOnboardingPluginStart | null;
@@ -140,10 +140,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     user: [props.user || null, {}],
   }),
   selectors: ({ selectors }) => ({
-    isCloud: [
-      () => [selectors.cloud],
-      (cloud?: Partial<CloudSetup>) => Boolean(cloud?.isCloudEnabled),
-    ],
+    isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
   }),
 });
 
