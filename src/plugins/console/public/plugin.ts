@@ -18,7 +18,6 @@ import {
   ConsolePluginSetup,
   ConsolePluginStart,
   ConsoleUILocatorParams,
-  EmbeddableConsoleProps,
   EmbeddedConsoleView,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
@@ -126,9 +125,8 @@ export class ConsoleUIPlugin
       embeddedConsoleUiSetting;
 
     if (embeddedConsoleAvailable) {
-      consoleStart.EmbeddableConsole = (props: EmbeddableConsoleProps) => {
+      consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
-          ...props,
           core,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {

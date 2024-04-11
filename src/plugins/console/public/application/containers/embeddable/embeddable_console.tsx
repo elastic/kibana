@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -17,12 +17,12 @@ import {
   EuiThemeProvider,
   EuiWindowEvent,
   keys,
+  useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
-  EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
   EmbeddableConsoleView,
 } from '../../../types/embeddable_console';
@@ -33,6 +33,7 @@ import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_fr
 import './_index.scss';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
+const CONSOLE_MIN_HEIGHT = 480;
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
@@ -43,13 +44,14 @@ const ConsoleWrapper = dynamic(async () => ({
 }));
 
 export const EmbeddableConsole = ({
-  size = 'm',
   core,
   usageCollection,
   setDispatch,
   alternateView,
   isMonacoEnabled,
-}: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
+}: EmbeddableConsoleDependencies) => {
+  const [consoleHeight, setConsoleHeight] = useState<number>(800);
+  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
     store.initialValue,
@@ -71,6 +73,12 @@ export const EmbeddableConsole = ({
     document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
     return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
   }, []);
+  useEffect(() => {
+    setGlobalCSSVariables({
+      '--embedded-console-height': `${consoleHeight}px`,
+      '--embedded-console-bottom': `-${consoleHeight}px`,
+    });
+  }, [consoleHeight, setGlobalCSSVariables]);
 
   const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
   const showConsole =
@@ -105,14 +113,10 @@ export const EmbeddableConsole = ({
 
   const classes = classNames('embeddableConsole', {
     'embeddableConsole-isOpen': isOpen,
-    'embeddableConsole--large': size === 'l',
-    'embeddableConsole--medium': size === 'm',
-    'embeddableConsole--small': size === 's',
     'embeddableConsole--classicChrome': chromeStyle === 'classic',
     'embeddableConsole--projectChrome': chromeStyle === 'project',
     'embeddableConsole--unknownChrome': chromeStyle === undefined,
     'embeddableConsole--fixed': true,
-    'embeddableConsole--showOnMobile': false,
   });
 
   return (
