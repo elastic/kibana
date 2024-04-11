@@ -20,7 +20,6 @@ interface Props {
   sort?: string;
   filters?: Filter[];
   reloadGroupSubject: Subject<SloEmbeddableInput | undefined>;
-  setTitle: (title: string) => void;
 }
 
 export function GroupSloView({
@@ -30,7 +29,6 @@ export function GroupSloView({
   kqlQuery: initialKqlQuery = '',
   filters: initialFilters = [],
   reloadGroupSubject,
-  setTitle,
 }: Props) {
   const [groupBy, setGroupBy] = useState(initialGroupBy);
   const [kqlQuery, setKqlQuery] = useState(initialKqlQuery);
@@ -74,7 +72,7 @@ export function GroupSloView({
     return () => {
       subs?.unsubscribe();
     };
-  }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject, setTitle]);
+  }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject]);
 
   return (
     <GroupView sloView={sloView} groupBy={groupBy} kqlQuery={combinedKqlQuery} filters={filters} />

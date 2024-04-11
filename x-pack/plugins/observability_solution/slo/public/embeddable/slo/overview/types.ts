@@ -12,7 +12,7 @@ export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   groupBy: GroupBy;
-  groups?: string[] | undefined[];
+  groups?: string[];
   tagsFilter?: Filter;
   filters?: Filter[];
   kqlQuery?: string;

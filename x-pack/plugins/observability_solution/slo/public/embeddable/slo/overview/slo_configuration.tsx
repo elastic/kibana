@@ -122,7 +122,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
           fill
         >
           <FormattedMessage
-            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+            id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
             defaultMessage="Save"
           />
         </EuiButton>
@@ -178,7 +178,7 @@ function GroupSloConfiguration({
 
         <EuiButton data-test-subj="sloConfirmButton" onClick={onConfirmClick} fill>
           <FormattedMessage
-            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+            id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
             defaultMessage="Save"
           />
         </EuiButton>

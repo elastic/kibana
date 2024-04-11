@@ -123,7 +123,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
                   }}
                   data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
                 >
-                  {i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
+                  {i18n.translate('xpack.slo.overviewEmbeddable.editCriteriaLabel', {
                     defaultMessage: 'Edit criteria',
                   })}
                 </EuiLink>
@@ -137,7 +137,6 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
                 kqlQuery={kqlQuery}
                 filters={groupFilters?.filters}
                 reloadGroupSubject={this.reloadGroupSubject}
-                setTitle={this.setTitle.bind(this)}
               />
             </EuiFlexItem>
           </Wrapper>

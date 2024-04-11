@@ -244,6 +244,6 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   );
 }
 
-const PLACEHOLDER = i18n.translate('xpack.slo.list.search', {
+const PLACEHOLDER = i18n.translate('xpack.slo.sloGroupConfiguration.customFilterText', {
   defaultMessage: 'Custom filter',
 });
