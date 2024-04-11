@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { bulkChangeConversations } from './use_bulk_actions_conversations';
+import { bulkUpdateConversations } from './bulk_update_actions_conversations';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { IToasts } from '@kbn/core-notifications-browser';
@@ -42,7 +42,7 @@ const conversation2 = {
 const toasts = {
   addError: jest.fn(),
 };
-describe('bulkChangeConversations', () => {
+describe('bulkUpdateConversations', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
@@ -57,13 +57,13 @@ describe('bulkChangeConversations', () => {
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions);
+    await bulkUpdateConversations(httpMock, conversationsActions);
 
     expect(httpMock.fetch).toHaveBeenCalledWith(
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [],
           create: [],
@@ -83,13 +83,13 @@ describe('bulkChangeConversations', () => {
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions);
+    await bulkUpdateConversations(httpMock, conversationsActions);
 
     expect(httpMock.fetch).toHaveBeenCalledWith(
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [],
           create: [conversation1, conversation2],
@@ -108,13 +108,13 @@ describe('bulkChangeConversations', () => {
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions);
+    await bulkUpdateConversations(httpMock, conversationsActions);
 
     expect(httpMock.fetch).toHaveBeenCalledWith(
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [conversation1, conversation2],
           delete: { ids: [] },
@@ -141,7 +141,7 @@ describe('bulkChangeConversations', () => {
       update: {},
       delete: { ids: [] },
     };
-    await bulkChangeConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
+    await bulkUpdateConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
     expect(toasts.addError.mock.calls[0][0]).toEqual(
       new Error('Error message: Error updating conversations for conversation Conversation 1')
     );
@@ -158,7 +158,7 @@ describe('bulkChangeConversations', () => {
       delete: { ids: [] },
     };
 
-    await bulkChangeConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
+    await bulkUpdateConversations(httpMock, conversationsActions, toasts as unknown as IToasts);
     expect(toasts.addError.mock.calls[0][0]).toEqual(new Error(''));
   });
 });

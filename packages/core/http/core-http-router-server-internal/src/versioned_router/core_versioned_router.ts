@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { omit } from 'lodash';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
+import type { Router } from '../router';
 
 /** @internal */
 export interface VersionedRouterArgs {
-  router: IRouter;
+  router: Router;
   /**
    * Which route resolution algo to use.
    * @note default to "oldest", but when running in dev default to "none"
@@ -57,7 +57,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     );
   }
   private constructor(
-    public readonly router: IRouter,
+    public readonly router: Router,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
     public readonly isDev: boolean = false,
     useVersionResolutionStrategyForInternalPaths: string[] = []
