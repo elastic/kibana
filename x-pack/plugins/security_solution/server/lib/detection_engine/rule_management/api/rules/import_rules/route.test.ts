@@ -32,6 +32,9 @@ import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 
+import * as findRulesModule from '../../../logic/search/find_rules';
+import * as readRulesModule from '../../../logic/crud/read_rules';
+
 jest.mock('../../../../../machine_learning/authz');
 
 describe('Import rules route', () => {
@@ -138,6 +141,21 @@ describe('Import rules route', () => {
   });
 
   describe('single rule import', () => {
+    let mockReadRules: jest.SpyInstance;
+    let mockFindRules: jest.SpyInstance;
+
+    beforeAll(() => {
+      mockReadRules = jest.spyOn(readRulesModule, 'readRules').mockResolvedValue(null);
+      mockFindRules = jest
+        .spyOn(findRulesModule, 'findRules')
+        .mockResolvedValue(getFindResultWithSingleHit());
+    });
+
+    afterAll(() => {
+      mockReadRules.mockRestore();
+      mockFindRules.mockRestore();
+    });
+
     test('returns 200 if rule imported successfully', async () => {
       clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -187,6 +205,18 @@ describe('Import rules route', () => {
     });
 
     describe('rule with existing rule_id', () => {
+      let mockReadRules: jest.SpyInstance;
+
+      beforeEach(() => {
+        mockReadRules = jest
+          .spyOn(readRulesModule, 'readRules')
+          .mockResolvedValueOnce(getRuleMock(getQueryRuleParams()));
+      });
+
+      afterEach(() => {
+        mockReadRules.mockRestore();
+      });
+
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -244,6 +274,23 @@ describe('Import rules route', () => {
   });
 
   describe('multi rule import', () => {
+    let mockReadRules: jest.SpyInstance;
+    let mockFindRules: jest.SpyInstance;
+
+    beforeAll(() => {
+      mockReadRules = jest.spyOn(readRulesModule, 'readRules').mockResolvedValue(null);
+      mockFindRules = jest
+        .spyOn(findRulesModule, 'findRules')
+        .mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    });
+
+    afterAll(() => {
+      clients.rulesClient.create.mockReset();
+      mockReadRules.mockRestore();
+      mockFindRules.mockRestore();
+    });
+
     test('returns 200 if all rules imported successfully', async () => {
       const multiRequest = getImportRulesRequest(
         buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2']))
@@ -398,8 +445,16 @@ describe('Import rules route', () => {
     });
 
     describe('rules with existing rule_id', () => {
+      let mockReadRules: jest.SpyInstance;
+
       beforeEach(() => {
-        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
+        mockReadRules = jest
+          .spyOn(readRulesModule, 'readRules')
+          .mockResolvedValueOnce(getRuleMock(getQueryRuleParams()));
+      });
+
+      afterEach(() => {
+        mockReadRules.mockRestore();
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
