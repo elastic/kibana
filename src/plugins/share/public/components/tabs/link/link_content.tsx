@@ -198,7 +198,13 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              color={allowShortUrl ? 'primary' : isNotSaved() ? 'warning' : 'primary'}
+              color={
+                objectType === 'dashboard' && allowShortUrl
+                  ? 'primary'
+                  : isNotSaved()
+                  ? 'warning'
+                  : 'primary'
+              }
               data-share-url={url}
               onClick={() => {
                 return url ? copyToClipboard(url) : setUrlHelper();

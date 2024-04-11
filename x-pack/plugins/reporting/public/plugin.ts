@@ -56,8 +56,6 @@ export interface ReportingPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
-  // needed for lens csv
-  fieldFormats: FieldFormatsStart;
 }
 
 /**
