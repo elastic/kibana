@@ -43,17 +43,7 @@ export const DEFAULT_CONTROLS: FilterControlConfig[] = [
   },
 ];
 
-export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
-
-export const URL_PARAM_KEY = {
-  appQuery: 'query',
-  eventFlyout: EXPANDABLE_FLYOUT_URL_KEY,
-  filters: 'filters',
-  savedQuery: 'savedQuery',
-  timerange: 'timerange',
-  pageFilters: 'pageFilters',
-  rulesTable: 'rulesTable',
-} as const;
+export const URL_PARAM_KEY = 'pageFilters';
 
 export const TEST_IDS = {
   FILTER_CONTROLS: 'filter-group__items',
@@ -72,7 +62,6 @@ export const TEST_IDS = {
     EDIT: 'filter-group__context--edit',
     DISCARD: `filter-group__context--discard`,
   },
-  FILTER_BY_ASSIGNEES_BUTTON: 'filter-popover-button-assignees',
 };
 
 export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<AddOptionsListControlProps> = {

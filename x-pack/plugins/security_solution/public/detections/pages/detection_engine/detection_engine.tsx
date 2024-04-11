@@ -38,8 +38,8 @@ import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '@kbn/alerts-ui-shared/src/alert_filter_controls/translations';
 import type { FilterGroupHandler, FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { FilterByAssigneesPopover } from '../../../common/components/filter_group/filter_by_assignees';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import {
   ALERTS_TABLE_REGISTRY_CONFIG_IDS,

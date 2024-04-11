@@ -36,7 +36,7 @@ import type { FilterGroupProps } from './types';
 
 const featureIds = [AlertConsumers.STACK_ALERTS];
 const spaceId = 'test-space-id';
-const LOCAL_STORAGE_KEY = `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY.pageFilters}`;
+const LOCAL_STORAGE_KEY = `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`;
 
 const controlGroupMock = getControlGroupMock();
 

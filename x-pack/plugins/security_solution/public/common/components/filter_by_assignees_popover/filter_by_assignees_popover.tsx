@@ -17,12 +17,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { TEST_IDS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import type { AssigneesIdsSelection } from '../assignees/types';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
 import { ASSIGNEES_PANEL_WIDTH } from '../assignees/constants';
 import { AssigneesSelectable } from '../assignees/assignees_selectable';
+import { FILTER_BY_ASSIGNEES_BUTTON } from './test_ids';
 
 export interface FilterByAssigneesPopoverProps {
   /**
@@ -63,7 +63,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
           }
         >
           <EuiFilterButton
-            data-test-subj={TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON}
+            data-test-subj={FILTER_BY_ASSIGNEES_BUTTON}
             iconType="arrowDown"
             badgeColor="subdued"
             disabled={!isPlatinumPlus}

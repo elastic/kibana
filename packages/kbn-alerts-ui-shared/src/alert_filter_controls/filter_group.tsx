@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ControlInputTransform } from '@kbn/controls-plugin/common';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
@@ -45,38 +45,6 @@ import { FilterGroupContext } from './filter_group_context';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 
-export const convertToBuildEsQuery = ({
-  config,
-  indexPattern,
-  queries,
-  filters,
-}: {
-  config: EsQueryConfig;
-  indexPattern: DataViewBase | undefined;
-  queries: Query[];
-  filters: Filter[];
-}): [string, undefined] | [undefined, Error] => {
-  try {
-    return [
-      JSON.stringify(
-        buildEsQuery(
-          indexPattern,
-          queries,
-          filters.filter((f) => f.meta.disabled === false),
-          {
-            nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
-            ...config,
-            dateFormatTZ: undefined,
-          }
-        )
-      ),
-      undefined,
-    ];
-  } catch (error) {
-    return [undefined, error];
-  }
-};
-
 export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const {
     dataViewId,
@@ -112,7 +80,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   const localStoragePageFilterKey = useMemo(
-    () => `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY.pageFilters}`,
+    () => `${featureIds.join(',')}.${spaceId}.${URL_PARAM_KEY}`,
     [featureIds, spaceId]
   );
 
@@ -154,21 +122,20 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, []);
 
   const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
-    const [_, kqlError] = convertToBuildEsQuery({
-      config: {},
-      queries: query ? [query] : [],
-      filters: filters ?? [],
-      indexPattern: { fields: [], title: '' },
-    });
-
-    // we only need to handle kqlError because control group can handle Lucene error
-    if (kqlError) {
-      /*
-       * Based on the behaviour from other components,
-       * ignore all filters and queries if there is some error
-       * in the input filters and queries
-       *
-       * */
+    try {
+      buildEsQuery(
+        { fields: [], title: '' },
+        query ? [query] : [],
+        filters?.filter((f) => f.meta.disabled === false) ?? [],
+        {
+          nestedIgnoreUnmapped: true,
+          dateFormatTZ: undefined,
+        }
+      );
+    } catch (e) {
+      // We only need to handle kqlError because control group can handle Lucene error
+      // Based on the behaviour from other components, ignore all filters and queries
+      // if there is some error in the input filters and queries
       return {
         filters: [],
         query: undefined,

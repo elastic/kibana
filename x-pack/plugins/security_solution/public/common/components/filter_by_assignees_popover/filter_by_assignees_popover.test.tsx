@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { FilterByAssigneesPopover } from './filter_by_assignees';
+import { FilterByAssigneesPopover } from './filter_by_assignees_popover';
 import { TestProviders } from '../../mock';
 import type { AssigneesIdsSelection } from '../assignees/types';
 
@@ -17,7 +17,7 @@ import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profi
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
-import { TEST_IDS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
+import { FILTER_BY_ASSIGNEES_BUTTON } from './test_ids';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
@@ -81,21 +81,21 @@ describe('<FilterByAssigneesPopover />', () => {
   it('should render closed popover component', () => {
     const { getByTestId, queryByTestId } = renderFilterByAssigneesPopover();
 
-    expect(getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
     expect(queryByTestId('euiSelectableList')).not.toBeInTheDocument();
   });
 
   it('should render opened popover component', () => {
     const { getByTestId } = renderFilterByAssigneesPopover();
 
-    getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON).click();
+    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
     expect(getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
   it('should render assignees', () => {
     const { getByTestId } = renderFilterByAssigneesPopover();
 
-    getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON).click();
+    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
 
     const assigneesList = getByTestId('euiSelectableList');
     expect(assigneesList).toHaveTextContent('User 1');
@@ -110,7 +110,7 @@ describe('<FilterByAssigneesPopover />', () => {
     const onUsersChangeMock = jest.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);
 
-    getByTestId(TEST_IDS.FILTER_BY_ASSIGNEES_BUTTON).click();
+    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
 
     getByText('User 1').click();
     getByText('User 2').click();
