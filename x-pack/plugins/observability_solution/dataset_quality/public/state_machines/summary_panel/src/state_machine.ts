@@ -227,7 +227,7 @@ export const createDatasetsSummaryPanelStateMachine = ({
         return { percentages };
       },
       loadDatasetsActivity: async (_context) => {
-        const { dataStreamStats } = await dataStreamStatsClient.getDataStreamsStats();
+        const dataStreamStats = await dataStreamStatsClient.getDataStreamsStats();
         const activeDataStreams = filterInactiveDatasets({ datasets: dataStreamStats });
         return {
           total: dataStreamStats.length,

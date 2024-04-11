@@ -49,14 +49,11 @@ export class DataStreamStat {
       rawName: dataStreamStat.name,
       type,
       name: dataset,
-      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      title: dataset,
       namespace,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
-      integration: dataStreamStat.integration
-        ? Integration.create(dataStreamStat.integration)
-        : undefined,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
