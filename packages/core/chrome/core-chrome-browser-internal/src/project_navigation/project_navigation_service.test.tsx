@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { createMemoryHistory } from 'history';
+import { render } from '@testing-library/react';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -1028,5 +1030,44 @@ describe('solution navigations', () => {
     }
 
     navLinksService.get.mockReset();
+  });
+
+  it('should add the solution to the solution home path if handler provided', async () => {
+    const { projectNavigation, application, navLinksService } = setup({
+      locationPathName: '/app/app1',
+      navLinkIds: ['app1'],
+    });
+    projectNavigation.updateSolutionNavigations({ solution1, solution2, solution3 });
+    projectNavigation.changeActiveSolutionNavigation('solution1');
+    navLinksService.get.mockReturnValue({ url: '/foo' } as any);
+
+    // Render the breacrumb solution switcher
+    const noop = () => undefined;
+    const [solutionSwitcher] = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    const popoverContentJSX = (solutionSwitcher.popoverContent as any)?.(noop) ?? <></>;
+
+    const Comp = <>{popoverContentJSX}</>;
+    {
+      const { findByTestId, unmount } = render(Comp);
+
+      expect(application.navigateToUrl).not.toHaveBeenCalled();
+      const solution2Button = await findByTestId('solutionNavSwitcher-solution2');
+      solution2Button.click();
+
+      // No handler to add the solutionId to the path
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/foo');
+      unmount();
+    }
+
+    application.navigateToUrl.mockReset();
+    // Provide handler to add the solutionId to the path
+    projectNavigation.setAddSolutionIdToUrlPath((solutionId, url) => `/n/${solutionId}${url}`);
+
+    {
+      const { findByTestId } = render(Comp);
+      const solution2Button = await findByTestId('solutionNavSwitcher-solution2');
+      solution2Button.click();
+      expect(application.navigateToUrl).toHaveBeenCalledWith('/n/solution2/foo');
+    }
   });
 });
