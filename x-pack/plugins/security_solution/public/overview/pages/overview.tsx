@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiShowFor,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
@@ -69,6 +76,10 @@ const OverviewComponent = () => {
 
   return (
     <>
+      <EuiScreenReaderOnly>
+        <h1>{OVERVIEW}</h1>
+      </EuiScreenReaderOnly>
+
       {indicesExist ? (
         <>
           <FiltersGlobal>
