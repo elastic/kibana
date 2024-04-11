@@ -1184,11 +1184,7 @@ export class Embeddable
     }
 
     const hasData = Object.values(this.activeData).some((table) => {
-      if (
-        table.meta &&
-        table.meta.statistics &&
-        typeof table.meta.statistics.totalCount === 'number'
-      ) {
+      if (table.meta?.statistics?.totalCount != null) {
         // if totalCount is set, refer to total count
         return table.meta.statistics.totalCount > 0;
       }
