@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import crypto from 'crypto';
 
 import type { Logger } from '@kbn/core/server';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
 
@@ -37,8 +38,8 @@ export class VerificationCode {
     );
 
     if (code === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(`
+      // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+      unsafeConsole.log(`
 
 Your verification code is: ${highlightedCode}
 
@@ -51,8 +52,8 @@ Your verification code is: ${highlightedCode}
       this.logger.error(
         `Invalid verification code '${code}' provided. ${this.remainingAttempts} attempts left.`
       );
-      // eslint-disable-next-line no-console
-      console.log(`
+      // eslint-disable-next-line @kbn/eslint/no_unsafe_console
+      unsafeConsole.log(`
 
 Your verification code is: ${highlightedCode}
 

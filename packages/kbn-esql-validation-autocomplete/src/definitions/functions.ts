@@ -97,7 +97,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
     validate: validateLogFunctions,
   },
-
   {
     name: 'log',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.logDoc', {
@@ -481,13 +480,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        returnType: 'version',
+        returnType: 'string',
         examples: [`from index | EVAL version = to_version(stringField)`],
-      },
-      {
-        params: [{ name: 'field', type: 'version' }],
-        returnType: 'version',
-        examples: [`from index | EVAL version = to_version(versionField)`],
       },
     ],
   },
@@ -920,6 +914,30 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         examples: [
           'from index | where cidr_match(ip_field, "127.0.0.1/30")',
           'from index | eval cidr="10.0.0.0/8" | where cidr_match(ip_field, "127.0.0.1/30", cidr)',
+        ],
+      },
+    ],
+  },
+  {
+    name: 'mv_sort',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvSortDoc', {
+      defaultMessage: 'Sorts a multivalue expression in lexicographical order.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'any' },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+            literalOptions: ['asc', 'desc'],
+          },
+        ],
+        returnType: 'any',
+        examples: [
+          'row a = [4, 2, -3, 2] | eval sorted = mv_sort(a)',
+          'row a = ["b", "c", "a"] | sorted = mv_sort(a, "DESC")',
         ],
       },
     ],
