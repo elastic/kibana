@@ -21,6 +21,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { finished } from 'stream/promises';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { inspect } from 'util';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
@@ -91,7 +92,9 @@ export abstract class SubActionConnector<Config, Secrets> {
     try {
       responseSchema.validate(data);
     } catch (resValidationError) {
-      throw new Error(`Response validation failed (${resValidationError})`);
+      const err = new Error(`Response validation failed (${resValidationError})`);
+      this.logger.debug(`${err.message}:\n${inspect(data, { depth: 10 })}`);
+      throw err;
     }
   }
 
