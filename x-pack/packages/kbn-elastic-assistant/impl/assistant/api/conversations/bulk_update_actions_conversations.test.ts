@@ -7,8 +7,8 @@
 
 import { bulkUpdateConversations } from './bulk_update_actions_conversations';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { IToasts } from '@kbn/core-notifications-browser';
@@ -63,7 +63,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [],
           create: [],
@@ -89,7 +89,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [],
           create: [conversation1, conversation2],
@@ -114,7 +114,7 @@ describe('bulkUpdateConversations', () => {
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [conversation1, conversation2],
           delete: { ids: [] },

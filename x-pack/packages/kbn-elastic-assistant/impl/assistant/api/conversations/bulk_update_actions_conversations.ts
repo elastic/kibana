@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
@@ -114,7 +114,7 @@ export const bulkUpdateConversations = async (
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: conversationsToUpdate,
           create: conversationsToCreate,

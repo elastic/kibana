@@ -8,14 +8,16 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ConversationCreateProps,
   ConversationResponse,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
+import { hasAIAssistantLicense } from '../helpers';
 
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
@@ -29,7 +31,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -39,8 +41,21 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
-
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate(
+                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
+                  {
+                    defaultMessage:
+                      'Your license does not support AI Assistant. Please upgrade your license.',
+                  }
+                ),
+              },
+            });
+          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {

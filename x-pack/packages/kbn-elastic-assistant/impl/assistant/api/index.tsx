@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
 import { TraceOptions } from '../types';
@@ -91,7 +91,7 @@ export const fetchConnectorExecuteAction = async ({
           signal,
           asResponse: true,
           rawResponse: true,
-          version: '1',
+          version: API_VERSIONS.internal.v1,
         }
       );
 
@@ -126,7 +126,7 @@ export const fetchConnectorExecuteAction = async ({
       body: JSON.stringify(requestBody),
       headers: { 'Content-Type': 'application/json' },
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     if (response.status !== 'ok' || !response.data) {
@@ -213,7 +213,7 @@ export const getKnowledgeBaseStatus = async ({
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as GetKnowledgeBaseStatusResponse;
@@ -252,7 +252,7 @@ export const postKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'POST',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as PostKnowledgeBaseResponse;
@@ -291,7 +291,7 @@ export const deleteKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'DELETE',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as DeleteKnowledgeBaseResponse;

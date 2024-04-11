@@ -6,7 +6,7 @@
  */
 
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -48,7 +48,7 @@ describe('bulkUpdateAnonymizationFields', () => {
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           create: [],
           update: [],
@@ -71,7 +71,7 @@ describe('bulkUpdateAnonymizationFields', () => {
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           create: [anonymizationField1, anonymizationField2],
           update: [],
@@ -93,7 +93,7 @@ describe('bulkUpdateAnonymizationFields', () => {
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           update: [anonymizationField1, anonymizationField2],
           delete: { ids: [] },

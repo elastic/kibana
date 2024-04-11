@@ -124,6 +124,7 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     onFetch: onFetchedConversations,
     refetchOnWindowFocus: !isStreaming,
+    isAssistantEnabled,
   });
 
   const [anonymizationFields, setAnonymizationFields] = useState<FindAnonymizationFieldsResponse>({
@@ -137,7 +138,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading: isLoadingAnonymizationFields,
     isError: isErrorAnonymizationFields,
     refetch: refetchAnonymizationFields,
-  } = useFetchAnonymizationFields({ http });
+  } = useFetchAnonymizationFields({ http, isAssistantEnabled });
 
   const refetchAnonymizationFieldsResults = useCallback(async () => {
     const updatedAnonymizationFields = await refetchAnonymizationFields();

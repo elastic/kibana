@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import {
   PerformBulkActionRequestBody,
@@ -26,7 +26,7 @@ export const bulkUpdateAnonymizationFields = async (
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       {
         method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(anonymizationFieldsActions),
       }
     );

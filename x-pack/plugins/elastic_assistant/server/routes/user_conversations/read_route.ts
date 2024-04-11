@@ -8,14 +8,16 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
+import { hasAIAssistantLicense } from '../helpers';
 
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -28,7 +30,7 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(ReadConversationRequestParams),
@@ -41,7 +43,21 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         const { id } = request.params;
 
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate(
+                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
+                  {
+                    defaultMessage:
+                      'Your license does not support AI Assistant. Please upgrade your license.',
+                  }
+                ),
+              },
+            });
+          }
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
             return assistantResponse.error({

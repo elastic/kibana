@@ -150,7 +150,12 @@ export const AssistantProvider: React.FC = ({ children }) => {
       migrateConversationsFromLocalStorage,
     ]
   );
-  useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+  useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled:
+      assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege,
+  });
 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;

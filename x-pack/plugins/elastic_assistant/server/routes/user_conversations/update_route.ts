@@ -8,7 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -17,8 +17,10 @@ import {
 } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
 import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
+import { hasAIAssistantLicense } from '../helpers';
 
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -31,7 +33,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationUpdateProps),
@@ -43,7 +45,21 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         const assistantResponse = buildResponse(response);
         const { id } = request.params;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate(
+                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
+                  {
+                    defaultMessage:
+                      'Your license does not support AI Assistant. Please upgrade your license.',
+                  }
+                ),
+              },
+            });
+          }
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();

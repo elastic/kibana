@@ -11,12 +11,14 @@ import {
   ConversationResponse,
   AppendConversationMessageRequestBody,
   AppendConversationMessageRequestParams,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
+import { hasAIAssistantLicense } from '../helpers';
 
 export const appendConversationMessageRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -29,7 +31,7 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(AppendConversationMessageRequestBody),
@@ -41,7 +43,21 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
         const assistantResponse = buildResponse(response);
         const { id } = request.params;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate(
+                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
+                  {
+                    defaultMessage:
+                      'Your license does not support AI Assistant. Please upgrade your license.',
+                  }
+                ),
+              },
+            });
+          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {

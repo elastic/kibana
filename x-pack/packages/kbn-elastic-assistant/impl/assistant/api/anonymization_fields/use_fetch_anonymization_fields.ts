@@ -9,12 +9,13 @@ import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/i
 import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 export interface UseFetchAnonymizationFieldsParams {
   http: HttpSetup;
+  isAssistantEnabled: boolean;
   signal?: AbortSignal | undefined;
 }
 
@@ -30,6 +31,7 @@ export interface UseFetchAnonymizationFieldsParams {
 export const useFetchAnonymizationFields = ({
   http,
   signal,
+  isAssistantEnabled,
 }: UseFetchAnonymizationFieldsParams) => {
   const query = {
     page: 1,
@@ -40,15 +42,18 @@ export const useFetchAnonymizationFields = ({
     ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
     query.page,
     query.per_page,
-    ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+    API_VERSIONS.public.v1,
   ];
 
   return useQuery([cachingKeys, query], async () => {
+    if (!isAssistantEnabled) {
+      return { page: 0, perPage: 0, total: 0, data: [] };
+    }
     const res = await http.fetch<FindAnonymizationFieldsResponse>(
       ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       {
         method: 'GET',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         query,
         signal,
       }

@@ -22,7 +22,10 @@ const http = {
   fetch: jest.fn().mockResolvedValue(statusResponse),
 } as unknown as HttpSetup;
 
-const defaultProps = { http } as unknown as UseFetchAnonymizationFieldsParams;
+const defaultProps = {
+  http,
+  isAssistantEnabled: true,
+} as unknown as UseFetchAnonymizationFieldsParams;
 
 const createWrapper = () => {
   const queryClient = new QueryClient();

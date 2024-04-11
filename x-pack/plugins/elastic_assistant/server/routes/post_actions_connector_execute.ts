@@ -12,7 +12,7 @@ import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
@@ -55,7 +55,7 @@ export const postActionsConnectorExecuteRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ExecuteConnectorRequestBody),

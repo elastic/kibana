@@ -10,8 +10,8 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
@@ -24,6 +24,7 @@ import {
   PerformBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -35,6 +36,7 @@ import {
   transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
 import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { hasAIAssistantLicense } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -122,7 +124,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
@@ -150,7 +152,21 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: i18n.translate(
+                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
+                  {
+                    defaultMessage:
+                      'Your license does not support AI Assistant. Please upgrade your license.',
+                  }
+                ),
+              },
+            });
+          }
 
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
