@@ -17,9 +17,9 @@ import {
   type SavedObjectMetaData,
 } from '@kbn/saved-objects-finder-plugin/public';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { apiHasType } from '@kbn/presentation-publishing';
+import { Toast } from '@kbn/core/public';
 import {
   core,
   embeddableStart,
@@ -29,14 +29,32 @@ import {
 } from '../kibana_services';
 import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 import {
-  getReactEmbeddableSavedObjects,
   ReactEmbeddableSavedObject,
-} from '../lib/embeddable_saved_object_registry/embeddable_saved_object_registry';
-import { EmbeddableFactory, EmbeddableFactoryNotFoundError } from '../lib';
+  EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
+  SavedObjectEmbeddableInput,
+  getReactEmbeddableSavedObjects,
+  Container,
+} from '../lib';
 
 type LegacyFactoryMap = { [key: string]: EmbeddableFactory };
 type FactoryMap<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
   [key: string]: ReactEmbeddableSavedObject<TSavedObjectAttributes> & { type: string };
+};
+
+let lastToast: string | Toast;
+const showSuccessToast = (name: string) => {
+  if (lastToast) core.notifications.toasts.remove(lastToast);
+
+  lastToast = core.notifications.toasts.addSuccess({
+    title: i18n.translate('embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
+      defaultMessage: '{savedObjectName} was added',
+      values: {
+        savedObjectName: name,
+      },
+    }),
+    'data-test-subj': 'addObjectToContainerSuccess',
+  });
 };
 
 const runAddTelemetry = (
@@ -53,7 +71,13 @@ const runAddTelemetry = (
   usageCollection?.reportUiCounter?.(parent.type, METRIC_TYPE.CLICK, `${type}:add`);
 };
 
-export const AddPanelFlyout = ({ container }: { container: PresentationContainer }) => {
+export const AddPanelFlyout = ({
+  container,
+  onAddPanel,
+}: {
+  container: Container;
+  onAddPanel?: (id: string) => void;
+}) => {
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
     return [...embeddableStart.getEmbeddableFactories()]
       .filter(
@@ -113,21 +137,36 @@ export const AddPanelFlyout = ({ container }: { container: PresentationContainer
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const initialState = savedObjectToPanel[type]
-        ? savedObjectToPanel[type](savedObject)
-        : { savedObjectId: id };
-      container.addNewPanel(
-        {
-          panelType: legacyFactoryForSavedObjectType.type,
-          initialState,
-        },
-        true
-      );
+      let embeddableId: string;
 
+      if (savedObjectToPanel[type]) {
+        // this panel type has a custom method for converting saved objects to panels
+        const panel = savedObjectToPanel[type](savedObject);
+
+        const { id: _embeddableId } = await container.addNewEmbeddable(
+          legacyFactoryForSavedObjectType.type,
+          panel,
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      } else {
+        const { id: _embeddableId } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+          legacyFactoryForSavedObjectType.type,
+          { savedObjectId: id },
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      }
+
+      onAddPanel?.(embeddableId);
+
+      showSuccessToast(name);
       const { savedObjectMetaData, type: factoryType } = legacyFactoryForSavedObjectType;
       runAddTelemetry(container, factoryType, savedObject, savedObjectMetaData);
     },
-    [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType]
+    [container, factoriesBySavedObjectType, legacyFactoriesBySavedObjectType, onAddPanel]
   );
 
   return (

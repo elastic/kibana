@@ -12,11 +12,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { AddPanelFlyout } from './add_panel_flyout';
-import { embeddableStart, usageCollection } from '../kibana_services';
+import { core, embeddableStart, usageCollection } from '../kibana_services';
 import { ContactCardEmbeddableFactory } from '../lib/test_samples';
-import { registerReactEmbeddableSavedObject } from '../lib';
+import { Container, registerReactEmbeddableSavedObject } from '../lib';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { PresentationContainer } from '@kbn/presentation-containers';
 
 // Mock saved objects finder component so we can call the onChoose method.
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
@@ -66,7 +65,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
 
 describe('add panel flyout', () => {
   describe('registered embeddables', () => {
-    let container: PresentationContainer;
+    let container: Container;
     const onAdd = jest.fn();
 
     beforeAll(() => {
@@ -83,7 +82,7 @@ describe('add panel flyout', () => {
 
     beforeEach(() => {
       onAdd.mockClear();
-      container = getMockPresentationContainer();
+      container = getMockPresentationContainer() as unknown as Container;
       // @ts-ignore type is only expected on a dashboard container
       container.type = 'DASHBOARD_CONTAINER';
     });
@@ -126,7 +125,7 @@ describe('add panel flyout', () => {
   });
 
   describe('legacy embeddables', () => {
-    let container: PresentationContainer;
+    let container: Container;
 
     beforeEach(() => {
       const { overlays } = coreMock.createStart();
@@ -139,8 +138,8 @@ describe('add panel flyout', () => {
         .fn()
         .mockReturnValue([contactCardEmbeddableFactory]);
 
-      container = getMockPresentationContainer();
-      container.addNewPanel = jest.fn();
+      container = getMockPresentationContainer() as unknown as Container;
+      container.addNewEmbeddable = jest.fn().mockResolvedValue({ id: 'foo' });
       // @ts-ignore type is only expected on a dashboard container
       container.type = 'HELLO_WORLD_CONTAINER';
     });
@@ -163,13 +162,19 @@ describe('add panel flyout', () => {
       // flush promises
       await new Promise((r) => setTimeout(r, 1));
 
-      expect(container.addNewPanel).toHaveBeenCalledWith(
-        {
-          panelType: 'CONTACT_CARD_EMBEDDABLE',
-          initialState: { savedObjectId: 'testId' },
-        },
-        true
-      );
+      expect(container.addNewEmbeddable).toHaveBeenCalled();
+    });
+
+    test('shows a success toast on add', async () => {
+      render(<AddPanelFlyout container={container} />);
+      fireEvent.click(screen.getByTestId('soFinderAddLegacyButton'));
+      // flush promises
+      await new Promise((r) => setTimeout(r, 1));
+
+      expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        'data-test-subj': 'addObjectToContainerSuccess',
+        title: 'test name was added',
+      });
     });
 
     test('runs telemetry function on add legacy embeddable', async () => {
