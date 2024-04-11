@@ -81,6 +81,7 @@ export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from './hooks/use_user_pref
 export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
 } from '../common/utils/advanced_settings';
 
 export const plugin: PluginInitializer<

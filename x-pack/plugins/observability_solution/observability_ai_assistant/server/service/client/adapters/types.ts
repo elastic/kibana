@@ -26,6 +26,7 @@ export type LlmApiAdapterFactory = (options: {
   messages: Message[];
   functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
   functionCall?: string;
+  useSimulatedFunctionCalling?: boolean;
 }) => LlmApiAdapter;
 
 export interface LlmApiAdapter {

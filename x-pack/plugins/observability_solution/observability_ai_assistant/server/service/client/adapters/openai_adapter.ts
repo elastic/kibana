@@ -8,11 +8,14 @@
 import { encode } from 'gpt-tokenizer';
 import { compact, isEmpty, merge, omit, pick } from 'lodash';
 import OpenAI from 'openai';
+import { identity } from 'rxjs';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';
 import { Message, MessageRole } from '../../../../common';
 import { processOpenAiStream } from './process_openai_stream';
 import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
 import { LlmApiAdapterFactory } from './types';
+import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
+import { getMessagesWithSimulatedFunctionCalling } from './simulate_function_calling/get_messages_with_simulated_function_calling';
 
 function getOpenAIPromptTokenCount({
   messages,
@@ -54,40 +57,37 @@ function getOpenAIPromptTokenCount({
   return tokensFromMessages + tokensFromFunctions;
 }
 
+function messagesToOpenAI(messages: Message[]): OpenAI.ChatCompletionMessageParam[] {
+  return compact(
+    messages
+      .filter((message) => message.message.content || message.message.function_call?.name)
+      .map((message) => {
+        const role =
+          message.message.role === MessageRole.Elastic ? MessageRole.User : message.message.role;
+
+        return {
+          role,
+          content: message.message.content,
+          function_call: isEmpty(message.message.function_call?.name)
+            ? undefined
+            : omit(message.message.function_call, 'trigger'),
+          name: message.message.name,
+        } as OpenAI.ChatCompletionMessageParam;
+      })
+  );
+}
+
 export const createOpenAiAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,
   functionCall,
   logger,
+  useSimulatedFunctionCalling,
 }) => {
   const promptTokens = getOpenAIPromptTokenCount({ messages, functions });
 
   return {
     getSubAction: () => {
-      const messagesForOpenAI: Array<
-        Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
-          role: MessageRole;
-        }
-      > = compact(
-        messages
-          .filter((message) => message.message.content || message.message.function_call?.name)
-          .map((message) => {
-            const role =
-              message.message.role === MessageRole.Elastic
-                ? MessageRole.User
-                : message.message.role;
-
-            return {
-              role,
-              content: message.message.content,
-              function_call: isEmpty(message.message.function_call?.name)
-                ? undefined
-                : omit(message.message.function_call, 'trigger'),
-              name: message.message.name,
-            };
-          })
-      );
-
       const functionsForOpenAI = functions?.map((fn) => ({
         ...fn,
         parameters: merge(
@@ -99,22 +99,38 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
         ),
       }));
 
-      const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
-        messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
-        stream: true,
-        ...(!!functionsForOpenAI?.length
-          ? {
-              tools: functionsForOpenAI.map((fn) => ({
-                function: pick(fn, 'name', 'description', 'parameters'),
-                type: 'function',
-              })),
-            }
-          : {}),
-        temperature: 0,
-        tool_choice: functionCall
-          ? { function: { name: functionCall }, type: 'function' }
-          : undefined,
-      };
+      let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+
+      if (useSimulatedFunctionCalling) {
+        request = {
+          messages: messagesToOpenAI(
+            getMessagesWithSimulatedFunctionCalling({
+              messages,
+              functions: functionsForOpenAI,
+              functionCall,
+            })
+          ),
+          stream: true,
+          temperature: 0,
+        };
+      } else {
+        request = {
+          messages: messagesToOpenAI(messages),
+          stream: true,
+          ...(!!functionsForOpenAI?.length
+            ? {
+                tools: functionsForOpenAI.map((fn) => ({
+                  function: pick(fn, 'name', 'description', 'parameters'),
+                  type: 'function',
+                })),
+              }
+            : {}),
+          temperature: 0,
+          tool_choice: functionCall
+            ? { function: { name: functionCall }, type: 'function' }
+            : undefined,
+        };
+      }
 
       return {
         subAction: 'stream',
@@ -126,7 +142,12 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
     },
     streamIntoObservable: (readable) => {
       return eventsourceStreamIntoObservable(readable).pipe(
-        processOpenAiStream({ promptTokenCount: promptTokens, logger })
+        processOpenAiStream({ promptTokenCount: promptTokens, logger }),
+        useSimulatedFunctionCalling
+          ? parseInlineFunctionCalls({
+              logger,
+            })
+          : identity
       );
     },
   };

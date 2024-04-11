@@ -50,7 +50,7 @@ export const registerFunctions: RegistrationCallback = async ({
 
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than "query".
 
-        Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
+        Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.
 
         You MUST use the "query" function when the user wants to:
         - visualize data

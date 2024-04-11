@@ -10,6 +10,7 @@ import { last } from 'lodash';
 import { MessageRole } from '../../../../../common';
 import { createBedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { LlmApiAdapterFactory } from '../types';
+import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
 
 describe('createBedrockClaudeAdapter', () => {
   describe('getSubAction', () => {
@@ -65,24 +66,9 @@ describe('createBedrockClaudeAdapter', () => {
 
       it('formats the functions', () => {
         expect(callSubActionFactory().messages[0].content).toContain(
-          dedent(`<tools>
-        <tool_description>
-          <tool_name>my_tool</tool_name>
-          <description>My tool</description>
-          <parameters>
-            <parameter>
-                <name>myParam</name>
-                <type>string</type>
-                <description>
-                  
-                  Required: false
-                  Multiple: false
-                  
-                </description>
-              </parameter>
-          </parameters>
-        </tool_description>
-      </tools>`)
+          dedent(
+            '[{"name":"my_tool","description":"My tool","parameters":{"properties":{"myParam":{"type":"string"}}}}]'
+          )
         );
       });
 
@@ -104,7 +90,7 @@ describe('createBedrockClaudeAdapter', () => {
         expect(content).toContain(`"esql" tool`);
         expect(content).not.toContain(`functions`);
         expect(content).toContain(`tools`);
-        expect(content).toContain(`function calls`);
+        expect(content).toContain(`tool calls`);
       });
 
       it('mentions to explicitly call the specified function if given', () => {
@@ -113,7 +99,7 @@ describe('createBedrockClaudeAdapter', () => {
         );
       });
 
-      it('formats the function requests as XML', () => {
+      it('formats the function requests as JSON', () => {
         const messages = [
           {
             '@timestamp': new Date().toISOString(),
@@ -136,14 +122,10 @@ describe('createBedrockClaudeAdapter', () => {
         ];
 
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          dedent(`<function_calls>
-          <invoke>
-            <tool_name>my_tool</tool_name>
-            <parameters>
-              <myParam>myValue</myParam>
-            </parameters>
-          </invoke>
-          </function_calls>`)
+          dedent(`${TOOL_USE_START}
+        \`\`\`json
+        {\"name\":\"my_tool\",\"input\":{\"myParam\":\"myValue\"}}
+        \`\`\`${TOOL_USE_END}`)
         );
       });
 
@@ -178,15 +160,11 @@ describe('createBedrockClaudeAdapter', () => {
         ];
 
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          dedent(`<function_results>
-          <system>
-            <error>An internal server error occurred</error>
-          </system>
-          </function_results>`)
+          '{"type":"tool_result","tool":"my_tool","error":"An internal server error occurred","is_error":true}'
         );
       });
 
-      it('formats function responses as XML + JSON', () => {
+      it('formats function responses as JSON', () => {
         const messages = [
           {
             '@timestamp': new Date().toISOString(),
@@ -217,16 +195,7 @@ describe('createBedrockClaudeAdapter', () => {
         ];
 
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          dedent(`<function_results>
-            <result>
-              <tool_name>my_tool</tool_name>
-              <stdout>
-                <myResponse>
-<myParam>myValue</myParam>
-</myResponse>
-              </stdout>
-            </result>
-          </function_results>`)
+          `{\"type\":\"tool_result\",\"tool\":\"my_tool\",\"myResponse\":{\"myParam\":\"myValue\"}}`
         );
       });
     });

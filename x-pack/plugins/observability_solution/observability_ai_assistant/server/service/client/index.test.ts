@@ -750,7 +750,7 @@ describe('Observability AI Assistant client', () => {
 
       await llmSimulator.next({
         content: 'Hello',
-        function_call: { name: 'my-function', arguments: JSON.stringify({ foo: 'bar' }) },
+        function_call: { name: 'myFunction', arguments: JSON.stringify({ foo: 'bar' }) },
       });
 
       const prevLlmSimulator = llmSimulator;
@@ -780,7 +780,7 @@ describe('Observability AI Assistant client', () => {
               content: 'Hello',
               role: MessageRole.Assistant,
               function_call: {
-                name: 'my-function',
+                name: 'myFunction',
                 arguments: JSON.stringify({ foo: 'bar' }),
                 trigger: MessageRole.Assistant,
               },
@@ -792,7 +792,7 @@ describe('Observability AI Assistant client', () => {
       it('executes the function', () => {
         expect(functionClientMock.executeFunction).toHaveBeenCalledWith({
           connectorId: 'foo',
-          name: 'my-function',
+          name: 'myFunction',
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
@@ -818,7 +818,7 @@ describe('Observability AI Assistant client', () => {
                 role: MessageRole.Assistant,
                 content: 'Hello',
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -851,7 +851,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: JSON.stringify({
                 my: 'content',
               }),
@@ -952,7 +952,7 @@ describe('Observability AI Assistant client', () => {
                 content: 'Hello',
                 role: MessageRole.Assistant,
                 function_call: {
-                  name: 'my-function',
+                  name: 'myFunction',
                   arguments: JSON.stringify({ foo: 'bar' }),
                   trigger: MessageRole.Assistant,
                 },
@@ -964,7 +964,7 @@ describe('Observability AI Assistant client', () => {
                 content: JSON.stringify({
                   my: 'content',
                 }),
-                name: 'my-function',
+                name: 'myFunction',
                 role: MessageRole.User,
               },
             },
@@ -999,7 +999,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: JSON.stringify({
                 message: 'Error: Function failed',
                 error: {},
@@ -1034,7 +1034,7 @@ describe('Observability AI Assistant client', () => {
 
         await nextTick();
 
-        response$.next(createFunctionResponseMessage({ name: 'my-function', content: {} }));
+        response$.next(createFunctionResponseMessage({ name: 'myFunction', content: {} }));
       });
 
       it('appends the function response', async () => {
@@ -1045,7 +1045,7 @@ describe('Observability AI Assistant client', () => {
             '@timestamp': expect.any(String),
             message: {
               role: MessageRole.User,
-              name: 'my-function',
+              name: 'myFunction',
               content: '{}',
             },
           },

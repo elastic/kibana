@@ -36,12 +36,14 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
+import { useSimulatedFunctionCalling } from '../../hooks/use_simulated_function_calling';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { SimulatedFunctionCallingCallout } from './simulated_function_calling_callout';
 import { WelcomeMessage } from './welcome_message';
 
 const fullHeightClassName = css`
@@ -126,6 +128,8 @@ export function ChatBody({
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
+
+  const { simulatedFunctionCallingEnabled } = useSimulatedFunctionCalling();
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
     initialConversationId,
@@ -369,6 +373,12 @@ export function ChatBody({
             </EuiPanel>
           </div>
         </EuiFlexItem>
+
+        {simulatedFunctionCallingEnabled ? (
+          <EuiFlexItem grow={false}>
+            <SimulatedFunctionCallingCallout />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem
           grow={false}

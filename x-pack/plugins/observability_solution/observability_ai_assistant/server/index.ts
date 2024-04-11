@@ -20,6 +20,7 @@ export type {
 export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
 } from '../common/utils/advanced_settings';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {

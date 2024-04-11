@@ -13,6 +13,7 @@ import {
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
+  aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -63,8 +64,32 @@ export function getFieldDefinitions(
         }
       ),
     },
+    {
+      id: aiAssistantSimulatedFunctionCalling,
+      defaultValue: false,
+      displayName: i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingLabel',
+        {
+          defaultMessage: 'Simulate function calling',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingDescription',
+        {
+          defaultMessage:
+            '<em>[technical preview]</em> Use simulated function calling. Simulated function calling does not need API support for functions or tools, but it may decrease performance. Simulated function calling is currently always enabled for non-OpenAI connector, regardless of this setting.',
+        }
+      ),
+      type: 'boolean',
+      defaultValueDisplay: i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.defaultValueOffLabel',
+        {
+          defaultMessage: 'Off',
+        }
+      ),
+    },
   ].reduce((acc, field) => {
-    const savedValue = uiSettings.get<string>(field.id, field.defaultValue);
+    const savedValue = uiSettings.get<string | boolean>(field.id, field.defaultValue);
 
     const fieldDef = {
       // defaults

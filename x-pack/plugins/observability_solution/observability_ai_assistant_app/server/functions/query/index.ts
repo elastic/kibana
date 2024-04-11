@@ -107,17 +107,8 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. This function takes no arguments.`,
       visibility: FunctionVisibility.AssistantOnly,
-      parameters: {
-        type: 'object',
-        properties: {
-          switch: {
-            type: 'boolean',
-          },
-        },
-        required: ['switch'],
-      } as const,
     },
     async ({ messages, connectorId, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
@@ -173,13 +164,14 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeXy}
 
               Some examples:
-              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
               "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
               "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              
+              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
               "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
@@ -296,6 +288,8 @@ export function registerQueryFunction({
                 \`\`\`esql
                 <query>
                 \`\`\`
+
+                Respond in plain text. Do not attempt to use a function.
   
                 Prefer to use commands and functions for which you have requested documentation.
   
@@ -397,7 +391,7 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
+        startWith(createFunctionResponseMessage({ name: 'query', content: {} }))
       );
     }
   );

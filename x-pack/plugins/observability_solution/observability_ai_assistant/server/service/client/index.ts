@@ -14,6 +14,7 @@ import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, merge, noop, omit, pick, take } from 'lodash';
 import {
+  catchError,
   filter,
   isObservable,
   last as lastOperator,
@@ -32,7 +33,9 @@ import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   createConversationNotFoundError,
+  createFunctionLimitExceededError,
   createTokenLimitReachedError,
+  isFunctionNotFoundError,
   MessageAddEvent,
   StreamingChatResponseEventType,
   TokenCountEvent,
@@ -67,6 +70,7 @@ import { rejectTokenCountEvents } from '../util/reject_token_count_events';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
+import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -153,10 +157,18 @@ export class ObservabilityAIAssistantClient {
     conversationId?: string;
     title?: string;
     instructions?: Array<string | UserInstruction>;
+    useSimulatedFunctionCalling?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist } = params;
+        const {
+          messages,
+          connectorId,
+          signal,
+          functionClient,
+          persist,
+          useSimulatedFunctionCalling,
+        } = params;
 
         const conversationId = params.conversationId || '';
         const title = params.title || '';
@@ -169,8 +181,11 @@ export class ObservabilityAIAssistantClient {
           total: 0,
         };
 
-        const chatWithTokenCountIncrement: ChatFn = async (...chatArgs) => {
-          const response$ = await this.chat(...chatArgs);
+        const chatWithTokenCountIncrement: ChatFn = async (name, options) => {
+          const response$ = await this.chat(name, {
+            ...options,
+            useSimulatedFunctionCalling,
+          });
 
           const incrementTokenCount = () => {
             return <T extends ChatCompletionChunkEvent | TokenCountEvent>(
@@ -249,7 +264,7 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
             const response$ = (
               await chatWithTokenCountIncrement(
@@ -263,7 +278,16 @@ export class ObservabilityAIAssistantClient {
                   functions,
                 }
               )
-            ).pipe(emitWithConcatenatedMessage(), shareReplay());
+            ).pipe(
+              emitWithConcatenatedMessage(),
+              shareReplay(),
+              catchError((error) => {
+                if (isFunctionNotFoundError(error) && functions.length === 0) {
+                  throw createFunctionLimitExceededError();
+                }
+                throw error;
+              })
+            );
 
             response$.subscribe({
               next: (val) => subscriber.next(val),
@@ -560,12 +584,14 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
+      useSimulatedFunctionCalling,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
+      useSimulatedFunctionCalling?: boolean;
     }
   ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
@@ -590,6 +616,7 @@ export class ObservabilityAIAssistantClient {
             functions,
             functionCall,
             logger: this.dependencies.logger,
+            useSimulatedFunctionCalling,
           });
           break;
 
@@ -645,7 +672,19 @@ export class ObservabilityAIAssistantClient {
 
       signal.addEventListener('abort', () => response.destroy());
 
-      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+      const response$ = adapter.streamIntoObservable(response).pipe(
+        shareReplay(),
+        failOnNonExistingFunctionCall({ functions }),
+        tap((event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        })
+      );
 
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
@@ -664,19 +703,6 @@ export class ObservabilityAIAssistantClient {
             span?.end();
           },
         });
-
-      response$.subscribe({
-        next: (event) => {
-          if (event.type === StreamingChatResponseEventType.TokenCount) {
-            span?.addLabels({
-              tokenCountPrompt: event.tokens.prompt,
-              tokenCountCompletion: event.tokens.completion,
-              tokenCountTotal: event.tokens.total,
-            });
-          }
-        },
-        error: () => {},
-      });
 
       return response$;
     } catch (error) {
