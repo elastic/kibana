@@ -7,17 +7,16 @@
  */
 
 import {
-  BehaviorSubject,
   combineLatest,
   debounceTime,
   delay,
   filter,
-  first,
   map,
   merge,
   Observable,
   of,
   skip,
+  startWith,
   Subject,
   switchMap,
   takeUntil,
@@ -117,12 +116,12 @@ function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
 }
 
 export function fetch$(api: unknown): Observable<FetchContext> {
-  const onSubscribe$ = new BehaviorSubject<undefined>(undefined).pipe(first());
   const batchedObservables = getBatchedObservables(api);
   const immediateObservables = getImmediateObservables(api);
 
   if (immediateObservables.length === 0) {
-    return merge(onSubscribe$, ...batchedObservables).pipe(
+    return merge(...batchedObservables).pipe(
+      startWith(getFetchContext(api, false)),
       debounceTime(0),
       map(() => getFetchContext(api, false))
     );
@@ -144,9 +143,5 @@ export function fetch$(api: unknown): Observable<FetchContext> {
     map(() => getFetchContext(api, true))
   );
 
-  return merge(
-    onSubscribe$.pipe(map(() => getFetchContext(api, false))),
-    immediateChange$,
-    batchedChanges$
-  );
+  return merge(immediateChange$, batchedChanges$).pipe(startWith(getFetchContext(api, false)));
 }

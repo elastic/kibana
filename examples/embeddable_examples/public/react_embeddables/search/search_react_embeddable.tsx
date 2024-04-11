@@ -89,11 +89,11 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         )
         .subscribe((next) => {
           dataLoading$.next(false);
-          if (next && next.hasOwnProperty('count')) {
-            count$.next(next.count as number);
+          if (next && next.hasOwnProperty('count') && next.count !== undefined) {
+            count$.next(next.count);
           }
           if (next && next.hasOwnProperty('error')) {
-            error$.next(next.error as Error);
+            error$.next(next.error);
           }
         });
 
