@@ -490,6 +490,7 @@ src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
+packages/kbn-ipynb @elastic/enterprise-search-frontend
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
