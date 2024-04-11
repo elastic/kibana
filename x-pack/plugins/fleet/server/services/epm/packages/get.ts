@@ -184,7 +184,7 @@ interface GetInstalledPackagesOptions {
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
   const { savedObjectsClient, ...otherOptions } = options;
-  const { dataStreamType } = otherOptions;
+  const { dataStreamType, nameQuery } = otherOptions;
 
   const packageSavedObjects = await getInstalledPackageSavedObjects(
     savedObjectsClient,
@@ -199,7 +199,11 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       es_index_patterns: esIndexPatterns,
     } = integrationSavedObject.attributes;
 
-    const dataStreams = getInstalledPackageSavedObjectDataStreams(esIndexPatterns, dataStreamType);
+    const dataStreams = getInstalledPackageSavedObjectDataStreams(
+      esIndexPatterns,
+      dataStreamType,
+      nameQuery
+    );
 
     return {
       name,
@@ -305,7 +309,9 @@ async function getInstalledPackageSavedObjects(
     sortField: 'name',
     sortOrder,
     // Name filter
-    ...(nameQuery && { searchFields: ['name'] }),
+    ...(nameQuery && {
+      searchFields: ['name', `es_index_patterns.title`],
+    }),
     ...(nameQuery && { search: `${nameQuery}* | ${nameQuery}` }),
     filter: nodeBuilder.and([
       // Filter to installed packages only
@@ -381,15 +387,27 @@ export async function getInstalledPackageManifests(
 
 function getInstalledPackageSavedObjectDataStreams(
   indexPatterns: EsIndexPattern[],
-  dataStreamType?: string
+  dataStreamType?: string,
+  nameQuery?: string
 ) {
-  return indexPatterns.filter((stream) => {
+  const dataStreams = indexPatterns.filter((stream) => {
     if (!dataStreamType) {
       return true;
     } else {
       return stream.name.startsWith(`${dataStreamType}-`);
     }
   });
+  if (nameQuery) {
+    const normalizedQuery = nameQuery?.toLowerCase();
+    const nameFilteredDataStreams = dataStreams.filter((stream) =>
+      stream.name.toLowerCase().includes(normalizedQuery)
+    );
+    if (nameFilteredDataStreams.length > 0) {
+      // if there are no data streams that match the name query, return all data streams
+      return nameFilteredDataStreams;
+    }
+  }
+  return dataStreams;
 }
 
 export const getInstallations = getPackageSavedObjects;
