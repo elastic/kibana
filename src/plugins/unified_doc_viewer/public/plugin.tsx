@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
+import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
@@ -75,8 +75,13 @@ export class UnifiedDocViewerPublicPlugin
       }),
       order: 10,
       component: (props) => {
+        const { textBasedHits } = props;
         const { uiSettings } = getUnifiedDocViewerServices();
-        const LazyDocView = uiSettings.get(DOC_TABLE_LEGACY)
+
+        const LazyDocView = isLegacyTableEnabled({
+          uiSettings,
+          isTextBasedQueryMode: Array.isArray(textBasedHits),
+        })
           ? LazyDocViewerLegacyTable
           : LazyDocViewerTable;
 

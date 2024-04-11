@@ -40,6 +40,7 @@ export {
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
   isNestedFieldParent,
+  isLegacyTableEnabled,
   usePager,
 } from './src';
 
