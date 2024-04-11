@@ -64,7 +64,7 @@ export class SelectableService extends FtrService {
       const textWrapper = await option.findByClassName('euiSelectableListItem__text');
 
       // Use innerText as getVisibleText doesn't return deeply nested text
-      const innerText = await textWrapper.getAttribute('innerText');
+      const innerText = (await textWrapper.getAttribute('innerText')) ?? '';
 
       // Replace screen reader and other Eui related text
       const visibleText = innerText

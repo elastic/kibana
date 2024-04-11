@@ -356,7 +356,7 @@ export class DiscoverPageObject extends FtrService {
           return await cell.getVisibleText();
         } else {
           const textContent = await cell.getAttribute('textContent');
-          return textContent.trim();
+          return textContent?.trim();
         }
       })
     );
