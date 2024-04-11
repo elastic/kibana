@@ -162,10 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
 
-  const {
-    indexListOfDocuments: indexListOfSourceDocuments,
-    indexGeneratedDocuments: indexGeneratedSourceDocuments,
-  } = dataGeneratorFactory({
+  const { indexListOfDocuments } = dataGeneratorFactory({
     es,
     index: 'ecs_compliant',
     log,
@@ -1717,7 +1714,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
         const id = uuidv4();
 
-        await indexListOfSourceDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
+        await indexListOfDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
 
         const { previewId, logs } = await previewRule({
           supertest,
@@ -1739,7 +1736,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
         const id = uuidv4();
 
-        await indexListOfSourceDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
+        await indexListOfDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
 
         const { previewId, logs } = await previewRule({
           supertest,
