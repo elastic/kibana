@@ -7,8 +7,8 @@
  */
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UiSettingsParams } from '@kbn/core/types';
-import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 
+import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import type { NavigationConfig } from './config';
 import { initSolutionOnRequestInterceptor } from './lib';
 import type {
