@@ -38,7 +38,7 @@ const readLoadFromParam = () => {
 };
 
 /**
- * Hook to provide a function that will set the initial value in the Console editor.
+ * Hook that sets the initial value in the Console editor.
  *
  * @param params The {@link SetInitialValueParams} to use.
  */
