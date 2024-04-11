@@ -9,7 +9,7 @@
 import { useEffect } from 'react';
 import { AutocompleteInfo, Settings } from '../../../../services';
 
-interface SetInitialValueParams {
+interface SetupAutocompletePollingParams {
   /** The Console autocomplete service. */
   autocompleteInfo: AutocompleteInfo;
   /** The Console settings service. */
@@ -19,9 +19,9 @@ interface SetInitialValueParams {
 /**
  * Hook that sets up the autocomplete polling for Console editor.
  *
- * @param params The {@link SetInitialValueParams} to use.
+ * @param params The {@link SetupAutocompletePollingParams} to use.
  */
-export const useSetupAutocompletePolling = (params: SetInitialValueParams) => {
+export const useSetupAutocompletePolling = (params: SetupAutocompletePollingParams) => {
   const { autocompleteInfo, settingsService } = params;
 
   useEffect(() => {
