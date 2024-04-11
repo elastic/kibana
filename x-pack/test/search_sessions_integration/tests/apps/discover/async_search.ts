@@ -157,6 +157,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.find('inspectorRequestSearchSessionId')
     ).getAttribute('data-search-session-id');
     await inspector.close();
-    return searchSessionId;
+    return searchSessionId ?? '';
   }
 }
