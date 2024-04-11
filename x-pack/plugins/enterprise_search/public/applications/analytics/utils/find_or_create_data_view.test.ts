@@ -32,7 +32,7 @@ describe('findOrCreateDataView', () => {
 
   it('should find and set dataView when analytics collection fetched', async () => {
     const dataView = { id: 'test', title: 'events1' } as DataView;
-    jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
+    jest.spyOn(KibanaLogic.values.data?.dataViews, 'find').mockResolvedValueOnce([dataView]);
 
     expect(
       await findOrCreateDataView({
@@ -40,12 +40,16 @@ describe('findOrCreateDataView', () => {
         name: 'collection1',
       } as AnalyticsCollection)
     ).toEqual(dataView);
-    expect(KibanaLogic.values.data.dataViews.createAndSave).not.toHaveBeenCalled();
+    expect(KibanaLogic.values.data?.dataViews.createAndSave).not.toHaveBeenCalled();
   });
 
   it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
     const dataView = { id: 'test21' } as DataView;
-    jest.spyOn(KibanaLogic.values.data.dataViews, 'createAndSave').mockResolvedValueOnce(dataView);
+    if (KibanaLogic.values.data) {
+      jest
+        .spyOn(KibanaLogic.values.data.dataViews, 'createAndSave')
+        .mockResolvedValueOnce(dataView);
+    }
 
     expect(
       await findOrCreateDataView({
@@ -53,6 +57,6 @@ describe('findOrCreateDataView', () => {
         name: 'collection1',
       } as AnalyticsCollection)
     ).toEqual(dataView);
-    expect(KibanaLogic.values.data.dataViews.createAndSave).toHaveBeenCalled();
+    expect(KibanaLogic.values.data?.dataViews.createAndSave).toHaveBeenCalled();
   });
 });
