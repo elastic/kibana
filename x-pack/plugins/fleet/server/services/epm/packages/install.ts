@@ -21,11 +21,17 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { AssetsMap, PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import type {
+  AssetsMap,
+  EsIndexPattern,
+  PackageDataStreamTypes,
+  PackageInstallContext,
+  RegistryDataStream,
+} from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
+import { generateTemplateIndexPattern } from '../elasticsearch/template/template';
 import type {
   ArchivePackage,
   BulkInstallPackageInfo,
@@ -1207,6 +1213,51 @@ export async function restartInstallation(options: {
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
 
+function loadYmlFromAssetMap(assetsMap: AssetsMap, path: string) {
+  if (!assetsMap.has(path)) {
+    return undefined;
+  }
+  return yaml.load(assetsMap.get(path)!.toString('utf-8'));
+}
+
+/**
+ * Returns a map of the data stream path fields to elasticsearch index pattern.
+ * @param dataStreams an array of RegistryDataStream objects
+ */
+function generateESIndexPatterns(
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo: { name: string; version: string },
+  assetsMap: AssetsMap
+): EsIndexPattern[] {
+  if (!dataStreams) {
+    return [];
+  }
+
+  return dataStreams
+    .map((dataStream) => {
+      return {
+        title: dataStream.path,
+        name: generateTemplateIndexPattern(dataStream),
+      };
+    })
+    .map((pattern) => {
+      const dataStreamAsset = loadYmlFromAssetMap(
+        assetsMap,
+        `${packageInfo.name}-${packageInfo.version}/data_stream/${pattern.title}/manifest.yml`
+      );
+      if (dataStreamAsset) {
+        const humanReadableTitle = dataStreamAsset.title;
+        if (humanReadableTitle) {
+          return {
+            display_name: humanReadableTitle,
+            ...pattern,
+          };
+        }
+      }
+      return pattern;
+    });
+}
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
@@ -1218,7 +1269,9 @@ export async function createInstallation(options: {
   const { savedObjectsClient, packageInfo, installSource, verificationResult, assetsMap } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME),
+    packageInfo,
+    assetsMap
   );
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
@@ -1230,11 +1283,10 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
-  const manifestAsset = assetsMap.get(`${pkgName}-${pkgVersion}/manifest.yml`);
+  const manifestAsset = loadYmlFromAssetMap(assetsMap, `${pkgName}-${pkgVersion}/manifest.yml`);
   let humanReadableTitle: string | undefined;
   if (manifestAsset) {
-    const manifest = yaml.load(manifestAsset.toString('utf-8'));
-    humanReadableTitle = manifest.title;
+    humanReadableTitle = manifestAsset.title;
   }
 
   let savedObject: Installation = {
@@ -1449,7 +1501,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
     soClient,
     installedPkgWithAssets.installation.name,
     [],
-    generateESIndexPatterns([dataStream])
+    generateESIndexPatterns([dataStream], pkgInfo, packageInstallContext?.assetsMap)
   );
 }
 

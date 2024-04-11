@@ -14,8 +14,6 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
-import type { EsIndexPattern } from '../../../../../common/types';
-
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -804,25 +802,6 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
   } else {
     return DATASET_IS_PREFIX_TEMPLATE_PRIORITY;
   }
-}
-
-/**
- * Returns a map of the data stream path fields to elasticsearch index pattern.
- * @param dataStreams an array of RegistryDataStream objects
- */
-export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
-): EsIndexPattern[] {
-  if (!dataStreams) {
-    return [];
-  }
-
-  return dataStreams.map((dataStream) => {
-    return {
-      title: dataStream.path,
-      name: generateTemplateIndexPattern(dataStream),
-    };
-  });
 }
 
 const flattenFieldsToNameAndType = (

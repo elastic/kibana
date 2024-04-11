@@ -85,6 +85,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         installSource,
         spaceId,
         verificationResult,
+        assetsMap: packageInstallContext.assetsMap,
       })
     );
   }

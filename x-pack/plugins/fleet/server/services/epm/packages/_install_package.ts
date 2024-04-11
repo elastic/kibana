@@ -149,6 +149,7 @@ export async function _installPackage({
         installSource,
         spaceId,
         verificationResult,
+        assetsMap: packageInstallContext.assetsMap,
       });
     }
     logger.debug(`Package install - Installing Kibana assets`);
