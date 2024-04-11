@@ -35,7 +35,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PluginContext } from '../../../context/plugin_context';
 import { SloCardChartList } from './slo_overview_grid';
 import { SloOverview } from './slo_overview';
-import { GroupSloView } from './group_view';
+import { GroupSloView } from './group_view/group_view';
 import type { SloEmbeddableInput } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
 

@@ -32,7 +32,7 @@ import type {
   GroupFilters,
   OverviewMode,
 } from './types';
-import { SloGroupFilters } from './slo_group_filters';
+import { SloGroupFilters } from './group_view/slo_group_filters';
 import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {

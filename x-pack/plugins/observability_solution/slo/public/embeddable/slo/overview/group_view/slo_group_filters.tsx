@@ -12,13 +12,13 @@ import { debounce } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useFetchSloGroups } from '../../../hooks/use_fetch_slo_groups';
-import { SLI_OPTIONS } from '../../../pages/slo_edit/constants';
-import { useKibana } from '../../../utils/kibana_react';
-import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
-import { sloAppId } from '../../../../common';
-import type { GroupFilters, GroupBy } from './types';
+import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
+import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
+import { useKibana } from '../../../../utils/kibana_react';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
+import { sloAppId } from '../../../../../common';
+import type { GroupFilters, GroupBy } from '../types';
 interface Option {
   value: string;
   text: string;

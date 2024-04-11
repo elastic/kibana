@@ -8,9 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { Subject } from 'rxjs';
-import { SLOView } from '../../../pages/slos/components/toggle_slo_view';
-import { SloEmbeddableInput } from './types';
-import { GroupView } from '../../../pages/slos/components/grouped_slos/group_view';
+import { SLOView } from '../../../../pages/slos/components/toggle_slo_view';
+import { SloEmbeddableInput } from '../types';
+import { GroupView } from '../../../../pages/slos/components/grouped_slos/group_view';
 
 interface Props {
   groupBy: string;
