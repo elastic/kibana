@@ -34,7 +34,10 @@ const MAX_JOBS = 500;
 // TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
 /** This function bridges the agent targeting between gobld and kibana-buildkite agent targeting */
 const getAgentRule = (queueName: string = 'n2-4-spot') => {
-  if (process.env?.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld') {
+  if (
+    process.env.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld' ||
+    process.env.BUILDKITE_AGENT_META_DATA_PROVIDER === 'k8s'
+  ) {
     const [kind, cores, addition] = queueName.split('-');
     const additionalProps =
       {
