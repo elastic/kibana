@@ -211,7 +211,7 @@ export function DiscoverGridFlyout({
 
   const defaultFlyoutTitle = isPlainRecord
     ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
-        defaultMessage: 'Row',
+        defaultMessage: 'Result',
       })
     : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
         defaultMessage: 'Document',
