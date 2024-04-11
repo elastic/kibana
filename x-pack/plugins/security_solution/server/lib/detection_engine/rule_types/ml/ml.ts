@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
+
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -30,6 +32,7 @@ import {
 import type { SetupPlugins } from '../../../../plugin';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { AnomalyResults } from '../../../machine_learning';
 
 export const mlExecutor = async ({
   completeRule,
@@ -93,19 +96,29 @@ export const mlExecutor = async ({
       result.warning = true;
     }
 
-    const anomalyResults = await findMlSignals({
-      ml,
-      // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-      // currently unused by the mlAnomalySearch function.
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient: services.savedObjectsClient,
-      jobIds: ruleParams.machineLearningJobId,
-      anomalyThreshold: ruleParams.anomalyThreshold,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      maxSignals: tuple.maxSignals,
-      exceptionFilter,
-    });
+    let anomalyResults: AnomalyResults;
+    try {
+      anomalyResults = await findMlSignals({
+        ml,
+        // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
+        // currently unused by the mlAnomalySearch function.
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient: services.savedObjectsClient,
+        jobIds: ruleParams.machineLearningJobId,
+        anomalyThreshold: ruleParams.anomalyThreshold,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        maxSignals: tuple.maxSignals,
+        exceptionFilter,
+      });
+    } catch (error) {
+      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
+        result.userError = true;
+      }
+      result.errors.push(error.message);
+      result.success = false;
+      return result;
+    }
 
     if (
       anomalyResults.hits.total &&
