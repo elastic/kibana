@@ -20,7 +20,7 @@ export const NLPCleanupTaskConstants = {
   TITLE: 'Serverless NLP Cleanup Task',
   TYPE: 'serverless-security:nlp-cleanup-task',
   VERSION: '1.0.0',
-  INTERVAL: '5m',
+  INTERVAL: '6h',
   SCOPE: ['serverlessSecurity'],
   TIMEOUT: '20m',
 };
