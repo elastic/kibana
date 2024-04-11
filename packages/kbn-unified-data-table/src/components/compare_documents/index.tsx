@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { lazy } from 'react';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('navigation app', function () {
-    loadTestFile(require.resolve('./_solution_nav_switcher'));
-  });
-}
+export const CompareDocuments = withSuspense(lazy(() => import('./compare_documents')));

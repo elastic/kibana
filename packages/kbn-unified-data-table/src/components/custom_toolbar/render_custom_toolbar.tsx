@@ -7,19 +7,33 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type {
-  UnifiedDataTableRenderCustomToolbarProps,
-  UnifiedDataTableRenderCustomToolbar,
-} from '@kbn/unified-data-table';
+import {
+  EuiDataGridCustomToolbarProps,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import './render_custom_toolbar.scss';
+
+export interface UnifiedDataTableRenderCustomToolbarProps {
+  toolbarProps: EuiDataGridCustomToolbarProps;
+  gridProps: {
+    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+  };
+}
+
+export type UnifiedDataTableRenderCustomToolbar = (
+  props: UnifiedDataTableRenderCustomToolbarProps
+) => React.ReactElement;
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }
 
-export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.ReactElement => {
+export const internalRenderCustomToolbar = (
+  props: RenderCustomToolbarProps
+): React.ReactElement => {
   const {
     leftSide,
     bottomSection,
@@ -38,22 +52,22 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
     <>
       {leftSide && additionalControls && (
         <EuiFlexItem grow={false}>
-          <div className="dscGridToolbarControlButton">{additionalControls}</div>
+          <div className="unifiedDataTableToolbarControlButton">{additionalControls}</div>
         </EuiFlexItem>
       )}
       {columnControl && (
         <EuiFlexItem grow={false}>
-          <div className="dscGridToolbarControlButton">{columnControl}</div>
+          <div className="unifiedDataTableToolbarControlButton">{columnControl}</div>
         </EuiFlexItem>
       )}
       {columnSortingControl && (
         <EuiFlexItem grow={false}>
-          <div className="dscGridToolbarControlButton">{columnSortingControl}</div>
+          <div className="unifiedDataTableToolbarControlButton">{columnSortingControl}</div>
         </EuiFlexItem>
       )}
       {!leftSide && additionalControls && (
         <EuiFlexItem grow={false}>
-          <div className="dscGridToolbarControlButton">{additionalControls}</div>
+          <div className="unifiedDataTableToolbarControlButton">{additionalControls}</div>
         </EuiFlexItem>
       )}
     </>
@@ -66,8 +80,8 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
         gutterSize="s"
         justifyContent="spaceBetween"
         alignItems="center"
-        className="dscGridToolbar"
-        data-test-subj="dscGridToolbar"
+        className="unifiedDataTableToolbar"
+        data-test-subj="unifiedDataTableToolbar"
         wrap
       >
         <EuiFlexItem grow={false}>
@@ -82,17 +96,19 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
             {Boolean(leftSide) && buttons}
             {(keyboardShortcutsControl || displayControl || fullScreenControl) && (
               <EuiFlexItem grow={false}>
-                <div className="dscGridToolbarControlGroup">
+                <div className="unifiedDataTableToolbarControlGroup">
                   {keyboardShortcutsControl && (
-                    <div className="dscGridToolbarControlIconButton">
+                    <div className="unifiedDataTableToolbarControlIconButton">
                       {keyboardShortcutsControl}
                     </div>
                   )}
                   {displayControl && (
-                    <div className="dscGridToolbarControlIconButton">{displayControl}</div>
+                    <div className="unifiedDataTableToolbarControlIconButton">{displayControl}</div>
                   )}
                   {fullScreenControl && (
-                    <div className="dscGridToolbarControlIconButton">{fullScreenControl}</div>
+                    <div className="unifiedDataTableToolbarControlIconButton">
+                      {fullScreenControl}
+                    </div>
                   )}
                 </div>
               </EuiFlexItem>
@@ -101,13 +117,18 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
         </EuiFlexItem>
       </EuiFlexGroup>
       {bottomSection ? (
-        <div className="dscGridToolbarBottom" data-test-subj="dscGridToolbarBottom">
+        <div
+          className="unifiedDataTableToolbarBottom"
+          data-test-subj="unifiedDataTableToolbarBottom"
+        >
           {bottomSection}
         </div>
       ) : null}
     </>
   );
 };
+
+export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internalRenderCustomToolbar;
 
 /**
  * Render custom element on the left side and all controls to the right
@@ -121,7 +142,7 @@ export const getRenderCustomToolbarWithElements = ({
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
-    renderCustomToolbar({
+    internalRenderCustomToolbar({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,

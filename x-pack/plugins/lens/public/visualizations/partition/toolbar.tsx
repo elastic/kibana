@@ -228,7 +228,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
             <EuiButtonGroup
               isFullWidth
-              name="emptySizeRatio"
               buttonSize="compressed"
               legend={emptySizeRatioLabel}
               options={emptySizeRatioOptions}
