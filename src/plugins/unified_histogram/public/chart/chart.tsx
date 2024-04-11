@@ -366,13 +366,8 @@ export function Chart({
             data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
-              <EuiDelayRender delay={500}>
-                <EuiProgress
-                  size="xs"
-                  color="accent"
-                  position="absolute"
-                  data-test-subj="unifiedHistogramProgressBar"
-                />
+              <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
+                <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
             )}
             <HistogramMemoized
