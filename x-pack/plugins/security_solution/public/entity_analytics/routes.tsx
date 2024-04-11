@@ -80,39 +80,3 @@ export const routes = [
     component: EntityAnalyticsAssetClassificationContainer,
   },
 ];
-
-//  const UsersRoutes = () => (
-//   <PluginTemplateWrapper>
-//     <TrackApplicationView viewId={SecurityPageName.users}>
-//       <UsersContainer />
-//     </TrackApplicationView>
-//   </PluginTemplateWrapper>
-// );
-
-// const HostsRoutes = () => (
-//   <PluginTemplateWrapper>
-//     <TrackApplicationView viewId={SecurityPageName.hosts}>
-//       <HostsContainer />
-//     </TrackApplicationView>
-//   </PluginTemplateWrapper>
-// );
-
-// export const routes: SecuritySubPluginRoutes = [
-//   {
-//     path: EXPLORE_PATH,
-//     exact: true,
-//     component: ExploreLanding,
-//   },
-//   {
-//     path: NETWORK_PATH,
-//     component: NetworkRoutes,
-//   },
-//   {
-//     path: USERS_PATH,
-//     component: UsersRoutes,
-//   },
-//   {
-//     path: HOSTS_PATH,
-//     component: HostsRoutes,
-//   },
-// ];

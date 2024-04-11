@@ -153,7 +153,7 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'POST',
         headers: {
-          'Content-Type': undefined, // Required by BE
+          'Content-Type': undefined, // Lets the browser set the appropriate content type
         },
         body,
       });
