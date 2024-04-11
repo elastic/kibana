@@ -167,7 +167,7 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
 
 export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
   agentUUID: schema.string({ minLength: 1 }),
-  zipPassCode: schema.string({ minLength: 1 }),
+  zipPassCode: schema.string({ minLength: 10 }),
   files: schema.arrayOf(schema.string({ minLength: 1 })),
 });
 
