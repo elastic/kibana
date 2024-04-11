@@ -20,8 +20,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   useEuiTheme,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_INSTANCE_ID, type AlertConsumers } from '@kbn/rule-data-utils';
@@ -57,12 +56,11 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const instanceId = alert.fields[ALERT_INSTANCE_ID];
   const featureIds = [rule.consumer as AlertConsumers];
   const options = rule.params.criteria.map((criterion, index) => ({
-    label: generateChartTitleAndTooltip(criterion, 27).title,
-    value: criterion,
+    text: generateChartTitleAndTooltip(criterion, 27).title,
   }));
-  const [selectedOption, setSelectedOption] = useState<
-    EuiComboBoxOptionOption<CustomMetricExpressionParams>
-  >(options[0]);
+  const [selectedCriterion, setSelectedCriterion] = useState<CustomMetricExpressionParams>(
+    rule.params.criteria[0]
+  );
 
   const {
     data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
@@ -131,14 +129,16 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
         {rule.params.criteria.length > 1 && (
-          <EuiComboBox
+          <EuiSelect
+            data-test-subj="o11yAlertHistoryChartSelect"
             options={options}
-            selectedOptions={[selectedOption]}
-            onChange={(selectedOptions) =>
-              selectedOptions[0] && setSelectedOption(selectedOptions[0])
+            onChange={(e) =>
+              setSelectedCriterion(
+                rule.params.criteria[
+                  options.map((option) => option.text).indexOf(e.target.value) ?? 0
+                ]
+              )
             }
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
           />
         )}
       </EuiFlexGroup>
@@ -208,7 +208,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
         }}
         dataView={dataView}
         groupBy={ruleParams.groupBy}
-        metricExpression={selectedOption.value!}
+        metricExpression={selectedCriterion}
         searchConfiguration={ruleParams.searchConfiguration}
         timeRange={dateRange}
       />
