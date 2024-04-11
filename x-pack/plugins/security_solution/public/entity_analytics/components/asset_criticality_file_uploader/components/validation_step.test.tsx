@@ -46,6 +46,7 @@ describe('AssetCriticalityValidationStep', () => {
     },
     onConfirm: mockOnConfirm,
     onReturn: mockOnReturn,
+    isLoading: false,
   };
 
   it('renders the component with correct counts and file name', () => {
