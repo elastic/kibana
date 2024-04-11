@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
-import { deNormalize } from '../application/components/mappings_editor/lib';
+import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../application/app_context';
 import { useComponentTemplatesContext } from '../application/components/component_templates/component_templates_context';
-import { State } from '../application/components/mappings_editor/types';
+import { InferenceToModelIdMap } from '../application/components/mappings_editor/components/document_fields/fields';
+import { deNormalize } from '../application/components/mappings_editor/lib';
 import { useDispatch } from '../application/components/mappings_editor/mappings_state_context';
+import { NormalizedFields } from '../application/components/mappings_editor/types';
 
 interface InferenceModel {
   data: InferenceAPIConfigResponse[];
@@ -66,18 +66,20 @@ const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) 
   };
 };
 
-export const useDetailsPageMappingsModelManagement = (state: State) => {
+export const useDetailsPageMappingsModelManagement = (
+  fields: NormalizedFields,
+  inferenceToModelIdMap?: InferenceToModelIdMap
+) => {
   const {
     plugins: { ml },
   } = useAppContext();
 
   const { api } = useComponentTemplatesContext();
-
-  const { inferenceToModelIdMap } = state;
   const dispatch = useDispatch();
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
     const inferenceModels = await api.getInferenceModels();
+
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
 
     return { inferenceModels, trainedModelStats };
@@ -85,7 +87,6 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
 
   const fetchInferenceToModelIdMap = useCallback(async () => {
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
-
     const deploymentStatsByModelId = getTrainedModelStats(trainedModelStats);
     const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
     const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, inferenceModels);
@@ -97,10 +98,10 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   }, [dispatch, fetchInferenceModelsAndTrainedModelStats]);
 
   const inferenceIdsInPendingList = useMemo(() => {
-    return Object.values(deNormalize(state.fields))
+    return Object.values(deNormalize(fields))
       .filter((field) => field.type === 'semantic_text' && field.inference_id)
       .map((field) => field.inference_id as string);
-  }, [state.fields]);
+  }, [fields]);
 
   const pendingDeployments = useMemo(() => {
     return inferenceIdsInPendingList
