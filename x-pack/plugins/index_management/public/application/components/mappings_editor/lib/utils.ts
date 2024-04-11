@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   DataType,
   Fields,
+  FieldsWithSemanticTextInfo,
   Field,
   NormalizedFields,
   NormalizedField,
@@ -333,10 +334,14 @@ const replaceAliasIdByAliasPath = (
   return updatedById;
 };
 
-export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields): Fields => {
+export const deNormalize = ({
+  rootLevelFields,
+  byId,
+  aliases,
+}: NormalizedFields): FieldsWithSemanticTextInfo => {
   const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
-  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
+  const deNormalizePaths = (ids: string[], to: FieldsWithSemanticTextInfo = {}) => {
     ids.forEach((id) => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;

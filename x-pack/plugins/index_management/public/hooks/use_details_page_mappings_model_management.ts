@@ -39,16 +39,15 @@ const getCustomInferenceIdMap = (
 };
 
 const getTrainedModelStats = (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
-  const deploymentStatsByModelId =
+  return (
     modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
       if (modelStat.model_id) {
         acc[modelStat.model_id] =
           modelStat?.deployment_stats?.state === 'started' ? 'deployed' : 'not_deployed';
       }
       return acc;
-    }, {}) ?? {};
-
-  return deploymentStatsByModelId;
+    }, {}) || {}
+  );
 };
 
 const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) => {
@@ -100,12 +99,15 @@ export const useDetailsPageMappingsModelManagement = (
   const inferenceIdsInPendingList = useMemo(() => {
     return Object.values(deNormalize(fields))
       .filter((field) => field.type === 'semantic_text' && field.inference_id)
-      .map((field) => field.inference_id as string);
+      .map((field) => field.inference_id);
   }, [fields]);
 
   const pendingDeployments = useMemo(() => {
     return inferenceIdsInPendingList
-      .map((inferenceId: string) => {
+      .map((inferenceId) => {
+        if (inferenceId === undefined) {
+          return undefined;
+        }
         const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';
         return trainedModelId && !inferenceToModelIdMap?.[inferenceId]?.isDeployed
           ? trainedModelId

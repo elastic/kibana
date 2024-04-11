@@ -195,9 +195,13 @@ type FieldParams = {
 
 export type Field = FieldBasic & Partial<FieldParams>;
 
+export interface FieldsWithSemanticTextInfo {
+  [key: string]: Omit<FieldWithSemanticTextInfo, 'name'>;
+}
 export interface FieldWithSemanticTextInfo extends Field {
   referenceField?: string;
   inferenceId?: string;
+  inference_id?: string;
 }
 
 export interface FieldMeta {
