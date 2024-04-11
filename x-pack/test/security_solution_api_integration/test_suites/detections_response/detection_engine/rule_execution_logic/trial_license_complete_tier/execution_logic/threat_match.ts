@@ -1736,7 +1736,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(logs[0].errors).to.have.length(0);
       });
 
-      it.skip('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
+      it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
         const id = uuidv4();
 
         await indexListOfSourceDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
