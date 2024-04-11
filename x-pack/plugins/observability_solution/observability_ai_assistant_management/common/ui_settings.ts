@@ -38,13 +38,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     // Argument of type 'Type<string>[]' is not assignable to parameter of type '[Type<string>]'.
     // @ts-expect-error
     schema: schema.oneOf(LANGUAGE_OPTIONS.map((lang) => schema.literal(lang.value))),
-    requiresPageReload: false,
     type: 'select',
     options: LANGUAGE_OPTIONS.map((lang) => lang.value),
     optionLabels: LANGUAGE_OPTIONS.reduce(
       (acc, { value, label }) => ({ ...acc, [value]: label }),
       {}
     ),
+    requiresPageReload: true,
   },
   [aiAssistantLogsIndexPattern]: {
     category: ['observability'],
@@ -62,5 +62,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     ),
     schema: schema.string(),
     type: 'string',
+    requiresPageReload: true,
   },
 };

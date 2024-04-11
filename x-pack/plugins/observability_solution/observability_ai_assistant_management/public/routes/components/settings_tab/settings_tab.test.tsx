@@ -14,22 +14,18 @@ import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import { coreMock } from '@kbn/core/public/mocks';
+import { uiSettings } from '../../../../common';
+import { merge } from 'lodash';
 
 jest.mock('../../../hooks/use_app_context');
 
 const useAppContextMock = useAppContext as jest.Mock;
-
 const navigateToAppMock = jest.fn(() => Promise.resolve());
-const settingsClientSet = jest.fn();
 
 describe('SettingsTab', () => {
   beforeEach(() => {
     useAppContextMock.mockReturnValue({
-      settings: {
-        client: {
-          set: settingsClientSet,
-        },
-      },
       uiSettings: {
         get: jest.fn(),
       },
@@ -76,6 +72,7 @@ describe('SettingsTab', () => {
   describe('allows updating the AI Assistant settings', () => {
     const windowLocationReloadMock = jest.fn();
     const windowLocationOriginal = window.location;
+    const settingsClientSet = jest.fn();
 
     beforeEach(async () => {
       Object.defineProperty(window, 'location', {
@@ -85,7 +82,16 @@ describe('SettingsTab', () => {
         writable: true,
       });
 
-      const { getByTestId, container } = render(<SettingsTab />);
+      const { getByTestId, container } = render(<SettingsTab />, {
+        coreStartMock: merge(coreMock.createStart(), {
+          settings: {
+            client: {
+              set: settingsClientSet,
+              getAll: () => uiSettings,
+            },
+          },
+        }),
+      });
 
       await waitFor(() => expect(container.querySelector('.euiLoadingSpinner')).toBeNull());
 

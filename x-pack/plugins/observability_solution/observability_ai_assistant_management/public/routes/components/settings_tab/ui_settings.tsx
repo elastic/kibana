@@ -47,8 +47,14 @@ export function UISettings() {
       <EuiSpacer />
       {settingsKeys.map((settingKey) => {
         const field = fields[settingKey];
+
+        if (!field) {
+          return null;
+        }
+
         return (
           <FieldRowProvider
+            key={settingKey}
             {...{
               links: docLinks.links.management,
               showDanger: (message: string) => notifications.toasts.addDanger(message),
