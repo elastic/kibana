@@ -36,7 +36,7 @@ import {
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
   agentLoggingLevels,
 } from '../../../../../../../common/constants';
-import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy, AgentLoggingLevel } from '../../../../types';
 import {
   useStartServices,
   useConfig,
@@ -76,8 +76,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
   disabled = false,
 }) => {
-  const LEVEL_VALUES = Object.keys(agentLoggingLevels);
-
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
@@ -437,12 +435,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             fullWidth
             onChange={(e) => {
               updateAgentPolicy({
-                logging_level: e.target.value,
+                logging_level: e.target.value as AgentLoggingLevel,
               });
             }}
-            options={LEVEL_VALUES.map((level) => ({
+            options={Object.keys(agentLoggingLevels).map((level) => ({
               text: level,
-              value: agentLoggingLevels[level],
+              // @ts-ignore-next-line
+              value: agentLoggingLevels[logLevel],
             }))}
           />
         </EuiFormRow>

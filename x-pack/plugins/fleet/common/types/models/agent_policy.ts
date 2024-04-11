@@ -14,7 +14,9 @@ import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
-export type AgentLoggingLevels = typeof agentLoggingLevels;
+
+type AgentLoggingLevelKeys = keyof typeof agentLoggingLevels;
+export type AgentLoggingLevel = typeof agentLoggingLevels[AgentLoggingLevelKeys];
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
 // x-pack/plugins/fleet/server/services/agent_policy.ts#L571
@@ -41,7 +43,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
-  logging_level?: ValueOf<AgentLoggingLevels>;
+  logging_level?: AgentLoggingLevel;
 }
 
 // SO definition for this type is declared in server/types/interfaces
