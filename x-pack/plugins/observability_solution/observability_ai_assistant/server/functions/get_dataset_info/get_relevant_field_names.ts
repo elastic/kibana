@@ -7,7 +7,7 @@
 import datemath from '@elastic/datemath';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { chunk, groupBy, uniq } from 'lodash';
+import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom, Observable } from 'rxjs';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import { type ChatCompletionChunkEvent, type Message, MessageRole } from '../../../common';
@@ -41,7 +41,7 @@ export async function getRelevantFieldNames({
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
   const fields = await dataViewsService.getFieldsForWildcard({
-    pattern: index,
+    pattern: castArray(index).join(','),
     allowNoIndex: true,
     indexFilter:
       start && end

@@ -312,7 +312,7 @@ export interface PersistenceAPI {
 }
 
 export interface GetFieldsOptions {
-  pattern: string | string[];
+  pattern: string;
   type?: string;
   metaFields?: string[];
   rollupIndex?: string;
