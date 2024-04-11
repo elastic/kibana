@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
+export const plugin = async () => {
   const { AiAssistantManagementPlugin } = await import('./plugin');
-  return new AiAssistantManagementPlugin(initContext);
+  return new AiAssistantManagementPlugin();
 };

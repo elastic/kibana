@@ -15,7 +15,7 @@ import {
   aiAssistantResponseLanguage,
 } from '@kbn/observability-ai-assistant-plugin/server';
 import { coreMock } from '@kbn/core/public/mocks';
-import { uiSettings } from '../../../../common';
+import { uiSettings } from '../../../../common/ui_settings';
 import { merge } from 'lodash';
 
 jest.mock('../../../hooks/use_app_context');
