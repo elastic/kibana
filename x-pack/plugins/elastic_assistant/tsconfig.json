@@ -44,7 +44,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/ml-response-stream",
     "@kbn/data-plugin",
-    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",
