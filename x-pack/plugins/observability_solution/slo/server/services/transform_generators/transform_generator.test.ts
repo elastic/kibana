@@ -25,12 +25,6 @@ describe('Transform Generator', () => {
         },
         type: 'keyword',
       },
-      'slo.instanceId': {
-        script: {
-          source: "emit('*')",
-        },
-        type: 'keyword',
-      },
       'slo.revision': {
         script: {
           source: 'emit(1)',
@@ -51,11 +45,6 @@ describe('Transform Generator', () => {
       'slo.id': {
         terms: {
           field: 'slo.id',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
         },
       },
       'slo.revision': {
@@ -81,12 +70,6 @@ describe('Transform Generator', () => {
         'slo.id': {
           script: {
             source: "emit('irrelevant')",
-          },
-          type: 'keyword',
-        },
-        'slo.instanceId': {
-          script: {
-            source: "emit('example:'+doc['example'].value)",
           },
           type: 'keyword',
         },
@@ -117,11 +100,6 @@ describe('Transform Generator', () => {
             field: 'slo.id',
           },
         },
-        'slo.instanceId': {
-          terms: {
-            field: 'slo.instanceId',
-          },
-        },
         'slo.revision': {
           terms: {
             field: 'slo.revision',
@@ -144,12 +122,6 @@ describe('Transform Generator', () => {
       'slo.id': {
         script: {
           source: "emit('irrelevant')",
-        },
-        type: 'keyword',
-      },
-      'slo.instanceId': {
-        script: {
-          source: "emit('example1:'+doc['example1'].value+'|'+'example2:'+doc['example2'].value)",
         },
         type: 'keyword',
       },
@@ -183,11 +155,6 @@ describe('Transform Generator', () => {
       'slo.id': {
         terms: {
           field: 'slo.id',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
         },
       },
       'slo.revision': {
