@@ -271,6 +271,8 @@
   "enterprise_search_telemetry": [],
   "epm-packages": [
     "es_index_patterns",
+    "es_index_patterns.name",
+    "es_index_patterns.title",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
     "experimental_data_stream_features.features",
