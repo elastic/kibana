@@ -99,7 +99,6 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
       cy.getBySel('saveIntegration').click();
       cy.contains(`Successfully updated '${integrationName}'`);
-      // should include streams on edit (upgrade)
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
