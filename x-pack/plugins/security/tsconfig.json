@@ -80,6 +80,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-security-common",
     "@kbn/core-user-profile-server",
+    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*",

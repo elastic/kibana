@@ -15,5 +15,12 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-user-profile-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/logging",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-user-profile-common",
+  ]
 }
