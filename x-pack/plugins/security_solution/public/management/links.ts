@@ -200,7 +200,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
-      // experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
     {
