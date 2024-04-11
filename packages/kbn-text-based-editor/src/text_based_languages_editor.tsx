@@ -58,6 +58,7 @@ import {
   getWrappedInPipesCode,
   parseErrors,
   getIndicesList,
+  getRemoteIndicesList,
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
@@ -390,7 +391,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
-        return await getIndicesList(dataViews);
+        const remoteIndices = await getRemoteIndicesList(dataViews);
+        const normalIndices = await getIndicesList(dataViews);
+        return [...normalIndices, ...remoteIndices];
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
