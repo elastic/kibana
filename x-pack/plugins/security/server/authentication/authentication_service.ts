@@ -228,7 +228,10 @@ export class AuthenticationService {
             originalURL,
             customBranding: customBrandingValue,
           }),
-          headers: { 'Content-Security-Policy': http.csp.header },
+          headers: {
+            'Content-Security-Policy': http.csp.header,
+            'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
+          },
         });
       }
 
@@ -241,6 +244,7 @@ export class AuthenticationService {
         body: '<div/>',
         headers: {
           'Content-Security-Policy': http.csp.header,
+          'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
           Refresh: `0;url=${http.basePath.prepend(
             `${
               needsToLogout ? '/logout' : '/login'

@@ -23,7 +23,22 @@ export interface FunctionDefinition {
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
+      /**
+       * if set this indicates that the value must be a literal
+       * but can be any literal of the correct type
+       */
       literalOnly?: boolean;
+      /**
+       * if provided this means that the value must be one
+       * of the options in the array iff the value is a literal.
+       *
+       * String values are case insensitive.
+       *
+       * If the value is not a literal, this field is ignored because
+       * we can't check the return value of a function to see if it
+       * matches one of the options prior to runtime.
+       */
+      literalOptions?: string[];
     }>;
     minParams?: number;
     returnType: string;
@@ -87,3 +102,5 @@ export type SignatureType =
   | FunctionDefinition['signatures'][number]
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
+
+export type FunctionArgSignature = FunctionDefinition['signatures'][number]['params'][number];
