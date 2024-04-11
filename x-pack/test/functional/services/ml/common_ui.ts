@@ -216,7 +216,7 @@ export function MachineLearningCommonUIProvider({
       const slider = await testSubjects.find(testDataSubj);
 
       await retry.tryForTime(60 * 1000, async () => {
-        const currentValue = await slider.getAttribute('value');
+        const currentValue = (await slider.getAttribute('value')) ?? '';
         const currentDiff = +currentValue - +value;
 
         if (currentDiff === 0) {
