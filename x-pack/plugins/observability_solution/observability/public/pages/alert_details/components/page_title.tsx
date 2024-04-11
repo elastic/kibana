@@ -24,13 +24,12 @@ import {
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
-import { BetaBadge, ExperimentalBadge } from '../../../components/experimental_badge';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -61,14 +60,11 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 
-  const showBetaBadge = alert.fields[ALERT_RULE_TYPE_ID] === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID;
-
   return (
     <div data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
         {showExperimentalBadge && <ExperimentalBadge />}
-        {showBetaBadge && <BetaBadge />}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
