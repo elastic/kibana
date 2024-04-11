@@ -177,7 +177,6 @@ For more information, refer to ({kibana-issue}179940[#179940]).
 For more information, refer to ({kibana-issue}180613[#180613]).
 ====
 
-
 [float]
 [[breaking-changes-8.13.0]]
 === Breaking changes
