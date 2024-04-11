@@ -627,10 +627,6 @@
                 "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
               },
               {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/public/application/mount_management_section.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
               },
@@ -665,6 +661,10 @@
               {
                 "plugin": "licenseManagement",
                 "path": "x-pack/plugins/license_management/public/plugin.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/public/application/mount_management_section.ts"
               },
               {
                 "plugin": "crossClusterReplication",

@@ -39,6 +39,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      queue: n2-2-spot
+    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - wait
+
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs
     key: public-api-docs
@@ -358,16 +371,6 @@ steps:
       queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/quick_checks.sh
-    label: 'Quick Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
