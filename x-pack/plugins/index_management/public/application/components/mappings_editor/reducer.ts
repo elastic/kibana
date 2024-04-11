@@ -16,14 +16,7 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   updateFieldsPathAfterFieldNameChange,
 } from './lib';
-import {
-  Action,
-  Field,
-  FieldWithSemanticTextInfo,
-  NormalizedField,
-  NormalizedFields,
-  State,
-} from './types';
+import { Action, Field, NormalizedField, NormalizedFields, State } from './types';
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };
@@ -324,7 +317,7 @@ export const reducer = (state: State, action: Action): State => {
       return addFieldToState(action.value, state);
     }
     case 'field.addSemanticText': {
-      const addTexFieldWithCopyToActionValue: FieldWithSemanticTextInfo = {
+      const addTexFieldWithCopyToActionValue: Field = {
         name: action.value.referenceField as string,
         type: 'text',
         copy_to: [action.value.name],
@@ -333,7 +326,7 @@ export const reducer = (state: State, action: Action): State => {
       // Add text field to state with copy_to of semantic_text field
       let updatedState = addFieldToState(addTexFieldWithCopyToActionValue, state);
 
-      const addSemanticTextFieldActionValue: FieldWithSemanticTextInfo = {
+      const addSemanticTextFieldActionValue: Field = {
         name: action.value.name,
         inference_id: action.value.inferenceId,
         type: 'semantic_text',
