@@ -40,6 +40,7 @@ import { SavedSearchesService } from './services/saved_searches/saved_searches_s
 import {
   getSavedSearchAttributeService,
   savedObjectToEmbeddableAttributes,
+  SavedSearchAttributeService,
 } from './services/saved_searches/saved_search_attribute_service';
 
 /**
@@ -64,6 +65,7 @@ export interface SavedSearchPublicPluginStart {
       id: string | undefined,
       result: SavedSearchUnwrapResult
     ) => Promise<SavedSearch>;
+    attributeService: SavedSearchAttributeService;
   };
 }
 
@@ -158,17 +160,6 @@ export class SavedSearchPublicPlugin
   ): SavedSearchPublicPluginStart {
     const deps = { search, spaces, savedObjectsTaggingOss, contentManagement, embeddable };
     const service = new SavedSearchesService(deps);
-    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { getSearchEmbeddableFactory } = await import(
-        './embeddable/get_search_embeddable_factory'
-      );
-      return getSearchEmbeddableFactory({
-        attributeService: getSavedSearchAttributeService(deps),
-        getSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
-          return toSavedSearch(id, result, deps);
-        },
-      });
-    });
 
     return {
       get: (savedSearchId: string) => service.get(savedSearchId),
@@ -181,6 +172,7 @@ export class SavedSearchPublicPlugin
         toSavedSearch: async (id: string | undefined, result: SavedSearchUnwrapResult) => {
           return toSavedSearch(id, result, deps);
         },
+        attributeService: getSavedSearchAttributeService(deps),
       },
     };
   }

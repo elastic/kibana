@@ -9,12 +9,19 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   Adapters,
+  DefaultEmbeddableApi,
   Embeddable,
   EmbeddableOutput,
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import {
+  HasLibraryTransforms,
+  PublishesDataLoading,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import type {
   HasSavedSearch,
+  SavedSearchByValueAttributes,
   SearchByReferenceInput,
   SearchByValueInput,
 } from '@kbn/saved-search-plugin/public';
@@ -24,6 +31,19 @@ import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_
 import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput; // TODO: Delete
+
+export type SearchEmbeddableSerializedState = SerializedTitles & {
+  // by value
+  attributes?: SavedSearchByValueAttributes;
+
+  // by reference
+  savedObjectId?: string;
+};
+
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
+  HasSavedSearch &
+  HasLibraryTransforms &
+  PublishesDataLoading;
 
 // TODO: Delete
 export interface SearchOutput extends EmbeddableOutput {

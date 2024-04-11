@@ -32,3 +32,26 @@ export function getSortForEmbeddable(
   }
   return getSortArray(sort, dataView, isEsqlMode);
 }
+
+/**
+ * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid
+ */
+// export function getSortForEmbeddable(
+//   savedSearch: SavedSearch,
+//   sort: SortInput | undefined,
+//   uiSettings: IUiSettingsClient | undefined
+// ): SortOrder[] {
+//   const dataView = savedSearch.searchSource.getField('index');
+
+//   const isTextBasedQuery = savedSearch.isTextBasedQuery ?? true; // TODO: FIX????
+
+//   if (!sort || !sort.length || !dataView) {
+//     if (!uiSettings) {
+//       return [];
+//     }
+//     const defaultSortOrder = uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc');
+//     const hidingTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+//     return getDefaultSort(dataView, defaultSortOrder, hidingTimeColumn, isTextBasedQuery);
+//   }
+//   return getSortArray(sort, dataView, isTextBasedQuery);
+// }

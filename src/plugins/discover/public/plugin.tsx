@@ -400,6 +400,8 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
+    this.registerEmbeddable(core, plugins);
+
     return {
       locator: this.locator,
       showInlineTopNav: () => {
@@ -510,5 +512,33 @@ export class DiscoverPlugin
       contextLocator: new ProfileAwareLocator(contextLocator, history),
       singleDocLocator: new ProfileAwareLocator(singleDocLocator, history),
     };
+  }
+
+  private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        executeTriggerActions: deps.uiActions.executeTriggerActions,
+        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+      };
+    };
+
+    const getDiscoverServicesInternal = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return this.getDiscoverServices(coreStart, deps);
+    };
+
+    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
+        getStartServices(),
+        getDiscoverServicesInternal(),
+        import('./embeddable/get_search_embeddable_factory'),
+      ]);
+
+      return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
   }
 }

@@ -15,22 +15,23 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitles } from '@kbn/presentation-publishing';
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { extract, inject } from '../../common/embeddable/search_inject_extract';
+import { DiscoverServices } from '../build_services';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
-import { inject, extract } from '../../common/embeddable/search_inject_extract';
-import {
-  SavedSearch,
-  SavedSearchAttributeService,
-  SavedSearchUnwrapResult,
-} from '../services/saved_searches';
 
 export const getSearchEmbeddableFactory = ({
-  attributeService,
-  getSavedSearch,
+  startServices,
+  discoverServices,
 }: {
-  attributeService: SavedSearchAttributeService;
-  getSavedSearch: (id: string | undefined, result: SavedSearchUnwrapResult) => Promise<SavedSearch>;
+  startServices: {
+    executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
+    isEditable: () => boolean;
+  };
+  discoverServices: DiscoverServices;
 }) => {
+  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
+
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
     SearchEmbeddableApi
@@ -47,7 +48,7 @@ export const getSearchEmbeddableFactory = ({
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const { searchEmbeddableApi, searchEmbeddableComparators, serializeSearchEmbeddable } =
-        await initializeSearchEmbeddableApi(initialState, attributeService, getSavedSearch);
+        await initializeSearchEmbeddableApi(initialState, attributeService, toSavedSearch);
 
       const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
         const { state: rawState, references } = extract({
