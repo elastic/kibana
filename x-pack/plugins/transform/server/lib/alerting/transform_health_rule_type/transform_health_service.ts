@@ -13,8 +13,10 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TransformStats } from '../../../../common/types/transform_stats';
+import { TRANSFORM_HEALTH_STATUS } from '../../../../common/constants';
 import type { TransformHealthRuleParams } from './schema';
 import {
+  mapEsHealthStatus2TransformHealthStatus,
   ALL_TRANSFORMS_SELECTION,
   TRANSFORM_HEALTH_CHECK_NAMES,
   TRANSFORM_NOTIFICATIONS_INDEX,
@@ -116,8 +118,8 @@ export function transformHealthServiceProvider({
       description: transformsDict.get(transformStats.id)?.description,
       transform_state: transformStats.state,
       node_name: transformStats.node?.name,
-      health_status: transformStats.health.status,
-      ...(transformStats.health.issues
+      health_status: mapEsHealthStatus2TransformHealthStatus(transformStats.health?.status),
+      ...(transformStats.health?.issues
         ? {
             issues: transformStats.health.issues.map((issue) => {
               return {
@@ -238,7 +240,11 @@ export function transformHealthServiceProvider({
       const transformsStats = await getTransformStats(transformIds);
 
       return transformsStats
-        .filter((t) => t.health.status !== 'green')
+        .filter(
+          (t) =>
+            mapEsHealthStatus2TransformHealthStatus(t.health?.status) !==
+            TRANSFORM_HEALTH_STATUS.green
+        )
         .map(baseTransformAlertResponseFormatter);
     },
     /**
