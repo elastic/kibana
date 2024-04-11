@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { get, isEqual, omit } from 'lodash';
 import expect from '@kbn/expect';
 import {
@@ -38,7 +39,13 @@ import {
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { previewRule, getAlerts, getPreviewAlerts } from '../../../../utils';
+import {
+  previewRule,
+  getAlerts,
+  getPreviewAlerts,
+  dataGeneratorFactory,
+  getThreatMatchRuleForAlertTesting,
+} from '../../../../utils';
 import {
   deleteAllAlerts,
   deleteAllRules,
@@ -155,10 +162,18 @@ export default ({ getService }: FtrProviderContext) => {
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
 
+  const {
+    indexListOfDocuments: indexListOfSourceDocuments,
+    indexGeneratedDocuments: indexGeneratedSourceDocuments,
+  } = dataGeneratorFactory({
+    es,
+    index: 'ecs_compliant',
+    log,
+  });
+
   /**
    * Specific api integration tests for threat matching rule type
    */
-  // FLAKY: https://github.com/elastic/kibana/issues/155304
   describe('@ess @serverless Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
@@ -1668,6 +1683,79 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(fullAlert?.['host.asset.criticality']).to.eql('low_impact');
         expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
+      });
+    });
+
+    // https://github.com/elastic/kibana/issues/174573
+    describe('timestamp override and fallback timestamp', () => {
+      const timestamp = '2020-10-28T05:45:00.000Z';
+
+      const eventDoc = (id: string) => ({
+        id,
+        '@timestamp': timestamp,
+        host: { name: 'host-a' },
+      });
+
+      const threatDoc = (id: string) => ({
+        id,
+        '@timestamp': timestamp,
+        host: { name: 'host-a' },
+        'agent.type': 'threat',
+      });
+
+      const threatMatchRule = (id: string): ThreatMatchRuleCreateProps => ({
+        ...getThreatMatchRuleForAlertTesting(['ecs_compliant']),
+        query: `id:${id} and NOT agent.type:threat`,
+        threat_query: `id:${id} and agent.type:threat`,
+        name: 'ALert suppression IM test rule',
+        from: 'now-35m',
+        interval: '30m',
+        timestamp_override: 'event.ingested',
+        timestamp_override_fallback_disabled: false,
+      });
+
+      it.only('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
+        const id = uuidv4();
+
+        await indexListOfSourceDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule: threatMatchRule(id),
+          timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts.length).to.eql(2);
+        expect(logs[0].errors).to.have.length(0);
+      });
+
+      it.skip('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
+        const id = uuidv4();
+
+        await indexListOfSourceDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule: threatMatchRule(id),
+          timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts.length).to.eql(1);
+        expect(logs[0].errors).to.have.length(0);
       });
     });
   });
