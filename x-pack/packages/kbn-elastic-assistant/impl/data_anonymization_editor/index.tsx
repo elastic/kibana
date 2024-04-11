@@ -88,6 +88,7 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         isDataAnonymizable={isDataAnonymizable}
         anonymizationFields={selectedPromptContext.contextAnonymizationFields?.data}
         rawData={selectedPromptContext.rawData}
+        replacements={selectedPromptContext.replacements}
       />
 
       <EuiSpacer size="s" />

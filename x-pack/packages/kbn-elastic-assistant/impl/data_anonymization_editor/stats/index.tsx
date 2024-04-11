@@ -25,6 +25,7 @@ interface Props {
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
   inline?: boolean;
+  replacements?: Record<string, string>;
 }
 
 const StatsComponent: React.FC<Props> = ({
@@ -32,14 +33,16 @@ const StatsComponent: React.FC<Props> = ({
   anonymizationFields,
   rawData,
   inline,
+  replacements,
 }) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({
         anonymizationFields,
         rawData,
+        replacements,
       }),
-    [anonymizationFields, rawData]
+    [anonymizationFields, rawData, replacements]
   );
 
   return (
@@ -53,7 +56,7 @@ const StatsComponent: React.FC<Props> = ({
       <StatFlexItem grow={false}>
         <AnonymizedStat
           anonymized={anonymized}
-          isDataAnonymizable={isDataAnonymizable}
+          isDataAnonymizable={isDataAnonymizable || anonymized > 0}
           inline={inline}
         />
       </StatFlexItem>

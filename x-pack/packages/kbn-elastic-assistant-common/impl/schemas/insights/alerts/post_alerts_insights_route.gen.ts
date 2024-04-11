@@ -17,7 +17,7 @@ import { z } from 'zod';
  */
 
 import { AnonymizationFieldResponse } from '../../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Replacements } from '../../conversations/common_attributes.gen';
+import { Replacements, TraceData } from '../../conversations/common_attributes.gen';
 
 /**
  * An insight generated from one or more alerts
@@ -69,19 +69,5 @@ export const AlertsInsightsPostResponse = z.object({
   insights: z.array(AlertsInsight).optional(),
   replacements: Replacements.optional(),
   status: z.string().optional(),
-  /**
-   * Trace Data
-   */
-  trace_data: z
-    .object({
-      /**
-       * Could be any string, not necessarily a UUID
-       */
-      transactionId: z.string().optional(),
-      /**
-       * Could be any string, not necessarily a UUID
-       */
-      traceId: z.string().optional(),
-    })
-    .optional(),
+  trace_data: TraceData.optional(),
 });
