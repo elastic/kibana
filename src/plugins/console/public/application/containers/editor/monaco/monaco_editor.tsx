@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
@@ -27,11 +27,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const [value, setValue] = useState(initialTextValue);
 
-  const setInitialValue = useSetInitialValue;
-
-  useEffect(() => {
-    setInitialValue({ initialTextValue, setValue, toasts });
-  }, [initialTextValue, setInitialValue, toasts]);
+  useSetInitialValue({ initialTextValue, setValue, toasts });
 
   return (
     <div
