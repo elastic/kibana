@@ -264,6 +264,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.canTrackContentfulRender",
+        "type": "Function",
+        "tags": [],
+        "label": "canTrackContentfulRender",
+        "description": [],
+        "signature": [
+          "(root: unknown) => root is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.TrackContentfulRender",
+            "text": "TrackContentfulRender"
+          }
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.canTrackContentfulRender.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-common.getContainerParentFromAPI",
         "type": "Function",
         "tags": [],
@@ -1369,6 +1409,38 @@
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.TrackContentfulRender",
+        "type": "Interface",
+        "tags": [],
+        "label": "TrackContentfulRender",
+        "description": [],
+        "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.TrackContentfulRender.trackContentfulRender",
+            "type": "Function",
+            "tags": [],
+            "label": "trackContentfulRender",
+            "description": [
+              "\nA way to report that the contentful render has been completed"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/track_contentful_render.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
