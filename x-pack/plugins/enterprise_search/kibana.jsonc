@@ -11,6 +11,7 @@
       "enterpriseSearch"
     ],
     "requiredPlugins": [
+      "data",
       "features",
       "licensing",
       "logsShared",
@@ -18,7 +19,6 @@
     ],
     "optionalPlugins": [
       "customIntegrations",
-      "data",
       "globalSearch",
       "home",
       "indexManagement",
