@@ -1512,6 +1512,21 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       });
+
+      it('should import a rule with "setup"', async () => {
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            setup: '# some setup markdown',
+          })
+        );
+
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+      });
     });
   });
 };
