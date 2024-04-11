@@ -20,6 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 
+import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import { EuiLink } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
@@ -32,9 +34,17 @@ export const IndicesConfigurationPanel = React.memo<{
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
 }>(({ isLoading, isReadOnly, indicesFormElement }) => {
   const {
-    services: { http },
+    services: {
+      http,
+      share: {
+        url: { locators },
+      },
+    },
   } = useKibanaContextForPlugin();
   const [numberOfLogsRules, setNumberOfLogsRules] = useState(0);
+
+  const [viewAffectedRulesLink, setViewAffectedRulesLink] = useState<string>();
+  const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
 
   const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
@@ -81,6 +91,15 @@ export const IndicesConfigurationPanel = React.memo<{
     };
     getNumberOfInfraRules();
   }, [http]);
+
+  useEffect(() => {
+    const getLink = async () => {
+      const resLink = await rulesLocator?.getUrl({ type: [LOG_THRESHOLD_ALERT_TYPE_ID] });
+      setViewAffectedRulesLink(resLink);
+    };
+
+    getLink();
+  }, [rulesLocator]);
 
   return (
     <EuiFormFieldset
@@ -167,6 +186,17 @@ export const IndicesConfigurationPanel = React.memo<{
               id="xpack.infra.sourceConfiguration.logsIndicesUsedByRulesMessage"
               defaultMessage="One or more rules rely on this data source setting. Changing this setting may impact the execution of these rules."
             />
+            <EuiSpacer size="s" />
+            <EuiLink
+              data-test-subj="infraIndicesConfigurationPanelViewAffectedRulesLink"
+              href={viewAffectedRulesLink}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.logIndices.viewAffectedRulesLink"
+                defaultMessage="View affected rules"
+              />
+            </EuiLink>
           </EuiCallOut>
         </>
       )}
