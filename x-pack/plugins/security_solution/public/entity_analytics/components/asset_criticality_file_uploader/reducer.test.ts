@@ -7,13 +7,13 @@
 
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
 import type { OnCompleteParams } from './hooks';
-import type { ReducerAction, ReducerState } from './reducer';
-import { reducer } from './reducer';
+import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
+import { reducer, FileUploaderSteps } from './reducer';
 
 describe('reducer', () => {
   const initialState: ReducerState = {
     isLoading: false,
-    step: 1,
+    step: FileUploaderSteps.FILE_PICKER,
   };
 
   const onCompleteParams: OnCompleteParams = {
@@ -31,7 +31,12 @@ describe('reducer', () => {
 
   it('should handle "uploadingFile" action', () => {
     const action: ReducerAction = { type: 'uploadingFile' };
-    const nextState = reducer(initialState, action);
+    const state: ValidationStepState = {
+      ...onCompleteParams,
+      isLoading: false,
+      step: FileUploaderSteps.VALIDATION,
+    };
+    const nextState = reducer(state, action) as ValidationStepState;
 
     expect(nextState.isLoading).toBe(true);
   });
@@ -45,27 +50,39 @@ describe('reducer', () => {
         failed: 0,
       },
     };
+    const state: ValidationStepState = {
+      ...onCompleteParams,
+      isLoading: true,
+      step: FileUploaderSteps.VALIDATION,
+    };
+
     const action: ReducerAction = { type: 'fileUploaded', payload: { response } };
-    const nextState = reducer({ ...initialState, isLoading: true }, action);
+    const nextState = reducer(state, action);
 
     expect(nextState).toEqual({
-      isLoading: false,
-      step: 3,
+      step: FileUploaderSteps.RESULT,
       fileUploadResponse: response,
       fileUploadError: undefined,
+      validLinesAsText: onCompleteParams.validLinesAsText,
     });
   });
 
   it('should handle "fileUploaded" action with errorMessage', () => {
     const errorMessage = 'File upload failed';
+    const state: ValidationStepState = {
+      ...onCompleteParams,
+      isLoading: true,
+      step: FileUploaderSteps.VALIDATION,
+    };
+
     const action: ReducerAction = { type: 'fileUploaded', payload: { errorMessage } };
-    const nextState = reducer({ ...initialState, isLoading: true }, action);
+    const nextState = reducer(state, action);
 
     expect(nextState).toEqual({
-      isLoading: false,
-      step: 3,
+      step: FileUploaderSteps.RESULT,
       fileUploadResponse: undefined,
       fileUploadError: errorMessage,
+      validLinesAsText: onCompleteParams.validLinesAsText,
     });
   });
 
@@ -76,7 +93,7 @@ describe('reducer', () => {
 
     expect(nextState).toEqual({
       isLoading: true,
-      step: 1,
+      step: FileUploaderSteps.FILE_PICKER,
       fileName,
     });
   });
@@ -87,7 +104,7 @@ describe('reducer', () => {
 
     expect(nextState).toEqual({
       isLoading: false,
-      step: 2,
+      step: FileUploaderSteps.VALIDATION,
       ...onCompleteParams,
     });
   });
@@ -95,11 +112,23 @@ describe('reducer', () => {
   it('should handle "fileError" action', () => {
     const message = 'File error';
     const action: ReducerAction = { type: 'fileError', payload: { message } };
-    const nextState = reducer({ step: 9999, isLoading: true }, action);
+    const nextState = reducer(
+      {
+        step: 9999,
+        isLoading: true,
+        fileSize: 0,
+        invalidLinesAsText: '',
+        validLinesAsText: '',
+        validLinesCount: 0,
+        invalidLinesCount: 0,
+        invalidLinesErrors: [],
+      },
+      action
+    );
 
     expect(nextState).toEqual({
       isLoading: false,
-      step: 1,
+      step: FileUploaderSteps.FILE_PICKER,
       fileError: message,
     });
   });

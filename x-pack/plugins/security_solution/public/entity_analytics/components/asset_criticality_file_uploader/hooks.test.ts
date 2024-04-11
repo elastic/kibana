@@ -5,10 +5,30 @@
  * 2.0.
  */
 
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useFileValidation } from './hooks';
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+
+const mockedUseKibana = mockUseKibana();
+const mockedTelemetry = createTelemetryServiceMock();
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 describe('useFileValidation', () => {
   const validLine = 'user,user-001,low_impact';
@@ -41,19 +61,25 @@ describe('useFileValidation', () => {
 
     await waitFor(() => {
       expect(onErrorMock).not.toHaveBeenCalled();
-      expect(onCompleteMock).toHaveBeenCalledWith({
-        fileName,
-        invalidLinesAsText: invalidLine,
-        validLinesAsText: validLine,
-        invalidLinesCount: 1,
-        validLinesCount: 1,
-        invalidLinesErrors: [
-          {
-            error: 'Expected 3 columns got 4',
-            index: 1,
-          },
-        ],
-      });
+      expect(onCompleteMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fileName,
+          fileSize: 61,
+          invalidLinesAsText: invalidLine,
+          validLinesAsText: validLine,
+          invalidLinesCount: 1,
+          validLinesCount: 1,
+          invalidLinesErrors: [
+            {
+              error: 'Expected 3 columns, got 4',
+              index: 1,
+            },
+          ],
+          processingEndTime: expect.any(String),
+          processingStartTime: expect.any(String),
+          tookMs: expect.any(Number),
+        })
+      );
     });
   });
 });

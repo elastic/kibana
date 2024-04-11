@@ -47,7 +47,7 @@ describe('AssetCriticalityValidationStep', () => {
       wrapper: TestProviders,
     });
 
-    expect(container).toHaveTextContent('10 assets criticalities will be assigned');
+    expect(container).toHaveTextContent('10 asset criticalities will be assigned');
     expect(container).toHaveTextContent("5 lines are invalid and won't be assigned");
     expect(container).toHaveTextContent('test.csv preview');
   });

@@ -141,12 +141,9 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
-    /**
-     * Create asset criticality
-     */
     const uploadAssetCriticalityFile = async (
       fileContent: string,
-      fileName: string = 'unknown-file.csv'
+      fileName: string
     ): Promise<AssetCriticalityCsvUploadResponse> => {
       const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
       const body = new FormData();
@@ -155,9 +152,6 @@ export const useEntityAnalyticsRoutes = () => {
       return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
         version: '1',
         method: 'POST',
-        headers: {
-          'Content-Type': undefined,
-        },
         body,
       });
     };

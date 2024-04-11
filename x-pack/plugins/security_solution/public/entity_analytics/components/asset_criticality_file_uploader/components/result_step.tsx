@@ -25,7 +25,7 @@ export const AssetCriticalityResultStep: React.FC<{
   validLinesAsText: string;
   errorMessage?: string;
   onReturn: () => void;
-}> = ({ result, validLinesAsText, errorMessage, onReturn }) => {
+}> = React.memo(({ result, validLinesAsText, errorMessage, onReturn }) => {
   const { euiTheme } = useEuiTheme();
 
   if (result === undefined || errorMessage !== undefined) {
@@ -122,7 +122,9 @@ export const AssetCriticalityResultStep: React.FC<{
       <ResultStepFooter onReturn={onReturn} />
     </>
   );
-};
+});
+
+AssetCriticalityResultStep.displayName = 'AssetCriticalityResultStep';
 
 const ResultStepFooter = ({ onReturn }: { onReturn: () => void }) => (
   <>

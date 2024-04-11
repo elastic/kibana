@@ -12,7 +12,7 @@ import { useCallback } from 'react';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
 import type { RowValidationErrors } from './validations';
 import { validateParsedContent, validateFile } from './validations';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../common/lib/kibana';
 export interface OnCompleteParams {
   fileName: string;
   fileSize: number;

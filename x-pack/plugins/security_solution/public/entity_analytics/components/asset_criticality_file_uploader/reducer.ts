@@ -8,19 +8,39 @@
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { RowValidationErrors } from './validations';
 
-export interface ReducerState {
-  fileError?: string;
+export interface FilePickerState {
   isLoading: boolean;
-  step: number;
+  step: FileUploaderSteps.FILE_PICKER;
+  fileError?: string;
+  fileName?: string;
+}
+
+export interface ValidationStepState {
+  isLoading: boolean;
+  step: FileUploaderSteps.VALIDATION;
+  fileError?: string;
+  fileName: string;
+  fileSize: number;
+  invalidLinesAsText: string;
+  validLinesAsText: string;
+  validLinesCount: number;
+  invalidLinesCount: number;
+  invalidLinesErrors: RowValidationErrors[];
+}
+
+export interface ResultStepState {
+  step: FileUploaderSteps.RESULT;
   fileUploadResponse?: AssetCriticalityCsvUploadResponse;
   fileUploadError?: string;
-  fileName?: string;
-  fileSize?: number;
-  invalidLinesAsText?: string;
-  validLinesAsText?: string;
-  validLinesCount?: number;
-  invalidLinesCount?: number;
-  invalidLinesErrors?: RowValidationErrors[];
+  validLinesAsText: string;
+}
+
+export type ReducerState = FilePickerState | ValidationStepState | ResultStepState;
+
+export enum FileUploaderSteps {
+  FILE_PICKER = 1,
+  VALIDATION = 2,
+  RESULT = 3,
 }
 
 export type ReducerAction =
@@ -45,52 +65,68 @@ export type ReducerAction =
       payload: { response?: AssetCriticalityCsvUploadResponse; errorMessage?: string };
     };
 
-const initialState = {
+export const INITIAL_STATE: FilePickerState = {
   isLoading: false,
-  step: 1,
+  step: FileUploaderSteps.FILE_PICKER,
 };
 
 export const reducer = (state: ReducerState, action: ReducerAction): ReducerState => {
   switch (action.type) {
     case 'resetState':
-      return initialState;
+      return INITIAL_STATE;
 
     case 'loadingFile':
+      if (isFilePickerStep(state)) {
+        return {
+          ...state,
+          isLoading: true,
+          fileName: action.payload.fileName,
+        };
+      }
+      break;
+
+    case 'fileError':
       return {
-        isLoading: true,
-        step: 1,
-        fileName: action.payload.fileName,
+        isLoading: false,
+        step: FileUploaderSteps.FILE_PICKER,
+        fileError: action.payload.message,
       };
 
     case 'fileValidated':
       return {
         isLoading: false,
-        step: 2,
+        step: FileUploaderSteps.VALIDATION,
         ...action.payload,
       };
 
-    case 'fileError':
-      return {
-        isLoading: false,
-        step: 1,
-        fileError: action.payload.message,
-      };
-
     case 'uploadingFile':
-      return {
-        ...state,
-        isLoading: true,
-      };
+      if (isValidationStep(state)) {
+        return {
+          ...state,
+          isLoading: true,
+        };
+      }
+      break;
 
     case 'fileUploaded':
-      return {
-        fileUploadResponse: action.payload.response,
-        fileUploadError: action.payload.errorMessage,
-        isLoading: false,
-        step: 3,
-      };
-
-    default:
-      return state;
+      if (isValidationStep(state)) {
+        return {
+          fileUploadResponse: action.payload.response,
+          fileUploadError: action.payload.errorMessage,
+          validLinesAsText: state.validLinesAsText,
+          step: FileUploaderSteps.RESULT,
+        };
+      }
+      break;
   }
+  return state;
 };
+
+export const isFilePickerStep = (state: ReducerState): state is FilePickerState =>
+  state.step === FileUploaderSteps.FILE_PICKER;
+
+export const isValidationStep = (state: ReducerState): state is ValidationStepState =>
+  state.step === FileUploaderSteps.VALIDATION;
+
+export const isResultStep = (state: ReducerState): state is ResultStepState =>
+  state.step === FileUploaderSteps.RESULT;
