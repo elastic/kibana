@@ -1359,7 +1359,9 @@ describe('Observability AI Assistant client', () => {
   });
 
   describe('when context has not been injected since last user message', () => {
-    it('does append the context request message', async () => {
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
       client = createClient();
       actionsClientMock.execute.mockImplementationOnce(async () => {
         llmSimulator = createLlmSimulator();
@@ -1392,7 +1394,7 @@ describe('Observability AI Assistant client', () => {
         })
       );
 
-      const dataHandler = jest.fn();
+      dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
 
@@ -1406,6 +1408,18 @@ describe('Observability AI Assistant client', () => {
 
       await finished(stream);
 
+      // console.log(
+      //   ...dataHandler.mock.calls.map((call) => JSON.stringify(JSON.parse(call), null, 4))
+      // );
+    });
+
+    it('executes the context function', async () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'context' })
+      );
+    });
+
+    it('appends the context request message', async () => {
       expect(JSON.parse(dataHandler.mock.calls[0])).toEqual({
         type: StreamingChatResponseEventType.MessageAdd,
         id: expect.any(String),
