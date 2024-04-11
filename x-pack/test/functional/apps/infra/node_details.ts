@@ -193,9 +193,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
+          it('should render 11 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
+            expect(hosts.length).to.equal(11);
           });
 
           it('should show all section as collapsable', async () => {
@@ -511,9 +511,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
 
-            it('should render 12 charts in the Metrics section', async () => {
+            it('should render 11 charts in the Metrics section', async () => {
               const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-              expect(hosts.length).to.equal(12);
+              expect(hosts.length).to.equal(11);
             });
 
             it('should render 4 charts in the Kubernetes Metrics section', async () => {
