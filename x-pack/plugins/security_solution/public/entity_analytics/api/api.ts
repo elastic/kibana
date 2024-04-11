@@ -126,6 +126,16 @@ export const useEntityAnalyticsRoutes = () => {
         }),
       });
 
+    const deleteAssetCriticality = async (
+      params: Pick<AssetCriticality, 'idField' | 'idValue'>
+    ): Promise<AssetCriticalityRecord> => {
+      return http.fetch(ASSET_CRITICALITY_URL, {
+        version: '1',
+        method: 'DELETE',
+        query: { id_value: params.idValue, id_field: params.idField },
+      });
+    };
+
     /**
      * Get asset criticality
      */
@@ -178,6 +188,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
+      deleteAssetCriticality,
       fetchAssetCriticality,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,

@@ -36,13 +36,10 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useToggle } from 'react-use';
 import { PICK_ASSET_CRITICALITY } from './translations';
-import {
-  AssetCriticalityBadge,
-  AssetCriticalityBadgeAllowMissing,
-} from './asset_criticality_badge';
+import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
   entity: Entity;
@@ -73,7 +70,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <AssetCriticalityBadgeAllowMissing
+            <AssetCriticalityBadge
               criticalityLevel={criticality.query.data?.criticality_level}
               dataTestSubj="asset-criticality-level"
               className={css`
@@ -201,8 +198,8 @@ interface ModalProps {
 
 const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
-  const [value, setNewValue] = useState<CriticalityLevel>(
-    criticality.query.data?.criticality_level ?? 'medium_impact'
+  const [value, setNewValue] = useState<CriticalityLevelWithUnassigned>(
+    criticality.query.data?.criticality_level ?? 'unassigned'
   );
 
   return (
@@ -252,7 +249,9 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, togg
   );
 };
 
-const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel> => ({
+const option = (
+  level: CriticalityLevelWithUnassigned
+): EuiSuperSelectOption<CriticalityLevelWithUnassigned> => ({
   value: level,
   dropdownDisplay: (
     <AssetCriticalityBadge
@@ -265,7 +264,8 @@ const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel>
     <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
   ),
 });
-const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
+const options: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> = [
+  option('unassigned'),
   option('low_impact'),
   option('medium_impact'),
   option('high_impact'),

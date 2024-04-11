@@ -8,6 +8,10 @@
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import type {
+  CriticalityLevel,
+  CriticalityLevelWithUnassigned,
+} from '../../../../common/entity_analytics/asset_criticality/types';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
@@ -48,7 +52,8 @@ export const useAssetCriticalityData = ({
 }): State => {
   const QC = useQueryClient();
   const QUERY_KEY = [ASSET_CRITICALITY_KEY, entity.name];
-  const { fetchAssetCriticality, createAssetCriticality } = useEntityAnalyticsRoutes();
+  const { fetchAssetCriticality, createAssetCriticality, deleteAssetCriticality } =
+    useEntityAnalyticsRoutes();
 
   const privileges = useAssetCriticalityPrivileges(entity.name);
   const query = useQuery<AssetCriticalityRecord, { body: { statusCode: number } }>({
@@ -59,7 +64,18 @@ export const useAssetCriticalityData = ({
   });
 
   const mutation = useMutation({
-    mutationFn: createAssetCriticality,
+    mutationFn: (params: Params) => {
+      if (params.criticalityLevel === 'unassigned') {
+        return deleteAssetCriticality({ idField: params.idField, idValue: params.idValue });
+      }
+
+      const critialityLevel = params.criticalityLevel as CriticalityLevel;
+      return createAssetCriticality({
+        idField: params.idField,
+        idValue: params.idValue,
+        criticalityLevel: critialityLevel,
+      });
+    },
     onSuccess: (data) => {
       QC.setQueryData(QUERY_KEY, data);
     },
@@ -79,7 +95,11 @@ export interface State {
   privileges: UseQueryResult<EntityAnalyticsPrivileges>;
   mutation: UseMutationResult<AssetCriticalityRecord, unknown, Params, unknown>;
 }
-type Params = Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>;
+interface Params {
+  idField: AssetCriticality['idField'];
+  idValue: AssetCriticality['idValue'];
+  criticalityLevel: CriticalityLevelWithUnassigned;
+}
 
 export interface ModalState {
   visible: boolean;
