@@ -1379,6 +1379,16 @@
       "warning": []
     },
     {
+      "query": "row var = mv_slice(\"a\", 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_slice(\"a\", 5, 5)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sort(\"a\", \"asc\")",
       "error": [],
       "warning": []
@@ -1407,6 +1417,30 @@
       "query": "row var = mv_sum(\"a\")",
       "error": [
         "Argument of [mv_sum] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(\"a\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_zip(\"a\", \"a\", \"a\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(to_string(\"a\"), to_string(\"a\"), to_string(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_zip(5, 5, 5)",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [5] type [number]",
+        "Argument of [mv_zip] must be [string], found value [5] type [number]",
+        "Argument of [mv_zip] must be [string], found value [5] type [number]"
       ],
       "warning": []
     },
@@ -6478,6 +6512,20 @@
       "warning": []
     },
     {
+      "query": "from a_index | where length(mv_zip(stringField, stringField, stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(mv_zip(numberField, numberField, numberField)) > 0",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where pi() > 0",
       "error": [],
       "warning": []
@@ -8940,6 +8988,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_slice(stringField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_slice(stringField, numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = mv_sort(stringField, \"asc\")",
       "error": [],
       "warning": []
@@ -8982,6 +9040,37 @@
       "query": "from a_index | eval var = mv_sum(*)",
       "error": [
         "Using wildcards (*) in mv_sum is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(stringField, stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(stringField, stringField, stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_zip(to_string(stringField), to_string(stringField), to_string(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(numberField, numberField, numberField)",
+      "error": [
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]",
+        "Argument of [mv_zip] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_zip(stringField, stringField, stringField, extraArg)",
+      "error": [
+        "Error: [mv_zip] function expects exactly 3 arguments, got 4."
       ],
       "warning": []
     },

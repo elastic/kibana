@@ -1099,6 +1099,44 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'mv_slice',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvSliceDoc', {
+      defaultMessage:
+        'Returns a subset of the multivalued field using the start and end index values.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'multivalue', type: 'any' },
+          { name: 'start', type: 'number' },
+          { name: 'end', type: 'number' },
+        ],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 2, 3] | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_zip',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvZipDoc', {
+      defaultMessage:
+        'Combines the values from two multivalued fields with a delimiter that joins them together.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'mvLeft', type: 'string' },
+          { name: 'mvRight', type: 'string' },
+          { name: 'delim', type: 'string' },
+        ],
+        returnType: 'string',
+        examples: [
+          'ROW a = ["x", "y", "z"], b = ["1", "2"] \n| EVAL c = mv_zip(a, b, "-") \n| KEEP a, b, c',
+        ],
+      },
+    ],
+  },
+  {
     name: 'pi',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.piDoc', {
       defaultMessage: 'The ratio of a circle’s circumference to its diameter.',
