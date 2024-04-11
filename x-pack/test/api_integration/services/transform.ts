@@ -11,11 +11,13 @@ import { TransformAPIProvider } from '../../functional/services/transform/api';
 import { TransformSecurityCommonProvider } from '../../functional/services/transform/security_common';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { MachineLearningTestResourcesProvider } from '../../functional/services/ml/test_resources';
+import { MachineLearningSecurityCommonProvider } from '../../functional/services/ml/security_common';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
-  const mlApi = MachineLearningAPIProvider(context);
   const securityCommon = TransformSecurityCommonProvider(context);
+  const mlSecurityCommon = MachineLearningSecurityCommonProvider(context);
+  const mlApi = MachineLearningAPIProvider(context, mlSecurityCommon);
   const testResources = MachineLearningTestResourcesProvider(context, mlApi);
 
   return {

@@ -15,10 +15,10 @@ import { MachineLearningTestExecutionProvider } from '../../functional/services/
 import { MachineLearningTestResourcesProvider } from '../../functional/services/ml/test_resources';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
-  const api = MachineLearningAPIProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const api = MachineLearningAPIProvider(context, securityCommon);
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
-  const securityCommon = MachineLearningSecurityCommonProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, api);
 

@@ -23,10 +23,12 @@ import { TransformAlertingProvider } from './alerting';
 
 import { MachineLearningAPIProvider } from '../ml/api';
 import { MachineLearningTestResourcesProvider } from '../ml/test_resources';
+import { MachineLearningSecurityCommonProvider } from '../ml/security_common';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
-  const mlApi = MachineLearningAPIProvider(context);
+  const mlSecurityCommon = MachineLearningSecurityCommonProvider(context);
+  const mlApi = MachineLearningAPIProvider(context, mlSecurityCommon);
   const datePicker = TransformDatePickerProvider(context);
   const discover = TransformDiscoverProvider(context);
   const editFlyout = TransformEditFlyoutProvider(context);
