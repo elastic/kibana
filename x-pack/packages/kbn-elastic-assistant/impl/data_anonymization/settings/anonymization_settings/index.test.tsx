@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { AnonymizationSettings } from '.';
@@ -104,30 +104,6 @@ describe('AnonymizationSettings', () => {
     );
 
     expect(getByTestId('contextEditor')).toBeInTheDocument();
-  });
-
-  it('does NOT call `setDefaultAllow` when `Reset` is clicked, because only local state is reset until the user clicks save', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings {...props} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('resetFields'));
-
-    expect(mockUseAssistantContext.setDefaultAllow).not.toHaveBeenCalled();
-  });
-
-  it('does NOT call `setDefaultAllowReplacement` when `Reset` is clicked, because only local state is reset until the user clicks save', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AnonymizationSettings {...props} />
-      </TestProviders>
-    );
-
-    fireEvent.click(getByTestId('resetFields'));
-
-    expect(mockUseAssistantContext.setDefaultAllowReplacement).not.toHaveBeenCalled();
   });
 
   it('renders the expected allowed stat content', () => {

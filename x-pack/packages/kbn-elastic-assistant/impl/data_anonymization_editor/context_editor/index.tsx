@@ -20,8 +20,8 @@ export const DEFAULT_PAGE_SIZE = 10;
 
 const defaultSort: SortConfig = {
   sort: {
-    direction: 'desc',
-    field: FIELDS.ALLOWED,
+    direction: 'asc',
+    field: FIELDS.FIELD,
   },
 };
 
@@ -103,7 +103,6 @@ const ContextEditorComponent: React.FC<Props> = ({
     () => (
       <Toolbar
         onListUpdated={onListUpdated}
-        onlyDefaults={rawData == null}
         onSelectAll={onSelectAll}
         selected={selected}
         totalFields={rawData == null ? anonymizationFields.total : Object.keys(rawData).length}

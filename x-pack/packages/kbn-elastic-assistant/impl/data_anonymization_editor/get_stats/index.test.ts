@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import type { Stats } from '../helpers';
 import { getStats } from '.';
 
 describe('getStats', () => {
   it('returns ZERO_STATS for string rawData', () => {
-    const context: SelectedPromptContext = {
-      contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
-      promptContextId: 'abcd',
+    const context = {
+      anonymizationFields: [],
       rawData: 'this will not be anonymized',
     };
 
@@ -28,47 +26,41 @@ describe('getStats', () => {
   });
 
   it('returns the expected stats for object rawData', () => {
-    const context: SelectedPromptContext = {
-      contextAnonymizationFields: {
-        total: 4,
-        page: 1,
-        perPage: 1000,
-        data: [
-          {
-            field: 'event.action',
-            id: 'test',
-            allowed: true,
-            anonymized: false,
-            createdAt: '',
-            timestamp: '',
-          },
-          {
-            field: 'user.name',
-            id: 'test1',
-            allowed: true,
-            anonymized: true,
-            createdAt: '',
-            timestamp: '',
-          },
-          {
-            field: 'event.category',
-            id: 'test2',
-            allowed: true,
-            anonymized: false,
-            createdAt: '',
-            timestamp: '',
-          },
-          {
-            field: 'host.ip',
-            id: 'test3',
-            allowed: false,
-            anonymized: true,
-            createdAt: '',
-            timestamp: '',
-          },
-        ],
-      },
-      promptContextId: 'abcd',
+    const context = {
+      anonymizationFields: [
+        {
+          field: 'event.action',
+          id: 'test',
+          allowed: true,
+          anonymized: false,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'user.name',
+          id: 'test1',
+          allowed: true,
+          anonymized: true,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'event.category',
+          id: 'test2',
+          allowed: true,
+          anonymized: false,
+          createdAt: '',
+          timestamp: '',
+        },
+        {
+          field: 'host.ip',
+          id: 'test3',
+          allowed: false,
+          anonymized: true,
+          createdAt: '',
+          timestamp: '',
+        },
+      ],
       rawData: {
         'event.category': ['process'],
         'event.action': ['process_stopped'],
