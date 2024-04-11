@@ -6,10 +6,10 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
 import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
@@ -33,27 +33,45 @@ const DESCRIPTION = i18n.translate(
   }
 );
 
-export const LABELS: Record<AntivirusRegistrationModes, string> = {
-  [AntivirusRegistrationModes.disabled]: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.disabled',
-    { defaultMessage: 'Disabled' }
-  ),
-  [AntivirusRegistrationModes.enabled]: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.enabled',
-    { defaultMessage: 'Enabled' }
-  ),
-  [AntivirusRegistrationModes.sync]: i18n.translate(
-    'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent',
-    { defaultMessage: 'Sync with Malware Prevent' }
-  ),
-};
-
 export type AntivirusRegistrationCardProps = PolicyFormComponentCommonProps;
 
 export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
   ({ policy, onChange, mode, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
+
+    const labels: Record<AntivirusRegistrationModes, React.ReactNode> = useMemo(
+      () => ({
+        [AntivirusRegistrationModes.disabled]: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.disabled',
+          { defaultMessage: 'Disabled' }
+        ),
+        [AntivirusRegistrationModes.enabled]: i18n.translate(
+          'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.enabled',
+          { defaultMessage: 'Enabled' }
+        ),
+        [AntivirusRegistrationModes.sync]: (
+          <>
+            {i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent',
+              { defaultMessage: 'Sync with Malware protection level' }
+            )}{' '}
+            <EuiIconTip
+              position="right"
+              content={i18n.translate(
+                'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePreventTooltip',
+                {
+                  defaultMessage:
+                    'Using this setting will automatically enable antivirus registration if Malware protection is set to prevent. ' +
+                    'In any other cases antivirus registration will be disabled.',
+                }
+              )}
+            />
+          </>
+        ),
+      }),
+      []
+    );
 
     let currentMode: AntivirusRegistrationModes;
     if (policy.windows.antivirus_registration.mode) {
@@ -103,7 +121,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
                 id={registrationMode}
                 value={registrationMode}
                 onChange={handleChange}
-                label={LABELS[registrationMode as AntivirusRegistrationModes]}
+                label={labels[registrationMode as AntivirusRegistrationModes]}
                 checked={currentMode === registrationMode}
                 disabled={!isEditMode}
                 data-test-subj={getTestId(registrationMode)}
