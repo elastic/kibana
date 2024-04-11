@@ -9,7 +9,6 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
 import { Message, TraceData } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { i18n } from '@kbn/i18n';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 
 interface GetPluginNameFromRequestParams {
@@ -86,9 +85,5 @@ export const getMessageFromRawResponse = ({
 export const hasAIAssistantLicense = (license: ILicense): boolean =>
   license.hasAtLeast(MINIMUM_AI_ASSISTANT_LICENSE);
 
-export const UPGRADE_LICENSE_MESSAGE = i18n.translate(
-  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
-  {
-    defaultMessage: 'Your license does not support AI Assistant. Please upgrade your license.',
-  }
-);
+export const UPGRADE_LICENSE_MESSAGE =
+  'Your license does not support AI Assistant. Please upgrade your license.';
