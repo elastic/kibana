@@ -50,6 +50,15 @@ export const getResolvedDateRange = function (timefilter: TimefilterContract) {
   return { fromDate: from, toDate: to };
 };
 
+export const getAbsoluteDateRange = function (timefilter: TimefilterContract) {
+  const { from, to } = timefilter.getTime();
+  const { min, max } = timefilter.calculateBounds({
+    from,
+    to,
+  });
+  return { fromDate: min?.toISOString() || from, toDate: max?.toISOString() || to };
+};
+
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
 }
