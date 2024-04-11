@@ -408,24 +408,26 @@ export class ProjectNavigationService {
     combineLatest([
       this.solutionNavDefinitions$,
       this.nextSolutionNavDefinitionId$.pipe(distinctUntilChanged()),
-    ]).subscribe(([definitions, nextId]) => {
-      const definition = typeof nextId === 'string' ? definitions[nextId] : undefined;
-      const noActiveDefinition =
-        Object.keys(definitions).length === 0 || !definition || nextId === null;
+    ])
+      .pipe(takeUntil(this.stop$))
+      .subscribe(([definitions, nextId]) => {
+        const definition = typeof nextId === 'string' ? definitions[nextId] : undefined;
+        const noActiveDefinition =
+          Object.keys(definitions).length === 0 || !definition || nextId === null;
 
-      if (noActiveDefinition) {
-        this.navigationTree$.next(undefined);
-        this.activeNodes$.next([]);
-        return;
-      }
+        if (noActiveDefinition) {
+          this.navigationTree$.next(undefined);
+          this.activeNodes$.next([]);
+          return;
+        }
 
-      const { sideNavComponent } = definition;
-      if (sideNavComponent) {
-        this.setSideNavComponent(sideNavComponent);
-      }
+        const { sideNavComponent } = definition;
+        if (sideNavComponent) {
+          this.setSideNavComponent(sideNavComponent);
+        }
 
-      this.initNavigation(nextId, definition.navigationTree$);
-    });
+        this.initNavigation(nextId, definition.navigationTree$);
+      });
   }
 
   private goToSolutionHome(id: string) {
