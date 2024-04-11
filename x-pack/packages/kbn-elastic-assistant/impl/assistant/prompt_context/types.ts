@@ -54,6 +54,12 @@ export interface PromptContext {
    * A unique identifier for this prompt context
    */
   id: string;
+
+  /**
+   * Replacements associated with the context, i.e. replacements for an insight provided as context
+   */
+  replacements?: Record<string, string>;
+
   /**
    * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens
    */
@@ -75,6 +81,8 @@ export interface SelectedPromptContext {
   promptContextId: string;
   /** this data is not anonymized  */
   rawData: string | Record<string, string[]>;
+  /** replacements associated with the context, i.e. replacements for an insight provided as context */
+  replacements?: Record<string, string>;
 }
 
 /**

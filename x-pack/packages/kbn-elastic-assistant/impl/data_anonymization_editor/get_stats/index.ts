@@ -13,9 +13,11 @@ import { Stats } from '../helpers';
 export const getStats = ({
   anonymizationFields = [],
   rawData,
+  replacements,
 }: {
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
+  replacements?: Record<string, string>;
 }): Stats => {
   const ZERO_STATS = {
     allowed: 0,
@@ -35,7 +37,14 @@ export const getStats = ({
       total: anonymizationFields.length,
     };
   } else if (typeof rawData === 'string') {
-    return ZERO_STATS;
+    if (replacements == null) {
+      return ZERO_STATS;
+    } else {
+      return {
+        ...ZERO_STATS,
+        anonymized: Object.keys(replacements).length,
+      };
+    }
   } else {
     const rawFields = Object.keys(rawData);
 

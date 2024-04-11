@@ -15,6 +15,7 @@ import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { ContextEditorFlyout } from './context_editor_flyout';
 import { ContextEditor } from './context_editor';
+import { ReplacementsContextViewer } from './replacements_context_viewer';
 import { Stats } from './stats';
 
 const EditorContainer = styled.div`
@@ -92,7 +93,14 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
       <EuiSpacer size="s" />
 
       {typeof selectedPromptContext.rawData === 'string' ? (
-        <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+        selectedPromptContext.replacements != null ? (
+          <ReplacementsContextViewer
+            markdown={selectedPromptContext.rawData}
+            replacements={selectedPromptContext.replacements}
+          />
+        ) : (
+          <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+        )
       ) : (
         <ContextEditor
           anonymizationFields={
