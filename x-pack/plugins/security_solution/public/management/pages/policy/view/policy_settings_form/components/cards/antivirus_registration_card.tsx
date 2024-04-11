@@ -40,7 +40,7 @@ const ENABLED = i18n.translate(
 );
 
 const DISABLED = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.enabled',
+  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.disabled',
   { defaultMessage: 'disabled' }
 );
 
@@ -80,7 +80,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
               <EuiIconTip
                 position="right"
                 content={i18n.translate(
-                  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePreventTooltip',
+                  'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.tooltip',
                   {
                     defaultMessage:
                       'Using this setting will automatically enable antivirus registration if Malware protection is set to prevent. ' +
