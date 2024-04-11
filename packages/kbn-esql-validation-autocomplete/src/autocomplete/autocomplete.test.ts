@@ -1051,7 +1051,7 @@ describe('autocomplete', () => {
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
-      if (fn.name !== 'auto_bucket') {
+      if (fn.name !== 'bucket') {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {
@@ -1102,7 +1102,7 @@ describe('autocomplete', () => {
       }
     }
 
-    testSuggestions('from a | eval var0 = auto_bucket(@timestamp,', []);
+    testSuggestions('from a | eval var0 = bucket(@timestamp,', []);
 
     describe('date math', () => {
       const dateSuggestions = timeLiterals.map(({ name }) => name);

@@ -598,11 +598,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1477,11 +1477,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedFunctions = getFieldMapping(params, {
@@ -1777,26 +1777,25 @@ describe('validation logic', () => {
       });
 
       describe('constant-only parameters', () => {
+        testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
+          'Argument of [abs] must be a constant, received [numberField]',
+        ]);
         testErrorsAndWarnings(
-          'from index | eval auto_bucket(dateField, abs(numberField), "", "")',
-          ['Argument of [abs] must be a constant, received [numberField]']
-        );
-        testErrorsAndWarnings(
-          'from index | eval auto_bucket(dateField, abs(length(numberField)), "", "")',
+          'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
           ['Argument of [length] must be a constant, received [numberField]']
         );
-        testErrorsAndWarnings('from index | eval auto_bucket(dateField, pi(), "", "")', []);
-        testErrorsAndWarnings('from index | eval auto_bucket(dateField, 1 + 30 / 10, "", "")', []);
+        testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
+        testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
         testErrorsAndWarnings(
-          'from index | eval auto_bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
+          'from index | eval bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
           []
         );
         testErrorsAndWarnings(
-          'from index | eval auto_bucket(dateField, numberField, stringField, stringField)',
+          'from index | eval bucket(dateField, numberField, stringField, stringField)',
           [
-            'Argument of [auto_bucket] must be a constant, received [numberField]',
-            'Argument of [auto_bucket] must be a constant, received [stringField]',
-            'Argument of [auto_bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [numberField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
+            'Argument of [bucket] must be a constant, received [stringField]',
           ]
         );
       });
@@ -2140,11 +2139,11 @@ describe('validation logic', () => {
           }
 
           // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
-          // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
+          // bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
           // the right error message
           if (
             params.every(({ type }) => type !== 'any') &&
-            !['auto_bucket', 'to_version', 'mv_sort'].includes(name)
+            !['bucket', 'to_version', 'mv_sort'].includes(name)
           ) {
             // now test nested functions
             const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {

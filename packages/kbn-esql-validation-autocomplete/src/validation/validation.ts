@@ -417,10 +417,10 @@ function validateFunction(
            * the constantOnly flag.
            *
            * Example:
-           * auto_bucket(@timestamp, abs(bytes), "", "")
+           * bucket(@timestamp, abs(bytes), "", "")
            *
            * In the above example, the abs function is not defined with the constantOnly flag,
-           * but the second parameter in auto_bucket _is_ defined with the constantOnly flag.
+           * but the second parameter in bucket _is_ defined with the constantOnly flag.
            *
            * Because of this, the abs function's arguments inherit the constraint and each
            * should be validated as if each were constantOnly.
