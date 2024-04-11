@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   const TEST_COMPONENT_TEMPLATE = '.a_test_component_template';
+
   describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
