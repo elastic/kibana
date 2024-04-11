@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -17,93 +17,29 @@ import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { basicResolvers } from '../resolvers';
-import { ML_PAGES } from '../../../locator';
-import type { NavigateToPath } from '../../contexts/kibana';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
+import { useRefresh } from '../../use_refresh';
+import { Explorer } from '../../../explorer';
+import { ml } from '../../../services/ml_api_service';
+import { useExplorerData } from '../../../explorer/actions';
+import { useJobSelection } from '../../../components/job_selector/use_job_selection';
+import { useTableInterval } from '../../../components/controls/select_interval';
+import { useTableSeverity } from '../../../components/controls/select_severity';
+import { MlPageHeader } from '../../../components/page_header';
+import { PageTitle } from '../../../components/page_title';
+import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
+import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 
-import type { MlRoute, PageProps } from '../router';
-import { createPath, PageLoader } from '../router';
-import { useRefresh } from '../use_refresh';
-import { useRouteResolver } from '../use_resolver';
-import { Explorer } from '../../explorer';
-import { mlJobService } from '../../services/job_service';
-import { ml } from '../../services/ml_api_service';
-import { useExplorerData } from '../../explorer/actions';
-import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { useTableInterval } from '../../components/controls/select_interval';
-import { useTableSeverity } from '../../components/controls/select_severity';
-import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { MlPageHeader } from '../../components/page_header';
-import { PageTitle } from '../../components/page_title';
-import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
-import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
-import {
-  AnomalyExplorerContextProvider,
-  useAnomalyExplorerContext,
-} from '../../explorer/anomaly_explorer_context';
-
-export const explorerRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'explorer',
-  path: createPath(ML_PAGES.ANOMALY_EXPLORER),
-  title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
-    defaultMessage: 'Anomaly Explorer',
-  }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
-        defaultMessage: 'Anomaly Explorer',
-      }),
-    },
-  ],
-  enableDatePicker: true,
-  'data-test-subj': 'mlPageAnomalyExplorer',
-});
-
-const PageWrapper: FC<PageProps> = () => {
-  const {
-    services: {
-      mlServices: { mlApiServices },
-    },
-  } = useMlKibana();
-
-  const { context, results } = useRouteResolver('full', ['canGetJobs'], {
-    ...basicResolvers(),
-    jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => mlApiServices.jobs.jobsWithTimerange(getDateFormatTz()),
-  });
-
-  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
-
-  return (
-    <PageLoader context={context}>
-      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <AnomalyExplorerContextProvider>
-          {results ? (
-            <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
-          ) : null}
-        </AnomalyExplorerContextProvider>
-      </MlAnnotationUpdatesContext.Provider>
-    </PageLoader>
-  );
-};
-
-interface ExplorerUrlStateManagerProps {
+export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
+export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
+  jobsWithTimeRange,
+}) => {
   const {
     services: { cases, presentationUtil, uiSettings },
   } = useMlKibana();
