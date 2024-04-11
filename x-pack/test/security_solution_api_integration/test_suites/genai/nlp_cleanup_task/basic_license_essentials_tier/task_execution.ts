@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await ml.api.importTrainedModel('pt_tiny_fill_mask', 'pt_tiny_fill_mask');
 
         // Poll for model to be imported, this can fail with a 404 till the model is imported
-        let m1: MlGetTrainedModelsResponse;
+        let m1: MlGetTrainedModelsResponse = { count: 0, trained_model_configs: [] };
         await waitFor(
           async () => {
             ({ body: m1 } = await esSupertest.get(`/_ml/trained_models`).expect(200));
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(m1?.trained_model_configs.some((m) => m.model_type === 'lang_ident')).to.eql(true);
 
         // Grab the task SO so we can update it to 'run_soon'
-        // Note: Can't go directly through TaskManager in Serverless at the moment, see: // TODO: Create core issue
+        // Note: Can't go directly through TaskManager in Serverless at the moment, see: https://github.com/elastic/kibana/issues/179303
         const task = await kibanaServer.savedObjects.get({
           type: 'task',
           id: TASK_ID,
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Let's wait and see...
-        let m2: MlGetTrainedModelsResponse;
+        let m2: MlGetTrainedModelsResponse = { count: 0, trained_model_configs: [] };
         await waitFor(
           async () => {
             ({ body: m2 } = await esSupertest.get(`/_ml/trained_models`).expect(200));
