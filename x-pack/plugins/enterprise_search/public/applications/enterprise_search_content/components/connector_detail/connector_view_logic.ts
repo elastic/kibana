@@ -24,17 +24,24 @@ import {
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 
+import {
+  ConnectorNameAndDescriptionLogic,
+  ConnectorNameAndDescriptionActions,
+} from './connector_name_and_description_logic';
+
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
   fetchConnectorApiError: CachedFetchConnectorByIdApiLogicActions['apiError'];
   fetchConnectorApiReset: CachedFetchConnectorByIdApiLogicActions['apiReset'];
   fetchConnectorApiSuccess: CachedFetchConnectorByIdApiLogicActions['apiSuccess'];
-  startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
-  stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
+  nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
+  startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
+  stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
   updateConnectorConfiguration: PostConnectorConfigurationActions['makeRequest'];
   updateConnectorConfigurationSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
@@ -95,6 +102,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'makeRequest as updateConnectorConfiguration',
         'apiSuccess as updateConnectorConfigurationSuccess',
       ],
+      ConnectorNameAndDescriptionLogic,
+      ['apiSuccess as nameAndDescriptionApiSuccess', 'apiError as nameAndDescriptionApiError'],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -112,6 +121,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   listeners: ({ actions, values }) => ({
+    nameAndDescriptionApiError: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    nameAndDescriptionApiSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });

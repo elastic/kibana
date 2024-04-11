@@ -90,7 +90,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
    * Attachment types are being registered in
    * x-pack/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
    */
-  describe('Attachment framework', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/178690
+  describe.skip('Attachment framework', () => {
     describe('External reference attachments', () => {
       let caseWithAttachment: Case;
       const externalReferenceAttachment = getExternalReferenceAttachment();
