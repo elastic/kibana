@@ -32,7 +32,9 @@ describe('findOrCreateDataView', () => {
 
   it('should find and set dataView when analytics collection fetched', async () => {
     const dataView = { id: 'test', title: 'events1' } as DataView;
-    jest.spyOn(KibanaLogic.values.data?.dataViews, 'find').mockResolvedValueOnce([dataView]);
+    if (KibanaLogic.values.data) {
+      jest.spyOn(KibanaLogic.values.data.dataViews, 'find').mockResolvedValueOnce([dataView]);
+    }
 
     expect(
       await findOrCreateDataView({
