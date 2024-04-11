@@ -7,7 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+import {
+  TECHNICAL_PREVIEW,
+  TECHNICAL_PREVIEW_TOOLTIP,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
 import {
@@ -99,6 +103,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               return {
                 ...command,
                 helpHidden: true,
+                validate: () => {
+                  return UPGRADE_AGENT_FOR_RESPONDER(
+                    agentType,
+                    command.name as ConsoleResponseActionCommands
+                  );
+                },
               };
             }
             return command;
