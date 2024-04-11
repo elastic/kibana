@@ -60,8 +60,8 @@ export function GroupSloView({
   useEffect(() => {
     const subs = reloadGroupSubject?.subscribe((input) => {
       if (input) {
-        const ngroupBy = input?.groupFilters?.groupBy ?? groupBy;
-        setGroupBy(ngroupBy);
+        const nGroupBy = input?.groupFilters?.groupBy ?? groupBy;
+        setGroupBy(nGroupBy);
 
         const nKqlInput = input?.groupFilters?.kqlQuery ?? kqlQuery;
         setKqlQuery(nKqlInput);
