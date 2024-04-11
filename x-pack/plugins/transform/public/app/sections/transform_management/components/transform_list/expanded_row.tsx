@@ -25,6 +25,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
+
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
@@ -154,7 +157,11 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     if (item.stats.health !== undefined) {
       stateItems.push({
         title: 'health',
-        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
+        description: (
+          <TransformHealthColoredDot
+            healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats.health.status)}
+          />
+        ),
       });
     }
 

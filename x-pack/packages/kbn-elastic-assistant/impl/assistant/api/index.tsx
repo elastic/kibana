@@ -7,17 +7,16 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
+import { TraceOptions } from '../types';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
   conversationId: string;
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: ApiConfig;
@@ -26,6 +25,7 @@ export interface FetchConnectorExecuteAction {
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
+  traceOptions?: TraceOptions;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -42,8 +42,6 @@ export const fetchConnectorExecuteAction = async ({
   conversationId,
   isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
@@ -52,6 +50,7 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const isStream =
     assistantStreamingEnabled &&
@@ -63,8 +62,6 @@ export const fetchConnectorExecuteAction = async ({
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
-    allow,
-    allowReplacement,
     size,
   });
 
@@ -77,6 +74,10 @@ export const fetchConnectorExecuteAction = async ({
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
+    langSmithProject:
+      traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
+    langSmithApiKey:
+      traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
     ...optionalRequestParams,
   };
 
@@ -90,7 +91,7 @@ export const fetchConnectorExecuteAction = async ({
           signal,
           asResponse: true,
           rawResponse: true,
-          version: '1',
+          version: API_VERSIONS.internal.v1,
         }
       );
 
@@ -125,7 +126,7 @@ export const fetchConnectorExecuteAction = async ({
       body: JSON.stringify(requestBody),
       headers: { 'Content-Type': 'application/json' },
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     if (response.status !== 'ok' || !response.data) {
@@ -212,7 +213,7 @@ export const getKnowledgeBaseStatus = async ({
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as GetKnowledgeBaseStatusResponse;
@@ -251,7 +252,7 @@ export const postKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'POST',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as PostKnowledgeBaseResponse;
@@ -290,7 +291,7 @@ export const deleteKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'DELETE',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as DeleteKnowledgeBaseResponse;

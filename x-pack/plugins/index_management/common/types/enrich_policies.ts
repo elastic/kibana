@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-import type { EnrichPolicyType } from '@elastic/elasticsearch/lib/api/types';
-
-export interface SerializedEnrichPolicy {
-  type: EnrichPolicyType;
-  name: string;
-  sourceIndices: string[];
-  matchField: string;
-  enrichFields: string[];
-  query?: Record<string, any>;
-}
-
 export interface FieldItem {
   name: string;
   type: string;
