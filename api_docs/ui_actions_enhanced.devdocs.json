@@ -3365,7 +3365,15 @@
             "label": "isCompatible",
             "description": [],
             "signature": [
-              "<C = unknown>(context: C) => Promise<boolean>"
+              "(context: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
+              ") => Promise<boolean>"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
@@ -3374,12 +3382,18 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.DynamicActionManagerParams.isCompatible.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "C"
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,

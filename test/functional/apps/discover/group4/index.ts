@@ -36,5 +36,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_field_list_new_fields'));
     loadTestFile(require.resolve('./_request_cancellation'));
     loadTestFile(require.resolve('./_new_search'));
+    loadTestFile(require.resolve('./_document_comparison'));
   });
 }

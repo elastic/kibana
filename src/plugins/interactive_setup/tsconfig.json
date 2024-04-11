@@ -25,6 +25,7 @@
     "@kbn/core-preboot-server",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-theme-browser",
+    "@kbn/security-hardening",
   ],
   "exclude": [
     "target/**/*",
