@@ -52,7 +52,6 @@ export function GroupSloView({
   } else if (kqlQuery) {
     combinedKqlQuery = kqlQuery;
   }
-
   useEffect(() => {
     const subs = reloadGroupSubject?.subscribe((input) => {
       if (input) {

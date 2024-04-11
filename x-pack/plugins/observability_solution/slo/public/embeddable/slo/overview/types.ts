@@ -13,7 +13,6 @@ export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
   groupBy: GroupBy;
   groups?: string[];
-  tagsFilter?: Filter;
   filters?: Filter[];
   kqlQuery?: string;
 }

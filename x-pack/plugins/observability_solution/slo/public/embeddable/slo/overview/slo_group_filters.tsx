@@ -7,6 +7,7 @@
 import './slo_group_filters.scss';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Filter } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiSelect, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +46,7 @@ export const groupByOptions: Option[] = [
 ];
 
 interface Props {
-  onSelected: (prop: string, value: string | Array<string | undefined>) => void;
+  onSelected: (prop: string, value: string | Array<string | undefined> | Filter[]) => void;
   selectedFilters: GroupFilters;
 }
 

@@ -27,6 +27,7 @@ import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { ActiveAlerts } from '../../../hooks/active_alerts';
 import { buildSlo } from '../../../data/slo/slo';
 import { historicalSummaryData } from '../../../data/slo/historical_summary_data';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { GroupListView } from '../../../pages/slos/components/grouped_slos/group_list_view';
 import { render } from 'react-dom';
@@ -61,6 +62,7 @@ function createSloEmbeddableDepsMock(): SloEmbeddableDeps {
     theme: themeServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
     observability: {
       config: {
         unsafe: {
@@ -157,24 +159,7 @@ describe('SLO Overview embeddable', () => {
       overviewMode: 'groups',
       groupFilters: {
         groupBy: 'slo.tags',
-        groups: [
-          {
-            group: 'production',
-            groupBy: 'slo.tags',
-            summary: {
-              total: 3,
-              violated: 0,
-              healthy: 3,
-              noData: 0,
-              degrading: 0,
-              worst: {
-                sliValue: 0.97,
-                status: 'VIOLATED',
-                slo: { id: 'slo1', instanceId: 'sloInstanceId1', name: 'test' },
-              },
-            },
-          },
-        ],
+        groups: ['production'],
       },
     });
     await waitOneTick();
