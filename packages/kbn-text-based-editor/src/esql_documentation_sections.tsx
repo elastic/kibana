@@ -3704,8 +3704,9 @@ FROM employees
             {
               defaultMessage: `### VALUES
 
-_**WARNING: Do not use \`VALUES\` on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+**WARNING: Do not use \`VALUES\` on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
 
+Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use \`MV_SORT\`.
 
 Accepts an expression of any type except \`geo_point\`, \`cartesian_point\`, \`geo_shape\`, or \`cartesian_shape\`.
 
