@@ -63,9 +63,10 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   async _getRelevantDocuments(query: string): Promise<Document[]> {
     try {
+      const queryBody = this.query_body_fn(query);
       const results = await this.client.search({
+        ...queryBody,
         index: this.index,
-        query: this.query_body_fn(query),
         size: this.k,
       });
 
@@ -81,9 +82,9 @@ export class ElasticsearchRetriever extends BaseRetriever {
         return new Document({
           pageContent: hit._source[pageContentFieldKey],
           metadata: {
-            score: hit._score,
-            id: hit._id,
-            index: hit._index,
+            _score: hit._score,
+            _id: hit._id,
+            _index: hit._index,
           },
         });
       };
