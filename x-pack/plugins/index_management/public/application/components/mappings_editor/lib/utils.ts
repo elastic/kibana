@@ -8,35 +8,34 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  DataType,
-  Fields,
-  FieldsWithSemanticTextInfo,
-  Field,
-  NormalizedFields,
-  NormalizedField,
-  FieldMeta,
-  MainType,
-  SubType,
   ChildFieldName,
-  ParameterName,
   ComboBoxOption,
+  DataType,
+  Field,
+  FieldMeta,
+  Fields,
   GenericObject,
-  RuntimeFields,
+  MainType,
+  NormalizedField,
+  NormalizedFields,
   NormalizedRuntimeFields,
+  ParameterName,
+  RuntimeFields,
+  SubType,
 } from '../types';
 
 import {
-  SUB_TYPE_MAP_TO_MAIN,
+  MAIN_DATA_TYPE_DEFINITION,
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
+  SUB_TYPE_MAP_TO_MAIN,
+  TYPE_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
-  TYPE_DEFINITION,
-  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
+import { FieldConfig } from '../shared_imports';
 
 export const getUniqueId = () => uuidv4();
 
@@ -334,14 +333,10 @@ const replaceAliasIdByAliasPath = (
   return updatedById;
 };
 
-export const deNormalize = ({
-  rootLevelFields,
-  byId,
-  aliases,
-}: NormalizedFields): FieldsWithSemanticTextInfo => {
+export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields): Fields => {
   const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
-  const deNormalizePaths = (ids: string[], to: FieldsWithSemanticTextInfo = {}) => {
+  const deNormalizePaths = (ids: string[], to: Fields = {}) => {
     ids.forEach((id) => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
