@@ -19,7 +19,7 @@ export interface HostKpiChartsProps {
   filters?: Filter[];
   searchSessionId?: string;
   options?: {
-    subtitle?: string;
+    getSubtitle?: (formulaValue: string) => string;
   };
   loading?: boolean;
 }
@@ -37,7 +37,7 @@ export const HostKpiCharts = ({
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
     options: {
-      subtitle: options?.subtitle,
+      getSubtitle: options?.getSubtitle,
       seriesColor: euiTheme.colors.lightestShade,
     },
   });
