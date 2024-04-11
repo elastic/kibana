@@ -92,14 +92,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const getRange = async () => {
         await dashboardControls.rangeSliderWaitForLoading(rangeSliderId);
-        const lower = await dashboardControls.rangeSliderGetLowerBoundAttribute(
-          rangeSliderId,
-          'placeholder'
-        );
-        const upper = await dashboardControls.rangeSliderGetUpperBoundAttribute(
-          rangeSliderId,
-          'placeholder'
-        );
+        const lower =
+          (await dashboardControls.rangeSliderGetLowerBoundAttribute(
+            rangeSliderId,
+            'placeholder'
+          )) ?? '0';
+        const upper =
+          (await dashboardControls.rangeSliderGetUpperBoundAttribute(
+            rangeSliderId,
+            'placeholder'
+          )) ?? '0';
         return parseInt(upper, 10) - parseInt(lower, 10);
       };
 

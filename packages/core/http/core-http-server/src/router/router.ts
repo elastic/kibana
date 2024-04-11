@@ -124,7 +124,10 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  validationSchemas?: RouteValidator<unknown, unknown, unknown> | false;
+  validationSchemas?:
+    | (() => RouteValidator<unknown, unknown, unknown>)
+    | RouteValidator<unknown, unknown, unknown>
+    | false;
   handler: (
     req: Request,
     responseToolkit: ResponseToolkit

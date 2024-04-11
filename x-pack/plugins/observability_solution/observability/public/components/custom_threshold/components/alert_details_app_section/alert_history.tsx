@@ -22,13 +22,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_GROUP, ALERT_GROUP_VALUE, type AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_INSTANCE_ID, type AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../../common/utils/formatters';
-import {
-  getGroupFilters,
-  getGroupQueries,
-} from '../../../../../common/custom_threshold_rule/helpers/get_group';
+import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AlertParams } from '../../types';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
@@ -54,6 +51,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const criterion = rule.params.criteria[0];
   const groups = alert.fields[ALERT_GROUP];
+  const instanceId = alert.fields[ALERT_INSTANCE_ID];
   const featureIds = [rule.consumer as AlertConsumers];
 
   const {
@@ -65,7 +63,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
     featureIds,
     ruleId: rule.id,
     dateRange,
-    queries: getGroupQueries(groups, ALERT_GROUP_VALUE),
+    instanceId,
   });
 
   // Only show alert history chart if there is only one condition
