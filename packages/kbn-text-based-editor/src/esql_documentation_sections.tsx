@@ -2179,6 +2179,36 @@ ROW message = "   some text  ",  color = " red "
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction',
+        {
+          defaultMessage: 'SIGNUM',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction.markdown',
+            {
+              defaultMessage: `### SIGNUM
+Returns the sign of the given number. Returns \`-1\` for negative numbers, \`0\` for \`0\` and \`1\` for positive numbers.
+
+Example:
+
+\`\`\`
+ROW d = 100.0
+| EVAL s = SIGNUM(d)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction',
         {
           defaultMessage: 'SIN',
