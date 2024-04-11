@@ -44,6 +44,10 @@ import {
   ServiceOverviewLocatorDefinition,
 } from './locators/apm/service_overview_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
+import {
+  type TransactionDetailsByNameLocator,
+  TransactionDetailsByNameLocatorDefinition,
+} from './locators/apm/transaction_details_by_name_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -73,6 +77,7 @@ interface ObservabilitySharedLocators {
   };
   apm: {
     serviceOverview: ServiceOverviewLocator;
+    transactionDetailsByName: TransactionDetailsByNameLocator;
   };
 }
 
@@ -140,6 +145,9 @@ export class ObservabilitySharedPlugin implements Plugin {
       },
       apm: {
         serviceOverview: urlService.locators.create(new ServiceOverviewLocatorDefinition()),
+        transactionDetailsByName: urlService.locators.create(
+          new TransactionDetailsByNameLocatorDefinition()
+        ),
       },
     };
   }

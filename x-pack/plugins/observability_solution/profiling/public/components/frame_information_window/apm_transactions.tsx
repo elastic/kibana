@@ -69,6 +69,22 @@ export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }
         defaultMessage: 'Transaction Name',
       }),
       truncateText: true,
+      render(_, { serviceName, transactionName }) {
+        if (transactionName) {
+          return (
+            <EuiLink
+              data-test-subj="profilingColumnsLink"
+              href={observabilityShared.locators.apm.transactionDetailsByName.getRedirectUrl({
+                serviceName,
+                transactionName,
+              })}
+            >
+              {transactionName}
+            </EuiLink>
+          );
+        }
+        return 'N/A';
+      },
     },
   ];
 
