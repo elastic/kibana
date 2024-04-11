@@ -645,7 +645,7 @@ export function MachineLearningJobWizardCommonProvider(
       const { startDate: origStartDate } = await this.getSelectedDateRange();
 
       // calculate the new end datedate
-      const shortDurationEndDate = `${origStartDate.split(':', 1)[0]}:01:00.000`;
+      const shortDurationEndDate = `${origStartDate?.split(':', 1)[0]}:01:00.000`;
 
       // set the new end date
       await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', shortDurationEndDate, {
