@@ -784,6 +784,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -809,6 +810,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -836,6 +838,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -882,6 +885,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -907,6 +911,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -934,6 +939,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -978,6 +984,7 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
@@ -1010,6 +1017,7 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
@@ -1045,6 +1053,7 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
@@ -1099,6 +1108,7 @@ describe('AuthenticationService', () => {
           body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
           },
         });
 
@@ -1140,6 +1150,7 @@ describe('AuthenticationService', () => {
           body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
