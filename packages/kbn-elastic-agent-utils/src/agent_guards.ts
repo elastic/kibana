@@ -16,11 +16,11 @@ import type {
 } from './agent_names';
 
 export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTelemetryAgentName {
-  return OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
+  return agentName?.startsWith("opentelemetry/") || OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
 }
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
-  return JAVA_AGENT_NAMES.includes(agentName! as JavaAgentName);
+  return agentName?.startsWith("opentelemetry/java") || JAVA_AGENT_NAMES.includes(agentName! as JavaAgentName);
 }
 
 export function isRumAgentName(agentName?: string): agentName is RumAgentName {
