@@ -101,8 +101,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { CreatePackagePolicySinglePage } from '.';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+
+import { CreatePackagePolicySinglePage } from '.';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -523,7 +524,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty name', async () => {
           await act(async () => {
-            fireEvent.change(renderResult.getByLabelText('Integration name'), {
+            fireEvent.change(renderResult.getByTestId('packagePolicyNameInput'), {
               target: { value: '' },
             });
           });

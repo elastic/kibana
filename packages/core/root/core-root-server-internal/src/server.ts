@@ -164,7 +164,6 @@ export class Server {
     this.log.debug('prebooting server');
 
     const config = await firstValueFrom(this.configService.atPath<CoreConfigType>(coreConfig.path));
-
     const { disablePreboot } = config.lifecycle;
     if (disablePreboot) {
       this.log.info('preboot phase is disabled - skipping');

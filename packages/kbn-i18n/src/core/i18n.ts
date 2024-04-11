@@ -166,7 +166,7 @@ export function translate(
  * @param newTranslation
  */
 export function init(newTranslation?: TranslationInput) {
-  if (!newTranslation) {
+  if (!newTranslation || !newTranslation.locale || typeof newTranslation.locale !== 'string') {
     return;
   }
 

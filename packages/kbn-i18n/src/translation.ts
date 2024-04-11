@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// import { Formats } from './core/formats';
-
 import { IntlShape, CustomFormats } from '@formatjs/intl';
 
 export interface TranslationInput {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { OnErrorFn } from '@formatjs/intl';
+import { OnErrorFn, IntlErrorCode } from '@formatjs/intl';
 
 export const handleIntlError: OnErrorFn = (error) => {
   // Dont through on missing translations.
-  if (error.code !== 'MISSING_TRANSLATION') {
+  if (error.code !== IntlErrorCode.MISSING_TRANSLATION) {
     throw error;
   }
 };
