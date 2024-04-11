@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  RefetchOptions,
+  QueryObserverResult,
+  RefetchQueryFilters,
+} from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
@@ -33,6 +38,9 @@ interface UseFetchSloGroupsResponse {
   isSuccess: boolean;
   isError: boolean;
   data: FindSLOGroupsResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<FindSLOGroupsResponse | undefined, unknown>>;
 }
 
 export function useFetchSloGroups({
@@ -74,7 +82,7 @@ export function useFetchSloGroups({
     }
   }, [filterDSL, tagsFilter, statusFilter, dataView]);
 
-  const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
+  const { data, isLoading, isSuccess, isError, isRefetching, refetch } = useQuery({
     queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters, lastRefresh }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
@@ -115,5 +123,6 @@ export function useFetchSloGroups({
     isSuccess,
     isError,
     isRefetching,
+    refetch,
   };
 }

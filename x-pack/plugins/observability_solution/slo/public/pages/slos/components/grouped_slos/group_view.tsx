@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
@@ -22,12 +22,21 @@ interface Props {
   sort?: string;
   direction?: SortDirection;
   filters?: Filter[];
+  lastRefreshTime?: number;
 }
 
-export function GroupView({ kqlQuery, sloView, sort, direction, groupBy, filters }: Props) {
+export function GroupView({
+  kqlQuery,
+  sloView,
+  sort,
+  direction,
+  groupBy,
+  filters,
+  lastRefreshTime,
+}: Props) {
   const { state, onStateChange } = useUrlSearchState();
   const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
-  const { data, isLoading, isError } = useFetchSloGroups({
+  const { data, isLoading, isError, refetch } = useFetchSloGroups({
     perPage,
     page: page + 1,
     groupBy,
@@ -37,6 +46,11 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy, filters
     filters,
     lastRefresh,
   });
+
+  useEffect(() => {
+    refetch();
+  }, [lastRefreshTime, refetch]);
+
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
     onStateChange({ page: pageNumber });

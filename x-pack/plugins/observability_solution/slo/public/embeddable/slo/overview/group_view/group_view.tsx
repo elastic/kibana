@@ -31,6 +31,7 @@ export function GroupSloView({
   filters: initialFilters = [],
   reloadGroupSubject,
 }: Props) {
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const [groupBy, setGroupBy] = useState(initialGroupBy);
   const [kqlQuery, setKqlQuery] = useState(initialKqlQuery);
   const [filters, setFilters] = useState(initialFilters);
@@ -53,6 +54,7 @@ export function GroupSloView({
         const nGroups = input?.groupFilters?.groups ?? groups;
         setGroups(nGroups);
       }
+      setLastRefreshTime(Date.now());
     });
     return () => {
       subs?.unsubscribe();
@@ -60,6 +62,12 @@ export function GroupSloView({
   }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject]);
 
   return (
-    <GroupView sloView={sloView} groupBy={groupBy} kqlQuery={combinedKqlQuery} filters={filters} />
+    <GroupView
+      sloView={sloView}
+      groupBy={groupBy}
+      kqlQuery={combinedKqlQuery}
+      filters={filters}
+      lastRefreshTime={lastRefreshTime}
+    />
   );
 }
