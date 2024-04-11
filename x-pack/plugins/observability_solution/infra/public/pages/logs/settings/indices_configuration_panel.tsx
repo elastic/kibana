@@ -18,7 +18,7 @@ import {
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { LOG_THRESHOLD_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { FormElement, isFormElementForType } from './form_elements';
@@ -70,7 +70,7 @@ export const IndicesConfigurationPanel = React.memo<{
       if (http) {
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
-          filterConsumers: [AlertConsumers.LOGS],
+          typesFilter: [LOG_THRESHOLD_ALERT_TYPE_ID],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,

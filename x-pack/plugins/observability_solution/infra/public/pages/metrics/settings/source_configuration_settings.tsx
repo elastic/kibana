@@ -19,7 +19,10 @@ import {
 } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -54,7 +57,7 @@ export const SourceConfigurationSettings = ({
       if (http) {
         const { ruleExecutionStatus } = await loadRuleAggregations({
           http,
-          filterConsumers: [AlertConsumers.INFRASTRUCTURE],
+          typesFilter: [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, METRIC_THRESHOLD_ALERT_TYPE_ID],
         });
         const numberOfRules = Object.values(ruleExecutionStatus).reduce(
           (acc, value) => acc + value,
