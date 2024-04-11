@@ -62,7 +62,6 @@ import {
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { ThemeProvider } from '@emotion/react';
-import { createFleetActionsClientMock } from '@kbn/fleet-plugin/server/mocks';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 
 // mock useParams
