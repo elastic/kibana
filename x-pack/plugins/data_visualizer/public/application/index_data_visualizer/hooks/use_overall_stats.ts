@@ -310,14 +310,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
           const aggregatableOverallStatsResp: AggregatableFieldOverallStats[] = [];
           const nonAggregatableOverallStatsResp: NonAggregatableFieldOverallStats[] = [];
 
-          // @TODO: remove
           let sampledNonAggregatableFieldsExamples: Array<{ [key: string]: string }> | undefined;
           value.forEach((resp, idx) => {
             if (idx === 0 && isNonAggregatableSampledDocs(resp)) {
               const docs = resp.rawResponse.hits.hits.map((d) =>
                 d.fields ? getProcessedFields(d.fields) : {}
               );
-
               sampledNonAggregatableFieldsExamples = docs;
             }
             if (isAggregatableFieldOverallStats(resp)) {

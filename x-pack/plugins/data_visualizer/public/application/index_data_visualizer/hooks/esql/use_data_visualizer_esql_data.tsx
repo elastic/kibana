@@ -274,6 +274,8 @@ export const useESQLDataVisualizerData = (
     columns,
     cancelOverallStatsRequest,
     timeFieldName,
+    queryHistoryStatus,
+    exampleDocs,
   } = useESQLOverallStatsData(fieldStatsRequest);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
@@ -527,9 +529,14 @@ export const useESQLDataVisualizerData = (
         visibleFieldTypes
       ).filteredFields;
 
+      const examples = exampleDocs?.reduce((map, exampleDoc) => {
+        map.set(exampleDoc.fieldName, exampleDoc);
+        return map;
+      }, new Map());
+
       if (fieldStatsProgress.loaded === 100 && fieldStats) {
         combinedConfigs = combinedConfigs.map((c) => {
-          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? examples?.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
                 ...c,
@@ -549,6 +556,7 @@ export const useESQLDataVisualizerData = (
       fieldStatsProgress.loaded,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
+      exampleDocs,
     ]
   );
 
@@ -620,5 +628,6 @@ export const useESQLDataVisualizerData = (
     showEmptyFields,
     fieldsCountStats,
     timeFieldName,
+    queryHistoryStatus,
   };
 };

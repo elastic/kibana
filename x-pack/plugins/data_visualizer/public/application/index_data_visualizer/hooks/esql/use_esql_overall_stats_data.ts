@@ -9,7 +9,7 @@ import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
@@ -51,6 +51,7 @@ interface Data {
     nonAggregatableExistsFields: NonAggregatableField[];
     nonAggregatableNotExistsFields: NonAggregatableField[];
   };
+  exampleDocs: Array<{ fieldName: string; examples: string[] }> | undefined;
 }
 
 const getESQLDocumentCountStats = async (
@@ -157,6 +158,7 @@ export const getInitialData = (): Data => ({
   timeFieldName: undefined,
   columns: undefined,
   totalCount: undefined,
+  exampleDocs: undefined,
 });
 
 const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
@@ -200,6 +202,7 @@ export const useESQLOverallStatsData = (
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
+  const [queryHistoryStatus, setQueryHistoryStatus] = useState<boolean | undefined>(false);
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
@@ -243,15 +246,18 @@ export const useESQLOverallStatsData = (
         // For doc count chart, we want the full base query without any limit
         const esqlBaseQuery = searchQuery.esql;
 
-        // dropNullColumns wills all columns are empty if limti 0
-        // So we can use this one query to
+        setQueryHistoryStatus(true);
+
+        // Note: dropNullColumns will return empty [] for all_columns if limit size is 0
+        // So we are making a query with default limit
+        // And use this one query to
         // 1) identify populated/empty fields
         // 2) gather examples for populated text fields
         const columnsResp = await runRequest(
           {
             params: {
               // Doing this to match with the default limit
-              query: getESQLWithSafeLimit(esqlBaseQuery, 1000),
+              query: esqlBaseQuery,
               ...(filter ? { filter } : {}),
               version: ESQL_LATEST_VERSION,
               dropNullColumns: true,
@@ -259,15 +265,17 @@ export const useESQLOverallStatsData = (
           },
           { strategy: ESQL_SEARCH_STRATEGY }
         );
+        setQueryHistoryStatus(false);
+
+        const columnInfo = columnsResp?.rawResponse
+          ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
+          : [];
 
         const populatedColumns = new Set(columnsResp?.rawResponse.columns.map((c) => c.name));
-        const columns = columnsResp?.rawResponse
-          ? // @ts-expect-error ES types need to be updated with columns for ESQL queries
-            (columnsResp.rawResponse.all_columns.map((c) => ({
-              ...c,
-              secondaryType: getSupportedFieldType(c.type),
-            })) as Column[])
-          : [];
+        const columns = columnInfo.map((c) => ({
+          ...c,
+          secondaryType: getSupportedFieldType(c.type),
+        })) as Column[];
 
         const timeFields = columns.filter((d) => d.type === 'date');
 
@@ -423,6 +431,22 @@ export const useESQLOverallStatsData = (
             isRunning: false,
             error: undefined,
           });
+
+          const columnsWithExamples = columnInfo.reduce((hashmap, curr, idx) => {
+            if (curr.type === 'text' || curr.type === 'geo_point' || curr.type === 'geo_shape') {
+              hashmap[curr.name] = idx;
+            }
+            return hashmap;
+          }, {} as Record<string, number>);
+
+          const exampleDocs = Object.entries(columnsWithExamples).map(([fieldName, idx]) => {
+            const examples = [
+              ...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx])),
+            ].slice(0, 10);
+            return { fieldName, examples };
+          });
+
+          setTableData({ exampleDocs });
         }
       } catch (error) {
         // If error already handled in sub functions, no need to propogate
@@ -446,7 +470,12 @@ export const useESQLOverallStatsData = (
   }, [startFetch]);
 
   return useMemo(
-    () => ({ ...tableData, overallStatsProgress, cancelOverallStatsRequest: cancelRequest }),
-    [tableData, overallStatsProgress, cancelRequest]
+    () => ({
+      ...tableData,
+      overallStatsProgress,
+      cancelOverallStatsRequest: cancelRequest,
+      queryHistoryStatus,
+    }),
+    [tableData, overallStatsProgress, cancelRequest, queryHistoryStatus]
   );
 };
