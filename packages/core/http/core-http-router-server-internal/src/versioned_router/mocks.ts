@@ -19,5 +19,5 @@ export function createRouter() {
     patch: jest.fn(),
     routerPath: '',
     versioned: {} as any,
-  } as unknown as Router;
+  } as unknown as jest.Mocked<Router>;
 }
