@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
-      await testSubjects.existOrFail('dscGridToolbar');
+      await testSubjects.existOrFail('unifiedDataTableToolbar');
     });
   });
 }

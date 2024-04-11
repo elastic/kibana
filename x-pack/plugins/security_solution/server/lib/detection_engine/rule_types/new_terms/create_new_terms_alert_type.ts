@@ -48,7 +48,7 @@ import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppre
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger, licensing } = createOptions;
+  const { logger, licensing, experimentalFeatures } = createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -110,7 +110,6 @@ export const createNewTermsAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           inputIndexFields,
-          experimentalFeatures,
           alertWithSuppression,
         },
         services,
