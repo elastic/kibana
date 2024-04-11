@@ -25,6 +25,7 @@ import { getComparatorSchemaType } from '../lib/comparator';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
+export const SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION = 100;
 
 // rule type parameters
 export type EsQueryRuleParams = TypeOf<typeof EsQueryRuleParamsSchema>;
@@ -210,6 +211,20 @@ function validateParams(anyParams: unknown): string | undefined {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage', {
       defaultMessage: '[esQuery]: must be valid JSON',
     });
+  }
+}
+
+export function validateServerless(anyParams: EsQueryRuleParams) {
+  const { size } = anyParams;
+  if (size > SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION) {
+    throw new Error(
+      i18n.translate('xpack.stackAlerts.esQuery.serverless.sizeErrorMessage', {
+        defaultMessage: '[size]: must be less than or equal to {maxSize}',
+        values: {
+          maxSize: SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION,
+        },
+      })
+    );
   }
 }
 

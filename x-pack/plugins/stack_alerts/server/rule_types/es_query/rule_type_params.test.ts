@@ -13,6 +13,7 @@ import {
   EsQueryRuleParamsSchema,
   EsQueryRuleParams,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
+  validateServerless,
 } from './rule_type_params';
 
 const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
@@ -370,6 +371,15 @@ describe('ruleType Params validate()', () => {
     );
   });
 
+  describe('serverless', () => {
+    it('fails for invalid size', async () => {
+      params.size = 101;
+      expect(onValidateServerless()).toThrowErrorMatchingInlineSnapshot(
+        `"[size]: must be less than or equal to 100"`
+      );
+    });
+  });
+
   describe('esqlQuery search type', () => {
     beforeEach(() => {
       params = { ...DefaultParams, searchType: 'esqlQuery', esqlQuery: { esql: 'from test' } };
@@ -401,5 +411,9 @@ describe('ruleType Params validate()', () => {
 
   function validate(): TypeOf<typeof EsQueryRuleParamsSchema> {
     return EsQueryRuleParamsSchema.validate(params);
+  }
+
+  function onValidateServerless() {
+    return () => validateServerless(params);
   }
 });
