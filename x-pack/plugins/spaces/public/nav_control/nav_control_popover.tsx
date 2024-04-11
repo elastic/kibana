@@ -35,7 +35,7 @@ interface Props {
   capabilities: Capabilities;
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  serverBasePath: string;
+  pageBasePath: string;
   theme: WithEuiThemeProps['theme'];
 }
 
@@ -97,7 +97,7 @@ class NavControlPopoverUI extends Component<Props, State> {
         <SpacesMenu
           id={popoutContentId}
           spaces={this.state.spaces}
-          serverBasePath={this.props.serverBasePath}
+          pageBasePath={this.props.pageBasePath}
           toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}

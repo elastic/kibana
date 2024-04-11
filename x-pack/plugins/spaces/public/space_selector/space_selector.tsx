@@ -37,7 +37,7 @@ import type { SpacesManager } from '../spaces_manager';
 
 interface Props {
   spacesManager: SpacesManager;
-  serverBasePath: string;
+  pageBasePath: string;
   customBranding$: Observable<CustomBranding>;
 }
 
@@ -169,7 +169,7 @@ export class SpaceSelector extends Component<Props, State> {
           {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
           {!this.state.loading && (
-            <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+            <SpaceCards spaces={filteredSpaces} pageBasePath={this.props.pageBasePath} />
           )}
 
           {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (

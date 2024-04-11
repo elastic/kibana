@@ -21,10 +21,10 @@ const LazySpaceAvatar = lazy(() =>
 
 interface Props {
   space: Space;
-  serverBasePath: string;
+  pageBasePath: string;
 }
 export const SpaceCard = (props: Props) => {
-  const { serverBasePath, space } = props;
+  const { pageBasePath, space } = props;
 
   return (
     <EuiCard
@@ -33,7 +33,7 @@ export const SpaceCard = (props: Props) => {
       icon={renderSpaceAvatar(space)}
       title={space.name}
       description={renderSpaceDescription(space)}
-      href={addSpaceIdToPath(serverBasePath, space.id, ENTER_SPACE_PATH)}
+      href={addSpaceIdToPath(pageBasePath, space.id, ENTER_SPACE_PATH)}
     />
   );
 };
