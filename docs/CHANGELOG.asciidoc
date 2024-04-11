@@ -174,7 +174,7 @@ For more information, refer to ({kibana-issue}179940[#179940]).
 [%collapsible]
 ====
 *Details* +
-For more information, refer to ({kibana-issue}180613[#180613]).
+When creating a new control or editing an existing control, selecting a field that has a custom label will cause an error. For more information, refer to ({kibana-issue}180613[#180613]).
 ====
 
 [float]
