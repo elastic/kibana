@@ -83,15 +83,13 @@ describe('useAssetCriticality', () => {
         'isSuccess'
       );
 
-      await renderMutation(() =>
+      await renderMutation(async () =>
         mutation.mutate({
           idField: 'test_entity_type.name',
           idValue: 'test_entity_name',
           criticalityLevel: 'unassigned',
         })
       );
-
-      await Promise.resolve(); // why do I need this here?
 
       expect(mockDeleteAssetCriticality).toHaveBeenCalled();
     });
@@ -107,15 +105,13 @@ describe('useAssetCriticality', () => {
         'isSuccess'
       );
 
-      await renderMutation(() =>
+      await renderMutation(async () =>
         mutation.mutate({
           idField: 'test_entity_type.name',
           idValue: 'test_entity_name',
           criticalityLevel: 'critical',
         })
       );
-
-      await Promise.resolve(); // why do I need this here?
 
       expect(mockCreateAssetCriticality).toHaveBeenCalled();
     });
