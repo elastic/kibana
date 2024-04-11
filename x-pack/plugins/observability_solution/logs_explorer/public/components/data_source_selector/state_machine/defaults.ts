@@ -7,7 +7,7 @@
 
 import { AllDatasetSelection } from '../../../../common/data_source_selection';
 import { HashedCache } from '../../../../common/hashed_cache';
-import { INTEGRATIONS_PANEL_ID, INTEGRATIONS_TAB_ID } from '../constants';
+import { INTEGRATIONS_TAB_ID } from '../constants';
 import { DataSourceSelectorSearchParams } from '../types';
 import { DefaultDataSourceSelectorContext } from './types';
 
@@ -19,7 +19,6 @@ export const defaultSearch: DataSourceSelectorSearchParams = {
 export const DEFAULT_CONTEXT: DefaultDataSourceSelectorContext = {
   selection: AllDatasetSelection.create(),
   searchCache: new HashedCache(),
-  panelId: INTEGRATIONS_PANEL_ID,
   tabId: INTEGRATIONS_TAB_ID,
   search: defaultSearch,
   dataViewsFilter: {},

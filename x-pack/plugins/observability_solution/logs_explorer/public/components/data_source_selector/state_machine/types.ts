@@ -11,21 +11,20 @@ import {
   DataSourceSelectionChangeHandler,
 } from '../../../../common/data_source_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
-import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
+import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { DataSourceSelectorSearchParams, PanelId, TabId } from '../types';
+import { DataSourceSelectorSearchParams, TabId } from '../types';
 import { DataViewsFilterParams } from '../../../state_machines/data_views';
 
 export interface DefaultDataSourceSelectorContext {
   selection: DataSourceSelection;
   tabId: TabId;
-  panelId: PanelId;
-  searchCache: IHashedCache<PanelId | TabId, DataSourceSelectorSearchParams>;
+  searchCache: IHashedCache<TabId, DataSourceSelectorSearchParams>;
   search: DataSourceSelectorSearchParams;
   dataViewsFilter: DataViewsFilterParams;
 }
@@ -49,18 +48,6 @@ export type DataSourceSelectorTypestate =
     }
   | {
       value: 'popover.open.integrationsTab';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
-      value: 'popover.open.integrationsTab.listingIntegrations';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
-      value: 'popover.open.integrationsTab.listingIntegrationStreams';
-      context: DefaultDataSourceSelectorContext;
-    }
-  | {
-      value: 'popover.open.uncategorizedTab';
       context: DefaultDataSourceSelectorContext;
     }
   | {
@@ -101,14 +88,7 @@ export type DataSourceSelectorEvent =
       type: 'SWITCH_TO_INTEGRATIONS_TAB';
     }
   | {
-      type: 'SWITCH_TO_UNCATEGORIZED_TAB';
-    }
-  | {
       type: 'SWITCH_TO_DATA_VIEWS_TAB';
-    }
-  | {
-      type: 'CHANGE_PANEL';
-      panelId: PanelId;
     }
   | {
       type: 'SELECT_DATASET';
@@ -146,10 +126,8 @@ export interface DataSourceSelectorStateMachineDependencies {
   onIntegrationsReload: ReloadIntegrations;
   onIntegrationsSearch: SearchIntegrations;
   onIntegrationsSort: SearchIntegrations;
-  onIntegrationsStreamsSearch: SearchIntegrations;
-  onIntegrationsStreamsSort: SearchIntegrations;
   onSelectionChange: DataSourceSelectionChangeHandler;
+  onUncategorizedLoad: LoadDatasets;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
-  onUncategorizedSort: SearchDatasets;
 }

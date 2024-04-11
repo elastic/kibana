@@ -15,6 +15,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   DatasetSelection,
   DataSourceSelection,
@@ -24,7 +25,8 @@ import {
 import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
-const panelStyle = { width: DATA_SOURCE_SELECTOR_WIDTH };
+const panelStyle = { width: '100%', maxWidth: DATA_SOURCE_SELECTOR_WIDTH };
+const mobilePanelStyle = { width: 'auto', right: euiThemeVars.euiSizeS };
 interface SelectorPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
@@ -62,16 +64,12 @@ export const SelectorPopover = ({
         </EuiButton>
       }
       panelPaddingSize="none"
+      panelStyle={{ ...panelStyle, ...(isMobile && mobilePanelStyle) }}
       buffer={8}
       {...(isMobile && { display: 'block' })}
       {...props}
     >
-      <EuiPanel
-        paddingSize="none"
-        hasShadow={false}
-        css={panelStyle}
-        data-test-subj="dataSourceSelectorContent"
-      >
+      <EuiPanel paddingSize="none" hasShadow={false} data-test-subj="dataSourceSelectorContent">
         {children}
       </EuiPanel>
     </EuiPopover>

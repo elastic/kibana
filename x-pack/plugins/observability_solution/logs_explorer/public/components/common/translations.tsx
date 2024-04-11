@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LOG_LEVEL_FIELD, MESSAGE_FIELD } from '../../../common/constants';
 
 export const flyoutContentLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.message', {
   defaultMessage: 'Content breakdown',
@@ -227,8 +228,8 @@ export const contentHeaderTooltipParagraph1 = (
     id="xpack.logsExplorer.dataTable.header.content.tooltip.paragraph1"
     defaultMessage="Displays the document's {logLevel} and {message} fields."
     values={{
-      logLevel: <strong>log.level</strong>,
-      message: <strong>message</strong>,
+      logLevel: <strong>{LOG_LEVEL_FIELD}</strong>,
+      message: <strong>{MESSAGE_FIELD}</strong>,
     }}
   />
 );

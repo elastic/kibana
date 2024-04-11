@@ -119,7 +119,6 @@ export function ObservabilityLogsExplorerPageObject({
   getService,
 }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common']);
-  const dataGrid = getService('dataGrid');
   const es = getService('es');
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -268,32 +267,24 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('dataSourceSelectorPopoverButton', 120000); // Increase timeout if refresh takes longer before opening the selector
     },
 
-    getDataSourceSelectorContent() {
-      return testSubjects.find('dataSourceSelectorContent');
-    },
-
     getDataSourceSelectorSearchControls() {
       return testSubjects.find('dataSourceSelectorSearchControls');
     },
 
-    getIntegrationsContextMenu() {
-      return testSubjects.find('integrationsContextMenu');
+    getIntegrationsListPanel() {
+      return testSubjects.find('dataSourceSelectorIntegrationsList');
     },
 
     getIntegrationsTab() {
       return testSubjects.find('dataSourceSelectorIntegrationsTab');
     },
 
-    getUncategorizedContextMenu() {
-      return testSubjects.find('uncategorizedContextMenu');
+    getUncategorizedIntegration() {
+      return testSubjects.find('integration-uncategorized-1.0.0');
     },
 
-    getUncategorizedTab() {
-      return testSubjects.find('dataSourceSelectorUncategorizedTab');
-    },
-
-    getDataViewsContextMenu() {
-      return testSubjects.find('dataViewsContextMenu');
+    getDataViewsListPanel() {
+      return testSubjects.find('dataSourceSelectorDataViewsList');
     },
 
     getDataViewsTab() {
@@ -331,24 +322,63 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('dataSourceSelectorShowAllLogs');
     },
 
-    getUnmanagedDatasetsButton() {
-      return testSubjects.find('unmanagedDatasets');
-    },
-
-    async getFlyoutDetail(rowIndex: number = 0) {
-      await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logsExplorerFlyoutDetail');
-    },
-
     async getIntegrations() {
-      const menu = await this.getIntegrationsContextMenu();
+      const menu = await this.getIntegrationsListPanel();
 
-      const nodes = await menu.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
-      const integrations = await Promise.all(nodes.map((node) => node.getVisibleText()));
+      const nodes = await menu.findAllByCssSelector(
+        '[data-test-subj^="integration-"]:not([data-test-subj^="integration-uncategorized-"]',
+        2000
+      );
+      const integrations = await Promise.all(
+        nodes.map((node) => node.getVisibleText().then((title) => title.split('\n')[0]))
+      );
 
       return {
         nodes,
         integrations,
+      };
+    },
+
+    async getIntegrationByName(name: string) {
+      const { integrations, nodes } = await this.getIntegrations();
+
+      if (name === 'Uncategorized') {
+        return this.getUncategorizedIntegration();
+      }
+
+      const integrationPos = integrations.findIndex((integrationName) => integrationName === name);
+
+      return nodes[integrationPos];
+    },
+
+    async getIntegrationDatasets(name: string) {
+      const integrationNode = await this.getIntegrationByName(name);
+
+      const nodes = await integrationNode.findAllByCssSelector(
+        '[data-test-subj^="dataset-"]',
+        2000
+      );
+
+      const datasets = await Promise.all(nodes.map((node) => node.getVisibleText()));
+
+      return {
+        datasets,
+        nodes,
+      };
+    },
+
+    async getDataViews() {
+      const menu = await this.getDataViewsListPanel();
+
+      const nodes = await menu.findAllByCssSelector(
+        '[data-test-subj^="logsExplorerDataView"]',
+        2000
+      );
+      const dataViews = await Promise.all(nodes.map((node) => node.getVisibleText()));
+
+      return {
+        nodes,
+        dataViews,
       };
     },
 
@@ -375,6 +405,24 @@ export function ObservabilityLogsExplorerPageObject({
       );
 
       return sortingButton.click();
+    },
+
+    async expandIntegrationByName(name: string) {
+      const integrationNode = await this.getIntegrationByName(name);
+
+      return integrationNode?.click();
+    },
+
+    async sortIntegrationsByName() {
+      const nameColumn = await testSubjects.find('dataSourceSelectorIntegrationNameHeader');
+
+      return nameColumn.click();
+    },
+
+    async sortDataViewsByName() {
+      const nameColumn = await testSubjects.find('dataSourceSelectorDataViewNameHeader');
+
+      return nameColumn.click();
     },
 
     async getSearchFieldValue() {
@@ -409,17 +457,31 @@ export function ObservabilityLogsExplorerPageObject({
     },
 
     async assertListStatusEmptyPromptExistsWithTitle(title: string) {
-      const [listStatus] = await testSubjects.findAll('dataSourceSelectorListStatusEmptyPrompt');
-      const promptTitle = await listStatus.findByTagName('h2');
+      const listStatusPrompts = await testSubjects.findAll(
+        'dataSourceSelectorListStatusEmptyPrompt'
+      );
 
-      expect(await promptTitle.getVisibleText()).to.be(title);
+      const listStatusPromptTitles = await Promise.all(
+        listStatusPrompts.map((listStatus) =>
+          listStatus.findByTagName('h2').then((titleNode) => titleNode.getVisibleText())
+        )
+      );
+
+      expect(listStatusPromptTitles.includes(title)).to.be(true);
     },
 
     async assertListStatusErrorPromptExistsWithTitle(title: string) {
-      const listStatus = await testSubjects.find('dataSourceSelectorListStatusErrorPrompt');
-      const promptTitle = await listStatus.findByTagName('h2');
+      const listStatusPrompts = await testSubjects.findAll(
+        'dataSourceSelectorListStatusErrorPrompt'
+      );
 
-      expect(await promptTitle.getVisibleText()).to.be(title);
+      const listStatusPromptTitles = await Promise.all(
+        listStatusPrompts.map((listStatus) =>
+          listStatus.findByTagName('h2').then((titleNode) => titleNode.getVisibleText())
+        )
+      );
+
+      expect(listStatusPromptTitles.includes(title)).to.be(true);
     },
 
     getHeaderMenu() {

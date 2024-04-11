@@ -43,8 +43,7 @@ const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
     integrationsStateService,
     (state) =>
       state.matches({ loaded: 'loadingMore' }) ||
-      state.matches({ loaded: 'debounceSearchingIntegrations' }) ||
-      state.matches({ loaded: 'debounceSearchingIntegrationsStreams' })
+      state.matches({ loaded: 'debounceSearchingIntegrations' })
   );
 
   const searchIntegrations: SearchIntegrations = useCallback(
@@ -60,24 +59,6 @@ const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
     (searchParams) =>
       integrationsStateService.send({
         type: 'SORT_INTEGRATIONS',
-        search: formatSearchParams(searchParams),
-      }),
-    [integrationsStateService]
-  );
-
-  const searchIntegrationsStreams: SearchIntegrations = useCallback(
-    (searchParams) =>
-      integrationsStateService.send({
-        type: 'SEARCH_INTEGRATIONS_STREAMS',
-        search: formatSearchParams(searchParams),
-      }),
-    [integrationsStateService]
-  );
-
-  const sortIntegrationsStreams: SearchIntegrations = useCallback(
-    (searchParams) =>
-      integrationsStateService.send({
-        type: 'SORT_INTEGRATIONS_STREAMS',
         search: formatSearchParams(searchParams),
       }),
     [integrationsStateService]
@@ -108,8 +89,6 @@ const useIntegrations = ({ datasetsClient }: IntegrationsContextDeps) => {
     reloadIntegrations,
     searchIntegrations,
     sortIntegrations,
-    searchIntegrationsStreams,
-    sortIntegrationsStreams,
   };
 };
 
