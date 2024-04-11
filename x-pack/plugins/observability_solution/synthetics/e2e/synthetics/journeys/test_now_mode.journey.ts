@@ -136,9 +136,7 @@ journey(`TestNowMode`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ testRunId, docType: 'stepEnd', stepIndex: 1 });
 
     await page.waitForSelector('text=1 step completed');
-    await page.waitForSelector(
-      '.euiTableRowCell--hideForMobile :has-text("Go to https://www.google.com")'
-    );
+    await page.waitForSelector('.euiTableRowCell:has-text("Go to https://www.google.com")');
     expect(await page.getByTestId('stepDurationText1').first()).toHaveText('1.4 sec');
     await page.waitForSelector('text=Complete');
   });
