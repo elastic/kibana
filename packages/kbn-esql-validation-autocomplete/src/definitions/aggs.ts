@@ -147,7 +147,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       ],
     },
     {
-      name: 'st_centroid',
+      name: 'st_centroid_agg',
       type: 'agg',
       description: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.definitions.stCentroidDoc',
@@ -161,16 +161,16 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
           returnType: 'cartesian_point',
           examples: [
-            `from index | stats result = st_centroid(cartesian_field)`,
-            `from index | stats st_centroid(cartesian_field)`,
+            `from index | stats result = st_centroid_agg(cartesian_field)`,
+            `from index | stats st_centroid_agg(cartesian_field)`,
           ],
         },
         {
           params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
           returnType: 'geo_point',
           examples: [
-            `from index | stats result = st_centroid(geo_field)`,
-            `from index | stats st_centroid(geo_field)`,
+            `from index | stats result = st_centroid_agg(geo_field)`,
+            `from index | stats st_centroid_agg(geo_field)`,
           ],
         },
       ],
