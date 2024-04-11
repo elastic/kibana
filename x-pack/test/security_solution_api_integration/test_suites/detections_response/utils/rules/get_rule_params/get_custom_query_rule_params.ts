@@ -30,6 +30,7 @@ export function getCustomQueryRuleParams(
     interval: '100m',
     from: 'now-6m',
     enabled: false,
+    setup: '# some setup markdown',
     ...rewrites,
   };
 }

@@ -125,6 +125,7 @@ import {
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
+  SETUP_GUIDE_TEXTAREA,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -201,6 +202,13 @@ export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {

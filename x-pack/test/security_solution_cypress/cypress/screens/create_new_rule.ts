@@ -132,6 +132,8 @@ export const INPUT = '[data-test-subj="input"]';
 export const INVESTIGATION_NOTES_TEXTAREA =
   '[data-test-subj="detectionEngineStepAboutRuleNote"] textarea';
 
+export const SETUP_GUIDE_TEXTAREA = '[data-test-subj="detectionEngineStepAboutRuleSetup"] textarea';
+
 export const FALSE_POSITIVES_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input';
 
