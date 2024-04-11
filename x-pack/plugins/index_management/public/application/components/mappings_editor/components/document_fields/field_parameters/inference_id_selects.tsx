@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 
@@ -17,12 +17,14 @@ interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
   inferenceToModelIdMap?: InferenceToModelIdMap;
+  showWarning?: boolean;
 }
 
 export const InferenceIdSelects = ({
   onChange,
   'data-test-subj': dataTestSubj,
   inferenceToModelIdMap,
+  showWarning = false,
 }: Props) => {
   const { form } = useForm({ defaultValue: { main: 'elser_model_2' } });
   const { subscribe } = form;
@@ -59,19 +61,26 @@ export const InferenceIdSelects = ({
             )}
           </UseField>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
-              {
-                defaultMessage:
-                  'The referenced model for this inference endpoint will be started when adding this field.',
-              }
-            )}
-          />
-        </EuiFlexItem>
+        {showWarning && (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon color="warning" type="warning" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiCallOut
+                size="s"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
+                  {
+                    defaultMessage:
+                      'The referenced model for this inference endpoint will be started when adding this field.',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
     </Form>
   );
