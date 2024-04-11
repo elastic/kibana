@@ -11,22 +11,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import {
-  UseFetchCurrentUserConversationsParams,
-  useFetchCurrentUserConversations,
-} from './use_fetch_current_user_conversations';
+  UseFetchAnonymizationFieldsParams,
+  useFetchAnonymizationFields,
+} from './use_fetch_anonymization_fields';
+import { HttpSetup } from '@kbn/core-http-browser';
 
 const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
 
 const http = {
   fetch: jest.fn().mockResolvedValue(statusResponse),
-};
-const onFetch = jest.fn();
+} as unknown as HttpSetup;
 
 const defaultProps = {
   http,
-  onFetch,
   isAssistantEnabled: true,
-} as unknown as UseFetchCurrentUserConversationsParams;
+} as unknown as UseFetchAnonymizationFieldsParams;
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
@@ -36,31 +35,29 @@ const createWrapper = () => {
   );
 };
 
-describe('useFetchCurrentUserConversations', () => {
-  it(`should make http request to fetch conversations`, async () => {
-    renderHook(() => useFetchCurrentUserConversations(defaultProps), {
+describe('useFetchAnonymizationFields', () => {
+  it(`should make http request to fetch anonymization fields`, async () => {
+    renderHook(() => useFetchAnonymizationFields(defaultProps), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() =>
-        useFetchCurrentUserConversations(defaultProps)
-      );
+      const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields(defaultProps));
       await waitForNextUpdate();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/current_user/conversations/_find',
+        '/api/elastic_assistant/anonymization_fields/_find',
         {
           method: 'GET',
           query: {
             page: 1,
-            perPage: 100,
+            per_page: 1000,
           },
           version: '2023-10-31',
           signal: undefined,
         }
       );
 
-      expect(onFetch).toHaveBeenCalled();
+      expect(defaultProps.http.fetch).toHaveBeenCalled();
     });
   });
 });
