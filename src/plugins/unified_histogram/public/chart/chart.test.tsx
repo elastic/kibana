@@ -43,6 +43,7 @@ async function mountComponent({
   allSuggestions,
   isPlainRecord,
   hasDashboardPermissions,
+  isChartLoading,
   hasHistogramSuggestionForESQL,
 }: {
   customToggle?: ReactElement;
@@ -55,6 +56,7 @@ async function mountComponent({
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
+  isChartLoading?: boolean;
   hasHistogramSuggestionForESQL?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
@@ -123,6 +125,7 @@ async function mountComponent({
         },
     chart,
     breakdown: noBreakdown ? undefined : { field: undefined },
+    isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,
     onChartHiddenChange: jest.fn(),
@@ -214,6 +217,11 @@ describe('Chart', () => {
       component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()
     ).toBeTruthy();
     expect(component.find('[data-test-subj="unifiedHistogramChart"]').exists()).toBeTruthy();
+  });
+
+  test('render progress bar when text based and request is loading', async () => {
+    const component = await mountComponent({ isPlainRecord: true, isChartLoading: true });
+    expect(component.find('[data-test-subj="unifiedHistogramProgressBar"]').exists()).toBeTruthy();
   });
 
   test('triggers onEditVisualization on click', async () => {
