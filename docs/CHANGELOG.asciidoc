@@ -170,7 +170,7 @@ For more information, refer to ({kibana-issue}179940[#179940]).
 
 [discrete]
 [[known-180613]]
-.In Dashboard, controls cannot be created or edited when using fields with custom labels
+.Controls cannot be created or edited when using fields with custom labels
 [%collapsible]
 ====
 *Details* +
