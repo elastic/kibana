@@ -30,9 +30,10 @@ interface Props {
 export const KubernetesCharts = React.forwardRef<
   HTMLDivElement,
   Props & { onShowAll?: (metric: string) => void }
->(({ assetId, dataView, dateRange, onShowAll }, ref) => {
+>(({ assetId, dataView, dateRange, onShowAll, overview }, ref) => {
   const { charts } = useKubernetesCharts({
     dataViewId: dataView?.id,
+    options: { overview },
   });
 
   const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetes });

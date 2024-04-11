@@ -97,7 +97,9 @@ export const Section = React.forwardRef<HTMLDivElement, Props>(
           <EuiFlexItem grow>{title}</EuiFlexItem>
           {extraAction && <EuiFlexItem grow={false}>{extraAction}</EuiFlexItem>}
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+        {React.Children.toArray(children).filter(Boolean).length > 0 ? (
+          <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }

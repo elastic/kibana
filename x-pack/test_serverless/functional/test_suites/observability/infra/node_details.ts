@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memory', chartsCount: 1 },
             { metric: 'disk', chartsCount: 2 },
             { metric: 'network', chartsCount: 1 },
-            { metric: 'kubernetes', chartsCount: 4 },
+            { metric: 'kubernetes', chartsCount: 2 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart`, async () => {
               retry.tryForTime(30 * 1000, async () => {

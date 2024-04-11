@@ -10,7 +10,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 
 export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
-interface UseHostChartsOptions {
+interface UseChartsOptions {
   overview?: boolean;
 }
 
@@ -21,7 +21,7 @@ export const useHostCharts = ({
 }: {
   metric: HostMetricTypes;
   dataViewId?: string;
-  options?: UseHostChartsOptions;
+  options?: UseChartsOptions;
 }) => {
   const { value: charts = [], error } = useAsync(async () => {
     const hostCharts = await getHostsCharts({ metric, options });
@@ -38,18 +38,28 @@ export const useHostCharts = ({
   return { charts, error };
 };
 
-export const useKubernetesCharts = ({ dataViewId }: { dataViewId?: string }) => {
+export const useKubernetesCharts = ({
+  dataViewId,
+  options,
+}: {
+  dataViewId?: string;
+  options?: UseChartsOptions;
+}) => {
   const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
     const { kibernetesNode } = await model.metrics.getCharts();
 
-    return [
-      kibernetesNode.xy.nodeCpuCapacity,
-      kibernetesNode.xy.nodeMemoryCapacity,
-      kibernetesNode.xy.nodeDiskCapacity,
-      kibernetesNode.xy.nodePodCapacity,
-    ].map((chart) => {
+    const items = options?.overview
+      ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
+      : [
+          kibernetesNode.xy.nodeCpuCapacity,
+          kibernetesNode.xy.nodeMemoryCapacity,
+          kibernetesNode.xy.nodeDiskCapacity,
+          kibernetesNode.xy.nodePodCapacity,
+        ];
+
+    return items.map((chart) => {
       return {
         ...chart,
         ...(dataViewId && {
@@ -59,7 +69,7 @@ export const useKubernetesCharts = ({ dataViewId }: { dataViewId?: string }) => 
         }),
       };
     });
-  }, [dataViewId]);
+  }, [dataViewId, options?.overview]);
 
   return { charts, error };
 };
@@ -99,7 +109,7 @@ const getHostsCharts = async ({
   options,
 }: {
   metric: HostMetricTypes;
-  options?: UseHostChartsOptions;
+  options?: UseChartsOptions;
 }) => {
   const model = findInventoryModel('host');
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();

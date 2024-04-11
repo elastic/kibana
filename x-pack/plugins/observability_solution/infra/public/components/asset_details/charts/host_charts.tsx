@@ -10,6 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { css, cx } from '@emotion/css';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';
 import { Section } from '../components/section';
@@ -53,11 +54,16 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
                         data-test-subj="hostsViewMetricsDocumentationLink"
                         href={`${HOST_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
+                        className={cx({
+                          [css`
+                            text-transform: lowercase;
+                          `]: metric !== 'cpu',
+                        })}
                       >
                         <FormattedMessage
                           id="xpack.infra.assetDetails.charts.host.toolTip.linkText"
-                          defaultMessage="{metric} metric"
-                          values={{ metric }}
+                          defaultMessage="{metric} metrics"
+                          values={{ metric: HOST_METRIC_GROUP_TITLES[metric] }}
                         />
                       </EuiLink>
                     ),

@@ -85,6 +85,23 @@ describe('useHostCharts', () => {
   });
 
   describe('kubernetes charts', () => {
+    it('should return an array of charts with correct order - overview', async () => {
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useKubernetesCharts({ dataViewId, options: { overview: true } })
+      );
+      await waitForNextUpdate();
+
+      const expectedOrder = ['nodeCpuCapacity', 'nodeMemoryCapacity'];
+
+      const { charts } = result.current;
+
+      expect(charts).toHaveLength(expectedOrder.length);
+
+      charts.forEach((chart, index) => {
+        expect(chart).toHaveProperty('id', expectedOrder[index]);
+      });
+    });
+
     it('should return an array of charts with correct order', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useKubernetesCharts({ dataViewId }));
       await waitForNextUpdate();

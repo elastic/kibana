@@ -33,7 +33,7 @@ export const HostMetrics = (props: Props) => {
         <HostCharts {...props} metric="network" onShowAll={onClick} overview />
       </EuiFlexGrid>
       <HostCharts {...props} metric="disk" onShowAll={onClick} overview />
-      <KubernetesCharts {...props} onShowAll={onClick} />
+      <KubernetesCharts {...props} onShowAll={onClick} overview />
     </EuiFlexGroup>
   );
 };
