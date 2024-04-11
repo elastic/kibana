@@ -11,45 +11,87 @@ import { act } from 'react-dom/test-utils';
 
 const refreshModal = jest.fn();
 const setIsModalVisible = jest.fn();
+const refreshForErrorModal = jest.fn();
+const setIsVisibleForErrorModal = jest.fn();
 
-describe('<TrainedModelsDeploymentModal /> with semantic_text enabled', () => {
-  const setup = registerTestBed(TrainedModelsDeploymentModal, {
-    defaultProps: {
-      isSemanticTextEnabled: true,
-      pendingDeployments: ['.elser-test-3'],
-      setIsModalVisible,
-      refreshModal,
-    },
-    memoryRouter: { wrapComponent: false },
-  });
-  const { exists, find } = setup();
-
-  it('should display the modal', () => {
-    expect(exists('trainedModelsDeploymentModal')).toBe(true);
-  });
-
-  it('should contain content related to semantic_text', () => {
-    expect(find('trainedModelsDeploymentModalText').text()).toContain(
-      'Some fields are referencing models'
-    );
-  });
-
-  it('should call refresh method if refresh button is pressed', async () => {
-    await act(async () => {
-      find('confirmModalConfirmButton').simulate('click');
+describe('When semantic_text is enabled', () => {
+  describe('When there is no error in the model deployment', () => {
+    const setup = registerTestBed(TrainedModelsDeploymentModal, {
+      defaultProps: {
+        isSemanticTextEnabled: true,
+        pendingDeployments: ['.elser-test-3'],
+        setIsModalVisible,
+        refreshModal,
+      },
+      memoryRouter: { wrapComponent: false },
     });
-    expect(refreshModal.mock.calls).toHaveLength(1);
+    const { exists, find } = setup();
+
+    it('should display the modal', () => {
+      expect(exists('trainedModelsDeploymentModal')).toBe(true);
+    });
+
+    it('should contain content related to semantic_text', () => {
+      expect(find('trainedModelsDeploymentModalText').text()).toContain(
+        'Some fields are referencing models'
+      );
+    });
+
+    it('should call refresh method if refresh button is pressed', async () => {
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      expect(refreshModal.mock.calls).toHaveLength(1);
+    });
+
+    it('should call setIsModalVisible method if cancel button is pressed', async () => {
+      await act(async () => {
+        find('confirmModalCancelButton').simulate('click');
+      });
+      expect(setIsModalVisible.mock.calls).toHaveLength(1);
+    });
   });
 
-  it('should call setIsModalVisible method if cancel button is pressed', async () => {
-    await act(async () => {
-      find('confirmModalCancelButton').simulate('click');
+  describe('When there is error in the model deployment', () => {
+    const setup = registerTestBed(TrainedModelsDeploymentModal, {
+      defaultProps: {
+        isSemanticTextEnabled: true,
+        pendingDeployments: ['.elser-test-3'],
+        setIsModalVisible: setIsVisibleForErrorModal,
+        refreshModal: refreshForErrorModal,
+        errorsInTrainedModelDeployment: ['.elser-test-3'],
+      },
+      memoryRouter: { wrapComponent: false },
     });
-    expect(setIsModalVisible.mock.calls).toHaveLength(1);
+    const { exists, find } = setup();
+
+    it('should display the modal', () => {
+      expect(exists('trainedModelsErroredDeploymentModal')).toBe(true);
+    });
+
+    it('should contain content related to semantic_text', () => {
+      expect(find('trainedModelsErrorDeploymentModalText').text()).toContain(
+        'There was an error when trying to deploy'
+      );
+    });
+
+    it("should call refresh method if 'Try again' button is pressed", async () => {
+      await act(async () => {
+        find('confirmModalConfirmButton').simulate('click');
+      });
+      expect(refreshForErrorModal.mock.calls).toHaveLength(1);
+    });
+
+    it('should call setIsModalVisible method if cancel button is pressed', async () => {
+      await act(async () => {
+        find('confirmModalCancelButton').simulate('click');
+      });
+      expect(setIsVisibleForErrorModal.mock.calls).toHaveLength(1);
+    });
   });
 });
 
-describe('<TrainedModelsDeploymentModal /> with semantic_text disabled', () => {
+describe('When semantic_text is disabled', () => {
   const setup = registerTestBed(TrainedModelsDeploymentModal, {
     defaultProps: { isSemanticTextEnabled: false },
     memoryRouter: { wrapComponent: false },

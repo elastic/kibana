@@ -149,7 +149,7 @@ export function TrainedModelsDeploymentModal({
         defaultFocusedButton="confirm"
         data-test-subj="trainedModelsErroredDeploymentModal"
       >
-        <p data-test-subj="trainedModelsDeploymentModalText">
+        <p data-test-subj="trainedModelsErrorDeploymentModalText">
           {i18n.translate(
             'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorText',
             {

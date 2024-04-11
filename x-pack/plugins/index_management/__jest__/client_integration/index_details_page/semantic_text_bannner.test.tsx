@@ -9,7 +9,7 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { SemanticTextBanner } from '../../../public/application/sections/home/index_list/details_page/semantic_text_banner';
 
-describe('<SemanticTextBanner /> with semantic_text enabled', () => {
+describe('When semantic_text is enabled', () => {
   const setup = registerTestBed(SemanticTextBanner, {
     defaultProps: { isSemanticTextEnabled: true },
     memoryRouter: { wrapComponent: false },
@@ -34,7 +34,7 @@ describe('<SemanticTextBanner /> with semantic_text enabled', () => {
   });
 });
 
-describe('<SemanticTextBanner /> with semantic_text disabled', () => {
+describe('When semantic_text is disabled', () => {
   const setup = registerTestBed(SemanticTextBanner, {
     defaultProps: { isSemanticTextEnabled: false },
     memoryRouter: { wrapComponent: false },
