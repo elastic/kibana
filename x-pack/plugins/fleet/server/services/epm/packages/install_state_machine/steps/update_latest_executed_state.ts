@@ -22,7 +22,7 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
 
   try {
     // if there is no error avoid updating the SO as the call adds ~1s to install time
-    // also ddon't save it if the error is of type ConcurrentInstallationError
+    // also don't save it if the error is of type ConcurrentInstallationError
     if (
       !latestExecutedState?.error ||
       latestExecutedState?.error?.includes('Concurrent installation or upgrade')
