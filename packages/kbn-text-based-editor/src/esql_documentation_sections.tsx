@@ -2062,6 +2062,42 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction',
+        {
+          defaultMessage: 'MV_ZIP',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction.markdown',
+            {
+              defaultMessage: `### MV_ZIP
+Combines the values from two multivalued fields with a delimiter that joins them together.
+
+
+Example:
+
+\`\`\`
+ROW a = ["x", "y", "z"], b = ["1", "2"]
+| EVAL c = mv_zip(a, b, "-")
+| KEEP a, b, c
+\`\`\`
+
+Specifying a delimiter is optional. If omitted, the default delimiter \`,\` is used.
+
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction',
         {
           defaultMessage: 'NOW',
