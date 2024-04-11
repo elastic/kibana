@@ -45,6 +45,40 @@ describe('Policy Form Antivirus Registration Card', () => {
     render();
 
     expect(renderResult.getByTestId(antivirusTestSubj.radioButtons)).toBeTruthy();
+
+    expect(getRadioButton(antivirusTestSubj.disabledRadioButton)).not.toHaveAttribute('disabled');
+    expect(getRadioButton(antivirusTestSubj.enabledRadioButton)).not.toHaveAttribute('disabled');
+    expect(getRadioButton(antivirusTestSubj.syncRadioButton)).not.toHaveAttribute('disabled');
+  });
+
+  it('should check `disabled` radio button if `antivirus_registration.mode` is disabled', () => {
+    formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.disabled;
+
+    render();
+
+    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(true);
+    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+  });
+
+  it('should check `enabled` radio button if `antivirus_registration.mode` is enabled', () => {
+    formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.enabled;
+
+    render();
+
+    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(true);
+    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+  });
+
+  it('should check `sync` radio button if `antivirus_registration.mode` is sync', () => {
+    formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
+
+    render();
+
+    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
+    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
   });
 
   it('should display for windows OS with restriction', () => {
