@@ -23,6 +23,10 @@ export interface AgentStatusRecords {
   };
 }
 
-export interface AgentStatusApiResponse {
-  data: AgentStatusRecords;
+// TODO: remove when agentStatusClientEnabled is enabled/removed
+export interface AgentStatusInfo {
+  [agentId: string]: AgentStatusRecords[string] & {
+    isPendingUninstall: boolean;
+    isUninstalled: boolean;
+  };
 }

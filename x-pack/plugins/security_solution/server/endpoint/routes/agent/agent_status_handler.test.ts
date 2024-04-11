@@ -63,8 +63,7 @@ describe('Agent Status API route handler', () => {
     });
   });
 
-  // TODO: Fix tests
-  it.skip('should only (v8.13) accept agent type of sentinel_one', async () => {
+  it('should only (v8.13) accept agent type of sentinel_one', async () => {
     // @ts-expect-error `query.*` is not mutable
     httpRequestMock.query.agentType = 'endpoint';
     await apiTestSetup
@@ -77,8 +76,7 @@ describe('Agent Status API route handler', () => {
     });
   });
 
-  // TODO: Fix tests
-  it.skip('should return status code 200 with expected payload', async () => {
+  it('should return status code 200 with expected payload', async () => {
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -89,19 +87,41 @@ describe('Agent Status API route handler', () => {
           one: {
             agentType: 'sentinel_one',
             found: false,
-            agentId: 'one',
+            id: 'one',
+            isUninstalled: false,
+            isPendingUninstall: false,
             isolated: false,
             lastSeen: '',
-            pendingActions: {},
+            pendingActions: {
+              execute: 0,
+              'get-file': 0,
+              isolate: 0,
+              'kill-process': 0,
+              'running-processes': 0,
+              'suspend-process': 0,
+              unisolate: 0,
+              upload: 0,
+            },
             status: 'unenrolled',
           },
           two: {
             agentType: 'sentinel_one',
             found: false,
-            agentId: 'two',
+            id: 'two',
+            isUninstalled: false,
+            isPendingUninstall: false,
             isolated: false,
             lastSeen: '',
-            pendingActions: {},
+            pendingActions: {
+              execute: 0,
+              'get-file': 0,
+              isolate: 0,
+              'kill-process': 0,
+              'running-processes': 0,
+              'suspend-process': 0,
+              unisolate: 0,
+              upload: 0,
+            },
             status: 'unenrolled',
           },
         },

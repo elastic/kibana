@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getAgentStatusClient } from '../../services';
+import { getAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -18,6 +18,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { getAgentStatusClient } from '../../services';
 
 export const registerAgentStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -52,29 +53,25 @@ export const getAgentStatusRouteHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointContext.logFactory.get('agentStatus');
+  const logger = endpointContext.logFactory.get('agentStatusRoute');
 
   return async (context, request, response) => {
     const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
     const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
-    // Note:  because our API schemas are defined as module static variables (as opposed to a
+    // Note: because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
-    //        `agentType` is included in the schema independent of the feature flag
+    //        `agent_type` is included in the schema independent of the feature flag
     if (
-      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
-      agentType === 'sentinel_one'
+      agentType === 'sentinel_one' &&
+      !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled
     ) {
       return errorHandler(
         logger,
         response,
-        new CustomHttpRequestError(`[request query.agentType]: feature is disabled`, 400)
+        new CustomHttpRequestError(`[request query.agent_type]: feature is disabled`, 400)
       );
     }
-
-    logger.debug(
-      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
-    );
 
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentStatusClient = getAgentStatusClient(agentType, {
@@ -82,10 +79,24 @@ export const getAgentStatusRouteHandler = (
       endpointService: endpointContext.service,
     });
 
+    // 8.14: use the new agent status client if FF enabled
+    const getAgentStatusPromise = endpointContext.experimentalFeatures.agentStatusClientEnabled
+      ? agentStatusClient.getAgentStatuses(agentIds)
+      : getAgentStatus({
+          agentType,
+          agentIds,
+          logger,
+          connectorActionsClient: (await context.actions).getActionsClient(),
+        });
+
+    logger.debug(
+      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
+    );
+
     try {
       return response.ok({
         body: {
-          data: await agentStatusClient.getAgentStatuses(agentIds),
+          data: await getAgentStatusPromise,
         },
       });
     } catch (e) {
