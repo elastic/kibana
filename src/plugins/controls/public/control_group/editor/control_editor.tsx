@@ -182,7 +182,7 @@ export const ControlEditor = ({
 
           const disabled =
             fieldRegistry && selectedField
-              ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
+              ? !fieldRegistry[selectedField]?.compatibleControlTypes.includes(controlType)
               : true;
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
