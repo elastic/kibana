@@ -134,8 +134,11 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           <EuiComboBox
             options={options}
             selectedOptions={[selectedOption]}
-            onChange={(selectedOptions) => setSelectedOption(selectedOptions[0])}
+            onChange={(selectedOptions) =>
+              selectedOptions[0] && setSelectedOption(selectedOptions[0])
+            }
             singleSelection={{ asPlainText: true }}
+            isClearable={false}
           />
         )}
       </EuiFlexGroup>
