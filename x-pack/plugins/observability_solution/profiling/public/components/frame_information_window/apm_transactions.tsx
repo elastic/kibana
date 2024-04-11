@@ -5,16 +5,18 @@
  * 2.0.
  */
 import {
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
+  EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
+import type { APMTransactionsPerService } from '../../services';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
@@ -27,6 +29,7 @@ interface Props {
 export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }: Props) {
   const {
     services: { fetchTopNFunctionAPMTransactions },
+    setup: { observabilityShared },
   } = useProfilingDependencies();
 
   const { status, data = [] } = useTimeRangeAsync(
@@ -42,13 +45,23 @@ export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }
     [fetchTopNFunctionAPMTransactions, functionName, serviceNames]
   );
 
-  const columns: EuiInMemoryTableProps['columns'] = [
+  const columns: Array<EuiBasicTableColumn<APMTransactionsPerService>> = [
     {
       field: 'serviceName',
       name: i18n.translate('xpack.profiling.apmTransactions.columns.serviceName', {
         defaultMessage: 'Service Name',
       }),
       truncateText: true,
+      render: (_, { serviceName }) => {
+        return (
+          <EuiLink
+            data-test-subj="profilingColumnsLink"
+            href={observabilityShared.locators.apm.serviceOverview.getRedirectUrl({ serviceName })}
+          >
+            {serviceName}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'transactionName',

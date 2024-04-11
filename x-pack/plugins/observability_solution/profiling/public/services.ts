@@ -23,10 +23,10 @@ import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
-type APMTransactions = Array<{
+export interface APMTransactionsPerService {
   serviceName: string;
   transactionName: string | null;
-}>;
+}
 
 export interface ProfilingSetupStatus {
   has_setup: boolean;
@@ -88,7 +88,7 @@ export interface Services {
     timeTo: number;
     functionName: string;
     serviceNames: string[];
-  }) => Promise<APMTransactions>;
+  }) => Promise<APMTransactionsPerService[]>;
 }
 
 export function getServices(): Services {
@@ -194,7 +194,7 @@ export function getServices(): Services {
       };
       return (await http.get(paths.APMTransactions, {
         query,
-      })) as Promise<APMTransactions>;
+      })) as Promise<APMTransactionsPerService[]>;
     },
   };
 }
