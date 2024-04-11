@@ -68,6 +68,8 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
     [ruleTypeCountsByProducer, onFilterByProducer, selectedProducer]
   );
 
+  const onClickAll = useCallback(() => onFilterByProducer(null), [onFilterByProducer]);
+
   return (
     <EuiFlexGroup
       style={{
@@ -85,10 +87,12 @@ export const RuleTypeList: React.FC<RuleTypeListProps> = ({
             <EuiFacetButton
               fullWidth
               quantity={ruleTypeCountsByProducer.total}
-              onClick={useCallback(() => onFilterByProducer(null), [onFilterByProducer])}
+              onClick={onClickAll}
               isSelected={!selectedProducer}
             >
-              All
+              {i18n.translate('alertsUIShared.components.ruleTypeModal.allRuleTypes', {
+                defaultMessage: 'All',
+              })}
             </EuiFacetButton>
             {facetList}
           </EuiFacetGroup>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
+import { countBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -44,14 +44,17 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     registeredRuleTypes,
   });
 
+  // Count producers before filtering. This is used to determine if we should show the categories,
+  // and categories should only be hidden if there is only one producer BEFORE filters are applied,
+  // e.g. on oblt serverless
+  const hasOnlyOneProducer = useMemo(() => {
+    const producerCount = countBy(ruleTypeIndex.values(), 'producer');
+    return Object.keys(producerCount).length === 1;
+  }, [ruleTypeIndex]);
+
   const [ruleTypes, ruleTypeCountsByProducer] = useMemo(
     () => filterAndCountRuleTypes(ruleTypeIndex, selectedProducer, searchString),
     [ruleTypeIndex, searchString, selectedProducer]
-  );
-
-  const hasOnlyOneProducer = useMemo(
-    () => Object.keys(omit(ruleTypeCountsByProducer, 'total')).length === 1,
-    [ruleTypeCountsByProducer]
   );
 
   return (
