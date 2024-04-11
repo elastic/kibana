@@ -6,9 +6,8 @@
  */
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { DynamicTool } from '@langchain/core/tools';
+import { ChainTool } from 'langchain/tools/chain';
 import { APP_UI_ID } from '../../../../common';
-
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
@@ -24,17 +23,11 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
     const { chain } = params as EsqlKnowledgeBaseToolParams;
-    return new DynamicTool({
+    return new ChainTool({
       name: 'ESQLKnowledgeBaseTool',
       description:
         'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
-      func: async (input, runManager, bb) => {
-        console.log('inputinputinputinput', input);
-        console.log('runManagerrunManager', runManager);
-        console.log('bb', bb);
-        const a = await chain.invoke({ query: input ?? '' }, bb);
-        return JSON.stringify(a);
-      },
+      chain,
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
   },
