@@ -3979,12 +3979,16 @@ export const operators = {
 These binary comparison operators are supported:
 
 * equality: \`==\`
-* case insensitive equality \`=~\`
 * inequality: \`!=\`
 * less than: \`<\`
 * less than or equal: \`<=\`
-* larger than: \`>\`
-* larger than or equal: \`>=\`
+* greater than: \`>\`
+* greater than or equal: \`>=\`
+* add: \`+\`
+* subtract: \`-\`
+* multiply: \`*\`
+* divide: \`/\`
+* modulus: \`%\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
