@@ -15,7 +15,7 @@ import type {
   RequestHandler,
   IKibanaResponse,
   RouteConfigOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RequestHandlerContextBase,
   RouteValidationFunction,
 } from '../..';
@@ -186,7 +186,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 }
 
 /** @public */
-export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type VersionedRouteRequestValidation<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B>;
 
 /** @public */
 export interface VersionedRouteResponseValidation {
@@ -198,7 +198,7 @@ export interface VersionedRouteResponseValidation {
  * Versioned route validation
  * @public
  */
-export interface FullValidationConfig<P, Q, B> {
+export interface VersionedRouteValidation<P, Q, B> {
   /**
    * Validation to run against route inputs: params, query and body
    * @public
@@ -228,7 +228,7 @@ export interface AddVersionOpts<P, Q, B> {
    * Validation for this version of a route
    * @public
    */
-  validate: false | FullValidationConfig<P, Q, B>;
+  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 }
 
 /**

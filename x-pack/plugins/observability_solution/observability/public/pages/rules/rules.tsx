@@ -6,7 +6,8 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -33,10 +34,17 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const {
     http,
     docLinks,
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
+    notifications: { toasts },
+    triggersActionsUi: {
+      ruleTypeRegistry,
+      getAddRuleFlyout: AddRuleFlyout,
+      getRulesSettingsLink: RulesSettingsLink,
+    },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
+  const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
+  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
@@ -64,7 +72,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
 
   const authorizedRuleTypes = [...ruleTypes.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
   );
 
   const tabs = [
@@ -96,7 +104,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             fill
             iconType="plusInCircle"
             key="create-alert"
-            onClick={() => setAddRuleFlyoutVisibility(true)}
+            onClick={() => setRuleTypeModalVisibility(true)}
           >
             <FormattedMessage
               id="xpack.observability.rules.addRuleButtonLabel"
@@ -141,9 +149,26 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {ruleTypeModalVisibility && (
+        <RuleTypeModal
+          onClose={() => setRuleTypeModalVisibility(false)}
+          onSelectRuleType={(ruleTypeId) => {
+            setRuleTypeIdToCreate(ruleTypeId);
+            setRuleTypeModalVisibility(false);
+            setAddRuleFlyoutVisibility(true);
+          }}
+          http={http}
+          toasts={toasts}
+          registeredRuleTypes={ruleTypeRegistry.list()}
+          filteredRuleTypes={filteredRuleTypes}
+        />
+      )}
+
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
-          consumer={ALERTS_FEATURE_ID}
+          ruleTypeId={ruleTypeIdToCreate}
+          canChangeTrigger={false}
+          consumer={ALERTING_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
           initialSelectedConsumer={AlertConsumers.LOGS}

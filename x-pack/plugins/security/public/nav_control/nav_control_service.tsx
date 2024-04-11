@@ -10,8 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';

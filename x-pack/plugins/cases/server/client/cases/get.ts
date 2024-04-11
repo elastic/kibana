@@ -26,7 +26,7 @@ import {
   GetReportersResponseRt,
   GetTagsResponseRt,
 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../common/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
@@ -37,7 +37,6 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { CaseRt } from '../../../common/types/domain';
 
 /**

@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
@@ -496,7 +496,12 @@ export class CoreUsageDataService
     const getClient = () => {
       const debugLogger = (message: string) => this.logger.debug(message);
 
-      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
+      return new CoreUsageStatsClient(
+        debugLogger,
+        http.basePath,
+        internalRepositoryPromise,
+        this.stop$
+      );
     };
 
     this.coreUsageStatsClient = getClient();

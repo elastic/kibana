@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
 
       firstFieldIcons = await Promise.all(
-        fieldIcons.slice(0, 10).map((fieldIcon) => fieldIcon.getAttribute('aria-label'))
+        fieldIcons.slice(0, 10).map(async (fieldIcon) => {
+          return (await fieldIcon.getAttribute('aria-label')) ?? '';
+        })
       ).catch((error) => {
         log.debug(`error in findFirstFieldIcons: ${error.message}`);
         return undefined;
@@ -130,19 +132,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('ip');
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('geo.coordinates');
 
-      expect(await findFirstColumnTokens()).to.eql(['Number', 'String', 'IP address', 'Geo point']);
+      expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'IP address', 'Geo point']);
 
       expect(await findFirstDocViewerTokens()).to.eql([
-        'String',
-        'String',
+        'Text',
+        'Text',
         'Date',
-        'String',
+        'Text',
         'Number',
         'IP address',
-        'String',
+        'Text',
         'Geo point',
-        'String',
-        'String',
+        'Keyword',
+        'Keyword',
       ]);
     });
 

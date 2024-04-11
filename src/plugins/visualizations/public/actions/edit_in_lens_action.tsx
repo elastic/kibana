@@ -18,13 +18,13 @@ import {
   EmbeddableApiContext,
   getInheritedViewMode,
   HasUniqueId,
-  PublishesLocalUnifiedSearch,
+  PublishesUnifiedSearch,
   PublishesPanelDescription,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '../embeddable';
 import {
   apiHasExpressionVariables,
@@ -64,7 +64,7 @@ type EditInLensActionApi = HasUniqueId &
   HasVisualizeConfig &
   CanAccessViewMode &
   Partial<
-    PublishesLocalUnifiedSearch &
+    PublishesUnifiedSearch &
       HasExpressionVariables &
       PublishesPanelTitle &
       PublishesPanelDescription
@@ -105,7 +105,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
     const searchFilters = parentSearchSource?.getField('filter') ?? visFilters;
     const searchQuery = parentSearchSource?.getField('query') ?? visQuery;
     const title = vis.title || embeddable.panelTitle?.getValue();
-    const panelTimeRange = embeddable.localTimeRange?.getValue();
+    const panelTimeRange = embeddable.timeRange$?.getValue();
     const updatedWithMeta = {
       ...navigateToLensConfig,
       title,

@@ -32,7 +32,7 @@ import { checkFleetServerVersion } from '../../../common/services/check_fleet_se
 import { getAgentById } from '../../services/agents';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
-import { getLatestAvailableVersion } from '../../services/agents/versions';
+import { getLatestAvailableAgentVersion } from '../../services/agents/versions';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -44,7 +44,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force, skipRateLimitCheck } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const latestAgentVersion = await getLatestAvailableVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   try {
     checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
@@ -172,7 +172,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const agentOptions = Array.isArray(agents)
+      ? { agentIds: agents }
+      : { kuery: agents, showInactive: request.body.includeInactive };
     const upgradeOptions = {
       ...agentOptions,
       sourceUri,

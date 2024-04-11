@@ -7,11 +7,14 @@ xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
 
+## Enable the slo plugin
+xpack.slo.enabled: true
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
-xpack.serverless.observability.enabled: true
+xpack.serverless.observability.enabled: true 
 
 ## Configure plugins
 
@@ -77,6 +80,9 @@ xpack.apm.featureFlags.infraUiAvailable: true
 xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
+
+## Set the AI Assistant type
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability

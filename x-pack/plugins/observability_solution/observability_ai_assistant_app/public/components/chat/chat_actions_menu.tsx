@@ -7,10 +7,16 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getSettingsHref } from '../../utils/get_settings_href';
 import { getSettingsKnowledgeBaseHref } from '../../utils/get_settings_kb_href';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
@@ -19,22 +25,24 @@ export function ChatActionsMenu({
   connectors,
   conversationId,
   disabled,
-  showLinkToConversationsApp,
   onCopyConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
   disabled: boolean;
-  showLinkToConversationsApp: boolean;
   onCopyConversationClick: () => void;
 }) {
   const {
-    application: { navigateToUrl },
+    application: { navigateToUrl, navigateToApp },
     http,
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(false);
 
-  const router = useObservabilityAIAssistantRouter();
+  const handleNavigateToConnectors = () => {
+    navigateToApp('management', {
+      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+    });
+  };
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -83,30 +91,6 @@ export function ChatActionsMenu({
               defaultMessage: 'Actions',
             }),
             items: [
-              ...(showLinkToConversationsApp
-                ? [
-                    {
-                      name: conversationId
-                        ? i18n.translate(
-                            'xpack.observabilityAiAssistant.chatHeader.actions.openInConversationsApp',
-                            {
-                              defaultMessage: 'Open in Conversations app',
-                            }
-                          )
-                        : i18n.translate(
-                            'xpack.observabilityAiAssistant.chatHeader.actions.goToConversationsApp',
-                            {
-                              defaultMessage: 'Go to Conversations app',
-                            }
-                          ),
-                      href: conversationId
-                        ? router.link('/conversations/{conversationId}', {
-                            path: { conversationId },
-                          })
-                        : router.link('/conversations/new'),
-                    },
-                  ]
-                : []),
               {
                 name: i18n.translate(
                   'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase',
@@ -168,6 +152,18 @@ export function ChatActionsMenu({
             content: (
               <EuiPanel>
                 <ConnectorSelectorBase {...connectors} />
+
+                <EuiButtonEmpty
+                  flush="left"
+                  size="xs"
+                  data-test-subj="settingsTabGoToConnectorsButton"
+                  onClick={handleNavigateToConnectors}
+                >
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistant.settingsPage.goToConnectorsButtonLabel',
+                    { defaultMessage: 'Manage connectors' }
+                  )}
+                </EuiButtonEmpty>
               </EuiPanel>
             ),
           },

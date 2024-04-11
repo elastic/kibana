@@ -30,7 +30,7 @@ export class HomePageObject extends FtrService {
 
   async openSampleDataAccordion() {
     const accordionButton = await this.testSubjects.find('showSampleDataButton');
-    let expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+    let expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
     let expanded = expandedAttribute.toLocaleLowerCase().includes('true');
     this.log.debug(`Sample data accordion expanded: ${expanded}`);
 
@@ -38,7 +38,7 @@ export class HomePageObject extends FtrService {
       await this.retry.waitFor('sample data according to be expanded', async () => {
         this.log.debug(`Opening sample data accordion`);
         await accordionButton.click();
-        expandedAttribute = await accordionButton.getAttribute('aria-expanded');
+        expandedAttribute = (await accordionButton.getAttribute('aria-expanded')) ?? '';
         expanded = expandedAttribute.toLocaleLowerCase().includes('true');
         return expanded;
       });
@@ -48,9 +48,12 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const installStatus = await (
+      await sampleDataCard.findByCssSelector('[data-status]')
+    ).getAttribute('data-status');
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
     this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
-    return deleteButton.length > 0;
+    return installStatus === 'installed' && deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -72,7 +75,7 @@ export class HomePageObject extends FtrService {
     const panelAttributes = await Promise.all(
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
-    return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
+    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
   }
 
   async goToSampleDataPage() {

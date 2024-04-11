@@ -6,21 +6,24 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { ChatFlyout } from '../chat/chat_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import { useTheme } from '../../hooks/use_theme';
+import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 
 export function NavControl({}: {}) {
   const service = useObservabilityAIAssistantAppService();
 
   const {
     services: {
+      notifications,
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
@@ -31,9 +34,27 @@ export function NavControl({}: {}) {
 
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
+  useNavControlScreenContext();
+
   const chatService = useAbortableAsync(
     ({ signal }) => {
-      return hasBeenOpened ? service.start({ signal }) : undefined;
+      return hasBeenOpened
+        ? service.start({ signal }).catch((error) => {
+            notifications.toasts.addError(error, {
+              title: i18n.translate(
+                'xpack.observabilityAiAssistant.navControl.initFailureErrorTitle',
+                {
+                  defaultMessage: 'Failed to initialize Observability AI Assistant',
+                }
+              ),
+            });
+
+            setHasBeenOpened(false);
+            setIsOpen(false);
+
+            throw error;
+          })
+        : undefined;
     },
     [service, hasBeenOpened]
   );
@@ -77,6 +98,11 @@ export function NavControl({}: {}) {
   return (
     <>
       <EuiButton
+        aria-label={i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.euiButton.openObservabilityAIAssistantLabel',
+          { defaultMessage: 'Open Observability AI Assistant chat' }
+        )}
+        data-test-subj="observabilityAiAssistantAppNavControlButton"
         css={buttonCss}
         onClick={() => {
           service.conversations.openNewConversation({
@@ -88,7 +114,7 @@ export function NavControl({}: {}) {
         fullWidth={false}
         minWidth={0}
       >
-        <AssistantAvatar size="xs" />
+        {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
       </EuiButton>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>

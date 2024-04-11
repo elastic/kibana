@@ -15,6 +15,7 @@ import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/pu
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -66,6 +67,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleKqlBar: true,
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
+      ruleFormV2: false,
     },
   });
   return (
@@ -91,6 +93,27 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
               http: getHttp(context),
               actionTypeRegistry: getActionTypeRegistry(),
               ruleTypeRegistry: getRuleTypeRegistry(),
+              charts: {
+                theme: {
+                  useChartsBaseTheme: () => (darkMode ? DARK_THEME : LIGHT_THEME),
+                  useSparklineOverrides: () => ({
+                    lineSeriesStyle: {
+                      point: {
+                        visible: false,
+                        strokeWidth: 1,
+                        radius: 1,
+                      },
+                    },
+                    areaSeriesStyle: {
+                      point: {
+                        visible: false,
+                        strokeWidth: 1,
+                        radius: 1,
+                      },
+                    },
+                  }),
+                },
+              },
               ...servicesOverride,
             }}
           >

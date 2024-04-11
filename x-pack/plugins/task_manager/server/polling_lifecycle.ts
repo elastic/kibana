@@ -8,7 +8,7 @@
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional } from 'fp-ts/lib/Option';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
@@ -217,7 +217,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
-      requeueInvalidTasksConfig: this.config.requeue_invalid_tasks,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
     });
   };

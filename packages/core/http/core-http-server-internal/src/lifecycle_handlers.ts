@@ -86,13 +86,14 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     name: serverName,
     securityResponseHeaders,
     customResponseHeaders,
-    csp: { header: cspHeader },
+    csp: { header: cspHeader, reportOnlyHeader: cspReportOnlyHeader },
   } = config;
 
   const additionalHeaders = {
     ...securityResponseHeaders,
     ...customResponseHeaders,
     'Content-Security-Policy': cspHeader,
+    'Content-Security-Policy-Report-Only': cspReportOnlyHeader,
     [KIBANA_NAME_HEADER]: serverName,
   };
 

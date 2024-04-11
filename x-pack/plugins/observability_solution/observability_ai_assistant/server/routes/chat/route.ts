@@ -25,11 +25,15 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(
-          t.type({
-            name: t.string,
-            description: t.string,
-            parameters: t.any,
-          })
+          t.intersection([
+            t.type({
+              name: t.string,
+              description: t.string,
+            }),
+            t.partial({
+              parameters: t.any,
+            }),
+          ])
         ),
       }),
       t.partial({
@@ -92,6 +96,15 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
         conversationId: t.string,
         title: t.string,
         responseLanguage: t.string,
+        instructions: t.array(
+          t.union([
+            t.string,
+            t.type({
+              doc_id: t.string,
+              text: t.string,
+            }),
+          ])
+        ),
       }),
     ]),
   }),
@@ -116,6 +129,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
         persist,
         screenContexts,
         responseLanguage,
+        instructions,
       },
     } = params;
 
@@ -141,6 +155,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       functionClient,
       responseLanguage,
+      instructions,
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));

@@ -43,5 +43,6 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'threshold',
   'saved_query',
   'query',
+  'new_terms',
   'threat_match',
 ];

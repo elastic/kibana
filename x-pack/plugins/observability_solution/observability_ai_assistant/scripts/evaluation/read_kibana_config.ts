@@ -13,7 +13,7 @@ import { identity, pickBy } from 'lodash';
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
 export const readKibanaConfig = () => {
-  const kibanaConfigDir = path.join(__filename, '../../../../../../config');
+  const kibanaConfigDir = path.join(__filename, '../../../../../../../config');
   const kibanaDevConfig = path.join(kibanaConfigDir, 'kibana.dev.yml');
   const kibanaConfig = path.join(kibanaConfigDir, 'kibana.yml');
 

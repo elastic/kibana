@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { HasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
-import { PublishesUnsavedChanges, PublishingSubject } from '@kbn/presentation-publishing';
-import { ReactElement } from 'react';
+import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/presentation-publishing';
+import React, { ReactElement } from 'react';
 
 export type ReactEmbeddableRegistration<
   ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
@@ -19,42 +19,31 @@ export type ReactEmbeddableRegistration<
  *
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
-export type DefaultEmbeddableApi = DefaultPresentationPanelApi &
-  PublishesUnsavedChanges & {
-    serializeState: () => Promise<SerializedPanelState>;
-  };
+export interface DefaultEmbeddableApi<StateType extends object = object>
+  extends DefaultPresentationPanelApi,
+    HasType,
+    PublishesUnsavedChanges,
+    HasSerializableState<StateType> {}
 
-export type ReactEmbeddable<ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi> =
-  React.ForwardRefExoticComponent<React.RefAttributes<ApiType>>;
+export type ReactEmbeddableApiRegistration<
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+> = Omit<ApiType, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
 
 export interface ReactEmbeddableFactory<
-  StateType extends unknown = unknown,
-  APIType extends DefaultEmbeddableApi = DefaultEmbeddableApi
+  StateType extends object = object,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 > {
-  getComponent: (initialState: StateType, maybeId?: string) => Promise<ReactEmbeddable<APIType>>;
-  deserializeState: (state: SerializedPanelState) => StateType;
+  type: string;
   latestVersion?: string;
+  deserializeState: (state: SerializedPanelState) => StateType;
+  buildEmbeddable: (
+    initialState: StateType,
+    buildApi: (
+      apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
+      comparators: StateComparators<StateType>
+    ) => ApiType,
+    uuid: string,
+    parentApi?: unknown
+  ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
 }
-
-export type StateTypeFromFactory<F extends ReactEmbeddableFactory<any>> =
-  F extends ReactEmbeddableFactory<infer S> ? S : never;
-
-/**
- * State comparators
- */
-export type EmbeddableComparatorFunction<StateType, KeyType extends keyof StateType> = (
-  last: StateType[KeyType] | undefined,
-  current: StateType[KeyType] | undefined,
-  lastState?: Partial<StateType>,
-  currentState?: Partial<StateType>
-) => boolean;
-
-export type EmbeddableComparatorDefinition<StateType, KeyType extends keyof StateType> = [
-  PublishingSubject<StateType[KeyType]>,
-  (value: StateType[KeyType]) => void,
-  EmbeddableComparatorFunction<StateType, KeyType>?
-];
-
-export type EmbeddableStateComparators<StateType> = {
-  [KeyType in keyof StateType]: EmbeddableComparatorDefinition<StateType, KeyType>;
-};

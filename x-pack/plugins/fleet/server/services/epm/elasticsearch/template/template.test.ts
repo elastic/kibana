@@ -1320,6 +1320,71 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing dimension fields on a dynamic template object', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template field', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
   it('tests processing scaled_float fields in a dynamic template', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: numeric_labels

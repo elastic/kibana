@@ -7,7 +7,7 @@
 
 import { alertConvo, customConvo, welcomeConvo } from '../../mock/conversation';
 import { useAssistantContext } from '../../assistant_context';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, act } from '@testing-library/react';
 import {
   AssistantSettings,
   ANONYMIZATION_TAB,
@@ -22,8 +22,8 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
 };
 const saveSettings = jest.fn();
 
@@ -41,8 +41,8 @@ const mockContext = {
   selectedSettingsTab: 'CONVERSATIONS_TAB',
 };
 const onClose = jest.fn();
-const onSave = jest.fn();
-const setSelectedConversationId = jest.fn();
+const onSave = jest.fn().mockResolvedValue(() => {});
+const onConversationSelected = jest.fn();
 
 const testProps = {
   defaultConnectorId: '123',
@@ -50,7 +50,8 @@ const testProps = {
   selectedConversation: welcomeConvo,
   onClose,
   onSave,
-  setSelectedConversationId,
+  onConversationSelected,
+  conversations: {},
 };
 jest.mock('../../assistant_context');
 
@@ -79,20 +80,25 @@ describe('AssistantSettings', () => {
     (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
   });
 
-  it('saves changes', () => {
+  it('saves changes', async () => {
     const { getByTestId } = render(<AssistantSettings {...testProps} />);
-    fireEvent.click(getByTestId('save-button'));
+
+    await act(async () => {
+      fireEvent.click(getByTestId('save-button'));
+    });
     expect(onSave).toHaveBeenCalled();
     expect(saveSettings).toHaveBeenCalled();
   });
 
-  it('saves changes and updates selected conversation when selected conversation has been deleted', () => {
+  it('saves changes and updates selected conversation when selected conversation has been deleted', async () => {
     const { getByTestId } = render(
       <AssistantSettings {...testProps} selectedConversation={customConvo} />
     );
-    fireEvent.click(getByTestId('save-button'));
+    await act(async () => {
+      fireEvent.click(getByTestId('save-button'));
+    });
     expect(onSave).toHaveBeenCalled();
-    expect(setSelectedConversationId).toHaveBeenCalled();
+    expect(onConversationSelected).toHaveBeenCalled();
     expect(saveSettings).toHaveBeenCalled();
   });
 

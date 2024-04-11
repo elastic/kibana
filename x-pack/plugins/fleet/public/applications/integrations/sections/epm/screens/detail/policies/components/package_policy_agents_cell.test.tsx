@@ -19,6 +19,7 @@ function renderCell({
   agentPolicy = {} as AgentPolicy,
   onAddAgent = () => {},
   hasHelpPopover = false,
+  canAddAgents = true,
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
@@ -27,6 +28,7 @@ function renderCell({
       agentCount={agentCount}
       agentPolicy={agentPolicy}
       onAddAgent={onAddAgent}
+      canAddAgents={canAddAgents}
       hasHelpPopover={hasHelpPopover}
     />
   );
@@ -78,6 +80,12 @@ describe('PackagePolicyAgentsCell', () => {
       expect(
         utils.container.querySelector('[data-test-subj="addAgentHelpPopover"]')
       ).not.toBeInTheDocument();
+    });
+  });
+  test('it should be disabled if canAddAgents is false', async () => {
+    const utils = renderCell({ agentCount: 0, canAddAgents: false });
+    await act(async () => {
+      expect(utils.container.querySelector('[data-test-subj="addAgentButton"]')).toBeDisabled();
     });
   });
 });

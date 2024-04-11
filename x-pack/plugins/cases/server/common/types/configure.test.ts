@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../runtime_types';
 import { ConfigurationPartialAttributesRt } from './configure';
 
 describe('Configuration', () => {

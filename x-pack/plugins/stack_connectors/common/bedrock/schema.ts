@@ -34,6 +34,9 @@ export const InvokeAIActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+  system: schema.maybe(schema.string()),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -45,10 +48,33 @@ export const StreamActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
 });
 
+export const RunApiLatestResponseSchema = schema.object(
+  {
+    stop_reason: schema.maybe(schema.string()),
+    usage: schema.object({
+      input_tokens: schema.number(),
+      output_tokens: schema.number(),
+    }),
+    content: schema.arrayOf(
+      schema.object(
+        { type: schema.string(), text: schema.maybe(schema.string()) },
+        { unknowns: 'allow' }
+      )
+    ),
+  },
+  { unknowns: 'allow' }
+);
+
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
     stop_reason: schema.maybe(schema.string()),
+    usage: schema.maybe(
+      schema.object({
+        input_tokens: schema.number(),
+        output_tokens: schema.number(),
+      })
+    ),
   },
   { unknowns: 'ignore' }
 );

@@ -15,6 +15,7 @@ import {
   CustomRequestHandlerContext,
   SavedObjectReference,
   Logger,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -30,6 +31,7 @@ import { ActionsConfigurationUtilities } from './actions_config';
 export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
+export type GetUnsecuredServicesFunction = () => UnsecuredServices;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type ActionTypeConfig = Record<string, unknown>;
@@ -45,6 +47,12 @@ export { ActionExecutionSourceType } from './lib';
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
+  connectorTokenClient: ConnectorTokenClient;
+}
+
+export interface UnsecuredServices {
+  savedObjectsClient: ISavedObjectsRepository;
   scopedClusterClient: ElasticsearchClient;
   connectorTokenClient: ConnectorTokenClient;
 }
@@ -70,7 +78,7 @@ export interface ActionTypeExecutorOptions<
   Params
 > {
   actionId: string;
-  services: Services;
+  services: Services | UnsecuredServices;
   config: Config;
   secrets: Secrets;
   params: Params;
@@ -234,3 +242,7 @@ export interface ConnectorToken extends SavedObjectAttributes {
   createdAt: string;
   updatedAt?: string;
 }
+
+// This unallowlist should only contain connector types that require a request or API key for
+// execution.
+export const UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS = ['.index'];

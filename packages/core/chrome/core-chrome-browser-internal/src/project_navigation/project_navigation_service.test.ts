@@ -7,7 +7,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -23,6 +23,14 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
+jest.mock('rxjs', () => {
+  const original = jest.requireActual('rxjs');
+  return {
+    ...original,
+    debounceTime: () => (source: Observable<any>) => source,
+  };
+});
+
 const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
   id: 'kibana',
   title: 'Kibana',
@@ -36,7 +44,7 @@ const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
 const getNavLinksService = (ids: Readonly<string[]> = []) => {
   const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
 
-  const navLinksMock: ChromeNavLinks = {
+  const navLinksMock: jest.Mocked<ChromeNavLinks> = {
     getNavLinks$: jest.fn().mockReturnValue(of(navLinks)),
     has: jest.fn(),
     get: jest.fn(),
@@ -52,32 +60,34 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
-  setChromeStyle = jest.fn(),
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
-  setChromeStyle?: () => void;
 } = {}) => {
-  const history = createMemoryHistory();
+  const history = createMemoryHistory({
+    initialEntries: [locationPathName],
+  });
   history.replace(locationPathName);
 
   const projectNavigationService = new ProjectNavigationService();
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
   const navLinksService = getNavLinksService(navLinkIds);
-
+  const application = {
+    ...applicationServiceMock.createInternalStartContract(),
+    history,
+  };
+  application.navigateToUrl.mockImplementation(async (url) => {
+    history.push(url);
+  });
   const projectNavigation = projectNavigationService.start({
-    application: {
-      ...applicationServiceMock.createInternalStartContract(),
-      history,
-    },
+    application,
     navLinksService,
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
-    setChromeStyle,
   });
 
-  return { projectNavigation, history, chromeBreadcrumbs$ };
+  return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
 };
 
 describe('initNavigation()', () => {
@@ -97,6 +107,7 @@ describe('initNavigation()', () => {
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -135,8 +146,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
     });
 
@@ -172,6 +182,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
         setupInitNavigation();
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -185,8 +196,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
       const treeDefinition = await getNavTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
@@ -197,6 +207,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -210,8 +221,7 @@ describe('initNavigation()', () => {
               ],
             },
           ],
-        }),
-        { cloudUrls: {} }
+        })
       );
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -382,6 +392,7 @@ describe('initNavigation()', () => {
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -390,8 +401,7 @@ describe('initNavigation()', () => {
             children: [{ link: 'foo' }],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     // 3. getNavigationTreeUi$() is resolved
@@ -402,7 +412,15 @@ describe('initNavigation()', () => {
 
   test('should add the Cloud links to the navigation tree', async () => {
     const { projectNavigation } = setup();
+    projectNavigation.setCloudUrls({
+      usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/', // trailing slash should be removed!
+      performanceUrl: 'https://cloud.elastic.co/performance/',
+      billingUrl: 'https://cloud.elastic.co/billing/',
+      deploymentUrl: 'https://cloud.elastic.co/deployment/',
+    });
+
     projectNavigation.initNavigation<any>(
+      'foo',
       // @ts-expect-error - We pass a non valid cloudLink that is not TS valid
       of({
         body: [
@@ -418,15 +436,7 @@ describe('initNavigation()', () => {
             ],
           },
         ],
-      }),
-      {
-        cloudUrls: {
-          usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/', // trailing slash should be removed!
-          performanceUrl: 'https://cloud.elastic.co/performance/',
-          billingUrl: 'https://cloud.elastic.co/billing/',
-          deploymentUrl: 'https://cloud.elastic.co/deployment/',
-        },
-      }
+      })
     );
 
     const treeDefinition = await lastValueFrom(
@@ -516,7 +526,7 @@ describe('breadcrumbs', () => {
     const obs = subj.asObservable();
 
     if (initiateNavigation) {
-      projectNavigation.initNavigation(obs, { cloudUrls: {} });
+      projectNavigation.initNavigation('foo', obs);
     }
 
     return {
@@ -729,7 +739,7 @@ describe('breadcrumbs', () => {
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-    projectNavigation.initNavigation(of(mockNavigation), { cloudUrls: {} }); // init navigation
+    projectNavigation.initNavigation('foo', of(mockNavigation)); // init navigation
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
@@ -768,6 +778,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -781,8 +792,7 @@ describe('getActiveNodes$()', () => {
             ],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
@@ -824,6 +834,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -838,8 +849,7 @@ describe('getActiveNodes$()', () => {
             ],
           },
         ],
-      }),
-      { cloudUrls: {} }
+      })
     );
 
     activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
@@ -877,26 +887,29 @@ describe('getActiveNodes$()', () => {
 });
 
 describe('solution navigations', () => {
-  const solution1: SolutionNavigationDefinition = {
+  const solution1: SolutionNavigationDefinition<any> = {
     id: 'solution1',
     title: 'Solution 1',
     icon: 'logoSolution1',
     homePage: 'discover',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app1' }] }),
   };
 
-  const solution2: SolutionNavigationDefinition = {
+  const solution2: SolutionNavigationDefinition<any> = {
     id: 'solution2',
     title: 'Solution 2',
     icon: 'logoSolution2',
-    homePage: 'discover',
-    sideNavComponentGetter: () => () => null,
+    homePage: 'app2',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app2' }] }),
+    sideNavComponent: () => null,
   };
 
-  const solution3: SolutionNavigationDefinition = {
+  const solution3: SolutionNavigationDefinition<any> = {
     id: 'solution3',
     title: 'Solution 3',
     icon: 'logoSolution3',
     homePage: 'discover',
+    navigationTree$: of({ body: [{ type: 'navItem', link: 'app3' }] }),
   };
 
   const localStorageGetItem = jest.fn();
@@ -973,9 +986,10 @@ describe('solution navigations', () => {
       const activeSolution = await lastValueFrom(
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
+      expect(activeSolution).not.toBeNull();
       // sideNavComponentGetter should not be exposed to consumers
-      expect('sideNavComponentGetter' in activeSolution!).toBe(false);
-      const { sideNavComponentGetter, ...rest } = solution2;
+      expect('sideNavComponent' in activeSolution!).toBe(false);
+      const { sideNavComponent, ...rest } = solution2;
       expect(activeSolution).toEqual(rest);
     }
 
@@ -993,28 +1007,45 @@ describe('solution navigations', () => {
     const { projectNavigation } = setup();
 
     projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-    projectNavigation.changeActiveSolutionNavigation('3');
 
     expect(() => {
-      return lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      projectNavigation.changeActiveSolutionNavigation('3');
+    }).toThrowErrorMatchingInlineSnapshot(
       `"Solution navigation definition with id \\"3\\" does not exist."`
     );
   });
 
-  it('should set the Chrome style when the active solution navigation changes', async () => {
-    const setChromeStyle = jest.fn();
-    const { projectNavigation } = setup({ setChromeStyle });
+  it('should change the active solution if no node match the current Location', async () => {
+    const { projectNavigation, navLinksService } = setup({
+      locationPathName: '/app/app3', // we are on app3 which only exists in solution3
+      navLinkIds: ['app1', 'app2', 'app3'],
+    });
 
-    expect(setChromeStyle).not.toHaveBeenCalled();
+    const getActiveDefinition = () =>
+      lastValueFrom(projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1)));
 
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution yet, we are still on classic Kibana
+    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2, 3: solution3 });
 
+    {
+      const definition = await getActiveDefinition();
+      expect(definition).toBe(null); // No active solution id yet
+    }
+
+    // Change to solution 2, but we are still on '/app/app3' which only exists in solution3
     projectNavigation.changeActiveSolutionNavigation('2');
-    expect(setChromeStyle).toHaveBeenCalledWith('project'); // We have an active solution nav, we should switch to project style
 
-    projectNavigation.changeActiveSolutionNavigation(null);
-    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution, we should switch back to classic Kibana
+    {
+      const definition = await getActiveDefinition();
+      expect(definition?.id).toBe('solution3'); // The solution3 was activated as it matches the "/app/app3" location
+    }
+
+    navLinksService.get.mockReturnValue({ url: '/app/app2', href: '/app/app2' } as any);
+    projectNavigation.changeActiveSolutionNavigation('2', { redirect: true }); // We ask to redirect to the home page of solution 2
+    {
+      const definition = await getActiveDefinition();
+      expect(definition?.id).toBe('solution2');
+    }
+
+    navLinksService.get.mockReset();
   });
 });

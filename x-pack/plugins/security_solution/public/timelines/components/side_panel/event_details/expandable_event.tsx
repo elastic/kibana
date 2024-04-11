@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewChatById } from '@kbn/elastic-assistant';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -109,7 +109,9 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       timestamp,
     });
     const urlModifier = (value: string) => {
-      return `${value}&${URL_PARAM_KEY.eventFlyout}=(preview:!(),rightPanel:(id:document-details-right,params:(id:${eventId},indexName:${eventIndex},scopeId:${scopeId})))`;
+      // this is actually only needed for when users click on the Share Alert button and then enable the expandable flyout
+      // (for the old (non-expandable) flyout, we do not need to save anything in the url as we automatically open the flyout here: x-pack/plugins/security_solution/public/detections/pages/alerts/alert_details_redirect.tsx
+      return `${value}&${URL_PARAM_KEY.flyout}=(preview:!(),right:(id:document-details-right,params:(id:'${eventId}',indexName:${eventIndex},scopeId:${scopeId})))`;
     };
 
     const { refetch } = useRefetchByScope({ scopeId });
@@ -154,8 +156,8 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
-                    <NewChatById
-                      conversationId={
+                    <NewChatByTitle
+                      conversationTitle={
                         isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
                       }
                       promptContextId={promptContextId}

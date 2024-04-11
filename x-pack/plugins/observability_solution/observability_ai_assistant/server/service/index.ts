@@ -13,7 +13,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
+import {
+  KnowledgeBaseEntryRole,
+  ObservabilityAIAssistantScreenContextRequest,
+} from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -93,6 +96,8 @@ export class ObservabilityAIAssistantService {
     this.logger = logger;
     this.getModelId = getModelId;
 
+    this.allowInit();
+
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
         title: 'Index queued KB articles',
@@ -119,7 +124,18 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  init = once(async () => {
+  init = async () => {};
+
+  private allowInit = () => {
+    this.init = once(async () => {
+      return this.doInit().catch((error) => {
+        this.allowInit();
+        throw error;
+      });
+    });
+  };
+
+  private doInit = async () => {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
@@ -239,7 +255,7 @@ export class ObservabilityAIAssistantService {
       this.logger.debug(error);
       throw error;
     }
-  });
+  };
 
   async getClient({
     request,
@@ -291,7 +307,7 @@ export class ObservabilityAIAssistantService {
     resources,
     client,
   }: {
-    screenContexts: ObservabilityAIAssistantScreenContext[];
+    screenContexts: ObservabilityAIAssistantScreenContextRequest[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;

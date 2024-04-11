@@ -11,7 +11,6 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -26,8 +25,6 @@ import { DiscoverAppState } from '../../services/discover_app_state_container';
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
-
-setHeaderActionMenuMounter(jest.fn());
 
 const customisationService = createCustomizationService();
 
@@ -85,8 +82,8 @@ describe('Discover documents layout', () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
-    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscGridToolbarBottom').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbarBottom').exists()).toBe(true);
     expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
   });
 

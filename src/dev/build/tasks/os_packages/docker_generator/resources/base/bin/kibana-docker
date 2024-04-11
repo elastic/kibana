@@ -39,6 +39,7 @@ kibana_vars=(
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
+    csp.report_only.form_action
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
@@ -136,6 +137,7 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes

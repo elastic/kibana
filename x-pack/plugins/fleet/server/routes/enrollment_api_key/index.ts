@@ -44,7 +44,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .delete({
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -74,7 +74,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -104,7 +104,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .delete({
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN_DEPRECATED,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -134,7 +134,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN_DEPRECATED,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(

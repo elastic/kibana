@@ -26,7 +26,6 @@ import {
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   apiHasDynamicActions,
-  embeddableEnhancedDrilldownGrouping,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
@@ -42,7 +41,7 @@ export interface FlyoutEditDrilldownParams {
 }
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
@@ -54,7 +53,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public order = 10;
-  public grouping = embeddableEnhancedDrilldownGrouping;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -69,9 +67,8 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable)) return false;
-    if (getInheritedViewMode(embeddable) !== 'edit') return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
+    return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

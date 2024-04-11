@@ -11,7 +11,8 @@ import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-plugin/common/constants';
+
+import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -45,6 +46,14 @@ export class ReportingPageObject extends FtrService {
         'href',
         timeout
       );
+      if (!url) {
+        throw new Error(
+          `${
+            url === null ? 'No' : 'Empty'
+          } href found on [data-test-subj="downloadCompletedReportButton"]`
+        );
+      }
+
       this.log.debug(`getReportURL got url: ${url}`);
 
       return url;

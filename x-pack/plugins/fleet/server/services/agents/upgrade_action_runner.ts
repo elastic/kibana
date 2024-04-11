@@ -30,7 +30,7 @@ import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
-import { getLatestAvailableVersion } from './versions';
+import { getLatestAvailableAgentVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -78,7 +78,7 @@ export async function upgradeBatch(
       ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
-  const latestAgentVersion = await getLatestAvailableVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents that are:

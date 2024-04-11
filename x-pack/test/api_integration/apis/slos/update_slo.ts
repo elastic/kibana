@@ -7,7 +7,7 @@
 import { cleanup } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
-import { SO_SLO_TYPE } from '@kbn/observability-plugin/server/saved_objects';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { loadTestData } from './helper/load_test_data';
@@ -137,6 +137,11 @@ export default function ({ getService }: FtrProviderContext) {
                         minimum_should_match: 1,
                       },
                     },
+                    {
+                      exists: {
+                        field: 'hosts',
+                      },
+                    },
                   ],
                 },
               },
@@ -146,17 +151,11 @@ export default function ({ getService }: FtrProviderContext) {
                   script: { source: `emit('${id}')` },
                 },
                 'slo.revision': { type: 'long', script: { source: 'emit(2)' } },
-                'slo.instanceId': {
-                  script: {
-                    source: "emit('hosts:'+doc['hosts'].value)",
-                  },
-                  type: 'keyword',
-                },
               },
             },
             dest: {
-              index: '.slo-observability.sli-v3',
-              pipeline: '.slo-observability.sli.pipeline-v3',
+              index: '.slo-observability.sli-v3.1',
+              pipeline: '.slo-observability.sli.pipeline-v3.1',
             },
             frequency: '1m',
             sync: { time: { field: '@timestamp', delay: '1m' } },
@@ -164,7 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
               group_by: {
                 'slo.id': { terms: { field: 'slo.id' } },
                 'slo.revision': { terms: { field: 'slo.revision' } },
-                'slo.instanceId': { terms: { field: 'slo.instanceId' } },
                 'slo.groupings.hosts': { terms: { field: 'hosts' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },
@@ -189,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Rolled-up SLI data for SLO: Test SLO for api integration [id: ${id}, revision: 2]`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
           },
         ],
       });
@@ -223,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             dest: {
-              index: '.slo-observability.summary-v3',
+              index: '.slo-observability.summary-v3.1',
               pipeline: `.slo-observability.summary.pipeline-${id}-2`,
             },
             frequency: '1m',
@@ -287,7 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             description: `Summarise the rollup data of SLO: Test SLO for api integration [id: ${id}, revision: 2].`,
             settings: { deduce_mappings: false, unattended: true },
-            _meta: { version: 3, managed: true, managed_by: 'observability' },
+            _meta: { version: 3.1, managed: true, managed_by: 'observability' },
           },
         ],
       });

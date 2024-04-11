@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -25,6 +26,7 @@ import {
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
@@ -37,7 +39,7 @@ export interface DiscoverGridFlyoutProps {
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
-  columnTypes?: Record<string, string>;
+  columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -61,7 +63,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
-  columnTypes,
+  columnsMeta,
   savedSearchId,
   filters,
   query,
@@ -98,6 +100,10 @@ export function DiscoverGridFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
+      const nodeName = get(ev, 'target.nodeName', null);
+      if (typeof nodeName === 'string' && nodeName.toLowerCase() === 'input') {
+        return;
+      }
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();
@@ -147,7 +153,7 @@ export function DiscoverGridFlyout({
     () => (
       <UnifiedDocViewer
         columns={columns}
-        columnTypes={columnTypes}
+        columnsMeta={columnsMeta}
         dataView={dataView}
         filter={onFilter}
         hit={actualHit}
@@ -161,7 +167,7 @@ export function DiscoverGridFlyout({
       actualHit,
       addColumn,
       columns,
-      columnTypes,
+      columnsMeta,
       dataView,
       hits,
       isPlainRecord,
@@ -192,7 +198,7 @@ export function DiscoverGridFlyout({
 
   const defaultFlyoutTitle = isPlainRecord
     ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
-        defaultMessage: 'Row',
+        defaultMessage: 'Result',
       })
     : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
         defaultMessage: 'Document',

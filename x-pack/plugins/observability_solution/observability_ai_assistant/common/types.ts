@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ObservabilityAIAssistantChatService } from '../public';
+import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
 export enum MessageRole {
   System = 'system',
@@ -40,6 +42,12 @@ export interface Message {
   };
 }
 
+export interface TokenCount {
+  prompt: number;
+  completion: number;
+  total: number;
+}
+
 export interface Conversation {
   '@timestamp': string;
   user: {
@@ -50,6 +58,7 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
+    token_count?: TokenCount;
   };
   messages: Message[];
   labels: Record<string, string>;
@@ -59,11 +68,13 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string };
+  conversation: { title: string; token_count?: TokenCount };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
-export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+export type ConversationUpdateRequest = ConversationRequestBase & {
+  conversation: { id: string };
+};
 
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
@@ -77,6 +88,36 @@ export interface KnowledgeBaseEntry {
   role: KnowledgeBaseEntryRole;
 }
 
+export interface UserInstruction {
+  doc_id: string;
+  text: string;
+}
+
+export interface ObservabilityAIAssistantScreenContextRequest {
+  screenDescription?: string;
+  data?: Array<{
+    name: string;
+    description: string;
+    value: any;
+  }>;
+  actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+}
+
+export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+  args: TArguments;
+  signal: AbortSignal;
+  connectorId: string;
+  client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'>;
+  messages: Message[];
+}) => Promise<FunctionResponse>;
+
+export interface ScreenContextActionDefinition<TArguments = undefined> {
+  name: string;
+  description: string;
+  parameters?: CompatibleJSONSchema;
+  respond: ScreenContextActionRespondFunction<TArguments>;
+}
+
 export interface ObservabilityAIAssistantScreenContext {
   screenDescription?: string;
   data?: Array<{
@@ -84,4 +125,5 @@ export interface ObservabilityAIAssistantScreenContext {
     description: string;
     value: any;
   }>;
+  actions?: ScreenContextActionDefinition[];
 }

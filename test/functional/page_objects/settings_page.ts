@@ -131,7 +131,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
-    let curValue: string | undefined;
+    let curValue: string | null;
     if (value !== undefined) {
       curValue = await this.getAdvancedSettingAriaCheckbox(propertyName);
 
@@ -669,7 +669,7 @@ export class SettingsPageObject extends FtrService {
       // case where we don't want the * appended so we'll remove it if it was added
       await field.type(indexPatternName, { charByChar: true });
       const tempName = await field.getAttribute('value');
-      if (tempName.length > indexPatternName.length) {
+      if (tempName?.length ?? 0 > indexPatternName.length) {
         await field.type(this.browser.keys.DELETE, { charByChar: true });
       }
     }
@@ -857,6 +857,9 @@ export class SettingsPageObject extends FtrService {
   async clickAddField() {
     this.log.debug('click Add Field');
     await this.testSubjects.click('addField');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('flyoutTitle');
+    });
   }
 
   async clickSaveField() {
@@ -872,8 +875,7 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
-    await this.testSubjects.setValue('typeField', type);
-    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.comboBox.set('typeField', type);
   }
 
   async setFieldTypeComposite() {

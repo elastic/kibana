@@ -28,6 +28,7 @@ import type {
 } from './types';
 import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
+import { createScreenContextAction } from './utils/create_screen_context_action';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -107,6 +108,7 @@ export class ObservabilityAIAssistantPlugin
           )
         : null,
       getContextualInsightMessages,
+      createScreenContextAction,
     };
   }
 }

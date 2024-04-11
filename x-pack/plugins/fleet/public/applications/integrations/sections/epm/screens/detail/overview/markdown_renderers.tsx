@@ -111,5 +111,10 @@ export const markdownRenderers = (
         </EuiCodeBlock>
       );
     },
+    img: (
+      props: React.ClassAttributes<HTMLImageElement> & React.ImgHTMLAttributes<HTMLImageElement>
+    ) => {
+      return <img style={{ maxWidth: '100%' }} {...props} alt={props.alt} />;
+    },
   };
 };

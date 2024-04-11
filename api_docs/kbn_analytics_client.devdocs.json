@@ -720,6 +720,10 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
+                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/functions/context.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
               },
               {
@@ -891,12 +895,16 @@
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/mock.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/observability_solution/apm/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -1081,14 +1089,6 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.test.ts"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/create_mock_chat_service.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -2010,7 +2010,7 @@
         "tags": [],
         "label": "OptInConfig",
         "description": [
-          "\n"
+          "\nOptions for the optIn API"
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,

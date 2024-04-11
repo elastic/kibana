@@ -5,6 +5,25 @@
     "functions": [
       {
         "parentPluginId": "fleet",
+        "id": "def-public.AvailablePackagesHook",
+        "type": "Function",
+        "tags": [],
+        "label": "AvailablePackagesHook",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/hooks/use_available_packages",
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CustomAssetsAccordion",
         "type": "Function",
         "tags": [],
@@ -54,6 +73,54 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.LazyPackagePolicyInputVarField",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyPackagePolicyInputVarField",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.InputFieldProps",
+            "text": "InputFieldProps"
+          },
+          " & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.InputFieldProps",
+            "text": "InputFieldProps"
+          },
+          ">; }"
+        ],
+        "path": "x-pack/plugins/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.LazyPackagePolicyInputVarField.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.PackageIcon",
         "type": "Function",
         "tags": [],
@@ -90,6 +157,25 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackageList",
+        "type": "Function",
+        "tags": [],
+        "label": "PackageList",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index",
+          ">"
+        ],
+        "path": "x-pack/plugins/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -794,6 +880,449 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.InputFieldProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "InputFieldProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.varDef",
+            "type": "Object",
+            "tags": [],
+            "label": "varDef",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.RegistryVarsEntry",
+                "text": "RegistryVarsEntry"
+              }
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.value",
+            "type": "Any",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(newValue: any) => void"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.InputFieldProps.onChange.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "newValue",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.errors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "string[] | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.forceShowErrors",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forceShowErrors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.frozen",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "frozen",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.packageType",
+            "type": "string",
+            "tags": [],
+            "label": "packageType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.packageName",
+            "type": "string",
+            "tags": [],
+            "label": "packageName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.datastreams",
+            "type": "Array",
+            "tags": [],
+            "label": "datastreams",
+            "description": [],
+            "signature": [
+              "DataStream",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.InputFieldProps.isEditPage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEditPage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.IntegrationCardItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationCardItem",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.release",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "release",
+            "description": [],
+            "signature": [
+              "IntegrationCardReleaseLabel",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.icons",
+            "type": "Array",
+            "tags": [],
+            "label": "icons",
+            "description": [],
+            "signature": [
+              "(",
+              {
+                "pluginId": "customIntegrations",
+                "scope": "common",
+                "docId": "kibCustomIntegrationsPluginApi",
+                "section": "def-common.CustomIntegrationIcon",
+                "text": "CustomIntegrationIcon"
+              },
+              " | ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackageSpecIcon",
+                "text": "PackageSpecIcon"
+              },
+              ")[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.integration",
+            "type": "string",
+            "tags": [],
+            "label": "integration",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.fromIntegrations",
+            "type": "string",
+            "tags": [],
+            "label": "fromIntegrations",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.isReauthorizationRequired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReauthorizationRequired",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.isUnverified",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isUnverified",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.isUpdateAvailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isUpdateAvailable",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.isQuickstart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isQuickstart",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.showLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showLabels",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.extraLabelsBadges",
+            "type": "Array",
+            "tags": [],
+            "label": "extraLabelsBadges",
+            "description": [],
+            "signature": [
+              "React.ReactNode[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.onCardClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onCardClick",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.IntegrationsAppBrowseRouteState",
         "type": "Interface",
         "tags": [],
@@ -1312,6 +1841,383 @@
               "[]"
             ],
             "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.PackageListGridProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackageListGridProps",
+        "description": [],
+        "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.controls",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controls",
+            "description": [],
+            "signature": [
+              "React.ReactNode | React.ReactNode[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.list",
+            "type": "Array",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.IntegrationCardItem",
+                "text": "IntegrationCardItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.searchTerm",
+            "type": "string",
+            "tags": [],
+            "label": "searchTerm",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.setSearchTerm",
+            "type": "Function",
+            "tags": [],
+            "label": "setSearchTerm",
+            "description": [],
+            "signature": [
+              "(search: string) => void"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.PackageListGridProps.setSearchTerm.$1",
+                "type": "string",
+                "tags": [],
+                "label": "search",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.selectedCategory",
+            "type": "string",
+            "tags": [],
+            "label": "selectedCategory",
+            "description": [],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.setCategory",
+            "type": "Function",
+            "tags": [],
+            "label": "setCategory",
+            "description": [],
+            "signature": [
+              "(category: string) => void"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.PackageListGridProps.setCategory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.categories",
+            "type": "Array",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "CategoryFacet",
+              "[]"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.setUrlandReplaceHistory",
+            "type": "Function",
+            "tags": [],
+            "label": "setUrlandReplaceHistory",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "IntegrationsURLParameters",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.PackageListGridProps.setUrlandReplaceHistory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "IntegrationsURLParameters"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.setUrlandPushHistory",
+            "type": "Function",
+            "tags": [],
+            "label": "setUrlandPushHistory",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "IntegrationsURLParameters",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.PackageListGridProps.setUrlandPushHistory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "IntegrationsURLParameters"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.callout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "callout",
+            "description": [],
+            "signature": [
+              "JSX.Element | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.showCardLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCardLabels",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.availableSubCategories",
+            "type": "Array",
+            "tags": [],
+            "label": "availableSubCategories",
+            "description": [],
+            "signature": [
+              "CategoryFacet",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.selectedSubCategory",
+            "type": "string",
+            "tags": [],
+            "label": "selectedSubCategory",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.setSelectedSubCategory",
+            "type": "Function",
+            "tags": [],
+            "label": "setSelectedSubCategory",
+            "description": [],
+            "signature": [
+              "((c: string | undefined) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.PackageListGridProps.setSelectedSubCategory.$1",
+                "type": "string",
+                "tags": [],
+                "label": "c",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.showMissingIntegrationMessage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showMissingIntegrationMessage",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.showControls",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showControls",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageListGridProps.showSearchTools",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showSearchTools",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/components/package_list_grid/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2426,6 +3332,64 @@
         "path": "x-pack/plugins/fleet/public/types/intra_app_route_state.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.AvailablePackagesHookType",
+        "type": "Type",
+        "tags": [],
+        "label": "AvailablePackagesHookType",
+        "description": [],
+        "signature": [
+          "({ prereleaseIntegrationsEnabled, }: { prereleaseIntegrationsEnabled: boolean; }) => { initialSelectedCategory: string; selectedCategory: string; setCategory: React.Dispatch<React.SetStateAction<string>>; allCategories: ",
+          "CategoryFacet",
+          "[]; mainCategories: ",
+          "CategoryFacet",
+          "[]; availableSubCategories: ",
+          "CategoryFacet",
+          "[]; selectedSubCategory: string | undefined; setSelectedSubCategory: React.Dispatch<React.SetStateAction<string | undefined>>; searchTerm: string; setSearchTerm: React.Dispatch<React.SetStateAction<string>>; setUrlandPushHistory: ({ searchString, categoryId, subCategoryId, }: ",
+          "IntegrationsURLParameters",
+          ") => void; setUrlandReplaceHistory: ({ searchString, categoryId, subCategoryId, }: ",
+          "IntegrationsURLParameters",
+          ") => void; preference: ",
+          "IntegrationPreferenceType",
+          "; setPreference: React.Dispatch<React.SetStateAction<",
+          "IntegrationPreferenceType",
+          ">>; isLoading: boolean; isLoadingCategories: boolean; isLoadingAllPackages: boolean; isLoadingAppendCustomIntegrations: boolean; eprPackageLoadingError: ",
+          "RequestError",
+          " | null; eprCategoryLoadingError: ",
+          "RequestError",
+          " | null; filteredCards: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.IntegrationCardItem",
+            "text": "IntegrationCardItem"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/hooks/use_available_packages.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.AvailablePackagesHookType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ prereleaseIntegrationsEnabled: boolean; }"
+            ],
+            "path": "x-pack/plugins/fleet/public/applications/integrations/sections/epm/screens/home/hooks/use_available_packages.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -7414,9 +8378,9 @@
               },
               ", options?: { spaceId?: string | undefined; id?: string | undefined; user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7571,9 +8535,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7837,9 +8801,9 @@
               "NewPackagePolicyWithId",
               "[], options?: { user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7953,9 +8917,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8047,9 +9011,9 @@
               },
               "[], options?: { user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8161,9 +9125,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8650,9 +9614,9 @@
               },
               ", options?: { user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8768,9 +9732,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8854,9 +9818,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8967,9 +9931,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -9082,9 +10046,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "@kbn/security-plugin-types-common",
+                "pluginId": "@kbn/core-security-common",
                 "scope": "common",
-                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "docId": "kibKbnCoreSecurityCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -9187,9 +10151,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/security-plugin-types-common",
+                        "pluginId": "@kbn/core-security-common",
                         "scope": "common",
-                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                        "docId": "kibKbnCoreSecurityCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -10606,7 +11570,39 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -10710,39 +11706,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -11977,7 +12941,39 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -12081,39 +13077,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -13361,7 +14325,39 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -13465,39 +14461,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -14742,7 +15706,39 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -14846,39 +15842,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -16126,7 +17090,39 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
               "CreateRequest",
@@ -16230,39 +17226,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -18851,7 +19815,7 @@
             "label": "installType",
             "description": [],
             "signature": [
-              "\"update\" | \"unknown\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
+              "\"unknown\" | \"update\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -19152,7 +20116,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; }"
+              "{ all: boolean; setup: boolean; readEnrollmentTokens: boolean; readAgentPolicies: boolean; allAgentPolicies: boolean; readAgents: boolean; allAgents: boolean; readSettings: boolean; allSettings: boolean; addAgents: boolean; addFleetServers: boolean; }"
             ],
             "path": "x-pack/plugins/fleet/common/authz.ts",
             "deprecated": false,
@@ -19753,6 +20717,23 @@
             "signature": [
               "OutputMap",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetServerAgent.unhealthy_reason",
+            "type": "Array",
+            "tags": [],
+            "label": "unhealthy_reason",
+            "description": [
+              "\nUnhealthy reason: input, output, other"
+            ],
+            "signature": [
+              "UnhealthyReason",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -21078,6 +22059,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_executed_state",
+            "type": "Object",
+            "tags": [],
+            "label": "latest_executed_state",
+            "description": [],
+            "signature": [
+              "InstallLatestExecutedState",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21122,7 +22118,8 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"installed\" | \"already_installed\" | undefined"
+              "InstallResultStatus",
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false,
@@ -21150,7 +22147,7 @@
             "label": "installType",
             "description": [],
             "signature": [
-              "\"update\" | \"unknown\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
+              "\"unknown\" | \"update\" | \"reinstall\" | \"reupdate\" | \"rollback\" | \"install\""
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false,
@@ -21667,6 +22664,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.advanced_settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "advanced_settings",
             "description": [],
             "signature": [
               "{ [key: string]: any; } | null | undefined"
@@ -22790,7 +23801,7 @@
             "label": "release",
             "description": [],
             "signature": [
-              "\"beta\" | \"experimental\" | \"ga\" | undefined"
+              "\"experimental\" | \"beta\" | \"ga\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -23202,7 +24213,7 @@
             "label": "[RegistryDataStreamKeys.release]",
             "description": [],
             "signature": [
-              "\"beta\" | \"experimental\" | \"ga\""
+              "\"experimental\" | \"beta\" | \"ga\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -25872,7 +26883,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; version: string; description: string; download: string; path: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; version: string; description: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -25896,7 +26907,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; release?: \"beta\" | \"experimental\" | \"ga\" | undefined; policy_templates?: ",
+          " | undefined)[] | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
