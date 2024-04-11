@@ -40,9 +40,6 @@ function flattenAccum(
   indexPattern?: DataView,
   params?: TabifyDocsOptions
 ) {
-  console.log('fklatten');
-
-  // for (const [k, val] of Object.entries(obj)) {
   for (const k in obj) {
     if (!obj.hasOwnProperty(k)) {
       continue;
@@ -129,14 +126,18 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
   }
 
   // Merge all valid meta fields into the flattened object
-  indexPattern?.metaFields?.forEach((fieldName) => {
-    const isExcludedMetaField =
-      EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
-    if (isExcludedMetaField) {
-      return;
+  if (indexPattern && indexPattern.metaFields) {
+    for (const fieldName in indexPattern.metaFields) {
+      if (indexPattern.hasOwnProperty(fieldName)) {
+        const isExcludedMetaField =
+          EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
+        if (isExcludedMetaField) {
+          return;
+        }
+        flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
+      }
     }
-    flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
-  });
+  }
 
   // Use a proxy to make sure that keys are always returned in a specific order,
   // so we have a guarantee on the flattened order of keys.
@@ -171,13 +172,14 @@ export const tabifyDocs = (
   index?: DataView,
   params: TabifyDocsOptions = {}
 ): Datatable => {
-  console.log('tavify!');
-
   const columns: DatatableColumn[] = [];
 
-  const rows = esResponse.hits.hits
+  const rows: DatatableRow[] = esResponse.hits.hits
     .map((hit) => {
       const flat = flattenHit(hit, index, params);
+      if (!flat) {
+        return;
+      }
       for (const [key, value] of Object.entries(flat)) {
         const field = index?.fields.getByName(key);
         const fieldName = field?.name || key;
