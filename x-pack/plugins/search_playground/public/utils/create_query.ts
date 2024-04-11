@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesQuerySourceFields } from '../types';
+import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 type IndexFields = Record<string, string[]>;
 
@@ -16,11 +16,11 @@ const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'text', 'content'];
+const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'page_content_text', 'text', 'content'];
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text'];
+const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text', 'page_content_text'];
 
 interface Matches {
   queryMatches: any[];
@@ -30,8 +30,8 @@ interface Matches {
 export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQuerySourceFields) {
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
-      const indexFields = fields[index];
-      const indexFieldDescriptors = fieldDescriptors[index];
+      const indexFields: string[] = fields[index];
+      const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
 
       const sparseMatches =
         indexFields.map((field) => {
@@ -39,7 +39,8 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
             (x) => x.field === field
           );
 
-          if (elserField) {
+          // not supporting nested fields for now
+          if (elserField && !elserField.nested) {
             // when another index has the same field, we don't want to duplicate the match rule
             const hasExistingSparseMatch = acc.queryMatches.find(
               (x: any) =>
@@ -83,7 +84,8 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
             (x) => x.field === field
           );
 
-          if (denseVectorField) {
+          // not supporting nested fields for now
+          if (denseVectorField && !denseVectorField.nested) {
             return {
               field: denseVectorField.field,
               k: 10,
@@ -133,13 +135,19 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        throw new Error('No source fields found');
+      }
+
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
       );
 
+      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
+
       return {
         ...acc,
-        [index]: suggested,
+        [index]: fields,
       };
     },
     {}

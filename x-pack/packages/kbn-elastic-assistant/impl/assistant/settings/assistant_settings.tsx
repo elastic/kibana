@@ -23,6 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
@@ -66,6 +67,8 @@ interface Props {
   selectedConversation: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
+  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -80,6 +83,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     onConversationSelected,
     conversations,
+    anonymizationFields,
+    refetchAnonymizationFieldsResults,
   }) => {
     const {
       actionTypeRegistry,
@@ -92,20 +97,22 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const {
       conversationSettings,
       setConversationSettings,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
+      assistantStreamingEnabled,
+      setUpdatedAssistantStreamingEnabled,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
       conversationsSettingsBulkActions,
+      updatedAnonymizationData,
       setConversationsSettingsBulkActions,
-    } = useSettingsUpdater(conversations);
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
+    } = useSettingsUpdater(conversations, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -160,12 +167,21 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         });
       }
       const saveResult = await saveSettings();
-      await onSave(saveResult);
+      if (
+        (anonymizationFieldsBulkActions?.create?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.update?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.delete?.ids?.length ?? 0) > 0
+      ) {
+        refetchAnonymizationFieldsResults();
+      }
+      onSave(saveResult);
     }, [
+      anonymizationFieldsBulkActions,
       conversationSettings,
       defaultSelectedConversation.title,
       onConversationSelected,
       onSave,
+      refetchAnonymizationFieldsResults,
       saveSettings,
     ]);
 
@@ -299,6 +315,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     allSystemPrompts={systemPromptSettings}
                     selectedConversation={selectedConversation}
                     isDisabled={selectedConversation == null}
+                    assistantStreamingEnabled={assistantStreamingEnabled}
+                    setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
                   />
@@ -326,11 +344,11 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultAllow={defaultAllow}
-                    defaultAllowReplacement={defaultAllowReplacement}
-                    pageSize={5}
-                    setUpdatedDefaultAllow={setUpdatedDefaultAllow}
-                    setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
+                    defaultPageSize={5}
+                    anonymizationFields={updatedAnonymizationData}
+                    anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
+                    setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+                    setUpdatedAnonymizationData={setUpdatedAnonymizationData}
                   />
                 )}
                 {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

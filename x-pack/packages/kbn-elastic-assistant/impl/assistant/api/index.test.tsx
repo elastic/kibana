@@ -6,6 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import {
@@ -15,7 +16,6 @@ import {
   getKnowledgeBaseStatus,
   postKnowledgeBase,
 } from '.';
-import type { Conversation } from '../../assistant_context/types';
 import { API_ERROR } from '../translations';
 
 jest.mock('@kbn/core-http-browser');
@@ -24,21 +24,42 @@ const mockHttp = {
   fetch: jest.fn(),
 } as unknown as HttpSetup;
 
-const apiConfig: Conversation['apiConfig'] = {
-  connectorId: 'foo',
-  model: 'gpt-4',
-  provider: OpenAiProviderType.OpenAi,
+const apiConfig: Record<'openai' | 'bedrock', ApiConfig> = {
+  openai: {
+    connectorId: 'foo',
+    actionTypeId: '.gen-ai',
+    model: 'gpt-4',
+    provider: OpenAiProviderType.OpenAi,
+  },
+  bedrock: {
+    connectorId: 'foo',
+    actionTypeId: '.bedrock',
+  },
 };
 
 const fetchConnectorArgs: FetchConnectorExecuteAction = {
   isEnabledRAGAlerts: false,
-  apiConfig,
+  apiConfig: apiConfig.openai,
   isEnabledKnowledgeBase: true,
   assistantStreamingEnabled: true,
   http: mockHttp,
   message: 'This is a test',
   conversationId: 'test',
-  replacements: [],
+  replacements: {},
+};
+const streamingDefaults = {
+  method: 'POST',
+  asResponse: true,
+  rawResponse: true,
+  signal: undefined,
+  version: '1',
+};
+
+const staticDefaults = {
+  headers: { 'Content-Type': 'application/json' },
+  method: 'POST',
+  signal: undefined,
+  version: '1',
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -46,24 +67,73 @@ describe('API tests', () => {
   });
 
   describe('fetchConnectorExecuteAction', () => {
-    it('calls the internal assistant API when isEnabledKnowledgeBase is true', async () => {
+    it('calls the non-stream API when assistantStreamingEnabled is false', async () => {
+      await fetchConnectorExecuteAction({
+        ...fetchConnectorArgs,
+        assistantStreamingEnabled: false,
+      });
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          ...staticDefaults,
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+        }
+      );
+    });
+
+    it('calls the stream API when assistantStreamingEnabled is true', async () => {
       await fetchConnectorExecuteAction(fetchConnectorArgs);
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-          signal: undefined,
-          version: '1',
+          ...streamingDefaults,
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".gen-ai","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
         }
       );
     });
 
-    it('calls the actions connector api with streaming when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false', async () => {
+    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is true', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
+        apiConfig: apiConfig.bedrock,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          ...staticDefaults,
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+        }
+      );
+    });
+
+    it('calls the non-stream API when assistantStreamingEnabled is true and actionTypeId is bedrock and isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        apiConfig: apiConfig.bedrock,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: true,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          ...staticDefaults,
+          body: '{"message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+        }
+      );
+    });
+
+    it('calls the stream API when assistantStreamingEnabled is true and actionTypeId is .bedrock and isEnabledKnowledgeBase is false', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        apiConfig: apiConfig.bedrock,
         isEnabledKnowledgeBase: false,
       };
 
@@ -72,24 +142,19 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeStream","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
-          method: 'POST',
-          asResponse: true,
-          rawResponse: true,
-          signal: undefined,
-          version: '1',
+          ...streamingDefaults,
+          body: '{"message":"This is a test","subAction":"invokeStream","conversationId":"test","actionTypeId":".bedrock","replacements":{},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
         }
       );
     });
 
-    it('calls the actions connector with the expected optional request parameters', async () => {
+    it('calls the api with the expected optional request parameters', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
         isEnabledRAGAlerts: true,
+        assistantStreamingEnabled: false,
         alertsIndexPattern: '.alerts-security.alerts-default',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
-        replacements: [{ uuid: 'auuid', value: 'real.hostname' }],
+        replacements: { auuid: 'real.hostname' },
         size: 30,
       };
 
@@ -98,59 +163,8 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[{"uuid":"auuid","value":"real.hostname"}],"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'POST',
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-
-    it('calls the actions connector api with invoke when assistantStreamingEnabled is false when isEnabledKnowledgeBase is false', async () => {
-      const testProps: FetchConnectorExecuteAction = {
-        ...fetchConnectorArgs,
-        isEnabledKnowledgeBase: false,
-        assistantStreamingEnabled: false,
-      };
-
-      await fetchConnectorExecuteAction(testProps);
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/actions/connector/foo/_execute',
-        {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-
-    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
-      const testProps: FetchConnectorExecuteAction = {
-        ...fetchConnectorArgs,
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: true,
-      };
-
-      await fetchConnectorExecuteAction(testProps);
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/actions/connector/foo/_execute',
-        {
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","replacements":[],"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: undefined,
-          version: '1',
+          ...staticDefaults,
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
         }
       );
     });
@@ -160,7 +174,11 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
 
-      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nCould not get reader from response`,
+        isStream: false,
+        isError: true,
+      });
     });
 
     it('returns API_ERROR + error message on non streaming responses', async () => {
@@ -170,7 +188,6 @@ describe('API tests', () => {
       });
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        isEnabledKnowledgeBase: false,
         assistantStreamingEnabled: false,
       };
 
@@ -222,22 +239,12 @@ describe('API tests', () => {
     it('returns API_ERROR when there are no choices', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
 
-      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
-
-      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
-    });
-
-    it('returns the original content when isEnabledKnowledgeBase is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
-      const response = '```json\n{"some_key": "some value"}\n```';
-
-      (mockHttp.fetch as jest.Mock).mockResolvedValue({
-        status: 'ok',
-        data: response,
+      const result = await fetchConnectorExecuteAction({
+        ...fetchConnectorArgs,
+        assistantStreamingEnabled: false,
       });
 
-      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
-
-      expect(result).toEqual({ response, isStream: false, isError: false });
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
     it('returns the original when isEnabledKnowledgeBase is true, and `content` is not JSON', async () => {
@@ -248,7 +255,10 @@ describe('API tests', () => {
         data: response,
       });
 
-      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+      const result = await fetchConnectorExecuteAction({
+        ...fetchConnectorArgs,
+        assistantStreamingEnabled: false,
+      });
 
       expect(result).toEqual({ response, isStream: false, isError: false });
     });

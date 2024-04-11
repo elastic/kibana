@@ -60,11 +60,9 @@ const logger = loggerMock.create();
 const setup = ({
   locationPathName = '/',
   navLinkIds,
-  setChromeStyle = jest.fn(),
 }: {
   locationPathName?: string;
   navLinkIds?: Readonly<string[]>;
-  setChromeStyle?: () => void;
 } = {}) => {
   const history = createMemoryHistory({
     initialEntries: [locationPathName],
@@ -87,7 +85,6 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
-    setChromeStyle,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -110,6 +107,7 @@ describe('initNavigation()', () => {
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -184,6 +182,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
         setupInitNavigation();
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -208,6 +207,7 @@ describe('initNavigation()', () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 
       projNavigation.initNavigation<any>(
+        'foo',
         of({
           body: [
             {
@@ -392,6 +392,7 @@ describe('initNavigation()', () => {
 
     // 2. initNavigation() is called
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -419,6 +420,7 @@ describe('initNavigation()', () => {
     });
 
     projectNavigation.initNavigation<any>(
+      'foo',
       // @ts-expect-error - We pass a non valid cloudLink that is not TS valid
       of({
         body: [
@@ -524,7 +526,7 @@ describe('breadcrumbs', () => {
     const obs = subj.asObservable();
 
     if (initiateNavigation) {
-      projectNavigation.initNavigation(obs);
+      projectNavigation.initNavigation('foo', obs);
     }
 
     return {
@@ -737,7 +739,7 @@ describe('breadcrumbs', () => {
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-    projectNavigation.initNavigation(of(mockNavigation)); // init navigation
+    projectNavigation.initNavigation('foo', of(mockNavigation)); // init navigation
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
@@ -776,6 +778,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -831,6 +834,7 @@ describe('getActiveNodes$()', () => {
     expect(activeNodes).toEqual([]);
 
     projectNavigation.initNavigation<any>(
+      'foo',
       of({
         body: [
           {
@@ -1009,22 +1013,6 @@ describe('solution navigations', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"Solution navigation definition with id \\"3\\" does not exist."`
     );
-  });
-
-  it('should set the Chrome style when the active solution navigation changes', async () => {
-    const setChromeStyle = jest.fn();
-    const { projectNavigation } = setup({ setChromeStyle });
-
-    expect(setChromeStyle).not.toHaveBeenCalled();
-
-    projectNavigation.updateSolutionNavigations({ 1: solution1, 2: solution2 });
-    expect(setChromeStyle).not.toHaveBeenCalled();
-
-    projectNavigation.changeActiveSolutionNavigation('2');
-    expect(setChromeStyle).toHaveBeenCalledWith('project'); // We have an active solution nav, we should switch to project style
-
-    projectNavigation.changeActiveSolutionNavigation(null);
-    expect(setChromeStyle).toHaveBeenCalledWith('classic'); // No active solution, we should switch back to classic Kibana
   });
 
   it('should change the active solution if no node match the current Location', async () => {

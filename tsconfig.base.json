@@ -950,6 +950,8 @@
       "@kbn/import-resolver/*": ["packages/kbn-import-resolver/*"],
       "@kbn/index-lifecycle-management-plugin": ["x-pack/plugins/index_lifecycle_management"],
       "@kbn/index-lifecycle-management-plugin/*": ["x-pack/plugins/index_lifecycle_management/*"],
+      "@kbn/index-management": ["x-pack/packages/index-management"],
+      "@kbn/index-management/*": ["x-pack/packages/index-management/*"],
       "@kbn/index-management-plugin": ["x-pack/plugins/index_management"],
       "@kbn/index-management-plugin/*": ["x-pack/plugins/index_management/*"],
       "@kbn/index-patterns-test-plugin": ["test/plugin_functional/plugins/index_patterns"],
@@ -1378,6 +1380,8 @@
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
       "@kbn/search-index-documents": ["packages/kbn-search-index-documents"],
       "@kbn/search-index-documents/*": ["packages/kbn-search-index-documents/*"],
+      "@kbn/search-notebooks": ["x-pack/plugins/search_notebooks"],
+      "@kbn/search-notebooks/*": ["x-pack/plugins/search_notebooks/*"],
       "@kbn/search-playground": ["x-pack/plugins/search_playground"],
       "@kbn/search-playground/*": ["x-pack/plugins/search_playground/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
@@ -1582,6 +1586,8 @@
       "@kbn/shared-ux-storybook-config/*": ["packages/shared-ux/storybook/config/*"],
       "@kbn/shared-ux-storybook-mock": ["packages/shared-ux/storybook/mock"],
       "@kbn/shared-ux-storybook-mock/*": ["packages/shared-ux/storybook/mock/*"],
+      "@kbn/shared-ux-tabbed-modal": ["packages/shared-ux/modal/tabbed"],
+      "@kbn/shared-ux-tabbed-modal/*": ["packages/shared-ux/modal/tabbed/*"],
       "@kbn/shared-ux-utility": ["packages/kbn-shared-ux-utility"],
       "@kbn/shared-ux-utility/*": ["packages/kbn-shared-ux-utility/*"],
       "@kbn/slo-plugin": ["x-pack/plugins/observability_solution/slo"],
@@ -1590,6 +1596,8 @@
       "@kbn/slo-schema/*": ["x-pack/packages/kbn-slo-schema/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/plugins/snapshot_restore/*"],
+      "@kbn/solution-nav-analytics": ["packages/solution-nav/analytics"],
+      "@kbn/solution-nav-analytics/*": ["packages/solution-nav/analytics/*"],
       "@kbn/solution-nav-es": ["packages/solution-nav/es"],
       "@kbn/solution-nav-es/*": ["packages/solution-nav/es/*"],
       "@kbn/solution-nav-oblt": ["packages/solution-nav/oblt"],
@@ -1808,7 +1816,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

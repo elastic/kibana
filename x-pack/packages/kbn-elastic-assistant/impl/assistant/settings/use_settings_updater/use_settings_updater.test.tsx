@@ -29,21 +29,28 @@ const mockHttp = {
 const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
 const mockQuickPrompts: Prompt[] = [defaultSystemPrompt];
 
-const initialDefaultAllow = ['allow1'];
-const initialDefaultAllowReplacement = ['replacement1'];
+const anonymizationFields = {
+  total: 2,
+  page: 1,
+  perPage: 1000,
+  data: [
+    { id: 'allow1', field: 'allow1', allowed: true, anonymized: false },
+    { id: 'replacement1', field: 'replacement1', allowed: false, anonymized: true },
+  ],
+};
 
 const setAllQuickPromptsMock = jest.fn();
 const setAllSystemPromptsMock = jest.fn();
-const setDefaultAllowMock = jest.fn();
-const setDefaultAllowReplacementMock = jest.fn();
+const setAssistantStreamingEnabled = jest.fn();
 const setKnowledgeBaseMock = jest.fn();
 const reportAssistantSettingToggled = jest.fn();
+const setUpdatedAnonymizationData = jest.fn();
 const mockValues = {
+  assistantStreamingEnabled: true,
+  setAssistantStreamingEnabled,
   assistantTelemetry: { reportAssistantSettingToggled },
   allSystemPrompts: mockSystemPrompts,
   allQuickPrompts: mockQuickPrompts,
-  defaultAllow: initialDefaultAllow,
-  defaultAllowReplacement: initialDefaultAllowReplacement,
   knowledgeBase: {
     isEnabledRAGAlerts: true,
     isEnabledKnowledgeBase: true,
@@ -52,23 +59,30 @@ const mockValues = {
   baseConversations: {},
   setAllQuickPrompts: setAllQuickPromptsMock,
   setAllSystemPrompts: setAllSystemPromptsMock,
-  setDefaultAllow: setDefaultAllowMock,
-  setDefaultAllowReplacement: setDefaultAllowReplacementMock,
   setKnowledgeBase: setKnowledgeBaseMock,
   http: mockHttp,
+  anonymizationFieldsBulkActions: {},
 };
 
 const updatedValues = {
   conversations: { [customConvo.title]: customConvo },
   allSystemPrompts: [mockSuperheroSystemPrompt],
   allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
-  defaultAllow: ['allow2'],
-  defaultAllowReplacement: ['replacement2'],
+  updatedAnonymizationData: {
+    total: 2,
+    page: 1,
+    perPage: 1000,
+    data: [
+      { id: 'allow2', field: 'allow2', allowed: true, anonymized: false },
+      { id: 'replacement2', field: 'replacement2', allowed: false, anonymized: true },
+    ],
+  },
   knowledgeBase: {
     isEnabledRAGAlerts: false,
     isEnabledKnowledgeBase: false,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
+  assistantStreamingEnabled: false,
 };
 
 jest.mock('../../../assistant_context', () => {
@@ -85,16 +99,17 @@ describe('useSettingsUpdater', () => {
   });
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(mockConversations, anonymizationFields)
+      );
       await waitForNextUpdate();
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
-        setUpdatedDefaultAllow,
-        setUpdatedDefaultAllowReplacement,
         setUpdatedKnowledgeBaseSettings,
+        setUpdatedAssistantStreamingEnabled,
         resetSettings,
       } = result.current;
 
@@ -102,48 +117,55 @@ describe('useSettingsUpdater', () => {
       setConversationsSettingsBulkActions({});
       setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
-      setUpdatedDefaultAllow(updatedValues.defaultAllow);
-      setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
+      setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
+      setUpdatedAssistantStreamingEnabled(updatedValues.assistantStreamingEnabled);
 
       expect(result.current.conversationSettings).toEqual(updatedValues.conversations);
       expect(result.current.quickPromptSettings).toEqual(updatedValues.allQuickPrompts);
       expect(result.current.systemPromptSettings).toEqual(updatedValues.allSystemPrompts);
-      expect(result.current.defaultAllow).toEqual(updatedValues.defaultAllow);
-      expect(result.current.defaultAllowReplacement).toEqual(updatedValues.defaultAllowReplacement);
+      expect(result.current.updatedAnonymizationData).toEqual(anonymizationFields);
       expect(result.current.knowledgeBase).toEqual(updatedValues.knowledgeBase);
+      expect(result.current.assistantStreamingEnabled).toEqual(
+        updatedValues.assistantStreamingEnabled
+      );
 
       resetSettings();
 
       expect(result.current.conversationSettings).toEqual(mockConversations);
       expect(result.current.quickPromptSettings).toEqual(mockValues.allQuickPrompts);
       expect(result.current.systemPromptSettings).toEqual(mockValues.allSystemPrompts);
-      expect(result.current.defaultAllow).toEqual(mockValues.defaultAllow);
-      expect(result.current.defaultAllowReplacement).toEqual(mockValues.defaultAllowReplacement);
+      expect(result.current.anonymizationFieldsBulkActions).toEqual(
+        mockValues.anonymizationFieldsBulkActions
+      );
       expect(result.current.knowledgeBase).toEqual(mockValues.knowledgeBase);
+      expect(result.current.assistantStreamingEnabled).toEqual(
+        mockValues.assistantStreamingEnabled
+      );
     });
   });
 
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(mockConversations, anonymizationFields)
+      );
       await waitForNextUpdate();
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
-        setUpdatedDefaultAllow,
-        setUpdatedDefaultAllowReplacement,
+        setAnonymizationFieldsBulkActions,
         setUpdatedKnowledgeBaseSettings,
       } = result.current;
 
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({ delete: { ids: ['1'] } });
+      setAnonymizationFieldsBulkActions({ delete: { ids: ['1'] } });
       setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
-      setUpdatedDefaultAllow(updatedValues.defaultAllow);
-      setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
+      setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
       await result.current.saveSettings();
@@ -158,16 +180,17 @@ describe('useSettingsUpdater', () => {
       );
       expect(setAllQuickPromptsMock).toHaveBeenCalledWith(updatedValues.allQuickPrompts);
       expect(setAllSystemPromptsMock).toHaveBeenCalledWith(updatedValues.allSystemPrompts);
-      expect(setDefaultAllowMock).toHaveBeenCalledWith(updatedValues.defaultAllow);
-      expect(setDefaultAllowReplacementMock).toHaveBeenCalledWith(
-        updatedValues.defaultAllowReplacement
+      expect(setUpdatedAnonymizationData).toHaveBeenCalledWith(
+        updatedValues.updatedAnonymizationData
       );
       expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
     });
   });
   it('should track which toggles have been updated when saveSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(mockConversations, anonymizationFields)
+      );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
@@ -182,7 +205,9 @@ describe('useSettingsUpdater', () => {
   });
   it('should track only toggles that updated', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(mockConversations, anonymizationFields)
+      );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
@@ -198,7 +223,9 @@ describe('useSettingsUpdater', () => {
   });
   it('if no toggles update, do not track anything', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
+      const { result, waitForNextUpdate } = renderHook(() =>
+        useSettingsUpdater(mockConversations, anonymizationFields)
+      );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 

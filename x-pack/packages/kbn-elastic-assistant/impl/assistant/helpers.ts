@@ -9,10 +9,12 @@ import { merge } from 'lodash/fp';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
-import type { Message } from '../assistant_context/types';
+import type { ClientMessage } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
-export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
+export const getMessageFromRawResponse = (
+  rawResponse: FetchConnectorExecuteResponse
+): ClientMessage => {
   const { response, isStream, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {
@@ -83,27 +85,19 @@ export const getDefaultConnector = (
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }
 
 export const getOptionalRequestParams = ({
   isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   size,
 }: {
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
-  const optionalAllow = allow ? { allow } : undefined;
-  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
   const optionalSize = size ? { size } : undefined;
 
   // the settings toggle must be enabled:
@@ -113,8 +107,14 @@ export const getOptionalRequestParams = ({
 
   return {
     ...optionalAlertsIndexPattern,
-    ...optionalAllow,
-    ...optionalAllowReplacement,
     ...optionalSize,
   };
 };
+
+export const hasParsableResponse = ({
+  isEnabledRAGAlerts,
+  isEnabledKnowledgeBase,
+}: {
+  isEnabledRAGAlerts: boolean;
+  isEnabledKnowledgeBase: boolean;
+}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;

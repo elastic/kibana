@@ -37,6 +37,8 @@ const testProps = {
   showAnonymizedValues: false,
   conversations: mockConversations,
   refetchConversationsState: jest.fn(),
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({
@@ -79,7 +81,7 @@ describe('AssistantHeader', () => {
     const { getByText, getByTestId } = render(
       <AssistantHeader
         {...testProps}
-        currentConversation={{ ...emptyWelcomeConvo, replacements: [] }}
+        currentConversation={{ ...emptyWelcomeConvo, replacements: {} }}
       />,
       {
         wrapper: TestProviders,

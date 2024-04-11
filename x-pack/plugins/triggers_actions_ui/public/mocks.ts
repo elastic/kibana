@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
@@ -22,6 +24,7 @@ import {
   RuleTagBadgeProps,
   RuleEventLogListOptions,
   RuleEventLogListProps,
+  RuleUiAction,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -48,6 +51,7 @@ import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { AlertActionsProps } from './types';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -58,8 +62,18 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
-    getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
-      return getActionFormLazy({ ...props, actionTypeRegistry, connectorServices });
+    getActionForm: (
+      props: Omit<ActionAccordionFormProps, 'actionTypeRegistry' | 'setActions'> & {
+        setActions: (actions: RuleAction[]) => void;
+      }
+    ) => {
+      const { setActions, ...restProps } = props;
+      return getActionFormLazy({
+        ...restProps,
+        setActions: setActions as (actions: RuleUiAction[]) => void,
+        actionTypeRegistry,
+        connectorServices,
+      });
     },
     getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
@@ -130,7 +144,10 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       });
     },
     getAlertSummaryWidget: (props) => {
-      return getAlertSummaryWidgetLazy(props);
+      const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+        charts: chartPluginMock.createStartContract(),
+      };
+      return getAlertSummaryWidgetLazy({ ...props, dependencies });
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
