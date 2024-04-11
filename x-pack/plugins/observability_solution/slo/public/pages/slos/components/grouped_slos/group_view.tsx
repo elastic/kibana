@@ -36,7 +36,7 @@ export function GroupView({
 }: Props) {
   const { state, onStateChange } = useUrlSearchState();
   const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
-  const { data, isLoading, isError, refetch } = useFetchSloGroups({
+  const { data, isLoading, isError, isRefetching, refetch } = useFetchSloGroups({
     perPage,
     page: page + 1,
     groupBy,
@@ -56,7 +56,7 @@ export function GroupView({
     onStateChange({ page: pageNumber });
   };
 
-  if (isLoading) {
+  if (isLoading || isRefetching) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sloGroupListLoading"
