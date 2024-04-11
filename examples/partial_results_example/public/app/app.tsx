@@ -9,6 +9,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { pluck } from 'rxjs';
 import {
+  EuiProvider,
   EuiBasicTable,
   EuiCallOut,
   EuiCodeBlock,
@@ -40,34 +41,36 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiPageTemplate offset={0}>
-      <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
-      <EuiPageTemplate.Section>
-        <EuiText data-test-subj="example-help">
-          <p>
-            This example listens for the window events and adds them to the table along with a
-            trigger counter.
-          </p>
-        </EuiText>
-        <EuiSpacer size={'m'} />
-        <EuiCodeBlock>{expression}</EuiCodeBlock>
-        <EuiSpacer size={'m'} />
-        {datatable ? (
-          <EuiBasicTable
-            data-test-subj={'example-table'}
-            columns={datatable.columns?.map(({ id: field, name }) => ({
-              field,
-              name,
-              'data-test-subj': `example-column-${field.toLowerCase()}`,
-            }))}
-            items={datatable.rows ?? []}
-          />
-        ) : (
-          <EuiCallOut color="success">
-            <p>Click or press any key.</p>
-          </EuiCallOut>
-        )}
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    <EuiProvider>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
+        <EuiPageTemplate.Section>
+          <EuiText data-test-subj="example-help">
+            <p>
+              This example listens for the window events and adds them to the table along with a
+              trigger counter.
+            </p>
+          </EuiText>
+          <EuiSpacer size={'m'} />
+          <EuiCodeBlock>{expression}</EuiCodeBlock>
+          <EuiSpacer size={'m'} />
+          {datatable ? (
+            <EuiBasicTable
+              data-test-subj={'example-table'}
+              columns={datatable.columns?.map(({ id: field, name }) => ({
+                field,
+                name,
+                'data-test-subj': `example-column-${field.toLowerCase()}`,
+              }))}
+              items={datatable.rows ?? []}
+            />
+          ) : (
+            <EuiCallOut color="success">
+              <p>Click or press any key.</p>
+            </EuiCallOut>
+          )}
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </EuiProvider>
   );
 }

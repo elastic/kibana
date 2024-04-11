@@ -7,6 +7,7 @@
  */
 
 import {
+  EuiProvider,
   DefaultItemAction,
   EuiButton,
   EuiCheckbox,
@@ -134,10 +135,12 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   );
 
   return (
-    <EuiPageTemplate offset={0}>
-      <EuiPageTemplate.Header pageTitle="Data view field editor demo" />
-      <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    <EuiProvider>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header pageTitle="Data view field editor demo" />
+        <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </EuiProvider>
   );
 };
 
