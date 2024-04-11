@@ -54,8 +54,8 @@ export const LinkContent = ({
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
   const isNotSaved = useCallback(() => {
-    return objectId === undefined || objectId === '' || isDirty;
-  }, [objectId, isDirty]);
+    return isDirty;
+  }, [isDirty]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
@@ -192,13 +192,13 @@ export const LinkContent = ({
         )}
         <EuiSpacer />
       </EuiForm>
-      <EuiModalFooter>
+      <EuiModalFooter css={{ padding: 0 }}>
         <EuiCopy textToCopy={url}>
           {() => (
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              color={isNotSaved() ? 'warning' : 'primary'}
+              color={allowShortUrl ? 'primary' : isNotSaved() ? 'warning' : 'primary'}
               data-share-url={url}
               onClick={() => {
                 return url ? copyToClipboard(url) : setUrlHelper();

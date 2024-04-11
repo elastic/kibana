@@ -212,7 +212,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes }: ExportPr
     return (
       <EuiButton
         fill
-        color={isDirty ? 'warning' : 'primary'}
+        color="primary"
         onClick={() => {
           setIsCreatingReport(true);
           getReport();
@@ -224,7 +224,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes }: ExportPr
         {generateReportButton}
       </EuiButton>
     );
-  }, [isDirty, generateReportButton, getReport, isCreatingReport]);
+  }, [generateReportButton, getReport, isCreatingReport]);
 
   const renderRadioOptions = () => {
     if (getRadioOptions().length > 1) {

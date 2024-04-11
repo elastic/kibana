@@ -487,6 +487,8 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
+      // avoids a bug where for printing toggled to on for PDF and then radio is selected for PNG
+      generateReportForPrinting: generateReportPNG,
       generateReport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,

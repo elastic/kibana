@@ -59,8 +59,8 @@ export const EmbedContent = ({
 
   useEffect(() => {
     onChange(url);
-    setIsNotSaved();
-  }, [url, setIsNotSaved, onChange]);
+    if (objectType !== 'dashboard') setIsNotSaved();
+  }, [url, setIsNotSaved, onChange, objectType]);
 
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
