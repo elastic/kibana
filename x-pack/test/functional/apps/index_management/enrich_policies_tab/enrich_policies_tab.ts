@@ -20,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const ENRICH_INDEX_NAME = 'test-policy-1';
   const ENRICH_POLICY_NAME = 'test-policy-1';
 
-  describe('Enrich policies tab', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/178962
+  describe.skip('Enrich policies tab', function () {
     before(async () => {
       await log.debug('Creating required index and enrich policy');
       try {
