@@ -113,7 +113,6 @@
     "@kbn/unified-data-table",
     "@kbn/shared-ux-markdown",
     "@kbn/licensing-plugin",
-    "@kbn/reporting-plugin",
   ],
   "exclude": ["target/**/*"]
 }
