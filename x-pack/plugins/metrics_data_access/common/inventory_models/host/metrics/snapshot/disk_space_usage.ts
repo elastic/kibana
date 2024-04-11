@@ -7,5 +7,5 @@
 
 import { MetricsUIAggregation } from '../../../types';
 export const diskSpaceUsage: MetricsUIAggregation = {
-  diskSpaceUsage: { avg: { field: 'system.filesystem.used.pct' } },
+  diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
 };

@@ -35,18 +35,12 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn(() => [])}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
-      defaultAllow={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
       }}
-      defaultAllowReplacement={[]}
       getComments={jest.fn(() => [])}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
       http={mockHttp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
     >
