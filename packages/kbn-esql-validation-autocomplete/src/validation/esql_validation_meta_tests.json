@@ -2045,6 +2045,190 @@
       "warning": []
     },
     {
+      "query": "row var = st_intersects(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"a\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geopoint(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geopoint(\"a\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geopoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_geoshape(\"POINT (30 10)\"), to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"a\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianpoint(\"a\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianpoint(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(to_cartesianshape(\"POINT (30 10)\"), to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_intersects(\"a\", \"a\")",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = st_within(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -9575,6 +9759,246 @@
       "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField, extraArg)",
       "error": [
         "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_geopoint(stringField), to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_geopoint(stringField), geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoPointField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, to_geopoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(geoShapeField, geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(geoShapeField, geoShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_cartesianpoint(stringField), to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(to_cartesianpoint(stringField), cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianPointField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, to_cartesianpoint(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_intersects(cartesianShapeField, cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(stringField, stringField)",
+      "error": [
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]",
+        "Argument of [st_intersects] must be [geo_point], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianShapeField, extraArg)",
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
       ],
       "warning": []
     },
