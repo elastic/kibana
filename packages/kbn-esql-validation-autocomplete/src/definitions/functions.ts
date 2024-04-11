@@ -58,6 +58,20 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'signum',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.signumDoc', {
+      defaultMessage:
+        'Returns the sign of the given number. It returns -1 for negative numbers, 0 for 0 and 1 for positive numbers.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'number',
+        examples: [`from index | eval s = signum(field)`],
+      },
+    ],
+  },
+  {
     name: 'abs',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.absDoc', {
       defaultMessage: 'Returns the absolute value.',

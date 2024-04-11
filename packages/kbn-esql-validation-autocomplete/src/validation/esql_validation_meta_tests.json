@@ -1558,6 +1558,28 @@
       "warning": []
     },
     {
+      "query": "row var = signum(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row signum(5)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = signum(to_integer(\"a\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = signum(\"a\")",
+      "error": [
+        "Argument of [signum] must be [number], found value [\"a\"] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = sin(5)",
       "error": [],
       "warning": []
@@ -5619,6 +5641,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | where signum(numberField) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where signum(stringField) > 0",
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where sin(numberField) > 0",
       "error": [],
       "warning": []
@@ -8177,6 +8211,42 @@
       "query": "from a_index | eval var = rtrim(*)",
       "error": [
         "Using wildcards (*) in rtrim is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = signum(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = signum(to_integer(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(stringField)",
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval signum(numberField, extraArg)",
+      "error": [
+        "Error: [signum] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = signum(*)",
+      "error": [
+        "Using wildcards (*) in signum is not allowed"
       ],
       "warning": []
     },
