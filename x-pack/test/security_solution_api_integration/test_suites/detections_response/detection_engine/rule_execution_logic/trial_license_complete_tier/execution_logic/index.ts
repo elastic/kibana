@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection Engine - Execution logic', function () {
     loadTestFile(require.resolve('./eql'));
-    loadTestFile(require.resolve('./eql_alert_suppresssion'));
+    loadTestFile(require.resolve('./eql_alert_suppression'));
     loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./new_terms'));
