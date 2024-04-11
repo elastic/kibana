@@ -17,6 +17,7 @@ import {
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { Readable } from 'stream';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
 import { SentinelOneConnector } from './sentinelone';
 import {
@@ -161,6 +162,7 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
       errors: null,
       data: { success: true },
     } as SentinelOneFetchAgentFilesResponse,
+    downloadAgentFileApiResponse: Readable.from(['test']),
   };
 
   public requestSpy = jest.fn(async ({ url }: SubActionRequestParams<any>) => {
@@ -172,6 +174,10 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
     } else if (url.endsWith('/actions/fetch-files')) {
       return sentinelOneConnectorMocks.createAxiosResponse(
         this.mockResponses.fetchAgentFilesApiResponse
+      );
+    } else if (/\/uploads\/.*$/.test(url)) {
+      return sentinelOneConnectorMocks.createAxiosResponse(
+        this.mockResponses.downloadAgentFileApiResponse
       );
     }
 

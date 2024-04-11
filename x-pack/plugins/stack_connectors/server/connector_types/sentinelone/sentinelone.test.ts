@@ -6,7 +6,10 @@
  */
 
 import { sentinelOneConnectorMocks } from './mocks';
-import { SentinelOneFetchAgentFilesParams } from '../../../common/sentinelone/types';
+import {
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneFetchAgentFilesParams,
+} from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
 
 describe('SentinelOne Connector', () => {
@@ -55,6 +58,31 @@ describe('SentinelOne Connector', () => {
           APIToken: 'token-abc',
         },
       });
+    });
+  });
+
+  describe('#downloadAgentFile()', () => {
+    let downloadAgentFileParams: SentinelOneDownloadAgentFileParams;
+
+    beforeEach(() => {
+      downloadAgentFileParams = {
+        agentUUID: 'uuid-1',
+        activityId: '11111',
+      };
+    });
+
+    it('should error if called with invalid agent UUID', async () => {
+      connectorInstance.mockResponses.getAgentsApiResponse.data.length = 0;
+
+      await expect(
+        connectorInstance.downloadAgentFile(downloadAgentFileParams)
+      ).rejects.toHaveProperty('message', 'No agent found in SentinelOne for UUID [uuid-1]');
+    });
+
+    it('should call SentinelOne api with expected url', async () => {
+      await expect(connectorInstance.downloadAgentFile(downloadAgentFileParams)).resolves.toEqual(
+        connectorInstance.mockResponses.downloadAgentFileApiResponse
+      );
     });
   });
 });

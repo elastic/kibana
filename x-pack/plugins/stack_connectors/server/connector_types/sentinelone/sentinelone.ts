@@ -162,7 +162,7 @@ export class SentinelOneConnector extends SubActionConnector<
     const agentId = agent.data[0]?.id;
 
     if (!agentId) {
-      throw new Error(`No agent found for UUID ${agentUUID}`);
+      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
     }
 
     return this.sentinelOneApiRequest({
@@ -334,9 +334,11 @@ export class SentinelOneConnector extends SubActionConnector<
     if (!error.response?.status) {
       return appendResponseBody('Unknown API Error');
     }
+
     if (error.response.status === 401) {
       return appendResponseBody('Unauthorized API Error (401)');
     }
+
     return appendResponseBody(`API Error: ${error.response?.statusText}`);
   }
 
