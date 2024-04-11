@@ -96,6 +96,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; command: string; option: string };
   };
+  unsupportedLiteralOption: {
+    message: string;
+    type: { name: string; value: string; supportedOptions: string };
+  };
   shadowFieldType: {
     message: string;
     type: { field: string; fieldType: string; newType: string };
