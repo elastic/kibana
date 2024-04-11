@@ -225,7 +225,7 @@ export class AlertingAuthorization {
   public async getFindAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,
-    options: AuthorizationOptions
+    options?: AuthorizationOptions
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -255,17 +255,17 @@ export class AlertingAuthorization {
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,
     operation: WriteOperations | ReadOperations,
-    { featureIds, ruleTypeIds }: AuthorizationOptions
+    options?: AuthorizationOptions
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
-        this.getRuleTypes(ruleTypeIds),
+        this.getRuleTypes(options?.ruleTypeIds),
         [operation],
         authorizationEntity,
-        featureIds
+        options?.featureIds
       );
 
       if (!authorizedRuleTypes.size) {

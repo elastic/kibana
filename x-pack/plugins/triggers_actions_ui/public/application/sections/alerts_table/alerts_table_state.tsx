@@ -266,7 +266,6 @@ const AlertsTableStateWithQueryProvider = ({
   });
 
   const columnsProps = {
-    featureIds,
     storageAlertsTable,
     storage,
     id,

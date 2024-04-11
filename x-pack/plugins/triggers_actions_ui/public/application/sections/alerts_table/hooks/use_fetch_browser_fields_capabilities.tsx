@@ -65,7 +65,7 @@ export const useFetchBrowserFieldCapabilities = ({
         return await http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
           `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
           {
-            query: { featureIds: validFeatureId, ruleTypeIds: validRuleTypeIds },
+            query: { featureIds: validFeatureId, rule_type_ids: validRuleTypeIds },
           }
         );
       } catch (e) {

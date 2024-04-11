@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isEmpty, pick } from 'lodash';
+import { pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule, RuleTypeParams, SanitizedRule, Rule } from '../../types';
@@ -28,7 +28,7 @@ import {
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import type { IndexType, RulesClientContext } from '../types';
-import { formatLegacyActions } from '../lib';
+import { buildAuthorizationOptions, formatLegacyActions } from '../lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface FindParams {
@@ -53,6 +53,7 @@ export interface FindOptions extends IndexType {
   fields?: string[];
   filter?: string | KueryNode;
   filterConsumers?: string[];
+  ruleTypeIds?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -65,7 +66,7 @@ export interface FindResult<Params extends RuleTypeParams> {
 export async function find<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   {
-    options: { fields, filterConsumers, ...options } = {},
+    options: { fields, filterConsumers, ruleTypeIds, ...options } = {},
     excludeFromPublicApi = false,
     includeSnoozeData = false,
   }: FindParams = {}
@@ -75,7 +76,7 @@ export async function find<Params extends RuleTypeParams = never>(
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
       alertingAuthorizationFilterOpts,
-      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
+      buildAuthorizationOptions(filterConsumers, ruleTypeIds)
     );
   } catch (error) {
     context.auditLogger?.log(

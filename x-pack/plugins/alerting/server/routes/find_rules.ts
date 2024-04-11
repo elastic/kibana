@@ -43,6 +43,7 @@ const querySchema = schema.object({
   fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
   filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
+  rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
@@ -53,12 +54,14 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   sort_field: sortField,
   sort_order: sortOrder,
   filter_consumers: filterConsumers,
+  rule_type_ids: ruleTypeIds,
   ...rest
 }) => ({
   ...rest,
   defaultSearchOperator,
   perPage,
   filterConsumers,
+  ruleTypeIds,
   ...(sortField ? { sortField } : {}),
   ...(sortOrder ? { sortOrder } : {}),
   ...(hasReference ? { hasReference } : {}),
