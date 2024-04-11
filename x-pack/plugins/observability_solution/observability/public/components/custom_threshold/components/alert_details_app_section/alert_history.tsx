@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -20,16 +20,20 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   useEuiTheme,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_GROUP, ALERT_INSTANCE_ID, type AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../../common/utils/formatters';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AlertParams } from '../../types';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
 import { CustomThresholdAlert, CustomThresholdRule } from '../types';
+import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 const DEFAULT_INTERVAL = '1d';
 const SERIES_TYPE = 'bar_stacked';
@@ -49,10 +53,16 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const { http, notifications } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
-  const criterion = rule.params.criteria[0];
   const groups = alert.fields[ALERT_GROUP];
   const instanceId = alert.fields[ALERT_INSTANCE_ID];
   const featureIds = [rule.consumer as AlertConsumers];
+  const options = rule.params.criteria.map((criterion, index) => ({
+    label: generateChartTitleAndTooltip(criterion, 27).title,
+    value: criterion,
+  }));
+  const [selectedOption, setSelectedOption] = useState<
+    EuiComboBoxOptionOption<CustomMetricExpressionParams>
+  >(options[0]);
 
   const {
     data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
@@ -65,11 +75,6 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
     dateRange,
     instanceId,
   });
-
-  // Only show alert history chart if there is only one condition
-  if (rule.params.criteria.length > 1) {
-    return null;
-  }
 
   if (isError) {
     notifications?.toasts.addDanger({
@@ -106,23 +111,33 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
 
   return (
     <EuiPanel hasBorder={true} data-test-subj="AlertDetails">
-      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.observability.customThreshold.alertHistory.chartTitle', {
-                defaultMessage: 'Alerts history',
+      <EuiFlexGroup>
+        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                {i18n.translate('xpack.observability.customThreshold.alertHistory.chartTitle', {
+                  defaultMessage: 'Alerts history',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.observability.customThreshold.alertHistory.last30days', {
+                defaultMessage: 'Last 30 days',
               })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.observability.customThreshold.alertHistory.last30days', {
-              defaultMessage: 'Last 30 days',
-            })}
-          </EuiText>
-        </EuiFlexItem>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {rule.params.criteria.length > 1 && (
+          <EuiComboBox
+            options={options}
+            selectedOptions={[selectedOption]}
+            onChange={(selectedOptions) => setSelectedOption(selectedOptions[0])}
+            singleSelection={{ asPlainText: true }}
+          />
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="l">
@@ -190,7 +205,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
         }}
         dataView={dataView}
         groupBy={ruleParams.groupBy}
-        metricExpression={criterion}
+        metricExpression={selectedOption.value!}
         searchConfiguration={ruleParams.searchConfiguration}
         timeRange={dateRange}
       />
