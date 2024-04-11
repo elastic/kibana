@@ -48,7 +48,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     const offsetTop =
       renderMode.mode === 'flyout'
-        ? `${actionMenuHeight}px`
+        ? `0px`
         : `calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0))`;
 
     const offsetScrollMarginTop = `calc(${offsetTop} + ${euiTheme.size.xs} + ${

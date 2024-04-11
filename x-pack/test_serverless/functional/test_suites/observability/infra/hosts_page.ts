@@ -85,9 +85,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart`, async () => {
+              const charts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(charts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show alerts', async () => {
@@ -96,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const CreateRuleButtonExist = await testSubjects.exists(
               'infraAssetDetailsCreateAlertsRuleButton'
             );
-            expect(CreateRuleButtonExist).to.be(false);
+            expect(CreateRuleButtonExist).to.be(true);
           });
         });
 
@@ -118,15 +125,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show processes title', async () => {
             await await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
           });
+        });
 
-          describe('Logs Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickLogsTab();
-            });
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
 
-            it('should render logs tab', async () => {
-              await pageObjects.assetDetails.logsExists();
-            });
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
           });
         });
       });

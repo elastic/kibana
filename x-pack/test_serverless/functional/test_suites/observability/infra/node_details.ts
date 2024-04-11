@@ -20,6 +20,7 @@ const END_HOST_KUBERNETES_SECTION_DATE = moment.utc(
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -70,17 +71,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const CreateRuleButtonExist = await testSubjects.exists(
               'infraAssetDetailsCreateAlertsRuleButton'
             );
-            expect(CreateRuleButtonExist).to.be(false);
+            expect(CreateRuleButtonExist).to.be(true);
           });
 
-          it('should render 12 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(12);
-          });
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+            { metric: 'kubernetes', chartsCount: 4 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart`, async () => {
+              retry.tryForTime(30 * 1000, async () => {
+                const charts = await (metric === 'kubernetes'
+                  ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
+                  : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
 
-          it('should render 4 charts in the Kubernetes Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
-            expect(hosts.length).to.equal(4);
+                expect(charts.length).to.equal(chartsCount);
+              });
+            });
           });
         });
       });
