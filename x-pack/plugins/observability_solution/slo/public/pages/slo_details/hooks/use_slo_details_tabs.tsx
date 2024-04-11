@@ -23,7 +23,6 @@ export const useSloDetailsTabs = ({
   selectedTabId: SloTabId;
   setSelectedTabId: (val: SloTabId) => void;
 }) => {
-  // TODO Kevin: slo.instanceId should always be set at this point
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
     shouldRefetch: isAutoRefreshing,
@@ -58,11 +57,12 @@ export const useSloDetailsTabs = ({
       'data-test-subj': 'alertsTab',
       disabled: Boolean(isRemote),
       isSelected: selectedTabId === ALERTS_TAB_ID,
-      append: slo ? (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
-        </EuiNotificationBadge>
-      ) : null,
+      append:
+        slo && !isRemote ? (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {(activeAlerts && activeAlerts.get(slo)) ?? 0}
+          </EuiNotificationBadge>
+        ) : null,
       onClick: () => setSelectedTabId(ALERTS_TAB_ID),
     },
   ];
