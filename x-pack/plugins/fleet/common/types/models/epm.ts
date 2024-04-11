@@ -584,6 +584,7 @@ export interface EsIndexPattern {
   title: string;
   /** The actual pattern with the * */
   name: string;
+  display_name?: string;
 }
 
 export interface Installation {
@@ -591,6 +592,7 @@ export interface Installation {
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   name: string;
+  display_name?: string;
   es_index_patterns: EsIndexPattern[];
   version: string;
   install_status: EpmPackageInstallStatus;

@@ -524,6 +524,9 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       properties: {
         name: { type: 'keyword' },
+        display_name: {
+          type: 'text',
+        },
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
@@ -532,6 +535,7 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           properties: {
             title: { type: 'keyword' },
             name: { type: 'keyword' },
+            display_name: { type: 'text' },
           },
         },
         verification_status: { type: 'keyword' },
@@ -625,6 +629,23 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                   ),
                 },
               };
+            },
+          },
+        ],
+      },
+      '4': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              display_name: {
+                type: 'text',
+              },
+              es_index_patterns: {
+                properties: {
+                  display_name: { type: 'text' },
+                },
+              },
             },
           },
         ],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as yaml from 'js-yaml';
 import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
@@ -20,7 +21,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import type { AssetsMap, PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -1212,8 +1213,9 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  assetsMap: AssetsMap;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult, assetsMap } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1228,6 +1230,13 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
+  const manifestAsset = assetsMap.get(`${pkgName}-${pkgVersion}/manifest.yml`);
+  let humanReadableTitle: string | undefined;
+  if (manifestAsset) {
+    const manifest = yaml.load(manifestAsset.toString('utf-8'));
+    humanReadableTitle = manifest.title;
+  }
+
   let savedObject: Installation = {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
@@ -1235,6 +1244,7 @@ export async function createInstallation(options: {
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
     name: pkgName,
+    display_name: humanReadableTitle,
     version: pkgVersion,
     install_version: pkgVersion,
     install_status: 'installing',
