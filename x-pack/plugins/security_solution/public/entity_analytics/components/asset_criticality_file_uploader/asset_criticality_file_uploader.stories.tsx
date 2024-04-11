@@ -23,7 +23,7 @@ addDecorator((storyFn) => (
 ));
 
 const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact`;
-const invalidLinesAsText = `user,user-001,wow_impact\nbleh,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
+const invalidLinesAsText = `user,user-001,wow_impact\ntest,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
 export default {
   component: AssetCriticalityFileUploader,
@@ -65,19 +65,34 @@ export const ValidationStep: Story<void> = () => {
         <div style={{ maxWidth: '800px' }}>
           <EuiPanel>
             <AssetCriticalityValidationStep
-              validLinesCount={5}
-              invalidLinesCount={3}
-              fileName="test.csv"
-              fileSize={100}
+              validatedFile={{
+                name: 'test.csv',
+                size: 100,
+                validLines: {
+                  text: validLinesAsText,
+                  count: 5,
+                },
+                invalidLines: {
+                  text: invalidLinesAsText,
+                  count: 3,
+                  errors: [
+                    {
+                      error: 'error message 1',
+                      index: 1,
+                    },
+                    {
+                      error: 'error message 2',
+                      index: 2,
+                    },
+                    {
+                      error: 'error message 3',
+                      index: 3,
+                    },
+                  ],
+                },
+              }}
               onConfirm={() => {}}
               onReturn={() => {}}
-              validLinesAsText={validLinesAsText}
-              invalidLinesAsText={invalidLinesAsText}
-              invalidLinesErrors={[
-                { error: 'error message 1', index: 1 },
-                { error: 'error message 2', index: 2 },
-                { error: 'error message 3', index: 3 },
-              ]}
             />
           </EuiPanel>
         </div>

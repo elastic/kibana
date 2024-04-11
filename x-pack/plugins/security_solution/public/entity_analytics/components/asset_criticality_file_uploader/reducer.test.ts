@@ -6,9 +6,9 @@
  */
 
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/api/entity_analytics';
-import type { OnCompleteParams } from './hooks';
 import type { ReducerAction, ReducerState, ValidationStepState } from './reducer';
-import { reducer, FileUploaderSteps } from './reducer';
+import { reducer } from './reducer';
+import { FileUploaderSteps } from './types';
 
 describe('reducer', () => {
   const initialState: ReducerState = {
@@ -16,23 +16,24 @@ describe('reducer', () => {
     step: FileUploaderSteps.FILE_PICKER,
   };
 
-  const onCompleteParams: OnCompleteParams = {
-    fileName: 'test.csv',
-    fileSize: 100,
-    processingStartTime: '2021-07-01T00:00:00',
-    processingEndTime: '2021-07-01T00:01:00',
-    tookMs: 60000,
-    validLinesAsText: 'valid lines',
-    invalidLinesAsText: 'invalid lines',
-    invalidLinesErrors: [],
-    validLinesCount: 10,
-    invalidLinesCount: 0,
+  const validatedFile = {
+    name: 'test.csv',
+    size: 100,
+    validLines: {
+      text: 'valid lines',
+      count: 10,
+    },
+    invalidLines: {
+      text: 'invalid lines',
+      count: 0,
+      errors: [],
+    },
   };
 
   it('should handle "uploadingFile" action', () => {
     const action: ReducerAction = { type: 'uploadingFile' };
     const state: ValidationStepState = {
-      ...onCompleteParams,
+      validatedFile,
       isLoading: false,
       step: FileUploaderSteps.VALIDATION,
     };
@@ -51,7 +52,7 @@ describe('reducer', () => {
       },
     };
     const state: ValidationStepState = {
-      ...onCompleteParams,
+      validatedFile,
       isLoading: true,
       step: FileUploaderSteps.VALIDATION,
     };
@@ -63,14 +64,14 @@ describe('reducer', () => {
       step: FileUploaderSteps.RESULT,
       fileUploadResponse: response,
       fileUploadError: undefined,
-      validLinesAsText: onCompleteParams.validLinesAsText,
+      validLinesAsText: validatedFile.validLines.text,
     });
   });
 
   it('should handle "fileUploaded" action with errorMessage', () => {
     const errorMessage = 'File upload failed';
     const state: ValidationStepState = {
-      ...onCompleteParams,
+      validatedFile,
       isLoading: true,
       step: FileUploaderSteps.VALIDATION,
     };
@@ -82,7 +83,7 @@ describe('reducer', () => {
       step: FileUploaderSteps.RESULT,
       fileUploadResponse: undefined,
       fileUploadError: errorMessage,
-      validLinesAsText: onCompleteParams.validLinesAsText,
+      validLinesAsText: validatedFile.validLines.text,
     });
   });
 
@@ -99,13 +100,16 @@ describe('reducer', () => {
   });
 
   it('should handle "fileValidated" action', () => {
-    const action: ReducerAction = { type: 'fileValidated', payload: onCompleteParams };
+    const action: ReducerAction = {
+      type: 'fileValidated',
+      payload: { validatedFile },
+    };
     const nextState = reducer({ ...initialState, isLoading: true }, action);
 
     expect(nextState).toEqual({
       isLoading: false,
       step: FileUploaderSteps.VALIDATION,
-      ...onCompleteParams,
+      validatedFile,
     });
   });
 
@@ -116,12 +120,12 @@ describe('reducer', () => {
       {
         step: 9999,
         isLoading: true,
-        fileSize: 0,
-        invalidLinesAsText: '',
-        validLinesAsText: '',
-        validLinesCount: 0,
-        invalidLinesCount: 0,
-        invalidLinesErrors: [],
+        validatedFile: {
+          name: '',
+          size: 0,
+          validLines: { text: '', count: 0 },
+          invalidLines: { text: '', count: 0, errors: [] },
+        },
       },
       action
     );
@@ -135,7 +139,7 @@ describe('reducer', () => {
 
   it('should handle "resetState" action', () => {
     const action: ReducerAction = { type: 'resetState' };
-    const nextState = reducer({ step: 9999, isLoading: true, ...onCompleteParams }, action);
+    const nextState = reducer({ step: 9999, isLoading: true, validatedFile }, action);
 
     expect(nextState).toEqual(initialState);
   });

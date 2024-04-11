@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-export const getStepStatus = (step: number, currentStep: number) => {
-  if (step < 3 && currentStep === 3) {
+import type {
+  FilePickerState,
+  ValidationStepState,
+  ResultStepState,
+  ReducerState,
+} from './reducer';
+import { FileUploaderSteps } from './types';
+
+export const getStepStatus = (step: FileUploaderSteps, currentStep: FileUploaderSteps) => {
+  if (step < FileUploaderSteps.RESULT && currentStep === FileUploaderSteps.RESULT) {
     return 'disabled';
   }
 
@@ -20,3 +28,12 @@ export const getStepStatus = (step: number, currentStep: number) => {
 
   return 'disabled';
 };
+
+export const isFilePickerStep = (state: ReducerState): state is FilePickerState =>
+  state.step === FileUploaderSteps.FILE_PICKER;
+
+export const isValidationStep = (state: ReducerState): state is ValidationStepState =>
+  state.step === FileUploaderSteps.VALIDATION;
+
+export const isResultStep = (state: ReducerState): state is ResultStepState =>
+  state.step === FileUploaderSteps.RESULT;

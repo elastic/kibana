@@ -31,15 +31,21 @@ describe('AssetCriticalityValidationStep', () => {
   const mockOnReturn = jest.fn();
 
   const defaultProps: AssetCriticalityValidationStepProps = {
-    validLinesCount: 10,
-    invalidLinesCount: 5,
-    validLinesAsText: 'Valid lines as text',
-    invalidLinesAsText: 'Invalid lines as text',
-    fileName: 'test.csv',
-    fileSize: 100,
+    validatedFile: {
+      name: 'test.csv',
+      size: 100,
+      validLines: {
+        text: 'Valid lines as text',
+        count: 10,
+      },
+      invalidLines: {
+        text: 'Invalid lines as text',
+        count: 5,
+        errors: [],
+      },
+    },
     onConfirm: mockOnConfirm,
     onReturn: mockOnReturn,
-    invalidLinesErrors: [],
   };
 
   it('renders the component with correct counts and file name', () => {

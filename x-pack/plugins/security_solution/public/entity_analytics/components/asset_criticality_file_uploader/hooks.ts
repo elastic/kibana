@@ -8,23 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import type { ParseConfig } from 'papaparse';
 import { unparse, parse } from 'papaparse';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
+import { noop } from 'lodash/fp';
 import { useFormatBytes } from '../../../common/components/formatted_bytes';
-import type { RowValidationErrors } from './validations';
 import { validateParsedContent, validateFile } from './validations';
 import { useKibana } from '../../../common/lib/kibana';
-export interface OnCompleteParams {
-  fileName: string;
-  fileSize: number;
-  processingStartTime: string;
-  processingEndTime: string;
-  tookMs: number;
-  validLinesAsText: string;
-  invalidLinesAsText: string;
-  invalidLinesErrors: RowValidationErrors[];
-  validLinesCount: number;
-  invalidLinesCount: number;
-}
+import type { OnCompleteParams } from './types';
+import type { ReducerState } from './reducer';
+import { getStepStatus, isValidationStep } from './helpers';
 
 interface UseFileChangeCbParams {
   onError: (errorMessage: string, file: File) => void;
@@ -100,16 +92,22 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
           const processingEndTime = Date.now();
           const tookMs = processingEndTime - processingStartTime;
           onComplete({
-            fileName: returnedFile?.name ?? '',
-            fileSize: returnedFile?.size ?? 0,
             processingStartTime: new Date(processingStartTime).toISOString(),
             processingEndTime: new Date(processingEndTime).toISOString(),
             tookMs,
-            validLinesAsText,
-            invalidLinesAsText,
-            invalidLinesErrors: errors,
-            validLinesCount: valid.length,
-            invalidLinesCount: invalid.length,
+            validatedFile: {
+              name: returnedFile?.name ?? '',
+              size: returnedFile?.size ?? 0,
+              validLines: {
+                text: validLinesAsText,
+                count: valid.length,
+              },
+              invalidLines: {
+                text: invalidLinesAsText,
+                count: invalid.length,
+                errors,
+              },
+            },
           });
         },
         error(parserError) {
@@ -120,5 +118,50 @@ export const useFileValidation = ({ onError, onComplete }: UseFileChangeCbParams
       parse(file, parserConfig);
     },
     [formatBytes, telemetry, onErrorWrapper, onComplete]
+  );
+};
+
+export const useNavigationSteps = (
+  state: ReducerState,
+  goToFirstStep: () => void
+): Array<Omit<EuiStepHorizontalProps, 'step'>> => {
+  return useMemo(
+    () => [
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.selectFileStepTitle',
+          {
+            defaultMessage: 'Select a file',
+          }
+        ),
+        status: getStepStatus(1, state.step),
+        onClick: () => {
+          if (isValidationStep(state)) {
+            goToFirstStep(); // User can only go back to the first step from the second step
+          }
+        },
+      },
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
+          {
+            defaultMessage: 'File validation',
+          }
+        ),
+        status: getStepStatus(2, state.step),
+        onClick: noop, // Prevents the user from navigating by clicking on the step
+      },
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.resultsStepTitle',
+          {
+            defaultMessage: 'Results',
+          }
+        ),
+        status: getStepStatus(3, state.step),
+        onClick: noop, // Prevents the user from navigating by clicking on the step
+      },
+    ],
+    [goToFirstStep, state]
   );
 };

@@ -63,18 +63,24 @@ describe('useFileValidation', () => {
       expect(onErrorMock).not.toHaveBeenCalled();
       expect(onCompleteMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          fileName,
-          fileSize: 61,
-          invalidLinesAsText: invalidLine,
-          validLinesAsText: validLine,
-          invalidLinesCount: 1,
-          validLinesCount: 1,
-          invalidLinesErrors: [
-            {
-              error: 'Expected 3 columns, got 4',
-              index: 1,
+          validatedFile: {
+            name: fileName,
+            size: 61,
+            validLines: {
+              text: validLine,
+              count: 1,
             },
-          ],
+            invalidLines: {
+              text: invalidLine,
+              count: 1,
+              errors: [
+                {
+                  error: 'Expected 3 columns, got 4',
+                  index: 1,
+                },
+              ],
+            },
+          },
           processingEndTime: expect.any(String),
           processingStartTime: expect.any(String),
           tookMs: expect.any(Number),

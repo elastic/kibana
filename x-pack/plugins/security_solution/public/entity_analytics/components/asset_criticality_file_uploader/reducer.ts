@@ -6,7 +6,9 @@
  */
 
 import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
-import type { RowValidationErrors } from './validations';
+import { FileUploaderSteps } from './types';
+import type { ValidatedFile } from './types';
+import { isFilePickerStep, isValidationStep } from './helpers';
 
 export interface FilePickerState {
   isLoading: boolean;
@@ -19,13 +21,7 @@ export interface ValidationStepState {
   isLoading: boolean;
   step: FileUploaderSteps.VALIDATION;
   fileError?: string;
-  fileName: string;
-  fileSize: number;
-  invalidLinesAsText: string;
-  validLinesAsText: string;
-  validLinesCount: number;
-  invalidLinesCount: number;
-  invalidLinesErrors: RowValidationErrors[];
+  validatedFile: ValidatedFile;
 }
 
 export interface ResultStepState {
@@ -37,25 +33,13 @@ export interface ResultStepState {
 
 export type ReducerState = FilePickerState | ValidationStepState | ResultStepState;
 
-export enum FileUploaderSteps {
-  FILE_PICKER = 1,
-  VALIDATION = 2,
-  RESULT = 3,
-}
-
 export type ReducerAction =
   | { type: 'loadingFile'; payload: { fileName: string } }
   | { type: 'resetState' }
   | {
       type: 'fileValidated';
       payload: {
-        fileName: string;
-        fileSize: number;
-        invalidLinesAsText: string;
-        validLinesAsText: string;
-        validLinesCount: number;
-        invalidLinesErrors: RowValidationErrors[];
-        invalidLinesCount: number;
+        validatedFile: ValidatedFile;
       };
     }
   | { type: 'fileError'; payload: { message: string } }
@@ -113,7 +97,7 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
         return {
           fileUploadResponse: action.payload.response,
           fileUploadError: action.payload.errorMessage,
-          validLinesAsText: state.validLinesAsText,
+          validLinesAsText: state.validatedFile.validLines.text,
           step: FileUploaderSteps.RESULT,
         };
       }
@@ -121,12 +105,3 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
   }
   return state;
 };
-
-export const isFilePickerStep = (state: ReducerState): state is FilePickerState =>
-  state.step === FileUploaderSteps.FILE_PICKER;
-
-export const isValidationStep = (state: ReducerState): state is ValidationStepState =>
-  state.step === FileUploaderSteps.VALIDATION;
-
-export const isResultStep = (state: ReducerState): state is ResultStepState =>
-  state.step === FileUploaderSteps.RESULT;

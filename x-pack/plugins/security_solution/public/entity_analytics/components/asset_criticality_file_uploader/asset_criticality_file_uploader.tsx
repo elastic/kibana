@@ -6,24 +6,15 @@
  */
 
 import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
-import React, { useCallback, useMemo, useReducer } from 'react';
-import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash/fp';
-import type { EuiStepHorizontalProps } from '@elastic/eui/src/components/steps/step_horizontal';
+import React, { useCallback, useReducer } from 'react';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
-import {
-  INITIAL_STATE,
-  isFilePickerStep,
-  isResultStep,
-  isValidationStep,
-  reducer,
-} from './reducer';
-import { getStepStatus } from './helpers';
+import { INITIAL_STATE, reducer } from './reducer';
+import { isFilePickerStep, isResultStep, isValidationStep } from './helpers';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
-import { useFileValidation } from './hooks';
+import { useFileValidation, useNavigationSteps } from './hooks';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
@@ -62,13 +53,19 @@ export const AssetCriticalityFileUploader: React.FC = () => {
       dispatch({
         type: 'fileValidated',
         payload: {
-          fileName,
-          fileSize,
-          validLinesAsText,
-          invalidLinesAsText,
-          invalidLinesErrors,
-          validLinesCount,
-          invalidLinesCount,
+          validatedFile: {
+            name: fileName,
+            size: fileSize,
+            validLines: {
+              text: validLinesAsText,
+              count: validLinesCount,
+            },
+            invalidLines: {
+              text: invalidLinesAsText,
+              count: invalidLinesCount,
+              errors: invalidLinesErrors,
+            },
+          },
         },
       });
     },
@@ -114,7 +111,10 @@ export const AssetCriticalityFileUploader: React.FC = () => {
       });
 
       try {
-        const result = await uploadAssetCriticalityFile(state.validLinesAsText, state.fileName);
+        const result = await uploadAssetCriticalityFile(
+          state.validatedFile.validLines.text,
+          state.validatedFile.name
+        );
 
         dispatch({
           type: 'fileUploaded',
@@ -129,45 +129,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
     }
   }, [state, uploadAssetCriticalityFile]);
 
-  const steps: Array<Omit<EuiStepHorizontalProps, 'step'>> = useMemo(
-    () => [
-      {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.selectFileStepTitle',
-          {
-            defaultMessage: 'Select a file',
-          }
-        ),
-        status: getStepStatus(1, state.step),
-        onClick: () => {
-          if (step === 2) {
-            goToFirstStep(); // User can only go back to the first step from the second step
-          }
-        },
-      },
-      {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.fileValidationStepTitle',
-          {
-            defaultMessage: 'File validation',
-          }
-        ),
-        status: getStepStatus(2, state.step),
-        onClick: noop, // Prevents the user from navigating by clicking on the step
-      },
-      {
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.resultsStepTitle',
-          {
-            defaultMessage: 'Results',
-          }
-        ),
-        status: getStepStatus(3, state.step),
-        onClick: noop, // Prevents the user from navigating by clicking on the step
-      },
-    ],
-    [goToFirstStep, state.step]
-  );
+  const steps = useNavigationSteps(state, goToFirstStep);
 
   return (
     <div>
@@ -185,13 +147,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
 
         {isValidationStep(state) && (
           <AssetCriticalityValidationStep
-            validLinesCount={state.validLinesCount}
-            invalidLinesCount={state.invalidLinesCount}
-            validLinesAsText={state.validLinesAsText}
-            invalidLinesAsText={state.invalidLinesAsText}
-            invalidLinesErrors={state.invalidLinesErrors}
-            fileName={state.fileName}
-            fileSize={state.fileSize}
+            validatedFile={state.validatedFile}
             onReturn={goToFirstStep}
             onConfirm={onUploadFile}
           />
