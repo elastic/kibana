@@ -4,8 +4,8 @@ exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"
-    className="dscGridToolbar"
-    data-test-subj="dscGridToolbar"
+    className="unifiedDataTableToolbar"
+    data-test-subj="unifiedDataTableToolbar"
     gutterSize="s"
     justifyContent="spaceBetween"
     responsive={false}
@@ -32,20 +32,20 @@ exports[`renderCustomToolbar should render correctly for smaller screens 1`] = `
           grow={false}
         >
           <div
-            className="dscGridToolbarControlGroup"
+            className="unifiedDataTableToolbarControlGroup"
           >
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               keyboard
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               display
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               fullScreen
             </div>
@@ -61,8 +61,8 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"
-    className="dscGridToolbar"
-    data-test-subj="dscGridToolbar"
+    className="unifiedDataTableToolbar"
+    data-test-subj="unifiedDataTableToolbar"
     gutterSize="s"
     justifyContent="spaceBetween"
     responsive={false}
@@ -88,7 +88,7 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               additional
             </div>
@@ -97,7 +97,7 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               column
             </div>
@@ -106,7 +106,7 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               columnSorting
             </div>
@@ -116,20 +116,20 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
           grow={false}
         >
           <div
-            className="dscGridToolbarControlGroup"
+            className="unifiedDataTableToolbarControlGroup"
           >
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               keyboard
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               display
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               fullScreen
             </div>
@@ -139,8 +139,8 @@ exports[`renderCustomToolbar should render correctly with an element 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <div
-    className="dscGridToolbarBottom"
-    data-test-subj="dscGridToolbarBottom"
+    className="unifiedDataTableToolbarBottom"
+    data-test-subj="unifiedDataTableToolbarBottom"
   >
     <div>
       bottom
@@ -153,8 +153,8 @@ exports[`renderCustomToolbar should render successfully 1`] = `
 <React.Fragment>
   <EuiFlexGroup
     alignItems="center"
-    className="dscGridToolbar"
-    data-test-subj="dscGridToolbar"
+    className="unifiedDataTableToolbar"
+    data-test-subj="unifiedDataTableToolbar"
     gutterSize="s"
     justifyContent="spaceBetween"
     responsive={false}
@@ -173,7 +173,7 @@ exports[`renderCustomToolbar should render successfully 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               column
             </div>
@@ -182,7 +182,7 @@ exports[`renderCustomToolbar should render successfully 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               columnSorting
             </div>
@@ -191,7 +191,7 @@ exports[`renderCustomToolbar should render successfully 1`] = `
             grow={false}
           >
             <div
-              className="dscGridToolbarControlButton"
+              className="unifiedDataTableToolbarControlButton"
             >
               additional
             </div>
@@ -211,20 +211,20 @@ exports[`renderCustomToolbar should render successfully 1`] = `
           grow={false}
         >
           <div
-            className="dscGridToolbarControlGroup"
+            className="unifiedDataTableToolbarControlGroup"
           >
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               keyboard
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               display
             </div>
             <div
-              className="dscGridToolbarControlIconButton"
+              className="unifiedDataTableToolbarControlIconButton"
             >
               fullScreen
             </div>
