@@ -165,13 +165,13 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   osTypes: schema.nullable(schema.string()),
 });
 
-export const SentinelOneGetAgentFilesParamsSchema = schema.object({
+export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
   agentUUID: schema.string({ minLength: 1 }),
   zipPassCode: schema.string({ minLength: 1 }),
   files: schema.arrayOf(schema.string({ minLength: 1 })),
 });
 
-export const SentinelOneGetAgentFilesResponseSchema = schema.object({
+export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
   errors: schema.nullable(schema.arrayOf(schema.string())),
   data: schema.maybe(
     schema.object(
