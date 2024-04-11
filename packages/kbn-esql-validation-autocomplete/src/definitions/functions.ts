@@ -1258,6 +1258,126 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       },
     ],
   },
+  {
+    name: 'st_within',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stWithinDoc', {
+      defaultMessage: 'Returns whether the first geometry is within the second geometry.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+    ],
+  },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
