@@ -19,9 +19,8 @@ describe('FeaturesRegistry', () => {
       const registry = new FeaturesRegistry<TestFeature>();
 
       registry.register({ id: 'feature-id-1' });
-      registry.register({ id: 'feature-id-2' });
 
-      expect(registry.getFeaturesMap().size).toBe(2);
+      expect(registry.getById('feature-id-1')).toBeDefined();
     });
 
     test('should throw an error when a feature is already registered by the given id', () => {

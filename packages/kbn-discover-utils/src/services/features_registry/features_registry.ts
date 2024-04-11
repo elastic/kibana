@@ -29,20 +29,12 @@ export class FeaturesRegistry<Feature extends BaseFeature = BaseFeature> {
   }
 
   /**
-   * Retrieves all the registered features.
-   * @returns A Map instance.
-   */
-  getFeaturesMap() {
-    return this.features.getValue();
-  }
-
-  /**
    * Retrieves a registered feature by its id.
    * @param id The identifier of the feature to retrieve.
    * @returns The feature if found, otherwise undefined.
    */
-  getById(id: Feature['id']) {
-    return this.getFeaturesMap().get(id);
+  getById<Id extends Feature['id']>(id: Id) {
+    return this.getFeaturesMap().get(id) as Extract<Feature, { id: Id }> | undefined;
   }
 
   /**
@@ -59,5 +51,13 @@ export class FeaturesRegistry<Feature extends BaseFeature = BaseFeature> {
    */
   subscribe(callback: (features: FeaturesMap<Feature>) => void): Subscription {
     return this.features.subscribe(callback);
+  }
+
+  /**
+   * Retrieves all the registered features.
+   * @returns A Map instance.
+   */
+  private getFeaturesMap() {
+    return this.features.getValue();
   }
 }
