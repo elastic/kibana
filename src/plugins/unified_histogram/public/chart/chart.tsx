@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -366,12 +366,14 @@ export function Chart({
             data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
-              <EuiProgress
-                size="xs"
-                color="accent"
-                position="absolute"
-                data-test-subj="unifiedHistogramProgressBar"
-              />
+              <EuiDelayRender delay={500}>
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  data-test-subj="unifiedHistogramProgressBar"
+                />
+              </EuiDelayRender>
             )}
             <HistogramMemoized
               abortController={abortController}
