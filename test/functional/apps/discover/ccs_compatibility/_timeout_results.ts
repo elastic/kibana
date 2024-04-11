@@ -42,7 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('timeout on single shard shows warning and results', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.createFromSearchBar({ name: 'ftr-remote:logstash-*,logstash-*' });
+      await dataViews.createFromSearchBar({
+        name: 'ftr-remote:logstash-*,logstash-*',
+        hasTimeField: false,
+        adHoc: true,
+      });
 
       // Add a stall time to the remote indices
       await filterBar.addDslFilter(`
