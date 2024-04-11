@@ -80,6 +80,7 @@ export default function ({
       });
     });
     after('clean up archives', async () => {
+      await PageObjects.share.closeShareModal();
       await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
@@ -90,23 +91,16 @@ export default function ({
     });
 
     describe('Print PDF button', () => {
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -118,12 +112,6 @@ export default function ({
       after(async () => {
         await unloadEcommerce();
       });
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
 
       it('downloads a PDF file', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
@@ -131,7 +119,7 @@ export default function ({
         this.timeout(300000);
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.checkUsePrintLayout();
         await PageObjects.reporting.clickGenerateReportButton();
 
@@ -160,14 +148,14 @@ export default function ({
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
-        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -191,7 +179,7 @@ export default function ({
         this.timeout(300000);
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
@@ -221,7 +209,7 @@ export default function ({
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
-        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
@@ -247,7 +235,6 @@ export default function ({
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
       });
-
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
           await PageObjects.share.closeShareModal(); // close modal

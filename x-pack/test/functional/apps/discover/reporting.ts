@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
@@ -41,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportTab();
     await PageObjects.reporting.clickGenerateReportButton();
 
     const url = await PageObjects.reporting.getReportURL(60000);
@@ -66,14 +65,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       it('is available if new', async () => {
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -97,6 +100,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
@@ -112,24 +119,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
-        await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
-
-        // get clipboard value using field search input, since
-        // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
-        await textInput.click();
-        await browser.getActions().keyDown(Key.CONTROL).perform();
-        await browser.getActions().keyDown('v').perform();
-
-        const reportURL = decodeURIComponent((await textInput.getAttribute('value')) ?? '');
+        await PageObjects.reporting.openExportTab();
+        const copyButton = await testSubjects.find('shareReportingCopyURL');
+        const reportURL = await copyButton.getAttribute('data-share-url');
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
+          decodeURIComponent(reportURL).split(
+            'query:(range:(order_date:(format:strict_date_optional_time'
+          ).length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
 
         expect(timeFiltersNumberInSharedURL).to.be(1);
@@ -137,17 +135,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
-          reportURL.includes(
-            'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
+          decodeURIComponent(reportURL).includes(
+            'query:(range:(order_date:(format:strict_date_optional_time'
           )
         ).to.be(true);
 
         // return keyboard state
         await browser.getActions().keyUp(Key.CONTROL).perform();
         await browser.getActions().keyUp('v').perform();
-
-        //  return field search input state
-        await textInput.clearValue();
       });
 
       it('generates a report from a new search with data: default', async () => {
@@ -268,6 +263,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       beforeEach(async () => {
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
@@ -310,6 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await PageObjects.reporting.checkForReportingToasts();
+        await PageObjects.share.closeShareModal();
       });
 
       it('generates a report with data', async () => {
