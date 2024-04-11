@@ -228,14 +228,14 @@ export function getBounds(
     const lowerBoundMax = scaleType === 'log' ? LOG_LOWER_BOUND_MAX : LOWER_BOUND_MAX;
     return {
       upperBound: dataBounds.max,
-      lowerBound: Math.min(lowerBoundMax, dataBounds.min),
+      lowerBound: Math.max(Math.min(lowerBoundMax, dataBounds.min), lowerBoundMax),
     };
   }
 
   if (dataBounds.min <= 0 && dataBounds.max <= 0) {
     const upperBoundMin = scaleType === 'log' ? -LOG_LOWER_BOUND_MAX : LOWER_BOUND_MAX;
     return {
-      upperBound: Math.max(upperBoundMin, dataBounds.min),
+      upperBound: Math.min(Math.max(upperBoundMin, dataBounds.max), upperBoundMin),
       lowerBound: dataBounds.min,
     };
   }
