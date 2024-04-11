@@ -14,8 +14,7 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 import { login, ROLE } from '../../tasks/login';
 
-// FLAKY: https://github.com/elastic/kibana/issues/171665
-describe.skip('Results', { tags: ['@ess', '@serverless'] }, () => {
+describe('Results', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);

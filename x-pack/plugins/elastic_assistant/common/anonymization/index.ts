@@ -90,3 +90,16 @@ export const DEFAULT_ALLOW_REPLACEMENT = [
   'user.domain',
   'user.name',
 ];
+
+export const getDefaultAnonymizationFields = (spaceId: string) => {
+  const changedAt = new Date().toISOString();
+  return DEFAULT_ALLOW.map((field) => ({
+    '@timestamp': changedAt,
+    created_at: changedAt,
+    created_by: '',
+    field,
+    anonymized: DEFAULT_ALLOW_REPLACEMENT.includes(field),
+    allowed: true,
+    namespace: spaceId,
+  }));
+};

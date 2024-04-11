@@ -61,7 +61,12 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
         <>
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="serverlessSearchConnectorName">
-              <h1>{connector.name || CONNECTOR_LABEL}</h1>
+              <h1>
+                {connector.name ||
+                  i18n.translate('xpack.serverlessSearch.connector.chooseName', {
+                    defaultMessage: 'Choose a name for your connector',
+                  })}
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
