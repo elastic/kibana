@@ -3691,6 +3691,62 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "alertState": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "new",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "ongoing",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "recovered",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "unknown",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
     "connector": Object {
       "flags": Object {
         "error": [Function],
