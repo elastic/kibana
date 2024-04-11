@@ -33,5 +33,18 @@ export function defineConnectorAdapters(
     },
   };
 
+  const systemActionConnectorAdapterWithKibanaPrivileges: ConnectorAdapter = {
+    connectorTypeId: 'test.system-action-kibana-privileges',
+    ruleActionParamsSchema: schema.object({
+      index: schema.maybe(schema.string()),
+      reference: schema.maybe(schema.string()),
+    }),
+    buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
+      return params;
+    },
+    getKibanaPrivileges: () => ['cases:cases/createCase'],
+  };
+
   alerting.registerConnectorAdapter(systemActionConnectorAdapter);
+  alerting.registerConnectorAdapter(systemActionConnectorAdapterWithKibanaPrivileges);
 }
