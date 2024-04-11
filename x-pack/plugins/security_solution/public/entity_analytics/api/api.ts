@@ -152,6 +152,9 @@ export const useEntityAnalyticsRoutes = () => {
       return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
         version: '1',
         method: 'POST',
+        headers: {
+          'Content-Type': undefined, // Required by BE
+        },
         body,
       });
     };

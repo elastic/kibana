@@ -15,6 +15,7 @@ import { isFilePickerStep, isResultStep, isValidationStep } from './helpers';
 import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 import { useFileValidation, useNavigationSteps } from './hooks';
+import type { OnCompleteParams } from './types';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
@@ -22,21 +23,10 @@ export const AssetCriticalityFileUploader: React.FC = () => {
   const { telemetry } = useKibana().services;
 
   const onValidationComplete = useCallback(
-    ({
-      fileName,
-      fileSize,
-      validLinesAsText,
-      invalidLinesAsText,
-      invalidLinesErrors,
-      validLinesCount,
-      invalidLinesCount,
-      processingStartTime,
-      processingEndTime,
-      tookMs,
-    }) => {
+    ({ validatedFile, processingStartTime, processingEndTime, tookMs }: OnCompleteParams) => {
       telemetry.reportAssetCriticalityCsvPreviewGenerated({
         file: {
-          size: fileSize,
+          size: validatedFile.size,
         },
         processing: {
           startTime: processingStartTime,
@@ -44,9 +34,9 @@ export const AssetCriticalityFileUploader: React.FC = () => {
           tookMs,
         },
         stats: {
-          validLines: validLinesCount,
-          invalidLines: invalidLinesCount,
-          totalLines: validLinesCount + invalidLinesCount,
+          validLines: validatedFile.validLines.count,
+          invalidLines: validatedFile.invalidLines.count,
+          totalLines: validatedFile.validLines.count + validatedFile.invalidLines.count,
         },
       });
 
@@ -54,16 +44,16 @@ export const AssetCriticalityFileUploader: React.FC = () => {
         type: 'fileValidated',
         payload: {
           validatedFile: {
-            name: fileName,
-            size: fileSize,
+            name: validatedFile.name,
+            size: validatedFile.size,
             validLines: {
-              text: validLinesAsText,
-              count: validLinesCount,
+              text: validatedFile.validLines.text,
+              count: validatedFile.validLines.count,
             },
             invalidLines: {
-              text: invalidLinesAsText,
-              count: invalidLinesCount,
-              errors: invalidLinesErrors,
+              text: validatedFile.invalidLines.text,
+              count: validatedFile.invalidLines.count,
+              errors: validatedFile.invalidLines.errors,
             },
           },
         },
@@ -148,6 +138,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
         {isValidationStep(state) && (
           <AssetCriticalityValidationStep
             validatedFile={state.validatedFile}
+            isLoading={state.isLoading}
             onReturn={goToFirstStep}
             onConfirm={onUploadFile}
           />

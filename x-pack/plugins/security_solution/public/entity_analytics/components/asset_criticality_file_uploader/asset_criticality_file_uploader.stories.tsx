@@ -49,8 +49,23 @@ export const FilePickerStep: Story<void> = () => {
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
+          <b>{'Loading state'}</b>
+          <EuiSpacer size="s" />
+
           <EuiPanel>
             <AssetCriticalityFilePickerStep onFileChange={() => {}} isLoading={true} />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+
+          <b>{'With Error message'}</b>
+          <EuiSpacer size="s" />
+
+          <EuiPanel>
+            <AssetCriticalityFilePickerStep
+              onFileChange={() => {}}
+              isLoading={false}
+              errorMessage="An error message"
+            />
           </EuiPanel>
         </div>
       </TestProvider>
@@ -63,8 +78,50 @@ export const ValidationStep: Story<void> = () => {
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
+          <b>{'Initial state'}</b>
+          <EuiSpacer size="s" />
+
           <EuiPanel>
             <AssetCriticalityValidationStep
+              isLoading={false}
+              validatedFile={{
+                name: 'test.csv',
+                size: 100,
+                validLines: {
+                  text: validLinesAsText,
+                  count: 5,
+                },
+                invalidLines: {
+                  text: invalidLinesAsText,
+                  count: 3,
+                  errors: [
+                    {
+                      error: 'error message 1',
+                      index: 1,
+                    },
+                    {
+                      error: 'error message 2',
+                      index: 2,
+                    },
+                    {
+                      error: 'error message 3',
+                      index: 3,
+                    },
+                  ],
+                },
+              }}
+              onConfirm={() => {}}
+              onReturn={() => {}}
+            />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+
+          <b>{'Loading state'}</b>
+          <EuiSpacer size="s" />
+
+          <EuiPanel>
+            <AssetCriticalityValidationStep
+              isLoading={true}
               validatedFile={{
                 name: 'test.csv',
                 size: 100,
@@ -106,7 +163,7 @@ export const ResultsStep: Story<void> = () => {
     <StorybookProviders>
       <TestProvider>
         <div style={{ maxWidth: '800px' }}>
-          <b>{'Results Step - Success'}</b>
+          <b>{'Success'}</b>
           <EuiSpacer size="s" />
 
           <EuiPanel>
@@ -125,7 +182,7 @@ export const ResultsStep: Story<void> = () => {
           </EuiPanel>
           <EuiSpacer size="xl" />
 
-          <b>{'Results Step - Partial error'}</b>
+          <b>{'Partial error'}</b>
           <EuiSpacer size="s" />
 
           <EuiPanel>
@@ -149,7 +206,7 @@ export const ResultsStep: Story<void> = () => {
 
           <EuiSpacer size="xl" />
 
-          <b>{'Results Step - Complete failure'}</b>
+          <b>{'Complete failure'}</b>
           <EuiSpacer size="s" />
 
           <EuiPanel>

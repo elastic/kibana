@@ -25,6 +25,7 @@ import type { ValidatedFile } from '../types';
 
 export interface AssetCriticalityValidationStepProps {
   validatedFile: ValidatedFile;
+  isLoading: boolean;
   onConfirm: () => void;
   onReturn: () => void;
 }
@@ -33,7 +34,7 @@ const CODE_BLOCK_HEIGHT = 250;
 const INVALID_FILE_NAME = `invalid_asset_criticality.csv`;
 
 export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidationStepProps> =
-  React.memo(({ validatedFile, onConfirm, onReturn }) => {
+  React.memo(({ validatedFile, isLoading, onConfirm, onReturn }) => {
     const { validLines, invalidLines, size: fileSize, name: fileName } = validatedFile;
     const { euiTheme } = useEuiTheme();
     const { telemetry } = useKibana().services;
@@ -85,7 +86,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty flush="right" onClick={onReturn} size="xs">
+                <EuiButtonEmpty flush="right" onClick={onReturn} size="xs" disabled={isLoading}>
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.chooseAnotherFileText"
                     defaultMessage="Choose another file"
@@ -137,6 +138,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
                   <EuiButtonEmpty
                     size="xs"
                     flush="right"
+                    disabled={isLoading}
                     onClick={() => {
                       if (invalidLines.text.length > 0) {
                         downloadBlob(new Blob([invalidLines.text]), INVALID_FILE_NAME);
@@ -173,7 +175,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onReturn}>
+            <EuiButtonEmpty onClick={onReturn} disabled={isLoading}>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.backButtonText"
                 defaultMessage="Back"
@@ -187,6 +189,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               onClick={onConfirmClick}
               disabled={validLines.count === 0}
               data-test-subj="asset-criticality-assign-button"
+              isLoading={isLoading}
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assignButtonText"

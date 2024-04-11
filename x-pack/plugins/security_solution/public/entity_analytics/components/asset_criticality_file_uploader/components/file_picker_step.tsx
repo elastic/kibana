@@ -10,6 +10,7 @@ import {
   EuiFilePicker,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -155,7 +156,11 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           isLoading={isLoading}
         />
         <br />
-        {errorMessage && <div>{errorMessage}</div>}
+        {errorMessage && (
+          <EuiText color={'danger'} size="xs">
+            {errorMessage}
+          </EuiText>
+        )}
       </>
     );
   });
