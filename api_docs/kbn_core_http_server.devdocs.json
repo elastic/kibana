@@ -2825,6 +2825,19 @@
             "path": "packages/core/http/core-http-server/src/csp.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.ICspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [
+              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy-Report-Only` header."
+            ],
+            "path": "packages/core/http/core-http-server/src/csp.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
