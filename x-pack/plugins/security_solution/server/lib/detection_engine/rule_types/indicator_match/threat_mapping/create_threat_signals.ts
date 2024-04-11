@@ -30,7 +30,7 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning } from '../../utils/utils';
+import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
 export const createThreatSignals = async ({
@@ -213,7 +213,7 @@ export const createThreatSignals = async ({
       }
       ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
 
-      const sortIds = list.hits.hits[list.hits.hits.length - 1].sort;
+      const sortIds = getSafeSortIds(list.hits.hits[list.hits.hits.length - 1].sort);
 
       // ES can return negative sort id for date field, when sort order set to desc
       // this could happen when event has empty sort field
