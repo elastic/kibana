@@ -35,9 +35,7 @@ The request body should contain the attributes of the monitor you want to update
 
 *Common Fields*:
 
-`name`:: (Required, string): The monitor's name.
-
-`type`:: (Required, string): The monitor type (e.g., `http` , `tcp` , `icmp` or `browser`) can't be changed after the monitor is created.
+`name`:: (string): The monitor's name.
 
 `schedule`:: (Optional, number): The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120` and `240`.
   * The default value is `3` minutes for HTTP, TCP, and ICMP monitors.
