@@ -17,73 +17,20 @@ import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
-import axios, { AxiosError } from 'axios';
 import path from 'path';
 import os from 'os';
-import pRetry from 'p-retry';
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
-interface ProductType {
-  product_line: string;
-  product_tier: string;
-}
+import { ProductType, CloudHandler } from './project_handler/cloud_project_handler';
 
-interface OverrideEntry {
-  docker_image: string;
-}
-
-interface ProductOverrides {
-  kibana?: OverrideEntry;
-  elasticsearch?: OverrideEntry;
-  fleet?: OverrideEntry;
-  cluster?: OverrideEntry;
-}
-
-interface CreateProjectRequestBody {
-  name: string;
-  region_id: string;
-  product_types?: ProductType[];
-  overrides?: ProductOverrides;
-}
-
-interface Project {
-  name: string;
-  id: string;
-  region: string;
-  es_url: string;
-  kb_url: string;
-  product: string;
-}
-
-interface Credentials {
-  username: string;
-  password: string;
-}
-
-const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
-  { product_line: 'security', product_tier: 'complete' },
-  { product_line: 'cloud', product_tier: 'complete' },
-  { product_line: 'endpoint', product_tier: 'complete' },
-] as const;
-
-const DEFAULT_REGION = 'aws-eu-west-1';
-const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
+const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
+// const PROXY_URL = `${process.env.PROXY_URL}`;
+
 let log: ToolingLog;
-const API_HEADERS = Object.freeze({
-  'kbn-xsrf': 'cypress-creds',
-  'x-elastic-internal-origin': 'security-solution',
-  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
-});
-const PROVIDERS = Object.freeze({
-  providerType: 'basic',
-  providerName: 'cloud-basic',
-});
 
 const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   const userHomeDir = os.homedir();
@@ -96,274 +43,11 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
-// Method to invoke the create project API for serverless.
-async function createSecurityProject(
-  projectName: string,
-  apiKey: string,
-  productTypes: ProductType[],
-  commit: string
-): Promise<Project | undefined> {
-  const body: CreateProjectRequestBody = {
-    name: projectName,
-    region_id: DEFAULT_REGION,
-    product_types: productTypes,
-  };
-
-  log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
-  if (
-    (process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
-      process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1') ||
-    commit
-  ) {
-    const override = commit ? commit : process.env.BUILDKITE_COMMIT;
-    const kibanaOverrideImage = `${override?.substring(0, 12)}`;
-    log.info(
-      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
-    );
-    body.overrides = {
-      kibana: {
-        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
-      },
-    };
-  }
-
-  try {
-    const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
-      headers: {
-        Authorization: `ApiKey ${apiKey}`,
-      },
-    });
-    return {
-      name: response.data.name,
-      id: response.data.id,
-      region: response.data.region_id,
-      es_url: `${response.data.endpoints.elasticsearch}:443`,
-      kb_url: `${response.data.endpoints.kibana}:443`,
-      product: response.data.type,
-    };
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      const errorData = JSON.stringify(error.response?.data);
-      log.error(`${error.response?.status}:${errorData}`);
-    } else {
-      log.error(`${error.message}`);
-    }
-  }
-}
-
-// Method to invoke the delete project API for serverless.
-async function deleteSecurityProject(
-  projectId: string,
-  projectName: string,
-  apiKey: string
-): Promise<void> {
-  try {
-    await axios.delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
-      headers: {
-        Authorization: `ApiKey ${apiKey}`,
-      },
-    });
-    log.info(`Project ${projectName} was successfully deleted!`);
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      log.error(`${error.response?.status}:${error.response?.data}`);
-    } else {
-      log.error(`${error.message}`);
-    }
-  }
-}
-
-// Method to reset the credentials for the created project.
-async function resetCredentials(
-  projectId: string,
-  runnerId: string,
-  apiKey: string
-): Promise<Credentials | undefined> {
-  log.info(`${runnerId} : Reseting credentials`);
-
-  const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
-    const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
-      {},
-      {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      }
-    );
-    log.info('Credentials have ben reset');
-    return {
-      password: response.data.password,
-      username: response.data.username,
-    };
-  };
-
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. A retry will be triggered soon..');
-      } else {
-        log.error(`${error.message}`);
-      }
-    },
-    retries: 100,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-
-  return pRetry(fetchResetCredentialsStatusAttempt, retryOptions);
-}
-
-// Wait until Project is initialized
-function waitForProjectInitialized(projectId: string, apiKey: string): Promise<void> {
-  const fetchProjectStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-    const response = await axios.get(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/status`,
-      {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      }
-    );
-    if (response.data.phase !== 'initialized') {
-      log.info(response.data);
-      throw new Error('Project is not initialized. A retry will be triggered soon...');
-    } else {
-      log.info('Project is initialized');
-    }
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. A retry will be triggered soon...');
-      } else {
-        log.error(`${error.message}`);
-      }
-    },
-    retries: 100,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-  return pRetry(fetchProjectStatusAttempt, retryOptions);
-}
-
-// Wait until elasticsearch status goes green
-function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
-  const fetchHealthStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
-
-    const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
-
-    log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(
-          `${runnerId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
-        );
-      }
-    },
-    retries: 50,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-
-  return pRetry(fetchHealthStatusAttempt, retryOptions);
-}
-
-// Wait until Kibana is available
-function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
-  const fetchKibanaStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if kibana is available.`);
-    const response = await axios.get(`${kbUrl}/api/status`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
-    if (response.data.status.overall.level !== 'available') {
-      throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
-    } else {
-      log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
-    }
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(
-          `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
-        );
-      } else {
-        log.info(`${runnerId}: ${error.message}`);
-      }
-    },
-    retries: 50,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-  return pRetry(fetchKibanaStatusAttempt, retryOptions);
-}
-
-// Wait for Elasticsearch to be accessible
-function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
-  const fetchEsAccessAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if can be accessed.`);
-
-    await axios.get(`${esUrl}`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(
-          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
-        );
-      }
-    },
-    retries: 100,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-
-  return pRetry(fetchEsAccessAttempt, retryOptions);
-}
-
-// Wait until application is ready
-function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<void> {
-  const body = {
-    ...PROVIDERS,
-    currentURL: '/',
-    params: credentials,
-  };
-
-  const fetchLoginStatusAttempt = async (attemptNum: number) => {
-    log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    axios.post(`${kbUrl}/internal/security/login`, body, {
-      headers: API_HEADERS,
-    });
-  };
-  const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. A retry will be triggered soon...');
-      } else {
-        log.error(`${error.message}`);
-      }
-    },
-    retries: 100,
-    factor: 2,
-    maxTimeout: 20000,
-  };
-  return pRetry(fetchLoginStatusAttempt, retryOptions);
-}
+const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
+  { product_line: 'security', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+] as const;
 
 const getProductTypes = (
   tier: string,
@@ -541,7 +225,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       }
 
       const failedSpecFilePaths: string[] = [];
-
+      let cloudHandler: CloudHandler;
+      if (API_KEY) {
+        cloudHandler = new CloudHandler(API_KEY);
+      }
       const runSpecs = (filePaths: string[]) =>
         pMap(
           filePaths,
@@ -566,9 +253,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
-              const project = await createSecurityProject(
+              const project = await cloudHandler.createSecurityProject(
                 PROJECT_NAME,
-                API_KEY,
                 productTypes,
                 commit
               );
@@ -585,7 +271,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               });
 
               // Reset credentials for elastic user
-              const credentials = await resetCredentials(project.id, id, API_KEY);
+              const credentials = await cloudHandler.resetCredentials(project.id, id);
 
               if (!credentials) {
                 log.info('Credentials could not be reset.');
@@ -594,22 +280,22 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
 
               // Wait for project to be initialized
-              await waitForProjectInitialized(project.id, API_KEY);
+              await cloudHandler.waitForProjectInitialized(project.id);
 
               // Base64 encode the credentials in order to invoke ES and KB APIs
               const auth = btoa(`${credentials.username}:${credentials.password}`);
 
               // Wait for elasticsearch status to go green.
-              await waitForEsStatusGreen(project.es_url, auth, id);
+              await cloudHandler.waitForEsStatusGreen(project.es_url, auth, id);
 
               // Wait until Kibana is available
-              await waitForKibanaAvailable(project.kb_url, auth, id);
+              await cloudHandler.waitForKibanaAvailable(project.kb_url, auth, id);
 
               // Wait for Elasticsearch to be accessible
-              await waitForEsAccess(project.es_url, auth, id);
+              await cloudHandler.waitForEsAccess(project.es_url, auth, id);
 
               // Wait until application is ready
-              await waitForKibanaLogin(project.kb_url, credentials);
+              await cloudHandler.waitForKibanaLogin(project.kb_url, credentials);
 
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
@@ -673,7 +359,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   }
                   // Delete serverless project
                   log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-                  await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
+                  await cloudHandler.deleteSecurityProject(project.id, PROJECT_NAME);
                 } catch (error) {
                   // False positive
                   // eslint-disable-next-line require-atomic-updates
