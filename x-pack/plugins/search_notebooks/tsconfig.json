@@ -18,7 +18,13 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/ipynb",
     "@kbn/logging",
+    "@kbn/console-plugin",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-utility",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ipynb",
   ]
 }

@@ -9,7 +9,8 @@
     ]
   },
   "include": [
-    "**/*.ts", "index.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
