@@ -29,7 +29,7 @@ if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
 
 cat <<EOF >> $KIBANA_DIR/.bazelrc
   build --remote_cache=https://storage.googleapis.com/$BAZEL_BUCKET
-  build --google_default_credentials
+  build --google_credentials=$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
 EOF
 fi
 
