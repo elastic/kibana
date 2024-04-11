@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -48,6 +49,11 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     [ruleTypeIndex, searchString, selectedProducer]
   );
 
+  const hasOnlyOneProducer = useMemo(
+    () => Object.keys(omit(ruleTypeCountsByProducer, 'total')).length === 1,
+    [ruleTypeCountsByProducer]
+  );
+
   return (
     <RuleTypeModal
       {...rest}
@@ -58,6 +64,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
       onFilterByProducer={setSelectedProducer}
       selectedProducer={selectedProducer}
       searchString={searchString}
+      showCategories={!hasOnlyOneProducer}
     />
   );
 };

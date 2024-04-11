@@ -33,6 +33,7 @@ export interface RuleTypeModalProps {
   onChangeSearch: (search: string) => void;
   searchString: string;
   selectedProducer: string | null;
+  showCategories: boolean;
 }
 
 export interface RuleTypeModalState {
@@ -64,6 +65,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   ruleTypeCountsByProducer,
   searchString,
   selectedProducer,
+  showCategories,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -131,6 +133,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
                 onFilterByProducer={onFilterByProducer}
                 selectedProducer={selectedProducer}
                 onClearFilters={onClearFilters}
+                showCategories={showCategories}
               />
             )}
           </EuiFlexItem>
