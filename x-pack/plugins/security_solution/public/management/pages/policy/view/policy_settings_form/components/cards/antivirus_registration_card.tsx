@@ -84,7 +84,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
                   {
                     defaultMessage:
                       'Using this setting will automatically enable antivirus registration if Malware protection is set to prevent. ' +
-                      'In any other cases antivirus registration will be disabled.',
+                      'In any other case antivirus registration will be disabled.',
                   }
                 )}
               />
