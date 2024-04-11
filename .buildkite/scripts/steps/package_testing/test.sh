@@ -59,7 +59,7 @@ trap "echoKibanaLogs" EXIT
 
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
   # TODO: add test script
-  sleep 10
+  sleep 1h
 else
   vagrant provision "$TEST_PACKAGE"
 
