@@ -7,100 +7,37 @@
 
 import { isEqual } from 'lodash';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import { ML_PAGES } from '../../../locator';
-import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
-import type { NavigateToPath } from '../../contexts/kibana';
-import {
-  useMlApiContext,
-  useMlKibana,
-  useNotifications,
-  useUiSettings,
-} from '../../contexts/kibana';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
-import { TimeSeriesExplorer } from '../../timeseriesexplorer';
-import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { mlJobService } from '../../services/job_service';
-import { useForecastService } from '../../services/forecast_service';
-import { useTimeSeriesExplorerService } from '../../util/time_series_explorer_service';
-import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
-import { validateJobSelection } from '../../timeseriesexplorer/timeseriesexplorer_utils';
-import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
-import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { useTableInterval } from '../../components/controls/select_interval';
-import { useTableSeverity } from '../../components/controls/select_severity';
-import type { MlRoute, PageProps } from '../router';
-import { createPath, PageLoader } from '../router';
-import { useRouteResolver } from '../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useToastNotificationService } from '../../services/toast_notification_service';
-import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
-import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
-import { useRefresh } from '../use_refresh';
-import { TimeseriesexplorerNoChartData } from '../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
-import { basicResolvers } from '../resolvers';
-
-export const timeSeriesExplorerRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'timeseriesexplorer',
-  path: createPath(ML_PAGES.SINGLE_METRIC_VIEWER),
-  title: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
-    defaultMessage: 'Single Metric Viewer',
-  }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
-        defaultMessage: 'Single Metric Viewer',
-      }),
-    },
-  ],
-  enableDatePicker: true,
-});
-
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const mlApi = useMlApiContext();
-  const uiSettings = useUiSettings();
-  const { context, results } = useRouteResolver('full', ['canGetJobs'], {
-    ...basicResolvers(),
-    jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz()),
-  });
-
-  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
-
-  return (
-    <PageLoader context={context}>
-      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        {results ? (
-          <TimeSeriesExplorerUrlStateManager
-            config={uiSettings}
-            jobsWithTimeRange={results.jobsWithTimeRange.jobs}
-          />
-        ) : null}
-      </MlAnnotationUpdatesContext.Provider>
-    </PageLoader>
-  );
-};
+import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
+import { useMlKibana, useNotifications } from '../../../contexts/kibana';
+import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
+import { isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
+import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
+import { mlJobService } from '../../../services/job_service';
+import { useForecastService } from '../../../services/forecast_service';
+import { useTimeSeriesExplorerService } from '../../../util/time_series_explorer_service';
+import { APP_STATE_ACTION } from '../../../timeseriesexplorer/timeseriesexplorer_constants';
+import { validateJobSelection } from '../../../timeseriesexplorer/timeseriesexplorer_utils';
+import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { useTableInterval } from '../../../components/controls/select_interval';
+import { useTableSeverity } from '../../../components/controls/select_severity';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { useTimeSeriesExplorerUrlState } from '../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
+import type { TimeSeriesExplorerAppState } from '../../../../../common/types/locator';
+import { useJobSelectionFlyout } from '../../../contexts/ml/use_job_selection_flyout';
+import { useRefresh } from '../../use_refresh';
+import { TimeseriesexplorerNoChartData } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
 
 type AppStateZoom = Exclude<TimeSeriesExplorerAppState['mlTimeSeriesExplorer'], undefined>['zoom'];
 
-interface TimeSeriesExplorerUrlStateManager {
+export interface TimeSeriesExplorerUrlStateManager {
   config: IUiSettingsClient;
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
