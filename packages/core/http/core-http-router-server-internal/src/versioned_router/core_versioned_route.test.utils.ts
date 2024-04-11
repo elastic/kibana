@@ -9,7 +9,6 @@
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { ApiVersion, ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { schema } from '@kbn/config-schema';
 import { CoreKibanaRequest } from '../request';
 import { passThroughValidation } from './core_versioned_route';
 
@@ -33,47 +32,4 @@ export function createRequest(
     }),
     passThroughValidation
   );
-}
-
-export function createFooValidation() {
-  const validateBodyFn = jest.fn();
-  const validateParamsFn = jest.fn();
-  const validateQueryFn = jest.fn();
-  const validateOutputFn = jest.fn();
-  const fooValidation = {
-    request: {
-      body: schema.object({
-        foo: schema.number({
-          validate: validateBodyFn,
-        }),
-      }),
-      params: schema.object({
-        foo: schema.number({
-          validate: validateParamsFn,
-        }),
-      }),
-      query: schema.object({
-        foo: schema.number({
-          validate: validateQueryFn,
-        }),
-      }),
-    },
-    response: {
-      200: {
-        body: schema.object({
-          foo: schema.number({
-            validate: validateOutputFn,
-          }),
-        }),
-      },
-    },
-  };
-
-  return {
-    fooValidation,
-    validateBodyFn,
-    validateParamsFn,
-    validateQueryFn,
-    validateOutputFn,
-  };
 }

@@ -9,11 +9,12 @@
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
 import { Router } from '../router';
+import { createFooValidation } from '../router.test.util';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
-import { createFooValidation, createRequest } from './core_versioned_route.test.utils';
+import { createRequest } from './core_versioned_route.test.utils';
 
 describe('Versioned route', () => {
   let router: Router;
@@ -159,7 +160,7 @@ describe('Versioned route', () => {
 
   it.each([['static' as const], ['lazy' as const]])(
     'runs %s request validations',
-    async (staticOrDynamic) => {
+    async (staticOrLazy) => {
       let handler: RequestHandler;
 
       (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
@@ -167,7 +168,7 @@ describe('Versioned route', () => {
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
         {
           version: '1',
-          validate: staticOrDynamic === 'static' ? fooValidation : () => fooValidation,
+          validate: staticOrLazy === 'static' ? fooValidation : () => fooValidation,
         },
         handlerFn
       );
