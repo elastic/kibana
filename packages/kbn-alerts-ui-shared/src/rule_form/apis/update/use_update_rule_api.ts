@@ -31,7 +31,7 @@ export const useUpdateRuleApi = () => {
     try {
       const updatedRule = await updateRule({ http, rule, id: rule.id });
       toasts.addSuccess(
-        i18n.translate('alertsUIShared.ruleForm.saveSuccessNotificationText', {
+        i18n.translate('alertsUIShared.ruleForm.updateSuccessNotificationText', {
           defaultMessage: 'Updated rule "{ruleName}"',
           values: {
             ruleName: updatedRule.name,

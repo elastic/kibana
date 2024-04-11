@@ -23,16 +23,13 @@ export const RuleAlertDelayField: React.FC = () => {
       name="alertDelay"
       data-test-subj="alertDelayInput"
       prepend={[
-        i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
+        i18n.translate('alertsUIShared.ruleForm.alertDelayFieldLabel', {
           defaultMessage: 'Alert after',
         }),
       ]}
-      append={i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
-        {
-          defaultMessage: 'consecutive matches',
-        }
-      )}
+      append={i18n.translate('alertsUIShared.ruleForm.alertDelayFieldAppendLabel', {
+        defaultMessage: 'consecutive matches',
+      })}
       onChange={(e) => {
         const value = e.target.value;
         dispatch(setAlertDelay(parseInt(value, 10)));

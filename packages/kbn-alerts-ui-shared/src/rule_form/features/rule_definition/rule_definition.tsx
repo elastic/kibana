@@ -278,10 +278,13 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                 description={
                   <EuiText size="s">
                     <p>
-                      {i18n.translate('alertsUIShared.ruleForm.ruleDefinition.scopeDescription', {
-                        defaultMessage:
-                          'Set the number of consecutive runs for which this rule must meet the alert conditions before an alert occurs',
-                      })}
+                      {i18n.translate(
+                        'alertsUIShared.ruleForm.ruleDefinition.alertDelayDescription',
+                        {
+                          defaultMessage:
+                            'Set the number of consecutive runs for which this rule must meet the alert conditions before an alert occurs',
+                        }
+                      )}
                     </p>
                   </EuiText>
                 }

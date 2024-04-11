@@ -34,7 +34,7 @@ export const useCreateRuleApi = () => {
     try {
       const newRule = await createRule({ http, rule });
       toasts.addSuccess(
-        i18n.translate('alertsUIShared.ruleForm.saveSuccessNotificationText', {
+        i18n.translate('alertsUIShared.ruleForm.createSuccessNotificationText', {
           defaultMessage: 'Created rule "{ruleName}"',
           values: {
             ruleName: newRule.name,
