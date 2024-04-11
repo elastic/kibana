@@ -68,9 +68,17 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
       defaultMessage: 'Needs updating',
     }),
+  getUpdateButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.updateButton', {
+      defaultMessage: 'Update',
+    }),
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
       defaultMessage: 'Refresh query',
+    }),
+  getRefreshButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refreshButton', {
+      defaultMessage: 'Refresh',
     }),
   getCancelQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
@@ -79,6 +87,10 @@ export const strings = {
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
+    }),
+  getRunButtonLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
+      defaultMessage: 'Run',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -557,6 +569,10 @@ export const QueryBarTopRow = React.memo(
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
 
+      const isDirtyButtonLabel = Boolean(isQueryLangSelected)
+        ? strings.getRunButtonLabel()
+        : strings.getUpdateButtonLabel();
+
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
@@ -581,7 +597,9 @@ export const QueryBarTopRow = React.memo(
                 delay: 'long',
                 position: 'bottom',
               }}
-            />
+            >
+              {props.isDirty ? isDirtyButtonLabel : strings.getRefreshButtonLabel()}
+            </EuiSuperUpdateButton>
           )}
         </EuiFlexItem>
       );

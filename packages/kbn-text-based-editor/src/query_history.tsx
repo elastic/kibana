@@ -103,30 +103,60 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiIcon
-                type="checkInCircleFilled"
-                color="success"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-success"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.success',
+                  {
+                    defaultMessage: 'Query run successfully',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="checkInCircleFilled"
+                  color="success"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-success"
+                />
+              </EuiToolTip>
             );
           case 'error':
             return (
-              <EuiIcon
-                type="error"
-                color="danger"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-error"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  {
+                    defaultMessage: 'Query failed',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="error"
+                  color="danger"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-error"
+                />
+              </EuiToolTip>
             );
           case 'warning':
             return (
-              <EuiIcon
-                type="warning"
-                color="warning"
-                size="s"
-                data-test-subj="TextBasedLangEditor-queryHistory-warning"
-              />
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.error',
+                  {
+                    defaultMessage: 'Query failed',
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="warning"
+                  color="warning"
+                  size="m"
+                  data-test-subj="TextBasedLangEditor-queryHistory-warning"
+                />
+              </EuiToolTip>
             );
         }
       },
@@ -224,7 +254,7 @@ export function QueryHistory({
                   )}
                 >
                   <EuiButtonIcon
-                    iconType="playFilled"
+                    iconType="play"
                     aria-label={i18n.translate(
                       'textBasedEditor.query.textBasedLanguagesEditor.querieshistoryRun',
                       {
@@ -253,7 +283,7 @@ export function QueryHistory({
                 >
                   {(copy) => (
                     <EuiButtonIcon
-                      iconType="copy"
+                      iconType="copyClipboard"
                       iconSize="m"
                       onClick={copy}
                       css={css`
@@ -303,6 +333,9 @@ export function QueryHistory({
     }
     .euiTable tbody tr:nth-child(odd) {
       background-color: ${euiTheme.colors.emptyShade};
+    }
+    .euiTableRowCell {
+      vertical-align: top;
     }
     max-height: ${CONTAINER_MAX_HEIGHT}px;
     overflow-y: auto;
@@ -372,6 +405,7 @@ export function QueryColumn({
           }
           iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
           size="xs"
+          color="text"
         />
       )}
       <span
@@ -382,6 +416,8 @@ export function QueryColumn({
           padding-left: ${isExpandable ? euiTheme.size.s : euiTheme.size.m ? 0 : euiTheme.size.xl};
           color: ${isOnReducedSpaceLayout ? euiTheme.colors.subduedText : euiTheme.colors.text};
           font-size: ${isOnReducedSpaceLayout ? euiTheme.size.m : 'inherit'};
+          font-family: ${euiTheme.font.familyCode};
+          line-height: 1.5;
         `}
         ref={containerRef}
       >
