@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../..';
-import { TelemetryEventTypes } from '../..';
+import type { TelemetryEvent } from '../../types';
+import { TelemetryEventTypes } from '../../constants';
 
 export const insightsGeneratedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.InsightsGenerated,
