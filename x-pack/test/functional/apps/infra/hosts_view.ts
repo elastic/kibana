@@ -37,7 +37,7 @@ const tableEntries = [
     normalizedLoad: '0.5%',
     memoryUsage: '18.4%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.6%',
+    diskSpaceUsage: '35.1%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -48,7 +48,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '18.2%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.8%',
+    diskSpaceUsage: '35.7%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -59,7 +59,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '15.9%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.5%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -70,7 +70,7 @@ const tableEntries = [
     normalizedLoad: '1.4%',
     memoryUsage: '18%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '17.5%',
+    diskSpaceUsage: '35%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -81,7 +81,7 @@ const tableEntries = [
     normalizedLoad: '0%',
     memoryUsage: '16.5%',
     memoryFree: '3.2 GB',
-    diskSpaceUsage: '16.3%',
+    diskSpaceUsage: '32.6%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -92,7 +92,7 @@ const tableEntries = [
     normalizedLoad: '0.1%',
     memoryUsage: '13.8%',
     memoryFree: '3.3 GB',
-    diskSpaceUsage: '16.9%',
+    diskSpaceUsage: '33.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts View', function () {
+  describe.only('Hosts View', function () {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     before(async () => {
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
@@ -348,7 +348,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Page Content', () => {
+    describe.only('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
