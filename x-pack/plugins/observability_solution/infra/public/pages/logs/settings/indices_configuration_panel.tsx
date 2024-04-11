@@ -155,12 +155,12 @@ export const IndicesConfigurationPanel = React.memo<{
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
-            data-test-subj="infraIndicesPanelSettingsDangerCallout"
+            data-test-subj="infraIndicesPanelSettingsWarningCallout"
             size="s"
             title={i18n.translate('xpack.infra.sourceConfiguration.logsIndicesUsedByRulesTitle', {
               defaultMessage: 'Rules utilize this data source.',
             })}
-            color="danger"
+            color="warning"
             iconType="warning"
           >
             <FormattedMessage

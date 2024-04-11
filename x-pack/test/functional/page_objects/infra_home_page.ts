@@ -294,12 +294,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async getInfraMissingMetricsIndicesCallout() {
       return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
     },
-    async getInfraIndicesPanelSettingsDangerCalloutUsedByRules() {
-      return testSubjects.find('infraIndicesPanelSettingsDangerCalloutUsedByRules');
+    async getInfraIndicesPanelSettingsWarningCalloutUsedByRules() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCalloutUsedByRules');
     },
 
     async getInfraMissingRemoteClusterIndicesCallout() {
-      return testSubjects.find('infraIndicesPanelSettingsDangerCallout');
+      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
     },
 
     async openSourceConfigurationFlyout() {

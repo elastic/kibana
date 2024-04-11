@@ -120,10 +120,10 @@ export const IndicesConfigurationPanel = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
-            data-test-subj="infraIndicesPanelSettingsDangerCalloutUsedByRules"
+            data-test-subj="infraIndicesPanelSettingsWarningCalloutUsedByRules"
             size="s"
             title={METRIC_INDICES_USED_BY_RULES}
-            color="danger"
+            color="warning"
             iconType="warning"
           >
             <FormattedMessage

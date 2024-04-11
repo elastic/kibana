@@ -240,7 +240,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
             await metricIndicesInput.clearValueWithKeyboard();
             await metricIndicesInput.type('newMatch');
-            await pageObjects.infraHome.getInfraIndicesPanelSettingsDangerCalloutUsedByRules();
+            await pageObjects.infraHome.getInfraIndicesPanelSettingsWarningCalloutUsedByRules();
           });
         });
       });
