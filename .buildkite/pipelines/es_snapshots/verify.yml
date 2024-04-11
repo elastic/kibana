@@ -38,7 +38,10 @@ steps:
     label: 'Default CI Group'
     parallelism: 27
     agents:
-      queue: n2-4
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      provider: gcp
+      machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
