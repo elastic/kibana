@@ -318,13 +318,26 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
+    const appendResponseBody = (message: string): string => {
+      const responseBody =
+        error.response?.data && error.response?.config?.responseType !== 'stream'
+          ? JSON.stringify(error.response?.data)
+          : '';
+
+      if (responseBody) {
+        return `${message}\nResponse body: ${responseBody}`;
+      }
+
+      return message;
+    };
+
     if (!error.response?.status) {
-      return 'Unknown API Error';
+      return appendResponseBody('Unknown API Error');
     }
     if (error.response.status === 401) {
-      return 'Unauthorized API Error';
+      return appendResponseBody('Unauthorized API Error (401)');
     }
-    return `API Error: ${error.response?.statusText}`;
+    return appendResponseBody(`API Error: ${error.response?.statusText}`);
   }
 
   public async getRemoteScripts(
