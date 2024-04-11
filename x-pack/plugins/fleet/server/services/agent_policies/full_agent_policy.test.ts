@@ -738,6 +738,45 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  it('should return agent logging level if logging_level is present in the policy', async () => {
+    mockAgentPolicy({
+      logging_level: 'debug',
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        logging: { level: 'debug' },
+      },
+    });
+  });
+
+  it('should retrun agent logging level and advanced settings if both are present', async () => {
+    mockAgentPolicy({
+      logging_level: 'warning',
+      advanced_settings: {
+        agent_limits_go_max_procs: 2,
+        agent_download_timeout: '60s',
+        agent_download_target_directory: '/tmp',
+        agent_logging_metrics_period: '10s',
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        download: {
+          timeout: '60s',
+          target_directory: '/tmp',
+        },
+        limits: { go_max_procs: 2 },
+        logging: { level: 'warning', metrics: { period: '10s' } },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {

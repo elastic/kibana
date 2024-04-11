@@ -287,6 +287,12 @@ export async function getFullAgentPolicy(
     };
   }
 
+  if (agentPolicy.logging_level) {
+    fullAgentPolicy.agent = {
+      ...fullAgentPolicy.agent,
+      logging: { ...fullAgentPolicy.agent?.logging, level: agentPolicy.logging_level },
+    };
+  }
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }

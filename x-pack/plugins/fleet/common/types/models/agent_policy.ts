@@ -43,7 +43,7 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
-  logging_level?: AgentLoggingLevel;
+  logging_level?: AgentLoggingLevel | null;
 }
 
 // SO definition for this type is declared in server/types/interfaces
@@ -124,6 +124,9 @@ export interface FullAgentPolicy {
       enabled: boolean;
       uninstall_token_hash: string;
       signing_key: string;
+    };
+    logging?: {
+      level: AgentLoggingLevel;
     };
   };
   secret_references?: PolicySecretReference[];

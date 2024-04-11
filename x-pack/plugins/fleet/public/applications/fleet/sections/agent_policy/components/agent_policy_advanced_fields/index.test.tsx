@@ -20,6 +20,7 @@ import { useLicense } from '../../../../../../hooks/use_license';
 
 import type { LicenseService } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
@@ -76,6 +77,25 @@ describe('Agent policy advanced options content', () => {
   });
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  describe('Agent logging select', () => {
+    usePlatinumLicense();
+    it('should be visible if feature flag is enabled', () => {
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ showAgentLoggingPerPolicy: true });
+      render();
+      expect(renderResult.queryByTestId('agentLoggingSelect')).toBeInTheDocument();
+    });
+
+    it('should not be visible if feature flag is disabled', () => {
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ showAgentLoggingPerPolicy: false });
+      render();
+      expect(renderResult.queryByTestId('agentLoggingSelect')).not.toBeInTheDocument();
+    });
   });
 
   describe('Agent tamper protection toggle', () => {

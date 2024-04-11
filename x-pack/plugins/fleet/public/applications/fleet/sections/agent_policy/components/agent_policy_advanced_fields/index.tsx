@@ -112,7 +112,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
 
-  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const { agentTamperProtectionEnabled, showAgentLoggingPerPolicy } =
+    ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
@@ -207,6 +208,62 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     agentPolicy.is_managed,
     AgentTamperProtectionWrapper,
     AgentTamperProtectionSectionContent,
+  ]);
+
+  const AgentLoggingSection = useMemo(() => {
+    return showAgentLoggingPerPolicy ? (
+      <EuiDescribedFormGroup
+        title={
+          <h4 data-test-subj="agentLoggingHeader">
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
+              defaultMessage="Agent logging level"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.agentLoggingDescription"
+            defaultMessage="Set the Agent log level. The default log level is 'info'."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.agentLogLevel && validation.agentLogLevel
+              ? validation.agentLogLevel
+              : null
+          }
+          isInvalid={Boolean(touchedFields.agentLogLevel && validation.agentLogLevel)}
+          isDisabled={disabled}
+        >
+          <EuiSelect
+            data-test-subj="agentLoggingSelect"
+            disabled={disabled}
+            value={agentPolicy.logging_level || agentLoggingLevels.Info}
+            fullWidth
+            onChange={(e) => {
+              updateAgentPolicy({
+                logging_level: e.target.value as AgentLoggingLevel,
+              });
+            }}
+            options={Object.keys(agentLoggingLevels).map((level) => ({
+              text: level,
+              // @ts-ignore-next-line
+              value: agentLoggingLevels[level],
+            }))}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    ) : null;
+  }, [
+    agentPolicy.logging_level,
+    disabled,
+    showAgentLoggingPerPolicy,
+    touchedFields.agentLogLevel,
+    updateAgentPolicy,
+    validation.agentLogLevel,
   ]);
 
   return (
@@ -403,49 +460,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={
-          <h4 data-test-subj="agentLoggingHeader">
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
-              defaultMessage="Agent logging level"
-            />
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.agentLoggingDescription"
-            defaultMessage="TBD"
-          />
-        }
-      >
-        <EuiFormRow
-          fullWidth
-          error={
-            touchedFields.agentLogLevel && validation.agentLogLevel
-              ? validation.agentLogLevel
-              : null
-          }
-          isInvalid={Boolean(touchedFields.agentLogLevel && validation.agentLogLevel)}
-          isDisabled={disabled}
-        >
-          <EuiSelect
-            disabled={disabled}
-            value={agentPolicy.logging_level}
-            fullWidth
-            onChange={(e) => {
-              updateAgentPolicy({
-                logging_level: e.target.value as AgentLoggingLevel,
-              });
-            }}
-            options={Object.keys(agentLoggingLevels).map((level) => ({
-              text: level,
-              // @ts-ignore-next-line
-              value: agentLoggingLevels[logLevel],
-            }))}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      {AgentLoggingSection}
       {AgentTamperProtectionSection}
 
       <EuiDescribedFormGroup
