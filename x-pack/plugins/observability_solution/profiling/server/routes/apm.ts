@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -17,12 +17,13 @@ const querySchema = schema.object({
   timeTo: schema.number(),
   startIndex: schema.number(),
   endIndex: schema.number(),
-  kuery: schema.string(),
+  functionName: schema.string(),
+  serviceNames: schema.arrayOf(schema.string()),
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
 
-export function registerTopNFunctionsSearchRoute({
+export function registerTopNFunctionsAPMTransactionsRoute({
   router,
   logger,
   dependencies: {
@@ -32,7 +33,7 @@ export function registerTopNFunctionsSearchRoute({
   const paths = getRoutePaths();
   router.get(
     {
-      path: paths.TopNFunctions,
+      path: paths.APMTransactions,
       options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: { query: querySchema },
     },
@@ -40,7 +41,14 @@ export function registerTopNFunctionsSearchRoute({
       try {
         const core = await context.core;
 
-        const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
+        const {
+          timeFrom,
+          timeTo,
+          startIndex,
+          endIndex,
+          functionName,
+          serviceNames,
+        }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -49,7 +57,7 @@ export function registerTopNFunctionsSearchRoute({
         const query = {
           bool: {
             filter: [
-              ...kqlQuery(kuery),
+              ...termQuery('service.name', serviceNames[0]),
               {
                 range: {
                   ['@timestamp']: {

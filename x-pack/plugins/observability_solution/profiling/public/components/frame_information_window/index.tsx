@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
-import React from 'react';
+import React, { useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { FramesSummary } from '../frames_summary';
+import { APMTransactions } from './apm_transactions';
 import { EmptyFrame } from './empty_frame';
 import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';
@@ -45,6 +53,7 @@ export interface Props {
   rank?: number;
   showSymbolsStatus?: boolean;
   compressed?: boolean;
+  subGroups?: Record<string, number>;
 }
 
 export function FrameInformationWindow({
@@ -58,7 +67,9 @@ export function FrameInformationWindow({
   totalSeconds,
   rank,
   compressed = false,
+  subGroups = {},
 }: Props) {
+  const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>('closed');
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
   if (!frame) {
@@ -143,14 +154,25 @@ export function FrameInformationWindow({
             ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <FrameInformationAIAssistant frame={frame} />
-        </EuiFlexItem>
+        <FrameInformationAIAssistant frame={frame} />
         {showSymbolsStatus && symbolStatus !== FrameSymbolStatus.SYMBOLIZED ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>
         ) : null}
+        <EuiFlexItem>
+          <EuiAccordion
+            id="apmTransactions"
+            buttonContent={i18n.translate(
+              'xpack.profiling.frameInformationWindow.apmTransactions',
+              { defaultMessage: 'APM Transactions' }
+            )}
+            forceState={accordionState}
+            onToggle={(isOpen) => setAccordionState(isOpen ? 'open' : 'closed')}
+          >
+            {accordionState === 'open' ? <APMTransactions /> : null}
+          </EuiAccordion>
+        </EuiFlexItem>
         <EuiFlexItem>
           <FramesSummary
             compressed={compressed}
