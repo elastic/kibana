@@ -33,6 +33,52 @@ interface TabifyDocsOptions {
 // Can be removed once the estypes.SearchHit knows about ignored_field_values
 type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<string, unknown[]> };
 
+function flattenAccum(
+  flat: Record<string, any>,
+  obj: Record<string, any>,
+  keyPrefix: string,
+  indexPattern?: DataView,
+  params?: TabifyDocsOptions
+) {
+  console.log('fklatten');
+
+  for (const [k, val] of Object.entries(obj)) {
+    const key = keyPrefix + k;
+
+    const field = indexPattern?.fields.getByName(key);
+
+    if (params?.shallow === false) {
+      const isNestedField = field?.type === 'nested';
+      if (Array.isArray(val) && !isNestedField) {
+        val.forEach((v) => {
+          if (isPlainObject(v)) {
+            flattenAccum(flat, v, key + '.', indexPattern, params);
+          }
+        });
+        continue;
+      }
+    } else if (flat[key] !== undefined) {
+      continue;
+    }
+
+    const hasValidMapping = field && field.type !== 'conflict';
+    const isValue = !isPlainObject(val);
+
+    if (hasValidMapping || isValue) {
+      if (!flat[key]) {
+        flat[key] = val;
+      } else if (Array.isArray(flat[key])) {
+        flat[key].push(val);
+      } else {
+        flat[key] = [flat[key], val];
+      }
+      continue;
+    }
+
+    flattenAccum(flat, val, key + '.', indexPattern, params);
+  }
+}
+
 /**
  * Flattens an individual hit (from an ES response) into an object. This will
  * create flattened field names, like `user.name`.
@@ -44,43 +90,10 @@ type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<s
 export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
   const flat = {} as Record<string, any>;
 
-  function flatten(obj: Record<string, any>, keyPrefix: string = '') {
-    for (const [k, val] of Object.entries(obj)) {
-      const key = keyPrefix + k;
+  flattenAccum(flat, hit.fields || {}, '', indexPattern, params);
 
-      const field = indexPattern?.fields.getByName(key);
-
-      if (params?.shallow === false) {
-        const isNestedField = field?.type === 'nested';
-        if (Array.isArray(val) && !isNestedField) {
-          val.forEach((v) => isPlainObject(v) && flatten(v, key + '.'));
-          continue;
-        }
-      } else if (flat[key] !== undefined) {
-        continue;
-      }
-
-      const hasValidMapping = field && field.type !== 'conflict';
-      const isValue = !isPlainObject(val);
-
-      if (hasValidMapping || isValue) {
-        if (!flat[key]) {
-          flat[key] = val;
-        } else if (Array.isArray(flat[key])) {
-          flat[key].push(val);
-        } else {
-          flat[key] = [flat[key], val];
-        }
-        continue;
-      }
-
-      flatten(val, key + '.');
-    }
-  }
-
-  flatten(hit.fields || {});
   if (params?.source !== false && hit._source) {
-    flatten(hit._source as Record<string, any>);
+    flattenAccum(flat, hit._source as Record<string, any>, '', indexPattern, params);
   } else if (params?.includeIgnoredValues && hit.ignored_field_values) {
     // If enabled merge the ignored_field_values into the flattened hit. This will
     // merge values that are not actually indexed by ES (i.e. ignored), e.g. because
@@ -117,22 +130,29 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
 
   // Use a proxy to make sure that keys are always returned in a specific order,
   // so we have a guarantee on the flattened order of keys.
+  return makeProxy(flat, indexPattern);
+}
+
+function makeProxy(flat, indexPattern?) {
+  function comparator(a, b) {
+    const aIsMeta = indexPattern?.metaFields?.includes(String(a));
+    const bIsMeta = indexPattern?.metaFields?.includes(String(b));
+    if (aIsMeta && bIsMeta) {
+      return String(a).localeCompare(String(b));
+    }
+    if (aIsMeta) {
+      return 1;
+    }
+    if (bIsMeta) {
+      return -1;
+    }
+    return String(a).localeCompare(String(b));
+  }
+
   return new Proxy(flat, {
     ownKeys: (target) => {
-      return Reflect.ownKeys(target).sort((a, b) => {
-        const aIsMeta = indexPattern?.metaFields?.includes(String(a));
-        const bIsMeta = indexPattern?.metaFields?.includes(String(b));
-        if (aIsMeta && bIsMeta) {
-          return String(a).localeCompare(String(b));
-        }
-        if (aIsMeta) {
-          return 1;
-        }
-        if (bIsMeta) {
-          return -1;
-        }
-        return String(a).localeCompare(String(b));
-      });
+      console.log('own keys');
+      return Reflect.ownKeys(target).sort(comparator);
     },
   });
 }
@@ -142,6 +162,8 @@ export const tabifyDocs = (
   index?: DataView,
   params: TabifyDocsOptions = {}
 ): Datatable => {
+  console.log('tavify!');
+
   const columns: DatatableColumn[] = [];
 
   const rows = esResponse.hits.hits
