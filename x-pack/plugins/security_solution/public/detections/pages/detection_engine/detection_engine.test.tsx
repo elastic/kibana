@@ -335,7 +335,7 @@ describe('DetectionEnginePageComponent', () => {
   });
 
   it('the pageFiltersUpdateHandler updates status when a multi status filter is passed', async () => {
-    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(
+    jest.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementationOnce(
       mockAlertFilterControls([
         {
           meta: {
