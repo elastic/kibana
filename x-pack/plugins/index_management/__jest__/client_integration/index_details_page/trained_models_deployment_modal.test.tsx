@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 
 const refreshModal = jest.fn();
 const setIsModalVisible = jest.fn();
-const refreshForErrorModal = jest.fn();
+const tryAgainForErrorModal = jest.fn();
 const setIsVisibleForErrorModal = jest.fn();
 
 describe('When semantic_text is enabled', () => {
@@ -58,7 +58,7 @@ describe('When semantic_text is enabled', () => {
         isSemanticTextEnabled: true,
         pendingDeployments: ['.elser-test-3'],
         setIsModalVisible: setIsVisibleForErrorModal,
-        refreshModal: refreshForErrorModal,
+        refreshModal: tryAgainForErrorModal,
         errorsInTrainedModelDeployment: ['.elser-test-3'],
       },
       memoryRouter: { wrapComponent: false },
@@ -79,7 +79,7 @@ describe('When semantic_text is enabled', () => {
       await act(async () => {
         find('confirmModalConfirmButton').simulate('click');
       });
-      expect(refreshForErrorModal.mock.calls).toHaveLength(1);
+      expect(tryAgainForErrorModal.mock.calls).toHaveLength(1);
     });
 
     it('should call setIsModalVisible method if cancel button is pressed', async () => {
