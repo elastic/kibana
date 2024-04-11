@@ -15,7 +15,7 @@ import { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {
-    services: { observabilityAIAssistant, http },
+    services: { observabilityAIAssistant },
   } = useKibana();
 
   const ObservabilityAIAssistantContextualInsight =
