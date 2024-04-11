@@ -61,6 +61,10 @@ export class CloudHandler {
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+    log = new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    });
   }
 
   // Method to invoke the create project API for serverless.
