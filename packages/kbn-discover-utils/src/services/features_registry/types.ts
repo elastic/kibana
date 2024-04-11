@@ -9,5 +9,3 @@
 export interface BaseFeature {
   id: string;
 }
-
-export type FeaturesMap<F extends BaseFeature> = Map<F['id'], F>;

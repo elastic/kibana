@@ -88,10 +88,3 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
 ```
 
 At this point, the feature should work correctly when registered and we have not created any direct dependency between the Discover and LogsShared apps.
-
-## Subscribe to feature changes
-
-If you need to subscribe and listen for changes on the features registry, it exposes 2 methods for interacting with it:
-
-- `discoverShared.features.registry.subscribe(callback)`: takes a callback and provides a unique argument, the Map of the registered features.
-- `discoverShared.features.registry.observe()`: returns the features registry as an observable, allowing for more flexible operations.

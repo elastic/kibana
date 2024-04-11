@@ -55,20 +55,4 @@ describe('FeaturesRegistry', () => {
       expect(registry.getById('feature-id-2')).toBeUndefined();
     });
   });
-
-  describe('#subscribe', () => {
-    test('should subscribe a callback to registry changes', () => {
-      const registry = new FeaturesRegistry<TestFeature>();
-      let registrySize = 0;
-
-      registry.subscribe((featuresMap) => {
-        registrySize = featuresMap.size;
-      });
-
-      registry.register({ id: 'feature-id-1', adHocProperty1: 'test' });
-      registry.register({ id: 'feature-id-2', adHocProperty2: 'test' });
-
-      expect(registrySize).toBe(2);
-    });
-  });
 });
