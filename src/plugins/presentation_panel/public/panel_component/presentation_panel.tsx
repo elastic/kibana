@@ -22,10 +22,18 @@ export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 >(
-  props: PresentationPanelProps<ApiType, PropsType>
+  props: PresentationPanelProps<ApiType, PropsType> & {
+    hidePresentationPanelChrome?: boolean;
+  }
 ) => {
-  const { Component, ...passThroughProps } = props;
+  const { Component, hidePresentationPanelChrome, ...passThroughProps } = props;
   const { loading, value, error } = useAsync(async () => {
+    if (hidePresentationPanelChrome) {
+      return {
+        unwrappedComponent: isPromise(Component) ? await Component : Component
+      };
+    }
+
     const startServicesPromise = untilPluginStartServicesReady();
     const modulePromise = await import('./presentation_panel_internal');
     const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
@@ -36,11 +44,16 @@ export const PresentationPanel = <
     ]);
     const Panel = panelModule.PresentationPanelInternal;
     return { Panel, unwrappedComponent };
+    
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
     // when unwrappedComponent needs to be re-loaded
   }, []);
 
-  if (error || (!loading && (!value?.Panel || !value?.unwrappedComponent))) {
+  const Panel = value?.Panel;
+  const unwrappedComponent = value?.unwrappedComponent;
+  const shouldHavePanel = !loading && !hidePresentationPanelChrome;
+  const shouldHaveUnwrappedComponent = !loading;
+  if (error || (shouldHavePanel && !Panel) || (shouldHaveUnwrappedComponent && !unwrappedComponent)) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -53,7 +66,7 @@ export const PresentationPanel = <
     );
   }
 
-  if (loading || !value?.Panel || !value?.unwrappedComponent)
+  if (loading)
     return (
       <PanelLoader
         showShadow={props.showShadow}
@@ -62,7 +75,7 @@ export const PresentationPanel = <
       />
     );
 
-  return (
-    <value.Panel<ApiType, PropsType> Component={value.unwrappedComponent} {...passThroughProps} />
-  );
+  return shouldHavePanel && Panel
+    ? <Panel<ApiType, PropsType> Component={unwrappedComponent!} {...passThroughProps} />
+    : unwrappedComponent! as unknown as JSX.Element;
 };
