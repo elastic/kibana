@@ -7,7 +7,7 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { BasePath } from './base_path_service';
+import { BasePath, PartialBasePathValue } from './base_path_service';
 
 describe('BasePath', () => {
   describe('serverBasePath', () => {
@@ -53,7 +53,7 @@ describe('BasePath', () => {
   });
 
   describe('#set()', () => {
-    it('#set() cannot be set twice for one request', () => {
+    it('#set() cannot be set twice for one request if not using partial declaration', () => {
       const request = mockRouter.createKibanaRequest();
       const basePath = new BasePath('/foo/bar');
 
@@ -63,6 +63,50 @@ describe('BasePath', () => {
       expect(setPath).toThrowErrorMatchingInlineSnapshot(
         `"Request basePath was previously set. Setting multiple times is not supported."`
       );
+    });
+
+    it('#set() cannot mix string and partial value for same request', () => {
+      const request = mockRouter.createKibanaRequest();
+      const basePath = new BasePath('/foo/bar');
+
+      const setPath = (path: string | PartialBasePathValue = '/baz') => basePath.set(request, path);
+      setPath({
+        id: 'partial',
+        basePath: 'partial',
+        index: 0,
+      });
+
+      expect(setPath).toThrowErrorMatchingInlineSnapshot(
+        `"Request basePath was previously set with partial value. Setting with a string is not supported."`
+      );
+    });
+
+    it('#set() can be set twice for one request if using partial values', () => {
+      const request = mockRouter.createKibanaRequest();
+      const basePath = new BasePath('/foo/bar');
+
+      const setPath = (
+        partial: PartialBasePathValue = {
+          id: 'partial1',
+          basePath: '/partial1',
+          index: 0, // Should appear first
+        }
+      ) => basePath.set(request, partial);
+
+      setPath({
+        id: 'partial2',
+        basePath: '/partial2',
+        index: 1, // Should appear second, even though it is called first
+      });
+
+      setPath({
+        id: 'partial2', // Same id, will override the above value
+        basePath: '/partial2Updated', // new updated value
+        index: 1, // Should appear second, even though it is called first
+      });
+
+      expect(setPath).not.toThrow();
+      expect(basePath.get(request)).toBe('/foo/bar/partial1/partial2Updated');
     });
   });
 

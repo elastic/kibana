@@ -11,13 +11,13 @@ import { Request } from '@hapi/hapi';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
-interface BasePathCacheValue {
+export interface PartialBasePathValue {
   id: string;
   basePath: string;
   index: number;
 }
 
-const isBasePathCacheValue = (obj?: string | BasePathCacheValue): obj is BasePathCacheValue =>
+const isPartialBasePath = (obj?: string | PartialBasePathValue): obj is PartialBasePathValue =>
   !!obj && typeof obj === 'object';
 
 const isObject = (obj?: any): obj is Record<string, any> => !!obj && typeof obj === 'object';
@@ -30,7 +30,7 @@ const isObject = (obj?: any): obj is Record<string, any> => !!obj && typeof obj 
 export class BasePath implements IBasePath {
   private readonly basePathCache = new WeakMap<
     Request,
-    string | Record<string, BasePathCacheValue>
+    string | Record<string, PartialBasePathValue>
   >();
 
   public readonly serverBasePath: string;
@@ -53,26 +53,26 @@ export class BasePath implements IBasePath {
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  public set = (request: KibanaRequest, requestSpecificBasePath: string | BasePathCacheValue) => {
+  public set = (request: KibanaRequest, requestSpecificBasePath: string | PartialBasePathValue) => {
     const rawRequest = ensureRawRequest(request);
 
     const cached = this.basePathCache.get(rawRequest);
-    let updatedCache: Record<string, BasePathCacheValue> | string;
+    let updatedCache: Record<string, PartialBasePathValue> | string;
 
     if (cached) {
-      if (typeof cached === 'string' || typeof requestSpecificBasePath === 'string') {
+      if (typeof cached === 'string') {
         throw new Error(
           'Request basePath was previously set. Setting multiple times is not supported.'
         );
       }
       if (isObject(cached) && !isObject(requestSpecificBasePath)) {
         throw new Error(
-          'Request basePath was previously set with an object. Setting with a string is not supported.'
+          'Request basePath was previously set with partial value. Setting with a string is not supported.'
         );
       }
     }
 
-    if (isBasePathCacheValue(requestSpecificBasePath)) {
+    if (isPartialBasePath(requestSpecificBasePath)) {
       if (typeof cached === 'string') throw new Error('Request basePath was previously set.');
       updatedCache = {
         ...cached,
