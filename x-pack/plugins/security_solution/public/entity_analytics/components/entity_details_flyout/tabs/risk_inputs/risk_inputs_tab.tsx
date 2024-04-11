@@ -69,7 +69,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
 
-  const alerts = useRiskContributingAlerts({ riskScore, entityType });
+  const alerts = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -330,6 +330,7 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
   }
   return (
     <EuiCallOut
+      data-test-subj="risk-input-extra-alerts-message"
       size="s"
       title={
         <FormattedMessage

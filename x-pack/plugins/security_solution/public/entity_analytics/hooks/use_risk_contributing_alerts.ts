@@ -7,10 +7,7 @@
 
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type {
-  EntityRiskInput,
-  RiskScoreEntity,
-} from '../../../common/entity_analytics/risk_engine';
+import type { EntityRiskInput } from '../../../common/entity_analytics/risk_engine';
 
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
@@ -23,7 +20,6 @@ import { isUserRiskScore } from '../../../common/search_strategy/security_soluti
 
 interface UseRiskContributingAlerts {
   riskScore: UserRiskScore | HostRiskScore | undefined;
-  entityType: RiskScoreEntity;
 }
 
 interface AlertData {
@@ -54,7 +50,6 @@ export interface UseRiskContributingAlertsResult {
  */
 export const useRiskContributingAlerts = ({
   riskScore,
-  entityType,
 }: UseRiskContributingAlerts): UseRiskContributingAlertsResult => {
   const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     query: {},
@@ -90,7 +85,7 @@ export const useRiskContributingAlerts = ({
 };
 
 const getInputs = (riskScore?: UserRiskScore | HostRiskScore) => {
-  if (riskScore === undefined) {
+  if (!riskScore) {
     return [];
   }
 

@@ -37,7 +37,7 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
 
       onClick: addToNewTimeline,
     };
-    const ruleName = get(['fields', ALERT_RULE_NAME], inputs[0]) ?? [''];
+    const ruleName = get(['alert', ALERT_RULE_NAME], inputs[0]) ?? '';
     const title = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
       {
@@ -45,7 +45,7 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
         values: {
           description:
             inputs.length === 1
-              ? ruleName[0]
+              ? ruleName
               : i18n.translate(
                   'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription',
                   {

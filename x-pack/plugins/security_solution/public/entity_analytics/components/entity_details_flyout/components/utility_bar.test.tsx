@@ -12,48 +12,23 @@ import { alertInputDataMock } from '../mocks';
 import { RiskInputsUtilityBar } from './utility_bar';
 
 describe('RiskInputsUtilityBar', () => {
-  it('renders', () => {
+  it('renders when at least one item is selected', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar riskInputs={[]} />
+        <RiskInputsUtilityBar riskInputs={[alertInputDataMock]} />
       </TestProviders>
     );
-
     expect(getByTestId('risk-input-utility-bar')).toBeInTheDocument();
   });
 
-  it('renders current page message when totalItemCount is 1', () => {
-    const { getByTestId } = render(
+  it('is hidden by default', () => {
+    const { queryByTestId } = render(
       <TestProviders>
         <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('Showing 1 Risk contribution');
-  });
-
-  it('renders current page message when totalItemCount is 20', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <RiskInputsUtilityBar riskInputs={[]} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 1-10 of 20 Risk contribution'
-    );
-  });
-
-  it('renders current page message when totalItemCount is 20 and on the second page', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <RiskInputsUtilityBar riskInputs={[]} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 11-20 of 20 Risk contribution'
-    );
+    expect(queryByTestId('risk-input-utility-bar')).toBeNull();
   });
 
   it('renders selected risk input message', () => {

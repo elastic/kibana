@@ -24,7 +24,16 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
         notes: [],
         category_1_score: 30,
         category_1_count: 1,
-        risk_inputs: [],
+        risk_inputs: [
+          {
+            id: 'test_id',
+            index: '_index',
+            rule_name: 'Test rule',
+            time: '2021-08-19T18:55:59.000Z',
+            score: 30,
+            contribution: 20,
+          },
+        ],
       },
     },
 
