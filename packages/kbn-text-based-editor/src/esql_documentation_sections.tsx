@@ -3627,7 +3627,7 @@ FROM employees
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction',
         {
-          defaultMessage: 'ST_CENTROID',
+          defaultMessage: 'ST_CENTROID_AGG',
         }
       ),
       description: (
@@ -3636,12 +3636,14 @@ FROM employees
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
             {
-              defaultMessage: `### ST_CENTROID
+              defaultMessage: `### ST_CENTROID_AGG
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
 Calculates the spatial centroid over a field with spatial point geometry type.
 
 \`\`\`
 FROM airports
-| STATS centroid=ST_CENTROID(location)
+| STATS centroid=ST_CENTROID_AGG(location)
 \`\`\`
               `,
               description:
