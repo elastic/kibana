@@ -43,7 +43,6 @@ The request body should contain the attributes of the monitor you want to update
   * The default value is `10` minutes for Browser monitors.
 
 :private-locations-url: https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html
-:locations-command: https://www.elastic.co/guide/en/observability/current/synthetics-command-reference.html#elastic-synthetics-locations-command
 
 `locations`:: (https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts#L28-L37[`Array<SyntheticsLocationsType>`])
 Where to deploy the monitor. Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
