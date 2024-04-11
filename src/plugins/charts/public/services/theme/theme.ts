@@ -52,6 +52,30 @@ export class ThemeService {
     return {};
   };
 
+  /**
+   * A react hook to return shared sparkline chart overrides
+   *
+   * Replacement for `EUI_SPARKLINE_THEME_PARTIAL`
+   */
+  public useSparklineOverrides = (): PartialTheme => {
+    return {
+      lineSeriesStyle: {
+        point: {
+          visible: false,
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+      areaSeriesStyle: {
+        point: {
+          visible: false,
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+    };
+  };
+
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
     const [value, update] = useState(this._chartsBaseTheme$.getValue());
@@ -70,7 +94,11 @@ export class ThemeService {
     return value;
   };
 
-  /** initialize service with uiSettings */
+  /**
+   * Initialize theme service with dark mode
+   *
+   * Meant to be called by charts plugin setup method
+   */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe(({ darkMode }) => {

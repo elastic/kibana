@@ -68,6 +68,7 @@ jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
 }));
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 
 export const mockCustomBrandingService = customBrandingServiceMock.create();
 jest.doMock('@kbn/core-custom-branding-server-internal', () => ({
@@ -137,4 +138,9 @@ jest.doMock('@kbn/core-doc-links-server-internal', () => ({
 export const mockSecurityService = securityServiceMock.create();
 jest.doMock('@kbn/core-security-server-internal', () => ({
   SecurityService: jest.fn(() => mockSecurityService),
+}));
+
+export const mockUsageDataService = coreUsageDataServiceMock.create();
+jest.doMock('@kbn/core-usage-data-server-internal', () => ({
+  CoreUsageDataService: jest.fn(() => mockUsageDataService),
 }));

@@ -60,6 +60,9 @@ NOTE: The `frame-ancestors` directive can also be configured by using
 <<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors`
 are ignored.
 
+`csp.report_only.form_action`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action[Content Security Policy `form-action` directive] in reporting mode.
+
 `csp.report_uri`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 
