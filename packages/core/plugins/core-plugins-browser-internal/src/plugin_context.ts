@@ -96,6 +96,10 @@ export function createPluginSetupContext<
     security: {
       registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
     },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
+    },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
@@ -162,6 +166,7 @@ export function createPluginStartContext<
     security: {
       authc: deps.security.authc,
     },
+    userProfile: deps.userProfile,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },

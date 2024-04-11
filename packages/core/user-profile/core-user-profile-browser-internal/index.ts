@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export function foo() {
-  return 'hello world';
-}
+export { UserProfileService } from './src/user_profile_service';
+export type {
+  InternalUserProfileServiceSetup,
+  InternalUserProfileServiceStart,
+} from './src/internal_contracts';

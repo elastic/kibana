@@ -210,7 +210,23 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreSecurityContract,
 } from '@kbn/core-security-browser';
+
+export type {
+  UserProfile,
+  UserProfileLabels,
+  UserProfileWithSecurity,
+  UserProfileUserInfoWithSecurity,
+  UserProfileUserInfo,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+  UserProfileService,
+  CoreUserProfileDelegateContract,
+} from '@kbn/core-user-profile-browser';
 
 export type {
   OverlayStart,

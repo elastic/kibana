@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { userProfileServiceMock } from './src/user_profile_service.mock';
+export { convertUserProfileAPI } from './convert_api';
+export { getDefaultUserProfileImplementation } from './default_implementation';

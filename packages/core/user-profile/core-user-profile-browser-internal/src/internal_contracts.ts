@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { userProfileServiceMock } from './src/user_profile_service.mock';
+import type {
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+} from '@kbn/core-user-profile-browser';
+
+export type InternalUserProfileServiceSetup = UserProfileServiceSetup;
+export type InternalUserProfileServiceStart = UserProfileServiceStart;

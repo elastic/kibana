@@ -5,5 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { Observable } from 'rxjs';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
+import type { UserProfileService } from './service';
 
-export { userProfileServiceMock } from './src/user_profile_service.mock';
+export type CoreUserProfileDelegateContract = Omit<UserProfileService, 'getUserProfile$'> & {
+  userProfile$: Observable<UserProfileData | null>;
+};
