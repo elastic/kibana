@@ -343,7 +343,6 @@ export const useDiscoverHistogram = ({
       nextVisContext: UnifiedHistogramVisContext | undefined,
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => {
-      // console.log('onVisContextChanged', nextVisContext, externalVisContextStatus);
       switch (externalVisContextStatus) {
         case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
           // if user customized the visualization manually
