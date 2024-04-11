@@ -36,13 +36,18 @@ export function GroupSloView({
   const [groups, setGroups] = useState(initialGroups);
 
   let groupsKqlQuery = '';
-  groups.map((group, index) => {
-    const shouldAddOr = index < groups.length - 1;
-    groupsKqlQuery += `(${groupBy}:"${group}")`;
-    if (shouldAddOr) {
-      groupsKqlQuery += ' or ';
-    }
-  });
+  if (groups.length > 0) {
+    groupsKqlQuery += `(`;
+
+    groups.map((group, index) => {
+      const shouldAddOr = index < groups.length - 1;
+      groupsKqlQuery += `${groupBy}:"${group}"`;
+      if (shouldAddOr) {
+        groupsKqlQuery += ' or ';
+      }
+    });
+    groupsKqlQuery += `)`;
+  }
 
   let combinedKqlQuery = '';
   if (kqlQuery && groupsKqlQuery) {
