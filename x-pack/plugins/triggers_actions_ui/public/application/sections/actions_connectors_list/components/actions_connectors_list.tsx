@@ -6,7 +6,7 @@
  */
 
 import { ClassNames } from '@emotion/react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -24,11 +24,11 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -171,42 +171,18 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
 
-  const editItem = useCallback(
-    (actionConnector?: ActionConnector, tab?: EditConnectorTabs, isFix?: boolean) => {
-      history.push(
-        setStateToKbnUrl(
-          '_a',
-          { initialConnector: actionConnector, tab, isFix: isFix ?? false },
-          { useHash: false },
-          routeToConnectors
-        )
-      );
-    },
-    [history]
-  );
-
-  useEffect(() => {
-    const { initialConnector, tab, isFix } =
-      getStatesFromKbnUrl<{ _a: EditConnectorProps }>()?._a || {};
-
-    if (initialConnector) {
-      setEditConnectorProps({ initialConnector, tab, isFix });
-    }
-  }, [location]);
-
   useEffect(() => {
     if (connectorId && !isLoadingActions) {
       const connector = actions.find((action) => action.id === connectorId);
-      history.push(
-        setStateToKbnUrl(
-          '_a',
-          { initialConnector: connector, tab: EditConnectorTabs.Configuration, isFix: false },
-          { useHash: false },
-          routeToConnectors
-        )
-      );
+      if (connector) {
+        editItem(connector, EditConnectorTabs.Configuration);
+      }
+
+      const linkToConnectors = history.createHref({ pathname: routeToConnectors });
+
+      window.history.replaceState(null, '', linkToConnectors);
     }
-  }, [actions, connectorId, history, isLoadingActions]);
+  }, [actions, connectorId, history, isLoadingActions, location]);
 
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
@@ -239,6 +215,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     } finally {
       setIsLoadingActions(false);
     }
+  }
+
+  function editItem(actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) {
+    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
   const actionsTableColumns = [
@@ -583,10 +563,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             connector={editConnectorProps.initialConnector}
             tab={editConnectorProps.tab}
             onClose={() => {
-              editItem();
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
             }}
             onConnectorUpdated={(connector) => {
-              editItem(connector, editConnectorProps.tab, editConnectorProps.isFix);
+              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
               loadActions();
             }}
             actionTypeRegistry={actionTypeRegistry}
