@@ -440,6 +440,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
+                  userError: runResult.userError,
                 };
                 runState = runResult.state;
               }
@@ -516,6 +517,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                 },
+                userError: result.userError,
               });
             }
           } catch (error) {
