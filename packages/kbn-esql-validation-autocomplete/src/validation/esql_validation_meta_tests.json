@@ -6886,58 +6886,58 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField)",
+      "query": "from a_index | eval var = st_centroid_agg(cartesianPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval var = st_centroid_agg(cartesianPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField)",
+      "query": "from a_index | eval st_centroid_agg(cartesianPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(cartesianPointField) > 0",
+      "query": "from a_index | eval st_centroid_agg(cartesianPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(geoPointField)",
+      "query": "from a_index | eval var = st_centroid_agg(geoPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = st_centroid(geoPointField) > 0",
+      "query": "from a_index | eval var = st_centroid_agg(geoPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(geoPointField)",
+      "query": "from a_index | eval st_centroid_agg(geoPointField)",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval st_centroid(geoPointField) > 0",
+      "query": "from a_index | eval st_centroid_agg(geoPointField) > 0",
       "error": [
-        "EVAL does not support function st_centroid"
+        "EVAL does not support function st_centroid_agg"
       ],
       "warning": []
     },
@@ -12227,78 +12227,78 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(cartesianPointField)",
+      "query": "from a_index | stats var = st_centroid_agg(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(cartesianPointField)",
+      "query": "from a_index | stats st_centroid_agg(cartesianPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(avg(numberField))",
+      "query": "from a_index | stats var = st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(avg(numberField))",
+      "query": "from a_index | stats st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(stringField)",
+      "query": "from a_index | stats st_centroid_agg(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid_agg] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(*)",
+      "query": "from a_index | stats var = st_centroid_agg(*)",
       "error": [
-        "Using wildcards (*) in st_centroid is not allowed"
+        "Using wildcards (*) in st_centroid_agg is not allowed"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(geoPointField)",
+      "query": "from a_index | stats var = st_centroid_agg(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(geoPointField)",
+      "query": "from a_index | stats st_centroid_agg(geoPointField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(avg(numberField))",
+      "query": "from a_index | stats var = st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(avg(numberField))",
+      "query": "from a_index | stats st_centroid_agg(avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats st_centroid(stringField)",
+      "query": "from a_index | stats st_centroid_agg(stringField)",
       "error": [
-        "Argument of [st_centroid] must be [cartesian_point], found value [stringField] type [string]"
+        "Argument of [st_centroid_agg] must be [cartesian_point], found value [stringField] type [string]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = st_centroid(*)",
+      "query": "from a_index | stats var = st_centroid_agg(*)",
       "error": [
-        "Using wildcards (*) in st_centroid is not allowed"
+        "Using wildcards (*) in st_centroid_agg is not allowed"
       ],
       "warning": []
     },
