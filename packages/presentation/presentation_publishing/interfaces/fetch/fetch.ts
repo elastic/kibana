@@ -131,7 +131,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   const batchedChanges$ = merge(...batchedObservables).pipe(
     switchMap((value) =>
       of(value).pipe(
-        delay(1),
+        delay(0),
         takeUntil(interrupt),
         map(() => getFetchContext(api, false))
       )
