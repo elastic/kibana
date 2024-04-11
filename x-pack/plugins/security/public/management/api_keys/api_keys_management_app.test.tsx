@@ -58,7 +58,8 @@ describe('apiKeysManagementApp', () => {
         element,
         setBreadcrumbs,
         history,
-        theme$: themeServiceMock.createTheme$(),
+        theme: coreStartMock.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
     });
 

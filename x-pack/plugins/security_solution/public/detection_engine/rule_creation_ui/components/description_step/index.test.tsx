@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(13);
     });
   });
 
@@ -559,8 +559,23 @@ describe('description_step', () => {
       });
     });
 
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
+      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning'];
       const suppressionFields = {
         groupByDuration: {
           unit: 'm',
