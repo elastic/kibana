@@ -10,6 +10,7 @@ import { getNormalizedDataStreams } from '../../../../../../common/services';
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
 
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepInstallIndexTemplatePipelines(context: InstallContext) {
   const { esClient, savedObjectsClient, packageInstallContext, logger, installedPkg } = context;
@@ -20,15 +21,18 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
     logger.debug(
       `Package install - Installing index templates and pipelines, packageInfo.type: ${packageInfo.type}`
     );
-    const { installedTemplates, esReferences: templateEsReferences } =
-      await installIndexTemplatesAndPipelines({
-        installedPkg: installedPkg ? installedPkg.attributes : undefined,
-        packageInstallContext,
-        esClient,
-        savedObjectsClient,
-        logger,
-        esReferences,
-      });
+    const { installedTemplates, esReferences: templateEsReferences } = await withPackageSpan(
+      'Install index templates and pipelines with packageInfo integration',
+      () =>
+        installIndexTemplatesAndPipelines({
+          installedPkg: installedPkg ? installedPkg.attributes : undefined,
+          packageInstallContext,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences,
+        })
+    );
     return {
       esReferences: templateEsReferences,
       indexTemplates: installedTemplates,
@@ -50,16 +54,19 @@ export async function stepInstallIndexTemplatePipelines(context: InstallContext)
     );
 
     if (dataStreams.length) {
-      const { installedTemplates, esReferences: templateEsReferences } =
-        await installIndexTemplatesAndPipelines({
-          installedPkg: installedPkg ? installedPkg.attributes : undefined,
-          packageInstallContext,
-          esClient,
-          savedObjectsClient,
-          logger,
-          esReferences,
-          onlyForDataStreams: dataStreams,
-        });
+      const { installedTemplates, esReferences: templateEsReferences } = await withPackageSpan(
+        'Install index templates and pipelines with packageInfo input',
+        () =>
+          installIndexTemplatesAndPipelines({
+            installedPkg: installedPkg ? installedPkg.attributes : undefined,
+            packageInstallContext,
+            esClient,
+            savedObjectsClient,
+            logger,
+            esReferences,
+            onlyForDataStreams: dataStreams,
+          })
+      );
       return { esReferences: templateEsReferences, indexTemplates: installedTemplates };
     }
   }
