@@ -26,7 +26,11 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       docLinks: {
-        links: {},
+        links: {
+          securitySolution: {
+            ruleUiAdvancedParams: 'http://link-to-docs',
+          },
+        },
       },
     },
   }),
