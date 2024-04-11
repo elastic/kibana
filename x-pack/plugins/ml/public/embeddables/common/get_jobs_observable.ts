@@ -8,10 +8,10 @@
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { catchError, distinctUntilChanged, map, of, switchMap } from 'rxjs';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { parseInterval } from '../../../common/util/parse_interval';
 import type { ExplorerJob } from '../../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import type { JobId } from '../../shared';
 
 export function getJobsObservable(
   embeddableInput: Observable<{ jobIds: JobId[] }>,

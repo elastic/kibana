@@ -28,8 +28,8 @@ import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
@@ -232,7 +232,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
               api.perPage,
               api.swimlaneType,
               swimLaneData$,
-              api.blockingError
+              blockingError
             );
 
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
