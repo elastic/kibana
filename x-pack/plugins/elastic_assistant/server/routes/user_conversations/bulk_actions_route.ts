@@ -21,7 +21,6 @@ import {
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { i18n } from '@kbn/i18n';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
@@ -36,7 +35,7 @@ import {
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
-import { hasAIAssistantLicense } from '../helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -161,13 +160,7 @@ export const bulkActionConversationsRoute = (
           if (!hasAIAssistantLicense(license)) {
             return response.forbidden({
               body: {
-                message: i18n.translate(
-                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
-                  {
-                    defaultMessage:
-                      'Your license does not support AI Assistant. Please upgrade your license.',
-                  }
-                ),
+                message: UPGRADE_LICENSE_MESSAGE,
               },
             });
           }

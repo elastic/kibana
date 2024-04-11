@@ -18,12 +18,11 @@ import {
   FindAnonymizationFieldsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { i18n } from '@kbn/i18n';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { hasAIAssistantLicense } from '../helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
@@ -60,13 +59,7 @@ export const findAnonymizationFieldsRoute = (
           if (!hasAIAssistantLicense(license)) {
             return response.forbidden({
               body: {
-                message: i18n.translate(
-                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
-                  {
-                    defaultMessage:
-                      'Your license does not support AI Assistant. Please upgrade your license.',
-                  }
-                ),
+                message: UPGRADE_LICENSE_MESSAGE,
               },
             });
           }

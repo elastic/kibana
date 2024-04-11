@@ -14,12 +14,11 @@ import {
   FindPromptsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { i18n } from '@kbn/i18n';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
 import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
-import { hasAIAssistantLicense } from '../helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
@@ -49,13 +48,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           if (!hasAIAssistantLicense(license)) {
             return response.forbidden({
               body: {
-                message: i18n.translate(
-                  'xpack.elasticAssistant.licensing.unsupportedAIAssistantMessage',
-                  {
-                    defaultMessage:
-                      'Your license does not support AI Assistant. Please upgrade your license.',
-                  }
-                ),
+                message: UPGRADE_LICENSE_MESSAGE,
               },
             });
           }
