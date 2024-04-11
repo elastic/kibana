@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { noop } from 'lodash';
 import { forkJoin, last, Observable, shareReplay, tap } from 'rxjs';
 import {
   ChatCompletionChunkEvent,
@@ -42,6 +43,7 @@ export function failOnNonExistingFunctionCall({
         next: (val) => {
           subscriber.next(val);
         },
+        error: noop,
       });
 
       forkJoin([source$, checkFunctionCallResponse$]).subscribe({
