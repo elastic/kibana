@@ -10,10 +10,17 @@ import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_a
 describe('getOpenAndAcknowledgedAlertsQuery', () => {
   it('returns the expected query', () => {
     const alertsIndexPattern = 'alerts-*';
-    const allow = ['field1', 'field2'];
+    const anonymizationFields = [
+      { id: 'field1', field: 'field1', allowed: true, anonymized: false },
+      { id: 'field2', field: 'field2', allowed: true, anonymized: false },
+    ];
     const size = 10;
 
-    const query = getOpenAndAcknowledgedAlertsQuery({ alertsIndexPattern, allow, size });
+    const query = getOpenAndAcknowledgedAlertsQuery({
+      alertsIndexPattern,
+      anonymizationFields,
+      size,
+    });
 
     expect(query).toEqual({
       allow_no_indices: true,
