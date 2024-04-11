@@ -23,6 +23,7 @@ export const stubFieldSpecMap: Record<string, FieldSpec> = {
   },
   'machine.os.raw': {
     name: 'machine.os.raw',
+    customLabel: 'OS',
     type: 'string',
     esTypes: ['keyword'],
     aggregatable: true,
