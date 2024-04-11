@@ -63,7 +63,6 @@ import { getDataControlFieldRegistry } from './data_control_editor_tools';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 
 export interface EditControlProps {
-  dataViewId?: string;
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
   width: ControlWidth;
@@ -79,7 +78,6 @@ const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 export const ControlEditor = ({
-  dataViewId,
   embeddable,
   isCreate,
   width,
@@ -131,7 +129,7 @@ export const ControlEditor = ({
       if (!mounted) return;
 
       const initialId =
-        dataViewId ??
+        controlGroup.getOutput().dataViewIds?.[0] ??
         embeddable?.getInput().dataViewId ??
         getRelevantDataViewId?.() ??
         (await getDefaultId());
