@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './models_list';
-
 export const ModelsTableToConfigMapping = {
   id: 'model_id',
   description: 'description',
@@ -14,5 +12,3 @@ export const ModelsTableToConfigMapping = {
   type: 'type',
   modelType: 'model_type',
 } as const;
-
-export { TrainedModelLink } from './model_link';
