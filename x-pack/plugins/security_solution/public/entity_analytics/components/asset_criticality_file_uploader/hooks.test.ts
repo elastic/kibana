@@ -75,7 +75,7 @@ describe('useFileValidation', () => {
               count: 1,
               errors: [
                 {
-                  error: 'Expected 3 columns, got 4',
+                  message: 'Expected 3 columns, got 4',
                   index: 1,
                 },
               ],

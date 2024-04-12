@@ -96,15 +96,15 @@ export const ValidationStep: Story<void> = () => {
                   count: 3,
                   errors: [
                     {
-                      error: 'error message 1',
+                      message: 'error message 1',
                       index: 1,
                     },
                     {
-                      error: 'error message 2',
+                      message: 'error message 2',
                       index: 2,
                     },
                     {
-                      error: 'error message 3',
+                      message: 'error message 3',
                       index: 3,
                     },
                   ],
@@ -134,15 +134,15 @@ export const ValidationStep: Story<void> = () => {
                   count: 3,
                   errors: [
                     {
-                      error: 'error message 1',
+                      message: 'error message 1',
                       index: 1,
                     },
                     {
-                      error: 'error message 2',
+                      message: 'error message 2',
                       index: 2,
                     },
                     {
-                      error: 'error message 3',
+                      message: 'error message 3',
                       index: 3,
                     },
                   ],
