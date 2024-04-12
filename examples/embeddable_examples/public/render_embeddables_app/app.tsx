@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExplorerPlugin } from './plugin';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-export const plugin = () => new EmbeddableExplorerPlugin();
+import { AppMountParameters } from "@kbn/core-application-browser";
+
+export const renderApp = (element: AppMountParameters['element']) => {
+  ReactDOM.render(<div>Render Embeddables example</div>, element);
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
