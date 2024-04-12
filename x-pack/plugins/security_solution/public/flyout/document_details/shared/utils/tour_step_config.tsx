@@ -9,7 +9,7 @@ import { EuiText, EuiCode, type EuiTourStepProps } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EXPAND_DETAILS_BUTTON_TEST_ID } from '../../../shared/components/test_ids';
+import { HEADER_NAVIGATION_BUTTON_TEST_ID } from '../../../shared/components/test_ids';
 import { OVERVIEW_TAB_LABEL_TEST_ID } from '../../right/test_ids';
 import { RULE_SUMMARY_BUTTON_TEST_ID } from '../../right/components/test_ids';
 import {
@@ -20,7 +20,7 @@ import {
 export const FLYOUT_TOUR_CONFIG_ANCHORS = {
   OVERVIEW_TAB: OVERVIEW_TAB_LABEL_TEST_ID,
   RULE_PREVIEW: RULE_SUMMARY_BUTTON_TEST_ID,
-  EXPAND_BUTTON: EXPAND_DETAILS_BUTTON_TEST_ID,
+  NAVIGATION_BUTTON: HEADER_NAVIGATION_BUTTON_TEST_ID,
   ENTITIES: INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
   PREVALENCE: INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
 };
@@ -124,21 +124,12 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.expandDetails.description"
-            defaultMessage="Click {expandDetails} to access more information about sections in the right panel."
-            values={{
-              expandDetails: (
-                <EuiCode>
-                  {i18n.translate('xpack.securitySolution.flyout.tour.expandDetails.text', {
-                    defaultMessage: 'Expand details',
-                  })}
-                </EuiCode>
-              ),
-            }}
+            defaultMessage="Click to access more information about sections in the right panel."
           />
         </EuiText>
       ),
       stepNumber: 3,
-      anchor: FLYOUT_TOUR_CONFIG_ANCHORS.EXPAND_BUTTON,
+      anchor: FLYOUT_TOUR_CONFIG_ANCHORS.NAVIGATION_BUTTON,
       anchorPosition: 'downCenter',
     },
   ];
