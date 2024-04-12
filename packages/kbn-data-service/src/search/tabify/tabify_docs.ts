@@ -131,14 +131,13 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
   }
 
   // Merge all valid meta fields into the flattened object
-  if (indexPattern && indexPattern.metaFields) {
-    for (const fieldName in indexPattern.metaFields) {
-      if (indexPattern.hasOwnProperty(fieldName)) {
-        const isExcludedMetaField =
-          EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
-        if (!isExcludedMetaField) {
-          flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
-        }
+  if (indexPattern?.metaFields) {
+    for (let i = 0; i < indexPattern?.metaFields.length; i++) {
+      const fieldName = indexPattern?.metaFields[i];
+      const isExcludedMetaField =
+        EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
+      if (!isExcludedMetaField) {
+        flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
       }
     }
   }
@@ -204,7 +203,7 @@ export const tabifyDocs = (
       }
       return flat;
     })
-    .filter((hit) => hit); // ensures no undefined values are returned
+    .filter((hit) => hit);
 
   return {
     type: 'datatable',
