@@ -86,6 +86,7 @@
     "@kbn/data-view-utils",
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-pattern-analysis",
+    "@kbn/field-types",
   ],
   "exclude": ["target/**/*"]
 }
