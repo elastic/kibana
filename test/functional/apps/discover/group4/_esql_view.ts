@@ -250,7 +250,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
       });
 
-      it('shows requests in the inspector', async () => {
+      it('shows Discover and Lens requests in Inspector', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
