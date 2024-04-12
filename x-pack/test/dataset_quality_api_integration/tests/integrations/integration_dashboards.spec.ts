@@ -8,11 +8,7 @@
 import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-
-interface IntegrationPackage {
-  name: string;
-  version: string;
-}
+import { installPackage, IntegrationPackage, uninstallPackage } from './package_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -32,17 +28,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  async function installPackage({ name, version }: IntegrationPackage) {
-    return supertest
-      .post(`/api/fleet/epm/packages/${name}/${version}`)
-      .set('kbn-xsrf', 'xxxx')
-      .send({ force: true });
-  }
-
-  async function uninstallPackage({ name, version }: IntegrationPackage) {
-    return supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
-  }
-
   async function callApiAs(integration: string) {
     const user = 'datasetQualityLogsUser' as DatasetQualityApiClientKey;
     return await datasetQualityApiClient[user]({
@@ -59,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('gets the installed integration dashboards', () => {
       before(async () => {
         await Promise.all(
-          integrationPackages.map((pkg: IntegrationPackage) => installPackage(pkg))
+          integrationPackages.map((pkg: IntegrationPackage) => installPackage({ supertest, pkg }))
         );
       });
 
@@ -108,7 +93,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(
         async () =>
           await Promise.all(
-            integrationPackages.map((pkg: IntegrationPackage) => uninstallPackage(pkg))
+            integrationPackages.map((pkg: IntegrationPackage) =>
+              uninstallPackage({ supertest, pkg })
+            )
           )
       );
     });
