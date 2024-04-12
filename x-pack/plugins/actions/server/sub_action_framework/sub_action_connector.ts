@@ -21,6 +21,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { finished } from 'stream/promises';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
 import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -40,6 +41,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   private axiosInstance: AxiosInstance;
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
+  protected readonly kibanaRequest?: KibanaRequest;
   protected logger: Logger;
   protected esClient: ElasticsearchClient;
   protected savedObjectsClient: SavedObjectsClientContract;
@@ -56,6 +58,7 @@ export abstract class SubActionConnector<Config, Secrets> {
     this.esClient = params.services.scopedClusterClient;
     this.configurationUtilities = params.configurationUtilities;
     this.axiosInstance = axios.create();
+    this.kibanaRequest = params.request;
   }
 
   private normalizeURL(url: string) {

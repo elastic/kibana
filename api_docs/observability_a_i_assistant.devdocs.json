@@ -3301,7 +3301,7 @@
         "signature": [
           "\"observability:aiAssistantLogsIndexPattern\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3316,7 +3316,7 @@
         "signature": [
           "\"observability:aiAssistantResponseLanguage\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3962,7 +3962,7 @@
         "signature": [
           "{ value: string; label: string; }[]"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4752,7 +4752,7 @@
         "signature": [
           "{ value: string; label: string; }"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_user_preferred_language.ts",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5184,7 +5184,7 @@
         "signature": [
           "\"observability:aiAssistantLogsIndexPattern\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5199,7 +5199,7 @@
         "signature": [
           "\"observability:aiAssistantResponseLanguage\""
         ],
-        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/advanced_settings.tsx",
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6697,6 +6697,36 @@
     "misc": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantLogsIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantLogsIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantResponseLanguage",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantResponseLanguage",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.BufferFlushEvent",
         "type": "Type",
         "tags": [],
@@ -6843,6 +6873,21 @@
           " | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.LANGUAGE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "LANGUAGE_OPTIONS",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6999,6 +7044,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.DEFAULT_LANGUAGE_OPTION",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_LANGUAGE_OPTION",
+        "description": [],
+        "signature": [
+          "{ value: string; label: string; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
