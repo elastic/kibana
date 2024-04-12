@@ -14,10 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiButton,
   useEuiTheme,
   EuiLink,
   EuiCode,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import type { MonacoMessage } from './helpers';
@@ -310,60 +310,31 @@ export const EditorFooter = memo(function EditorFooter({
                     />
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color="text"
-                      size="s"
-                      fill
+                    <EuiButtonIcon
+                      display="base"
+                      color="primary"
                       onClick={runQuery}
+                      iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
+                      size="s"
                       isLoading={isLoading && !allowQueryCancellation}
                       isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
                       data-test-subj="TextBasedLangEditor-run-query-button"
-                      minWidth={isSpaceReduced ? false : undefined}
-                    >
-                      <EuiFlexGroup
-                        gutterSize="xs"
-                        responsive={false}
-                        alignItems="center"
-                        justifyContent="spaceBetween"
-                      >
-                        <EuiFlexItem grow={false}>
-                          {allowQueryCancellation && isLoading
-                            ? i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.cancel',
-                                {
-                                  defaultMessage: 'Cancel',
-                                }
-                              )
-                            : isSpaceReduced
-                            ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
-                                defaultMessage: 'Run',
-                              })
-                            : i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                                {
-                                  defaultMessage: 'Run query',
-                                }
-                              )}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText
-                            size="xs"
-                            css={css`
-                              border: 1px solid
-                                ${Boolean(disableSubmitAction && !allowQueryCancellation)
-                                  ? euiTheme.colors.disabled
-                                  : euiTheme.colors.emptyShade};
-                              padding: 0 ${euiTheme.size.xs};
-                              font-size: ${euiTheme.size.s};
-                              margin-left: ${euiTheme.size.xs};
-                              border-radius: ${euiTheme.size.xs};
-                            `}
-                          >
-                            {allowQueryCancellation && isLoading ? 'X' : `${COMMAND_KEY}⏎`}
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiButton>
+                      aria-label={
+                        allowQueryCancellation && isLoading
+                          ? i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.cancel',
+                              {
+                                defaultMessage: 'Cancel',
+                              }
+                            )
+                          : i18n.translate(
+                              'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
+                              {
+                                defaultMessage: 'Run query',
+                              }
+                            )
+                      }
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

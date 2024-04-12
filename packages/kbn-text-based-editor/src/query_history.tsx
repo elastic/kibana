@@ -202,12 +202,13 @@ export const getTableColumns = (
       ),
       sortable: false,
       width: isOnReducedSpaceLayout ? 'auto' : '120px',
+      css: { justifyContent: 'flex-end' as const }, // right alignment
     },
     {
       name: '',
       actions,
       'data-test-subj': 'actions',
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '60px',
     },
   ];
 
@@ -341,6 +342,9 @@ export function QueryHistory({
     .euiTableRowCell {
       vertical-align: top;
       border: none;
+    }
+    .euiTable th[data-test-subj='tableHeaderCell_duration_3'] span {
+      justify-content: flex-end;
     }
     max-height: ${isInCompactMode ? CONTAINER_MAX_HEIGHT_COMPACT : CONTAINER_MAX_HEIGHT_EXPANDED}px;
     overflow-y: auto;
