@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { AuthenticatedUser, CoreSetup, KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
@@ -19,9 +19,15 @@ interface SetupSavedObjectsParams {
     'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'
   >;
   savedObjects: CoreSetup['savedObjects'];
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
-export function setupSavedObjects({ audit, authz, savedObjects }: SetupSavedObjectsParams) {
+export function setupSavedObjects({
+  audit,
+  authz,
+  savedObjects,
+  getCurrentUser,
+}: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
     // authentication layer sitting between Kibana and Elasticsearch, and if Elasticsearch security is disabled. It's unclear if it's even
@@ -43,6 +49,7 @@ export function setupSavedObjects({ audit, authz, savedObjects }: SetupSavedObje
           auditLogger: audit.asScoped(request),
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
+          getCurrentUser: () => getCurrentUser(request),
         })
       : undefined;
   });

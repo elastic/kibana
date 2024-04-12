@@ -145,7 +145,10 @@ function buildEuiGridColumn({
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(columnType),
-    isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
+    isSortable:
+      isSortEnabled &&
+      // TODO: would be great to have something like `sortable` flag for text based columns too
+      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized

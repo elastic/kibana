@@ -100,7 +100,8 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 async function createSecurityProject(
   projectName: string,
   apiKey: string,
-  productTypes: ProductType[]
+  productTypes: ProductType[],
+  commit: string
 ): Promise<Project | undefined> {
   const body: CreateProjectRequestBody = {
     name: projectName,
@@ -110,10 +111,12 @@ async function createSecurityProject(
 
   log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
   if (
-    process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
-    process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1'
+    (process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
+      process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1') ||
+    commit
   ) {
-    const kibanaOverrideImage = `${process.env.BUILDKITE_COMMIT?.substring(0, 12)}`;
+    const override = commit ? commit : process.env.BUILDKITE_COMMIT;
+    const kibanaOverrideImage = `${override?.substring(0, 12)}`;
     log.info(
       `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
     );
@@ -446,6 +449,11 @@ export const cli = () => {
           alias: 'ca',
           type: 'boolean',
           default: true,
+        })
+        .option('commit', {
+          alias: 'c',
+          type: 'string',
+          default: '',
         });
 
       log.info(`
@@ -459,13 +467,20 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-
+      // KIBANA_MKI_USE_LATEST_COMMIT === 1 means that we are overriding the image for the periodic pipeline execution.
+      // We don't override the image when executing the tests on the second quality gate.
+      if (
+        !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
+        process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
+      ) {
+        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
+      }
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
+      const commit: string = argv.commit;
 
       log.info(`
 ----------------------------------------------
@@ -551,7 +566,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
-              const project = await createSecurityProject(PROJECT_NAME, API_KEY, productTypes);
+              const project = await createSecurityProject(
+                PROJECT_NAME,
+                API_KEY,
+                productTypes,
+                commit
+              );
 
               if (!project) {
                 log.info('Failed to create project.');

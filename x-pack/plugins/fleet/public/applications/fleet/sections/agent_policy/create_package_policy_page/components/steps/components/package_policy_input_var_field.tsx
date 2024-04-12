@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, memo, useMemo, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { i18n } from '@kbn/i18n';
@@ -24,8 +23,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -52,11 +50,11 @@ const FormRow = styled(EuiFormRow)`
   }
 
   .euiFormRow__fieldWrapper > .euiPanel {
-    padding: ${(props) => props.theme.eui.euiSizeXS};
+    padding: ${(props) => props.theme.eui?.euiSizeXS};
   }
 `;
 
-interface InputFieldProps {
+export interface InputFieldProps {
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
@@ -344,16 +342,16 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
           {fieldLabel}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
+            type="iInCircle"
+            position="top"
             content={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
                 defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again."
               />
             }
-          >
-            <EuiIcon aria-label="Secret value" type="questionInCircle" color="subdued" />
-          </EuiToolTip>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

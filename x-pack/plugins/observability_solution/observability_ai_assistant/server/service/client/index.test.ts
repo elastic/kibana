@@ -103,6 +103,7 @@ describe('Observability AI Assistant client', () => {
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
+    getInstructions: jest.fn(),
   } as any;
 
   const loggerMock: DeeplyMockedKeys<Logger> = {
@@ -152,6 +153,8 @@ describe('Observability AI Assistant client', () => {
     currentUserEsClientMock.fieldCaps.mockResolvedValue({
       fields: [],
     } as any);
+
+    knowledgeBaseServiceMock.getInstructions.mockResolvedValue([]);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
@@ -206,14 +209,6 @@ describe('Observability AI Assistant client', () => {
     beforeEach(async () => {
       client = createClient();
       actionsClientMock.execute
-        .mockImplementationOnce(async () => {
-          llmSimulator = createLlmSimulator();
-          return {
-            actionId: '',
-            status: 'ok',
-            data: llmSimulator.stream,
-          };
-        })
         .mockImplementationOnce(() => {
           return new Promise((resolve, reject) => {
             titleLlmPromiseResolve = (title: string) => {
@@ -230,6 +225,14 @@ describe('Observability AI Assistant client', () => {
               reject();
             };
           });
+        })
+        .mockImplementationOnce(async () => {
+          llmSimulator = createLlmSimulator();
+          return {
+            actionId: '',
+            status: 'ok',
+            data: llmSimulator.stream,
+          };
         });
 
       stream = observableIntoStream(
@@ -362,6 +365,7 @@ describe('Observability AI Assistant client', () => {
 
           await finished(stream);
         });
+
         it('adds the completed message to the stream', () => {
           expect(JSON.parse(dataHandler.mock.calls[1])).toEqual({
             id: expect.any(String),
@@ -431,7 +435,7 @@ describe('Observability AI Assistant client', () => {
                   '@timestamp': expect.any(String),
                   message: {
                     content:
-                      'You MUST respond in the users preferred language which is: English. This is a system message',
+                      'This is a system message\n\nYou MUST respond in the users preferred language which is: English.',
                     role: MessageRole.System,
                   },
                 },
@@ -577,7 +581,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                  'This is a system message\n\nYou MUST respond in the users preferred language which is: English.',
                 role: MessageRole.System,
               },
             },
@@ -707,7 +711,6 @@ describe('Observability AI Assistant client', () => {
             descriptionForUser: '',
             parameters: {
               type: 'object',
-              additionalProperties: false,
               properties: {
                 foo: {
                   type: 'string',
@@ -799,7 +802,7 @@ describe('Observability AI Assistant client', () => {
               message: {
                 role: MessageRole.System,
                 content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                  'This is a system message\n\nYou MUST respond in the users preferred language which is: English.',
               },
             },
             {
@@ -916,9 +919,9 @@ describe('Observability AI Assistant client', () => {
               last_updated: expect.any(String),
               title: 'My predefined title',
               token_count: {
-                completion: 24,
-                prompt: 458,
-                total: 482,
+                completion: expect.any(Number),
+                prompt: expect.any(Number),
+                total: expect.any(Number),
               },
             },
           });
@@ -932,7 +935,7 @@ describe('Observability AI Assistant client', () => {
               '@timestamp': expect.any(String),
               message: {
                 content:
-                  'You MUST respond in the users preferred language which is: English. This is a system message',
+                  'This is a system message\n\nYou MUST respond in the users preferred language which is: English.',
                 role: MessageRole.System,
               },
             },
@@ -1273,7 +1276,6 @@ describe('Observability AI Assistant client', () => {
             name: 'get_top_alerts',
             contexts: ['core'],
             description: '',
-            parameters: {},
           },
           respond: async () => {
             return { content: 'Call this function again' };
@@ -1308,9 +1310,9 @@ describe('Observability AI Assistant client', () => {
 
         let nextLlmCallPromise: Promise<void>;
 
-        if (body.functions?.length) {
+        if (body.tools?.length) {
           nextLlmCallPromise = waitForNextLlmCall();
-          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts', arguments: '{}' } });
         } else {
           nextLlmCallPromise = Promise.resolve();
           await llmSimulator.next({ content: 'Looks like we are done here' });
@@ -1350,9 +1352,9 @@ describe('Observability AI Assistant client', () => {
         (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
       );
 
-      expect(firstBody.functions.length).toBe(1);
+      expect(firstBody.tools.length).toBe(1);
 
-      expect(body.functions).toBeUndefined();
+      expect(body.tools).toBeUndefined();
     });
   });
 
@@ -1471,9 +1473,10 @@ describe('Observability AI Assistant client', () => {
         persist: false,
       })
       .subscribe(() => {}); // To trigger call to chat
+    await nextTick();
 
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      'You MUST respond in the users preferred language which is: English. This is a system message'
+      'This is a system message\n\nYou MUST respond in the users preferred language which is: English.'
     );
   });
 
@@ -1500,9 +1503,10 @@ describe('Observability AI Assistant client', () => {
         responseLanguage: 'Orcish',
       })
       .subscribe(() => {}); // To trigger call to chat
+    await nextTick();
 
     expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      'You MUST respond in the users preferred language which is: Orcish. This is a system message'
+      'This is a system message\n\nYou MUST respond in the users preferred language which is: Orcish.'
     );
   });
 

@@ -9,9 +9,13 @@
 import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTimeRange, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import {
+  initializeTimeRange,
+  fetch$,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, switchMap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
 import { Api, Services, State } from './types';
@@ -23,13 +27,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       return state.rawState as State;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const {
-        appliedTimeRange$,
-        cleanupTimeRange,
-        serializeTimeRange,
-        timeRangeApi,
-        timeRangeComparators,
-      } = initializeTimeRange(state, parentApi);
+      const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -38,66 +36,77 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const api = buildApi(
         {
-          ...timeRangeApi,
+          ...timeRange.api,
           dataViews: dataViews$,
           dataLoading: dataLoading$,
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTimeRange(),
+                ...timeRange.serialize(),
               },
               references: [],
             };
           },
         },
         {
-          ...timeRangeComparators,
+          ...timeRange.comparators,
         }
       );
+
+      const error$ = new BehaviorSubject<Error | undefined>(undefined);
+      const count$ = new BehaviorSubject<number>(0);
+      const fetchSubscription = fetch$(api)
+        .pipe(
+          switchMap(async (fetchContext) => {
+            error$.next(undefined);
+            if (!defaultDataView) {
+              return;
+            }
+
+            try {
+              dataLoading$.next(true);
+              const count = await getCount(
+                defaultDataView,
+                services.data,
+                fetchContext.filters ?? [],
+                fetchContext.query,
+                // timeRange and timeslice provided seperatly so consumers can decide
+                // whether to refetch data for just mask current data.
+                // In this example, we must refetch because we need a count within the time range.
+                fetchContext.timeslice
+                  ? {
+                      from: new Date(fetchContext.timeslice[0]).toISOString(),
+                      to: new Date(fetchContext.timeslice[1]).toISOString(),
+                      mode: 'absolute' as 'absolute',
+                    }
+                  : fetchContext.timeRange
+              );
+              return { count };
+            } catch (error) {
+              return { error };
+            }
+          })
+        )
+        .subscribe((next) => {
+          dataLoading$.next(false);
+          if (next && next.hasOwnProperty('count') && next.count !== undefined) {
+            count$.next(next.count);
+          }
+          if (next && next.hasOwnProperty('error')) {
+            error$.next(next.error);
+          }
+        });
 
       return {
         api,
         Component: () => {
-          const [count, setCount] = useState<number>(0);
-          const [error, setError] = useState<Error | undefined>();
-          const [filters, query, appliedTimeRange] = useBatchedPublishingSubjects(
-            api.parentApi?.filters$,
-            api.parentApi?.query$,
-            appliedTimeRange$
-          );
+          const [count, error] = useBatchedPublishingSubjects(count$, error$);
 
           useEffect(() => {
             return () => {
-              cleanupTimeRange();
+              fetchSubscription.unsubscribe();
             };
           }, []);
-
-          useEffect(() => {
-            let ignore = false;
-            setError(undefined);
-            if (!defaultDataView) {
-              return;
-            }
-            dataLoading$.next(true);
-            getCount(defaultDataView, services.data, filters ?? [], query, appliedTimeRange)
-              .then((nextCount: number) => {
-                if (ignore) {
-                  return;
-                }
-                dataLoading$.next(false);
-                setCount(nextCount);
-              })
-              .catch((err) => {
-                if (ignore) {
-                  return;
-                }
-                dataLoading$.next(false);
-                setError(err);
-              });
-            return () => {
-              ignore = true;
-            };
-          }, [filters, query, appliedTimeRange]);
 
           if (!defaultDataView) {
             return (
