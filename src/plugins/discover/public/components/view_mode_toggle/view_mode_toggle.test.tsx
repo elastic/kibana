@@ -18,6 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DataTotalHits$ } from '../../application/main/services/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({
@@ -37,7 +38,7 @@ describe('Document view mode toggle component', () => {
       fields: [
         {
           name: 'field1',
-          esTypes: ['text'],
+          esTypes: [ES_FIELD_TYPES.TEXT],
         },
       ],
     } as unknown as DataView;
@@ -46,7 +47,7 @@ describe('Document view mode toggle component', () => {
       fields: [
         {
           name: 'field1',
-          esTypes: ['float'],
+          esTypes: [ES_FIELD_TYPES.FLOAT],
         },
       ],
     } as unknown as DataView;
