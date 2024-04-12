@@ -30,5 +30,6 @@
     "@kbn/ui-theme",
     "@kbn/core-doc-links-browser",
     "@kbn/core",
+    "@kbn/elastic-assistant",
   ]
 }
