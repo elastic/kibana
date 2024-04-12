@@ -42,6 +42,7 @@ import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../const
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { ShowRequestModal } from './show_request_modal';
 
 const defaultCreateRuleErrorMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleAdd.saveErrorNotificationText',
@@ -100,10 +101,12 @@ const RuleAdd = <
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
+  const [isShowRequestModalOpen, setIsShowRequestModalOpen] = useState<boolean>(false);
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+  const [isRuleValid, setIsRuleValid] = useState<boolean>(false);
 
   const selectableConsumer = useMemo(
     () => rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId),
@@ -280,6 +283,10 @@ const RuleAdd = <
     }
   }
 
+  useEffect(() => {
+    setIsRuleValid(isValidRule(rule, ruleErrors, ruleActionsErrors));
+  }, [rule, ruleErrors, ruleActionsErrors]);
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -332,6 +339,7 @@ const RuleAdd = <
             <RuleAddFooter
               isSaving={isSaving}
               isFormLoading={isLoading}
+              isRuleValid={isRuleValid}
               onSave={async () => {
                 setIsSaving(true);
                 if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
@@ -353,6 +361,9 @@ const RuleAdd = <
                 }
               }}
               onCancel={checkForChangesAndCloseFlyout}
+              onShowRequest={() => {
+                setIsShowRequestModalOpen(true);
+              }}
             />
           </HealthCheck>
         </HealthContextProvider>
@@ -377,6 +388,19 @@ const RuleAdd = <
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);
             }}
+          />
+        )}
+        {isShowRequestModalOpen && (
+          <ShowRequestModal
+            onClose={() => {
+              setIsShowRequestModalOpen(false);
+            }}
+            rule={
+              {
+                ...rule,
+                ...(selectableConsumer && selectedConsumer ? { consumer: selectedConsumer } : {}),
+              } as RuleUpdates
+            }
           />
         )}
       </EuiFlyout>
