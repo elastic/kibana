@@ -2604,6 +2604,21 @@
     "objects": [
       {
         "parentPluginId": "@kbn/config-schema",
+        "id": "def-common.metaFields",
+        "type": "Object",
+        "tags": [],
+        "label": "metaFields",
+        "description": [],
+        "signature": [
+          "{ readonly META_FIELD_X_OAS_OPTIONAL: \"x-oas-optional\"; readonly META_FIELD_X_OAS_MAX_LENGTH: \"x-oas-max-length\"; readonly META_FIELD_X_OAS_MIN_LENGTH: \"x-oas-min-length\"; readonly META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES: \"x-oas-get-additional-properties\"; }"
+        ],
+        "path": "packages/kbn-config-schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-schema",
         "id": "def-common.schema",
         "type": "Object",
         "tags": [],

@@ -21,7 +21,7 @@ export const TABLE_COLUMN_LABEL = {
   }),
 
   diskSpaceUsage: i18n.translate('xpack.infra.hostsViewPage.table.diskUsageColumnHeader', {
-    defaultMessage: 'Disk Usage (avg.)',
+    defaultMessage: 'Disk Usage (max)',
   }),
 
   tx: i18n.translate('xpack.infra.hostsViewPage.table.txColumnHeader', {
