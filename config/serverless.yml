@@ -131,10 +131,10 @@ xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
-# Disables ESQL in advanced settings (hides it from the UI)
+# Enables ESQL in advanced settings (hides it from the UI)
 uiSettings:
   overrides:
-    discover:enableESQL: false
+    discover:enableESQL: true
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
