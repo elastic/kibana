@@ -121,7 +121,7 @@ const ContextEditorComponent: React.FC<Props> = ({
   return (
     <EuiInMemoryTable
       allowNeutralSort={false}
-      childrenBetween={toolbar}
+      childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
       columns={columns}
       compressed={true}
       data-test-subj="contextEditor"
