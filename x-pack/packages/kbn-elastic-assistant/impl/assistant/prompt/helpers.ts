@@ -64,8 +64,7 @@ export function getCombinedMessage({
     .sort()
     .map((id) => {
       const promptContextData = transformRawData({
-        allow: selectedPromptContexts[id].allow,
-        allowReplacement: selectedPromptContexts[id].allowReplacement,
+        anonymizationFields: selectedPromptContexts[id].contextAnonymizationFields?.data ?? [],
         currentReplacements,
         getAnonymizedValue,
         onNewReplacements,
