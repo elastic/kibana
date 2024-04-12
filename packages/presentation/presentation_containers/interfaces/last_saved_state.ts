@@ -11,9 +11,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, map } from 'rxjs';
 import { SerializedPanelState } from './serialized_state';
 
-export interface PublishesLastSavedState {
+export interface PublishesLastSavedState<StateType extends object = object> {
   lastSavedState: Subject<void>; // a notification that the last saved state has changed
-  getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined;
+  getLastSavedStateForChild: (childId: string) => SerializedPanelState<StateType> | undefined;
 }
 
 export const apiPublishesLastSavedState = (api: unknown): api is PublishesLastSavedState => {

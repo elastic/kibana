@@ -13,7 +13,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
+import { initializeReactEmbeddableState } from './react_embeddable_state';
 import { DefaultEmbeddableApi, ReactEmbeddableApiRegistration } from './types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
@@ -27,18 +27,16 @@ export const ReactEmbeddableRenderer = <
   StateType extends object = object,
   ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 >({
-  maybeId,
   type,
-  state,
+  maybeId,
   parentApi,
-  onApiAvailable,
   panelProps,
   onAnyStateChange,
+  onApiAvailable,
 }: {
-  maybeId?: string;
   type: string;
-  state: SerializedPanelState<StateType>;
   parentApi?: unknown;
+  maybeId?: string;
   onApiAvailable?: (api: ApiType) => void;
   panelProps?: Pick<
     PresentationPanelProps<ApiType>,
@@ -62,18 +60,17 @@ export const ReactEmbeddableRenderer = <
       (async () => {
         const uuid = maybeId ?? generateId();
         const factory = await getReactEmbeddableFactory<StateType, ApiType>(type);
+
+        const { initialState, startStateDiffing } = await initializeReactEmbeddableState(
+          uuid,
+          factory,
+          parentApi
+        );
+
         const registerApi = (
           apiRegistration: ReactEmbeddableApiRegistration<StateType, ApiType>,
           comparators: StateComparators<StateType>
         ) => {
-          const { unsavedChanges, resetUnsavedChanges, cleanup } =
-            startTrackingEmbeddableUnsavedChanges(
-              uuid,
-              parentApi,
-              comparators,
-              factory.deserializeState
-            );
-
           if (onAnyStateChange) {
             /**
              * To avoid unnecessary re-renders, only subscribe to the comparator publishing subjects if
@@ -88,6 +85,7 @@ export const ReactEmbeddableRenderer = <
               });
           }
 
+          const { unsavedChanges, resetUnsavedChanges, cleanup } = startStateDiffing(comparators);
           const fullApi = {
             ...apiRegistration,
             uuid,
@@ -102,7 +100,7 @@ export const ReactEmbeddableRenderer = <
         };
 
         const { api, Component } = await factory.buildEmbeddable(
-          factory.deserializeState(state),
+          initialState,
           registerApi,
           uuid,
           parentApi

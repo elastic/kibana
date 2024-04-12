@@ -25,13 +25,15 @@ export {
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
-export {
-  canTrackContentfulRender,
-  type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
+export { apiHasSavableState, type HasSavableState } from './interfaces/saved_state';
 export {
   apiHasSerializableState,
   type HasSerializableState,
   type SerializedPanelState,
 } from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/track_contentful_render';
+export { apiProvidesUnsavedState, type ProvidesUnsavedState } from './interfaces/unsaved_state';
