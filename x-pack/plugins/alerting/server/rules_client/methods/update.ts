@@ -37,7 +37,7 @@ import {
   validateScheduleLimit,
   ValidateScheduleLimitResult,
 } from '../../application/rule/methods/get_schedule_frequency';
-import { validateSystemActions } from '../../lib/validate_system_actions';
+import { validateAndAuthorizeSystemActions } from '../../lib/validate_authorize_system_actions';
 import { transformRawActionsToDomainActions } from '../../application/rule/transforms';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { transformRawActionsToDomainSystemActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
@@ -245,10 +245,12 @@ async function updateAlert<Params extends RuleTypeParams>(
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
-  await validateSystemActions({
+  await validateAndAuthorizeSystemActions({
     actionsClient,
+    actionsAuthorization: context.actionsAuthorization,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions: data.systemActions,
+    rule: { consumer: currentRule.attributes.consumer },
   });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it

@@ -66,5 +66,29 @@ describe('eql_executor', () => {
         }`,
       ]);
     });
+
+    it('should classify EQL verification exceptions as "user errors" when reporting to the framework', async () => {
+      alertServices.scopedClusterClient.asCurrentUser.eql.search.mockRejectedValue({
+        name: 'ResponseError',
+        message:
+          'verification_exception\n\tRoot causes:\n\t\tverification_exception: Found 1 problem\nline 1:1: Unknown column [event.category]',
+      });
+      const result = await eqlExecutor({
+        inputIndex: DEFAULT_INDEX_PATTERN,
+        runtimeMappings: {},
+        completeRule: eqlCompleteRule,
+        tuple,
+        ruleExecutionLogger,
+        services: alertServices,
+        version,
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+        wrapSequences: jest.fn(),
+        primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
+      });
+      expect(result.userError).toEqual(true);
+    });
   });
 });

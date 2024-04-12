@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import supertestLib from 'supertest';
+import url from 'url';
 import {
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -27,7 +29,10 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -46,6 +51,8 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -58,6 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
+  const request = supertestLib(url.format(config.get('servers.kibana')));
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
@@ -170,6 +178,42 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
+    });
+
+    it('classifies ml job missing errors as user errors', async () => {
+      function getMetricsRequest(reset: boolean = false) {
+        return request
+          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200)
+          .then((response) => response.body);
+      }
+
+      await getMetricsRequest(true);
+      const badRule: MachineLearningRuleCreateProps = {
+        ...rule,
+        machine_learning_job_id: 'doesNotExist',
+      };
+      const createdRule = await createRule(supertest, log, badRule);
+      await waitForRuleFailure({ supertest, log, id: createdRule.id });
+
+      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
+      const response = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .query({ id: createdRule.id })
+        .expect(200);
+
+      const ruleResponse = response.body;
+      expect(ruleResponse.execution_summary.last_execution.message.includes('missing')).toEqual(
+        true
+      );
+
+      const metricsResponse = await getMetricsRequest();
+      expect(
+        metricsResponse.metrics.task_run.value.by_type['alerting:siem__mlRule'].user_errors
+      ).toEqual(1);
     });
 
     it('@skipInQA generates max alerts warning when circuit breaker is exceeded', async () => {

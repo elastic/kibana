@@ -46,6 +46,14 @@ export class ReportingPageObject extends FtrService {
         'href',
         timeout
       );
+      if (!url) {
+        throw new Error(
+          `${
+            url === null ? 'No' : 'Empty'
+          } href found on [data-test-subj="downloadCompletedReportButton"]`
+        );
+      }
+
       this.log.debug(`getReportURL got url: ${url}`);
 
       return url;

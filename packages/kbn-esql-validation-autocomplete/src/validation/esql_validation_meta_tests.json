@@ -1371,6 +1371,16 @@
       "warning": []
     },
     {
+      "query": "row var = mv_sort(\"a\", \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_sort(\"a\", \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sum(5)",
       "error": [],
       "warning": []
@@ -2006,21 +2016,6 @@
       "warning": []
     },
     {
-      "query": "row var = to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row to_version(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = to_ver(\"a\")",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "row var = trim(\"a\")",
       "error": [],
       "warning": []
@@ -2331,6 +2326,23 @@
       "error": [
         "Argument of [not_rlike] must be [string], found value [5] type [number]"
       ],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
       "warning": []
     },
     {
@@ -5752,6 +5764,18 @@
       "warning": []
     },
     {
+      "query": "from a_index | where length(to_version(stringField)) > 0",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where length(to_version(numberField)) > 0",
+      "error": [
+        "Argument of [to_version] must be [string], found value [numberField] type [number]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | where length(trim(stringField)) > 0",
       "error": [],
       "warning": []
@@ -6884,6 +6908,34 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField)",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval values(stringField) > 0",
+      "error": [
+        "EVAL does not support function values"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = abs(numberField)",
       "error": [],
       "warning": []
@@ -7872,6 +7924,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = mv_sort(stringField, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort(stringField, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval var = mv_sum(numberField)",
       "error": [],
       "warning": []
@@ -8822,28 +8884,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval to_version(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_ver(stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = to_version(*)",
-      "error": [
-        "Using wildcards (*) in to_version is not allowed"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = trim(stringField)",
       "error": [],
       "warning": []
@@ -9411,6 +9451,23 @@
         "SyntaxError: missing '(' at 'stringField'",
         "SyntaxError: mismatched input '<EOF>' expecting {',', ')'}"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"DESC\")",
+      "error": [],
       "warning": []
     },
     {
@@ -12173,6 +12230,16 @@
       "error": [
         "Using wildcards (*) in st_centroid is not allowed"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = values(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(stringField)",
+      "error": [],
       "warning": []
     },
     {
