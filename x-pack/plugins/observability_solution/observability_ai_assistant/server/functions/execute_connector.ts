@@ -19,7 +19,6 @@ export function registerExecuteConnectorFunction({
       descriptionForUser: 'Call kibana connector on behalf of the user',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           id: {
             type: 'string',

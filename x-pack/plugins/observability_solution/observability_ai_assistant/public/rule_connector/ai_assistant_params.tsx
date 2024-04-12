@@ -67,7 +67,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             onChange={(event) => {
               editAction('message', event.target.value, index);
             }}
-            isInvalid={errors.message.length > 0}
+            isInvalid={errors.message?.length > 0}
           />
         </EuiFlexItem>
       </EuiFormRow>

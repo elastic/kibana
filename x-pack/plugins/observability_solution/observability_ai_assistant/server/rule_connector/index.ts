@@ -16,6 +16,14 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import { SlackApiParamsSchema } from '@kbn/stack-connectors-plugin/common';
+import {
+  EmailParamsSchema,
+  JiraParamsSchema,
+  PagerdutyParamsSchema,
+  SlackParamsSchema,
+  WebhookParamsSchema,
+} from '@kbn/stack-connectors-plugin/server';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -25,6 +33,17 @@ import {
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { ChatFunctionClient } from '../service/chat_function_client';
+import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
+import { CompatibleJSONSchema } from '../../common/functions/types';
+
+const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
+  '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
+  '.slack': convertSchemaToOpenApi(SlackParamsSchema),
+  '.email': convertSchemaToOpenApi(EmailParamsSchema),
+  '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
+  '.jira': convertSchemaToOpenApi(JiraParamsSchema),
+  '.pagerduty': convertSchemaToOpenApi(PagerdutyParamsSchema),
+};
 
 const ParamsSchema = schema.object({
   connector: schema.string(),
@@ -114,6 +133,7 @@ async function executor(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const state = execOptions.params.alertState;
+
   if (state !== 'new') {
     // system connector action frequency can't be user configured. we use this
     // flag as dedup mechanism to prevent triggering the same worfklow again.
@@ -133,6 +153,19 @@ async function executor(
   const actionsClient = await (
     await resources.plugins.actions.start()
   ).getActionsClientWithRequest(request);
+
+  const connectorsList = await actionsClient.getAll().then((connectors) => {
+    return connectors.map((connector) => {
+      if (connector.actionTypeId in connectorParamsSchemas) {
+        return {
+          ...connector,
+          parameters: connectorParamsSchemas[connector.actionTypeId],
+        };
+      }
+
+      return connector;
+    });
+  });
 
   const systemMessage = buildSystemMessage(functionClient, execOptions.params.rule, state);
 
@@ -178,22 +211,7 @@ async function executor(
               role: MessageRole.User,
               name: 'get_connectors',
               content: JSON.stringify({
-                connectors: await actionsClient.getAll().then((connectors) => {
-                  return connectors.map((connector) => {
-                    if (connector.actionTypeId === '.slack') {
-                      return {
-                        ...connector,
-                        // TODO: figure out how to parse ParamsSchema at
-                        // x-pack/plugins/stack_connectors/server/connector_types/slack/index.ts
-                        params: {
-                          message: 'string',
-                        },
-                      };
-                    }
-
-                    return connector;
-                  });
-                }),
+                connectors: connectorsList,
               }),
             },
           },

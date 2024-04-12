@@ -44,7 +44,7 @@ export function registerGetDatasetInfoFunction({
       const coreContext = await resources.context.core;
 
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = coreContext.savedObjects.getClient();
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       let indices: string[] = [];
 
