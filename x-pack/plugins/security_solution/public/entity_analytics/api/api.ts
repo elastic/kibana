@@ -138,6 +138,7 @@ export const useEntityAnalyticsRoutes = () => {
         query: { id_value: params.idValue, id_field: params.idField },
       });
 
+      // spoof a response to allow us to better distnguish a delete from a create in use_asset_criticality.ts
       return { deleted: true };
     };
 
