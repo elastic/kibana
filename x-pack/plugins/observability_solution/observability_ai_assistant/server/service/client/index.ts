@@ -168,12 +168,13 @@ export class ObservabilityAIAssistantClient {
           isPublic = false,
         } = params;
 
+        const isConversationUpdate = persist && !!params.conversationId;
         const conversationId = persist ? params.conversationId || v4() : '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
         const requestInstructions = params.instructions || [];
 
-        if (persist && !params.conversationId && kibanaPublicUrl) {
+        if (persist && !isConversationUpdate && kibanaPublicUrl) {
           const systemMessage = messages.find(
             (message) => message.message.role === MessageRole.System
           );
@@ -472,7 +473,7 @@ export class ObservabilityAIAssistantClient {
           });
 
           // store the updated conversation and close the stream
-          if (params.conversationId) {
+          if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -558,7 +559,7 @@ export class ObservabilityAIAssistantClient {
           });
 
         const titlePromise =
-          !params.conversationId && !title && persist
+          !isConversationUpdate && !title && persist
             ? this.getGeneratedTitle({
                 chat: chatWithTokenCountIncrement,
                 messages,
