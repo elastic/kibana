@@ -26,16 +26,10 @@ import { Buffer } from 'buffer';
 import React, { ReactNode } from 'react';
 import { intersection } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EaInstallProgressStepId } from '../../../common/logs_flow_progress_step_id';
 import { StepStatus } from './step_status';
 
 export type EuiStepStatus = EuiStepsProps['steps'][number]['status'];
-
-export type ProgressStepId =
-  | 'ea-download'
-  | 'ea-extract'
-  | 'ea-install'
-  | 'ea-status'
-  | 'ea-config';
 
 interface Props<PlatformId extends string> {
   installAgentPlatformOptions: Array<{
@@ -53,7 +47,7 @@ interface Props<PlatformId extends string> {
   installAgentStatus: EuiStepStatus;
   showInstallProgressSteps: boolean;
   installProgressSteps: Partial<
-    Record<ProgressStepId, { status: EuiStepStatus; message?: string }>
+    Record<EaInstallProgressStepId, { status: EuiStepStatus; message?: string }>
   >;
   configureAgentStatus: EuiStepStatus;
   configureAgentYaml: string;
@@ -343,7 +337,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
 }
 
 function getStep(
-  id: ProgressStepId,
+  id: EaInstallProgressStepId,
   installProgressSteps: Props<string>['installProgressSteps'],
   configPath: string
 ): { title: string; status: EuiStepStatus; message?: string } {
@@ -374,7 +368,7 @@ function getStep(
 const PROGRESS_STEP_TITLES: (
   configPath: string
 ) => Record<
-  ProgressStepId,
+  EaInstallProgressStepId,
   Record<'incompleteTitle' | 'loadingTitle' | 'completedTitle', string>
 > = (configPath: string) => ({
   'ea-download': {
