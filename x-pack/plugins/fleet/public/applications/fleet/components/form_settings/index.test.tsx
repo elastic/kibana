@@ -101,4 +101,68 @@ describe('ConfiguredSettings', () => {
     ).not.toBeNull();
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
+
+  it('should render field group', () => {
+    const result = render([
+      {
+        name: 'agent.monitoring.http',
+        api_field: {
+          name: 'agent_monitoring_http',
+        },
+        title: 'Agent HTTP monitoring',
+        description: 'Agent HTTP monitoring settings',
+        learnMoreLink:
+          'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
+        schema: z
+          .object({
+            enabled: z.boolean().describe('Enabled').default(false),
+            host: z.string().describe('Host').default('localhost'),
+            port: z.number().describe('Port').min(0).max(65353).default(6791),
+            'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
+          })
+          .default({}),
+      },
+    ]);
+
+    expect(result.getByText('Agent HTTP monitoring')).not.toBeNull();
+    expect(result.getByText('Buffer Enabled')).not.toBeNull();
+    const switches = result.getAllByRole('switch');
+    expect(switches).toHaveLength(2);
+    expect(switches[0]).not.toBeChecked();
+    expect(switches[1]).not.toBeChecked();
+    const port = result.getByTestId('configuredSetting-agent.monitoring.http-port');
+    expect(port).toHaveValue(6791);
+    const host = result.getByTestId('configuredSetting-agent.monitoring.http-host');
+    expect(host).toHaveValue('localhost');
+
+    act(() => {
+      fireEvent.click(switches[0]);
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ agent_monitoring_http: { enabled: true } }),
+      })
+    );
+
+    act(() => {
+      fireEvent.change(port, { target: { value: '6792' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ agent_monitoring_http: { port: 6792 } }),
+      })
+    );
+
+    act(() => {
+      fireEvent.change(host, { target: { value: '1.2.3.4' } });
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ agent_monitoring_http: { host: '1.2.3.4' } }),
+      })
+    );
+  });
 });
