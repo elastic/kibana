@@ -1318,6 +1318,8 @@
       "@kbn/rison/*": ["packages/kbn-rison/*"],
       "@kbn/rollup-plugin": ["x-pack/plugins/rollup"],
       "@kbn/rollup-plugin/*": ["x-pack/plugins/rollup/*"],
+      "@kbn/router-to-openapispec": ["packages/kbn-router-to-openapispec"],
+      "@kbn/router-to-openapispec/*": ["packages/kbn-router-to-openapispec/*"],
       "@kbn/router-utils": ["packages/kbn-router-utils"],
       "@kbn/router-utils/*": ["packages/kbn-router-utils/*"],
       "@kbn/routing-example-plugin": ["examples/routing_example"],

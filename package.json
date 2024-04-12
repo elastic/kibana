@@ -667,6 +667,7 @@
     "@kbn/response-stream-plugin": "link:examples/response_stream",
     "@kbn/rison": "link:packages/kbn-rison",
     "@kbn/rollup-plugin": "link:x-pack/plugins/rollup",
+    "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
     "@kbn/router-utils": "link:packages/kbn-router-utils",
     "@kbn/routing-example-plugin": "link:examples/routing_example",
     "@kbn/rrule": "link:packages/kbn-rrule",
