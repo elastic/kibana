@@ -54,6 +54,7 @@ import {
   ThreatArray,
   SetupGuide,
   RelatedIntegrationArray,
+  RequiredFieldInput,
   RuleObjectId,
   RuleSignatureId,
   IsRuleImmutable,
@@ -116,7 +117,6 @@ export const BaseOptionalFields = z.object({
   meta: RuleMetadata.optional(),
   investigation_fields: InvestigationFields.optional(),
   throttle: RuleActionThrottle.optional(),
-  required_fields: RequiredFieldArray.optional(),
 });
 
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
@@ -138,6 +138,7 @@ export const BaseDefaultableFields = z.object({
   threat: ThreatArray.optional(),
   setup: SetupGuide.optional(),
   related_integrations: RelatedIntegrationArray.optional(),
+  required_fields: z.array(RequiredFieldInput).optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;

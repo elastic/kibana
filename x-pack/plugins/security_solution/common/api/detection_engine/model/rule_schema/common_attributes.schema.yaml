@@ -327,6 +327,17 @@ components:
         - type
         - ecs
 
+    RequiredFieldInput:
+      type: object
+      properties:
+        name:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        type:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - name
+        - type
+
     RequiredFieldArray:
       type: array
       items:

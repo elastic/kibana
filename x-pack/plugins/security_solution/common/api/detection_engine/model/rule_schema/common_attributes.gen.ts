@@ -310,6 +310,12 @@ export const RequiredField = z.object({
   ecs: z.boolean(),
 });
 
+export type RequiredFieldInput = z.infer<typeof RequiredFieldInput>;
+export const RequiredFieldInput = z.object({
+  name: NonEmptyString,
+  type: NonEmptyString,
+});
+
 export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;
 export const RequiredFieldArray = z.array(RequiredField);
 

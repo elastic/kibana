@@ -48,6 +48,7 @@ import {
 import type {
   RuleCreateProps,
   AlertSuppression,
+  RequiredField,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
@@ -395,6 +396,9 @@ export const getStepDataDataSource = (
   return copiedStepData;
 };
 
+const removeEmptyRequiredFieldsValues = (requiredFields: RequiredField[]) =>
+  requiredFields.filter((requiredField) => requiredField.name !== '');
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
 
@@ -404,6 +408,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   const baseFields = {
     type: ruleType,
     related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
+    required_fields: removeEmptyRequiredFieldsValues(defineStepData.requiredFields),
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
