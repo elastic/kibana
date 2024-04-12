@@ -43,12 +43,12 @@ export function fetchTextBased(
     dataView,
     inputQuery,
     titleForInspector: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
-      defaultMessage: 'Results',
+      defaultMessage: 'ES|QL',
     }),
     descriptionForInspector: i18n.translate(
       'discover.inspectorTextBasedRequestDescriptionDocument',
       {
-        defaultMessage: 'This request queries Elasticsearch using ES|QL to fetch results.',
+        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
       }
     ),
   })

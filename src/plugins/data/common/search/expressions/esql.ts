@@ -115,14 +115,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       titleForInspector: {
         aliases: ['titleForInspector'],
         types: ['string'],
-        help: i18n.translate('data.search.essql.titleForInspector.help', {
+        help: i18n.translate('data.search.esql.titleForInspector.help', {
           defaultMessage: 'The title to show in Inspector.',
         }),
       },
       descriptionForInspector: {
         aliases: ['descriptionForInspector'],
         types: ['string'],
-        help: i18n.translate('data.search.essql.descriptionForInspector.help', {
+        help: i18n.translate('data.search.esql.descriptionForInspector.help', {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
