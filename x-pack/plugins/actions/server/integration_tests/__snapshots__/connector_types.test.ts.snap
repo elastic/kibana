@@ -5435,20 +5435,6 @@ Object {
           ],
           "type": "alternatives",
         },
-        "name": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
       },
       "preferences": Object {
         "stripUnknown": Object {
