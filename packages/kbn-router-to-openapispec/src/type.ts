@@ -16,11 +16,20 @@ export interface OpenAPIConverter {
   convertPathParameters(
     schema: unknown,
     knownPathParameters: KnownParameters
-  ): OpenAPIV3.ParameterObject[];
+  ): {
+    params: OpenAPIV3.ParameterObject[];
+    shared: { [key: string]: OpenAPIV3.SchemaObject };
+  };
 
-  convertQuery(schema: unknown): OpenAPIV3.ParameterObject[];
+  convertQuery(schema: unknown): {
+    query: OpenAPIV3.ParameterObject[];
+    shared: { [key: string]: OpenAPIV3.SchemaObject };
+  };
 
-  convert(schema: unknown): OpenAPIV3.BaseSchemaObject;
+  convert(schema: unknown): {
+    schema: OpenAPIV3.SchemaObject;
+    shared: { [key: string]: OpenAPIV3.SchemaObject };
+  };
 
   is(type: unknown): boolean;
 }
