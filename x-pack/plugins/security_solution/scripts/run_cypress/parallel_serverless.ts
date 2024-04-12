@@ -654,7 +654,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
