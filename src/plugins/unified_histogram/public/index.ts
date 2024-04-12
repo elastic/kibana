@@ -8,8 +8,8 @@
 
 import { UnifiedHistogramPublicPlugin } from './plugin';
 
-export type { BreakdownFieldSelectorProps } from './chart';
-export { UnifiedBreakdownFieldSelector } from './chart';
+export type { BreakdownFieldSelectorProps } from './chart/lazy';
+export { UnifiedBreakdownFieldSelector } from './chart/lazy';
 
 export type {
   UnifiedHistogramApi,

@@ -12,8 +12,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { BreakdownFieldSelectorProps } from './breakdown_field_selector';
 
 export type { BreakdownFieldSelectorProps } from './breakdown_field_selector';
-export { Chart } from './chart';
-export { checkChartAvailability } from './check_chart_availability';
 
 const LazyUnifiedBreakdownFieldSelector = lazy(() => import('./breakdown_field_selector'));
 
