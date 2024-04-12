@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
@@ -31,44 +32,91 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         },
       },
       async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const musts = [
+            {
+                term: {
+                  'resource.attributes.k8s.pod.name': request.query.pod_name,
+                },
+              },
+              {
+                term: {
+                  'resource.attributes.k8s.namespace.name': request.query.namespace,
+                },
+              },
+              { exists: { field: 'metrics.k8s.pod.phase' } }
+          ];
+        const dsl: estypes.SearchRequest = {
+            index: ["metrics-otel.*"],
+            size: 1,
+            sort: [{ '@timestamp': 'desc' }],
+            _source: false,
+            fields: [
+              '@timestamp',
+              'metrics.k8s.pod.phase',
+              'resource.attributes.k8s.*',
+            ],
+            query: {
+              bool: {
+                must: musts,
+              },
+            },
+        };
+
+        const esResponse = await client.search(dsl);
+        const hit = esResponse.hits.hits[0];
+        const { fields = {} } = hit;
+        const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
+        const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
+        const time = extractFieldValue(fields['@timestamp']);
+        const state = phaseToState(podPhase);
         return response.ok({
           body: {
-            time: new Date().toISOString(),
-            message: "Pod default/redis is in Running state",
-            state: "Running",
-            name: "redis",
-            namespace: "default",
-            node: "node1",
+            time: time,
+            message: "Pod " + request.query.namespace + "/" + request.query.pod_name + " is in " + state + " state",
+            state: state,
+            name: request.query.pod_name,
+            namespace: request.query.namespace,
+            node: nodeName,
           },
         });
       }
     );
 };
 
-// export const doCount = async (
-//   client: ElasticsearchClient,
-//   index: string,
-//   query: string,
-//   field: string
-// ) => {
-//   const queryDSL = JSON.parse(query);
+ function extractFieldValue<T>(maybeArray: T | T[] | undefined): T {
+    return toArray(maybeArray)[0];
+}
 
-//   const search = await client.search({
-//     index: [index],
-//     body: {
-//       query: queryDSL,
-//       size: 0,
-//       aggs: {
-//         custom_count: {
-//           cardinality: {
-//             field,
-//           },
-//         },
-//       },
-//     },
-//   });
+ function toArray<T>(maybeArray: T | T[] | undefined): T[] {
+    if (!maybeArray) {
+      return [];
+    }
+    if (Array.isArray(maybeArray)) {
+      return maybeArray;
+    }
+    return [maybeArray];
+  }
 
-//   const agg: any = search.aggregations?.custom_count;
-
-//   return agg?.value || 0;
-// };
+  function phaseToState(phase: number) {
+    switch(phase) { 
+        case 1: { 
+           return "Pending"; 
+        } 
+        case 2: { 
+            return "Running"; 
+        } 
+        case 3: { 
+            return "Succeeded"; 
+        }
+        case 4: { 
+            return "Failed"; 
+        }
+        case 5: { 
+            return "Unknown"; 
+        }  
+        default: { 
+            return "Unknown"; 
+        } 
+     } 
+  }

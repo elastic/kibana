@@ -15,7 +15,7 @@
       "apmDataAccess",
       "metricsDataAccess"
     ],
-    "browser": true,
+    "browser": false,
     "server": true,
     "requiredBundles": [
     ]
