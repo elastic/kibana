@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import type { CombinedJob } from '../../../../../shared';
 import { MLJobEditor } from '../ml_job_editor';
+import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJob;

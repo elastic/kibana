@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-export const EmbeddableSwimLaneContainer = React.lazy(
-  () => import('./embeddable_swim_lane_container')
-);
+export { explorerRouteFactory } from './explorer';
