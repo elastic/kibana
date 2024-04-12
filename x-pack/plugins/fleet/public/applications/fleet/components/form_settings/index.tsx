@@ -48,6 +48,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, (settingsConfig) =
               ]?.[key] ?? defaultValue;
             const type = getInnerType(field);
             const [error, setError] = useState('');
+            const description = field._def.description ?? key;
 
             const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               const newValue = convertValue(e.target.value, type);
@@ -121,7 +122,13 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, (settingsConfig) =
 
             return (
               <EuiFlexItem key={`flexItem-${fieldKey}`}>
-                <EuiFormRow fullWidth key={fieldKey} label={key} error={error} isInvalid={!!error}>
+                <EuiFormRow
+                  fullWidth
+                  key={fieldKey}
+                  label={description}
+                  error={error}
+                  isInvalid={!!error}
+                >
                   {getFormField()}
                 </EuiFormRow>
               </EuiFlexItem>
