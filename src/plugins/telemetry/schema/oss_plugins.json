@@ -10439,7 +10439,7 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
-        },
+        }
       }
     },
     "static_telemetry": {
