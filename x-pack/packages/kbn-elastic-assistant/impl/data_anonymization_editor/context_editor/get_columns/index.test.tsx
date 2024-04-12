@@ -133,7 +133,7 @@ describe('getColumns', () => {
       fireEvent.click(getByTestId('allowed'));
 
       expect(onListUpdated).toBeCalledWith([
-        { field: 'event.category', operation: 'remove', update: 'defaultAllowReplacement' },
+        { field: 'event.category', operation: 'remove', update: 'allow' },
       ]);
     });
   });

@@ -33,14 +33,12 @@ export const getRequestWithStreamOption = (
   stream: boolean,
   defaultModel: string
 ): string => {
-  if (!APIS_ALLOWING_STREAMING.has(url)) {
-    return body;
-  }
-
   try {
     const jsonBody = JSON.parse(body);
     if (jsonBody) {
-      jsonBody.stream = stream;
+      if (APIS_ALLOWING_STREAMING.has(url)) {
+        jsonBody.stream = stream;
+      }
       jsonBody.model = jsonBody.model || defaultModel;
     }
 

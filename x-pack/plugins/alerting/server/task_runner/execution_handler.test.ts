@@ -115,6 +115,7 @@ const rule = {
       uuid: '111-111',
     },
   ],
+  consumer: 'test-consumer',
 } as unknown as SanitizedRule<RuleTypeParams>;
 
 const defaultExecutionParams = {
@@ -2472,6 +2473,7 @@ describe('Execution Handler', () => {
           id: rule.id,
           name: rule.name,
           tags: rule.tags,
+          consumer: 'test-consumer',
         },
         ruleUrl:
           'https://example.com/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
