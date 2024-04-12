@@ -9,7 +9,11 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, formatNumber } from '@elastic/eui';
 
 import { _IGNORED } from '../../../../common/es_fields';
-import { BYTE_NUMBER_FORMAT, NUMBER_FORMAT } from '../../../../common/constants';
+import {
+  BYTE_NUMBER_FORMAT,
+  MAX_HOSTS_METRIC_VALUE,
+  NUMBER_FORMAT,
+} from '../../../../common/constants';
 import {
   flyoutDegradedDocsText,
   flyoutDocsCountTotalText,
@@ -83,7 +87,15 @@ function getSummaryKpis(
 
   const hosts = dataStreamDetails?.hosts ?? {};
   const hostKeys = Object.keys(hosts);
-  const countOfHosts = hostKeys.map((key: string) => hosts[key].length).reduce((a, b) => a + b, 0);
+  const countOfHosts = hostKeys
+    .map((key: string) => hosts[key].length)
+    .reduce(
+      ({ count, anyHostExceedsMax }, hostCount) => ({
+        count: count + hostCount,
+        anyHostExceedsMax: anyHostExceedsMax || hostCount > MAX_HOSTS_METRIC_VALUE,
+      }),
+      { count: 0, anyHostExceedsMax: false }
+    );
   const hostsLink = undefined; // TODO: Add link to Infra hosts when locator is available
 
   const degradedDocsLink = degradedDocsHref
@@ -108,12 +120,16 @@ function getSummaryKpis(
       : []),
     {
       title: flyoutServicesText,
-      value: formatNumber(countOfServices, NUMBER_FORMAT),
+      value: formatMetricValueForMax(countOfServices, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT),
       link: servicesLink,
     },
     {
       title: flyoutHostsText,
-      value: formatNumber(countOfHosts, NUMBER_FORMAT),
+      value: formatMetricValueForMax(
+        countOfHosts.anyHostExceedsMax ? countOfHosts.count + 1 : countOfHosts.count,
+        countOfHosts.count,
+        NUMBER_FORMAT
+      ),
       link: hostsLink,
     },
     {
@@ -122,4 +138,13 @@ function getSummaryKpis(
       link: degradedDocsLink,
     },
   ];
+}
+
+/**
+ * Formats a metric value to show a '+' sign if it's above a max value e.g. 50+
+ */
+function formatMetricValueForMax(value: number, max: number, numberFormat: string): string {
+  const exceedsMax = value > max;
+  const valueToShow = exceedsMax ? max : value;
+  return `${formatNumber(valueToShow, numberFormat)}${exceedsMax ? '+' : ''}`;
 }

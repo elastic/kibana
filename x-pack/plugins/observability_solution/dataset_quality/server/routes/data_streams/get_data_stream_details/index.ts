@@ -14,6 +14,7 @@ import {
 } from '@kbn/metrics-data-access-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 
+import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -91,7 +92,7 @@ async function getDataStreamCreatedOn(esClient: ElasticsearchClient, dataStream:
 
 type TermAggregation = Record<string, { terms: { field: string; size: number } }>;
 
-const MAX_HOSTS = 50;
+const MAX_HOSTS = MAX_HOSTS_METRIC_VALUE + 1; // Adding 1 so that we can show e.g. '50+'
 
 // Gather service.name terms
 const serviceNamesAgg: TermAggregation = {
