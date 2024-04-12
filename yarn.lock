@@ -4484,6 +4484,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-features-registry@link:packages/kbn-discover-features-registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""
