@@ -204,11 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'disk', chartsCount: 2 },
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it(`should show ${metric} charts group the in metrics section`, async () => {
-              await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
-            });
-
-            it(`should render ${chartsCount} ${metric} charts in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
               expect(hosts.length).to.equal(chartsCount);
             });
@@ -385,16 +381,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
             { metric: 'log', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it(`should show ${metric} charts group the in metrics section`, async () => {
-              await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
-            });
-
-            it(`should render ${chartsCount} ${metric} charts in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
               const charts = await pageObjects.assetDetails.getMetricsTabHostCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });
 
-            it(`should render quick access items for ${metric}`, async () => {
+            it(`should render a quick access for ${metric} in the side panel`, async () => {
               await pageObjects.assetDetails.quickAccessItemExists(metric);
             });
           });
@@ -586,12 +578,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'log', chartsCount: 1 },
               { metric: 'kubernetes', chartsCount: 4 },
             ].forEach(({ metric, chartsCount }) => {
-              it(`should show ${metric} charts group`, async () => {
-                await retry.try(async () => {
-                  await pageObjects.assetDetails.hostMetricsChartsGroupExists(metric);
-                });
-              });
-
               it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
                 retry.try(async () => {
                   const charts = await (metric === 'kubernetes'
@@ -602,7 +588,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 });
               });
 
-              it(`should render quick access items for ${metric}`, async () => {
+              it(`should render a quick access for ${metric} in the side panel`, async () => {
                 await retry.try(async () => {
                   await pageObjects.assetDetails.quickAccessItemExists(metric);
                 });

@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
             { metric: 'kubernetes', chartsCount: 2 },
           ].forEach(({ metric, chartsCount }) => {
-            it(`should render ${chartsCount} ${metric} chart`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
               await retry.try(async () => {
                 const charts = await (metric === 'kubernetes'
                   ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()

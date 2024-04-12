@@ -26,7 +26,7 @@ export const ChartsGrid = ({
     return { grid: gridItems, lastRow: lastRowItem };
   }, [childrenArray, childrenCount, columns]);
 
-  if (childrenArray.length === 1) {
+  if (childrenCount === 1) {
     return <>{children}</>;
   }
 
