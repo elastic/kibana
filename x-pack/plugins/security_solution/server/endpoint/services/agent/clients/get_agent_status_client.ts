@@ -10,6 +10,7 @@ import type { AgentStatusClientInterface } from './lib/types';
 import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
 import { EndpointAgentStatusClient } from './endpoint/endpoint_agent_status_client';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { UnsupportedAgentTypeError } from './errors';
 
 /**
  * Retrieve a agent status  client for an agent type
@@ -26,5 +27,9 @@ export const getAgentStatusClient = (
       return new EndpointAgentStatusClient(constructorOptions);
     case 'sentinel_one':
       return new SentinelOneAgentStatusClient(constructorOptions);
+    default:
+      throw new UnsupportedAgentTypeError(
+        `Agent type [${agentType}] does not support agent status`
+      );
   }
 };
