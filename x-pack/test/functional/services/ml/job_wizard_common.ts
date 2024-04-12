@@ -655,13 +655,9 @@ export function MachineLearningJobWizardCommonProvider(
 
       // click away from time popover
       await testSubjects.click('mlJobWizardTimeRangeStep');
-      const { endDate: newEndDate } = await this.getSelectedDateRange();
 
       // assert time is set as expected
-      expect(newEndDate).to.eql(
-        shortDurationEndDate,
-        `Expect [${newEndDate}] to eql [${shortDurationEndDate}]`
-      );
+      await this.assertDateRangeSelection(origStartDate as string, shortDurationEndDate);
     },
 
     async goBackToJobDetailsStep() {

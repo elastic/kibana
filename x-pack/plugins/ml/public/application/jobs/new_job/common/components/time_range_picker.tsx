@@ -85,7 +85,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
             />
           }
           endDateControl={
-            <div data-test-subj="mlJobWizardDatePickerRangeEndDate">
+            <span data-test-subj="mlJobWizardDatePickerRangeEndDate">
               <EuiDatePicker
                 selected={endMoment}
                 onChange={handleChangeEnd}
@@ -101,7 +101,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
                 dateFormat={dateFormat}
                 minDate={startMoment}
               />
-            </div>
+            </span>
           }
         />
       </div>
