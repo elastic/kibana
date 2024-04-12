@@ -366,6 +366,12 @@ export function Chart({
             data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
+              /*
+                There are 2 different loaders which can appear above the chart. One is from the embeddable and one is from the UnifiedHistogram.
+                The idea is to show UnifiedHistogram loader until we get a new query params which would trigger the embeddable loader.
+                Updates to the time range can come earlier than the query updates which we delay on purpose, this is why it might get both loaders.
+                We should find a way to resolve that better.
+              */
               <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
                 <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
