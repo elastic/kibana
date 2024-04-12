@@ -21,9 +21,9 @@ xpack.securitySolutionServerless.productTypes:
   ]
 
 xpack.securitySolution.offeringSettings: {
-    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
-    ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
-  }
+  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+  ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
+}
 
 newsfeed.enabled: true
 
