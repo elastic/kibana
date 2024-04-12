@@ -191,13 +191,8 @@ export function AlertDetails() {
   );
 
   const metadataTab = alertDetail?.raw && (
-    <EuiPanel
-      hasShadow={false}
-      data-test-subj="metadataTabPanel"
-      css={css`
-        padding: ${euiTheme.size.l} 0 0 0;
-      `}
-    >
+    <EuiPanel hasShadow={false} data-test-subj="metadataTabPanel" paddingSize="none">
+      <EuiSpacer size="l" />
       <AlertFieldsTable alert={alertDetail.raw} />
     </EuiPanel>
   );
