@@ -10,6 +10,13 @@ import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 
+/**
+ * Theme doesn't expose width variables. Using provided size variables will require
+ * multiplying it by another magic constant.
+ *
+ * 320px width looks
+ * like a [commonly used width in EUI](https://github.com/search?q=repo%3Aelastic%2Feui%20320&type=code).
+ */
 const POPOVER_WIDTH = 320;
 
 export function RelatedIntegrationsHelpInfo(): JSX.Element {
