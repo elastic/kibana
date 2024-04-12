@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RuleFormRule } from '../../types';
 import { updateRule } from './update_rule';
 
@@ -66,23 +66,23 @@ describe('updateRule', () => {
     http.put.mockResolvedValueOnce({
       ...resolvedValue,
       actions: [
-        {
-          group: 'default',
-          id: '2',
-          connector_type_id: 'test',
-          params: {},
-          use_alert_data_for_template: false,
-          frequency: {
-            notify_when: 'onActionGroupChange',
-            throttle: null,
-            summary: false,
-          },
-        },
-        {
-          id: '.test-system-action',
-          params: {},
-          connector_type_id: '.system-action',
-        },
+        // {
+        //   group: 'default',
+        //   id: '2',
+        //   connector_type_id: 'test',
+        //   params: {},
+        //   use_alert_data_for_template: false,
+        //   frequency: {
+        //     notify_when: 'onActionGroupChange',
+        //     throttle: null,
+        //     summary: false,
+        //   },
+        // },
+        // {
+        //   id: '.test-system-action',
+        //   params: {},
+        //   connector_type_id: '.system-action',
+        // },
       ],
     });
 
@@ -91,30 +91,30 @@ describe('updateRule', () => {
     expect(result).toEqual({
       ...resolvedValue,
       actions: [
-        {
-          group: 'default',
-          id: '2',
-          actionTypeId: 'test',
-          params: {},
-          useAlertDataForTemplate: false,
-          frequency: {
-            notifyWhen: 'onActionGroupChange',
-            throttle: null,
-            summary: false,
-          },
-        },
-        {
-          id: '.test-system-action',
-          params: {},
-          actionTypeId: '.system-action',
-        },
+        // {
+        //   group: 'default',
+        //   id: '2',
+        //   actionTypeId: 'test',
+        //   params: {},
+        //   useAlertDataForTemplate: false,
+        //   frequency: {
+        //     notifyWhen: 'onActionGroupChange',
+        //     throttle: null,
+        //     summary: false,
+        //   },
+        // },
+        // {
+        //   id: '.test-system-action',
+        //   params: {},
+        //   actionTypeId: '.system-action',
+        // },
       ],
     });
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rule/12%2F3",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[{\\"group\\":\\"default\\",\\"id\\":\\"2\\",\\"params\\":{},\\"frequency\\":{\\"notify_when\\":\\"onActionGroupChange\\",\\"throttle\\":null,\\"summary\\":false},\\"use_alert_data_for_template\\":false},{\\"id\\":\\".test-system-action\\",\\"params\\":{}}],\\"alert_delay\\":{\\"active\\":10}}",
+          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"alert_delay\\":{\\"active\\":10}}",
         },
       ]
     `);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { resolveRule } from './resolve_rule';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import { RuleUpdates } from '../../../types';
-import { createRule } from './create';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { createRule, RuleCreateBody } from './create_rule';
 
 const http = httpServiceMock.createStartContract();
 
@@ -33,25 +32,26 @@ describe('createRule', () => {
       name: 'test',
       rule_type_id: '.index-threshold',
       actions: [
-        {
-          group: 'threshold met',
-          id: '1',
-          params: {
-            level: 'info',
-            message: 'alert ',
-          },
-          connector_type_id: '.server-log',
-          frequency: {
-            notify_when: 'onActionGroupChange',
-            throttle: null,
-            summary: false,
-          },
-        },
-        {
-          id: '.test-system-action',
-          params: {},
-          connector_type_id: '.system-action',
-        },
+        // Enable this in next PR which adds action support
+        // {
+        //   group: 'threshold met',
+        //   id: '1',
+        //   params: {
+        //     level: 'info',
+        //     message: 'alert ',
+        //   },
+        //   connector_type_id: '.server-log',
+        //   frequency: {
+        //     notify_when: 'onActionGroupChange',
+        //     throttle: null,
+        //     summary: false,
+        //   },
+        // },
+        // {
+        //   id: '.test-system-action',
+        //   params: {},
+        //   connector_type_id: '.system-action',
+        // },
       ],
       scheduled_task_id: '1',
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
@@ -62,10 +62,7 @@ describe('createRule', () => {
       },
     };
 
-    const ruleToCreate: Omit<
-      RuleUpdates,
-      'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
-    > = {
+    const ruleToCreate: RuleCreateBody = {
       params: {
         aggType: 'count',
         termSize: 5,
@@ -81,35 +78,29 @@ describe('createRule', () => {
       schedule: { interval: '1m' },
       tags: [],
       name: 'test',
-      enabled: true,
-      throttle: null,
       ruleTypeId: '.index-threshold',
       actions: [
-        {
-          group: 'threshold met',
-          id: '83d4d860-9316-11eb-a145-93ab369a4461',
-          params: {
-            level: 'info',
-            message:
-              "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
-          },
-          actionTypeId: '.server-log',
-          frequency: {
-            notifyWhen: 'onActionGroupChange',
-            throttle: null,
-            summary: false,
-          },
-        },
-        {
-          id: '.test-system-action',
-          params: {},
-          actionTypeId: '.system-action',
-        },
+        // {
+        //   group: 'threshold met',
+        //   id: '83d4d860-9316-11eb-a145-93ab369a4461',
+        //   params: {
+        //     level: 'info',
+        //     message:
+        //       "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
+        //   },
+        //   actionTypeId: '.server-log',
+        //   frequency: {
+        //     notifyWhen: 'onActionGroupChange',
+        //     throttle: null,
+        //     summary: false,
+        //   },
+        // },
+        // {
+        //   id: '.test-system-action',
+        //   params: {},
+        //   actionTypeId: '.system-action',
+        // },
       ],
-      createdAt: new Date('2021-04-01T21:33:13.247Z'),
-      updatedAt: new Date('2021-04-01T21:33:13.247Z'),
-      apiKeyOwner: '',
-      revision: 0,
       alertDelay: {
         active: 10,
       },
@@ -119,25 +110,25 @@ describe('createRule', () => {
     const result = await createRule({ http, rule: ruleToCreate });
     expect(result).toEqual({
       actions: [
-        {
-          actionTypeId: '.server-log',
-          group: 'threshold met',
-          id: '1',
-          params: {
-            level: 'info',
-            message: 'alert ',
-          },
-          frequency: {
-            notifyWhen: 'onActionGroupChange',
-            throttle: null,
-            summary: false,
-          },
-        },
-        {
-          id: '.test-system-action',
-          params: {},
-          actionTypeId: '.system-action',
-        },
+        // {
+        //   actionTypeId: '.server-log',
+        //   group: 'threshold met',
+        //   id: '1',
+        //   params: {
+        //     level: 'info',
+        //     message: 'alert ',
+        //   },
+        //   frequency: {
+        //     notifyWhen: 'onActionGroupChange',
+        //     throttle: null,
+        //     summary: false,
+        //   },
+        // },
+        // {
+        //   id: '.test-system-action',
+        //   params: {},
+        //   actionTypeId: '.system-action',
+        // },
       ],
       ruleTypeId: '.index-threshold',
       apiKeyOwner: undefined,

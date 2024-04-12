@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { pick } from 'lodash';
-import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
+import { RewriteResponseCase, AsApiContract } from '@kbn/actions-types';
 import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { RuleFormRule } from '../../types';
 import { transformRule } from '../common_transformations';

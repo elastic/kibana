@@ -9,7 +9,7 @@
 import { omit } from 'lodash';
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 import { RuleFormPage } from './rule_form_page';
 import {

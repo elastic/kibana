@@ -132,3 +132,6 @@ export interface RuleFormStateValidation {
   ruleDetails: RuleDetailsValidation;
   isOverallValid: boolean;
 }
+
+// Type this correctly in the next PR in which action support is added
+export type RuleUiAction = any;

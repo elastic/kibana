@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { AsApiContract } from '@kbn/actions-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../common/constants';
 import { transformResolvedRule } from '../common_transformations';
 import { RuleFormRule } from '../../types';
