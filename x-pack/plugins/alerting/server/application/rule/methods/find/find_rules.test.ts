@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -13,24 +13,29 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
-import { RegistryRuleType } from '../../rule_type_registry';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { RecoveredActionGroup } from '../../../../../common';
+import { RegistryRuleType } from '../../../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
-import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
-import { formatLegacyActions } from '../lib';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import {
+  enabledRule1,
+  enabledRule2,
+  siemRule1,
+  siemRule2,
+} from '../../../../rules_client/tests/test_helpers';
+import { formatLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
     formatLegacyActions: jest.fn(),
   };
@@ -80,7 +85,7 @@ beforeEach(() => {
 
 setGlobalDate();
 
-jest.mock('../common/map_sort_field', () => ({
+jest.mock('../../../../rules_client/common/map_sort_field', () => ({
   mapSortField: jest.fn(),
 }));
 
@@ -125,6 +130,10 @@ describe('find()', () => {
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+            },
             notifyWhen: 'onActiveAlert',
             actions: [
               {
@@ -195,6 +204,10 @@ describe('find()', () => {
             ],
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
             "id": "1",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -241,6 +254,10 @@ describe('find()', () => {
             schedule: { interval: '10s' },
             params: {
               bar: true,
+            },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -301,6 +318,10 @@ describe('find()', () => {
             ],
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
             "id": "1",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -347,6 +368,10 @@ describe('find()', () => {
             schedule: { interval: '10s' },
             params: {
               bar: true,
+            },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -398,6 +423,10 @@ describe('find()', () => {
             ],
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
             "id": "1",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -439,7 +468,9 @@ describe('find()', () => {
   test('calls mapSortField', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
-    expect(jest.requireMock('../common/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+    expect(
+      jest.requireMock('../../../../rules_client/common/map_sort_field').mapSortField
+    ).toHaveBeenCalledWith('name');
   });
 
   test('should translate filter/sort/search on params to mapped_params', async () => {
@@ -557,6 +588,10 @@ describe('find()', () => {
             params: {
               bar: true,
             },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+            },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             notifyWhen: 'onActiveAlert',
@@ -588,6 +623,10 @@ describe('find()', () => {
             params: {
               bar: true,
               parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -647,6 +686,10 @@ describe('find()', () => {
             ],
             "alertTypeId": "myType",
             "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
             "id": "1",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -673,6 +716,10 @@ describe('find()', () => {
             ],
             "alertTypeId": "123",
             "createdAt": 2019-02-12T21:01:22.479Z,
+            "executionStatus": Object {
+              "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+              "status": "pending",
+            },
             "id": "2",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -777,6 +824,10 @@ describe('find()', () => {
             params: {
               bar: true,
             },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+            },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             notifyWhen: 'onActiveAlert',
@@ -808,6 +859,10 @@ describe('find()', () => {
             params: {
               bar: true,
               parameterThatIsSavedObjectRef: 'soRef_0',
+            },
+            executionStatus: {
+              status: 'pending',
+              lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -889,6 +944,10 @@ describe('find()', () => {
             type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               actions: [],
+              executionStatus: {
+                status: 'pending',
+                lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+              },
               alertTypeId: 'myType',
               consumer: 'myApp',
               tags: ['myTag'],

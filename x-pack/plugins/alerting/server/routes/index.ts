@@ -20,7 +20,7 @@ import { deleteRuleRoute } from './delete_rule';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
-import { findRulesRoute, findInternalRulesRoute } from './find_rules';
+import { findRulesRoute, findInternalRulesRoute } from './rule/apis/find/find_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';

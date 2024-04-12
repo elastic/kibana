@@ -6,70 +6,54 @@
  */
 
 import Boom from '@hapi/boom';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty, pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RawRule, RuleTypeParams, SanitizedRule, Rule } from '../../types';
-import { AlertingAuthorizationEntity } from '../../authorization';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
+import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
   validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
-} from '../common';
+} from '../../../../rules_client/common';
 import {
   getModifiedField,
   getModifiedSearchFields,
   getModifiedSearch,
   modifyFilterKueryNode,
-} from '../common/mapped_params_utils';
-import { alertingAuthorizationFilterOpts } from '../common/constants';
-import { getAlertFromRaw } from '../lib/get_alert_from_raw';
-import type { IndexType, RulesClientContext } from '../types';
-import { formatLegacyActions } from '../lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+} from '../../../../rules_client/common/mapped_params_utils';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import { formatLegacyActions, getAlertFromRaw } from '../../../../rules_client/lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import type { FindRulesParams } from './types';
+import { findRulesParamsSchema } from './schemas';
+import { Rule, RuleParams } from '../../types';
+import { findRulesSo } from '../../../../data/rule';
 
-export interface FindParams {
-  options?: FindOptions;
-  excludeFromPublicApi?: boolean;
-  includeSnoozeData?: boolean;
-  featuresIds?: string[];
-}
-
-export interface FindOptions extends IndexType {
-  perPage?: number;
-  page?: number;
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: estypes.SortOrder;
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  fields?: string[];
-  filter?: string | KueryNode;
-  filterConsumers?: string[];
-}
-
-export interface FindResult<Params extends RuleTypeParams> {
+export interface FindResult<Params extends RuleParams> {
   page: number;
   perPage: number;
   total: number;
   data: Array<SanitizedRule<Params>>;
 }
 
-export async function find<Params extends RuleTypeParams = never>(
+export async function findRules<Params extends RuleParams = never>(
   context: RulesClientContext,
-  {
-    options: { fields, filterConsumers, ...options } = {},
-    excludeFromPublicApi = false,
-    includeSnoozeData = false,
-  }: FindParams = {}
+  params?: FindRulesParams
 ): Promise<FindResult<Params>> {
+  const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
+
+  const { fields, filterConsumers, ...restOptions } = options || {};
+
+  try {
+    findRulesParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating find data - ${error.message}`);
+  }
+
   let authorizationTuple;
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
@@ -88,14 +72,14 @@ export async function find<Params extends RuleTypeParams = never>(
   }
 
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-  const filterKueryNode = buildKueryNodeFilter(options.filter);
-  let sortField = mapSortField(options.sortField);
+  const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
+  let sortField = mapSortField(restOptions.sortField);
   if (excludeFromPublicApi) {
     try {
       validateOperationOnAttributes(
         filterKueryNode,
         sortField,
-        options.searchFields,
+        restOptions.searchFields,
         context.fieldsToExcludeFromPublicApi
       );
     } catch (error) {
@@ -103,16 +87,20 @@ export async function find<Params extends RuleTypeParams = never>(
     }
   }
 
-  sortField = mapSortField(getModifiedField(options.sortField));
+  sortField = mapSortField(getModifiedField(restOptions.sortField));
 
   // Generate new modified search and search fields, translating certain params properties
   // to mapped_params. Thus, allowing for sort/search/filtering on params.
   // We do the modifcation after the validate check to make sure the public API does not
   // use the mapped_params in their queries.
-  options = {
-    ...options,
-    ...(options.searchFields && { searchFields: getModifiedSearchFields(options.searchFields) }),
-    ...(options.search && { search: getModifiedSearch(options.searchFields, options.search) }),
+  const modifiedOptions = {
+    ...restOptions,
+    ...(restOptions.searchFields && {
+      searchFields: getModifiedSearchFields(restOptions.searchFields),
+    }),
+    ...(restOptions.search && {
+      search: getModifiedSearch(restOptions.searchFields, restOptions.search),
+    }),
   };
 
   // Modifies kuery node AST to translate params filter and the filter value to mapped_params.
@@ -126,15 +114,17 @@ export async function find<Params extends RuleTypeParams = never>(
     per_page: perPage,
     total,
     saved_objects: data,
-  } = await context.unsecuredSavedObjectsClient.find<RawRule>({
-    ...options,
-    sortField,
-    filter:
-      (authorizationFilter && filterKueryNode
-        ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-        : authorizationFilter) ?? filterKueryNode,
-    fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
-    type: RULE_SAVED_OBJECT_TYPE,
+  } = await findRulesSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsFindOptions: {
+      ...modifiedOptions,
+      sortField,
+      filter:
+        (authorizationFilter && filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
+          : authorizationFilter) ?? filterKueryNode,
+      fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
+    },
   });
 
   const siemRules: Rule[] = [];
@@ -161,7 +151,7 @@ export async function find<Params extends RuleTypeParams = never>(
       context,
       id,
       attributes.alertTypeId,
-      fields ? (pick(attributes, fields) as RawRule) : attributes,
+      (fields ? pick(attributes, fields) : attributes) as RawRule,
       references,
       false,
       excludeFromPublicApi,
@@ -170,7 +160,7 @@ export async function find<Params extends RuleTypeParams = never>(
 
     // collect SIEM rule for further formatting legacy actions
     if (attributes.consumer === AlertConsumers.SIEM) {
-      siemRules.push(rule);
+      siemRules.push(rule as Rule);
     }
 
     return rule;
@@ -187,12 +177,12 @@ export async function find<Params extends RuleTypeParams = never>(
 
   // format legacy actions for SIEM rules, if there any
   if (siemRules.length) {
-    const formattedRules = await formatLegacyActions(siemRules, {
+    const formattedRules = await formatLegacyActions(siemRules as DeprecatedRule[], {
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       logger: context.logger,
     });
 
-    const formattedRulesMap = formattedRules.reduce<Record<string, Rule>>((acc, rule) => {
+    const formattedRulesMap = formattedRules.reduce<Record<string, DeprecatedRule>>((acc, rule) => {
       acc[rule.id] = rule;
       return acc;
     }, {});
@@ -210,6 +200,6 @@ export async function find<Params extends RuleTypeParams = never>(
     page,
     perPage,
     total,
-    data: authorizedData,
+    data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

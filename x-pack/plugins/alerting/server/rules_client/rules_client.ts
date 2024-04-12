@@ -35,7 +35,7 @@ import {
   getRuleExecutionKPI,
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
-import { find, FindParams } from './methods/find';
+import { findRules, FindRulesParams } from '../application/rule/methods/find';
 import { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
@@ -126,8 +126,8 @@ export class RulesClient {
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>
     createRule<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
-  public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
-    find<Params>(this.context, params);
+  public find = <Params extends RuleTypeParams = never>(params?: FindRulesParams) =>
+    findRules<Params>(this.context, params);
   public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
     get<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>

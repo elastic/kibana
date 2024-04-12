@@ -7,70 +7,21 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { FindOptions, FindResult } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext, rewriteRule } from './lib';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
+import type {
+  FindRulesRequestQueryV1,
+  FindRulesResponseV1,
+} from '../../../../../common/routes/rule/apis/find';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import {
-  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_ALERTING_API_FIND_RULES_PATH,
-} from '../types';
-import { trackLegacyTerminology } from './lib/track_legacy_terminology';
-
-// query definition
-const querySchema = schema.object({
-  per_page: schema.number({ defaultValue: 10, min: 0 }),
-  page: schema.number({ defaultValue: 1, min: 1 }),
-  search: schema.maybe(schema.string()),
-  default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-    defaultValue: 'OR',
-  }),
-  search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
-  sort_field: schema.maybe(schema.string()),
-  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-  has_reference: schema.maybe(
-    // use nullable as maybe is currently broken
-    // in config-schema
-    schema.nullable(
-      schema.object({
-        type: schema.string(),
-        id: schema.string(),
-      })
-    )
-  ),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
-  filter: schema.maybe(schema.string()),
-  filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
-});
-
-const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
-  default_search_operator: defaultSearchOperator,
-  has_reference: hasReference,
-  search_fields: searchFields,
-  per_page: perPage,
-  sort_field: sortField,
-  sort_order: sortOrder,
-  filter_consumers: filterConsumers,
-  ...rest
-}) => ({
-  ...rest,
-  defaultSearchOperator,
-  perPage,
-  filterConsumers,
-  ...(sortField ? { sortField } : {}),
-  ...(sortOrder ? { sortOrder } : {}),
-  ...(hasReference ? { hasReference } : {}),
-  ...(searchFields ? { searchFields } : {}),
-});
-const rewriteBodyRes = ({ perPage, data, ...restOfResult }: FindResult<RuleTypeParams>) => {
-  return {
-    ...restOfResult,
-    per_page: perPage,
-    data: data.map(rewriteRule),
-  };
-};
+} from '../../../../types';
+import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
+import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
 
 interface BuildFindRulesRouteParams {
   licenseState: ILicenseState;
@@ -91,24 +42,24 @@ const buildFindRulesRoute = ({
     {
       path,
       validate: {
-        query: querySchema,
+        query: findRulesRequestQuerySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
 
+        const query: FindRulesRequestQueryV1 = req.query;
+
         trackLegacyTerminology(
-          [req.query.search, req.query.search_fields, req.query.sort_field].filter(
-            Boolean
-          ) as string[],
+          [query.search, query.search_fields, query.sort_field].filter(Boolean) as string[],
           usageCounter
         );
 
-        const options = rewriteQueryReq({
-          ...req.query,
-          has_reference: req.query.has_reference || undefined,
-          search_fields: searchFieldsAsArray(req.query.search_fields),
+        const options = transformFindRulesBodyV1({
+          ...query,
+          has_reference: query.has_reference || undefined,
+          search_fields: searchFieldsAsArray(query.search_fields),
         });
 
         if (req.query.fields) {
@@ -124,8 +75,12 @@ const buildFindRulesRoute = ({
           excludeFromPublicApi,
           includeSnoozeData: true,
         });
+
+        const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
+          transformFindRulesResponseV1<RuleParamsV1>(findResult);
+
         return res.ok({
-          body: rewriteBodyRes(findResult),
+          body: responseBody,
         });
       })
     )
@@ -135,12 +90,14 @@ const buildFindRulesRoute = ({
       {
         path,
         validate: {
-          body: querySchema,
+          body: findRulesRequestQuerySchemaV1,
         },
       },
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+
+          const body: FindRulesRequestQueryV1 = req.body;
 
           trackLegacyTerminology(
             [req.body.search, req.body.search_fields, req.body.sort_field].filter(
@@ -149,10 +106,10 @@ const buildFindRulesRoute = ({
             usageCounter
           );
 
-          const options = rewriteQueryReq({
-            ...req.body,
-            has_reference: req.body.has_reference || undefined,
-            search_fields: searchFieldsAsArray(req.body.search_fields),
+          const options = transformFindRulesBodyV1({
+            ...body,
+            has_reference: body.has_reference || undefined,
+            search_fields: searchFieldsAsArray(body.search_fields),
           });
 
           if (req.body.fields) {
@@ -168,8 +125,12 @@ const buildFindRulesRoute = ({
             excludeFromPublicApi,
             includeSnoozeData: true,
           });
+
+          const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
+            transformFindRulesResponseV1<RuleParamsV1>(findResult);
+
           return res.ok({
-            body: rewriteBodyRes(findResult),
+            body: responseBody,
           });
         })
       )
