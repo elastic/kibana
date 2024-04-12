@@ -11,7 +11,7 @@ import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
@@ -34,11 +34,9 @@ export const getMarkdownRenderer =
           <Markdown
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
+            markdown={config.content}
             openLinksInNewTab={config.openLinksInNewTab}
-            readOnly
-          >
-            {config.content}
-          </Markdown>
+          />
         </KibanaThemeProvider>,
         domNode,
         () => handlers.done()

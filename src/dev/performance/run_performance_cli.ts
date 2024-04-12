@@ -14,7 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import path from 'path';
 
-const JOURNEY_BASE_PATH = 'x-pack/performance/journeys';
+const JOURNEY_BASE_PATH = 'x-pack/performance/journeys_e2e';
 
 export interface Journey {
   name: string;
@@ -126,7 +126,7 @@ run(
     if (journeyPath && fs.statSync(journeyPath).isFile()) {
       journeys.push({ name: path.parse(journeyPath).name, path: journeyPath });
     } else {
-      // default dir is x-pack/performance/journeys
+      // default dir is x-pack/performance/journeys_e2e
       const dir = journeyPath ?? path.resolve(REPO_ROOT, JOURNEY_BASE_PATH);
       readFilesRecursively(dir, (filePath: string) =>
         journeys.push({

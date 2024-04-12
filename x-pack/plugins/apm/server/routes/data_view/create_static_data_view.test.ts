@@ -12,7 +12,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
 import { APMCore } from '../typings';
-import { createStaticDataView } from './create_static_data_view';
+import { createOrUpdateStaticDataView } from './create_static_data_view';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
@@ -52,10 +52,10 @@ const apmEventClientMock = {
   } as APMIndices,
 } as unknown as APMEventClient;
 
-describe('createStaticDataView', () => {
+describe('createOrUpdateStaticDataView', () => {
   it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const dataViewService = getMockedDataViewService('apm-*');
-    await createStaticDataView({
+    await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
@@ -75,7 +75,7 @@ describe('createStaticDataView', () => {
 
     const dataViewService = getMockedDataViewService('apm-*');
 
-    await createStaticDataView({
+    await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
@@ -95,7 +95,7 @@ describe('createStaticDataView', () => {
 
     const dataViewService = getMockedDataViewService('apm-*');
 
-    await createStaticDataView({
+    await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
@@ -119,7 +119,7 @@ describe('createStaticDataView', () => {
     const expectedDataViewTitle =
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
-    await createStaticDataView({
+    await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
@@ -150,7 +150,7 @@ describe('createStaticDataView', () => {
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
     );
 
-    await createStaticDataView({
+    await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,

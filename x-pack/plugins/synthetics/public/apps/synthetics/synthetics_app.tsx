@@ -95,6 +95,7 @@ const Application = (props: SyntheticsAppProps) => {
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
                 fleet: startPlugins.fleet,
+                unifiedSearch: startPlugins.unifiedSearch,
               }}
             >
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>

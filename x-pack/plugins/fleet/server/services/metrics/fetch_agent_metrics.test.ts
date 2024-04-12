@@ -30,7 +30,7 @@ describe('fetchAgentMetrics', () => {
   });
 
   it('should not fetch agent if .fleet-agents is not created', async () => {
-    esClient.indices.get.mockRejectedValue({ statusCode: 404 });
+    esClient.indices.exists.mockResolvedValue(false);
 
     const result = await fetchAgentMetrics(mockCore, abortController);
 

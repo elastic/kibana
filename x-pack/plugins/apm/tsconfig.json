@@ -112,6 +112,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
     "@kbn/shared-ux-markdown",
+    "@kbn/apm-data-view"
   ],
   "exclude": ["target/**/*"]
 }

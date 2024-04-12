@@ -191,7 +191,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
-            'smtp.live.com',
+            'smtp-mail.outlook.com',
             'slack.com',
           ])}`,
           `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,

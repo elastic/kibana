@@ -122,23 +122,33 @@ export function registerContextFunction({
           };
         }
 
-        const { relevantDocuments, scores } = await scoreSuggestions({
-          suggestions,
-          queries: queriesOrUserPrompt,
-          messages,
-          client,
-          connectorId,
-          signal,
-          logger: resources.logger,
-        });
-
-        return {
-          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
-          data: {
-            scores,
+        try {
+          const { relevantDocuments, scores } = await scoreSuggestions({
             suggestions,
-          },
-        };
+            queries: queriesOrUserPrompt,
+            messages,
+            client,
+            connectorId,
+            signal,
+            logger: resources.logger,
+          });
+
+          return {
+            content: { ...content, learnings: relevantDocuments as unknown as Serializable },
+            data: {
+              scores,
+              suggestions,
+            },
+          };
+        } catch (error) {
+          return {
+            content: { ...content, learnings: suggestions.slice(0, 5) },
+            data: {
+              error,
+              suggestions,
+            },
+          };
+        }
       }
 
       return new Observable<MessageAddEvent>((subscriber) => {
@@ -214,7 +224,7 @@ async function scoreSuggestions({
 
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
-    0 being completely relevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
+    0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
     answering the question. Judge it according to the following criteria:
 
     - The document is relevant to the question, and the rest of the conversation

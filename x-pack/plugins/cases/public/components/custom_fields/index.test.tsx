@@ -17,7 +17,8 @@ import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFields } from '.';
 import * as i18n from './translations';
 
-describe('CustomFields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/176805
+describe.skip('CustomFields', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {

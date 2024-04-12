@@ -352,7 +352,8 @@ export function isEqualType(
   item: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
-  parentCommand?: string
+  parentCommand?: string,
+  nameHit?: string
 ) {
   const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
   if (argType === 'any') {
@@ -375,10 +376,8 @@ export function isEqualType(
       // anything goes, so avoid any effort here
       return true;
     }
-    // perform a double check, but give priority to the non trimmed version
-    const hit = getColumnHit(item.name, references);
-    const hitTrimmed = getColumnHit(item.name.replace(/\s/g, ''), references);
-    const validHit = hit || hitTrimmed;
+    const hit = getColumnHit(nameHit ?? item.name, references);
+    const validHit = hit;
     if (!validHit) {
       return false;
     }
@@ -399,7 +398,7 @@ function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
   }
 }
 
-function getMatcher(name: string, position: 'start' | 'end' | 'middle') {
+function getMatcher(name: string, position: 'start' | 'end' | 'middle' | 'multiple-within') {
   if (position === 'start') {
     const prefix = name.substring(1);
     return (resource: string) => resource.endsWith(prefix);
@@ -408,6 +407,19 @@ function getMatcher(name: string, position: 'start' | 'end' | 'middle') {
     const prefix = name.substring(0, name.length - 1);
     return (resource: string) => resource.startsWith(prefix);
   }
+  if (position === 'multiple-within') {
+    // make sure to remove the * at the beginning of the name if present
+    const safeName = name.startsWith('*') ? name.slice(1) : name;
+    // replace 2 ore more consecutive wildcards with a single one
+    const setOfChars = safeName.replace(/\*{2+}/g, '*').split('*');
+    return (resource: string) => {
+      let index = -1;
+      return setOfChars.every((char) => {
+        index = resource.indexOf(char, index + 1);
+        return index !== -1;
+      });
+    };
+  }
   const [prefix, postFix] = name.split('*');
   return (resource: string) => resource.startsWith(prefix) && resource.endsWith(postFix);
 }
@@ -415,6 +427,10 @@ function getMatcher(name: string, position: 'start' | 'end' | 'middle') {
 function getWildcardPosition(name: string) {
   if (!hasWildcard(name)) {
     return 'none';
+  }
+  const wildCardCount = name.match(/\*/g)!.length;
+  if (wildCardCount > 1) {
+    return 'multiple-within';
   }
   if (name.startsWith('*')) {
     return 'start';
@@ -426,7 +442,7 @@ function getWildcardPosition(name: string) {
 }
 
 export function hasWildcard(name: string) {
-  return name.includes('*');
+  return /\*/.test(name);
 }
 export function isVariable(
   column: ESQLRealField | ESQLVariable | undefined
@@ -445,9 +461,9 @@ export function columnExists(
     return { hit: true, nameHit: column.name };
   }
   if (column.quoted) {
-    const trimmedName = column.name.replace(/`/g, '``').replace(/\s/g, '');
-    if (variables.has(trimmedName)) {
-      return { hit: true, nameHit: trimmedName };
+    const originalName = column.text;
+    if (variables.has(originalName)) {
+      return { hit: true, nameHit: originalName };
     }
   }
   if (

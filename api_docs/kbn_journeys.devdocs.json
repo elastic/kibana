@@ -184,7 +184,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [
-              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys directory."
+              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys_e2e directory."
             ],
             "signature": [
               "any"

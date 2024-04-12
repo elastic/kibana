@@ -39,6 +39,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      queue: n2-2-spot
+    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - wait
+
   - command: .buildkite/scripts/steps/on_merge_api_docs.sh
     label: Check Public API Docs
     key: public-api-docs
@@ -199,6 +212,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      queue: n2-4-virt
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 16
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
@@ -224,16 +250,6 @@ steps:
       queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/quick_checks.sh
-    label: 'Quick Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'

@@ -273,27 +273,27 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 </EuiText>
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder hasShadow={false}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="globe" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <h3>
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
-                          {
-                            defaultMessage: 'Document level security',
-                          }
-                        )}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                {hasDocumentLevelSecurity && (
+            {hasDocumentLevelSecurity && (
+              <EuiFlexItem grow={false}>
+                <EuiPanel hasBorder hasShadow={false}>
+                  <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="globe" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h3>
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
+                            {
+                              defaultMessage: 'Document level security',
+                            }
+                          )}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
                   <EuiText size="s">
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.description',
@@ -312,9 +312,9 @@ export const NativeConnectorConfiguration: React.FC = () => {
                       )}
                     </EuiLink>
                   </EuiText>
-                )}
-              </EuiPanel>
-            </EuiFlexItem>
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder hasShadow={false}>
                 <ConvertConnector />

@@ -96,6 +96,7 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 
 jest.mock('uuid', () => ({
@@ -554,6 +555,7 @@ describe('Task Runner', () => {
               [EVENT_ACTION]: 'open',
               [EVENT_KIND]: 'signal',
               [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],

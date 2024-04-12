@@ -78,6 +78,7 @@ import {
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
+import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -927,6 +928,8 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -967,6 +970,7 @@ export const UnifiedDataTable = ({
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
         <div
+          ref={setDataGridWrapper}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -976,6 +980,7 @@ export const UnifiedDataTable = ({
           className={classnames(className, 'unifiedDataTable__table')}
         >
           <EuiDataGridMemoized
+            id={dataGridId}
             aria-describedby={randomId}
             aria-labelledby={ariaLabelledBy}
             columns={euiGridColumns}

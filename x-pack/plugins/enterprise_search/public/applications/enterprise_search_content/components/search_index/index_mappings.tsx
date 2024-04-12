@@ -126,19 +126,19 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.searchIndex.mappings.description"
-                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. These index mappings determine the functions available in your relevance tuning and search experience."
+                  defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
                   values={{
+                    date: <EuiCode>date</EuiCode>,
                     keyword: <EuiCode>keyword</EuiCode>,
                     number: <EuiCode>number</EuiCode>,
-                    date: <EuiCode>date</EuiCode>,
                   }}
                 />
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
+            <EuiLink href={docLinks.connectorsMappings} target="_blank" external>
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
-                defaultMessage: 'Learn more',
+                defaultMessage: 'Learn how to customize index mappings and settings',
               })}
             </EuiLink>
           </EuiPanel>

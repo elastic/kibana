@@ -649,6 +649,42 @@
         "Team:Monitoring"
       ],
       "enabled": true
+    },
+    {
+      "groupName": "csp",
+      "packageNames": [
+        "content-security-policy-parser"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "ci:serverless-test-all"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "AlertingEmails",
+      "matchPackageNames": [
+        "nodemailer"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor"
+      ],
+      "enabled": true
     }
   ]
 }

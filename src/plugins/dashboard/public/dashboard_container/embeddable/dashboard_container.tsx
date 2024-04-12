@@ -603,9 +603,9 @@ export class DashboardContainer
         omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
       );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      if (this.controlGroup && loadDashboardReturn?.dashboardInput.controlGroupInput) {
+      if (this.controlGroup) {
         this.controlGroup.dispatch.setLastSavedInput(
-          loadDashboardReturn?.dashboardInput.controlGroupInput
+          loadDashboardReturn.dashboardInput?.controlGroupInput
         );
       }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.

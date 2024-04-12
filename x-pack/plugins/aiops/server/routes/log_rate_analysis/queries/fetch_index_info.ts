@@ -52,8 +52,6 @@ export const fetchIndexInfo = async (
 
   const allFieldNames: string[] = [];
 
-  const finalFieldCandidates: Set<string> = new Set([]);
-  const finalTextFieldCandidates: Set<string> = new Set([]);
   const acceptableFields: Set<string> = new Set();
   const acceptableTextFields: Set<string> = new Set();
 
@@ -100,20 +98,19 @@ export const fetchIndexInfo = async (
 
   // Get all field names for each returned doc and flatten it
   // to a list of unique field names used across all docs
-  // and filter by list of acceptable fields.
-  [...new Set(sampledDocs.map(Object.keys).flat(1))].forEach((field) => {
-    if (
-      acceptableFields.has(field) &&
+  // and filter then by list of acceptable fields.
+  const fieldNamesFromDocs = [...new Set(sampledDocs.map(Object.keys).flat(1))];
+  const fieldCandidates: string[] = [...acceptableFields].filter(
+    (field) =>
+      fieldNamesFromDocs.includes(field) &&
       !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
-    ) {
-      finalFieldCandidates.add(field);
-    }
-    if (
-      acceptableTextFields.has(field) &&
-      (!allFieldNames.includes(`${field}.keyword`) || textFieldCandidatesOverrides.includes(field))
-    ) {
-      finalTextFieldCandidates.add(field);
-    }
+  );
+  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
+    const fieldName = field.replace(new RegExp(/\.text$/), '');
+    return (
+      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
+      textFieldCandidatesOverrides.includes(field)
+    );
   });
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
@@ -122,8 +119,8 @@ export const fetchIndexInfo = async (
     .value;
 
   return {
-    fieldCandidates: [...finalFieldCandidates],
-    textFieldCandidates: [...finalTextFieldCandidates],
+    fieldCandidates: fieldCandidates.sort(),
+    textFieldCandidates: textFieldCandidates.sort(),
     baselineTotalDocCount,
     deviationTotalDocCount,
     zeroDocsFallback: baselineTotalDocCount === 0 || deviationTotalDocCount === 0,

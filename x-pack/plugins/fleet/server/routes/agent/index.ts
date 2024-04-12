@@ -50,7 +50,7 @@ import {
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandlerDeprecated,
-  postBulkAgentsReassignHandler,
+  postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
   getAvailableVersionsHandler,
@@ -440,7 +440,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         version: API_VERSIONS.public.v1,
         validate: { request: PostBulkAgentReassignRequestSchema },
       },
-      postBulkAgentsReassignHandler
+      postBulkAgentReassignHandler
     );
 
   // Bulk unenroll

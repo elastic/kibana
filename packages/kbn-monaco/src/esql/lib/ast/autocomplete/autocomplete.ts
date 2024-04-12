@@ -71,7 +71,7 @@ import {
   buildOptionDefinition,
   buildSettingDefinitions,
 } from './factories';
-import { EDITOR_MARKER } from '../shared/constants';
+import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -563,7 +563,7 @@ async function getExpressionSuggestionsByType(
 
   // collect all fields + variables to suggest
   const fieldsMap: Map<string, ESQLRealField> = await (argDef ? getFieldsMap() : new Map());
-  const anyVariables = collectVariables(commands, fieldsMap);
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   // enrich with assignment has some special rules who are handled somewhere else
   const canHaveAssignments = ['eval', 'stats', 'row'].includes(command.name);
@@ -1017,13 +1017,20 @@ async function getFieldsOrFunctionsSuggestions(
     }
     // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
     // avg( numberField ) => avg_numberField_
+    const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
       filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => /[^a-zA-Z\d]/.test(v))
+      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
       for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(/[^a-zA-Z\d]/g, '_');
-        const index = filteredFieldsByType.findIndex(({ label }) => underscoredName === label);
+        // remove backticks if present
+        const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
+          ? variable.slice(1, variable.length - 1)
+          : variable;
+        const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+        const index = filteredFieldsByType.findIndex(
+          ({ label }) => underscoredName === label || `_${underscoredName}_` === label
+        );
         if (index >= 0) {
           filteredFieldsByType.splice(index);
         }
@@ -1067,7 +1074,8 @@ async function getFunctionArgsSuggestions(
   const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
     commands,
     command,
-    fieldsMap
+    fieldsMap,
+    innerText
   );
   // pick the type of the next arg
   const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
@@ -1102,7 +1110,10 @@ async function getFunctionArgsSuggestions(
   const isUnknownColumn =
     arg &&
     isColumnItem(arg) &&
-    !columnExists(arg, { fields: fieldsMap, variables: variablesExcludingCurrentCommandOnes }).hit;
+    !columnExists(arg, {
+      fields: fieldsMap,
+      variables: variablesExcludingCurrentCommandOnes,
+    }).hit;
   if (noArgDefined || isUnknownColumn) {
     const commandArgIndex = command.args.findIndex(
       (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
@@ -1213,7 +1224,7 @@ async function getListArgsSuggestions(
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
     const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
-    const anyVariables = collectVariables(commands, fieldsMap);
+    const anyVariables = collectVariables(commands, fieldsMap, innerText);
     // extract the current node from the variables inferred
     anyVariables.forEach((values, key) => {
       if (values.some((v) => v.location === node.location)) {
@@ -1301,7 +1312,7 @@ async function getOptionArgsSuggestions(
   const isNewExpression = isRestartingExpression(innerText) || option.args.length === 0;
 
   const fieldsMap = await getFieldsMaps();
-  const anyVariables = collectVariables(commands, fieldsMap);
+  const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   const references = {
     fields: fieldsMap,
@@ -1339,7 +1350,8 @@ async function getOptionArgsSuggestions(
         const policyMetadata = await getPolicyMetadata(policyName);
         const anyEnhancedVariables = collectVariables(
           commands,
-          appendEnrichFields(fieldsMap, policyMetadata)
+          appendEnrichFields(fieldsMap, policyMetadata),
+          innerText
         );
 
         if (isNewExpression) {

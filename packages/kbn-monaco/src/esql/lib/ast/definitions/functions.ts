@@ -592,7 +592,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'condition', type: 'boolean' },
           { name: 'value', type: 'any' },
         ],
-        minParams: 3,
+        minParams: 2,
         returnType: 'any',
         examples: [
           `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
