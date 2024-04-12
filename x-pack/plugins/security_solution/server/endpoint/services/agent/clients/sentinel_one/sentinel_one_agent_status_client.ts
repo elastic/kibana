@@ -29,6 +29,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService();
+    const sortField = 'sentinel_one.agent.last_active_date';
 
     const query = {
       bool: {
@@ -63,7 +64,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
                 size: 1,
                 sort: [
                   {
-                    '@timestamp': {
+                    [sortField]: {
                       order: 'desc',
                     },
                   },
@@ -72,7 +73,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
             },
             sort: [
               {
-                'sentinel_one.agent.last_active_date': {
+                [sortField]: {
                   order: 'desc',
                 },
               },
