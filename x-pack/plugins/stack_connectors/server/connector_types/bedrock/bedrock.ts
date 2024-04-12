@@ -318,7 +318,6 @@ const formatBedrockBody = ({
 
 /**
  * Ensures that the messages are in the correct format for the Bedrock API
- * Bedrock only accepts assistant and user roles.
  * If 2 user or 2 assistant messages are sent in a row, Bedrock throws an error
  * We combine the messages into a single message to avoid this error
  * @param messages

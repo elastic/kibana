@@ -116,6 +116,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
+  console.log('TOOOOOOOLs', tools);
+
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   // isStream check is not on agentType alone because typescript doesn't like
@@ -242,7 +244,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     }
 
     return executor.call(
-      { input: latestMessage[0].content.trim() },
+      { input: latestMessage[0].content },
       {
         callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
         runName: DEFAULT_AGENT_EXECUTOR_ID,

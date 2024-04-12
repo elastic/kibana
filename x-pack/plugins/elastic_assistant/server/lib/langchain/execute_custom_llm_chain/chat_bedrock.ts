@@ -18,9 +18,9 @@ import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 
-export const getMessageContentAndRole = (prompt: string) => ({
+export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
   content: prompt,
-  role: 'user',
+  role,
 });
 
 export interface CustomChatModelInput extends BaseChatModelParams {
@@ -56,19 +56,36 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
+    console.log('MESSAGESMESSAGES', messages);
+    console.log('MESSAGESlength', messages.length);
+    console.log({
+      keys: Object.keys(messages[0]),
+      role: messages[0].role,
+      content: messages[0].content,
+    });
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
-
-    if (typeof messages[0].content !== 'string') {
-      throw new Error('Multimodal messages are not supported.');
+    const bedrockMessages = [];
+    if (messages.length === 2) {
+      messages.forEach((message, i) => {
+        if (typeof message.content !== 'string') {
+          throw new Error('Multimodal messages are not supported.');
+        }
+        bedrockMessages.push(
+          getMessageContentAndRole(message.content, i === 0 ? 'system' : 'user')
+        );
+      });
+    } else {
+      if (typeof messages[0].content !== 'string') {
+        throw new Error('Multimodal messages are not supported.');
+      }
+      bedrockMessages.push(getMessageContentAndRole(messages[0].content));
     }
-    const prompt = messages[0].content;
-    const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
       `ActionsClientChatBedrock#_call\ntraceId: ${
         this.#traceId
-      }\nassistantMessage:\n${JSON.stringify(assistantMessage)} `
+      }\nassistantMessage:\n${JSON.stringify(bedrockMessages)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {
@@ -78,7 +95,7 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
         subAction: 'invokeAI',
         subActionParams: {
           model: this.#request.body.model,
-          messages: [assistantMessage], // the assistant message
+          messages: bedrockMessages, // the assistant message
           temperature: 0,
           stopSequences: options?.stop,
         },
