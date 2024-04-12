@@ -9,8 +9,10 @@ import { sentinelOneConnectorMocks } from './mocks';
 import {
   SentinelOneDownloadAgentFileParams,
   SentinelOneFetchAgentFilesParams,
+  SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
 import { API_PATH } from './sentinelone';
+import { SentinelOneGetActivitiesResponseSchema } from '../../../common/sentinelone/schema';
 
 describe('SentinelOne Connector', () => {
   let connectorInstance: ReturnType<typeof sentinelOneConnectorMocks.create>;
@@ -82,6 +84,39 @@ describe('SentinelOne Connector', () => {
     it('should call SentinelOne api with expected url', async () => {
       await expect(connectorInstance.downloadAgentFile(downloadAgentFileParams)).resolves.toEqual(
         connectorInstance.mockResponses.downloadAgentFileApiResponse
+      );
+    });
+  });
+
+  describe('#getActivities()', () => {
+    it('should call sentinelone activities api with no query params', async () => {
+      await connectorInstance.getActivities();
+
+      expect(connectorInstance.requestSpy).toHaveBeenCalledWith({
+        method: 'get',
+        url: `${connectorInstance.constructorParams.config.url}${API_PATH}/activities`,
+        params: {
+          APIToken: 'token-abc',
+        },
+        responseSchema: SentinelOneGetActivitiesResponseSchema,
+      });
+    });
+
+    it('should call sentinelone activities api with provided query params', async () => {
+      const params: SentinelOneGetActivitiesParams = {
+        ids: 'one, two',
+        limit: 20,
+        cursor: 'at-position-1',
+      };
+      await connectorInstance.getActivities(params);
+
+      expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: {
+            APIToken: 'token-abc',
+            ...params,
+          },
+        })
       );
     });
   });
