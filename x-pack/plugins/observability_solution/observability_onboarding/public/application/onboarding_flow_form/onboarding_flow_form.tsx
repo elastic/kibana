@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
@@ -23,9 +23,8 @@ import {
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
-import { FeaturedCard } from '../packages_list/types';
-
-type Category = 'apm' | 'infra' | 'logs';
+import { Category } from './types';
+import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 
 interface UseCaseOption {
   id: Category;
@@ -86,16 +85,24 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
   const [integrationSearch, setIntegrationSearch] = useState('');
 
-  const createCollectionCardHandler = (query: string) => () => {
-    setIntegrationSearch(query);
-    if (packageListSearchBarRef.current) {
-      packageListSearchBarRef.current.focus();
-      packageListSearchBarRef.current.scrollIntoView({
-        behavior: 'auto',
-        block: 'center',
-      });
-    }
-  };
+  const createCollectionCardHandler = useCallback(
+    (query: string) => () => {
+      setIntegrationSearch(query);
+      if (packageListSearchBarRef.current) {
+        packageListSearchBarRef.current.focus();
+        packageListSearchBarRef.current.scrollIntoView({
+          behavior: 'auto',
+          block: 'center',
+        });
+      }
+    },
+    [setIntegrationSearch]
+  );
+
+  const customCards = useCustomCardsForCategory(
+    createCollectionCardHandler,
+    searchParams.get('category') as Category | null
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -111,7 +118,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
-        {options.map((option, index) => (
+        {options.map((option) => (
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
@@ -147,64 +154,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          <OnboardingFlowPackageList
-            customCards={[
-              toFeaturedCard('kubernetes'),
-              toFeaturedCard('prometheus'),
-              toFeaturedCard('docker'),
-              {
-                id: 'azure-generated',
-                type: 'generated',
-                title: 'Azure',
-                description: 'Collect logs and metrics from Microsoft Azure',
-                name: 'azure',
-                categories: ['observability'],
-                icons: [],
-                url: 'https://azure.com',
-                version: '',
-                integration: '',
-                isCollectionCard: true,
-                onCardClick: createCollectionCardHandler('azure'),
-              },
-              {
-                id: 'aws-generated',
-                type: 'generated',
-                title: 'AWS',
-                description:
-                  'Collect logs and metrics from Amazon Web Services (AWS)',
-                name: 'aws',
-                categories: ['observability'],
-                icons: [],
-                url: 'https://aws.com',
-                version: '',
-                integration: '',
-                isCollectionCard: true,
-                onCardClick: createCollectionCardHandler('aws'),
-              },
-              {
-                id: 'gcp-generated',
-                type: 'generated',
-                title: 'Google Cloud Platform',
-                description:
-                  'Collect logs and metrics from Google Cloud Platform',
-                name: 'gcp',
-                categories: ['observability'],
-                icons: [],
-                url: '',
-                version: '',
-                integration: '',
-                isCollectionCard: true,
-                onCardClick: createCollectionCardHandler('gcp'),
-              },
-            ]}
-          />
+          {Array.isArray(customCards) && (
+            <OnboardingFlowPackageList customCards={customCards} />
+          )}
 
           <EuiText css={customMargin} size="s" color="subdued">
             {i18n.translate(
               'xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText',
               {
                 defaultMessage:
-                  'Not seeing yours? Search through our 300+ ways of ingesting data:',
+                  'Not seeing yours? Search through our 130 ways of ingesting data:',
               }
             )}
           </EuiText>
@@ -240,7 +199,3 @@ const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-function toFeaturedCard(name: string): FeaturedCard {
-  return { type: 'featured', name };
-}
