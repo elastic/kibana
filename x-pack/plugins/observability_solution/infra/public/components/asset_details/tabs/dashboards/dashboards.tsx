@@ -41,7 +41,7 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-import { useCanManipulateCustomDashboard } from '../../hooks/use_custom_dashboards_permissions';
+import { useSavedObjectsPermissions } from '../../hooks/use_saved_objects_permissions';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
@@ -54,8 +54,7 @@ export function Dashboards() {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
 
   const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
-  const { canLinkOrEditCustomDashboard, canDeleteCustomDashboard } =
-    useCanManipulateCustomDashboard();
+  const { canLinkOrEdit, canDelete } = useSavedObjectsPermissions();
 
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<string, DashboardItem>();
@@ -168,20 +167,20 @@ export function Dashboards() {
                       onRefresh={reload}
                       customDashboards={customDashboards}
                       assetType={asset.type}
-                      canLinkOrEditCustomDashboard={canLinkOrEditCustomDashboard}
+                      canLinkOrEdit={canLinkOrEdit}
                     />,
                     <GotoDashboardLink currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={reload}
                       assetType={asset.type}
-                      canLinkOrEditCustomDashboard={canLinkOrEditCustomDashboard}
+                      canLinkOrEdit={canLinkOrEdit}
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={reload}
                       assetType={asset.type}
-                      canDeleteCustomDashboard={canDeleteCustomDashboard}
+                      canDelete={canDelete}
                     />,
                   ]}
                 />
@@ -206,7 +205,7 @@ export function Dashboards() {
               onRefresh={reload}
               customDashboards={customDashboards}
               assetType={asset.type}
-              canLinkOrEditCustomDashboard={canLinkOrEditCustomDashboard}
+              canLinkOrEdit={canLinkOrEdit}
             />
           }
         />

@@ -20,12 +20,12 @@ export function UnlinkDashboard({
   currentDashboard,
   onRefresh,
   assetType,
-  canDeleteCustomDashboard,
+  canDelete,
 }: {
   currentDashboard: DashboardItemWithTitle;
   onRefresh: () => void;
   assetType: InfraCustomDashboardAssetType;
-  canDeleteCustomDashboard: boolean;
+  canDelete: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { notifications } = useKibana();
@@ -90,7 +90,7 @@ export function UnlinkDashboard({
       <EuiToolTip
         position="top"
         content={
-          !canDeleteCustomDashboard
+          !canDelete
             ? i18n.translate(
                 'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
                 {
@@ -107,7 +107,7 @@ export function UnlinkDashboard({
           iconType="unlink"
           data-test-subj="infraUnLinkDashboardMenu"
           onClick={onClick}
-          disabled={!canDeleteCustomDashboard}
+          disabled={!canDelete}
         >
           {i18n.translate('xpack.infra.customDashboards.unlinkEmptyButtonLabel', {
             defaultMessage: 'Unlink dashboard',

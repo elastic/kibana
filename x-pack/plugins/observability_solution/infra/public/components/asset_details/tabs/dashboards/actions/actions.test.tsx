@@ -23,8 +23,8 @@ describe('Custom Dashboards Actions', () => {
       <EditDashboard
         onRefresh={() => {}}
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        assetType={'host'}
-        canLinkOrEditCustomDashboard={true}
+        assetType="host"
+        canLinkOrEdit
       />
     );
     expect(screen.getByTestId('infraEditCustomDashboardMenu')).not.toBeDisabled();
@@ -37,8 +37,8 @@ describe('Custom Dashboards Actions', () => {
       <EditDashboard
         onRefresh={() => {}}
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        assetType={'host'}
-        canLinkOrEditCustomDashboard={false}
+        assetType="host"
+        canLinkOrEdit={false}
       />
     );
 
@@ -48,27 +48,20 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the link dashboard action when the user can link a dashboard', () => {
-    render(<LinkDashboard onRefresh={() => {}} assetType={'host'} canLinkOrEditCustomDashboard />);
+    render(<LinkDashboard onRefresh={() => {}} assetType="host" canLinkOrEdit />);
 
     expect(screen.getByTestId('infraAddDashboard')).not.toBeDisabled();
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link dashboard action when the user cannot link a dashboard', () => {
-    render(
-      <LinkDashboard onRefresh={() => {}} assetType={'host'} canLinkOrEditCustomDashboard={false} />
-    );
+    render(<LinkDashboard onRefresh={() => {}} assetType="host" canLinkOrEdit={false} />);
 
     expect(screen.getByTestId('infraAddDashboard')).toBeDisabled();
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link new dashboard action when the user can link a dashboard', () => {
     render(
-      <LinkDashboard
-        onRefresh={() => {}}
-        newDashboardButton
-        assetType={'host'}
-        canLinkOrEditCustomDashboard
-      />
+      <LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" canLinkOrEdit />
     );
     expect(screen.getByTestId('infraLinkDashboardMenu')).not.toBeDisabled();
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
@@ -78,8 +71,8 @@ describe('Custom Dashboards Actions', () => {
       <LinkDashboard
         onRefresh={() => {}}
         newDashboardButton
-        assetType={'host'}
-        canLinkOrEditCustomDashboard={false}
+        assetType="host"
+        canLinkOrEdit={false}
       />
     );
     expect(screen.getByTestId('infraLinkDashboardMenu')).toBeDisabled();
@@ -89,9 +82,9 @@ describe('Custom Dashboards Actions', () => {
     render(
       <UnlinkDashboard
         onRefresh={() => {}}
-        assetType={'host'}
+        assetType="host"
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        canDeleteCustomDashboard
+        canDelete
       />
     );
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).not.toBeDisabled();
@@ -101,9 +94,9 @@ describe('Custom Dashboards Actions', () => {
     render(
       <UnlinkDashboard
         onRefresh={() => {}}
-        assetType={'host'}
+        assetType="host"
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        canDeleteCustomDashboard={false}
+        canDelete={false}
       />
     );
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).toBeDisabled();

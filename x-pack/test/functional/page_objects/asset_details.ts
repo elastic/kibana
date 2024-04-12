@@ -268,8 +268,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getAddDashboardButton() {
-      const button = await testSubjects.find('infraAddDashboard');
-      return button;
+      return testSubjects.find('infraAddDashboard');
     },
 
     // APM Tab link

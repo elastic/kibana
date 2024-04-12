@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const useCanManipulateCustomDashboard = () => {
+export const useSavedObjectsPermissions = () => {
   const {
     services: {
       application: { capabilities },
     },
   } = useKibanaContextForPlugin();
 
-  const canLinkOrEditCustomDashboard = useMemo(
-    () => capabilities.savedObjectsManagement.edit === true,
-    [capabilities]
-  );
+  const canLinkOrEdit = capabilities.savedObjectsManagement.edit === true;
 
-  const canDeleteCustomDashboard = useMemo(
-    () => capabilities.savedObjectsManagement.delete === true,
-    [capabilities]
-  );
+  const canDelete = capabilities.savedObjectsManagement.delete === true;
 
   return {
-    canLinkOrEditCustomDashboard,
-    canDeleteCustomDashboard,
+    canLinkOrEdit,
+    canDelete,
   };
 };

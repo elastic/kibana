@@ -17,12 +17,12 @@ export function EditDashboard({
   onRefresh,
   currentDashboard,
   assetType,
-  canLinkOrEditCustomDashboard,
+  canLinkOrEdit,
 }: {
   onRefresh: () => void;
   currentDashboard: DashboardItemWithTitle;
   assetType: InfraCustomDashboardAssetType;
-  canLinkOrEditCustomDashboard: boolean;
+  canLinkOrEdit: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onClick = useCallback(() => setIsModalVisible(!isModalVisible), [isModalVisible]);
@@ -32,7 +32,7 @@ export function EditDashboard({
       <EuiToolTip
         position="top"
         content={
-          !canLinkOrEditCustomDashboard
+          !canLinkOrEdit
             ? i18n.translate(
                 'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
                 {
@@ -49,7 +49,7 @@ export function EditDashboard({
           iconType="pencil"
           data-test-subj="infraEditCustomDashboardMenu"
           onClick={onClick}
-          disabled={!canLinkOrEditCustomDashboard}
+          disabled={!canLinkOrEdit}
         >
           {i18n.translate('xpack.infra.customDashboards.editEmptyButtonLabel', {
             defaultMessage: 'Edit dashboard link',

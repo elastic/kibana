@@ -18,13 +18,13 @@ export function LinkDashboard({
   newDashboardButton = false,
   customDashboards,
   assetType,
-  canLinkOrEditCustomDashboard,
+  canLinkOrEdit,
 }: {
   onRefresh: () => void;
   newDashboardButton?: boolean;
   customDashboards?: DashboardItemWithTitle[];
   assetType: InfraCustomDashboardAssetType;
-  canLinkOrEditCustomDashboard: boolean;
+  canLinkOrEdit: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -36,7 +36,7 @@ export function LinkDashboard({
       <EuiToolTip
         position="top"
         content={
-          !canLinkOrEditCustomDashboard ? (
+          !canLinkOrEdit ? (
             <p data-test-subj="infraCannotAddDashboardTooltip">
               {i18n.translate(
                 'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
@@ -56,18 +56,14 @@ export function LinkDashboard({
             iconType="plusInCircle"
             data-test-subj="infraLinkDashboardMenu"
             onClick={onClick}
-            disabled={!canLinkOrEditCustomDashboard}
+            disabled={!canLinkOrEdit}
           >
             {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
               defaultMessage: 'Link new dashboard',
             })}
           </EuiButtonEmpty>
         ) : (
-          <EuiButton
-            data-test-subj="infraAddDashboard"
-            onClick={onClick}
-            disabled={!canLinkOrEditCustomDashboard}
-          >
+          <EuiButton data-test-subj="infraAddDashboard" onClick={onClick} disabled={!canLinkOrEdit}>
             {i18n.translate('xpack.infra.assetDetails.dashboards.linkButtonLabel', {
               defaultMessage: 'Link dashboard',
             })}
