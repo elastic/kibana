@@ -54,6 +54,7 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
       getRulesClientWithRequest: () => mockRulesClient,
     });
@@ -70,6 +71,7 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       },
     });
   });
@@ -88,6 +90,7 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        run: { alerts: { max: 1000 }, actions: { max: 100000 } },
       }),
       getRulesClientWithRequest: () => mockRulesClient,
     });
