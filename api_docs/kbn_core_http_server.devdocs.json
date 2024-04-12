@@ -118,7 +118,15 @@
             "section": "def-common.RouteValidator",
             "text": "RouteValidator"
           },
-          "<P, Q, B>) => ",
+          "<P, Q, B> | (() => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidator",
+            "text": "RouteValidator"
+          },
+          "<P, Q, B>)) => ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -147,7 +155,15 @@
                 "section": "def-common.RouteValidator",
                 "text": "RouteValidator"
               },
-              "<P, Q, B>"
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B>)"
             ],
             "path": "packages/core/http/core-http-server/src/router/utils.ts",
             "deprecated": false,
@@ -211,10 +227,18 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.FullValidationConfig",
-                "text": "FullValidationConfig"
+                "section": "def-common.VersionedRouteValidation",
+                "text": "VersionedRouteValidation"
               },
-              "<P, Q, B>"
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteValidation",
+                "text": "VersionedRouteValidation"
+              },
+              "<P, Q, B>)"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -1046,80 +1070,6 @@
               "boolean | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-http-server",
-        "id": "def-common.FullValidationConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullValidationConfig",
-        "description": [
-          "\nVersioned route validation"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.FullValidationConfig",
-            "text": "FullValidationConfig"
-          },
-          "<P, Q, B>"
-        ],
-        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.FullValidationConfig.request",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "request",
-            "description": [
-              "\nValidation to run against route inputs: params, query and body"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.VersionedRouteRequestValidation",
-                "text": "VersionedRouteRequestValidation"
-              },
-              "<P, Q, B> | undefined"
-            ],
-            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.FullValidationConfig.response",
-            "type": "Object",
-            "tags": [
-              "note"
-            ],
-            "label": "response",
-            "description": [
-              "\nValidation to run against route output"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.VersionedRouteResponseValidation",
-                "text": "VersionedRouteResponseValidation"
-              },
-              " | undefined"
-            ],
-            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2825,6 +2775,19 @@
             "path": "packages/core/http/core-http-server/src/csp.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.ICspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [
+              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy-Report-Only` header."
+            ],
+            "path": "packages/core/http/core-http-server/src/csp.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3331,10 +3294,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts"
@@ -4745,14 +4704,6 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -4772,8 +4723,8 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-server-internal",
@@ -4870,6 +4821,18 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -5770,10 +5733,6 @@
               {
                 "plugin": "interactiveSetup",
                 "path": "src/plugins/interactive_setup/server/routes/status.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -5945,10 +5904,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts"
@@ -7187,22 +7142,6 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -7222,8 +7161,16 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-server-internal",
@@ -7272,6 +7219,30 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -8008,10 +7979,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -8183,10 +8150,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts"
@@ -8545,27 +8508,27 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -8710,10 +8673,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -8886,10 +8845,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.ts"
               },
@@ -9008,10 +8963,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -9183,10 +9134,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts"
@@ -9614,10 +9561,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -12157,7 +12100,15 @@
                 "section": "def-common.RouteValidator",
                 "text": "RouteValidator"
               },
-              "<P, Q, B>"
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B>)"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12526,7 +12477,15 @@
             "label": "validationSchemas",
             "description": [],
             "signature": [
-              "false | ",
+              "false | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<unknown, unknown, unknown>) | ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -14419,6 +14378,10 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -15598,6 +15561,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -15727,6 +15694,14 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -16119,6 +16094,10 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -16218,6 +16197,80 @@
             "description": [],
             "signature": [
               "{ body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.VersionedRouteValidation",
+        "type": "Interface",
+        "tags": [],
+        "label": "VersionedRouteValidation",
+        "description": [
+          "\nVersioned route validation"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteValidation",
+            "text": "VersionedRouteValidation"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.VersionedRouteValidation.request",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nValidation to run against route inputs: params, query and body"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteRequestValidation",
+                "text": "VersionedRouteRequestValidation"
+              },
+              "<P, Q, B> | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.VersionedRouteValidation.response",
+            "type": "Object",
+            "tags": [
+              "note"
+            ],
+            "label": "response",
+            "description": [
+              "\nValidation to run against route output"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteResponseValidation",
+                "text": "VersionedRouteResponseValidation"
+              },
+              " | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,

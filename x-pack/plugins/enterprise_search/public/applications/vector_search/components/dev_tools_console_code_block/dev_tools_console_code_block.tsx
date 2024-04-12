@@ -52,8 +52,8 @@ export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> =
                 <TryInConsoleButton
                   request={children}
                   application={application}
-                  consolePlugin={consolePlugin}
-                  sharePlugin={share}
+                  consolePlugin={consolePlugin ?? undefined}
+                  sharePlugin={share ?? undefined}
                 />
               </EuiFlexItem>
             )}

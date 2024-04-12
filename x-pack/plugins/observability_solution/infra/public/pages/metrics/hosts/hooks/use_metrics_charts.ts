@@ -21,7 +21,6 @@ export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
       cpu.xy.normalizedLoad1m,
       memory.xy.memoryUsage,
       memory.xy.memoryFree,
-      disk.xy.diskUsage,
       disk.xy.diskSpaceAvailable,
       disk.xy.diskIORead,
       disk.xy.diskIOWrite,

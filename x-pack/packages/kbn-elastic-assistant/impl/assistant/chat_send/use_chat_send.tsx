@@ -125,6 +125,9 @@ export const useChatSend = ({
         role: userMessage.role,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
       });
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
@@ -137,6 +140,9 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: responseMessage.role,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
       });

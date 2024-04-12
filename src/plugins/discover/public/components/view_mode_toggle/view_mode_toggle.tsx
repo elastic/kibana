@@ -10,7 +10,7 @@ import React, { useMemo, ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverStateContainer } from '../../application/main/services/discover_state';
@@ -33,7 +33,10 @@ export const DocumentViewModeToggle = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const isLegacy = useMemo(
+    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
+    [uiSettings, isTextBasedQuery]
+  );
   const includesNormalTabsStyle =
     viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
 
