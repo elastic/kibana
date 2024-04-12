@@ -24,7 +24,7 @@ import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
 import type { DisplayOptionsState } from '../session_view_display_options';
-import type { SessionViewDeps, SessionViewTelemetryKey } from '../../types';
+import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
 import { SessionViewDetailPanel } from '../session_view_detail_panel';
 import { SessionViewSearchBar } from '../session_view_search_bar';
 import { SessionViewDisplayOptions } from '../session_view_display_options';
@@ -71,18 +71,13 @@ export const SessionView = ({
 
   // track session open telemetry
   useEffect(() => {
-    let source = '';
-    // append 'app' details (which telemtry source is this from?)
-    if (index === CLOUD_DEFEND_INDEX) {
-      source += CLOUD_DEFEND_DATA_SOURCE;
-    } else if (index === ENDPOINT_INDEX) {
-      source += ELASTIC_DEFEND_DATA_SOURCE;
-    } else if (index === AUDITBEAT_INDEX) {
-      source += AUDITBEAT_DATA_SOURCE;
-    } else {
-      // any telemetry producers setting process.entry_leader.entity_id will cause sessionview action to appear in timeline tables.
-      source += 'unknown';
-    }
+    const sourceMap: Record<string, SessionViewIndices> = {
+      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
+      [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
+      [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
+    };
+
+    const source = sourceMap[index] || 'unknown';
 
     const eventKey: SessionViewTelemetryKey = `loaded_from_${source}_${
       investigatedAlertId ? 'alert' : 'log'

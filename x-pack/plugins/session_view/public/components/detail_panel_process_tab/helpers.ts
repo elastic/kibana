@@ -136,7 +136,7 @@ export const getDetailPanelProcess = (
   }
 
   processData.executable = executables.map((exe, i) => {
-    const execEventAction = index !== AUDITBEAT_INDEX ? 'exec' : 'executed';
+    const execEventAction = index === AUDITBEAT_INDEX ? 'executed' : 'exec';
     const action: EventAction = i === 0 ? 'fork' : execEventAction;
 
     return [exe, `(${action})`];
