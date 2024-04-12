@@ -38,11 +38,12 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels, createInferenceEndpoint } from '../../../../../services/api';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
 }
-export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
+export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: Props) => {
   const {
     core: { application },
     docLinks,
@@ -114,23 +115,18 @@ export const InferenceIdSelects = ({ onChange, 'data-test-subj': dataTestSubj }:
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
       try {
-        const { error } = await createInferenceEndpoint(inferenceId, taskType, modelConfig);
-
-        if (!error) {
-          setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-          setIsCreateInferenceApiLoading(false);
-          setInferenceAddError(undefined);
-          resendRequest();
-        } else {
-          setInferenceAddError(error.message);
-          setIsCreateInferenceApiLoading(false);
-        }
-      } catch (exception) {
-        setInferenceAddError(exception.message);
+        await ml?.mlApi?.trainedModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
+        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+        setIsCreateInferenceApiLoading(false);
+        setInferenceAddError(undefined);
+        resendRequest();
+      } catch (error) {
+        const errorObj = extractErrorProperties(error);
+        setInferenceAddError(errorObj.message);
         setIsCreateInferenceApiLoading(false);
       }
     },
-    [isInferenceFlyoutVisible, resendRequest]
+    [isInferenceFlyoutVisible, resendRequest, ml]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {

@@ -26,7 +26,8 @@ import type {
   NodesOverviewResponse,
   MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
-
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;
@@ -289,7 +290,16 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         version: '1',
       });
     },
+    createInferenceEndpoint(inferenceId: string,taskType: InferenceTaskType,modelConfig: ModelConfig){
+      return httpService.http<estypes.InferencePutModelResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_endpoint/${taskType}/${inferenceId}`,
+        method: 'POST',
+        body: JSON.stringify({ ...modelConfig }),
+        version: '1',
+      });
+    },
   };
+
 }
 
 export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;

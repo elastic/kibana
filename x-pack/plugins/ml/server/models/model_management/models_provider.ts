@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
-import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceModelConfig, InferenceTaskType, TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
@@ -27,6 +27,7 @@ import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
+import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -581,4 +582,36 @@ export class ModelsProvider {
     await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
     return putResponse;
   }
+    /**
+   * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
+   * @param inferenceId
+   * @param taskType
+   * @param modelConfig
+   */
+     async createInferenceEndpoint(inferenceId: string, taskType: InferenceTaskType, modelConfig: InferenceModelConfig) {
+
+      let esModelExists = false;
+      try {
+        await this._client.asInternalUser.inference.getModel({ inference_id: inferenceId });
+
+        esModelExists = true;
+      } catch (error) {
+
+        if (error.statusCode !== 404) {
+          throw error;
+        }
+        // model doesn't exist, ignore error
+      }
+
+      if (esModelExists) {
+        // return {error: Boom.badRequest('Model already exists')}
+        throw Boom.badRequest('Model already exists');
+      }
+      const putResponse = await this._client.asCurrentUser.inference.putModel({
+        inference_id: inferenceId,
+        task_type: taskType,
+        model_config: modelConfig,
+      });
+      return putResponse;
+    }
 }

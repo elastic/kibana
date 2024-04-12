@@ -77,7 +77,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   jsonData,
   refetchMapping,
   showAboutMappings,
-  isSemanticTextEnabled = true,
+  isSemanticTextEnabled = false,
 }) => {
   const {
     services: { extensionsService },
@@ -452,7 +452,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder>
+              <EuiPanel hasBorder paddingSize="s">
                 <EuiAccordion
                   id={pendingFieldListId}
                   initialIsOpen
@@ -483,7 +483,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     </EuiPanel>
                   }
                 >
-                  <EuiPanel hasShadow={false}>
+                  <EuiPanel hasShadow={false} paddingSize="s">
                     {newFieldsLength <= 0 ? (
                       <DocumentFields
                         onCancelAddingNewFields={onCancelAddingNewFields}

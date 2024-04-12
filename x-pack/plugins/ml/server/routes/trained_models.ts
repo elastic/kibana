@@ -30,12 +30,14 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
   modelDownloadsQuery,
+  createInferenceSchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
+import { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
@@ -889,4 +891,49 @@ export function trainedModelsRoutes(
         }
       )
     );
+
+    /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/create_inference_endpoint/:taskType/:inferenceId Create Inference Endpoint
+   * @apiName CreateInferenceEndpoint
+   * @apiDescription Create Inference Endpoint
+   */
+  router.versioned
+  .post({
+    path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_endpoint/{taskType}/{inferenceId}`,
+    access: 'internal',
+    options: {
+      tags: ['access:ml:canCreateInferenceEndpoint'],
+    },
+  })
+  .addVersion(
+    {
+      version: '1',
+      validate: {
+        request: {
+          params: createInferenceSchema,
+          body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+        },
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response }) => {
+        try {
+          const { inferenceId, taskType } = request.params;
+          const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
+            inferenceId,
+            taskType as InferenceTaskType,
+            request.body as InferenceModelConfig
+          );
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    )
+  );
+
 }
