@@ -54,6 +54,7 @@
       "savedObjects",
       "savedSearch",
       "unifiedDocViewer",
+      "charts"
     ],
     "optionalPlugins": [
       "cloudExperiments",
