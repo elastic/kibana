@@ -90,8 +90,11 @@ export function getObsAIAssistantConnectorType(
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     isSystemActionType: true,
-    getKibanaPrivileges: (params) => ['api:observabilityAIAssistant'],
-    minimumLicenseRequired: 'gold',
+    getKibanaPrivileges: (params) => [
+      'api:observabilityAIAssistant',
+      'app:observabilityAIAssistant',
+    ],
+    minimumLicenseRequired: 'enterprise',
     name: i18n.translate('xpack.observabilityAiAssistant.alertConnector.title', {
       defaultMessage: 'Observability AI Assistant',
     }),
