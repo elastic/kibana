@@ -193,27 +193,13 @@
           },
           {
             "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allow",
+            "id": "def-server.AssistantToolParams.anonymizationFields",
             "type": "Array",
             "tags": [],
-            "label": "allow",
+            "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allowReplacement",
-            "type": "Array",
-            "tags": [],
-            "label": "allowReplacement",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
+              "{ id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

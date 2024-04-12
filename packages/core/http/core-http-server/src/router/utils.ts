@@ -32,7 +32,8 @@ export function isFullValidatorContainer(
  * @public
  */
 export function getRequestValidation<P, Q, B>(
-  value: RouteValidator<P, Q, B>
+  value: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>)
 ): RouteValidatorFullConfigRequest<P, Q, B> {
+  if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.request : value;
 }
