@@ -97,7 +97,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { home, triggersActionsUi, usageCollection, management } = plugins;
 
     const assistantManagementTitle = i18n.translate(
-      'xpack.securitySolution.aiAssistantManagementSecurity.app.title',
+      'xpack.securitySolution.securityAiAssistantManagement.app.title',
       {
         defaultMessage: 'AI Assistant for Security',
       }
@@ -120,7 +120,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         id: 'ai_assistant_security',
         title: assistantManagementTitle,
         description: i18n.translate(
-          'xpack.securitySolution.aiAssistantManagementSecurity.app.description',
+          'xpack.securitySolution.securityAiAssistantManagement.app.description',
           {
             defaultMessage: 'Manage your AI Assistant for Security.',
           }
@@ -133,7 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       if (management) {
         management.sections.section.kibana.registerApp({
-          id: 'aiAssistantManagementSecurity',
+          id: 'securityAiAssistantManagement',
           title: assistantManagementTitle,
           hideFromSidebar: true,
           order: 1,
@@ -147,7 +147,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             const [coreStart, startPlugins] = await core.getStartServices();
             const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
             const store = await this.store(coreStart, startPlugins, subPlugins);
-            const services = await this.services.generateServices(coreStart, startPlugins, params);
+            const services = await this.services.generateServices(coreStart, startPlugins);
             await this.registerActions(store, params.history, services);
 
             const { renderApp } = await this.lazyApplicationDependencies();

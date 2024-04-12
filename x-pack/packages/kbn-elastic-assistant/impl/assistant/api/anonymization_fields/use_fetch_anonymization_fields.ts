@@ -45,19 +45,20 @@ export const useFetchAnonymizationFields = ({
     API_VERSIONS.public.v1,
   ];
 
-  return useQuery([cachingKeys, query], async () => {
-    if (!isAssistantEnabled) {
-      return { page: 0, perPage: 0, total: 0, data: [] };
-    }
-    const res = await http.fetch<FindAnonymizationFieldsResponse>(
-      ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-      {
-        method: 'GET',
-        version: API_VERSIONS.public.v1,
-        query,
-        signal,
-      }
-    );
-    return res;
-  });
+  return useQuery(
+    [cachingKeys, query],
+    async () => {
+      const res = await http.fetch<FindAnonymizationFieldsResponse>(
+        ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+        {
+          method: 'GET',
+          version: API_VERSIONS.public.v1,
+          query,
+          signal,
+        }
+      );
+      return res;
+    },
+    { enabled: isAssistantEnabled }
+  );
 };

@@ -168,8 +168,8 @@ export type StartServices = CoreStart &
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+    onAppLeave?: (handler: AppLeaveHandler) => void;
 
     /**
      * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.

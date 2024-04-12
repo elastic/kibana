@@ -233,12 +233,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiPageTemplate.Header
-          pageTitle="Settings"
-          tabs={tabs}
-          paddingSize="none"
-          // rightSideItems={[button]}
-        />
+        <EuiPageTemplate.Header pageTitle="Settings" tabs={tabs} paddingSize="none" />
         <EuiPageTemplate.Section
           paddingSize="l"
           css={css`
@@ -251,14 +246,16 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               actionTypeRegistry={actionTypeRegistry}
               defaultConnector={defaultConnector}
               conversationSettings={conversationSettings}
-              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+              setConversationsSettingsBulkActions={handleChange(
+                setConversationsSettingsBulkActions
+              )}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-              setConversationSettings={setConversationSettings}
+              setConversationSettings={handleChange(setConversationSettings)}
               allSystemPrompts={systemPromptSettings}
               selectedConversation={selectedConversation}
               isDisabled={selectedConversation == null}
               assistantStreamingEnabled={assistantStreamingEnabled}
-              setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
+              setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
               onSelectedConversationChange={onHandleSelectedConversationChange}
               http={http}
             />
@@ -291,8 +288,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               defaultPageSize={5}
               anonymizationFields={updatedAnonymizationData}
               anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
-              setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
-              setUpdatedAnonymizationData={setUpdatedAnonymizationData}
+              setAnonymizationFieldsBulkActions={handleChange(setAnonymizationFieldsBulkActions)}
+              setUpdatedAnonymizationData={handleChange(setUpdatedAnonymizationData)}
             />
           )}
           {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

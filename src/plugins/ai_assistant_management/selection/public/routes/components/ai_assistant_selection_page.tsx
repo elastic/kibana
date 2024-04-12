@@ -136,10 +136,10 @@ export function AiAssistantSelectionPage() {
                   </>
                 ) : null}
                 <EuiLink
-                  data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
+                  data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
                   external
                   target="_blank"
-                  href="https://www.elastic.co/guide/en/security/current/obs-ai-assistant.html"
+                  href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
                 >
                   {i18n.translate(
                     'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
@@ -159,7 +159,7 @@ export function AiAssistantSelectionPage() {
             )}
             titleSize="xs"
             onClick={() =>
-              navigateToApp('management', { path: 'kibana/aiAssistantManagementSecurity' })
+              navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
             }
           />
         </EuiFlexItem>

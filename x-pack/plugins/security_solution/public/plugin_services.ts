@@ -9,7 +9,6 @@ import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn
 import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -99,7 +98,7 @@ export class PluginServices {
   public async generateServices(
     coreStart: CoreStart,
     startPlugins: StartPluginsDependencies,
-    params: AppMountParameters<unknown> | ManagementAppMountParams
+    params?: AppMountParameters<unknown>
   ): Promise<StartServices> {
     const { apm } = await import('@elastic/apm-rum');
     const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
@@ -120,11 +119,11 @@ export class PluginServices {
       apm,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
-      setHeaderActionMenu: (params as AppMountParameters).setHeaderActionMenu,
+      ...(params?.setHeaderActionMenu ? { setHeaderActionMenu: params.setHeaderActionMenu } : {}),
       storage: this.storage,
       sessionStorage: this.sessionStorage,
       security: startPlugins.security,
-      onAppLeave: (params as AppMountParameters).onAppLeave,
+      ...(params?.onAppLeave ? { onAppLeave: params.onAppLeave } : {}),
       securityLayout: { getPluginWrapper: () => SecuritySolutionTemplateWrapper },
       contentManagement: startPlugins.contentManagement,
       telemetry: this.telemetry.start(),
