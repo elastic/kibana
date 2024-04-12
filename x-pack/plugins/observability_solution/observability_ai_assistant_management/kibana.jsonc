@@ -4,7 +4,7 @@
   "owner": "@elastic/obs-ai-assistant",
   "plugin": {
     "id": "observabilityAiAssistantManagement",
-    "server": false,
+    "server": true,
     "browser": true,
     "configPath": ["xpack", "observabilityAiAssistantManagement"],
     "requiredPlugins": ["management", "observabilityAIAssistant", "observabilityShared"],
