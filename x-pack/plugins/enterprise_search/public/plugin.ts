@@ -76,24 +76,24 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
-  security: SecurityPluginSetup;
-  share: SharePluginSetup;
+  security?: SecurityPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginsStart {
-  charts: ChartsPluginStart;
+  charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  indexManagement: IndexManagementPluginStart;
-  lens: LensPublicStart;
-  licensing: LicensingPluginStart;
-  ml: MlPluginStart;
-  searchConnectors: SearchConnectorsPluginStart;
-  searchPlayground: SearchPlaygroundPluginStart;
-  security: SecurityPluginStart;
-  share: SharePluginStart;
+  data?: DataPublicPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
+  indexManagement?: IndexManagementPluginStart;
+  lens?: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  ml?: MlPluginStart;
+  searchConnectors?: SearchConnectorsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
+  security?: SecurityPluginStart;
+  share?: SharePluginStart;
 }
 
 export interface ESConfig {
@@ -404,7 +404,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({
