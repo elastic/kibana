@@ -13,9 +13,9 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import { getMlGlobalServices } from '../../application/app';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
+import { getMlGlobalServices } from '../../application/util/get_services';
 
 /**
  * Handles Anomaly detection jobs selection by a user.

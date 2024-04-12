@@ -51,6 +51,7 @@ interface LatencyAlertsHistoryChartProps {
   environment: string;
   timeZone: string;
   ruleId: string;
+  alertInstanceId?: string;
 }
 export function LatencyAlertsHistoryChart({
   serviceName,
@@ -61,6 +62,7 @@ export function LatencyAlertsHistoryChart({
   environment,
   timeZone,
   ruleId,
+  alertInstanceId,
 }: LatencyAlertsHistoryChartProps) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -144,6 +146,7 @@ export function LatencyAlertsHistoryChart({
     featureIds: [AlertConsumers.APM],
     ruleId,
     dateRange: { from: start, to: end },
+    instanceId: alertInstanceId,
   });
 
   if (isError) {

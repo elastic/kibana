@@ -154,8 +154,6 @@ describe('API tests', () => {
         isEnabledRAGAlerts: true,
         assistantStreamingEnabled: false,
         alertsIndexPattern: '.alerts-security.alerts-default',
-        allow: ['a', 'b', 'c'],
-        allowReplacement: ['b', 'c'],
         replacements: { auuid: 'real.hostname' },
         size: 30,
       };
@@ -166,7 +164,7 @@ describe('API tests', () => {
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
           ...staticDefaults,
-          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
+          body: '{"model":"gpt-4","message":"This is a test","subAction":"invokeAI","conversationId":"test","actionTypeId":".gen-ai","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","size":30}',
         }
       );
     });
