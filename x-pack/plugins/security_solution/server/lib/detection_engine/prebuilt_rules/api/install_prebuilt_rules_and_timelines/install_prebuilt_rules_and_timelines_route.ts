@@ -8,6 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULE_MANAGEMENT_API_WRITE } from '@kbn/security-solution-features/src/constants';
 import {
   InstallPrebuiltRulesAndTimelinesResponse,
   PREBUILT_RULES_URL,
@@ -34,7 +35,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
       access: 'public',
       path: PREBUILT_RULES_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_WRITE}`],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

@@ -11,6 +11,7 @@ import type { ServerlessSecurityConfig } from '../config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
+import { getRuleManagementProductFeaturesConfigurator } from './rule_management_product_features_config ';
 
 export const getProductProductFeaturesConfigurator = (
   enabledProductFeatureKeys: ProductFeatureKeys,
@@ -23,5 +24,6 @@ export const getProductProductFeaturesConfigurator = (
     ),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
+    ruleManagement: getRuleManagementProductFeaturesConfigurator(enabledProductFeatureKeys),
   };
 };

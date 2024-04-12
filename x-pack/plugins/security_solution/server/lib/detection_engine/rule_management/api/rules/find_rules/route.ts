@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -27,7 +28,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL_FIND,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(

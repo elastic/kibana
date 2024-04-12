@@ -19,6 +19,8 @@ import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
   SecuritySubFeatureId,
+  ProductFeatureRuleManagementKey,
+  RuleManagementSubFeatureId,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -49,6 +51,11 @@ export type ProductFeaturesCasesConfig = Map<
 export type ProductFeaturesAssistantConfig = Map<
   ProductFeatureAssistantKey,
   ProductFeatureKibanaConfig<AssistantSubFeatureId>
+>;
+
+export type ProductFeaturesRuleManagementConfig = Map<
+  ProductFeatureRuleManagementKey,
+  ProductFeatureKibanaConfig<RuleManagementSubFeatureId>
 >;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;

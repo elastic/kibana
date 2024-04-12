@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SetupPlugins } from '../../../../../plugin';
@@ -36,7 +37,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       access: 'public',
       path: PREBUILT_RULES_STATUS_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(

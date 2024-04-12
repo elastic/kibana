@@ -10,10 +10,12 @@ import type {
   SecuritySubFeatureId,
   CasesSubFeatureId,
   AssistantSubFeatureId,
+  RuleManagementSubFeatureId,
 } from '@kbn/security-solution-features/keys';
 
 export interface ProductFeaturesConfigurator {
   security: () => ProductFeaturesConfig<SecuritySubFeatureId>;
   cases: () => ProductFeaturesConfig<CasesSubFeatureId>;
   securityAssistant: () => ProductFeaturesConfig<AssistantSubFeatureId>;
+  ruleManagement: () => ProductFeaturesConfig<RuleManagementSubFeatureId>;
 }

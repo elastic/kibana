@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleUpgradeResponseBody,
@@ -33,7 +34,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
       access: 'internal',
       path: REVIEW_RULE_UPGRADE_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

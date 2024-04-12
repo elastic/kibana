@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULE_MANAGEMENT_API_WRITE } from '@kbn/security-solution-features/src/constants';
 import {
   PERFORM_RULE_UPGRADE_URL,
   SkipRuleUpgradeReason,
@@ -38,7 +39,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_WRITE}`],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

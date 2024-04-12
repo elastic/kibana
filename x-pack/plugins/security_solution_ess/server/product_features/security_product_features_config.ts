@@ -47,4 +47,7 @@ const securityProductFeaturesConfig: Record<
   [ProductFeatureSecurityKey.endpointExceptions]: {
     privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
   },
+  [ProductFeatureSecurityKey.ruleManagement]: {
+    privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.ruleManagement],
+  },
 };

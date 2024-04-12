@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -30,7 +31,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
       path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
       access: 'internal',
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(

@@ -79,17 +79,26 @@ export enum ProductFeatureAssistantKey {
   assistant = 'assistant',
 }
 
+export enum ProductFeatureRuleManagementKey {
+  /**
+   * Enables management of detection rules
+   */
+  ruleManagement = 'rule_management',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
+  ...ProductFeatureRuleManagementKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
-  | ProductFeatureAssistantKey;
+  | ProductFeatureAssistantKey
+  | ProductFeatureRuleManagementKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -118,4 +127,9 @@ export enum CasesSubFeatureId {
 /** Sub-features IDs for Security Assistant */
 export enum AssistantSubFeatureId {
   createConversation = 'createConversationSubFeature',
+}
+
+export enum RuleManagementSubFeatureId {
+  manageExceptions = 'manageExceptionsSubFeature',
+  manageLists = 'manageListsSubFeature',
 }

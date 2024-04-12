@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { RULE_MANAGEMENT_API_READ } from '@kbn/security-solution-features/src/constants';
 import {
   GetRuleManagementFiltersResponse,
   RULE_MANAGEMENT_FILTERS_URL,
@@ -57,7 +58,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       access: 'internal',
       path: RULE_MANAGEMENT_FILTERS_URL,
       options: {
-        tags: ['access:securitySolution'],
+        tags: [`access:${RULE_MANAGEMENT_API_READ}`],
       },
     })
     .addVersion(

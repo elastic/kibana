@@ -8,6 +8,7 @@
 import { ESQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
+import { RULE_MANAGEMENT_FEATURE_ID } from '@kbn/security-solution-features/src/constants';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EsqlRuleParams } from '../../rule_schema';
 import { esqlExecutor } from './esql';
@@ -43,7 +44,7 @@ export const createEsqlAlertType = (
     minimumLicenseRequired: 'basic',
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
-    producer: SERVER_APP_ID,
+    producer: RULE_MANAGEMENT_FEATURE_ID,
     executor: (params) => esqlExecutor({ ...params, version }),
   };
 };

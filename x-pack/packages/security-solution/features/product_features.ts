@@ -8,3 +8,4 @@
 export { getSecurityFeature } from './src/security';
 export { getCasesFeature } from './src/cases';
 export { getAssistantFeature } from './src/assistant';
+export { getRuleManagementFeature } from './src/rule_management';
