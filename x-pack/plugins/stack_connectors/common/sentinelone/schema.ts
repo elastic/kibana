@@ -324,18 +324,24 @@ export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({
 });
 
 export const SentinelOneExecuteScriptParamsSchema = schema.object({
-  computerName: schema.maybe(schema.string()),
+  // Only a sub-set of filters are defined below. This API, however, support many more filters
+  // which can be added in the future if needed.
+  filter: schema.object({
+    uuids: schema.maybe(schema.string({ minLength: 1 })),
+    ids: schema.maybe(schema.string({ minLength: 1 })),
+  }),
   script: schema.object({
-    scriptId: schema.string(),
-    scriptName: schema.maybe(schema.string()),
     apiKey: schema.maybe(schema.string()),
-    outputDirectory: schema.maybe(schema.string()),
-    requiresApproval: schema.maybe(schema.boolean()),
-    taskDescription: schema.maybe(schema.string()),
-    singularityxdrUrl: schema.maybe(schema.string()),
     inputParams: schema.maybe(schema.string()),
-    singularityxdrKeyword: schema.maybe(schema.string()),
-    scriptRuntimeTimeoutSeconds: schema.maybe(schema.number()),
+    outputDirectory: schema.maybe(schema.string()),
+    outputDestination: schema.maybe(
+      schema.oneOf([
+        schema.literal('Local'),
+        schema.literal('None'),
+        schema.literal('SentinelCloud'),
+        schema.literal('SingularityXDR'),
+      ])
+    ),
     passwordFromScope: schema.maybe(
       schema.object({
         scopeLevel: schema.maybe(schema.string()),
@@ -343,6 +349,13 @@ export const SentinelOneExecuteScriptParamsSchema = schema.object({
       })
     ),
     password: schema.maybe(schema.string()),
+    requiresApproval: schema.maybe(schema.boolean()),
+    scriptId: schema.string(),
+    scriptName: schema.maybe(schema.string()),
+    scriptRuntimeTimeoutSeconds: schema.maybe(schema.number()),
+    singularityxdrKeyword: schema.maybe(schema.string()),
+    singularityxdrUrl: schema.maybe(schema.string()),
+    taskDescription: schema.maybe(schema.string()),
   }),
   alertIds: AlertIds,
 });

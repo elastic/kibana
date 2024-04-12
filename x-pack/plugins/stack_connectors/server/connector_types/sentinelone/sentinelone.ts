@@ -184,19 +184,20 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async executeScript(payload: SentinelOneExecuteScriptParams) {
-    // FIXME:PT fix this method to return response and support API options in a better way
-    await this.sentinelOneApiRequest({
+  public async executeScript({ filter, script }: SentinelOneExecuteScriptParams) {
+    if (!filter.ids && !filter.uuids) {
+      throw new Error(`A filter must be defined; either 'ids' or 'uuids'`);
+    }
+
+    return this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
       data: {
         data: {
           outputDestination: 'SentinelCloud',
-          ...payload.script,
+          ...script,
         },
-        filter: {
-          computerName: payload.computerName,
-        },
+        filter,
       },
       responseSchema: SentinelOneExecuteScriptResponseSchema,
     });
