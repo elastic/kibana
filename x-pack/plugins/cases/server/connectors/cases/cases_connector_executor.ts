@@ -789,11 +789,11 @@ export class CasesConnectorExecutor {
       .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
   }
 
-  private getGroupingAsTags(grouping: GroupedAlerts['grouping']) {
+  private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
     const flattenGrouping = getFlattenedObject(grouping);
-    return Object.entries(flattenGrouping).map(
-      ([key, value]) => `${key}:${convertValueToString(value)}`
-    );
+    return Object.entries(flattenGrouping)
+      .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
+      .flat();
   }
 
   private async handleClosedCases(

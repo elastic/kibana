@@ -253,7 +253,9 @@ describe('CasesConnectorExecutor', () => {
                 tags: [
                   'auto-generated',
                   'rule:rule-test-id',
+                  'host.name',
                   'host.name:A',
+                  'dest.ip',
                   'dest.ip:0.0.0.1',
                   ...rule.tags,
                 ],
@@ -277,7 +279,9 @@ describe('CasesConnectorExecutor', () => {
                 tags: [
                   'auto-generated',
                   'rule:rule-test-id',
+                  'host.name',
                   'host.name:B',
+                  'dest.ip',
                   'dest.ip:0.0.0.1',
                   ...rule.tags,
                 ],
@@ -301,7 +305,9 @@ describe('CasesConnectorExecutor', () => {
                 tags: [
                   'auto-generated',
                   'rule:rule-test-id',
+                  'host.name',
                   'host.name:B',
+                  'dest.ip',
                   'dest.ip:0.0.0.3',
                   ...rule.tags,
                 ],
@@ -552,7 +558,9 @@ describe('CasesConnectorExecutor', () => {
                 tags: [
                   'auto-generated',
                   'rule:rule-test-id',
+                  'host.name',
                   'host.name:B',
+                  'dest.ip',
                   'dest.ip:0.0.0.3',
                   ...rule.tags,
                 ],
@@ -706,7 +714,9 @@ describe('CasesConnectorExecutor', () => {
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
             'a'.repeat(MAX_LENGTH_PER_TAG),
           ]);
@@ -736,14 +746,18 @@ describe('CasesConnectorExecutor', () => {
           const systemTags = [
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
           ];
 
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
             ...Array(MAX_TAGS_PER_CASE - systemTags.length).fill('foo'),
           ]);
@@ -783,8 +797,11 @@ describe('CasesConnectorExecutor', () => {
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'foo',
             'foo:["bar",1,true,{}]',
+            'bar.foo',
             'bar.foo:test',
+            'baz',
             'baz:my value',
             'rule',
             'test',
@@ -852,7 +869,9 @@ describe('CasesConnectorExecutor', () => {
                 tags: [
                   'auto-generated',
                   'rule:rule-test-id',
+                  'host.name',
                   'host.name:A',
+                  'dest.ip',
                   'dest.ip:0.0.0.1',
                   ...rule.tags,
                 ],
@@ -960,7 +979,9 @@ describe('CasesConnectorExecutor', () => {
                   tags: [
                     'auto-generated',
                     'rule:rule-test-id',
+                    'host.name',
                     'host.name:B',
+                    'dest.ip',
                     'dest.ip:0.0.0.3',
                     ...rule.tags,
                   ],
@@ -1009,7 +1030,9 @@ describe('CasesConnectorExecutor', () => {
                   tags: [
                     'auto-generated',
                     'rule:rule-test-id',
+                    'host.name',
                     'host.name:A',
+                    'dest.ip',
                     'dest.ip:0.0.0.1',
                     ...rule.tags,
                   ],
