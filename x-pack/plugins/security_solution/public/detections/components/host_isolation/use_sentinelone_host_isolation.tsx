@@ -34,9 +34,8 @@ export const useGetSentinelOneAgentStatus = (
 
   return useQuery<AgentStatusInfo, IHttpFetchError<ErrorType>>({
     queryKey: ['get-agent-status', agentIds],
+    refetchInterval: 5000,
     ...options,
-    // TODO: update this to use a function instead of a number
-    refetchInterval: 2000,
     queryFn: () =>
       http
         .get<{ data: AgentStatusInfo }>(AGENT_STATUS_ROUTE, {
@@ -60,9 +59,9 @@ export const useGetAgentStatus = (
 
   return useQuery<AgentStatusRecords, IHttpFetchError<ErrorType>>({
     queryKey: ['get-agent-status', agentIds],
-    ...options,
     // TODO: remove this refetchInterval and instead override it where called, via options.
-    refetchInterval: 2000,
+    refetchInterval: 5000,
+    ...options,
     queryFn: () =>
       http
         .get<{ data: AgentStatusRecords }>(AGENT_STATUS_ROUTE, {
@@ -76,7 +75,9 @@ export const useGetAgentStatus = (
   });
 };
 
-export const useAgentStatusHook = () => {
+export const useAgentStatusHook = ():
+  | typeof useGetAgentStatus
+  | typeof useGetSentinelOneAgentStatus => {
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   // 8.14 use agent status client hook if FF enabled
   return !agentStatusClientEnabled ? useGetSentinelOneAgentStatus : useGetAgentStatus;
