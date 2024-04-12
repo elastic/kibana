@@ -24,7 +24,7 @@ export const RELATED_INTEGRATION_ARIA_LABEL = i18n.translate(
 export const RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.relatedIntegrationVersionDependencyAriaLabel',
   {
-    defaultMessage: 'Related integration version range',
+    defaultMessage: 'Related integration version constraint',
   }
 );
 
@@ -66,7 +66,7 @@ export const INTEGRATION_REQUIRED = i18n.translate(
 export const VERSION_DEPENDENCY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionRequired',
   {
-    defaultMessage: 'Version range must be specified',
+    defaultMessage: 'Version constraint must be specified',
   }
 );
 
@@ -74,7 +74,7 @@ export const VERSION_DEPENDENCY_INVALID = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.validation.versionInvalid',
   {
     defaultMessage:
-      'Version range is invalid semver. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
+      'Version constraint is invalid. Only tilde, caret or plain version supported e.g. ~1.2.3, ^1.2.3 or 1.2.3.',
   }
 );
 

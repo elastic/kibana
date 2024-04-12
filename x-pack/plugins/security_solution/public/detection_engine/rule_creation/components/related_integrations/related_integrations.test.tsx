@@ -212,7 +212,7 @@ describe('RelatedIntegrations form part', () => {
       }
     );
 
-    it('shows integration version range corresponding to the latest package version when integration is NOT installed', async () => {
+    it('shows integration version constraint corresponding to the latest package version when integration is NOT installed', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
           {
@@ -235,7 +235,7 @@ describe('RelatedIntegrations form part', () => {
       expect(screen.getByTestId(VERSION_INPUT_TEST_ID)).toHaveValue('^1.2.0');
     });
 
-    it('shows integration version range corresponding to the installed package version when integration is installed', async () => {
+    it('shows integration version constraint corresponding to the installed package version when integration is installed', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
           {
@@ -403,7 +403,7 @@ describe('RelatedIntegrations form part', () => {
       });
     });
 
-    it('returns a selected integration with version range modified ', async () => {
+    it('returns a selected integration with version constraint modified ', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
           {
@@ -524,7 +524,7 @@ describe('RelatedIntegrations form part', () => {
       );
     });
 
-    it('shows an error when version range is invalid', async () => {
+    it('shows an error when version constraint is invalid', async () => {
       render(<TestForm />, { wrapper: createReactQueryWrapper() });
 
       await addRelatedIntegrationRow();
@@ -534,7 +534,7 @@ describe('RelatedIntegrations form part', () => {
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '100' });
 
       expect(screen.getByTestId(RELATED_INTEGRATION_ROW)).toHaveTextContent(
-        'Version range is invalid'
+        'Version constraint is invalid'
       );
     });
   });
