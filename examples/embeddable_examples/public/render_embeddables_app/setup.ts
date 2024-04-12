@@ -11,7 +11,7 @@ import type { StartDeps } from '../plugin';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 const APP_ID = 'embeddableRenderer';
-const title = 'Render Embeddables';
+const title = 'Render embeddables';
 
 export function setupRenderEmbeddablesApp(core: CoreSetup<StartDeps>, developerExamples: DeveloperExamplesSetup) {
   core.application.register({

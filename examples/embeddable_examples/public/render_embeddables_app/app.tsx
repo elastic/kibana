@@ -10,9 +10,31 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from "@kbn/core-application-browser";
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { Overview } from './overview';
+
+const App = () => {
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageSection>
+          <EuiPageHeader pageTitle="Render embeddables" />
+        </EuiPageSection>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
+            <Overview />
+
+            <EuiSpacer />
+
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
 
 export const renderApp = (element: AppMountParameters['element']) => {
-  ReactDOM.render(<div>Render Embeddables example</div>, element);
+  ReactDOM.render(<App />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
