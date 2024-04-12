@@ -233,7 +233,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const {
-    columns: currentColumns,
+    columns: currentColumnIds,
     onAddColumn,
     onRemoveColumn,
     onSetColumns,
@@ -250,7 +250,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const onSetColumnsTimeline = useCallback(
     (nextColumns: string[]) => {
-      onSetColumns(nextColumns, true);
+      const shouldUnifiedTableKeepColumnsUnchanged = true;
+      // to support the legacy table, unified table has the ability to automatically
+      // prepend timestamp field column to the table. We do not want that, otherwise
+      // the list of columns returned does not have timestamp field because unifiedDataTable assumes that
+      // it is automatically available in the table.
+      onSetColumns(nextColumns, shouldUnifiedTableKeepColumnsUnchanged);
     },
     [onSetColumns]
   );
@@ -386,7 +391,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
                       columns={columns}
-                      columnIds={currentColumns}
+                      columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
                       itemsPerPage={itemsPerPage}
