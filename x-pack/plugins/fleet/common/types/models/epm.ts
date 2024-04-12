@@ -579,12 +579,20 @@ export interface StateContext<T> {
   latestExecutedState?: LatestExecutedState<T>;
 }
 
+export interface EsDataStream {
+  name: string;
+  pattern: string;
+  display_name?: string;
+}
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
+  data_streams?: EsDataStream[];
   name: string;
+  display_name?: string;
   version: string;
   install_status: EpmPackageInstallStatus;
   install_version: string;

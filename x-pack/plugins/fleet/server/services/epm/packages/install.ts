@@ -20,11 +20,19 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
-import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
+import type {
+  EsDataStream,
+  PackageDataStreamTypes,
+  PackageInstallContext,
+  RegistryDataStream,
+} from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
+import {
+  generateESIndexPatterns,
+  generateTemplateIndexPattern,
+} from '../elasticsearch/template/template';
 import type {
   ArchivePackage,
   BulkInstallPackageInfo,
@@ -1206,6 +1214,22 @@ export async function restartInstallation(options: {
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
 
+/**
+ * Returns a map of the data stream path fields to elasticsearch index pattern.
+ * @param dataStreams an array of RegistryDataStream objects
+ */
+function generateESDataStreams(dataStreams: RegistryDataStream[] | undefined): EsDataStream[] {
+  if (!dataStreams) {
+    return [];
+  }
+
+  return dataStreams.map((dataStream) => ({
+    name: dataStream.path,
+    pattern: generateTemplateIndexPattern(dataStream),
+    display_name: dataStream.title,
+  }));
+}
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
@@ -1234,7 +1258,9 @@ export async function createInstallation(options: {
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
+    data_streams: generateESDataStreams(packageInfo.data_streams),
     name: pkgName,
+    display_name: packageInfo.title,
     version: pkgVersion,
     install_version: pkgVersion,
     install_status: 'installing',
@@ -1439,7 +1465,8 @@ export async function installAssetsForInputPackagePolicy(opts: {
     soClient,
     installedPkgWithAssets.installation.name,
     [],
-    generateESIndexPatterns([dataStream])
+    generateESIndexPatterns([dataStream]),
+    generateESDataStreams([dataStream])
   );
 }
 

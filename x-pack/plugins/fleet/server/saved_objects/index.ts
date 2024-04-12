@@ -533,12 +533,22 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       properties: {
         name: { type: 'keyword' },
+        display_name: { type: 'text' },
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
+        /* deprecated */
         es_index_patterns: {
           dynamic: false,
           properties: {},
+        },
+        data_streams: {
+          dynamic: false,
+          properties: {
+            pattern: { type: 'keyword' },
+            name: { type: 'keyword' },
+            display_name: { type: 'text' },
+          },
         },
         verification_status: { type: 'keyword' },
         verification_key_id: { type: 'keyword' },
@@ -600,6 +610,39 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               latest_executed_state: { type: 'object', enabled: false },
+            },
+          },
+        ],
+      },
+      '3': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              display_name: { type: 'text' },
+              data_streams: {
+                dynamic: false,
+                properties: {
+                  pattern: { type: 'keyword' },
+                  name: { type: 'keyword' },
+                  display_name: { type: 'text' },
+                },
+              },
+            },
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: (doc) => {
+              return {
+                attributes: {
+                  data_streams: Object.entries(doc.attributes.es_index_patterns ?? {}).map(
+                    ([key, value]) => ({
+                      pattern: value,
+                      name: key,
+                    })
+                  ),
+                },
+              };
             },
           },
         ],
