@@ -20,11 +20,12 @@ import { EditOutputFlyout } from '.';
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <>CODE EDITOR</>,
 }));
+
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
   FleetStatusProvider: (props: any) => {
     return props.children;
   },
-  useFleetStatus: jest.fn().mockReturnValue({}),
+  useFleetStatus: jest.fn(),
 }));
 
 jest.mock('../../../../hooks', () => {
@@ -43,7 +44,7 @@ jest.mock('./confirm_update', () => ({
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
 
-const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
+const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
 function renderFlyout(output?: Output) {
   const renderer = createFleetTestRendererMock();
@@ -104,8 +105,8 @@ describe('EditOutputFlyout', () => {
   beforeEach(() => {
     mockStartServices(false);
     jest.clearAllMocks();
-    // mockSendPutOutput.mockClear();
-    // mockedUsedFleetStatus.mockClear();
+
+    mockedUseFleetStatus.mockReturnValue({} as any);
   });
 
   it('should render the flyout if there is not output provided', async () => {
@@ -192,6 +193,13 @@ describe('EditOutputFlyout', () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
       type: 'kafka',
       name: 'kafka output',
@@ -225,6 +233,13 @@ describe('EditOutputFlyout', () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
       type: 'kafka',
       name: 'kafka output',
@@ -259,6 +274,13 @@ describe('EditOutputFlyout', () => {
 
   it('should populate secret input with plain text value when editing logstash output', async () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ outputSecretsStorage: true });
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
       type: 'logstash',
       name: 'logstash output',
@@ -285,7 +307,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
-    mockedUsedFleetStatus.mockReturnValue({
+    mockedUseFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
     } as any);
     const { utils } = renderFlyout({
@@ -304,6 +326,13 @@ describe('EditOutputFlyout', () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
       type: 'remote_elasticsearch',
       name: 'remote es output',
@@ -328,6 +357,13 @@ describe('EditOutputFlyout', () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
       .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
       type: 'remote_elasticsearch',
       name: 'remote es output',
