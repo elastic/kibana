@@ -184,13 +184,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
         <EuiFlexItem grow={false}>{Renderer}</EuiFlexItem>
       </EuiFlexGroup>
     ) : (
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        step={AlertsCasesTourSteps.pointToAlertName}
-        tourId={SecurityStepId.alertsCases}
-      >
-        {Renderer}
-      </GuidedOnboardingTourStep>
+      <>{Renderer}</>
     );
   }
 );
