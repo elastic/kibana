@@ -1657,7 +1657,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.memory_scan',
-    first_supported_version: '8.14.0',
+    first_supported_version: '8.14',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.memory_scan',
       {
