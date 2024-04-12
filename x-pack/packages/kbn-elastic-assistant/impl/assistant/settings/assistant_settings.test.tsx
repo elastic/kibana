@@ -83,7 +83,7 @@ jest.mock('./use_settings_updater/use_settings_updater', () => {
 
 const queryClient = new QueryClient();
 
-const wrapper = (props) => (
+const wrapper = (props: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
 );
 
