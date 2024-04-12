@@ -381,6 +381,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           experimentalFeatures: this.experimentalFeatures,
           upselling: upsellingService,
           capabilities: core.application.capabilities,
+          uiSettingsClient: core.uiSettings,
           ...(license.type != null && { license }),
         };
         updateAppLinks(links, linksPermissions);
