@@ -9,7 +9,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { useFormContext } from 'react-hook-form';
 import { OptionalText } from './optional_text';
 import { CreateSLOForm } from '../../types';
@@ -19,8 +19,7 @@ import { GroupByCardinality } from './group_by_cardinality';
 export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isLoading: boolean }) {
   const { watch } = useFormContext<CreateSLOForm>();
 
-  const groupByFields =
-    dataView?.fields?.filter((field) => field.aggregatable && field.type !== 'date') ?? [];
+  const groupByFields = dataView?.fields?.filter((field) => canGroupBy(field)) ?? [];
   const index = watch('indicator.params.index');
 
   return (
@@ -53,3 +52,13 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
     </>
   );
 }
+
+const canGroupBy = (field: FieldSpec) => {
+  const isAggregatble = field.aggregatable;
+  const isNotDate = field.type !== 'date';
+  // handles multi fields where there are multi es types, which could include 'text'
+  // text fields break the transforms so we must ensure that the field is only a keyword
+  const isOnlyKeyword = field.esTypes?.length === 1 && field.esTypes[0] === 'keyword';
+
+  return isAggregatble && isNotDate && isOnlyKeyword;
+};
