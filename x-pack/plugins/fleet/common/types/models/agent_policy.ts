@@ -43,7 +43,6 @@ export interface NewAgentPolicy {
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
   advanced_settings?: { [key: string]: any } | null;
-  logging_level?: AgentLoggingLevel | null;
 }
 
 // SO definition for this type is declared in server/types/interfaces

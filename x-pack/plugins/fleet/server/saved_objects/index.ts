@@ -158,7 +158,6 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         overrides: { type: 'flattened', index: false },
         keep_monitoring_alive: { type: 'boolean' },
         advanced_settings: { type: 'flattened', index: false },
-        logging_level: { type: 'keyword', index: false },
       },
     },
     migrations: {

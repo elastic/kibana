@@ -53,7 +53,6 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'agent_features',
     'is_protected',
     'advanced_settings',
-    'logging_level',
   ]);
 
 const FormWrapper = styled.div`
