@@ -41,7 +41,7 @@ export interface FlyoutTourProps {
 
 const MAX_POPOVER_WIDTH = 500;
 const TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subtitle', {
-  defaultMessage: 'New ways to investigate alerts',
+  defaultMessage: 'A redesigned alert experience',
 });
 
 /**

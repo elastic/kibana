@@ -56,6 +56,7 @@ export const RightPanelTour: FC = memo(() => {
   }, [eventId, indexName, scopeId, openRightPanel]);
 
   const tourStepContent = useMemo(
+    // we append the left tour steps here to support the scenarios where the flyout left section is already expanded when starting the tour
     () => [...getRightSectionTourSteps(), ...getLeftSectionTourSteps()],
     []
   );

@@ -68,18 +68,25 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
   const rightSectionTourSteps: FlyoutTourStepsProps[] = [
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.overview.title', {
-        defaultMessage: 'A more detailed overview of the alert',
+        defaultMessage: 'More ways to understand your alerts',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.overview.description"
-            defaultMessage="Explore sections on the {overview} tab to quickly build an understanding of the alert."
+            defaultMessage="Explore new insights in the {entities} and {prevalence} sections."
             values={{
-              overview: (
+              entities: (
                 <EuiCode>
-                  {i18n.translate('xpack.securitySolution.flyout.tour.overview.text', {
-                    defaultMessage: 'Overview',
+                  {i18n.translate('xpack.securitySolution.flyout.tour.overview.entities.text', {
+                    defaultMessage: 'Entities',
+                  })}
+                </EuiCode>
+              ),
+              prevalence: (
+                <EuiCode>
+                  {i18n.translate('xpack.securitySolution.flyout.tour.overview.prevalence.text', {
+                    defaultMessage: 'Prevalence',
                   })}
                 </EuiCode>
               ),
@@ -93,7 +100,7 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
     },
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.preview.title', {
-        defaultMessage: 'Quickly access rule details',
+        defaultMessage: 'A quick way to access rule details',
       }),
       content: (
         <EuiText>
@@ -118,13 +125,13 @@ export const getRightSectionTourSteps = (): FlyoutTourStepsProps[] => {
     },
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.expandDetails.title', {
-        defaultMessage: 'A more developed view of important alert details',
+        defaultMessage: 'An expanded view of important alert details',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.expandDetails.description"
-            defaultMessage="Click to access more information about sections in the right panel."
+            defaultMessage="Click the linked text to open and close the flyout's left panel. The left panel is a detailed view of sections in the right panel."
           />
         </EuiText>
       ),
@@ -140,13 +147,13 @@ export const getLeftSectionTourSteps = (): FlyoutTourStepsProps[] => {
   return [
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.entities.title', {
-        defaultMessage: 'New insights are available',
+        defaultMessage: 'New host and user insights are available',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.entities.description"
-            defaultMessage="Host and user information are in {entities}."
+            defaultMessage="Check out the expanded {entities} view to learn more about hosts and users that are related to the alert."
             values={{
               entities: (
                 <EuiCode>
@@ -165,13 +172,13 @@ export const getLeftSectionTourSteps = (): FlyoutTourStepsProps[] => {
     },
     {
       title: i18n.translate('xpack.securitySolution.flyout.tour.prevalence.title', {
-        defaultMessage: 'New insights are available',
+        defaultMessage: 'New host and user insights are available',
       }),
       content: (
         <EuiText>
           <FormattedMessage
             id="xpack.securitySolution.flyout.tour.prevalence.description"
-            defaultMessage="See host and user prevalence in {prevalence}."
+            defaultMessage="Check out the expanded {prevalence} view to learn how the alert is related to other alerts, events, and entities."
             values={{
               prevalence: (
                 <EuiCode>
