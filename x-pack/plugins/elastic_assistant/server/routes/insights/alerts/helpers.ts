@@ -14,7 +14,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { uniq } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AssistantToolParams, ElasticAssistantApiRequestHandlerContext } from '../../../types';
@@ -33,17 +32,6 @@ export const REQUIRED_FOR_INSIGHTS: AnonymizationFieldResponse[] = [
     anonymized: false,
   },
 ];
-
-/**
- * Adds the specified fields to the allow / allow replacement list
- */
-export const addRequiredFields = ({
-  list,
-  requiredFields,
-}: {
-  list: string[];
-  requiredFields: string[];
-}): string[] => uniq([...list, ...requiredFields]);
 
 export const getAssistantToolParams = ({
   alertsIndexPattern,

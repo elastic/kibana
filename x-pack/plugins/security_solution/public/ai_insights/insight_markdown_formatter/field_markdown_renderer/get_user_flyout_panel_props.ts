@@ -22,8 +22,7 @@ interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: UserPanelProps;
 }
 
-export const isUserName = (fieldName: string) =>
-  fieldName === 'user.name' || fieldName === 'host.hostname';
+export const isUserName = (fieldName: string) => fieldName === 'user.name';
 
 export const getUserFlyoutPanelProps = ({
   contextId,
