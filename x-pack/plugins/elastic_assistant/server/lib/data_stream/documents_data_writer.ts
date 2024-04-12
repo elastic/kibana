@@ -69,15 +69,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
       }
 
-      console.error('body', await this.buildBulkOperations(params));
-
       const { errors, items, took } = await this.options.esClient.bulk({
         refresh: 'wait_for',
         body: await this.buildBulkOperations(params),
       });
-
-      console.error('errr', errors);
-      console.error('items', JSON.stringify(items, null, 2));
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],
