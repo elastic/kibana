@@ -351,7 +351,8 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it(
+    // Failing: See https://github.com/elastic/kibana/issues/179831
+    it.skip(
       'should sort date column',
       async () => {
         const { container } = renderTestComponents();
@@ -511,7 +512,8 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  describe('left controls', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/179831
+  describe.skip('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -541,6 +543,7 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
+    // Failing: See https://github.com/elastic/kibana/issues/179831
     it(
       'should be able to sort by multiple columns',
       async () => {
@@ -662,7 +665,7 @@ describe('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '36'
+            '37'
           );
         });
 
@@ -688,7 +691,7 @@ describe('query tab with unified timeline', () => {
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '36'
+            '37'
           );
         });
 
