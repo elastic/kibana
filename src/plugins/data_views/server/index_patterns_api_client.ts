@@ -11,13 +11,15 @@ import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
+import { getIndexFilterDsl } from './utils';
 
 export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
   constructor(
     elasticsearchClient: ElasticsearchClient,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly rollupsEnabled: boolean
+    private readonly rollupsEnabled: boolean,
+    private readonly excludedTiers: string
   ) {
     this.esClient = elasticsearchClient;
   }
@@ -41,7 +43,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         metaFields,
         type,
         rollupIndex,
-        indexFilter,
+        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers: this.excludedTiers }),
         fields,
       })
       .catch((err) => {

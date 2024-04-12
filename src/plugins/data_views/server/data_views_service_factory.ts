@@ -19,6 +19,7 @@ import { DataViewsService } from '../common';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
 
 interface DataViewsServiceFactoryDeps {
   logger: Logger;
@@ -43,6 +44,7 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
     const { logger, uiSettings, fieldFormats, capabilities, rollupsEnabled } = deps;
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+    const excludedTiers = await uiSettingsClient.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
@@ -50,7 +52,8 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
       apiClient: new IndexPatternsApiServer(
         elasticsearchClient,
         savedObjectsClient,
-        rollupsEnabled
+        rollupsEnabled,
+        excludedTiers
       ),
       fieldFormats: formats,
       onError: (error) => {

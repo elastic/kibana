@@ -15,10 +15,9 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_PATH as path, DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../common/constants';
+import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
-import { getIndexFilterDsl } from './utils';
 
 export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');
@@ -32,9 +31,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
-    const excludedTiers = await core.uiSettings.client.get<string>(
-      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
-    );
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -67,7 +64,6 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           includeUnmapped,
         },
         fieldTypes: parsedFieldTypes,
-        indexFilter: getIndexFilterDsl({ excludedTiers }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 
