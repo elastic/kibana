@@ -74,6 +74,13 @@ describe('Document view mode toggle component', () => {
     expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
   });
 
+  it('should set the view mode to VIEW_MODE.PATTERN_LEVEL when dscViewModePatternAnalysisButton is clicked', () => {
+    const setDiscoverViewMode = jest.fn();
+    const component = mountComponent({ setDiscoverViewMode });
+    component.find('[data-test-subj="dscViewModePatternAnalysisButton"]').at(0).simulate('click');
+    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.PATTERN_LEVEL);
+  });
+
   it('should set the view mode to VIEW_MODE.AGGREGATED_LEVEL when dscViewModeFieldStatsButton is clicked', () => {
     const setDiscoverViewMode = jest.fn();
     const component = mountComponent({ setDiscoverViewMode });
@@ -86,8 +93,13 @@ describe('Document view mode toggle component', () => {
     expect(component.find(EuiTab).at(0).prop('isSelected')).toBe(true);
   });
 
+  it('should select the Patter Analysis tab if viewMode is VIEW_MODE.PATTERN_LEVEL', () => {
+    const component = mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
+    expect(component.find(EuiTab).at(1).prop('isSelected')).toBe(true);
+  });
+
   it('should select the Field statistics tab if viewMode is VIEW_MODE.AGGREGATED_LEVEL', () => {
     const component = mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
-    expect(component.find(EuiTab).at(1).prop('isSelected')).toBe(true);
+    expect(component.find(EuiTab).at(2).prop('isSelected')).toBe(true);
   });
 });
