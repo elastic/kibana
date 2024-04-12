@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { CustomCard } from './types';
 
 const QUICKSTART_FLOWS = ['kubernetes'];
 
@@ -19,7 +20,7 @@ function extractFeaturedCards(
   filteredCards: IntegrationCardItem[],
   featuredCardNames?: string[]
 ) {
-  const featuredCards: Record<string, IntegrationCardItem> = {};
+  const featuredCards: Record<string, IntegrationCardItem | undefined> = {};
   filteredCards.forEach((card) => {
     if (featuredCardNames?.includes(card.name)) {
       featuredCards[card.name] = card;
@@ -31,20 +32,27 @@ function extractFeaturedCards(
 export function useIntegrationCardList(
   filteredCards: IntegrationCardItem[],
   selectedCategory = 'observability',
-  featuredCardNames?: string[],
-  generatedCards?: IntegrationCardItem[]
+  customCards?: CustomCard[]
 ): IntegrationCardItem[] {
-  const list: IntegrationCardItem[] = [];
   const featuredCards = useMemo(() => {
-    if (!featuredCardNames) return {};
-    return extractFeaturedCards(filteredCards, featuredCardNames);
-  }, [filteredCards, featuredCardNames]);
-  if (featuredCardNames || generatedCards) {
-    Object.keys(featuredCards).forEach((key) =>
-      list.push(toCustomCard(featuredCards[key]))
+    if (!customCards) return {};
+    return extractFeaturedCards(
+      filteredCards,
+      customCards.filter((c) => c.type === 'featured').map((c) => c.name)
     );
-    generatedCards?.forEach((c) => list.push(toCustomCard(c)));
-    return list;
+  }, [filteredCards, customCards]);
+
+  if (customCards && customCards.length > 0) {
+    return customCards
+      .map((c) => {
+        if (c.type === 'featured') {
+          return !!featuredCards[c.name]
+            ? toCustomCard(featuredCards[c.name]!)
+            : null;
+        }
+        return toCustomCard(c);
+      })
+      .filter((c) => c) as IntegrationCardItem[];
   }
   return filteredCards
     .filter((card) => card.categories.includes(selectedCategory))

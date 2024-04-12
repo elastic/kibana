@@ -23,9 +23,12 @@ import {
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
+import { FeaturedCard } from '../packages_list/types';
+
+type Category = 'apm' | 'infra' | 'logs';
 
 interface UseCaseOption {
-  id: string;
+  id: Category;
   label: string;
   description: React.ReactNode;
 }
@@ -145,10 +148,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <EuiSpacer size="m" />
 
           <OnboardingFlowPackageList
-            featuredCards={['kubernetes', 'prometheus', 'docker']}
-            generatedCards={[
+            customCards={[
+              toFeaturedCard('kubernetes'),
+              toFeaturedCard('prometheus'),
+              toFeaturedCard('docker'),
               {
                 id: 'azure-generated',
+                type: 'generated',
                 title: 'Azure',
                 description: 'Collect logs and metrics from Microsoft Azure',
                 name: 'azure',
@@ -162,6 +168,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               },
               {
                 id: 'aws-generated',
+                type: 'generated',
                 title: 'AWS',
                 description:
                   'Collect logs and metrics from Amazon Web Services (AWS)',
@@ -176,7 +183,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               },
               {
                 id: 'gcp-generated',
-                title: 'Google Cloud Platfrm',
+                type: 'generated',
+                title: 'Google Cloud Platform',
                 description:
                   'Collect logs and metrics from Google Cloud Platform',
                 name: 'gcp',
@@ -232,3 +240,7 @@ const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+function toFeaturedCard(name: string): FeaturedCard {
+  return { type: 'featured', name };
+}

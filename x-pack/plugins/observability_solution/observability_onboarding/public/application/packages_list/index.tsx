@@ -22,17 +22,15 @@ import React, { useEffect, useRef, Suspense, useState } from 'react';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
+import { CustomCard } from './types';
 
 interface Props {
   /**
-   * The inclusive set of card names to display.
+   * A subset of either existing card names to feature, or generated
+   * cards to display. The inclusion of CustomCards will override the default
+   * list functionality.
    */
-  featuredCards?: string[];
-  /**
-   * Cards that do not correspond to an integration, but
-   * have some custom behavior.
-   */
-  generatedCards?: IntegrationCardItem[];
+  customCards?: CustomCard[];
   /**
    * Override the default `observability` option.
    */
@@ -53,11 +51,10 @@ const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
   showSearchBar = false,
-  featuredCards: featuredCardNames,
-  generatedCards,
   searchBarRef,
   searchQuery,
   setSearchQuery,
+  customCards,
 }: WrapperProps) => {
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
@@ -68,8 +65,7 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
-    featuredCardNames,
-    generatedCards
+    customCards
   );
   React.useEffect(() => {
     if (isInitialHidden && searchQuery) {
