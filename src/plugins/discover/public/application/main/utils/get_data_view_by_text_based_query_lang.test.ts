@@ -45,4 +45,19 @@ describe('getDataViewByTextBasedQueryLang', () => {
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBeUndefined();
   });
+
+  it('creates an adhoc ES|QL dataview if the query doesnt have from command', async () => {
+    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+      ...dataViewAdHoc,
+      isPersisted: () => false,
+      id: 'ad-hoc-id-1',
+      title: 'test-1',
+      timeFieldName: undefined,
+    });
+    const query = { esql: 'ROW x = "ES|QL is awesome"' };
+    const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
+    expect(dataView.isPersisted()).toEqual(false);
+    expect(dataView.name).toEqual(dataViewAdHoc.name);
+    expect(dataView.timeFieldName).toBeUndefined();
+  });
 });
