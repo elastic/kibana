@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiPageSection,
   EuiPageHeader,
@@ -274,20 +273,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                         defaultMessage="Show request"
                       />
                     </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiButtonEmpty
-                      flush="right"
-                      href={services.documentation.getCreatePipelineUrl()}
-                      target="_blank"
-                      iconType="help"
-                      data-test-subj="documentationLink"
-                    >
-                      <FormattedMessage
-                        id="xpack.ingestPipelines.form.docsButtonLabel"
-                        defaultMessage="Documentation"
-                      />
-                    </EuiButtonEmpty>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
