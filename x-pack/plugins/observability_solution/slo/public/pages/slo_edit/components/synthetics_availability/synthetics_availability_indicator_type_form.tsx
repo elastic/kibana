@@ -152,83 +152,96 @@ const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.syntheticsAvail
   defaultMessage: 'Last 24 hours',
 });
 
-const getGroupByCardinalityFilters = (monitorIds: string[], projects: string[], tags: string[]) => {
-  const monitorIdFilters = {
-    meta: {
-      disabled: false,
-      negate: false,
-      alias: null,
-      key: 'monitor.id',
-      params: monitorIds,
-      type: 'phrases',
-    },
-    $state: {
-      store: FilterStateStore.APP_STATE,
-    },
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        should: monitorIds.map((id) => ({
-          match_phrase: {
-            'monitor.id': id,
+export const getGroupByCardinalityFilters = (
+  monitorIds: string[],
+  projects: string[],
+  tags: string[]
+): Filter[] => {
+  const monitorIdFilters = monitorIds.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'monitor.id',
+          params: monitorIds,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: monitorIds.map((id) => ({
+              match_phrase: {
+                'monitor.id': id,
+              },
+            })),
           },
-        })),
-      },
-    },
-  };
+        },
+      }
+    : null;
 
-  const projectFilters = {
-    meta: {
-      disabled: false,
-      negate: false,
-      alias: null,
-      key: 'monitor.project.id',
-      params: projects,
-      type: 'phrases',
-    },
-    $state: {
-      store: FilterStateStore.APP_STATE,
-    },
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        should: projects.map((id) => ({
-          match_phrase: {
-            'monitor.project.id': id,
+  const projectFilters = projects.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'monitor.project.id',
+          params: projects,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: projects.map((id) => ({
+              match_phrase: {
+                'monitor.project.id': id,
+              },
+            })),
           },
-        })),
-      },
-    },
-  };
+        },
+      }
+    : null;
 
-  const tagFilters = {
-    meta: {
-      disabled: false,
-      negate: false,
-      alias: null,
-      key: 'tags',
-      params: tags,
-      type: 'phrases',
-    },
-    $state: {
-      store: FilterStateStore.APP_STATE,
-    },
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        should: tags.map((tag) => ({
-          match_phrase: {
-            tags: tag,
+  const tagFilters = tags.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'tags',
+          params: tags,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: tags.map((tag) => ({
+              match_phrase: {
+                tags: tag,
+              },
+            })),
           },
-        })),
-      },
-    },
-  };
+        },
+      }
+    : null;
 
-  return [monitorIdFilters, projectFilters, tagFilters];
+  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as Filter[];
 };
 
-const formatAllFilters = (globalFilters: QuerySchema = '', groupByCardinalityFilters: Filter[]) => {
+export const formatAllFilters = (
+  globalFilters: QuerySchema = '',
+  groupByCardinalityFilters: Filter[]
+) => {
   if (kqlQuerySchema.is(globalFilters)) {
     return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
   } else if (kqlWithFiltersSchema) {
