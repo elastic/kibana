@@ -100,6 +100,15 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
+                  id: 'system-connector-.observability-ai-assistant',
+                  name: 'Observability AI Assistant',
+                  connector_type_id: '.observability-ai-assistant',
+                  is_preconfigured: false,
+                  is_deprecated: false,
+                  referenced_by_count: 0,
+                  is_system_action: true,
+                },
+                {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
                   is_system_action: false,
@@ -134,15 +143,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
-                },
-                {
-                  id: 'system-connector-.observability-ai-assistant',
-                  name: 'System action: .observability-ai-assistant',
-                  connector_type_id: '.observability-ai-assistant',
-                  is_preconfigured: false,
-                  is_deprecated: false,
-                  referenced_by_count: 0,
-                  is_system_action: true,
                 },
                 {
                   id: 'custom-system-abc-connector',
