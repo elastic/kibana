@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
@@ -159,13 +160,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           )}
 
           <EuiText css={customMargin} size="s" color="subdued">
-            {i18n.translate(
-              'xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText',
-              {
-                defaultMessage:
-                  'Not seeing yours? Search through our 130 ways of ingesting data:',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
+              defaultMessage="Not seeing yours? Search through our 130 ways of ingesting data:"
+            />
           </EuiText>
           <OnboardingFlowPackageList
             showSearchBar={true}
