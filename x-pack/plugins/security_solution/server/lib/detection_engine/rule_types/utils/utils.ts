@@ -26,6 +26,7 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  PluginSetupContract,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -418,6 +419,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   ruleExecutionLogger,
+  alerting,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -426,6 +428,7 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  alerting: PluginSetupContract;
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -433,11 +436,20 @@ export const getRuleRangeTuples = ({
     throw new Error('Failed to parse date math of rule.from or rule.to');
   }
 
+  const maxAlertsAllowed = alerting.getConfig().run.alerts.max;
+  let maxSignalsToUse = maxSignals;
+  if (maxSignals > maxAlertsAllowed) {
+    maxSignalsToUse = maxAlertsAllowed;
+    ruleExecutionLogger.warn(
+      `max_signals value set above limit set in xpack.rule.run.alerts.max, will only write a maximum of ${maxAlertsAllowed} per rule execution`
+    );
+  }
+
   const tuples = [
     {
       to: originalTo,
       from: originalFrom,
-      maxSignals,
+      maxSignals: maxSignalsToUse,
     },
   ];
 
@@ -464,7 +476,7 @@ export const getRuleRangeTuples = ({
   const catchupTuples = getCatchupTuples({
     originalTo,
     originalFrom,
-    ruleParamsMaxSignals: maxSignals,
+    ruleParamsMaxSignals: maxSignalsToUse,
     catchup,
     intervalDuration,
   });

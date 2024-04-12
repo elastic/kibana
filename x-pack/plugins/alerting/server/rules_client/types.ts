@@ -34,7 +34,7 @@ import {
   RuleAction,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
-import { AlertingConfig, AlertingRulesConfig } from '../config';
+import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { GetAlertIndicesAlias } from '../lib';
 import { AlertsService } from '../alerts_service';
@@ -85,7 +85,7 @@ export interface RulesClientContext {
   readonly alertsService: AlertsService | null;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
-  readonly maxAlertsPerRun: AlertingConfig['rules']['run']['alerts']['max'];
+  readonly maxAlertsPerRun: AlertingRulesConfig['run']['alerts']['max'];
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

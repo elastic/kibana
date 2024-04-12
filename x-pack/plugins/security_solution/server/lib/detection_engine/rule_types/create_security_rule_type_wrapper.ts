@@ -75,6 +75,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     version,
     isPreview,
     experimentalFeatures,
+    alerting,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -313,6 +314,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
+            alerting,
           });
 
           if (remainingGap.asMilliseconds() > 0) {

@@ -65,6 +65,7 @@ import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -442,6 +443,13 @@ describe('utils', () => {
   });
 
   describe('getRuleRangeTuples', () => {
+    let alerting: PluginSetupContract;
+
+    beforeEach(() => {
+      alerting = alertsMock.createSetup();
+      alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
+    });
+
     test('should return a single tuple if no gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
@@ -451,6 +459,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        alerting,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -467,6 +476,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        alerting,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -483,6 +493,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        alerting,
       });
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
@@ -498,6 +509,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        alerting,
       });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
@@ -520,11 +532,29 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        alerting,
       });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+    });
+
+    test('should use alerting framework max alerts value if maxSignals is greater than limit', () => {
+      alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 10 } } });
+      const { tuples } = getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().subtract(30, 's').toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+      const someTuple = tuples[0];
+      expect(someTuple.maxSignals).toEqual(10);
+      expect(tuples.length).toEqual(1);
     });
   });
 
