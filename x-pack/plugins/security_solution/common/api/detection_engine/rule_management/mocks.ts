@@ -6,6 +6,7 @@
  */
 
 export * from './bulk_actions/bulk_actions_route.mock';
+export * from './bulk_get_sources/bulk_get_sources_route.mock';
 export * from './crud/patch_rule/patch_rule_route.mock';
 
 export * from './export_rules/export_rules_details_schema.mock';

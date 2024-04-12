@@ -34,8 +34,10 @@ import {
   previewRule,
   findRuleExceptionReferences,
   performBulkAction,
+  bulkGetRulesSources,
   fetchRulesSnoozeSettings,
 } from './api';
+import { DETECTION_ENGINE_RULES_BULK_GET_SOURCES } from '../../../../common/constants';
 
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../common/lib/kibana');
@@ -795,6 +797,39 @@ describe('Detections Rules API', () => {
       });
 
       expect(result).toBe(fetchMockResult);
+    });
+  });
+
+  describe('bulkGetRulesSources', () => {
+    const fetchMockResult = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(fetchMockResult);
+    });
+
+    test('passes a query', async () => {
+      await bulkGetRulesSources({ query: 'fetch all rules' });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ query: 'fetch all rules' }),
+        })
+      );
+    });
+
+    test('passes ids', async () => {
+      await bulkGetRulesSources({ ids: ['rule1', 'rule5'] });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ ids: ['rule1', 'rule5'] }),
+        })
+      );
     });
   });
 

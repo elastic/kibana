@@ -105,7 +105,7 @@ export const performBulkGetRulesSourcesRoute = (
 
         if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
           return siemResponse.error({
-            body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+            body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk get sources.`,
             statusCode: 400,
           });
         }
@@ -150,11 +150,11 @@ export const performBulkGetRulesSourcesRoute = (
           });
 
           if (abortController.signal.aborted === true) {
-            throw new AbortError('Bulk action was aborted');
+            throw new AbortError('Bulk get sources request was aborted');
           }
 
           const responseBody: BulkGetRulesSourcesResponse = {
-            indexPatterns,
+            indexPatterns: [...new Set(indexPatterns)],
             dataViewIds,
           };
 

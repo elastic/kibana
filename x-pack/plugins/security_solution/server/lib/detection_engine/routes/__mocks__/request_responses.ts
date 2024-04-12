@@ -23,6 +23,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_DELETE,
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
 } from '../../../../../common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/api/detection_engine/rule_management/urls';
 
@@ -52,6 +53,7 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 
 import { requestMock } from './request';
 import type { HapiReadableStream } from '../../../../types';
+import { getPerformBulkGetSourcesSchemaMock } from '../../../../../common/api/detection_engine/rule_management/bulk_get_sources/bulk_get_sources_route.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -108,6 +110,13 @@ export const getFindRequest = () =>
   requestMock.create({
     method: 'get',
     path: DETECTION_ENGINE_RULES_URL_FIND,
+  });
+
+export const getBulkGetSourcesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
+    body: getPerformBulkGetSourcesSchemaMock(),
   });
 
 export const getReadBulkRequest = () =>
