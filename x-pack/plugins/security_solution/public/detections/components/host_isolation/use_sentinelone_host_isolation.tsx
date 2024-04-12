@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
@@ -14,7 +13,6 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ENDPOINT_AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface ErrorType {
   statusCode: number;
@@ -26,19 +24,11 @@ export const useGetSentinelOneAgentStatus = (
   agentIds: string[],
   options: UseQueryOptions<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>> => {
-  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
-    'sentinelOneManualHostActionsEnabled'
-  );
-
   const http = useHttp();
 
   return useQuery<AgentStatusApiResponse['data'], IHttpFetchError<ErrorType>>({
     queryKey: ['get-agent-status', agentIds],
     ...options,
-    enabled: !(
-      sentinelOneManualHostActionsEnabled &&
-      isEmpty(agentIds.filter((agentId) => agentId.trim().length))
-    ),
     // TODO: update this to use a function instead of a number
     refetchInterval: 2000,
     queryFn: () =>

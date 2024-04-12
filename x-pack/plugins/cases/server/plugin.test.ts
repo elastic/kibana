@@ -48,6 +48,7 @@ describe('Cases Plugin', () => {
     coreStart = coreMock.createStart();
 
     pluginsSetup = {
+      alerting: alertsMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
       actions: actionsMock.createSetup(),
       files: createFilesSetupMock(),

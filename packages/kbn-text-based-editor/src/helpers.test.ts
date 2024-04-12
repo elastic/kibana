@@ -12,6 +12,7 @@ import {
   getInlineEditorText,
   getWrappedInPipesCode,
   getIndicesList,
+  getRemoteIndicesList,
 } from './helpers';
 
 describe('helpers', function () {
@@ -279,6 +280,38 @@ describe('helpers', function () {
         { name: '.system1', hidden: true },
         { name: 'logs', hidden: false },
       ]);
+    });
+  });
+
+  describe('getRemoteIndicesList', function () {
+    it('should filter out aliases and hidden indices', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'remote: alias1',
+            item: {
+              indices: ['index1'],
+            },
+          },
+          {
+            name: 'remote:.system1',
+            item: {
+              name: 'system',
+            },
+          },
+          {
+            name: 'remote:logs',
+            item: {
+              name: 'logs',
+              timestamp_field: '@timestamp',
+            },
+          },
+        ]),
+      };
+      const indices = await getRemoteIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false }]);
     });
   });
 });

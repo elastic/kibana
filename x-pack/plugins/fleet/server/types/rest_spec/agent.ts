@@ -259,6 +259,16 @@ export const GetActionStatusRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
+    date: schema.maybe(
+      schema.string({
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
+      })
+    ),
+    latest: schema.maybe(schema.number()),
     errorSize: schema.number({ defaultValue: 5 }),
   }),
 };
