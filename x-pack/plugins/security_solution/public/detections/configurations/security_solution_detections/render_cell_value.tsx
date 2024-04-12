@@ -62,10 +62,10 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
     const isTourAnchor = useMemo(
       () =>
         columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
-        isDetectionsAlertsTable(scopeId) &&
+        isDetectionsAlertsTable(tableId) &&
         rowIndex === 0 &&
         !props.isDetails,
-      [columnId, props.isDetails, rowIndex, scopeId]
+      [columnId, props.isDetails, rowIndex, tableId]
     );
     const { browserFields } = useSourcererDataView(scopeId);
     const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
