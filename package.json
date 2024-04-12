@@ -1539,7 +1539,7 @@
     "apidoc-markdown": "^7.3.0",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
-    "axe-core": "^4.8.2",
+    "axe-core": "^4.8.4",
     "babel-jest": "^29.6.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-add-module-exports": "^1.0.4",
