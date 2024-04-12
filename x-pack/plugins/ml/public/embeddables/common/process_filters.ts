@@ -6,21 +6,28 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfEsqlQueryType } from '@kbn/es-query';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { getDefaultQuery } from '@kbn/data-plugin/public';
 
 export function processFilters(
   optionalFilters?: Filter[],
-  optionalQuery?: Query,
+  optionalQuery?: Query | AggregateQuery,
   controlledBy?: string
 ): estypes.QueryDslQueryContainer {
   const filters = optionalFilters ?? [];
   const query = optionalQuery ?? getDefaultQuery();
-  const inputQuery =
-    query.language === 'kuery'
-      ? toElasticsearchQuery(fromKueryExpression(query.query as string))
-      : luceneStringToDsl(query.query);
+
+  // We do not support esql yet
+  let inputQuery: estypes.QueryDslQueryContainer = {};
+  if (!isOfEsqlQueryType(query) && !isOfAggregateQueryType(query)) {
+    inputQuery =
+      query.language === 'kuery'
+        ? toElasticsearchQuery(fromKueryExpression(query.query as string))
+        : luceneStringToDsl(query.query);
+  }
 
   const must = [inputQuery];
   const mustNot = [];
