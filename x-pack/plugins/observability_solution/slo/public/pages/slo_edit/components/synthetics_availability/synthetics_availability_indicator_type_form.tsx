@@ -7,7 +7,14 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  SyntheticsAvailabilityIndicator,
+  QuerySchema,
+  kqlQuerySchema,
+  kqlWithFiltersSchema,
+} from '@kbn/slo-schema';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { useFormContext } from 'react-hook-form';
 import { FieldSelector } from '../synthetics_common/field_selector';
 import { CreateSLOForm } from '../../types';
@@ -20,11 +27,12 @@ const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
 
-  const [monitorIds = [], projects = [], tags = [], index] = watch([
+  const [monitorIds = [], projects = [], tags = [], index, globalFilters] = watch([
     'indicator.params.monitorIds',
     'indicator.params.projects',
     'indicator.params.tags',
     'indicator.params.index',
+    'indicator.params.filter',
   ]);
 
   const [range, _] = useState({
@@ -37,6 +45,12 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
     tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
+  const groupByCardinalityFilters: Filter[] = getGroupByCardinalityFilters(
+    filters.monitorIds,
+    filters.projects,
+    filters.tags
+  );
+  const allFilters = formatAllFilters(globalFilters, groupByCardinalityFilters);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -123,13 +137,11 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <GroupByCardinality
-        titleAppend={i18n.translate(
-          'xpack.observability.slo.sloEdit.syntheticsAvailability.warning',
-          {
-            defaultMessage:
-              'Synthetics availability SLIs are automatically grouped by monitor and location.',
-          }
-        )}
+        titleAppend={i18n.translate('xpack.slo.sloEdit.syntheticsAvailability.warning', {
+          defaultMessage:
+            'Synthetics availability SLIs are automatically grouped by monitor and location.',
+        })}
+        customFilters={allFilters as QuerySchema}
       />
       <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
     </EuiFlexGroup>
@@ -139,3 +151,90 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
 const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.syntheticsAvailability.xTitle', {
   defaultMessage: 'Last 24 hours',
 });
+
+const getGroupByCardinalityFilters = (monitorIds: string[], projects: string[], tags: string[]) => {
+  const monitorIdFilters = {
+    meta: {
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: 'monitor.id',
+      params: monitorIds,
+      type: 'phrases',
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: monitorIds.map((id) => ({
+          match_phrase: {
+            'monitor.id': id,
+          },
+        })),
+      },
+    },
+  };
+
+  const projectFilters = {
+    meta: {
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: 'monitor.project.id',
+      params: projects,
+      type: 'phrases',
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: projects.map((id) => ({
+          match_phrase: {
+            'monitor.project.id': id,
+          },
+        })),
+      },
+    },
+  };
+
+  const tagFilters = {
+    meta: {
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: 'tags',
+      params: tags,
+      type: 'phrases',
+    },
+    $state: {
+      store: FilterStateStore.APP_STATE,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: tags.map((tag) => ({
+          match_phrase: {
+            tags: tag,
+          },
+        })),
+      },
+    },
+  };
+
+  return [monitorIdFilters, projectFilters, tagFilters];
+};
+
+const formatAllFilters = (globalFilters: QuerySchema = '', groupByCardinalityFilters: Filter[]) => {
+  if (kqlQuerySchema.is(globalFilters)) {
+    return { kqlQuery: globalFilters, filters: groupByCardinalityFilters };
+  } else if (kqlWithFiltersSchema) {
+    return {
+      kqlQuery: globalFilters.kqlQuery,
+      filters: [...globalFilters.filters, ...groupByCardinalityFilters],
+    };
+  }
+};

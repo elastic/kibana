@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
@@ -14,7 +14,13 @@ import { useFetchGroupByCardinality } from '../../../../hooks/use_fetch_group_by
 import { CreateSLOForm } from '../../types';
 import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 
-export function GroupByCardinality({ titleAppend }: { titleAppend?: React.ReactNode }) {
+export function GroupByCardinality({
+  titleAppend,
+  customFilters,
+}: {
+  titleAppend?: React.ReactNode;
+  customFilters?: QuerySchema;
+}) {
   const { watch } = useFormContext<CreateSLOForm>();
 
   const index = watch('indicator.params.index');
@@ -23,7 +29,7 @@ export function GroupByCardinality({ titleAppend }: { titleAppend?: React.ReactN
   const groupByField = watch('groupBy');
 
   const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
-    useFetchGroupByCardinality(index, timestampField, groupByField, filters);
+    useFetchGroupByCardinality(index, timestampField, groupByField, customFilters || filters);
   const groupBy = [groupByField].flat().filter((value) => !!value);
   const hasGroupBy = !groupBy.includes(ALL_VALUE) && groupBy.length;
 
