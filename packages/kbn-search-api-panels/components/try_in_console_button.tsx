@@ -20,7 +20,7 @@ export interface TryInConsoleButtonProps {
   request?: string;
   application?: ApplicationStart;
   consolePlugin?: ConsolePluginStart;
-  sharePlugin: SharePluginStart;
+  sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
   showIcon?: boolean;
   link?: boolean;
@@ -34,7 +34,7 @@ export const TryInConsoleButton = ({
   showIcon = true,
   link = false,
 }: TryInConsoleButtonProps) => {
-  const { url } = sharePlugin;
+  const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   if (!canShowDevtools || !url) return null;
 

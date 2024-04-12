@@ -28,7 +28,7 @@ import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-util
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { ModelsTableToConfigMapping } from '../../../../model_management';
+import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import type { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
 
