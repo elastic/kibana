@@ -10715,14 +10715,14 @@
     {
       "query": "from index | eval bucket(dateField, abs(numberField), \"\", \"\")",
       "error": [
-        "Argument of [abs] must be a constant, received [numberField]"
+        "Argument of [bucket] must be a constant, received [abs(numberField)]"
       ],
       "warning": []
     },
     {
       "query": "from index | eval bucket(dateField, abs(length(numberField)), \"\", \"\")",
       "error": [
-        "Argument of [length] must be a constant, received [numberField]"
+        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
       ],
       "warning": []
     },

@@ -411,26 +411,43 @@ function validateFunction(
           parentOption,
           references,
           /**
-           * The constantOnly constraint needs to be enforced for
-           * arguments that are functions as well, regardless of
-           * whether the definition for the sub function's arguments includes
-           * the constantOnly flag.
+           * The constantOnly constraint needs to be enforced for arguments that
+           * are functions as well, regardless of whether the definition for the
+           * sub function's arguments includes the constantOnly flag.
            *
            * Example:
            * bucket(@timestamp, abs(bytes), "", "")
            *
-           * In the above example, the abs function is not defined with the constantOnly flag,
-           * but the second parameter in bucket _is_ defined with the constantOnly flag.
+           * In the above example, the abs function is not defined with the
+           * constantOnly flag, but the second parameter in bucket _is_ defined
+           * with the constantOnly flag.
            *
-           * Because of this, the abs function's arguments inherit the constraint and each
-           * should be validated as if each were constantOnly.
+           * Because of this, the abs function's arguments inherit the constraint
+           * and each should be validated as if each were constantOnly.
            */
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats
           // TODO: revisit this part later on to make it more generic
           parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
         );
-        messages.push(...messagesFromArg);
+
+        if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
+          const consolidatedMessage = getMessageFromId({
+            messageId: 'expectedConstant',
+            values: {
+              fn: astFunction.name,
+              given: subArg.text,
+            },
+            locations: subArg.location,
+          });
+
+          messages.push(
+            consolidatedMessage,
+            ...messagesFromArg.filter(({ code }) => code !== 'expectedConstant')
+          );
+        } else {
+          messages.push(...messagesFromArg);
+        }
       }
     }
   }

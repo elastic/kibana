@@ -1778,11 +1778,11 @@ describe('validation logic', () => {
 
       describe('constant-only parameters', () => {
         testErrorsAndWarnings('from index | eval bucket(dateField, abs(numberField), "", "")', [
-          'Argument of [abs] must be a constant, received [numberField]',
+          'Argument of [bucket] must be a constant, received [abs(numberField)]',
         ]);
         testErrorsAndWarnings(
           'from index | eval bucket(dateField, abs(length(numberField)), "", "")',
-          ['Argument of [length] must be a constant, received [numberField]']
+          ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
         );
         testErrorsAndWarnings('from index | eval bucket(dateField, pi(), "", "")', []);
         testErrorsAndWarnings('from index | eval bucket(dateField, 1 + 30 / 10, "", "")', []);
