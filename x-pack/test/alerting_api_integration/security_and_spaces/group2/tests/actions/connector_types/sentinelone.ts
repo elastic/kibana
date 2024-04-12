@@ -41,6 +41,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
         SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
         SUB_ACTION.FETCH_AGENT_FILES,
+        SUB_ACTION.DOWNLOAD_AGENT_FILE,
       ];
 
       let connectorId: string;
