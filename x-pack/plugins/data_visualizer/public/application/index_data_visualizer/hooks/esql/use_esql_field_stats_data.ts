@@ -113,19 +113,6 @@ export const useESQLFieldStatsData = <T extends Column>({
               esqlBaseQuery,
             }).then(addToProcessedFieldStats);
 
-            // // GETTING STATS FOR TEXT FIELDS
-            // await getESQLExampleFieldValues({
-            //   columns: columns.filter(
-            //     (f) =>
-            //       f.secondaryType === 'text' ||
-            //       f.secondaryType === 'geo_point' ||
-            //       f.secondaryType === 'geo_shape'
-            //   ),
-            //   filter,
-            //   runRequest,
-            //   esqlBaseQuery,
-            // }).then(addToProcessedFieldStats);
-
             // GETTING STATS FOR DATE FIELDS
             await getESQLDateFieldStats({
               columns: columns.filter((f) => f.secondaryType === 'date'),
