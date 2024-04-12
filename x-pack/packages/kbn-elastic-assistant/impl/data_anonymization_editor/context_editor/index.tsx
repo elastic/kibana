@@ -9,6 +9,8 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import styled from '@emotion/styled';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
@@ -17,18 +19,22 @@ import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './typ
 
 export const DEFAULT_PAGE_SIZE = 10;
 
+const Wrapper = styled.div`
+  > div > .euiSpacer {
+    block-size: 16px;
+  }
+`;
+
 const defaultSort: SortConfig = {
   sort: {
-    direction: 'desc',
-    field: FIELDS.ALLOWED,
+    direction: 'asc',
+    field: FIELDS.FIELD,
   },
 };
 
 export interface Props {
-  allow: string[];
-  allowReplacement: string[];
+  anonymizationFields: FindAnonymizationFieldsResponse;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  onReset?: () => void;
   rawData: Record<string, string[]> | null;
   pageSize?: number;
 }
@@ -52,10 +58,8 @@ const search: EuiSearchBarProps = {
 };
 
 const ContextEditorComponent: React.FC<Props> = ({
-  allow,
-  allowReplacement,
+  anonymizationFields,
   onListUpdated,
-  onReset,
   rawData,
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
@@ -84,11 +88,10 @@ const ContextEditorComponent: React.FC<Props> = ({
   const rows = useMemo(
     () =>
       getRows({
-        allow,
-        allowReplacement,
+        anonymizationFields,
         rawData,
       }),
-    [allow, allowReplacement, rawData]
+    [anonymizationFields, rawData]
   );
 
   const onSelectAll = useCallback(() => {
@@ -107,31 +110,31 @@ const ContextEditorComponent: React.FC<Props> = ({
     () => (
       <Toolbar
         onListUpdated={onListUpdated}
-        onlyDefaults={rawData == null}
-        onReset={onReset}
         onSelectAll={onSelectAll}
         selected={selected}
-        totalFields={rows.length}
+        totalFields={rawData == null ? anonymizationFields.total : Object.keys(rawData).length}
       />
     ),
-    [onListUpdated, onReset, onSelectAll, rawData, rows.length, selected]
+    [anonymizationFields.total, onListUpdated, onSelectAll, rawData, selected]
   );
 
   return (
-    <EuiInMemoryTable
-      allowNeutralSort={false}
-      childrenBetween={toolbar}
-      columns={columns}
-      compressed={true}
-      data-test-subj="contextEditor"
-      isSelectable={true}
-      itemId={FIELDS.FIELD}
-      items={rows}
-      pagination={pagination}
-      search={search}
-      selection={selectionValue}
-      sorting={defaultSort}
-    />
+    <Wrapper>
+      <EuiInMemoryTable
+        allowNeutralSort={false}
+        childrenBetween={toolbar}
+        columns={columns}
+        compressed={true}
+        data-test-subj="contextEditor"
+        isSelectable={true}
+        itemId={FIELDS.FIELD}
+        items={rows}
+        pagination={pagination}
+        search={search}
+        selection={selectionValue}
+        sorting={defaultSort}
+      />
+    </Wrapper>
   );
 };
 

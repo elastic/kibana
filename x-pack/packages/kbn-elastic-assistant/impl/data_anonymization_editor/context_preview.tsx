@@ -37,19 +37,13 @@ const SelectedPromptContextPreviewComponent = ({
   const data = useMemo(
     () =>
       getAnonymizedData({
-        allow: selectedPromptContext.allow,
-        allowReplacement: selectedPromptContext.allowReplacement,
+        anonymizationFields: selectedPromptContext.contextAnonymizationFields?.data ?? [],
         getAnonymizedValue,
         getAnonymizedValues,
         rawData: selectedPromptContext.rawData as Record<string, string[]>,
         currentReplacements,
       }),
-    [
-      currentReplacements,
-      selectedPromptContext.allow,
-      selectedPromptContext.allowReplacement,
-      selectedPromptContext.rawData,
-    ]
+    [currentReplacements, selectedPromptContext]
   );
 
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -17,15 +17,29 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useGeneratedHtmlId,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n as I18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  AnonymizationFieldResponse,
+  PerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { find, uniqBy } from 'lodash';
 import { ContextEditor } from '../context_editor';
 import { Stats } from '../stats';
 import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { BatchUpdateListItem } from '../context_editor/types';
 import { updateSelectedPromptContext, getIsDataAnonymizable } from '../helpers';
+import { useAssistantContext } from '../../assistant_context';
+import { bulkUpdateAnonymizationFields } from '../../assistant/api/anonymization_fields/bulk_update_anonymization_fields';
+import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
   onClose: () => void;
@@ -34,35 +48,101 @@ export interface Props {
 }
 
 const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptContext }: Props) => {
+  const { http, toasts } = useAssistantContext();
+  const [checked, setChecked] = useState(false);
+  const checkboxId = useGeneratedHtmlId({ prefix: 'updateSettingPresetsCheckbox' });
+
+  const { data: anonymizationFields, refetch: anonymizationFieldsRefetch } =
+    useFetchAnonymizationFields();
   const [contextUpdates, setContextUpdates] = React.useState<BatchUpdateListItem[]>([]);
   const [selectedPromptContext, setSelectedPromptContext] = React.useState(promptContext);
+  const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
+    useState<PerformBulkActionRequestBody>({
+      create: [],
+      update: [],
+      delete: {},
+    });
 
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
     [selectedPromptContext.rawData]
   );
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (onSave) {
       onSave(contextUpdates);
     }
+    try {
+      await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts);
+      anonymizationFieldsRefetch();
+    } catch (e) {
+      /* empty */
+    }
     onClose();
-  }, [contextUpdates, onClose, onSave]);
+  }, [
+    anonymizationFieldsBulkActions,
+    anonymizationFieldsRefetch,
+    contextUpdates,
+    http,
+    onClose,
+    onSave,
+    toasts,
+  ]);
 
-  const onListUpdated = useCallback((updates: BatchUpdateListItem[]) => {
-    setContextUpdates((prev) => [...prev, ...updates]);
-    setSelectedPromptContext((prev) =>
-      updates.reduce<SelectedPromptContext>(
-        (acc, { field, operation, update }) =>
-          updateSelectedPromptContext({
-            field,
-            operation,
-            selectedPromptContext: acc,
-            update,
-          }),
-        prev
-      )
-    );
+  const onListUpdated = useCallback(
+    (updates: BatchUpdateListItem[]) => {
+      setContextUpdates((prev) => [...prev, ...updates]);
+
+      setAnonymizationFieldsBulkActions((prev) => {
+        return updates.reduce<PerformBulkActionRequestBody>(
+          (acc, item) => {
+            const persistedField = find(anonymizationFields.data, ['field', item.field]) as
+              | AnonymizationFieldResponse
+              | undefined;
+
+            if (persistedField) {
+              acc.update?.push({
+                id: persistedField.id,
+                ...(item.update === 'allow' || item.update === 'defaultAllow'
+                  ? { allowed: item.operation === 'add' }
+                  : {}),
+                ...(item.update === 'allowReplacement' || item.update === 'defaultAllowReplacement'
+                  ? { anonymized: item.operation === 'add' }
+                  : {}),
+              });
+            } else {
+              acc.create?.push({
+                field: item.field,
+                allowed: item.operation === 'add',
+                anonymized: item.operation === 'add',
+              });
+              acc.create = uniqBy(acc.create, 'field');
+            }
+
+            return acc;
+          },
+          { create: prev.create ?? [], update: prev.update ?? [] }
+        );
+      });
+
+      setSelectedPromptContext((prev) =>
+        updates.reduce<SelectedPromptContext>(
+          (acc, { field, operation, update }) =>
+            updateSelectedPromptContext({
+              field,
+              operation,
+              selectedPromptContext: acc,
+              update,
+            }),
+          prev
+        )
+      );
+    },
+    [anonymizationFields]
+  );
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(e.target.checked);
   }, []);
 
   return (
@@ -83,27 +163,73 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
       <EuiModalBody>
         <Stats
           isDataAnonymizable={isDataAnonymizable}
-          selectedPromptContext={selectedPromptContext}
+          anonymizationFields={selectedPromptContext.contextAnonymizationFields?.data}
+          rawData={selectedPromptContext.rawData}
         />
+        <EuiSpacer size="s" />
         <ContextEditor
-          allow={selectedPromptContext.allow}
-          allowReplacement={selectedPromptContext.allowReplacement}
+          anonymizationFields={
+            selectedPromptContext.contextAnonymizationFields ?? {
+              total: 0,
+              page: 1,
+              perPage: 1000,
+              data: [],
+            }
+          }
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData as Record<string, string[]>}
         />
       </EuiModalBody>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} size="s">
-          {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.closeButton', {
-            defaultMessage: 'Close',
-          })}
-        </EuiButtonEmpty>
-        <EuiButton onClick={handleSave} fill size="s">
-          {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.saveButton', {
-            defaultMessage: 'Save',
-          })}
-        </EuiButton>
+      <EuiModalFooter
+        css={css`
+          background: ${euiThemeVars.euiColorLightestShade};
+          padding-block: 16px;
+        `}
+      >
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              helpText={I18n.translate(
+                'xpack.elasticAssistant.dataAnonymizationEditor.updatePresetsCheckboxHelpText',
+                {
+                  defaultMessage:
+                    'Apply new anonymization settings for current & future conversations.',
+                }
+              )}
+            >
+              <EuiCheckbox
+                id={checkboxId}
+                label={I18n.translate(
+                  'xpack.elasticAssistant.dataAnonymizationEditor.updatePresetsCheckboxLabel',
+                  {
+                    defaultMessage: 'Update presets',
+                  }
+                )}
+                checked={checked}
+                onChange={onChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiButtonEmpty onClick={onClose} size="s">
+                  {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.closeButton', {
+                    defaultMessage: 'Close',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton onClick={handleSave} fill size="s">
+                  {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.saveButton', {
+                    defaultMessage: 'Save',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
   );

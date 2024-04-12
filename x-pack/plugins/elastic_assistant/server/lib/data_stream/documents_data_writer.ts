@@ -36,7 +36,7 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script;
+  getUpdateScript?: (document: TUpdateParams, updatedAt: string) => Script;
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -69,10 +69,15 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
       }
 
+      console.error('body', await this.buildBulkOperations(params));
+
       const { errors, items, took } = await this.options.esClient.bulk({
         refresh: 'wait_for',
         body: await this.buildBulkOperations(params),
       });
+
+      console.error('errr', errors);
+      console.error('items', JSON.stringify(items, null, 2));
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],
@@ -106,14 +111,19 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     }
   };
 
-  private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
-    documentsToUpdate: TUpdateParams[],
-    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
-    authenticatedUser?: AuthenticatedUser
-  ) => {
-    const updatedAt = new Date().toISOString();
-    const filterByUser = authenticatedUser
-      ? [
+  getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: {
+                exists: {
+                  field: 'users',
+                },
+              },
+            },
+          },
           {
             nested: {
               path: 'users',
@@ -130,8 +140,17 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           },
-        ]
-      : [];
+        ],
+      },
+    },
+  });
+
+  private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
+    documentsToUpdate: TUpdateParams[],
+    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
+    authenticatedUser?: AuthenticatedUser
+  ) => {
+    const updatedAt = new Date().toISOString();
 
     const responseToUpdate = await this.options.esClient.search({
       body: {
@@ -149,8 +168,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },
@@ -184,27 +203,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
-    const filterByUser = authenticatedUser
-      ? [
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        ]
-      : [];
-
     const responseToDelete = await this.options.esClient.search({
       body: {
         query: {
@@ -221,8 +219,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },
@@ -246,13 +244,12 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   private buildBulkOperations = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
   ): Promise<BulkOperationContainer[]> => {
-    const documentCreateBody =
-      params.authenticatedUser && params.documentsToCreate
-        ? params.documentsToCreate.flatMap((document) => [
-            { create: { _index: this.options.index, _id: uuidV4() } },
-            document,
-          ])
-        : [];
+    const documentCreateBody = params.documentsToCreate
+      ? params.documentsToCreate.flatMap((document) => [
+          { create: { _index: this.options.index, _id: uuidV4() } },
+          document,
+        ])
+      : [];
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
@@ -260,7 +257,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         : [];
 
     const documentUpdatedBody =
-      params.documentsToUpdate && params.documentsToUpdate.length > 0
+      params.documentsToUpdate && params.documentsToUpdate.length > 0 && params.getUpdateScript
         ? await this.getUpdateDocumentsQuery(
             params.documentsToUpdate,
             params.getUpdateScript,

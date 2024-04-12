@@ -112,6 +112,23 @@ export const getComments = ({
       ]
     : [];
 
+  const UserAvatar = () => {
+    if (currentUserAvatar) {
+      return (
+        <EuiAvatar
+          name="user"
+          size="l"
+          color={currentUserAvatar?.color ?? 'subdued'}
+          {...(currentUserAvatar?.imageUrl
+            ? { imageUrl: currentUserAvatar.imageUrl as string }
+            : { initials: currentUserAvatar?.initials })}
+        />
+      );
+    }
+
+    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+  };
+
   return [
     ...currentConversation.messages.map((message, index) => {
       const isLastComment = index === currentConversation.messages.length - 1;
@@ -120,14 +137,7 @@ export const getComments = ({
 
       const messageProps = {
         timelineAvatar: isUser ? (
-          <EuiAvatar
-            name="user"
-            size="l"
-            color={currentUserAvatar?.color ?? 'subdued'}
-            {...(currentUserAvatar?.imageUrl
-              ? { imageUrl: currentUserAvatar.imageUrl as string }
-              : { initials: currentUserAvatar?.initials })}
-          />
+          <UserAvatar />
         ) : (
           <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),

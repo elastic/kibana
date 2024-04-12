@@ -7,7 +7,7 @@
 
 import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { omit, uniq } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -62,10 +62,6 @@ export interface AssistantProviderProps {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  baseAllow: string[];
-  baseAllowReplacement: string[];
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
@@ -87,8 +83,6 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
-  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
   toasts?: IToasts;
 }
@@ -111,11 +105,7 @@ export interface UseAssistantContext {
   ) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
-  baseAllow: string[];
-  baseAllowReplacement: string[];
   docLinks: Omit<DocLinksStart, 'links'>;
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
   basePath: string;
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
@@ -143,8 +133,6 @@ export interface UseAssistantContext {
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
-  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
-  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -170,10 +158,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   assistantAvailability,
   assistantTelemetry,
   augmentMessageCodeBlocks,
-  baseAllow,
-  baseAllowReplacement,
-  defaultAllow,
-  defaultAllowReplacement,
   docLinks,
   basePath,
   basePromptContexts = [],
@@ -184,8 +168,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   http,
   baseConversations,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  setDefaultAllow,
-  setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
 }) => {
@@ -307,14 +289,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
-      baseAllow: uniq(baseAllow),
-      baseAllowReplacement: uniq(baseAllowReplacement),
       basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
-      defaultAllow: uniq(defaultAllow),
-      defaultAllowReplacement: uniq(defaultAllowReplacement),
       docLinks,
       getComments,
       http,
@@ -329,8 +307,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setAssistantStreamingEnabled: setLocalStorageStreaming,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
       setSelectedSettingsTab,
       setShowAssistantOverlay,
@@ -352,14 +328,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
-      baseAllow,
-      baseAllowReplacement,
       basePath,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
-      defaultAllow,
-      defaultAllowReplacement,
       docLinks,
       getComments,
       http,
@@ -373,8 +345,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageStreaming,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
       setLocalStorageKnowledgeBase,
       setSessionStorageTraceOptions,
       showAssistantOverlay,

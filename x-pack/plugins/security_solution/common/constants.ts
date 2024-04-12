@@ -272,6 +272,7 @@ export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
 export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
 export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
 export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
+export const ASSET_CRITICALITY_CSV_UPLOAD_URL = `${ASSET_CRITICALITY_URL}/upload_csv`;
 
 /**
  * Public Risk Score routes

@@ -38,7 +38,11 @@ const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> 
   }, []);
 
   const { allowed, anonymized, total } = useMemo(
-    () => getStats(selectedPromptContext),
+    () =>
+      getStats({
+        anonymizationFields: selectedPromptContext.contextAnonymizationFields?.data,
+        rawData: selectedPromptContext.rawData,
+      }),
     [selectedPromptContext]
   );
 

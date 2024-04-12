@@ -37,6 +37,7 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -92,25 +93,28 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
     } = useAssistantContext();
 
+    const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
+      useFetchAnonymizationFields();
+
     const {
       conversationSettings,
       setConversationSettings,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
       assistantStreamingEnabled,
       setUpdatedAssistantStreamingEnabled,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
       conversationsSettingsBulkActions,
+      updatedAnonymizationData,
       setConversationsSettingsBulkActions,
-    } = useSettingsUpdater(conversations);
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
+    } = useSettingsUpdater(conversations, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -168,12 +172,21 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         iconType: 'check',
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
+      if (
+        (anonymizationFieldsBulkActions?.create?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.update?.length ?? 0) > 0 ||
+        (anonymizationFieldsBulkActions?.delete?.ids?.length ?? 0) > 0
+      ) {
+        await refetchAnonymizationFieldsResults();
+      }
       await onSave(saveResult);
     }, [
+      anonymizationFieldsBulkActions,
       conversationSettings,
       defaultSelectedConversationId,
       onConversationSelected,
       onSave,
+      refetchAnonymizationFieldsResults,
       saveSettings,
       toasts,
     ]);
@@ -338,11 +351,11 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultAllow={defaultAllow}
-                    defaultAllowReplacement={defaultAllowReplacement}
-                    pageSize={5}
-                    setUpdatedDefaultAllow={setUpdatedDefaultAllow}
-                    setUpdatedDefaultAllowReplacement={setUpdatedDefaultAllowReplacement}
+                    defaultPageSize={5}
+                    anonymizationFields={updatedAnonymizationData}
+                    anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
+                    setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+                    setUpdatedAnonymizationData={setUpdatedAnonymizationData}
                   />
                 )}
                 {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (

@@ -53,6 +53,8 @@ const testProps = {
   isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 jest.mock('../../assistant_context');
 

@@ -9,10 +9,9 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
-import { useAssistantContext } from '../assistant_context';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { BatchUpdateListItem } from './context_editor/types';
-import { getIsDataAnonymizable, updateDefaults, updateSelectedPromptContext } from './helpers';
+import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { ContextEditorFlyout } from './context_editor_flyout';
 import { ContextEditor } from './context_editor';
@@ -37,8 +36,6 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
   currentReplacements,
   isFlyoutMode,
 }) => {
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAssistantContext();
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
     [selectedPromptContext]
@@ -61,23 +58,8 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         ...prev,
         [selectedPromptContext.promptContextId]: updatedPromptContext,
       }));
-
-      updateDefaults({
-        defaultAllow,
-        defaultAllowReplacement,
-        setDefaultAllow,
-        setDefaultAllowReplacement,
-        updates,
-      });
     },
-    [
-      defaultAllow,
-      defaultAllowReplacement,
-      selectedPromptContext,
-      setDefaultAllow,
-      setDefaultAllowReplacement,
-      setSelectedPromptContexts,
-    ]
+    [selectedPromptContext, setSelectedPromptContexts]
   );
 
   if (isFlyoutMode) {
@@ -103,7 +85,8 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
     <EditorContainer data-test-subj="dataAnonymizationEditor">
       <Stats
         isDataAnonymizable={isDataAnonymizable}
-        selectedPromptContext={selectedPromptContext}
+        anonymizationFields={selectedPromptContext.contextAnonymizationFields?.data}
+        rawData={selectedPromptContext.rawData}
       />
 
       <EuiSpacer size="s" />
@@ -112,8 +95,14 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
       ) : (
         <ContextEditor
-          allow={selectedPromptContext.allow}
-          allowReplacement={selectedPromptContext.allowReplacement}
+          anonymizationFields={
+            selectedPromptContext.contextAnonymizationFields ?? {
+              total: 0,
+              page: 1,
+              perPage: 1000,
+              data: [],
+            }
+          }
           onListUpdated={onListUpdated}
           rawData={selectedPromptContext.rawData}
         />

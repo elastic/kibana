@@ -89,6 +89,7 @@ import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
   conversationTitle?: string;
@@ -125,8 +126,6 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    defaultAllow,
-    defaultAllowReplacement,
     docLinks,
     getComments,
     http,
@@ -172,7 +171,15 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     onFetch: onFetchedConversations,
     refetchOnWindowFocus: !isStreaming,
+    isAssistantEnabled,
   });
+
+  const {
+    data: anonymizationFields,
+    isLoading: isLoadingAnonymizationFields,
+    isError: isErrorAnonymizationFields,
+    isFetched: isFetchedAnonymizationFields,
+  } = useFetchAnonymizationFields();
 
   // Connector details
   const { data: connectors, isFetched: areConnectorsFetched } = useLoadConnectors({
@@ -441,14 +448,19 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     const promptContext: PromptContext | undefined = promptContexts[promptContextId];
-    if (promptContext != null) {
+    if (
+      promptContext != null &&
+      !isLoadingAnonymizationFields &&
+      !isErrorAnonymizationFields &&
+      isFetchedAnonymizationFields &&
+      anonymizationFields
+    ) {
       setAutoPopulatedOnce(true);
 
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {
           const newSelectedPromptContext = await getNewSelectedPromptContext({
-            defaultAllow,
-            defaultAllowReplacement,
+            anonymizationFields,
             promptContext,
           });
 
@@ -473,8 +485,10 @@ const AssistantComponent: React.FC<Props> = ({
     currentConversation?.title,
     selectedPromptContexts,
     autoPopulatedOnce,
-    defaultAllow,
-    defaultAllowReplacement,
+    isLoadingAnonymizationFields,
+    isErrorAnonymizationFields,
+    anonymizationFields,
+    isFetchedAnonymizationFields,
   ]);
 
   useEffect(() => {}, [
@@ -957,8 +971,7 @@ const AssistantComponent: React.FC<Props> = ({
                           <EuiFlexItem>
                             <>
                               <ContextPills
-                                defaultAllow={defaultAllow}
-                                defaultAllowReplacement={defaultAllowReplacement}
+                                anonymizationFields={anonymizationFields}
                                 promptContexts={promptContexts}
                                 selectedPromptContexts={selectedPromptContexts}
                                 setSelectedPromptContexts={setSelectedPromptContexts}
@@ -1056,11 +1069,10 @@ const AssistantComponent: React.FC<Props> = ({
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
         {createCodeBlockPortals()}
 
-        {!isDisabled && (
+        {!isDisabled && !isLoadingAnonymizationFields && !isErrorAnonymizationFields && (
           <>
             <ContextPills
-              defaultAllow={defaultAllow}
-              defaultAllowReplacement={defaultAllowReplacement}
+              anonymizationFields={anonymizationFields}
               promptContexts={promptContexts}
               selectedPromptContexts={selectedPromptContexts}
               setSelectedPromptContexts={setSelectedPromptContexts}

@@ -11,7 +11,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  describe('Trained models list', () => {
+  // failsOnMKI, see https://github.com/elastic/kibana/issues/180481
+  describe('Trained models list', function () {
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.login();
       await ml.api.syncSavedObjects();

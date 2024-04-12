@@ -97,27 +97,19 @@ export const getDefaultConnector = (
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }
 
 export const getOptionalRequestParams = ({
   isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   size,
 }: {
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
-  const optionalAllow = allow ? { allow } : undefined;
-  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
   const optionalSize = size ? { size } : undefined;
 
   // the settings toggle must be enabled:
@@ -127,8 +119,6 @@ export const getOptionalRequestParams = ({
 
   return {
     ...optionalAlertsIndexPattern,
-    ...optionalAllow,
-    ...optionalAllowReplacement,
     ...optionalSize,
   };
 };

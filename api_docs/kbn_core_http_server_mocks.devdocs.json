@@ -43,7 +43,7 @@
             "section": "def-common.IExternalUrlPolicy",
             "text": "IExternalUrlPolicy"
           },
-          "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
+          "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
           {
             "pluginId": "@kbn/config-mocks",
             "scope": "common",
@@ -80,7 +80,7 @@
                 "section": "def-common.IExternalUrlPolicy",
                 "text": "IExternalUrlPolicy"
               },
-              "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
+              "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,

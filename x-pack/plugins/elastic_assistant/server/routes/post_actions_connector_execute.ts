@@ -14,7 +14,7 @@ import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import { schema } from '@kbn/config-schema';
 import {
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
@@ -40,6 +40,8 @@ import {
   getPluginNameFromRequest,
 } from './helpers';
 import { getLangSmithTracer } from './evaluate/utils';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -55,7 +57,7 @@ export const postActionsConnectorExecuteRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ExecuteConnectorRequestBody),
@@ -84,7 +86,11 @@ export const postActionsConnectorExecuteRoute = (
               body: `Authenticated user not found`,
             });
           }
-          const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
+          const conversationsDataClient =
+            await assistantContext.getAIAssistantConversationsDataClient();
+
+          const anonymizationFieldsDataClient =
+            await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
 
           let latestReplacements: Replacements = request.body.replacements;
           const onNewReplacements = (newReplacements: Replacements) => {
@@ -116,7 +122,7 @@ export const postActionsConnectorExecuteRoute = (
           const actions = (await context.elasticAssistant).actions;
 
           if (conversationId) {
-            const conversation = await dataClient?.getConversation({
+            const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -126,15 +132,14 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            // messages are anonymized by dataClient
-            prevMessages =
-              conversation?.messages?.map((c) => ({
-                role: c.role,
-                content: c.content,
-              })) ?? [];
+            // messages are anonymized by conversationsDataClient
+            prevMessages = conversation?.messages?.map((c) => ({
+              role: c.role,
+              content: c.content,
+            }));
 
             if (request.body.message) {
-              const res = await dataClient?.appendConversationMessages({
+              const res = await conversationsDataClient?.appendConversationMessages({
                 existingConversation: conversation,
                 messages: [
                   {
@@ -156,7 +161,7 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
             }
-            const updatedConversation = await dataClient?.getConversation({
+            const updatedConversation = await conversationsDataClient?.getConversation({
               id: conversationId,
               authenticatedUser,
             });
@@ -167,7 +172,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            if (conversation?.title === 'New chat') {
+            if (conversation?.title === 'New chat' && prevMessages) {
               try {
                 const autoTitle = await executeAction({
                   actions,
@@ -184,7 +189,7 @@ export const postActionsConnectorExecuteRoute = (
                           content:
                             'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
                         },
-                        newMessage ?? prevMessages[0],
+                        newMessage ?? prevMessages?.[0],
                       ],
                       ...(connectors[0]?.actionTypeId === '.gen-ai'
                         ? { n: 1, stop: null, temperature: 0.2 }
@@ -204,7 +209,7 @@ export const postActionsConnectorExecuteRoute = (
                     const match = (autoTitle as StaticResponse).data.match(/^["']?([^"']+)["']?$/);
                     const title = match ? match[1] : (autoTitle as StaticResponse).data;
 
-                    await dataClient?.updateConversation({
+                    await conversationsDataClient?.updateConversation({
                       conversationUpdateProps: {
                         id: conversationId,
                         title,
@@ -225,7 +230,7 @@ export const postActionsConnectorExecuteRoute = (
               isError = false
             ): Promise<void> => {
               if (updatedConversation) {
-                await dataClient?.appendConversationMessages({
+                await conversationsDataClient?.appendConversationMessages({
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
@@ -240,7 +245,7 @@ export const postActionsConnectorExecuteRoute = (
                 });
               }
               if (Object.keys(latestReplacements).length > 0) {
-                await dataClient?.updateConversation({
+                await conversationsDataClient?.updateConversation({
                   conversationUpdateProps: {
                     id: conversationId,
                     replacements: latestReplacements,
@@ -307,12 +312,19 @@ export const postActionsConnectorExecuteRoute = (
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
+          const anonymizationFieldsRes =
+            await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
+            });
+
           const result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
             await callAgentExecutor({
               abortSignal,
               alertsIndexPattern: request.body.alertsIndexPattern,
-              allow: request.body.allow,
-              allowReplacement: request.body.allowReplacement,
+              anonymizationFields: anonymizationFieldsRes
+                ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+                : undefined,
               actions,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
               assistantTools,

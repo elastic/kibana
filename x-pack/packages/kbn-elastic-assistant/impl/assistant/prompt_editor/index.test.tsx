@@ -14,15 +14,13 @@ import { SelectedPromptContext } from '../prompt_context/types';
 import { PromptEditor, Props } from '.';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'alert data',
 };
 
 const mockSelectedEventPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockEventPromptContext.id,
   rawData: 'event data',
 };
