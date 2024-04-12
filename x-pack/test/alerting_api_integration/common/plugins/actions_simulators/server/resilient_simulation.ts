@@ -44,10 +44,16 @@ export class ResilientSimulator extends Simulator {
   private static sendResponse(request: http.IncomingMessage, response: http.ServerResponse) {
     response.statusCode = 202;
     response.setHeader('Content-Type', 'application/json');
-    response.end({
-      id: 123,
-      created_date: '2020-04-27T14:17:45.490Z',
-    });
+    response.end(
+      JSON.stringify(
+        {
+          id: '123',
+          create_date: 1589391874472,
+        },
+        null,
+        4
+      )
+    );
   }
 
   private static sendErrorResponse(response: http.ServerResponse) {

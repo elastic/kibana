@@ -278,19 +278,14 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             });
         });
 
-        it('should handle failing with a simulated success without title', async () => {
+        it('should handle failing with a simulated success without incident', async () => {
           await supertest
             .post(`/api/actions/connector/${resilientActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
                 subAction: 'pushToService',
-                subActionParams: {
-                  incident: {
-                    description: 'success',
-                  },
-                  comments: [],
-                },
+                subActionParams: { comments: [] },
               },
             })
             .then((resp: any) => {
@@ -301,7 +296,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
-                  '[Action][IBM Resilient]: Unable to create incident. Error: Status code: 404. Message: API Error: Not Found.',
+                  "Cannot destructure property 'externalId' of 'incident' as it is undefined.",
               });
             });
         });

@@ -111,7 +111,7 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
   private getOrgUrl() {
     const { apiUrl: url, orgId } = this.config;
 
-    return `${url}rest/orgs/${orgId}`;
+    return `${url}/rest/orgs/${orgId}`;
   }
 
   private getIncidentFieldsUrl = () => `${this.getOrgUrl()}/types/incident/fields`;
