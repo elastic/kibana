@@ -10,7 +10,10 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRightPanelContext } from '../context';
 import { FlyoutTour } from '../../shared/components/flyout_tour';
-import { getRightSectionTourSteps } from '../../shared/utils/tour_step_config';
+import {
+  getRightSectionTourSteps,
+  getLeftSectionTourSteps,
+} from '../../shared/utils/tour_step_config';
 import { getField } from '../../shared/utils';
 import { DocumentDetailsRightPanelKey } from '..';
 import { DocumentDetailsLeftPanelKey } from '../../left';
@@ -52,7 +55,10 @@ export const RightPanelTour: FC = memo(() => {
     });
   }, [eventId, indexName, scopeId, openRightPanel]);
 
-  const tourStepContent = useMemo(() => getRightSectionTourSteps(), []);
+  const tourStepContent = useMemo(
+    () => [...getRightSectionTourSteps(), ...getLeftSectionTourSteps()],
+    []
+  );
 
   return showTour ? (
     <FlyoutTour
