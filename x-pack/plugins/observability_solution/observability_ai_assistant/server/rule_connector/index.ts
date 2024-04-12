@@ -32,9 +32,10 @@ import {
 } from '../../common';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
-import { ChatFunctionClient } from '../service/chat_function_client';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { CompatibleJSONSchema } from '../../common/functions/types';
+
+const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
 const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
   '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
@@ -90,10 +91,7 @@ export function getObsAIAssistantConnectorType(
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     isSystemActionType: true,
-    getKibanaPrivileges: (params) => [
-      'api:observabilityAIAssistant',
-      'app:observabilityAIAssistant',
-    ],
+    getKibanaPrivileges: () => CONNECTOR_PRIVILEGES,
     minimumLicenseRequired: 'enterprise',
     name: i18n.translate('xpack.observabilityAiAssistant.alertConnector.title', {
       defaultMessage: 'Observability AI Assistant',
@@ -173,11 +171,7 @@ async function executor(
   const systemMessage = functionClient
     .getContexts()
     .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = getBackgroundProcessInstruction(
-    functionClient,
-    execOptions.params.rule,
-    state
-  );
+  const backgroundInstruction = getBackgroundProcessInstruction(execOptions.params.rule, state);
 
   client
     .complete({
@@ -239,6 +233,7 @@ async function executor(
         execOptions.logger.error(err);
       },
     });
+  execOptions.logger.error(new Error('rule_connector error'));
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
@@ -250,6 +245,7 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   return {
     connectorTypeId: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     ruleActionParamsSchema: ParamsSchema,
+    getKibanaPrivileges: () => CONNECTOR_PRIVILEGES,
     buildActionParams: ({ params, rule, ruleUrl, alerts }) => {
       return {
         connector: params.connector,
@@ -268,11 +264,7 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
   };
 };
 
-function getBackgroundProcessInstruction(
-  functionClient: ChatFunctionClient,
-  rule: RuleType,
-  state: AlertState
-) {
+function getBackgroundProcessInstruction(rule: RuleType, state: AlertState) {
   let instruction = `You are called as a background process because the alert ${JSON.stringify(
     rule
   )} ${state === 'new' ? 'fired' : 'recovered'}.`;
