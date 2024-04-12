@@ -5310,6 +5310,269 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "comments": Object {
+      "flags": Object {
+        "default": null,
+        "error": [Function],
+        "presence": "optional",
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "error": [Function],
+            },
+            "items": Array [
+              Object {
+                "flags": Object {
+                  "default": Object {
+                    "special": "deep",
+                  },
+                  "error": [Function],
+                  "presence": "optional",
+                },
+                "keys": Object {
+                  "comment": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                  "commentId": Object {
+                    "flags": Object {
+                      "error": [Function],
+                    },
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
+                    ],
+                    "type": "string",
+                  },
+                },
+                "preferences": Object {
+                  "stripUnknown": Object {
+                    "objects": false,
+                  },
+                },
+                "type": "object",
+              },
+            ],
+            "type": "array",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "incident": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {
+        "externalId": Object {
+          "flags": Object {
+            "default": null,
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "flags": Object {
+                  "error": [Function],
+                },
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "method": [Function],
+                    },
+                    "name": "custom",
+                  },
+                ],
+                "type": "string",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  null,
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      },
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "id": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 6`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .resilient 7`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
     "apiUrl": Object {
       "flags": Object {
         "error": [Function],
@@ -5348,7 +5611,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 2`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient 8`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -5396,553 +5659,54 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 3`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient 9`] = `
 Object {
   "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
     "error": [Function],
+    "presence": "optional",
   },
-  "matches": Array [
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
-        },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "getFields",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
       },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
     },
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
         },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "getIncident",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {
-              "externalId": Object {
-                "flags": Object {
-                  "error": [Function],
-                },
-                "rules": Array [
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
-                ],
-                "type": "string",
-              },
-            },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
       },
-    },
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
         },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "handshake",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
       },
+      "type": "object",
     },
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
-        },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "pushToService",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {
-              "comments": Object {
-                "flags": Object {
-                  "default": null,
-                  "error": [Function],
-                  "presence": "optional",
-                },
-                "matches": Array [
-                  Object {
-                    "schema": Object {
-                      "flags": Object {
-                        "error": [Function],
-                      },
-                      "items": Array [
-                        Object {
-                          "flags": Object {
-                            "default": Object {
-                              "special": "deep",
-                            },
-                            "error": [Function],
-                            "presence": "optional",
-                          },
-                          "keys": Object {
-                            "comment": Object {
-                              "flags": Object {
-                                "error": [Function],
-                              },
-                              "rules": Array [
-                                Object {
-                                  "args": Object {
-                                    "method": [Function],
-                                  },
-                                  "name": "custom",
-                                },
-                              ],
-                              "type": "string",
-                            },
-                            "commentId": Object {
-                              "flags": Object {
-                                "error": [Function],
-                              },
-                              "rules": Array [
-                                Object {
-                                  "args": Object {
-                                    "method": [Function],
-                                  },
-                                  "name": "custom",
-                                },
-                              ],
-                              "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
-                            },
-                          },
-                          "type": "object",
-                        },
-                      ],
-                      "type": "array",
-                    },
-                  },
-                  Object {
-                    "schema": Object {
-                      "allow": Array [
-                        null,
-                      ],
-                      "flags": Object {
-                        "error": [Function],
-                        "only": true,
-                      },
-                      "type": "any",
-                    },
-                  },
-                ],
-                "type": "alternatives",
-              },
-              "incident": Object {
-                "flags": Object {
-                  "default": Object {
-                    "special": "deep",
-                  },
-                  "error": [Function],
-                  "presence": "optional",
-                },
-                "keys": Object {
-                  "description": Object {
-                    "flags": Object {
-                      "default": null,
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "matches": Array [
-                      Object {
-                        "schema": Object {
-                          "flags": Object {
-                            "error": [Function],
-                          },
-                          "rules": Array [
-                            Object {
-                              "args": Object {
-                                "method": [Function],
-                              },
-                              "name": "custom",
-                            },
-                          ],
-                          "type": "string",
-                        },
-                      },
-                      Object {
-                        "schema": Object {
-                          "allow": Array [
-                            null,
-                          ],
-                          "flags": Object {
-                            "error": [Function],
-                            "only": true,
-                          },
-                          "type": "any",
-                        },
-                      },
-                    ],
-                    "type": "alternatives",
-                  },
-                  "externalId": Object {
-                    "flags": Object {
-                      "default": null,
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "matches": Array [
-                      Object {
-                        "schema": Object {
-                          "flags": Object {
-                            "error": [Function],
-                          },
-                          "rules": Array [
-                            Object {
-                              "args": Object {
-                                "method": [Function],
-                              },
-                              "name": "custom",
-                            },
-                          ],
-                          "type": "string",
-                        },
-                      },
-                      Object {
-                        "schema": Object {
-                          "allow": Array [
-                            null,
-                          ],
-                          "flags": Object {
-                            "error": [Function],
-                            "only": true,
-                          },
-                          "type": "any",
-                        },
-                      },
-                    ],
-                    "type": "alternatives",
-                  },
-                  "incidentTypes": Object {
-                    "flags": Object {
-                      "default": null,
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "matches": Array [
-                      Object {
-                        "schema": Object {
-                          "flags": Object {
-                            "error": [Function],
-                          },
-                          "items": Array [
-                            Object {
-                              "flags": Object {
-                                "error": [Function],
-                                "presence": "optional",
-                              },
-                              "type": "number",
-                            },
-                          ],
-                          "type": "array",
-                        },
-                      },
-                      Object {
-                        "schema": Object {
-                          "allow": Array [
-                            null,
-                          ],
-                          "flags": Object {
-                            "error": [Function],
-                            "only": true,
-                          },
-                          "type": "any",
-                        },
-                      },
-                    ],
-                    "type": "alternatives",
-                  },
-                  "name": Object {
-                    "flags": Object {
-                      "error": [Function],
-                    },
-                    "rules": Array [
-                      Object {
-                        "args": Object {
-                          "method": [Function],
-                        },
-                        "name": "custom",
-                      },
-                    ],
-                    "type": "string",
-                  },
-                  "severityCode": Object {
-                    "flags": Object {
-                      "default": null,
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "matches": Array [
-                      Object {
-                        "schema": Object {
-                          "flags": Object {
-                            "error": [Function],
-                          },
-                          "type": "number",
-                        },
-                      },
-                      Object {
-                        "schema": Object {
-                          "allow": Array [
-                            null,
-                          ],
-                          "flags": Object {
-                            "error": [Function],
-                            "only": true,
-                          },
-                          "type": "any",
-                        },
-                      },
-                    ],
-                    "type": "alternatives",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
-                "type": "object",
-              },
-            },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
-      },
+  },
+  "preferences": Object {
+    "stripUnknown": Object {
+      "objects": false,
     },
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
-        },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "incidentTypes",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
-      },
-    },
-    Object {
-      "schema": Object {
-        "flags": Object {
-          "default": Object {
-            "special": "deep",
-          },
-          "error": [Function],
-          "presence": "optional",
-        },
-        "keys": Object {
-          "subAction": Object {
-            "allow": Array [
-              "severity",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-          "subActionParams": Object {
-            "flags": Object {
-              "default": Object {
-                "special": "deep",
-              },
-              "error": [Function],
-              "presence": "optional",
-            },
-            "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
-            "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
-          },
-        },
-        "type": "object",
-      },
-    },
-  ],
-  "type": "alternatives",
+  },
+  "type": "object",
 }
 `;
 
