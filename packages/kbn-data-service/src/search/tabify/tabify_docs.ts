@@ -131,10 +131,9 @@ export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDoc
       if (indexPattern.hasOwnProperty(fieldName)) {
         const isExcludedMetaField =
           EXCLUDED_META_FIELDS.includes(fieldName) || fieldName.charAt(0) !== '_';
-        if (isExcludedMetaField) {
-          return;
+        if (!isExcludedMetaField) {
+          flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
         }
-        flat[fieldName] = hit[fieldName as keyof estypes.SearchHit];
       }
     }
   }
