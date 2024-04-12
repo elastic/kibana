@@ -67,8 +67,8 @@ describe('CustomGridBody', () => {
   });
 
   it('should render exactly as snapshots', () => {
-    // mainly make sure that if styling is changed,
-    // the test fails and the developer is aware of the change
+    // mainly to make sure that if styling is changed the test fails and the developer is
+    // aware of the change that affected this component
     const { container } = renderTestComponents();
     expect(container).toMatchSnapshot();
   });

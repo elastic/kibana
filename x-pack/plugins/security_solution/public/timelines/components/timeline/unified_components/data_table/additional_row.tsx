@@ -33,8 +33,12 @@ const AdditionalRowComp: React.FC<AdditionalRowProps> = memo(
   ({ rowIndex, event, setCellProps, timelineId, enabledRowRenderers }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // as of now eui does not update trailing column cell props when the row is expanded
-    // so we need to use the UnifiedDataTableContext to determine if the row is expanded
+    /*
+     * Ideally, unified data table could have handled the styling of trailing columns when a row is expanded.
+     * But, a trailing column can have arbitrary design and that is why it is best for consumer to handle the styling
+     * as we are doing below
+     *
+     * */
     const ctx = useTimelineUnifiedDataTableContext();
 
     useEffect(() => {
