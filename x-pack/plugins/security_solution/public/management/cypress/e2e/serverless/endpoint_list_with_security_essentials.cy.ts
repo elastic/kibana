@@ -15,42 +15,45 @@ import {
   visitEndpointList,
 } from '../../screens';
 
-// Failing: See https://github.com/elastic/kibana/issues/171643
-describe.skip('When on the Endpoint List in Security Essentials PLI', {
-  tags: ['@serverless'],
-  env: {
-    ftrConfig: {
-      productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+describe(
+  'When on the Endpoint List in Security Essentials PLI',
+  {
+    tags: ['@serverless'],
+    env: {
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+      },
     },
   },
-}, () => {
-  describe('and Isolated hosts exist', () => {
-    let indexedEndpointData: CyIndexEndpointHosts;
+  () => {
+    describe('and Isolated hosts exist', () => {
+      let indexedEndpointData: CyIndexEndpointHosts;
 
-    before(() => {
-      indexEndpointHosts({ isolation: true }).then((response) => {
-        indexedEndpointData = response;
+      before(() => {
+        indexEndpointHosts({ isolation: true }).then((response) => {
+          indexedEndpointData = response;
+        });
+      });
+
+      after(() => {
+        if (indexedEndpointData) {
+          indexedEndpointData.cleanup();
+        }
+      });
+
+      beforeEach(() => {
+        login();
+        visitEndpointList();
+        openRowActionMenu();
+      });
+
+      it('should display `release` options in host row actions', () => {
+        getUnIsolateActionMenuItem().should('exist');
+      });
+
+      it('should NOT display access to response console', () => {
+        getConsoleActionMenuItem().should('not.exist');
       });
     });
-
-    after(() => {
-      if (indexedEndpointData) {
-        indexedEndpointData.cleanup();
-      }
-    });
-
-    beforeEach(() => {
-      login();
-      visitEndpointList();
-      openRowActionMenu();
-    });
-
-    it('should display `release` options in host row actions', () => {
-      getUnIsolateActionMenuItem().should('exist');
-    });
-
-    it('should NOT display access to response console', () => {
-      getConsoleActionMenuItem().should('not.exist');
-    });
-  });
-});
+  }
+);

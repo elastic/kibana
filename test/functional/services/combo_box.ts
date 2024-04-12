@@ -108,7 +108,7 @@ export class ComboBoxService extends FtrService {
             (
               await this.find.allByCssSelector(`.euiFilterSelectItem`, this.WAIT_FOR_EXISTS_TIME)
             ).map(async (e) => {
-              const title = await e.getAttribute('title');
+              const title = (await e.getAttribute('title')) ?? '';
               return { title, formattedTitle: title.toLowerCase().trim() };
             })
           )
