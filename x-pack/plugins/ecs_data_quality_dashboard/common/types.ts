@@ -19,9 +19,8 @@ export interface MeteringIndicesStatsResponse {
     failed: number;
   };
   indices: MeteringStatsIndex[];
-  datastreams: Array<{ name: string; num_docs: number; size_in_bytes: number }>;
+  datastreams: Array<{ name: string; num_docs: number }>;
   total: {
     num_docs: number;
-    size_in_bytes: number;
   };
 }

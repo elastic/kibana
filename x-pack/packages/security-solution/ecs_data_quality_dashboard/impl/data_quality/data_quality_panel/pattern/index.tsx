@@ -273,10 +273,11 @@ const PatternComponent: React.FC<Props> = ({
         indices: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }).length,
         pattern,
         results: undefined,
-        sizeInBytes: getTotalSizeInBytes({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
-          stats,
-        }),
+        sizeInBytes:
+          getTotalSizeInBytes({
+            indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
+            stats,
+          }) ?? getFallbackValue(isILMAvailable), // It fallback to 0 only when isILMAvailable is true
         stats,
       });
     }
@@ -336,7 +337,7 @@ const PatternComponent: React.FC<Props> = ({
             ilmExplainPhaseCounts={ilmExplainPhaseCounts}
             pattern={pattern}
             patternDocsCount={patternRollup?.docsCount ?? 0}
-            patternSizeInBytes={patternRollup?.sizeInBytes ?? getFallbackValue(isILMAvailable)}
+            patternSizeInBytes={patternRollup?.sizeInBytes}
           />
           <EuiSpacer />
         </EuiFlexItem>
