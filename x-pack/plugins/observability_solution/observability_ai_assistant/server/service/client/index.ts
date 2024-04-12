@@ -218,12 +218,14 @@ export class ObservabilityAIAssistantClient {
             ({ message }) => message.role === MessageRole.User && !message.name
           );
 
-          const shouldInjectContext =
+          const hasNoContextRequestAfterLastUserMessage =
             indexOfLastUserMessage !== -1 &&
             nextMessages
               .slice(indexOfLastUserMessage)
-              .every(({ message }) => message.function_call?.name !== 'context') &&
-            functionClient.hasFunction('context');
+              .every(({ message }) => message.function_call?.name !== 'context');
+
+          const shouldInjectContext =
+            functionClient.hasFunction('context') && hasNoContextRequestAfterLastUserMessage;
 
           if (shouldInjectContext) {
             const contextFunctionRequest = {
