@@ -14,17 +14,12 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const registerRiskEngineRoutes = ({
   router,
-  config,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
-    riskEngineDisableRoute(router, getStartServices);
-    riskEngineSettingsRoute(router);
-    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
-      riskEnginePrivilegesRoute(router, getStartServices);
-    }
-  }
+  riskEngineStatusRoute(router);
+  riskEngineInitRoute(router, getStartServices);
+  riskEngineEnableRoute(router, getStartServices);
+  riskEngineDisableRoute(router, getStartServices);
+  riskEngineSettingsRoute(router);
+  riskEnginePrivilegesRoute(router, getStartServices);
 };

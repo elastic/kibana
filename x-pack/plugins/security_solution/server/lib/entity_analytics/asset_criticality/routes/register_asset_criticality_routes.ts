@@ -22,6 +22,6 @@ export const registerAssetCriticalityRoutes = ({
   assetCriticalityUpsertRoute(router, logger);
   assetCriticalityGetRoute(router, logger);
   assetCriticalityDeleteRoute(router, logger);
-  assetCriticalityPrivilegesRoute(router, getStartServices, logger);
+  assetCriticalityPrivilegesRoute(router, logger, getStartServices);
   assetCriticalityCSVUploadRoute(router, logger, config, getStartServices);
 };

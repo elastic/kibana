@@ -19,8 +19,8 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const assetCriticalityPrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
