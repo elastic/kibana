@@ -29,9 +29,10 @@ import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/typ
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
-interface Props {
+export interface Props {
   onClose: () => void;
 }
+
 export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);

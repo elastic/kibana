@@ -74,6 +74,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cases-comments": "5cb0a421588831c2a950e50f486048b8aabbae25",
         "cases-configure": "44ed7b8e0f44df39516b8870589b89e32224d2bf",
         "cases-connector-mappings": "f9d1ac57e484e69506c36a8051e4d61f4a8cfd25",
+        "cases-rules": "6d1776f5c46a99e1a0f3085c537146c1cdfbc829",
         "cases-telemetry": "f219eb7e26772884342487fc9602cfea07b3cedc",
         "cases-user-actions": "483f10db9b3bd1617948d7032a98b7791bf87414",
         "cloud-security-posture-settings": "e0f61c68bbb5e4cfa46ce8994fa001e417df51ca",
