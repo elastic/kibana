@@ -45,6 +45,12 @@ import type {
   ReportDetailsFlyoutOpenedParams,
   ReportDetailsFlyoutTabClickedParams,
 } from './events/document_details/types';
+import type {
+  OnboardingHubStepFinishedParams,
+  OnboardingHubStepLinkClickedParams,
+  OnboardingHubStepOpenParams,
+  OnboardingHubTelemetryEvent,
+} from './events/onboarding/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -97,7 +103,8 @@ export type TelemetryEventParams =
   | ReportDataQualityIndexCheckedParams
   | ReportDataQualityCheckAllCompletedParams
   | ReportBreadcrumbClickedParams
-  | ReportDocumentDetailsTelemetryEventParams;
+  | ReportDocumentDetailsTelemetryEventParams
+  | OnboardingHubStepOpenParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -129,6 +136,11 @@ export interface TelemetryClientStart {
   // document details flyout
   reportDetailsFlyoutOpened(params: ReportDetailsFlyoutOpenedParams): void;
   reportDetailsFlyoutTabClicked(params: ReportDetailsFlyoutTabClickedParams): void;
+
+  // onboarding hub
+  reportOnboardingHubStepOpen(params: OnboardingHubStepOpenParams): void;
+  reportOnboardingHubStepFinished(params: OnboardingHubStepFinishedParams): void;
+  reportOnboardingHubStepLinkClicked(params: OnboardingHubStepLinkClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -152,4 +164,5 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.BreadcrumbClicked;
       schema: RootSchema<ReportBreadcrumbClickedParams>;
-    };
+    }
+  | OnboardingHubTelemetryEvent;

@@ -30,6 +30,11 @@ import {
   DocumentDetailsFlyoutOpenedEvent,
   DocumentDetailsTabClickedEvent,
 } from './document_details';
+import {
+  onboardingHubStepFinishedEvent,
+  onboardingHubStepLinkClickedEvent,
+  onboardingHubStepOpenEvent,
+} from './onboarding';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -161,4 +166,7 @@ export const telemetryEvents = [
   breadCrumbClickedEvent,
   DocumentDetailsFlyoutOpenedEvent,
   DocumentDetailsTabClickedEvent,
+  onboardingHubStepOpenEvent,
+  onboardingHubStepLinkClickedEvent,
+  onboardingHubStepFinishedEvent,
 ];

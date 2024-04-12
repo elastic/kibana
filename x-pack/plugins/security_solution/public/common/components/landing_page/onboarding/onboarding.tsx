@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -22,6 +22,8 @@ import { ProductLine } from './configs';
 
 import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
+import { useKibana } from '../../../lib/kibana';
+import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -50,6 +52,13 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
   const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
+  const { telemetry } = useKibana().services;
+  const onStepLinkClicked = useCallback(
+    (params: OnboardingHubStepLinkClickedParams) => {
+      telemetry.reportOnboardingHubStepLinkClicked(params);
+    },
+    [telemetry]
+  );
 
   useScrollToHash();
 
@@ -82,6 +91,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
           finishedSteps={finishedSteps}
           indicesExist={!!indicesExist}
           onStepClicked={onStepClicked}
+          onStepLinkClicked={onStepLinkClicked}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
           <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
