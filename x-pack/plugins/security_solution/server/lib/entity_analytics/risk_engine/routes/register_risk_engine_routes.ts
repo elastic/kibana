@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StartServicesAccessor } from '@kbn/core/server';
-import type { StartPlugins } from '../../../../plugin_contract';
-import type { ConfigType } from '../../../../config';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { riskEngineInitRoute } from './init';
 import { riskEngineEnableRoute } from './enable';
 import { riskEngineDisableRoute } from './disable';
 import { riskEngineStatusRoute } from './status';
 import { riskEnginePrivilegesRoute } from './privileges';
 import { riskEngineSettingsRoute } from './settings';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const registerRiskEngineRoutes = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  getStartServices: StartServicesAccessor<StartPlugins>
-) => {
+export const registerRiskEngineRoutes = ({
+  router,
+  config,
+  getStartServices,
+}: EntityAnalyticsRoutesDeps) => {
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);

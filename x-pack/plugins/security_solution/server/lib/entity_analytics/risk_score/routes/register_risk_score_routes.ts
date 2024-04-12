@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { ConfigType } from '../../../../config';
 import { riskScorePreviewRoute } from './preview';
 import { riskScoreCalculationRoute } from './calculation';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const registerRiskScoreRoutes = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  config: ConfigType
-) => {
+export const registerRiskScoreRoutes = ({ router, logger, config }: EntityAnalyticsRoutesDeps) => {
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
