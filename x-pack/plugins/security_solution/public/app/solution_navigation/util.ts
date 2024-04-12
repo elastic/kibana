@@ -26,20 +26,23 @@ export const getSolutionPageNameFromNavLinkId = (navLinkId: string): SolutionPag
 // They are navLinks tree with a SecurityPageName, so they should be treated as leading breadcrumbs in ESS as well.
 // TODO: Improve the breadcrumbs logic in `use_breadcrumbs_nav` to avoid this workaround.
 const HIDDEN_BREADCRUMBS = new Set<SolutionPageName>([
+  SecurityPageName.networkFlows,
   SecurityPageName.networkDns,
   SecurityPageName.networkHttp,
   SecurityPageName.networkTls,
   SecurityPageName.networkAnomalies,
   SecurityPageName.networkEvents,
+  SecurityPageName.usersAll,
   SecurityPageName.usersAuthentications,
   SecurityPageName.usersAnomalies,
   SecurityPageName.usersRisk,
   SecurityPageName.usersEvents,
-  SecurityPageName.uncommonProcesses,
+  SecurityPageName.hostsAll,
+  SecurityPageName.hostsUncommonProcesses,
   SecurityPageName.hostsAnomalies,
   SecurityPageName.hostsEvents,
   SecurityPageName.hostsRisk,
-  SecurityPageName.sessions,
+  SecurityPageName.hostsSessions,
 ]);
 
 export const isBreadcrumbHidden = (id: SolutionPageName): boolean =>
