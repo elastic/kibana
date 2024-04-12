@@ -273,7 +273,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   );
 };
 
-interface Props {
+export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
