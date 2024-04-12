@@ -52,7 +52,7 @@ export const createAppMockRenderer = (
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
     <I18nProvider>
-      <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+      <KibanaRenderContextProvider {...core}>
         <KibanaContextProvider services={services}>
           <QueryClientProvider client={queryClient} context={queryClientContext}>
             {children}
