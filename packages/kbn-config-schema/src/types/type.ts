@@ -7,6 +7,7 @@
  */
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
+import { META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -15,6 +16,11 @@ export interface TypeOptions<T> {
   validate?: (value: T) => string | void;
   /** A human-friendly description of this type to be used in documentation */
   description?: string;
+  /**
+   * A string that uniquely identifies this schema. Used when generating OAS
+   * to create refs instead of inline schemas.
+   */
+  id?: string;
 }
 
 export interface SchemaStructureEntry {
@@ -90,6 +96,10 @@ export abstract class Type<V> {
 
     if (options.description) {
       schema = schema.description(options.description);
+    }
+
+    if (options.id) {
+      schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.id });
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

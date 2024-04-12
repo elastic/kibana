@@ -15,3 +15,4 @@ export const META_FIELD_X_OAS_MIN_LENGTH = 'x-oas-min-length' as const;
 export const META_FIELD_X_OAS_MAX_LENGTH = 'x-oas-max-length' as const;
 export const META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES =
   'x-oas-get-additional-properties' as const;
+export const META_FIELD_X_OAS_REF_ID = 'x-oas-ref-id' as const;

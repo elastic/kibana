@@ -240,6 +240,7 @@ export const schema = {
 export type Schema = typeof schema;
 
 import {
+  META_FIELD_X_OAS_REF_ID,
   META_FIELD_X_OAS_OPTIONAL,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
@@ -247,6 +248,7 @@ import {
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({
+  META_FIELD_X_OAS_REF_ID,
   META_FIELD_X_OAS_OPTIONAL,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
