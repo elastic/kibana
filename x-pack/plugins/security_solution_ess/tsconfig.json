@@ -23,5 +23,10 @@
     "@kbn/security-solution-navigation",
     "@kbn/licensing-plugin",
     "@kbn/security-solution-upselling",
+    "@kbn/i18n",
+    "@kbn/navigation-plugin",
+    "@kbn/management-cards-navigation",
+    "@kbn/management-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

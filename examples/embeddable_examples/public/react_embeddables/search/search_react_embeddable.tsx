@@ -10,13 +10,12 @@ import { EuiCallOut } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  FetchContext,
   initializeTimeRange,
-  onFetchContextChanged,
+  fetch$,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
 import { Api, Services, State } from './types';
@@ -54,51 +53,49 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         }
       );
 
-      let isUnmounted = false;
       const error$ = new BehaviorSubject<Error | undefined>(undefined);
       const count$ = new BehaviorSubject<number>(0);
-      const onFetch = (fetchContext: FetchContext, isCanceled: () => boolean) => {
-        error$.next(undefined);
-        if (!defaultDataView) {
-          return;
-        }
-        dataLoading$.next(true);
-        getCount(
-          defaultDataView,
-          services.data,
-          fetchContext.filters ?? [],
-          fetchContext.query,
-          // timeRange and timeslice provided seperatly so consumers can decide
-          // whether to refetch data for just mask current data.
-          // In this example, we must refetch because we need a count within the time range.
-          fetchContext.timeslice
-            ? {
-                from: new Date(fetchContext.timeslice[0]).toISOString(),
-                to: new Date(fetchContext.timeslice[1]).toISOString(),
-                mode: 'absolute' as 'absolute',
-              }
-            : fetchContext.timeRange
-        )
-          .then((nextCount: number) => {
-            if (isUnmounted || isCanceled()) {
+      const fetchSubscription = fetch$(api)
+        .pipe(
+          switchMap(async (fetchContext) => {
+            error$.next(undefined);
+            if (!defaultDataView) {
               return;
             }
-            dataLoading$.next(false);
-            count$.next(nextCount);
+
+            try {
+              dataLoading$.next(true);
+              const count = await getCount(
+                defaultDataView,
+                services.data,
+                fetchContext.filters ?? [],
+                fetchContext.query,
+                // timeRange and timeslice provided seperatly so consumers can decide
+                // whether to refetch data for just mask current data.
+                // In this example, we must refetch because we need a count within the time range.
+                fetchContext.timeslice
+                  ? {
+                      from: new Date(fetchContext.timeslice[0]).toISOString(),
+                      to: new Date(fetchContext.timeslice[1]).toISOString(),
+                      mode: 'absolute' as 'absolute',
+                    }
+                  : fetchContext.timeRange
+              );
+              return { count };
+            } catch (error) {
+              return { error };
+            }
           })
-          .catch((err) => {
-            if (isUnmounted || isCanceled()) {
-              return;
-            }
-            dataLoading$.next(false);
-            error$.next(err);
-          });
-      };
-      const unsubscribeFromFetch = onFetchContextChanged({
-        api,
-        onFetch,
-        fetchOnSetup: true,
-      });
+        )
+        .subscribe((next) => {
+          dataLoading$.next(false);
+          if (next && next.hasOwnProperty('count') && next.count !== undefined) {
+            count$.next(next.count);
+          }
+          if (next && next.hasOwnProperty('error')) {
+            error$.next(next.error);
+          }
+        });
 
       return {
         api,
@@ -107,8 +104,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
           useEffect(() => {
             return () => {
-              isUnmounted = true;
-              unsubscribeFromFetch();
+              fetchSubscription.unsubscribe();
             };
           }, []);
 

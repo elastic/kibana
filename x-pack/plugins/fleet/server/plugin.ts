@@ -301,7 +301,8 @@ export class FleetPlugin
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
-          defaultMessage: 'All Spaces is required for Fleet access.',
+          defaultMessage:
+            'All Spaces is required for Fleet access. Subfeatures privileges functionality is in technical preview and may be changed or removed completely in a future release.',
         }),
         reserved: {
           description:
