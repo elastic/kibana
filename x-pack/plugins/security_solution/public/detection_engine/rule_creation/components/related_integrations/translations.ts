@@ -85,23 +85,38 @@ export const INTEGRATION_NOT_INSTALLED = i18n.translate(
   }
 );
 
-export const INTEGRATION_INSTALLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.installedText',
+export const INTEGRATION_INSTALLED_AND_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.installedDisabledText',
   {
-    defaultMessage: 'Installed',
+    defaultMessage: 'Installed: Disabled',
   }
 );
 
-export const INTEGRATION_DISABLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.disabledText',
+export const INTEGRATION_INSTALLED_AND_ENABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.installedEnabledText',
   {
-    defaultMessage: 'Disabled',
+    defaultMessage: 'Installed: Enabled',
   }
 );
 
-export const INTEGRATION_ENABLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.enabledText',
-  {
-    defaultMessage: 'Enabled',
-  }
-);
+export const INTEGRATION_DISABLED = (integrationTitle: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.integrationDisabledText',
+    {
+      defaultMessage: '{integrationTitle}: Disabled',
+      values: {
+        integrationTitle,
+      },
+    }
+  );
+
+export const INTEGRATION_ENABLED = (integrationTitle: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.integrationEnabledText',
+    {
+      defaultMessage: '{integrationTitle}: Enabled',
+      values: {
+        integrationTitle,
+      },
+    }
+  );

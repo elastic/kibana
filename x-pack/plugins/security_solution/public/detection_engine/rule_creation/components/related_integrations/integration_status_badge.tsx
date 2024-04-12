@@ -20,9 +20,9 @@ export function IntegrationStatusBadge({
 }: IntegrationStatusBadgeProps): JSX.Element {
   const color = isEnabled ? 'success' : isInstalled ? 'primary' : undefined;
   const statusText = isEnabled
-    ? `${i18n.INTEGRATION_INSTALLED}: ${i18n.INTEGRATION_ENABLED}`
+    ? i18n.INTEGRATION_INSTALLED_AND_ENABLED
     : isInstalled
-    ? `${i18n.INTEGRATION_INSTALLED}: ${i18n.INTEGRATION_DISABLED}`
+    ? i18n.INTEGRATION_INSTALLED_AND_DISABLED
     : i18n.INTEGRATION_NOT_INSTALLED;
 
   return (

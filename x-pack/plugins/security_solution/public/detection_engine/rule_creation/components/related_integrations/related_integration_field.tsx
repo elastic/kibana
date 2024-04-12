@@ -160,14 +160,12 @@ function filterOutUsedIntegrations(
 function transformIntegrationToOption(
   integration: Integration
 ): EuiComboBoxOptionOption<Integration> {
-  const label = [
-    integration.integration_title ?? integration.package_title,
-    integration.is_enabled
-      ? `: ${i18n.INTEGRATION_ENABLED}`
-      : integration.is_installed
-      ? `: ${i18n.INTEGRATION_DISABLED}`
-      : '',
-  ].join('');
+  const integrationTitle = integration.integration_title ?? integration.package_title;
+  const label = integration.is_enabled
+    ? i18n.INTEGRATION_ENABLED(integrationTitle)
+    : integration.is_installed
+    ? i18n.INTEGRATION_DISABLED(integrationTitle)
+    : integrationTitle;
 
   return {
     key: getKey(integration.package_name, integration.integration_name),
