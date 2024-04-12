@@ -33,7 +33,7 @@ interface SummaryResult {
   meta: Meta;
 }
 
-// TODO Kevin: This is called "SummaryClient" but is responsible for:
+// This is called "SummaryClient" but is responsible for:
 // - computing summary
 // - formatting groupings
 // - adding extra Meta parameter for synthetics
