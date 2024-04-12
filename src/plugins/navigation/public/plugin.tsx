@@ -41,7 +41,7 @@ import type {
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
   ConfigSchema,
-  SolutionNavigation,
+  AddSolutionNavigationArg,
   SolutionType,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
@@ -182,9 +182,11 @@ export class NavigationPublicPlugin
 
     // Keep track of the solution navigation enabled state
     let isSolutionNavEnabled = false;
-    this.isSolutionNavEnabled$.pipe(takeUntil(this.stop$)).subscribe((_isSolutionNavEnabled) => {
-      isSolutionNavEnabled = _isSolutionNavEnabled;
-    });
+    isSolutionNavExperiementEnabled$
+      .pipe(takeUntil(this.stop$))
+      .subscribe((_isSolutionNavEnabled) => {
+        isSolutionNavEnabled = _isSolutionNavEnabled;
+      });
 
     return {
       ui: {
@@ -192,14 +194,7 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
-      addSolutionNavigation: (
-        solutionNavigation: Omit<SolutionNavigation, 'sideNavComponent'> & {
-          /** Data test subj for the side navigation */
-          dataTestSubj?: string;
-          /** Panel content provider for the side navigation */
-          panelContentProvider?: PanelContentProvider;
-        }
-      ) => {
+      addSolutionNavigation: (solutionNavigation) => {
         if (!isSolutionNavEnabled) return;
         return this.addSolutionNavigation(solutionNavigation);
       },
@@ -268,19 +263,10 @@ export class NavigationPublicPlugin
     );
   }
 
-  private addSolutionNavigation(
-    solutionNavigation: SolutionNavigation & {
-      /** Data test subj for the side navigation */
-      dataTestSubj?: string;
-      /** Panel content provider for the side navigation */
-      panelContentProvider?: PanelContentProvider;
-    }
-  ) {
+  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
     const { dataTestSubj, panelContentProvider, ...rest } = solutionNavigation;
-    const sideNavComponent =
-      solutionNavigation.sideNavComponent ??
-      this.getSideNavComponent({ dataTestSubj, panelContentProvider });
+    const sideNavComponent = this.getSideNavComponent({ dataTestSubj, panelContentProvider });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },

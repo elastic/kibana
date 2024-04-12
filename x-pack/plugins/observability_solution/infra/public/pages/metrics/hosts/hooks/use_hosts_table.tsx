@@ -349,7 +349,7 @@ export const useHostsTable = () => {
         field: 'diskSpaceUsage',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-diskSpaceUsage',
-        render: (avg: number) => formatMetric('diskSpaceUsage', avg),
+        render: (max: number) => formatMetric('diskSpaceUsage', max),
         align: 'right',
       },
       {
