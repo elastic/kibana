@@ -29,8 +29,10 @@ const getCustomInferenceIdMap = (
     const inferenceId = model.model_id;
     const trainedModelId =
       'model_id' in model.service_settings ? model.service_settings.model_id : '';
+
     inferenceMap[inferenceId] = {
       trainedModelId,
+      isDeployable: model.service === 'elser' || model.service === 'elasticsearch',
       isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
       defaultInferenceEndpoint: false,
     };
@@ -54,11 +56,13 @@ const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) 
   return {
     elser_model_2: {
       trainedModelId: '.elser_model_2',
+      isDeployable: true,
       isDeployed: deploymentStatsByModelId['.elser_model_2'] === 'deployed',
       defaultInferenceEndpoint: true,
     },
     e5: {
       trainedModelId: '.multilingual-e5-small',
+      isDeployable: true,
       isDeployed: deploymentStatsByModelId['.multilingual-e5-small'] === 'deployed',
       defaultInferenceEndpoint: true,
     },
