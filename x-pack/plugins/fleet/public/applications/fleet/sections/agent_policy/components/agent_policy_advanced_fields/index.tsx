@@ -65,7 +65,6 @@ interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
-  isEditing?: boolean;
   disabled?: boolean;
 }
 
@@ -73,7 +72,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   agentPolicy,
   updateAgentPolicy,
   validation,
-  isEditing = false,
   disabled = false,
 }) => {
   const { docLinks } = useStartServices();
@@ -230,11 +228,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       >
         <EuiFormRow
           fullWidth
-          error={
-            touchedFields.agentLogLevel && validation.agentLogLevel
-              ? validation.agentLogLevel
-              : null
-          }
           isInvalid={Boolean(touchedFields.agentLogLevel && validation.agentLogLevel)}
           isDisabled={disabled}
         >
@@ -252,6 +245,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               text: level,
               // @ts-ignore-next-line
               value: agentLoggingLevels[level],
+              key: level,
             }))}
           />
         </EuiFormRow>

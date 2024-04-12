@@ -141,7 +141,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
                 agentPolicy={agentPolicy}
                 updateAgentPolicy={updateAgentPolicy}
                 validation={validation}
-                isEditing={isEditing}
               />
 
               {advancedPolicySettings ? (
@@ -168,7 +167,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               agentPolicy={agentPolicy}
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
-              isEditing={isEditing}
               disabled={disabled}
             />
             {advancedPolicySettings ? (

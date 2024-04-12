@@ -653,6 +653,7 @@ class AgentPolicyService {
           'monitoring_output_id',
           'download_source_id',
           'fleet_server_host_id',
+          'logging_level',
         ]),
         ...newAgentPolicyProps,
       },

@@ -35,8 +35,6 @@ interface Props {
   withSysMonitoring: boolean;
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
-  isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
@@ -45,8 +43,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
   withSysMonitoring,
   updateSysMonitoring,
   validation,
-  isEditing = false,
-  onDelete = () => {},
 }) => {
   return (
     <EuiForm>
@@ -101,7 +97,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             agentPolicy={agentPolicy}
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
-            isEditing={isEditing}
           />
         </StyledEuiAccordion>
       </>
