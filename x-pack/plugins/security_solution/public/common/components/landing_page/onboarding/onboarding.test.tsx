@@ -22,6 +22,7 @@ jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');
   return {
     ...original,
+    useCurrentUser: jest.fn().mockReturnValue({ fullName: 'UserFullName' }),
     useAppUrl: jest.fn().mockReturnValue({ getAppUrl: jest.fn().mockReturnValue('mock url') }),
   };
 });
@@ -63,10 +64,14 @@ describe('OnboardingComponent', () => {
       ViewAlertsSteps.viewAlerts,
     ],
   };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render page title, subtitle, and description', () => {
     const { getByText } = render(<OnboardingComponent {...props} />);
 
-    const pageTitle = getByText('Hi Unknown!');
+    const pageTitle = getByText('Hi UserFullName!');
     const subtitle = getByText(`Get started with Security`);
     const description = getByText(
       `This area shows you everything you need to know. Feel free to explore all content. You can always come back here at any time.`
