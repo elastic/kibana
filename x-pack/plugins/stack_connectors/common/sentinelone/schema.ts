@@ -190,6 +190,79 @@ export const SentinelOneDownloadAgentFileParamsSchema = schema.object({
 
 export const SentinelOneDownloadAgentFileResponseSchema = schema.stream();
 
+export const SentinelOneGetActivitiesParamsSchema = schema.maybe(
+  schema.object({
+    accountIds: schema.maybe(schema.string({ minLength: 1 })),
+    activityTypes: schema.maybe(schema.string()),
+    activityUuids: schema.maybe(schema.string({ minLength: 1 })),
+    agentIds: schema.maybe(schema.string({ minLength: 1 })),
+    alertIds: schema.maybe(schema.string({ minLength: 1 })),
+    countOnly: schema.maybe(schema.boolean()),
+    createdAt__between: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__gt: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__gte: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__lt: schema.maybe(schema.string({ minLength: 1 })),
+    createdAt__lte: schema.maybe(schema.string({ minLength: 1 })),
+    cursor: schema.maybe(schema.string({ minLength: 1 })),
+    groupIds: schema.maybe(schema.string({ minLength: 1 })),
+    ids: schema.maybe(schema.string({ minLength: 1 })),
+    includeHidden: schema.maybe(schema.boolean()),
+    limit: schema.maybe(schema.number()),
+    ruleIds: schema.maybe(schema.string({ minLength: 1 })),
+    siteIds: schema.maybe(schema.string({ minLength: 1 })),
+    skip: schema.maybe(schema.number()),
+    skipCount: schema.maybe(schema.boolean()),
+    sortBy: schema.maybe(schema.string({ minLength: 1 })),
+    sortOrder: schema.maybe(schema.string({ minLength: 1 })),
+    threatIds: schema.maybe(schema.string({ minLength: 1 })),
+    userEmails: schema.maybe(schema.string({ minLength: 1 })),
+    userIds: schema.maybe(schema.string({ minLength: 1 })),
+  })
+);
+
+export const SentinelOneGetActivitiesResponseSchema = schema.object({
+  errors: schema.maybe(schema.arrayOf(schema.string())),
+  pagination: schema.object({
+    nextCursor: schema.nullable(schema.string()),
+    totalItems: schema.number(),
+  }),
+  data: schema.arrayOf(
+    schema.object(
+      {
+        accountId: schema.string(),
+        accountName: schema.string(),
+        activityType: schema.number(),
+        activityUuid: schema.string(),
+        agentId: schema.nullable(schema.string()),
+        agentUpdatedVersion: schema.nullable(schema.string()),
+        comments: schema.nullable(schema.string()),
+        createdAt: schema.string(),
+        data: schema.object(
+          {
+            // Empty by design.
+            // The SentinelOne Activity Log can place any (unknown) data here
+          },
+          { unknowns: 'allow' }
+        ),
+        description: schema.nullable(schema.string()),
+        groupId: schema.nullable(schema.string()),
+        groupName: schema.nullable(schema.string()),
+        hash: schema.nullable(schema.string()),
+        id: schema.string(),
+        osFamily: schema.nullable(schema.string()),
+        primaryDescription: schema.nullable(schema.string()),
+        secondaryDescription: schema.nullable(schema.string()),
+        siteId: schema.string(),
+        siteName: schema.string(),
+        threatId: schema.nullable(schema.string()),
+        updatedAt: schema.string(),
+        userId: schema.nullable(schema.string()),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
+});
+
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
 
 export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({
