@@ -1035,6 +1035,15 @@
       "name": {
         "type": "keyword"
       },
+      "display_name": { "type": "text" },
+      "data_streams": {
+        "dynamic": false,
+        "properties": {
+          "pattern": { "type": "keyword" },
+          "name": { "type": "keyword" },
+          "display_name": { "type": "text" }
+        }
+      },
       "package_assets": {
         "dynamic": false,
         "properties": {}

@@ -278,6 +278,9 @@
   "enterprise_search_telemetry": [],
   "epm-packages": [
     "es_index_patterns",
+    "data_streams.name",
+    "data_streams.pattern",
+    "data_streams.display_name",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
     "experimental_data_stream_features.features",
@@ -300,6 +303,7 @@
     "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
+    "display_name",
     "package_assets",
     "verification_key_id",
     "verification_status",
