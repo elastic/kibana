@@ -62,10 +62,10 @@ export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = 
               const validationError = validateSchema(coercedSchema, newValue);
 
               if (validationError) {
-                setErrors({ ...errors, key: validationError });
+                setErrors({ ...errors, [key]: validationError });
                 agentPolicyFormContext?.updateAdvancedSettingsHasErrors(true);
               } else {
-                setErrors({ ...errors, key: '' });
+                setErrors({ ...errors, [key]: '' });
                 agentPolicyFormContext?.updateAdvancedSettingsHasErrors(false);
               }
 
