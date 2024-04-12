@@ -21,8 +21,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
 
   useEffect(() => {
     editAction('connector', selectedConnector, index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConnector]);
+  }, [editAction, selectedConnector, index]);
 
   return (
     <>
