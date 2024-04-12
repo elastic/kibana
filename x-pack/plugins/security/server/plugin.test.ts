@@ -133,10 +133,10 @@ describe('Security Plugin', () => {
       `);
     });
 
-    it('calls core.security.registerSecurityApi', () => {
+    it('calls core.security.registerSecurityDelegate', () => {
       plugin.setup(mockCoreSetup, mockSetupDependencies);
 
-      expect(mockCoreSetup.security.registerSecurityApi).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.security.registerSecurityDelegate).toHaveBeenCalledTimes(1);
     });
 
     it('calls core.userProfile.registerUserProfileDelegate', () => {

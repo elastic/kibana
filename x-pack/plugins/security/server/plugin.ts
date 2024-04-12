@@ -310,7 +310,7 @@ export class SecurityPlugin
 
     this.registerDeprecations(core, license);
 
-    core.security.registerSecurityApi(
+    core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
       })

@@ -94,7 +94,7 @@ export function createPluginSetupContext<
     settings: deps.settings,
     theme: deps.theme,
     security: {
-      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>

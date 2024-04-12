@@ -18,7 +18,7 @@ import type {
 
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = {
-    registerSecurityApi: jest.fn(),
+    registerSecurityDelegate: jest.fn(),
   };
 
   return mock;
@@ -36,7 +36,7 @@ const createStartMock = () => {
 
 const createInternalSetupMock = () => {
   const mock: jest.Mocked<InternalSecurityServiceSetup> = {
-    registerSecurityApi: jest.fn(),
+    registerSecurityDelegate: jest.fn(),
   };
 
   return mock;

@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 
-import type { CoreSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
 
@@ -17,7 +17,7 @@ import { securityMock } from './mocks';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationMock.createSetup>;
-  let api: CoreSecurityContract;
+  let api: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();

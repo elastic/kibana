@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import { convertSecurityApi } from './convert_security_api';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {
-    const source: CoreSecurityContract = { authc: { getCurrentUser: jest.fn() } };
+    const source: CoreSecurityDelegateContract = { authc: { getCurrentUser: jest.fn() } };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
   });

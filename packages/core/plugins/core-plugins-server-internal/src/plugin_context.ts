@@ -285,7 +285,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     security: {
-      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>

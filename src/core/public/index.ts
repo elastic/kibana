@@ -210,7 +210,7 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
-  CoreSecurityContract,
+  CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 
 export type {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type {
   AuthenticationServiceSetup,
@@ -16,7 +16,7 @@ export const buildSecurityApi = ({
   authc,
 }: {
   authc: AuthenticationServiceSetup;
-}): CoreSecurityContract => {
+}): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: () => authc.getCurrentUser(),

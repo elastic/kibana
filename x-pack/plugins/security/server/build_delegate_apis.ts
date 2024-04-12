@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
@@ -15,7 +15,7 @@ export const buildSecurityApi = ({
   getAuthc,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
-}): CoreSecurityContract => {
+}): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: (request) => {
