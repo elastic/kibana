@@ -70,6 +70,10 @@
     "@kbn/core-application-browser",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
+    "@kbn/datemath",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-logging-browser-mocks",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",
