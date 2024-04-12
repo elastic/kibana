@@ -601,10 +601,16 @@ owner: elastic`,
                 type: 'epm-packages',
                 id: 'elastic_agent',
                 attributes: {
-                  es_index_patterns: {
-                    apm_server_logs: 'logs-elastic_agent.apm_server-*',
-                    apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
-                  },
+                  es_index_patterns: [
+                    {
+                      name: 'apm_server_logs',
+                      pattern: 'logs-elastic_agent.apm_server-*',
+                    },
+                    {
+                      name: 'apm_server_metrics',
+                      pattern: 'metrics-elastic_agent.apm_server-*',
+                    },
+                  ],
                   name: 'elastic_agent',
                   version: '1.7.0',
                   install_status: 'installed',
@@ -743,10 +749,16 @@ owner: elastic`,
                 type: 'epm-packages',
                 id: 'elastic_agent',
                 attributes: {
-                  es_index_patterns: {
-                    apm_server_logs: 'logs-elastic_agent.apm_server-*',
-                    apm_server_metrics: 'metrics-elastic_agent.apm_server-*',
-                  },
+                  es_index_patterns: [
+                    {
+                      name: 'apm_server_logs',
+                      pattern: 'logs-elastic_agent.apm_server-*',
+                    },
+                    {
+                      name: 'apm_server_metrics',
+                      pattern: 'metrics-elastic_agent.apm_server-*',
+                    },
+                  ],
                   name: 'elastic_agent',
                   version: '1.8.0',
                   install_status: 'installed',

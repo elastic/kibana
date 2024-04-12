@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
-interface IntersectionOptions {
-  onIntersecting?: () => void;
+interface IntersectionOptions<THandler extends Function> {
+  onIntersecting?: THandler;
 }
 
-export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonElement>({
-  onIntersecting,
-}: IntersectionOptions = {}) {
+export function useIntersectionRef<
+  ElementType extends HTMLElement = HTMLElement,
+  THandler extends Function = Function
+>({ onIntersecting }: IntersectionOptions<THandler> = {}) {
   const [intersectionRef, setRef] = useState<ElementType | null>(null);
 
   const intersection = useIntersection(
     { current: intersectionRef },
-    { root: null, threshold: 0.5 }
+    { root: null, threshold: 0.75 }
   );
 
   useEffect(() => {
@@ -30,3 +31,8 @@ export function useIntersectionRef<ElementType extends HTMLElement = HTMLButtonE
 
   return [setRef, intersection] as [typeof setRef, IntersectionObserverEntry | null];
 }
+
+export const SpyRef = <THandler extends Function>(props: IntersectionOptions<THandler>) => {
+  const [spyRef] = useIntersectionRef(props);
+  return <span ref={spyRef} />;
+};

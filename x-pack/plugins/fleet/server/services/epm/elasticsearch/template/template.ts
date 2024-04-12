@@ -14,6 +14,8 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
+import type { EsIndexPattern } from '../../../../../common/types';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -810,16 +812,17 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
  */
 export function generateESIndexPatterns(
   dataStreams: RegistryDataStream[] | undefined
-): Record<string, string> {
+): EsIndexPattern[] {
   if (!dataStreams) {
-    return {};
+    return [];
   }
 
-  const patterns: Record<string, string> = {};
-  for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
-  }
-  return patterns;
+  return dataStreams.map((dataStream) => {
+    return {
+      title: dataStream.path,
+      name: generateTemplateIndexPattern(dataStream),
+    };
+  });
 }
 
 const flattenFieldsToNameAndType = (

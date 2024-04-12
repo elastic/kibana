@@ -10,6 +10,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { uniqBy } from 'lodash';
 
+import type { EsIndexPattern } from '../../../../common/types';
+
 import type { EsAssetReference, Installation } from '../../../types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -92,7 +94,7 @@ export const optimisticallyAddEsAssetReferences = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetsToAdd: EsAssetReference[],
-  esIndexPatterns?: Record<string, string>
+  esIndexPatterns?: EsIndexPattern[]
 ): Promise<EsAssetReference[]> => {
   const addEsAssets = async () => {
     // TODO: Should this be replaced by a `get()` call from epm/get.ts?
@@ -110,11 +112,13 @@ export const optimisticallyAddEsAssetReferences = async (
       ({ type, id }) => `${type}-${id}`
     );
 
-    const deduplicatedIndexPatterns = Object.assign(
-      {},
-      so.attributes.es_index_patterns ?? {},
-      esIndexPatterns
-    );
+    const deduplicatedIndexPatterns: Record<string, string> = {};
+    (so.attributes.es_index_patterns ?? []).forEach((p) => {
+      deduplicatedIndexPatterns[p.name] = p.title;
+    });
+    (esIndexPatterns ?? []).forEach((p) => {
+      deduplicatedIndexPatterns[p.name] = p.title;
+    });
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -129,7 +133,10 @@ export const optimisticallyAddEsAssetReferences = async (
       pkgName,
       {
         installed_es: deduplicatedAssets,
-        es_index_patterns: deduplicatedIndexPatterns,
+        es_index_patterns: Object.entries(deduplicatedIndexPatterns).map(([title, name]) => ({
+          title,
+          name,
+        })),
       },
       {
         version: so.version,
