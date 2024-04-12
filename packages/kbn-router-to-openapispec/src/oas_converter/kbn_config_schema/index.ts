@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { kbnConfigSchemaConverter } from './kbn_config_schema';
+import type { OpenAPIConverter } from '../../type';
+import { is, convert, convertQuery, convertPathParameters } from './lib';
+
+export const kbnConfigSchemaConverter: OpenAPIConverter = {
+  is,
+  convert,
+  convertQuery,
+  convertPathParameters,
+};

@@ -7,13 +7,43 @@
  */
 
 import joi from 'joi';
-import { isConfigSchema, Type } from '@kbn/config-schema';
+import { isConfigSchema, Type, metaFields } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { KnownParameters, OpenAPIConverter } from '../../type';
+import type { KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
-import * as mutations from './post_process_mutations';
 import { parse } from './parse';
+import { Context } from './post_process_mutations';
+
+export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
+  if (metaFields.META_FIELD_X_OAS_REF_ID in schema) {
+    return schema[metaFields.META_FIELD_X_OAS_REF_ID] as string;
+  }
+};
+
+const removeSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
+  const { [metaFields.META_FIELD_X_OAS_REF_ID]: id, ...rest } = schema as any;
+  return rest;
+};
+
+export const sharedComponentIdToRef = (id: string) => {
+  return {
+    $ref: `#/components/schemas/${id}`,
+  };
+};
+
+type IdSchemaTuple = [id: string, schema: OpenAPIV3.SchemaObject];
+
+export const tryConvertToRef = (schema: OpenAPIV3.SchemaObject) => {
+  const sharedId = getSharedComponentId(schema);
+  if (sharedId) {
+    const idSchema: IdSchemaTuple = [sharedId, removeSharedComponentId(schema)];
+    return {
+      idSchema,
+      ref: sharedComponentIdToRef(sharedId),
+    };
+  }
+};
 
 const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
   return schema.type === 'object';
@@ -51,7 +81,7 @@ const isEmptyObjectAllowsUnknowns = (schema: joi.Description) => {
   );
 };
 
-const createError = (message: string): Error => {
+const createError = (message: string) => {
   return new Error(`[@kbn/config-schema converter] ${message}`);
 };
 
@@ -73,56 +103,32 @@ const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
   return 'required' === get(schema, 'flags.presence');
 };
 
-const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
-
-const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
-  mutations.processAny(schema);
-  if (schema.type === 'array') {
-    walkSchema(schema.items as OpenAPIV3.SchemaObject);
-  } else if (schema.type === 'object') {
-    mutations.processObject(schema);
-    if (schema.properties) {
-      Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
-    }
-  } else if ((schema.type as string) === 'record') {
-    mutations.processRecord(schema);
-  } else if ((schema.type as string) === 'map') {
-    mutations.processMap(schema);
-  } else if (schema.type === 'string') {
-    mutations.processString(schema);
-  } else if (schema.type) {
-    // Do nothing
-  } else {
-    for (const arrayContainer of arrayContainers) {
-      if (schema[arrayContainer]) {
-        schema[arrayContainer].forEach(walkSchema);
-        break;
-      }
-    }
-  }
+const createCtx = () => {
+  const ctx: Context = { sharedSchemas: new Map() };
+  return ctx;
 };
 
-export const postProcessMutations = (oasSchema: OpenAPIV3.SchemaObject) => {
-  if (!oasSchema) return;
-  walkSchema(oasSchema);
-};
-
-const convert = (kbnConfigSchema: unknown): OpenAPIV3.BaseSchemaObject => {
+export const convert = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  return parse(schema) as OpenAPIV3.SchemaObject;
+  const { result, shared } = parse({ schema, ctx: createCtx() });
+  return { schema: result, shared: Object.fromEntries(shared.entries()) };
 };
 
 const convertObjectMembersToParameterObjects = (
+  ctx: Context,
   schema: joi.Schema,
   knownParameters: KnownParameters = {},
   isPathParameter = false
-): OpenAPIV3.ParameterObject[] => {
+) => {
   let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
   if (isNullableObjectType(schema)) {
-    const { anyOf }: { anyOf: OpenAPIV3.SchemaObject[] } = parse(schema);
+    const {
+      result: { anyOf },
+    }: { result: { anyOf: OpenAPIV3.SchemaObject[] } } = parse({ schema, ctx });
     properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
-    ({ properties } = parse(schema));
+    const { result } = parse({ schema, ctx });
+    properties = result.properties;
   } else if (isRecordType(schema)) {
     return [];
   } else {
@@ -130,52 +136,56 @@ const convertObjectMembersToParameterObjects = (
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {
-    const isSubSchemaRequired = isSchemaRequired(schemaObject);
-    if (isReferenceObject(schemaObject)) {
-      throw createError(
-        `Expected schema but got reference object: ${JSON.stringify(schemaObject, null, 2)}`
-      );
-    }
-    const { description, ...openApiSchemaObject } = schemaObject;
     if (!knownParameters[schemaKey] && isPathParameter) {
       throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
+    }
+    const isSubSchemaRequired = isSchemaRequired(schemaObject);
+    let description: undefined | string;
+    let finalSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+    if (!isReferenceObject(schemaObject)) {
+      const { description: des, ...rest } = schemaObject;
+      description = des;
+      finalSchema = rest;
+    } else {
+      finalSchema = schemaObject;
     }
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter ? !knownParameters[schemaKey].optional : isSubSchemaRequired,
-      schema: openApiSchemaObject,
+      schema: finalSchema,
       description,
     };
   });
 };
 
-const convertQuery = (kbnConfigSchema: unknown): OpenAPIV3.ParameterObject[] => {
+export const convertQuery = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  return convertObjectMembersToParameterObjects(schema, {}, false);
+  const ctx = createCtx();
+  const result = convertObjectMembersToParameterObjects(ctx, schema, {}, false);
+  return {
+    query: result,
+    shared: Object.fromEntries(ctx.sharedSchemas.entries()),
+  };
 };
 
-const convertPathParameters = (
+export const convertPathParameters = (
   kbnConfigSchema: unknown,
   knownParameters: { [paramName: string]: { optional: boolean } }
-): OpenAPIV3.ParameterObject[] => {
+) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-
-  if (isObjectType(schema)) {
-    // TODO: Revisit this validation logic
-    // const schemaDescription = schema.describe();
-    // const schemaKeys = Object.keys(schemaDescription.keys);
-    // validatePathParameters(pathParameters, schemaKeys);
-  } else if (isNullableObjectType(schema)) {
-    // nothing to do for now...
-  } else {
+  if (!isObjectType(schema) && !isNullableObjectType(schema)) {
     throw createError('Input parser for path params expected to be an object schema');
   }
-
-  return convertObjectMembersToParameterObjects(schema, knownParameters, true);
+  const ctx = createCtx();
+  const result = convertObjectMembersToParameterObjects(ctx, schema, knownParameters, true);
+  return {
+    params: result,
+    shared: Object.fromEntries(ctx.sharedSchemas.entries()),
+  };
 };
 
-const is = (schema: unknown): boolean => {
+export const is = (schema: unknown): boolean => {
   if (isConfigSchema(schema)) {
     const description = schema.getSchema().describe();
     // We ignore "any" @kbn/config-schema for the purposes of OAS generation...
@@ -188,11 +198,4 @@ const is = (schema: unknown): boolean => {
     return true;
   }
   return false;
-};
-
-export const kbnConfigSchemaConverter: OpenAPIConverter = {
-  convertQuery,
-  convertPathParameters,
-  convert,
-  is,
 };
