@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -30,7 +30,7 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
+  const { attributeService } = discoverServices.savedSearch.byValue;
 
   const savedSearchEmbeddableFactory: ReactEmbeddableFactory<
     SearchEmbeddableSerializedState,
@@ -47,8 +47,12 @@ export const getSearchEmbeddableFactory = ({
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const { searchEmbeddableApi, searchEmbeddableComparators, serializeSearchEmbeddable } =
-        await initializeSearchEmbeddableApi(initialState, attributeService, toSavedSearch);
+      const {
+        onUnmount,
+        searchEmbeddableApi,
+        searchEmbeddableComparators,
+        serializeSearchEmbeddable,
+      } = await initializeSearchEmbeddableApi(initialState, { startServices, discoverServices });
 
       const serializeState = (): SerializedPanelState<SearchEmbeddableSerializedState> => {
         const { state: rawState, references } = extract({
@@ -110,6 +114,13 @@ export const getSearchEmbeddableFactory = ({
       return {
         api: embeddable,
         Component: () => {
+          useEffect(() => {
+            return () => {
+              console.log('on unmount');
+              onUnmount();
+            };
+          }, []);
+
           return <>Here</>;
         },
       };

@@ -6,77 +6,75 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
 import deepEqual from 'react-fast-compare';
+import { BehaviorSubject, skip } from 'rxjs';
 
 import type { StateComparators } from '@kbn/presentation-publishing';
+import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import {
-  SavedSearchAttributeService,
+  SavedSearch,
   SavedSearchByValueAttributes,
-  SearchByReferenceInput,
-  SortOrder,
-} from '..';
+  SavedSearchUnwrapResult,
+} from '@kbn/saved-search-plugin/public';
+import { DiscoverServices } from '../build_services';
 import { SearchEmbeddableSerializedState } from './types';
-import { SavedSearch, SavedSearchUnwrapResult, toSavedSearch } from '../services/saved_searches';
-import { getSortForEmbeddable } from './sorting';
+import { getSortForEmbeddable } from '../utils';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,
-  attributeService: SavedSearchAttributeService,
-  getSavedSearch: (id: string | undefined, result: SavedSearchUnwrapResult) => Promise<SavedSearch>
+  {
+    startServices,
+    discoverServices,
+  }: {
+    startServices: {
+      executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
+      isEditable: () => boolean;
+    };
+    discoverServices: DiscoverServices;
+  }
 ) => {
+  const { attributeService, toSavedSearch } = discoverServices.savedSearch.byValue;
+
   const unwrapResult = initialState?.savedObjectId
     ? await attributeService.unwrapMethod(initialState.savedObjectId)
     : initialState;
   const { attributes: initialAttributes } = unwrapResult;
 
-  const savedSearch = await getSavedSearch(
+  const savedSearch = await toSavedSearch(
     initialState?.savedObjectId,
     unwrapResult as SavedSearchUnwrapResult
   );
-  console.log('savedSearch ', savedSearch);
+  const savedSearch$ = new BehaviorSubject<SavedSearch>(savedSearch);
 
-  // const columns$ = new BehaviorSubject<string[]>(initialAttributes?.columns ?? []);
-  // const sort$ = new BehaviorSubject<SortOrder[]>(initialAttributes?.sort ?? []);
-  // const rowHeight$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowHeight);
-  // const headerRowHeight$ = new BehaviorSubject<number | undefined>(
-  //   initialAttributes?.headerRowHeight
-  // );
-  // const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowsPerPage);
-  // const sampleSize$ = new BehaviorSubject<number | undefined>(initialAttributes?.sampleSize);
+  console.log('saved search', savedSearch);
 
   // by reference
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
   // by value
-  const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(initialAttributes);
-  // const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(
-  //   initialAttributes ?? {
-  //     sort: getSortForEmbeddable(
-  //       savedSearch,
-  //       sort: attributes.sort,
-  //       this.services.uiSettings,
-  //     ),
-  //     columns: savedSearch.columns,
-  //   }
-  // );
+  const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(
+    initialAttributes ??
+      ({
+        columns: [] as string[],
+        sort: getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
+      } as SavedSearchByValueAttributes)
+  );
 
-  // const latestStateSubscription = combineLatest([
-  //   columns$,
-  //   sort$,
-  //   rowHeight$,
-  //   headerRowHeight$,
-  //   rowsPerPage$,
-  //   sampleSize$,
-  // ]).subscribe(([columns, sort, rowHeight, headerRowHeight, rowsPerPage, sampleSize]) =>
-  //   attributes$.next({
-  //     columns,
-  //     sort,
-  //     rowHeight,
-  //     headerRowHeight,
-  //     rowsPerPage,
-  //     sampleSize,
-  //   })
-  // );
+  const savedSearchToAttributes = savedSearch$.pipe(skip(1)).subscribe((newSavedSearch) => {
+    console.log('savedSearchToAttributes', newSavedSearch);
+    const { searchSourceJSON, references: originalReferences } =
+      savedSearch.searchSource.serialize();
+
+    attributes$.next({
+      ...toSavedSearchAttributes(newSavedSearch, searchSourceJSON),
+      references: originalReferences,
+    });
+  });
+
+  const cleanup = () => {
+    savedSearchToAttributes.unsubscribe();
+  };
+
+  // savedSearchToAttributes - unsubscribe
 
   const getSearchEmbeddableComparators = (): StateComparators<SearchEmbeddableSerializedState> => {
     if (savedObjectId$.getValue()) {
@@ -91,17 +89,20 @@ export const initializeSearchEmbeddableApi = async (
     /** Otherwise, compare all of the state */
     return {
       attributes: [
-        attributes$,
-        (attributes) => attributes$.next(attributes),
+        attributes$ as BehaviorSubject<SavedSearchByValueAttributes | undefined>,
+        (attributes: SavedSearchByValueAttributes | undefined) =>
+          attributes$.next(attributes as SavedSearchByValueAttributes),
         (a, b) => deepEqual(a, b),
       ],
     };
   };
 
   return {
+    onUnmount: cleanup,
     searchEmbeddableApi: {
       savedObjectId$,
       attributes$,
+      savedSearch$,
     },
     searchEmbeddableComparators: getSearchEmbeddableComparators(),
     serializeSearchEmbeddable: () => {
@@ -117,3 +118,53 @@ export const initializeSearchEmbeddableApi = async (
     },
   };
 };
+
+// const columns$ = new BehaviorSubject<string[]>(initialAttributes?.columns ?? []);
+// const sort$ = new BehaviorSubject<SortOrder[]>(
+//   initialAttributes?.sort ??
+//     getSortForEmbeddable(
+//       savedSearch,
+//       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
+//       discoverServices.uiSettings
+//     )
+// );
+// const rowHeight$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowHeight);
+// const headerRowHeight$ = new BehaviorSubject<number | undefined>(
+//   initialAttributes?.headerRowHeight
+// );
+// const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowsPerPage);
+// const sampleSize$ = new BehaviorSubject<number | undefined>(initialAttributes?.sampleSize);
+
+// const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(
+// initialAttributes ??
+//   ({
+//     ...savedSearch,
+//     columns: [] as string[],
+//     sort: getSortForEmbeddable(
+//       savedSearch,
+//       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
+//       discoverServices.uiSettings
+//     ),
+//   } as SavedSearchByValueAttributes)
+// );
+
+// console.log('initialAttributes', attributes$.getValue());
+
+// const latestStateSubscription = combineLatest([
+//   columns$,
+//   sort$,
+//   rowHeight$,
+//   headerRowHeight$,
+//   rowsPerPage$,
+//   sampleSize$,
+// ]).subscribe(([columns, sort, rowHeight, headerRowHeight, rowsPerPage, sampleSize]) =>
+//   attributes$.next({
+//     columns,
+//     sort,
+//     rowHeight,
+//     headerRowHeight,
+//     rowsPerPage,
+//     sampleSize,
+//   } as SavedSearchByValueAttributes)
+// );
+// // UNSUBSCRIBE
