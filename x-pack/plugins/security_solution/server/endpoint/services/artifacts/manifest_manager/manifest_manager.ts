@@ -913,13 +913,14 @@ export class ManifestManager {
               if (unifiedManifest.policyId === '.global') {
                 return acc;
               }
-              return [
-                ...acc,
+              acc.push(
                 ...unifiedManifest.artifactIds.map((artifactId) => ({
                   policyId: unifiedManifest.policyId,
                   artifactId,
-                })),
-              ];
+                }))
+              );
+
+              return acc;
             },
             []
           ),
