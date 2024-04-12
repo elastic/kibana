@@ -11,7 +11,6 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
-  SingleMetricViewerComponentApi,
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
 } from '../types';
@@ -63,7 +62,7 @@ export const initializeSingleMetricViewerControls = (
       selectedEntities,
       functionDescription,
       updateUserInput,
-    } as unknown as SingleMetricViewerComponentApi,
+    },
     serializeSingleMetricViewerState,
     singleMetricViewerComparators,
     onSingleMetricViewerDestroy: () => {

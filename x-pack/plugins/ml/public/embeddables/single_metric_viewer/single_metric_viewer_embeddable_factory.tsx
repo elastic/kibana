@@ -11,14 +11,11 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { pick } from 'lodash';
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { EuiResizeObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import moment from 'moment';
 import {
-  apiHasParentApi,
-  apiPublishesTimeRange,
   initializeTimeRange,
   initializeTitles,
   useStateFromPublishingSubject,
@@ -27,24 +24,17 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { Observable } from 'rxjs';
 import { throttle } from 'lodash';
-import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
-import type { MlDependencies } from '../../application/app';
-import { HttpService } from '../../application/services/http_service';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
-import type {
-  SingleMetricViewerEmbeddableServices,
-  SingleMetricViewerEmbeddableApi,
-  SingleMetricViewerEmbeddableState,
-} from '../types';
+import type { SingleMetricViewerEmbeddableApi, SingleMetricViewerEmbeddableState } from '../types';
 import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
+import { getServices } from './get_services';
 import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
@@ -53,89 +43,6 @@ interface AppStateZoom {
   from?: string;
   to?: string;
 }
-
-/**
- * Provides the services required by the Anomaly Swimlane Embeddable.
- */
-export const getServices = async (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
-): Promise<SingleMetricViewerEmbeddableServices> => {
-  const [
-    [coreStart, pluginsStart],
-    { AnomalyDetectorService },
-    { fieldFormatServiceFactory },
-    { indexServiceFactory },
-    { timeSeriesExplorerServiceFactory },
-    { mlApiServicesProvider },
-    { mlJobServiceFactory },
-    { mlResultsServiceProvider },
-    { MlCapabilitiesService },
-    { timeSeriesSearchServiceFactory },
-    { toastNotificationServiceProvider },
-  ] = await Promise.all([
-    await getStartServices(),
-    await import('../../application/services/anomaly_detector_service'),
-    await import('../../application/services/field_format_service_factory'),
-    await import('../../application/util/index_service'),
-    await import('../../application/util/time_series_explorer_service'),
-    await import('../../application/services/ml_api_service'),
-    await import('../../application/services/job_service'),
-    await import('../../application/services/results_service'),
-    await import('../../application/capabilities/check_capabilities'),
-    await import(
-      '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
-    ),
-    await import('../../application/services/toast_notification_service'),
-  ]);
-
-  const httpService = new HttpService(coreStart.http);
-  const anomalyDetectorService = new AnomalyDetectorService(httpService);
-  const mlApiServices = mlApiServicesProvider(httpService);
-  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
-  const mlJobService = mlJobServiceFactory(toastNotificationService, mlApiServices);
-  const mlResultsService = mlResultsServiceProvider(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
-  const mlTimeSeriesExplorerService = timeSeriesExplorerServiceFactory(
-    coreStart.uiSettings,
-    mlApiServices,
-    mlResultsService
-  );
-  const mlCapabilities = new MlCapabilitiesService(mlApiServices);
-  const anomalyExplorerService = new AnomalyExplorerChartsService(
-    pluginsStart.data.query.timefilter.timefilter,
-    mlApiServices,
-    mlResultsService
-  );
-
-  // Note on the following services:
-  // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,
-  //   but it's not being made available as part of global services. Since it's just
-  //   some stateless utils `useMlIndexUtils()` should be used from within components.
-  // - `mlFieldFormatService` is a stateful legacy service that relied on "dependency cache",
-  //   so because of its own state it needs to be made available as a global service.
-  //   In the long run we should again try to get rid of it here and make it available via
-  //   its own context or possibly without having a singleton like state at all, since the
-  //   way this manages its own state right now doesn't consider React component lifecycles.
-  const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
-  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
-
-  return [
-    coreStart,
-    pluginsStart as MlDependencies,
-    {
-      anomalyDetectorService,
-      anomalyExplorerService,
-      mlApiServices,
-      mlCapabilities,
-      mlFieldFormatService,
-      mlJobService,
-      mlResultsService,
-      mlTimeSeriesSearchService,
-      mlTimeSeriesExplorerService,
-      toastNotificationService,
-    },
-  ];
-};
 
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -168,24 +75,15 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
       const dataLoading = new BehaviorSubject<boolean | undefined>(true);
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ =
-        // @ts-ignore property does not exist on type 'PresentationContainer'
-        (state.query ? new BehaviorSubject(state.query) : parentApi?.query$) ??
-        new BehaviorSubject(undefined);
-      const filters$ =
-        // @ts-ignore property does not exist on type 'PresentationContainer'
-        (state.query ? new BehaviorSubject(state.filters) : parentApi?.filters$) ??
-        new BehaviorSubject(undefined);
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
       const api = buildApi(
+        // @ts-ignore
         {
           ...titlesApi,
           ...timeRangeApi,
           ...singleMetricViewerControlsApi,
-          query$,
-          filters$,
           dataLoading,
           serializeState: () => {
             return {
@@ -205,37 +103,10 @@ export const getSingleMetricViewerEmbeddableFactory = (
         }
       );
 
-      const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
-        api.timeRange$,
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
-          ? api.parentApi.timeRange$
-          : of(null),
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
-          ? api.parentApi.timeslice$
-          : of(null),
-      ]).pipe(
-        // @ts-ignore
-        map(([timeRange, parentTimeRange, parentTimeslice]) => {
-          if (timeRange) {
-            return timeRange;
-          }
-          if (parentTimeRange) {
-            return parentTimeRange;
-          }
-          if (parentTimeslice) {
-            return parentTimeRange;
-          }
-          return undefined;
-        })
-      ) as Observable<TimeRange | undefined>;
-
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
         api,
         dataLoading,
         blockingError,
-        appliedTimeRange$,
-        query$,
-        filters$,
         refresh$,
         services[1].data.query.timefilter.timefilter
       );
@@ -265,8 +136,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
             showFrozenDataTierChoice: false,
           };
 
-          const [singleMetricViewerData, , , , , bounds, lastRefresh] =
-            useStateFromPublishingSubject(singleMetricViewerData$);
+          const data = useStateFromPublishingSubject(singleMetricViewerData$);
+          const [singleMetricViewerData, bounds, lastRefresh] = data;
 
           useUnmount(() => {
             onSingleMetricViewerDestroy();

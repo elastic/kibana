@@ -26,7 +26,6 @@ import type {
   PublishesWritablePanelTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -177,10 +176,6 @@ export interface SingleMetricViewerComponentApi {
 
   updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
 }
-
-export type SingleMetricViewerEmbeddableApi = MlEmbeddableBaseApi &
-  PublishesWritablePanelTitle &
-  SingleMetricViewerComponentApi;
 
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
