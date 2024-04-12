@@ -15,6 +15,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { getESQLWithSafeLimit, ESQL_LATEST_VERSION } from '@kbn/esql-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type {
   DataStatsFetchProgress,
@@ -436,9 +437,9 @@ export const useESQLOverallStatsData = (
           }, {} as Record<string, number>);
 
           const exampleDocs = Object.entries(columnsWithExamples).map(([fieldName, idx]) => {
-            const examples = [
-              ...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx])),
-            ].slice(0, 10);
+            const examples = [...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx]))]
+              .filter(isDefined)
+              .slice(0, 10);
             return { fieldName, examples: examples as string[] };
           });
 
