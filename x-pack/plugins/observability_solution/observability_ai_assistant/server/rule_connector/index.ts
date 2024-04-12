@@ -233,7 +233,12 @@ async function executor(
           event.type === StreamingChatResponseEventType.ChatCompletionChunk
       )
     )
-    .pipe(concatenateChatCompletionChunks());
+    .pipe(concatenateChatCompletionChunks())
+    .subscribe({
+      error: (err) => {
+        execOptions.logger.error(err);
+      },
+    });
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
@@ -250,6 +255,14 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
+        alertState:
+          alerts.new.count > 0
+            ? 'new'
+            : alerts.ongoing.count > 0
+            ? 'ongoing'
+            : alerts.recovered.count > 0
+            ? 'recovered'
+            : 'unknown',
       };
     },
   };
