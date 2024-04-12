@@ -476,6 +476,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:aiAssistantLogsIndexPattern': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:aiAssistantResponseLanguage': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logsExplorer:allowedDataViews': {
     type: 'array',
     items: {

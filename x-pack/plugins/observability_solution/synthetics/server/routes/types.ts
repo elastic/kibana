@@ -16,7 +16,11 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
-import { FullValidationConfig, HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
+import {
+  VersionedRouteValidation,
+  HttpResponsePayload,
+  ResponseError,
+} from '@kbn/core-http-server';
 import { UptimeEsClient } from '../lib';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -35,7 +39,7 @@ export interface UMServerRoute<T> {
   method: SupportedMethod;
   writeAccess?: boolean;
   handler: T;
-  validation?: FullValidationConfig<any, any, any>;
+  validation?: VersionedRouteValidation<any, any, any>;
   streamHandler?: (
     context: UptimeRequestHandlerContext,
     request: SyntheticsRequest,
