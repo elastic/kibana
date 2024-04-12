@@ -53,6 +53,9 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default false
    */
   enableQueryVersion?: boolean;
+
+  /** Human-friendly description of this route, should be usable for documentation */
+  description?: string;
 };
 
 /**
