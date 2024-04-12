@@ -1310,7 +1310,8 @@ export default function (providerContext: FtrProviderContext) {
             { id: `logs-somedataset${id}-3.0.0`, type: 'ingest_pipeline' },
             { id: `logs-somedataset${id}`, type: 'index_template' },
             { id: `logs-somedataset${id}@package`, type: 'component_template' },
-            { id: `logs-somedataset${id}@custom`, type: 'component_template' }
+            { id: `logs-somedataset${id}@custom`, type: 'component_template' },
+            { id: `logs@mappings`, type: 'component_template' }
           );
         };
 
