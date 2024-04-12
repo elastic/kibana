@@ -43,3 +43,9 @@ export interface ChatRequestData {
   source_fields: string;
   doc_size: number;
 }
+
+export interface SearchPlaygroundConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}

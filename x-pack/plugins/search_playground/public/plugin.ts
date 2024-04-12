@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
+import {
+  CoreSetup,
+  Plugin,
+  CoreStart,
+  AppMountParameters,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
+  SearchPlaygroundConfigType,
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
@@ -17,8 +24,14 @@ import {
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
+  private config: SearchPlaygroundConfigType;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<SearchPlaygroundConfigType>();
+  }
+
   public setup(core: CoreSetup): SearchPlaygroundPluginSetup {
-    return {};
+    if (!this.config.ui?.enabled) return {};
 
     core.application.register({
       id: PLUGIN_ID,
@@ -31,6 +44,8 @@ export class SearchPlaygroundPlugin
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
     });
+
+    return {};
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {

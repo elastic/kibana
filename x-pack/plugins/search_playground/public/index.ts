@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
+
 import { SearchPlaygroundPlugin } from './plugin';
 
-export function plugin() {
-  return new SearchPlaygroundPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SearchPlaygroundPlugin(initializerContext);
 }
 
 export type { SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart } from './types';
