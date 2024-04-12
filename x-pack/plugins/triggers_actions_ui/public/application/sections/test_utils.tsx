@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
+// FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
