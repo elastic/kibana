@@ -11,11 +11,12 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DashboardStart, DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
   registerReactEmbeddableFactory,
+  registerEmbeddablePlacementStrategy,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -28,6 +29,7 @@ import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
+import { LinksSerializedState } from './react_embeddable/types';
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -101,6 +103,13 @@ export class LinksPlugin
     setKibanaServices(core, plugins);
     untilPluginStartServicesReady().then(() => {
       registerCreateLinksPanelAction();
+      registerEmbeddablePlacementStrategy(CONTENT_ID, (serializedState: LinksSerializedState) => {
+        if (!serializedState) return {};
+        const isHorizontal = serializedState.attributes?.layout === 'horizontal';
+        const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+        const height = isHorizontal ? 4 : (serializedState.attributes?.links?.length ?? 1 * 3) + 4;
+        return { width, height, strategy: 'placeAtTop' };
+      });
       registerReactEmbeddableFactory(CONTENT_ID, async () => {
         const { getLinksEmbeddableFactory } = await import(
           './react_embeddable/links_react_embeddable'

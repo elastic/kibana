@@ -104,6 +104,11 @@ export {
   startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
+export {
+  registerEmbeddablePlacementStrategy,
+  getEmbeddablePlacementStrategy,
+} from './lib/embeddable_placement/embeddable_placement_registry';
+
 export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -27,6 +27,7 @@ import {
   isExplicitInputWithAttributes,
   PanelNotFoundError,
   reactEmbeddableRegistryHasKey,
+  getEmbeddablePlacementStrategy,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
@@ -89,6 +90,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { PanelPlacementSettings } from '../component/panel_placement/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -468,10 +470,20 @@ export class DashboardContainer
     }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
-      const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
-        currentPanels: this.getInput().panels,
-        height: DEFAULT_PANEL_HEIGHT,
+
+      const placementSettings: PanelPlacementSettings = {
         width: DEFAULT_PANEL_WIDTH,
+        height: DEFAULT_PANEL_HEIGHT,
+        strategy: 'findTopLeftMostOpenSpace',
+        ...getEmbeddablePlacementStrategy(panelPackage.panelType)?.(panelPackage.initialState),
+      };
+
+      const { width, height, strategy } = placementSettings;
+
+      const { newPanelPlacement, otherPanels } = panelPlacementStrategies[strategy]({
+        currentPanels: this.getInput().panels,
+        height,
+        width,
       });
       const newPanel: DashboardPanelState = {
         type: panelPackage.panelType,
