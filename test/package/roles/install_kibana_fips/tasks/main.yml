@@ -15,7 +15,7 @@
 - name: find kibana distribution
   find:
     paths: /packages/
-    patterns: kibana-*-linux-x86_64.tar.gz
+    patterns: kibana-default.tar.gz
   register: kibana_tar
 
 - name: extract kibana distribution
@@ -25,6 +25,19 @@
     dest: /usr/share/kibana
     remote_src: yes
     extra_opts: ["--strip-components=1"]
+
+- name: find kibana plugins distribution
+  find:
+    paths: /packages/
+    patterns: kibana-default-plugins.tar.gz
+  register: kibana_plugins_tar
+
+- name: extract kibana plugins distribution
+  become: yes
+  unarchive:
+    src: "{{ kibana_plugins_tar.files[0].path }}"
+    dest: /usr/share/kibana
+    remote_src: yes
 
 - name: copy configuration
   become: yes
