@@ -24,6 +24,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
   download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 elif [[ "$TEST_PACKAGE" == "fips" ]]; then
+  # TODO: revert
   download_artifact kibana-default.tar.gz . --build "018e7d6c-f037-430f-87f7-fa915fd919dc"
   download_artifact kibana-default-plugins.tar.gz . --build "018e7d6c-f037-430f-87f7-fa915fd919dc"
   # download_artifact kibana-default.tar.gz . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
@@ -46,6 +47,7 @@ else
   while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 fi
 
+# TODO add fips logs
 function echoKibanaLogs {
   if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
     echo "--- /var/log/kibana/kibana.log "
@@ -61,7 +63,9 @@ function echoKibanaLogs {
 trap "echoKibanaLogs" EXIT
 
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
-  # TODO: add test script
+  vagrant ssh $TEST_PACKAGE -t -c './kibana/src/.buildkite/scripts/steps/fips/smoke_test.sh'
+
+  # TODO: Remove
   sleep 1h
 else
   vagrant provision "$TEST_PACKAGE"
