@@ -61,7 +61,6 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
-import { ThemeProvider } from '@emotion/react';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 
 // mock useParams
@@ -128,33 +127,31 @@ describe('<CspPolicyTemplateForm />', () => {
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
-      <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
-        <FleetAppWrapper>
-          <TestProvider>
-            {edit && (
-              <CspPolicyTemplateForm
-                policy={newPolicy as PackagePolicy}
-                newPolicy={newPolicy}
-                onChange={onChange}
-                packageInfo={packageInfo}
-                isEditPage={true}
-                agentPolicy={agentPolicy}
-                agentlessPolicy={agentlessPolicy}
-              />
-            )}
-            {!edit && (
-              <CspPolicyTemplateForm
-                newPolicy={newPolicy}
-                onChange={onChange}
-                packageInfo={packageInfo}
-                isEditPage={false}
-                agentPolicy={agentPolicy}
-                agentlessPolicy={agentlessPolicy}
-              />
-            )}
-          </TestProvider>
-        </FleetAppWrapper>
-      </ThemeProvider>
+      <FleetAppWrapper>
+        <TestProvider>
+          {edit && (
+            <CspPolicyTemplateForm
+              policy={newPolicy as PackagePolicy}
+              newPolicy={newPolicy}
+              onChange={onChange}
+              packageInfo={packageInfo}
+              isEditPage={true}
+              agentPolicy={agentPolicy}
+              agentlessPolicy={agentlessPolicy}
+            />
+          )}
+          {!edit && (
+            <CspPolicyTemplateForm
+              newPolicy={newPolicy}
+              onChange={onChange}
+              packageInfo={packageInfo}
+              isEditPage={false}
+              agentPolicy={agentPolicy}
+              agentlessPolicy={agentlessPolicy}
+            />
+          )}
+        </TestProvider>
+      </FleetAppWrapper>
     );
   };
 
