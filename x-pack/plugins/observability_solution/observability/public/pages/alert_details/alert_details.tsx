@@ -181,13 +181,8 @@ export function AlertDetails() {
         )}
       </>
     ) : (
-      <EuiPanel
-        hasShadow={false}
-        data-test-subj="overviewTabPanel"
-        css={css`
-          padding: ${euiTheme.size.l} 0 0 0;
-        `}
-      >
+      <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} />
       </EuiPanel>
     )
