@@ -118,6 +118,10 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+    value: 'flyout.initializing.dataStreamSettings.fetching';
+    context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'flyout.initializing.dataStreamDetails.fetching';
       context: DefaultDatasetQualityStateContext;
     }

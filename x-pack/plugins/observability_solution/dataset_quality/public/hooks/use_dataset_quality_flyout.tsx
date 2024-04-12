@@ -6,6 +6,7 @@
  */
 
 import { useSelector } from '@xstate/react';
+import { useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -28,14 +29,29 @@ export const useDatasetQualityFlyout = () => {
   const dataStreamDetailsLoading = useSelector(service, (state) =>
     state.matches('flyout.initializing.dataStreamDetails.fetching')
   );
+  const dataStreamSettingsLoading = useSelector(service, (state) =>
+    state.matches('flyout.initializing.dataStreamSettings.fetching')
+  );
+
+  const datasetIntegrationsLoading = useSelector(service, (state) =>
+    state.matches('flyout.initializing.integrationDashboards.fetching')
+  );
+
+  const loadingState = useMemo(() => {
+    return {
+      dataStreamDetailsLoading,
+      dataStreamSettingsLoading,
+      datasetIntegrationsLoading,
+    };
+  }, [dataStreamDetailsLoading, dataStreamSettingsLoading, datasetIntegrationsLoading]);
 
   return {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
-    dataStreamDetailsLoading,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
+    loadingState,
   };
 };

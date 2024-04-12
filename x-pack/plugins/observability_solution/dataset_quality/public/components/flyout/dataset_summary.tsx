@@ -19,12 +19,16 @@ import { FieldsList, FieldsListLoading } from './fields_list';
 interface DatasetSummaryProps {
   fieldFormats: FieldFormatsStart;
   dataStreamSettings?: DataStreamSettings;
+  dataStreamSettingsLoading: boolean;
   dataStreamDetails?: DataStreamDetails;
+  dataStreamDetailsLoading: boolean;
 }
 
 export function DatasetSummary({
   dataStreamSettings,
+  dataStreamSettingsLoading,
   dataStreamDetails,
+  dataStreamDetailsLoading,
   fieldFormats,
 }: DatasetSummaryProps) {
   const dataFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
@@ -44,10 +48,12 @@ export function DatasetSummary({
         {
           fieldTitle: flyoutDatasetLastActivityText,
           fieldValue: formattedLastActivity,
+          isLoading: dataStreamDetailsLoading,
         },
         {
           fieldTitle: flyoutDatasetCreatedOnText,
           fieldValue: formattedCreatedOn,
+          isLoading: dataStreamSettingsLoading,
         },
       ]}
     />

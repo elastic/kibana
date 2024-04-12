@@ -33,10 +33,10 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
-    dataStreamDetailsLoading,
     fieldFormats,
     timeRange,
     breakdownField,
+    loadingState,
   } = useDatasetQualityFlyout();
 
   return (
@@ -55,7 +55,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
               dataStream={dataset.rawName}
               dataStreamStat={dataStreamStat}
               dataStreamDetails={dataStreamDetails}
-              dataStreamDetailsLoading={dataStreamDetailsLoading}
+              dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
               timeRange={timeRange}
             />
           </EuiPanel>
@@ -63,20 +63,25 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
           <EuiHorizontalRule margin="none" />
 
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-            {dataStreamDetailsLoading ? (
+            {loadingState.dataStreamDetailsLoading && loadingState.dataStreamSettingsLoading ? (
               <DatasetSummaryLoading />
             ) : dataStreamStat ? (
               <Fragment>
                 <DatasetSummary
                   dataStreamSettings={dataStreamSettings}
+                  dataStreamSettingsLoading={loadingState.dataStreamSettingsLoading}
                   dataStreamDetails={dataStreamDetails}
+                  dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
                   fieldFormats={fieldFormats}
                 />
 
                 {dataStreamStat.integration && (
                   <>
                     <EuiSpacer />
-                    <IntegrationSummary integration={dataStreamStat.integration} />
+                    <IntegrationSummary
+                      integration={dataStreamStat.integration}
+                      dashboardsLoading={loadingState.datasetIntegrationsLoading}
+                    />
                   </>
                 )}
               </Fragment>
