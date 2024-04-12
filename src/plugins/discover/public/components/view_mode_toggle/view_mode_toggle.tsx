@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, ReactElement } from 'react';
+import React, { useMemo, useEffect, type ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverStateContainer } from '../../application/main/services/discover_state';
+import type { DiscoverStateContainer } from '../../application/main/services/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
@@ -23,6 +25,7 @@ export const DocumentViewModeToggle = ({
   stateContainer,
   setDiscoverViewMode,
   patternCount,
+  dataView,
 }: {
   viewMode: VIEW_MODE;
   isTextBasedQuery: boolean;
@@ -30,6 +33,7 @@ export const DocumentViewModeToggle = ({
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
   patternCount?: number;
+  dataView: DataView;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
@@ -37,6 +41,18 @@ export const DocumentViewModeToggle = ({
     () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
     [uiSettings, isTextBasedQuery]
   );
+
+  const showPatternAnalysisTab = useMemo(
+    () => dataView.fields.some((f) => f.esTypes?.includes(ES_FIELD_TYPES.TEXT)),
+    [dataView.fields]
+  );
+
+  useEffect(() => {
+    if (showPatternAnalysisTab === false && viewMode === VIEW_MODE.PATTERN_LEVEL) {
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL);
+    }
+  }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
+
   const includesNormalTabsStyle =
     viewMode === VIEW_MODE.AGGREGATED_LEVEL || viewMode === VIEW_MODE.PATTERN_LEVEL || isLegacy;
 
@@ -87,17 +103,19 @@ export const DocumentViewModeToggle = ({
               <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
             </EuiTab>
 
-            <EuiTab
-              isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
-              data-test-subj="dscViewModePatternAnalysisButton"
-            >
-              <FormattedMessage
-                id="discover.viewModes.patternAnalysis.label"
-                defaultMessage="Patterns {patternCount}"
-                values={{ patternCount: patternCount !== undefined ? ` (${patternCount})` : '' }}
-              />
-            </EuiTab>
+            {showPatternAnalysisTab ? (
+              <EuiTab
+                isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
+                onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
+                data-test-subj="dscViewModePatternAnalysisButton"
+              >
+                <FormattedMessage
+                  id="discover.viewModes.patternAnalysis.label"
+                  defaultMessage="Patterns {patternCount}"
+                  values={{ patternCount: patternCount !== undefined ? ` (${patternCount})` : '' }}
+                />
+              </EuiTab>
+            ) : null}
 
             <EuiTab
               isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}

@@ -93,6 +93,7 @@ export const DiscoverMainContent = ({
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
         patternCount={patternCount}
+        dataView={dataView}
         prepend={
           React.isValidElement(panelsToggle)
             ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
@@ -108,6 +109,7 @@ export const DiscoverMainContent = ({
     panelsToggle,
     isChartAvailable,
     patternCount,
+    dataView,
   ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);

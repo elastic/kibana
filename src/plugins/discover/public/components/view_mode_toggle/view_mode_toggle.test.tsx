@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DocumentViewModeToggle } from './view_mode_toggle';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
@@ -24,12 +25,31 @@ describe('Document view mode toggle component', () => {
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
     isTextBasedQuery = false,
     setDiscoverViewMode = jest.fn(),
+    useDataViewWithTextFields = true,
   } = {}) => {
     const serivces = {
       uiSettings: {
         get: () => showFieldStatistics,
       },
     };
+
+    const dataViewWithTextFields = {
+      fields: [
+        {
+          name: 'field1',
+          esTypes: ['text'],
+        },
+      ],
+    } as unknown as DataView;
+
+    const dataViewWithoutTextFields = {
+      fields: [
+        {
+          name: 'field1',
+          esTypes: ['float'],
+        },
+      ],
+    } as unknown as DataView;
 
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
@@ -44,6 +64,7 @@ describe('Document view mode toggle component', () => {
           isTextBasedQuery={isTextBasedQuery}
           stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
+          dataView={useDataViewWithTextFields ? dataViewWithTextFields : dataViewWithoutTextFields}
         />
       </KibanaContextProvider>
     );
@@ -93,7 +114,7 @@ describe('Document view mode toggle component', () => {
     expect(component.find(EuiTab).at(0).prop('isSelected')).toBe(true);
   });
 
-  it('should select the Patter Analysis tab if viewMode is VIEW_MODE.PATTERN_LEVEL', () => {
+  it('should select the Pattern Analysis tab if viewMode is VIEW_MODE.PATTERN_LEVEL', () => {
     const component = mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
     expect(component.find(EuiTab).at(1).prop('isSelected')).toBe(true);
   });
@@ -101,5 +122,16 @@ describe('Document view mode toggle component', () => {
   it('should select the Field statistics tab if viewMode is VIEW_MODE.AGGREGATED_LEVEL', () => {
     const component = mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
     expect(component.find(EuiTab).at(2).prop('isSelected')).toBe(true);
+  });
+
+  it('should switch to document and hide pattern tab when there are no text fields', () => {
+    const setDiscoverViewMode = jest.fn();
+    const component = mountComponent({
+      viewMode: VIEW_MODE.PATTERN_LEVEL,
+      useDataViewWithTextFields: false,
+      setDiscoverViewMode,
+    });
+    expect(setDiscoverViewMode).toHaveBeenCalledWith(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(component.find(EuiTab).length).toBe(2);
   });
 });
