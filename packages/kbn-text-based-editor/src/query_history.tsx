@@ -27,7 +27,8 @@ import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 
-const CONTAINER_MAX_HEIGHT = 190;
+const CONTAINER_MAX_HEIGHT_EXPANDED = 190;
+const CONTAINER_MAX_HEIGHT_COMPACT = 250;
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -219,11 +220,13 @@ export function QueryHistory({
   containerWidth,
   refetchHistoryItems,
   onUpdateAndSubmit,
+  isInCompactMode,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
   refetchHistoryItems?: boolean;
+  isInCompactMode?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -332,12 +335,14 @@ export function QueryHistory({
       background-color: ${euiTheme.colors.lightestShade};
     }
     .euiTable tbody tr:nth-child(odd) {
-      background-color: ${euiTheme.colors.emptyShade};
+      background-color: ${euiTheme.colors.lightestShade};
+      filter: brightness(97%);
     }
     .euiTableRowCell {
       vertical-align: top;
+      border: none;
     }
-    max-height: ${CONTAINER_MAX_HEIGHT}px;
+    max-height: ${isInCompactMode ? CONTAINER_MAX_HEIGHT_COMPACT : CONTAINER_MAX_HEIGHT_EXPANDED}px;
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}

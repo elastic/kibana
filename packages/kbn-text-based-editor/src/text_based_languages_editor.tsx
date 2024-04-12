@@ -770,6 +770,31 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={getLanguageDisplayName(String(language))}
+                      sections={documentationSections}
+                      searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
+                      buttonProps={{
+                        color: 'text',
+                        size: 's',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
+                        'aria-label': i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexItem>
               {!Boolean(hideMinimizeButton) && (
                 <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                   <EuiToolTip
@@ -800,31 +825,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                {documentationSections && (
-                  <EuiFlexItem grow={false}>
-                    <LanguageDocumentationPopover
-                      language={getLanguageDisplayName(String(language))}
-                      sections={documentationSections}
-                      searchInDescription
-                      linkToDocumentation={
-                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
-                      }
-                      buttonProps={{
-                        color: 'text',
-                        size: 's',
-                        'data-test-subj': 'TextBasedLangEditor-documentation',
-                        'aria-label': i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                          {
-                            defaultMessage: 'Documentation',
-                          }
-                        ),
-                      }}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -979,6 +979,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         containerWidth={editorWidth}
                         hideQueryHistory={hideHistoryComponent}
                         refetchHistoryItems={refetchHistoryItems}
+                        isInCompactMode={true}
                       />
                     )}
                   </div>
@@ -990,38 +991,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         {!isCodeEditorExpanded && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
-                    {
-                      defaultMessage: 'Expand query editor',
-                    }
-                  )}
-                >
-                  <EuiButtonIcon
-                    display="empty"
-                    iconType="expand"
-                    size="m"
-                    aria-label="Expand"
-                    onClick={() => expandCodeEditor(true)}
-                    data-test-subj="TextBasedLangEditor-expand"
-                    css={{
-                      ...(documentationSections
-                        ? {
-                            borderRadius: 0,
-                          }
-                        : {
-                            borderTopLeftRadius: 0,
-                            borderBottomLeftRadius: 0,
-                          }),
-                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
-                      border: '1px solid rgb(17 43 134 / 10%) !important',
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
@@ -1045,16 +1014,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         ),
                         size: 'm',
                         css: {
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
+                          borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
-                          borderLeft: 'transparent !important',
                         },
                       }}
                     />
                   </EuiFlexItem>
                 )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
+                    {
+                      defaultMessage: 'Expand query editor',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    display="empty"
+                    iconType="expand"
+                    size="m"
+                    aria-label="Expand"
+                    onClick={() => expandCodeEditor(true)}
+                    data-test-subj="TextBasedLangEditor-expand"
+                    css={{
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                      border: '1px solid rgb(17 43 134 / 10%) !important',
+                      borderLeft: 'transparent !important',
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

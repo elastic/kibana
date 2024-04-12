@@ -41,7 +41,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
             data-test-subj="TextBasedLangEditor-feedback-link"
           >
             <EuiIcon
-              type="discuss"
+              type="editorComment"
               color="primary"
               size="m"
               css={css`
@@ -54,7 +54,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
       {!isSpaceReduced && (
         <>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="discuss" color="primary" size="s" />
+            <EuiIcon type="editorComment" color="primary" size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
@@ -106,6 +106,7 @@ interface EditorFooterProps {
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
+  isInCompactMode?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -129,11 +130,14 @@ export const EditorFooter = memo(function EditorFooter({
   setIsHistoryOpen,
   hideQueryHistory,
   refetchHistoryItems,
+  isInCompactMode,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-
+  // boxShadow: !isCodeEditorExpanded
+  // ? `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`
+  // : 'none',
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
       // update the query first
@@ -148,6 +152,10 @@ export const EditorFooter = memo(function EditorFooter({
     [runQuery, updateQuery]
   );
 
+  const shadowStyle = isInCompactMode
+    ? `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`
+    : 'none';
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -155,6 +163,7 @@ export const EditorFooter = memo(function EditorFooter({
       direction="column"
       css={css`
         width: ${containerWidth}px;
+        box-shadow: ${shadowStyle};
       `}
     >
       <EuiFlexItem grow={false}>
@@ -369,6 +378,7 @@ export const EditorFooter = memo(function EditorFooter({
             onUpdateAndSubmit={onUpdateAndSubmit}
             containerWidth={containerWidth}
             refetchHistoryItems={refetchHistoryItems}
+            isInCompactMode={isInCompactMode}
           />
         </EuiFlexItem>
       )}
