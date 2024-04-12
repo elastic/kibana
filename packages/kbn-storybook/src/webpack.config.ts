@@ -201,8 +201,8 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     config
   );
-  // webpackMerge is concatenating the storybookConfig and config
-  // we do have a module loader defined and it should not be included
+  // webpackMerge is concatenating resolve.mainFields from storybookConfig and config
+  // we do not have a module loader defined and it should not be included
   // @ts-ignore
   mergedConfig.resolve.mainFields = ['browser', 'main'];
   return mergedConfig;
