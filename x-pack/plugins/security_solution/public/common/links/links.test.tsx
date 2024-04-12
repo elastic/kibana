@@ -57,8 +57,8 @@ const mockCapabilities = {
 const fakePageId = 'fakePage';
 const testFeatureflag = 'detectionResponseEnabled';
 
-jest.mock('./app_links', () => {
-  const actual = jest.requireActual('./app_links');
+jest.mock('../../app_links', () => {
+  const actual = jest.requireActual('../../app_links');
   const fakeLink = {
     id: fakePageId,
     title: 'test fake menu item',
