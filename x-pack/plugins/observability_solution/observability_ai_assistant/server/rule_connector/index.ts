@@ -16,11 +16,11 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { SlackApiParamsSchema } from '@kbn/stack-connectors-plugin/common';
 import {
   EmailParamsSchema,
   JiraParamsSchema,
   PagerdutyParamsSchema,
+  SlackApiParamsSchema,
   SlackParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
