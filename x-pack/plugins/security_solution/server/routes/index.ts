@@ -58,14 +58,7 @@ import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
-import {
-  riskEngineDisableRoute,
-  riskEngineInitRoute,
-  riskEngineEnableRoute,
-  riskEngineStatusRoute,
-  riskEnginePrivilegesRoute,
-  riskEngineSettingsRoute,
-} from '../lib/entity_analytics/risk_engine/routes';
+import { registerRiskEngineRoutes } from '../lib/entity_analytics/risk_engine/routes';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
 import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
@@ -161,17 +154,10 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
+  registerRiskEngineRoutes(router, logger, config, getStartServices);
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
-    riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
-    riskEngineDisableRoute(router, getStartServices);
-    riskEngineSettingsRoute(router);
-    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
-      riskEnginePrivilegesRoute(router, getStartServices);
-    }
   }
 
   assetCriticalityStatusRoute(router, logger);

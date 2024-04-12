@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export { riskEngineInitRoute } from './init';
-export { riskEngineEnableRoute } from './enable';
-export { riskEngineDisableRoute } from './disable';
-export { riskEngineStatusRoute } from './status';
-export { riskEnginePrivilegesRoute } from './privileges';
-export { riskEngineSettingsRoute } from './settings';
+export { registerRiskEngineRoutes } from './register_risk_engine_routes';
