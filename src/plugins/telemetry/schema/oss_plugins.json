@@ -10170,6 +10170,18 @@
             }
           }
         },
+        "observability:aiAssistantLogsIndexPattern": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:aiAssistantResponseLanguage": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {

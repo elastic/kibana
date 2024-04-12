@@ -75,7 +75,7 @@ export interface InfraClientSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
-  ml: MlPluginSetup;
+  ml?: MlPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   lens: LensPublicStart;
@@ -95,7 +95,7 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
-  ml: MlPluginStart;
+  ml?: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -135,6 +135,7 @@ export interface InfraHttpError extends IHttpFetchError {
 export interface ExecutionTimeRange {
   gte: number;
   lte: number;
+  buckets?: number;
 }
 
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
