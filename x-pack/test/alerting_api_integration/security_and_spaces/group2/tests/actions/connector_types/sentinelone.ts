@@ -34,7 +34,6 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
 
       // SentinelOne supported sub-actions
       const s1SubActions = [
-        SUB_ACTION.KILL_PROCESS,
         SUB_ACTION.GET_AGENTS,
         SUB_ACTION.ISOLATE_HOST,
         SUB_ACTION.RELEASE_HOST,
@@ -42,6 +41,7 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
         SUB_ACTION.FETCH_AGENT_FILES,
         SUB_ACTION.DOWNLOAD_AGENT_FILE,
+        SUB_ACTION.GET_ACTIVITIES,
       ];
 
       let connectorId: string;

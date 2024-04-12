@@ -347,6 +347,18 @@ export const SentinelOneExecuteScriptParamsSchema = schema.object({
   alertIds: AlertIds,
 });
 
+export const SentinelOneExecuteScriptResponseSchema = schema.object({
+  errors: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  data: schema.nullable(
+    schema.object({
+      pendingExecutionId: schema.nullable(schema.string()),
+      affected: schema.nullable(schema.number()),
+      parentTaskId: schema.nullable(schema.string()),
+      pending: schema.nullable(schema.boolean()),
+    })
+  ),
+});
+
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
   {
     parentTaskId: schema.string(),
@@ -560,25 +572,6 @@ export const SentinelOneGetRemoteScriptsStatusParams = schema.object({
   parentTaskId: schema.string(),
 });
 
-export const SentinelOneExecuteScriptResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-  data: schema.nullable(
-    schema.object({
-      pendingExecutionId: schema.nullable(schema.string()),
-      affected: schema.nullable(schema.number()),
-      parentTaskId: schema.nullable(schema.string()),
-      pending: schema.nullable(schema.boolean()),
-    })
-  ),
-});
-
-export const SentinelOneKillProcessResponseSchema = SentinelOneExecuteScriptResponseSchema;
-
-export const SentinelOneKillProcessSchema = schema.object({
-  subAction: schema.literal(SUB_ACTION.KILL_PROCESS),
-  subActionParams: SentinelOneKillProcessParamsSchema,
-});
-
 export const SentinelOneIsolateHostSchema = schema.object({
   subAction: schema.literal(SUB_ACTION.ISOLATE_HOST),
   subActionParams: SentinelOneIsolateHostParamsSchema,
@@ -595,7 +588,6 @@ export const SentinelOneExecuteScriptSchema = schema.object({
 });
 
 export const SentinelOneActionParamsSchema = schema.oneOf([
-  SentinelOneKillProcessSchema,
   SentinelOneIsolateHostSchema,
   SentinelOneReleaseHostSchema,
   SentinelOneExecuteScriptSchema,

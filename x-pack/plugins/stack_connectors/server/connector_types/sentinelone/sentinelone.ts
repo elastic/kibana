@@ -18,11 +18,9 @@ import type {
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
-  SentinelOneKillProcessParams,
   SentinelOneExecuteScriptParams,
 } from '../../../common/sentinelone/types';
 import {
-  SentinelOneKillProcessResponseSchema,
   SentinelOneExecuteScriptParamsSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
@@ -33,7 +31,6 @@ import {
   SentinelOneGetRemoteScriptStatusResponseSchema,
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
-  SentinelOneKillProcessParamsSchema,
   SentinelOneFetchAgentFilesParamsSchema,
   SentinelOneFetchAgentFilesResponseSchema,
   SentinelOneDownloadAgentFileParamsSchema,
@@ -131,12 +128,6 @@ export class SentinelOneConnector extends SubActionConnector<
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.KILL_PROCESS,
-      method: 'killProcess',
-      schema: SentinelOneKillProcessParamsSchema,
-    });
-
-    this.registerSubAction({
       name: SUB_ACTION.EXECUTE_SCRIPT,
       method: 'executeScript',
       schema: SentinelOneExecuteScriptParamsSchema,
@@ -194,6 +185,7 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async executeScript(payload: SentinelOneExecuteScriptParams) {
+    // FIXME:PT fix this method to return response and support API options in a better way
     await this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
@@ -207,43 +199,6 @@ export class SentinelOneConnector extends SubActionConnector<
         },
       },
       responseSchema: SentinelOneExecuteScriptResponseSchema,
-    });
-  }
-
-  public async killProcess({ alertIds, processName, ...payload }: SentinelOneKillProcessParams) {
-    const agentData = await this.getAgents(payload);
-
-    const agentId = agentData.data[0]?.id;
-
-    if (!agentId) {
-      throw new Error(`No agent found for filter ${JSON.stringify(payload)}`);
-    }
-
-    const terminateScriptResponse = await this.getRemoteScripts({
-      query: 'terminate',
-      osTypes: agentData?.data[0]?.osType,
-    });
-
-    if (!processName) {
-      throw new Error('No process name provided');
-    }
-
-    await this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptsExecute,
-      method: 'post',
-      data: {
-        data: {
-          outputDestination: 'SentinelCloud',
-          scriptId: terminateScriptResponse.data[0].id,
-          scriptRuntimeTimeoutSeconds: terminateScriptResponse.data[0].scriptRuntimeTimeoutSeconds,
-          taskDescription: terminateScriptResponse.data[0].scriptName,
-          inputParams: `--terminate --processes ${processName}`,
-        },
-        filter: {
-          ids: agentId,
-        },
-      },
-      responseSchema: SentinelOneKillProcessResponseSchema,
     });
   }
 
