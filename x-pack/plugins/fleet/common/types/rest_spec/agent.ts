@@ -244,6 +244,15 @@ export interface GetAgentIncomingDataResponse {
 export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
 }
+
+export interface GetActionStatusRequest {
+  query: {
+    perPage?: number;
+    page?: number;
+    date?: string;
+    latest?: number;
+  };
+}
 export interface GetActionStatusResponse {
   items: ActionStatus[];
 }

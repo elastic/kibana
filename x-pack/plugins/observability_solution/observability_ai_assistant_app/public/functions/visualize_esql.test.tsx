@@ -18,7 +18,8 @@ describe('VisualizeESQL', () => {
   function renderComponent(
     userOverrides?: unknown,
     newLensService?: LensPublicStart,
-    setVisibilitySpy?: () => void
+    setVisibilitySpy?: () => void,
+    errorMessages?: string[]
   ) {
     const lensService = newLensService ?? lensPluginMock.createStartContract();
     const dataViewsService = {
@@ -28,6 +29,7 @@ describe('VisualizeESQL', () => {
           title: 'foo',
           id: 'foo',
           toSpec: jest.fn(),
+          toMinimalSpec: jest.fn(),
           isPersisted: jest.fn().mockReturnValue(false),
         })
       ),
@@ -67,6 +69,7 @@ describe('VisualizeESQL', () => {
           query={'from foo | keep bytes, destination'}
           onActionClick={jest.fn()}
           userOverrides={userOverrides}
+          errorMessages={errorMessages}
           ObservabilityAIAssistantMultipaneFlyoutContext={
             ObservabilityAIAssistantMultipaneFlyoutContext
           }
@@ -124,5 +127,19 @@ describe('VisualizeESQL', () => {
       userEvent.click(screen.getByTestId('observabilityAiAssistantLensESQLEditButton'));
       expect(setVisibilitySpy).toHaveBeenCalled();
     });
+  });
+
+  it('should display the errors if given', async () => {
+    const lensService = {
+      ...lensPluginMock.createStartContract(),
+      stateHelperApi: jest.fn().mockResolvedValue({
+        formula: jest.fn(),
+        suggestions: jest.fn(),
+      }),
+    };
+    renderComponent({}, lensService, undefined, ['There is an error mate']);
+    await waitFor(() =>
+      expect(screen.getByTestId('observabilityAiAssistantErrorsList')).toBeInTheDocument()
+    );
   });
 });

@@ -669,6 +669,27 @@
       }
     }
   },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -1002,6 +1023,10 @@
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
+      },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
       },
       "latest_install_failed_attempts": {
         "enabled": false,
@@ -1564,11 +1589,11 @@
       "assetType": {
         "type": "keyword"
       },
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
       "dashboardFilterAssetIdEnabled": {
         "type": "boolean"
+      },
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -1586,6 +1611,10 @@
   },
   "ingest-agent-policies": {
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {

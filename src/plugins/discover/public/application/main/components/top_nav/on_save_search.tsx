@@ -10,9 +10,10 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
-import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
+import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -93,6 +94,9 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = state.internalState.getState().dataView;
+  const overriddenVisContextAfterInvalidation =
+    state.internalState.getState().overriddenVisContextAfterInvalidation;
+
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -116,10 +120,14 @@ export async function onSaveSearch({
     const currentSampleSize = savedSearch.sampleSize;
     const currentDescription = savedSearch.description;
     const currentTags = savedSearch.tags;
+    const currentVisContext = savedSearch.visContext;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
     savedSearch.timeRestore = newTimeRestore;
-    savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
+    savedSearch.rowsPerPage = isLegacyTableEnabled({
+      uiSettings,
+      isTextBasedQueryMode: isOfAggregateQueryType(savedSearch.searchSource.getField('query')),
+    })
       ? currentRowsPerPage
       : state.appState.getState().rowsPerPage;
 
@@ -134,6 +142,11 @@ export async function onSaveSearch({
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
+
+    if (overriddenVisContextAfterInvalidation) {
+      savedSearch.visContext = overriddenVisContextAfterInvalidation;
+    }
+
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -159,10 +172,12 @@ export async function onSaveSearch({
       savedSearch.rowsPerPage = currentRowsPerPage;
       savedSearch.sampleSize = currentSampleSize;
       savedSearch.description = currentDescription;
+      savedSearch.visContext = currentVisContext;
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
     } else {
+      state.internalState.transitions.resetOnSavedSearchChange();
       state.appState.resetInitialState();
     }
     onSaveCb?.();
