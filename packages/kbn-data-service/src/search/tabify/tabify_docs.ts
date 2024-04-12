@@ -8,7 +8,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
-import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  DatatableColumnType,
+} from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 // meta fields we won't merge with our result hit
@@ -173,7 +178,7 @@ export const tabifyDocs = (
 ): Datatable => {
   const columns: DatatableColumn[] = [];
 
-  const rows: DatatableRow[] = esResponse.hits.hits
+  const rows: Array<DatatableRow | undefined> = esResponse.hits.hits
     .map((hit) => {
       const flat = flattenHit(hit, index, params);
       if (!flat) {
@@ -199,11 +204,11 @@ export const tabifyDocs = (
       }
       return flat;
     })
-    .filter((hit) => hit);
+    .filter((hit) => hit); // ensures no undefined values are returned
 
   return {
     type: 'datatable',
     columns,
-    rows,
+    rows: rows as DatatableRow[],
   };
 };
