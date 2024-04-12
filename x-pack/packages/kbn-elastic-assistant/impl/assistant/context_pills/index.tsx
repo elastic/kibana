@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 
@@ -19,8 +20,7 @@ const PillButton = styled(EuiButton)`
 `;
 
 interface Props {
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  anonymizationFields: FindAnonymizationFieldsResponse;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
@@ -29,8 +29,7 @@ interface Props {
 }
 
 const ContextPillsComponent: React.FC<Props> = ({
-  defaultAllow,
-  defaultAllowReplacement,
+  anonymizationFields,
   promptContexts,
   selectedPromptContexts,
   setSelectedPromptContexts,
@@ -44,8 +43,7 @@ const ContextPillsComponent: React.FC<Props> = ({
     async (id: string) => {
       if (selectedPromptContexts[id] == null && promptContexts[id] != null) {
         const newSelectedPromptContext = await getNewSelectedPromptContext({
-          defaultAllow,
-          defaultAllowReplacement,
+          anonymizationFields,
           promptContext: promptContexts[id],
         });
 
@@ -55,13 +53,7 @@ const ContextPillsComponent: React.FC<Props> = ({
         }));
       }
     },
-    [
-      defaultAllow,
-      defaultAllowReplacement,
-      promptContexts,
-      selectedPromptContexts,
-      setSelectedPromptContexts,
-    ]
+    [anonymizationFields, promptContexts, selectedPromptContexts, setSelectedPromptContexts]
   );
 
   return (

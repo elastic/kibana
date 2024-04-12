@@ -38,7 +38,6 @@ export const getColumns = ({
           disableAnonymize={!row.allowed || (row.allowed && row.anonymized)}
           disableUnanonymize={!row.allowed || (row.allowed && !row.anonymized)}
           onListUpdated={onListUpdated}
-          onlyDefaults={rawData == null}
           selected={[row]}
         />
       );
@@ -74,17 +73,6 @@ export const getColumns = ({
                 update: rawData == null ? 'defaultAllow' : 'allow',
               },
             ]);
-
-            if (rawData == null && allowed) {
-              // when editing defaults, remove the default replacement if the field is no longer allowed
-              onListUpdated([
-                {
-                  field,
-                  operation: 'remove',
-                  update: 'defaultAllowReplacement',
-                },
-              ]);
-            }
           }}
         />
       ),
