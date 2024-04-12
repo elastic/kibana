@@ -47,7 +47,9 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['valueListItemsModal'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'valueListItemsModalEnabled',
+          ])}`,
         ],
       },
     },

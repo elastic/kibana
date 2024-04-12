@@ -237,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new modal for the value list items
    */
-  valueListItemsModal: true,
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

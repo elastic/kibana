@@ -22,7 +22,7 @@ export const ShowValueListModal = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const { canWriteIndex, canReadIndex, loading } = useListsPrivileges();
-  const isValueItemsListModalEnabled = useIsExperimentalFeatureEnabled('valueListItemsModal');
+  const isValueItemsListModalEnabled = useIsExperimentalFeatureEnabled('valueListItemsModalEnabled');
 
   const onCloseModal = useCallback(() => setShowModal(false), []);
   const onShowModal = useCallback(() => setShowModal(true), []);
