@@ -19,9 +19,8 @@ export const useDatasetQualityFilters = () => {
   const isLoading = useSelector(
     service,
     (state) =>
-      state.matches('integrations.fetching') ||
-      state.matches('datasets.fetching') ||
-      state.matches('degradedDocs.fetching')
+      state.matches('integrations.fetching') &&
+      (state.matches('datasets.fetching') || state.matches('degradedDocs.fetching'))
   );
 
   const {
