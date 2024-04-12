@@ -45,7 +45,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         functionName,
-        serviceNames: Object.keys(...serviceNames),
+        serviceNames: Object.keys(serviceNames),
       });
     },
     [fetchTopNFunctionAPMTransactions, functionName, serviceNames, timeRange.end, timeRange.start]
