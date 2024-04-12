@@ -267,7 +267,6 @@ export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes })
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
   const render = () => {
-    if (status === 'not-deployed') return <NotDeployed postureType={postureType} />; // integration installed, but no agents added
     if (status === 'indexing' || status === 'waiting_for_results') return <Indexing />; // agent added, index timeout hasn't passed since installation
     if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
     if (status === 'unprivileged')
@@ -279,6 +278,7 @@ export const NoFindingsStates = ({ postureType }: { postureType: PostureTypes })
           cspmIntegrationLink={cspmIntegrationLink}
         />
       );
+    if (status === 'not-deployed') return <NotDeployed postureType={postureType} />; // integration installed, but no agents added
   };
 
   return (
