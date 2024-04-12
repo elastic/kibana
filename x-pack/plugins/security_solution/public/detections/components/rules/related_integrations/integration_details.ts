@@ -143,7 +143,7 @@ const createIntegrationDetails = (integration: IntegrationMatch): IntegrationDet
   // Version check e.g. installed version `1.2.3` satisfies required version `~1.2.1`
   const installedVersion = found.installed_package_version ?? '';
   const isVersionSatisfied = installedVersion
-    ? semver.satisfies(installedVersion, requiredVersion)
+    ? semver.satisfies(installedVersion, requiredVersion, { includePrerelease: true })
     : true;
   const targetVersion =
     installedVersion && isVersionSatisfied

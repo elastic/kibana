@@ -8,6 +8,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
+import semver from 'semver';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiTextTruncate,
@@ -201,7 +202,16 @@ function renderIntegrationOption(
 }
 
 function calculateRelevantSemver(integration: Integration): string {
-  return integration.installed_package_version
-    ? `^${integration.installed_package_version}`
-    : `^${integration.latest_package_version}`;
+  if (!integration.installed_package_version) {
+    return `^${integration.latest_package_version}`;
+  }
+
+  // In some rare cases users may install a prerelease integration version.
+  // We need to build constraint on the latest stable version and
+  // it's supposed `latest_package_version` is the latest stable version.
+  if (semver.gt(integration.installed_package_version, integration.latest_package_version)) {
+    return `^${integration.latest_package_version}`;
+  }
+
+  return `^${integration.installed_package_version}`;
 }
