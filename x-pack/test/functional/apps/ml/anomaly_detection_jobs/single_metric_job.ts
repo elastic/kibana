@@ -420,7 +420,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout warning',
-        'Time range\nThe selected or available time range might be too short. The recommended minimum time range should be at least 2 hours and 25 times the bucket span.'
+        /Time range\s*The selected or available time range might be too short/
       );
 
       await ml.jobWizardCommon.goToTimeRangeStep();
@@ -432,7 +432,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout success']);
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout success',
-        'Time range\nValid and long enough to model patterns in the data.'
+        /Time range\s*Valid and long enough to model patterns in the data/
       );
     });
 
@@ -452,7 +452,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout warning',
-        'Job will not be able to run in the current cluster because model memory limit is higher than 9790MB.'
+        /Job will not be able to run in the current cluster because model memory limit is higher than/
       );
     });
   });

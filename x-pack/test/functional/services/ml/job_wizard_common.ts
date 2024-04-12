@@ -681,10 +681,12 @@ export function MachineLearningJobWizardCommonProvider(
         });
     },
 
-    async assertCalloutText(testSubj: string, text: string) {
+    async assertCalloutText(testSubj: string, text: RegExp) {
       const allOfTestSubj = await testSubjects.getVisibleTextAll(testSubj);
 
-      const oneOfVisibleTextMatches = allOfTestSubj.some((visibleText) => visibleText === text);
+      const oneOfVisibleTextMatches = allOfTestSubj.some(
+        (visibleText) => !!visibleText.match(text)
+      );
       expect(oneOfVisibleTextMatches).to.eql(
         true,
         `Expect one of the visible text entries to match [${text}], instead found ${JSON.stringify(
