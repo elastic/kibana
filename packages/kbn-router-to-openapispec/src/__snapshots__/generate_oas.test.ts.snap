@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateOpenApiDocument @kbn/config-schema generates references as in the expected format 1`] = `
+exports[`generateOpenApiDocument @kbn/config-schema generates references in the expected format 1`] = `
 Object {
   "components": Object {
     "schemas": Object {
@@ -24,7 +24,7 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "/foo/{id}#1",
+        "operationId": "/foo/{id}#0",
         "parameters": Array [
           Object {
             "in": "header",
