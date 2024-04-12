@@ -48,6 +48,7 @@ import {
   URIOptions,
   URIType,
   StreamType,
+  UnionTypeOptions,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
@@ -154,43 +155,46 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
     Type<J>,
     Type<K>
   ],
-  options?: TypeOptions<A | B | C | D | E | F | G | H | I | J | K>
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
 ): Type<A | B | C | D | E | F | G | H | I | J | K>;
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
-  options?: TypeOptions<A | B | C | D | E | F | G | H | I | J>
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
 ): Type<A | B | C | D | E | F | G | H | I | J>;
 function oneOf<A, B, C, D, E, F, G, H, I>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
-  options?: TypeOptions<A | B | C | D | E | F | G | H | I>
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
 ): Type<A | B | C | D | E | F | G | H | I>;
 function oneOf<A, B, C, D, E, F, G, H>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
-  options?: TypeOptions<A | B | C | D | E | F | G | H>
+  options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
 ): Type<A | B | C | D | E | F | G | H>;
 function oneOf<A, B, C, D, E, F, G>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
-  options?: TypeOptions<A | B | C | D | E | F | G>
+  options?: UnionTypeOptions<A | B | C | D | E | F | G>
 ): Type<A | B | C | D | E | F | G>;
 function oneOf<A, B, C, D, E, F>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>],
-  options?: TypeOptions<A | B | C | D | E | F>
+  options?: UnionTypeOptions<A | B | C | D | E | F>
 ): Type<A | B | C | D | E | F>;
 function oneOf<A, B, C, D, E>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
-  options?: TypeOptions<A | B | C | D | E>
+  options?: UnionTypeOptions<A | B | C | D | E>
 ): Type<A | B | C | D | E>;
 function oneOf<A, B, C, D>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>],
-  options?: TypeOptions<A | B | C | D>
+  options?: UnionTypeOptions<A | B | C | D>
 ): Type<A | B | C | D>;
 function oneOf<A, B, C>(
   types: [Type<A>, Type<B>, Type<C>],
-  options?: TypeOptions<A | B | C>
+  options?: UnionTypeOptions<A | B | C>
 ): Type<A | B | C>;
-function oneOf<A, B>(types: [Type<A>, Type<B>], options?: TypeOptions<A | B>): Type<A | B>;
-function oneOf<A>(types: [Type<A>], options?: TypeOptions<A>): Type<A>;
-function oneOf<RTS extends Array<Type<any>>>(types: RTS, options?: TypeOptions<any>): Type<any> {
+function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
+function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
+function oneOf<RTS extends Array<Type<any>>>(
+  types: RTS,
+  options?: UnionTypeOptions<any>
+): Type<any> {
   return new UnionType(types, options);
 }
 

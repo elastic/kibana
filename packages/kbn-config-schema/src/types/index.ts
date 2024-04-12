@@ -33,6 +33,7 @@ export { RecordOfType } from './record_type';
 export { StreamType } from './stream_type';
 export type { StringOptions } from './string_type';
 export { StringType } from './string_type';
+export type { UnionTypeOptions } from './union_type';
 export { UnionType } from './union_type';
 export type { URIOptions } from './uri_type';
 export { URIType } from './uri_type';

@@ -11,11 +11,13 @@ import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
+export type UnionTypeOptions<T> = Omit<TypeOptions<T>, 'id'>;
+
 export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   private readonly unionTypes: RTS;
-  private readonly typeOptions?: TypeOptions<T>;
+  private readonly typeOptions?: UnionTypeOptions<T>;
 
-  constructor(types: RTS, options?: TypeOptions<T>) {
+  constructor(types: RTS, options?: UnionTypeOptions<T>) {
     const schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
     super(schema, options);
