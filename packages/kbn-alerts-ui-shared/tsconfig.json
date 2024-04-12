@@ -22,6 +22,9 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-doc-links-browser",
-    "@kbn/router-utils"
+    "@kbn/router-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-doc-links-browser-mocks"
   ]
 }
