@@ -59,21 +59,23 @@ const PackageListGridWrapper = ({
 }: WrapperProps) => {
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
-  const availablePackages = useAvailablePackages({
+  const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
-  const { filteredCards } = availablePackages;
+
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
     customCards
   );
+
   React.useEffect(() => {
     if (isInitialHidden && searchQuery) {
       setIsInitialHidden(false);
     }
   }, [searchQuery, isInitialHidden]);
-  if (!isInitialHidden && availablePackages.isLoading) return <Loading />;
+
+  if (!isInitialHidden && isLoading) return <Loading />;
 
   const showPackageList =
     (showSearchBar && !isInitialHidden) || showSearchBar === false;
