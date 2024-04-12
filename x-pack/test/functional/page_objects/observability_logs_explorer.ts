@@ -335,11 +335,6 @@ export function ObservabilityLogsExplorerPageObject({
       return testSubjects.find('unmanagedDatasets');
     },
 
-    async getFlyoutDetail(rowIndex: number = 0) {
-      await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logsExplorerFlyoutDetail');
-    },
-
     async getIntegrations() {
       const menu = await this.getIntegrationsContextMenu();
 
