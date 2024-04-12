@@ -495,7 +495,7 @@
             "label": "ensureAuthorized",
             "description": [],
             "signature": [
-              "({ ruleTypeId, consumer: legacyConsumer, operation, entity, }: ",
+              "({ ruleTypeId, consumer: legacyConsumer, operation, entity, additionalPrivileges, }: ",
               "EnsureAuthorizedOpts",
               ") => Promise<void>"
             ],
@@ -508,7 +508,7 @@
                 "id": "def-server.AlertingAuthorization.ensureAuthorized.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    ruleTypeId,\n    consumer: legacyConsumer,\n    operation,\n    entity,\n  }",
+                "label": "{\n    ruleTypeId,\n    consumer: legacyConsumer,\n    operation,\n    entity,\n    additionalPrivileges = [],\n  }",
                 "description": [],
                 "signature": [
                   "EnsureAuthorizedOpts"
@@ -1853,6 +1853,47 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.ConnectorAdapter.getKibanaPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaPrivileges",
+            "description": [],
+            "signature": [
+              "(({ consumer }: { consumer: string; }) => string[]) | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ consumer }",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1.consumer",
+                    "type": "string",
+                    "tags": [],
+                    "label": "consumer",
+                    "description": [],
+                    "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []

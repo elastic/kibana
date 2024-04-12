@@ -79,6 +79,18 @@
           },
           {
             "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/esql/lib/esql_theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/esql/lib/esql_theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
+            "path": "packages/kbn-monaco/src/esql/lib/esql_theme.ts"
+          },
+          {
+            "plugin": "@kbn/monaco",
             "path": "packages/kbn-monaco/src/console/theme/shared.ts"
           },
           {

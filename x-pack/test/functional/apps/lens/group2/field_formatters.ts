@@ -10,16 +10,10 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'visualize',
-    'lens',
-    'header',
-    'dashboard',
-    'common',
-    'settings',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header']);
   const retry = getService('retry');
   const fieldEditor = getService('fieldEditor');
+  const dataViews = getService('dataViews');
 
   describe('lens fields formatters tests', () => {
     describe('keyword formatters', () => {
@@ -38,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should display url formatter correctly', async () => {
         await retry.try(async () => {
-          await PageObjects.lens.clickAddField();
+          await dataViews.clickAddFieldFromSearchBar();
           await fieldEditor.setName('runtimefield');
           await fieldEditor.enableValue();
           await fieldEditor.typeScript("emit(doc['geo.dest'].value)");
@@ -137,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should display bytes number formatter correctly', async () => {
         await retry.try(async () => {
-          await PageObjects.lens.clickAddField();
+          await dataViews.clickAddFieldFromSearchBar();
           await fieldEditor.setName('runtimefield');
           await fieldEditor.setFieldType('long');
           await fieldEditor.enableValue();
@@ -211,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should be overridden by Lens formatter', async () => {
         await retry.try(async () => {
-          await PageObjects.lens.clickAddField();
+          await dataViews.clickAddFieldFromSearchBar();
           await fieldEditor.setName('runtimefield');
           await fieldEditor.setFieldType('long');
           await fieldEditor.enableValue();

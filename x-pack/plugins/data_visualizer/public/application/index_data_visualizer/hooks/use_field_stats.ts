@@ -87,7 +87,6 @@ export function useFieldStatsSearchStrategy(
   const startFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
-
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
     setFetchState({
@@ -275,7 +274,12 @@ export function useFieldStatsSearchStrategy(
 
         if (Array.isArray(fieldBatches)) {
           fieldBatches.forEach((f) => {
-            if (Array.isArray(f) && f.length === 1) {
+            if (
+              Array.isArray(f) &&
+              f.length === 1 &&
+              Array.isArray(f[0].fields) &&
+              f[0].fields.length > 0
+            ) {
               statsMap.set(f[0].fields[0], f[0]);
             }
           });
@@ -317,8 +321,11 @@ export function useFieldStatsSearchStrategy(
   // auto-update
   useEffect(() => {
     startFetch();
+  }, [startFetch]);
+
+  useEffect(() => {
     return cancelFetch;
-  }, [startFetch, cancelFetch]);
+  }, [cancelFetch]);
 
   return {
     progress: fetchState,

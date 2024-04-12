@@ -105,6 +105,10 @@ export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
+export const INVESTIGATIONS_PATH = '/investigations' as const;
+export const MACHINE_LEARNING_PATH = '/ml' as const;
+export const ASSETS_PATH = '/assets' as const;
+export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -272,6 +276,7 @@ export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
 export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
 export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
 export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
+export const ASSET_CRITICALITY_CSV_UPLOAD_URL = `${ASSET_CRITICALITY_URL}/upload_csv`;
 
 /**
  * Public Risk Score routes

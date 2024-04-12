@@ -17,7 +17,7 @@ import { useConnectorSetup } from '../connectorland/connector_setup';
 import { UseQueryResult } from '@tanstack/react-query';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 
-import { useLocalStorage } from 'react-use';
+import { useLocalStorage, useSessionStorage } from 'react-use';
 import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
@@ -108,15 +108,22 @@ describe('Assistant', () => {
   });
 
   let persistToLocalStorage: jest.Mock;
+  let persistToSessionStorage: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     persistToLocalStorage = jest.fn();
+    persistToSessionStorage = jest.fn();
 
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
+      >);
+    jest
+      .mocked(useSessionStorage)
+      .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
+        typeof useSessionStorage
       >);
   });
 

@@ -63,6 +63,7 @@ export interface EnsureAuthorizedOpts {
   consumer: string;
   operation: ReadOperations | WriteOperations;
   entity: AlertingAuthorizationEntity;
+  additionalPrivileges?: string[];
 }
 
 interface HasPrivileges {
@@ -173,6 +174,7 @@ export class AlertingAuthorization {
     consumer: legacyConsumer,
     operation,
     entity,
+    additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
     const { authorization } = this;
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
@@ -187,7 +189,10 @@ export class AlertingAuthorization {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
       const { hasAllRequested } = await checkPrivileges({
-        kibana: [authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)],
+        kibana: [
+          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
+          ...additionalPrivileges,
+        ],
       });
 
       if (!isAvailableConsumer) {

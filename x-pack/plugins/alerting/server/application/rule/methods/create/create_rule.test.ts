@@ -4355,5 +4355,35 @@ describe('create()', () => {
         `[Error: Cannot use the same system action twice]`
       );
     });
+
+    test('should throw an error if the user does not have privileges to execute the action', async () => {
+      actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error('Unauthorized to execute actions')
+      );
+
+      const data = getMockData({
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system_action-id',
+            params: {
+              foo: 'test',
+            },
+          },
+        ],
+      });
+
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to execute actions]`
+      );
+    });
   });
 });

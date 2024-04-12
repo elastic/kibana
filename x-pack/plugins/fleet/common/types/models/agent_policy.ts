@@ -39,6 +39,7 @@ export interface NewAgentPolicy {
   agent_features?: Array<{ name: string; enabled: boolean }>;
   is_protected?: boolean;
   overrides?: { [key: string]: any } | null;
+  advanced_settings?: { [key: string]: any } | null;
 }
 
 // SO definition for this type is declared in server/types/interfaces

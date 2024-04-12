@@ -2223,6 +2223,10 @@
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
+            },
+            {
               "plugin": "painlessLab",
               "path": "x-pack/plugins/painless_lab/server/services/license.ts"
             },

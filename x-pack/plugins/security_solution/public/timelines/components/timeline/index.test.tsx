@@ -34,7 +34,7 @@ jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content', () => ({
+jest.mock('./tabs', () => ({
   TabsContent: () => <div data-test-subj="tabs-content" />,
 }));
 

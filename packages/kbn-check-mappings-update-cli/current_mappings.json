@@ -677,6 +677,27 @@
       }
     }
   },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -1576,11 +1597,11 @@
       "assetType": {
         "type": "keyword"
       },
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
       "dashboardFilterAssetIdEnabled": {
         "type": "boolean"
+      },
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -1598,6 +1619,10 @@
   },
   "ingest-agent-policies": {
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {
