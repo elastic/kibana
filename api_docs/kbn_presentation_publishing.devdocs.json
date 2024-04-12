@@ -1111,6 +1111,49 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.fetch$",
+        "type": "Function",
+        "tags": [],
+        "label": "fetch$",
+        "description": [],
+        "signature": [
+          "(api: unknown) => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.FetchContext",
+            "text": "FetchContext"
+          },
+          ">"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.fetch$.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.getInheritedViewMode",
         "type": "Function",
         "tags": [],
@@ -1509,131 +1552,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.onFetchContextChanged",
-        "type": "Function",
-        "tags": [],
-        "label": "onFetchContextChanged",
-        "description": [],
-        "signature": [
-          "({\n  api,\n  onFetch,\n  fetchOnSetup,\n}: { api: unknown; onFetch: (fetchContext: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.FetchContext",
-            "text": "FetchContext"
-          },
-          ", isCanceled: () => boolean) => void; fetchOnSetup: boolean; }) => () => void"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.onFetchContextChanged.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  api,\n  onFetch,\n  fetchOnSetup,\n}",
-            "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.onFetchContextChanged.$1.api",
-                "type": "Unknown",
-                "tags": [],
-                "label": "api",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.onFetchContextChanged.$1.onFetch",
-                "type": "Function",
-                "tags": [],
-                "label": "onFetch",
-                "description": [],
-                "signature": [
-                  "(fetchContext: ",
-                  {
-                    "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.FetchContext",
-                    "text": "FetchContext"
-                  },
-                  ", isCanceled: () => boolean) => void"
-                ],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/presentation-publishing",
-                    "id": "def-common.onFetchContextChanged.$1.onFetch.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "fetchContext",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/presentation-publishing",
-                        "scope": "common",
-                        "docId": "kibKbnPresentationPublishingPluginApi",
-                        "section": "def-common.FetchContext",
-                        "text": "FetchContext"
-                      }
-                    ],
-                    "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  },
-                  {
-                    "parentPluginId": "@kbn/presentation-publishing",
-                    "id": "def-common.onFetchContextChanged.$1.onFetch.$2",
-                    "type": "Function",
-                    "tags": [],
-                    "label": "isCanceled",
-                    "description": [],
-                    "signature": [
-                      "() => boolean"
-                    ],
-                    "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.onFetchContextChanged.$1.fetchOnSetup",
-                "type": "boolean",
-                "tags": [],
-                "label": "fetchOnSetup",
-                "description": [],
-                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.runComparators",
         "type": "Function",
         "tags": [],
@@ -2011,7 +1929,7 @@
         "tags": [],
         "label": "FetchContext",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2022,7 +1940,7 @@
             "tags": [],
             "label": "isReload",
             "description": [],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2043,7 +1961,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2072,7 +1990,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2086,7 +2004,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2107,7 +2025,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2121,7 +2039,7 @@
             "signature": [
               "[number, number] | undefined"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
             "deprecated": false,
             "trackAdoption": false
           }
