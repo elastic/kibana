@@ -53,12 +53,12 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
   );
 }
 
-const canGroupBy = (field: FieldSpec) => {
-  const isAggregatble = field.aggregatable;
+export const canGroupBy = (field: FieldSpec) => {
+  const isAggregatable = field.aggregatable;
   const isNotDate = field.type !== 'date';
   // handles multi fields where there are multi es types, which could include 'text'
   // text fields break the transforms so we must ensure that the field is only a keyword
   const isOnlyKeyword = field.esTypes?.length === 1 && field.esTypes[0] === 'keyword';
 
-  return isAggregatble && isNotDate && isOnlyKeyword;
+  return isAggregatable && isNotDate && isOnlyKeyword;
 };
