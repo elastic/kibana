@@ -10,6 +10,7 @@ import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
+  aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { EuiSpacer } from '@elastic/eui';
