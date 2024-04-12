@@ -100,7 +100,11 @@ export async function findBackfill(
       context.auditLogger?.log(
         adHocRunAuditEvent({
           action: AdHocRunAuditAction.FIND,
-          savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id: so.id },
+          savedObject: {
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            id: so.id,
+            name: `backfill for rule "${so.attributes.rule.name}"`,
+          },
         })
       );
 

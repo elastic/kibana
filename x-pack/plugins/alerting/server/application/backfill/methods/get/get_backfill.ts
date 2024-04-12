@@ -48,7 +48,11 @@ export async function getBackfill(context: RulesClientContext, id: string): Prom
       context.auditLogger?.log(
         adHocRunAuditEvent({
           action: AdHocRunAuditAction.GET,
-          savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id },
+          savedObject: {
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            id,
+            name: `backfill for rule "${result.attributes.rule.name}"`,
+          },
           error,
         })
       );
@@ -57,7 +61,11 @@ export async function getBackfill(context: RulesClientContext, id: string): Prom
     context.auditLogger?.log(
       adHocRunAuditEvent({
         action: AdHocRunAuditAction.GET,
-        savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id },
+        savedObject: {
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          id,
+          name: `backfill for rule "${result.attributes.rule.name}"`,
+        },
       })
     );
 

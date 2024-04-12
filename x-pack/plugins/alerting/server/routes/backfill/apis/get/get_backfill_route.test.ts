@@ -73,7 +73,7 @@ describe('getBackfillRoute', () => {
     });
   });
 
-  test('ensures the license allows for scheduling the backfill', async () => {
+  test('ensures the license allows for getting the backfill', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -87,7 +87,7 @@ describe('getBackfillRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  test('ensures the license check prevents for scheduling the backfill when appropriate', async () => {
+  test('ensures the license check prevents for getting the backfill when appropriate', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 

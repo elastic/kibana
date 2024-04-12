@@ -263,7 +263,13 @@ describe('findBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
     });
 
@@ -320,7 +326,13 @@ describe('findBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
     });
 
@@ -377,7 +389,13 @@ describe('findBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
     });
 
@@ -450,7 +468,13 @@ describe('findBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
     });
 
@@ -525,7 +549,13 @@ describe('findBackfill()', () => {
         outcome: 'success',
         type: ['access'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
     });
 

@@ -145,7 +145,13 @@ describe('deleteBackfill()', () => {
         outcome: 'unknown',
         type: ['deletion'],
       },
-      kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
       message: 'User is deleting ad hoc run for ad_hoc_run_params [id=1]',
     });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenLastCalledWith(
@@ -202,7 +208,13 @@ describe('deleteBackfill()', () => {
           outcome: 'failure',
           type: ['deletion'],
         },
-        kibana: { saved_object: { id: '1', type: AD_HOC_RUN_SAVED_OBJECT_TYPE } },
+        kibana: {
+          saved_object: {
+            id: '1',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            name: `backfill for rule "my rule name"`,
+          },
+        },
         message: 'Failed attempt to delete ad hoc run for ad_hoc_run_params [id=1]',
       });
     });
