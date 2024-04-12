@@ -21,7 +21,7 @@ if ! run_bootstrap; then
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  run_bootstrap
+  yarn kbn reset && yarn kbn bootstrap
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
