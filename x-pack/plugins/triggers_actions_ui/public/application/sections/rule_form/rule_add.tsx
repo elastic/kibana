@@ -53,9 +53,6 @@ const defaultCreateRuleErrorMessage = i18n.translate(
 
 export type RuleAddComponent = typeof RuleAdd;
 
-/**
- * @deprecated V1 Rule Form, use RuleForm from `@kbn/alerts_ui_shared` instead
- */
 const RuleAdd = <
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData extends RuleTypeMetaData = RuleTypeMetaData

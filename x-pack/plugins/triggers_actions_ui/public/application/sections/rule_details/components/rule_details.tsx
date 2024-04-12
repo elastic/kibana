@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useReducer, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageHeader,
@@ -30,9 +30,7 @@ import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleActionsPopover } from './rule_actions_popover';
-import { getEditRuleRoute } from '../../../lib/get_rule_v2_routes';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
@@ -125,8 +123,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
 
-  const isRuleFormV2Enabled = getIsExperimentalFeatureEnabled('ruleFormV2');
-
   useEffect(() => {
     (async () => {
       setConfig(await triggersActionsUiConfig({ http }));
@@ -177,16 +173,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       : false);
 
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const goToEditForm = useCallback(() => {
-    if (isRuleFormV2Enabled) {
-      history.push(getEditRuleRoute(rule.id), {
-        referrer: window.location.href,
-      });
-    } else {
-      setEditFlyoutVisibility(true);
-    }
-  }, [history, isRuleFormV2Enabled, rule.id]);
-
   const onRunRule = async (id: string) => {
     await runRule(http, toasts, id);
   };
@@ -220,7 +206,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       data-test-subj="ruleIntervalToastEditButton"
                       onClick={() => {
                         toasts.remove(configurationToast);
-                        goToEditForm();
+                        setEditFlyoutVisibility(true);
                       }}
                     >
                       <FormattedMessage
@@ -244,7 +230,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     config.minimumScheduleInterval,
     toasts,
     hasEditButton,
-    goToEditForm,
   ]);
 
   const setRule = async () => {
@@ -276,7 +261,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       <EuiButtonEmpty
         data-test-subj="openEditRuleFlyoutButton"
         iconType="pencil"
-        onClick={() => goToEditForm()}
+        onClick={() => setEditFlyoutVisibility(true)}
         name="edit"
         disabled={!ruleType.enabledInLicense}
       >
@@ -543,7 +528,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                     <EuiLink
                       data-test-subj="actionWithBrokenConnectorWarningBannerEdit"
                       color="primary"
-                      onClick={() => goToEditForm()}
+                      onClick={() => setEditFlyoutVisibility(true)}
                     >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerEditText"

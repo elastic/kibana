@@ -18,7 +18,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.index[0].toString()).toBe('Index is required.');
+    expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
   });
   test('if timeField property is not defined should return proper error message', () => {
     const initialParams: IndexThresholdRuleParams = {
@@ -29,9 +29,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
     };
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.timeField[0].toString()).toBe(
-      'Time field is required.'
-    );
+    expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
   });
   test('if aggField property is invalid should return proper error message', () => {
     const initialParams: IndexThresholdRuleParams = {
@@ -42,7 +40,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
     };
     expect(validateExpression(initialParams).errors.aggField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.aggField[0].toString()).toBe(
+    expect(validateExpression(initialParams).errors.aggField[0]).toBe(
       'Aggregation field is required.'
     );
   });
@@ -56,9 +54,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
     };
     expect(validateExpression(initialParams).errors.termSize.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.termSize[0].toString()).toBe(
-      'Term size is required.'
-    );
+    expect(validateExpression(initialParams).errors.termSize[0]).toBe('Term size is required.');
   });
   test('if termField property is not set should return proper error message', () => {
     const initialParams: IndexThresholdRuleParams = {
@@ -70,9 +66,7 @@ describe('expression params validation', () => {
       timeWindowUnit: 's',
     };
     expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.termField[0].toString()).toBe(
-      'Term field is required.'
-    );
+    expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
   });
   test('if threshold0 property is not set should return proper error message', () => {
     const initialParams: IndexThresholdRuleParams = {
@@ -85,9 +79,7 @@ describe('expression params validation', () => {
       thresholdComparator: '<',
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.threshold0[0].toString()).toBe(
-      'Threshold 0 is required.'
-    );
+    expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold0 is required.');
   });
   test('if threshold1 property is not set should return proper error message', () => {
     const initialParams: IndexThresholdRuleParams = {
@@ -100,9 +92,7 @@ describe('expression params validation', () => {
       thresholdComparator: 'between',
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.threshold1[0].toString()).toBe(
-      'Threshold 1 is required.'
-    );
+    expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold1 is required.');
   });
 
   test('if filterKuery is invalid should return proper error message', () => {
@@ -117,7 +107,7 @@ describe('expression params validation', () => {
       filterKuery: 'group:',
     };
     expect(validateExpression(initialParams).errors.filterKuery.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.filterKuery[0].toString()).toBe(
+    expect(validateExpression(initialParams).errors.filterKuery[0]).toBe(
       'Filter query is invalid.'
     );
   });

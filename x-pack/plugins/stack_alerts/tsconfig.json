@@ -50,7 +50,6 @@
     "@kbn/code-editor",
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
-    "@kbn/alerts-ui-shared",
   ],
   "exclude": [
     "target/**/*",
