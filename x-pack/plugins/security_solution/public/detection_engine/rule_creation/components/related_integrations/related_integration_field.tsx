@@ -77,9 +77,7 @@ export function RelatedIntegrationField({
         package: changedSelectedOption?.value?.package_name ?? '',
         integration: changedSelectedOption?.value?.integration_name,
         version: changedSelectedOption?.value
-          ? changedSelectedOption.value.installed_package_version
-            ? `^${changedSelectedOption.value.installed_package_version}`
-            : `^${changedSelectedOption.value.latest_package_version}`
+          ? calculateRelevantSemver(changedSelectedOption.value)
           : '',
       }),
     [field]
@@ -202,4 +200,10 @@ function renderIntegrationOption(
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function calculateRelevantSemver(integration: Integration): string {
+  return integration.installed_package_version
+    ? `^${integration.installed_package_version}`
+    : `^${integration.latest_package_version}`;
 }
