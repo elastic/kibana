@@ -60,8 +60,7 @@ export const Section = React.forwardRef<HTMLDivElement, Props>(
     });
 
     const onToggle = (isOpen: boolean) => {
-      const newState = isOpen ? 'open' : 'closed';
-      setTrigger(newState);
+      setTrigger(isOpen ? 'open' : 'closed');
     };
 
     return collapsible ? (

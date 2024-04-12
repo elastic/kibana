@@ -16,12 +16,11 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useEuiTheme,
-  EuiListGroup,
-  EuiListGroupItem,
   useEuiMaxBreakpoint,
   useEuiMinBreakpoint,
   useIsWithinBreakpoints,
   useResizeObserver,
+  EuiLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../hooks/use_kibana_header';
@@ -50,8 +49,11 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
         ? `0px`
         : `calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0))`;
 
-    const quickAccessHorizontalOffset = isLargeScreen ? 0 : listGroupDimensions.height;
-    const quickAccessOffset = `calc(${kibanaHeaderOffset} + ${euiTheme.size.xs} + ${quickAccessHorizontalOffset}px)`;
+    const quickAccessHorizontalOffset = isLargeScreen
+      ? `${euiTheme.size.s} - 1px` // arbitrary value to align with the content
+      : `${listGroupDimensions.height}px`;
+
+    const quickAccessOffset = `calc(${kibanaHeaderOffset} + ${quickAccessHorizontalOffset})`;
 
     const setContentRef = useCallback((contentRef: HTMLDivElement | null) => {
       const sectionId = contentRef?.getAttribute('data-section-id');
@@ -135,39 +137,39 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
             }
           `}
         >
-          <div ref={quickAccessRef}>
-            <EuiListGroup
-              flush
-              bordered={false}
-              maxWidth={false}
-              css={css`
-                width: 100%;
-                ${useEuiMaxBreakpoint('xl')} {
-                  margin-top: ${euiTheme.size.xs};
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                }
-              `}
-            >
-              {quickAccessItems.map(([sectionId, label]) => (
-                <EuiListGroupItem
-                  data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
-                  onClick={() => onQuickAccessItemClick(sectionId)}
-                  label={label}
-                  size="s"
-                />
-              ))}
-            </EuiListGroup>
-          </div>
+          <EuiFlexGroup
+            gutterSize="s"
+            ref={quickAccessRef}
+            direction="column"
+            css={css`
+              width: 100%;
+              ${useEuiMaxBreakpoint('xl')} {
+                flex-direction: row;
+                gap: ${euiTheme.size.xl};
+                flex-wrap: wrap;
+              }
+            `}
+          >
+            {quickAccessItems.map(([sectionId, label]) => (
+              <EuiLink
+                data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
+                onClick={() => onQuickAccessItemClick(sectionId)}
+                color="text"
+                css={css`
+                  padding: ${euiTheme.size.s} 0px;
+                `}
+              >
+                {label}
+              </EuiLink>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="m"
             direction="column"
             css={css`
-              &:first-child {
-                margin-top: ${euiTheme.size.s};
-              }
+              padding-top: ${euiTheme.size.s};
               & > [data-section-id] {
                 scroll-margin-top: ${quickAccessOffset};
               }

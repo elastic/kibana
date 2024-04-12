@@ -38,7 +38,11 @@ export const KubernetesCharts = React.forwardRef<
 
   const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetes });
 
-  return hasIntegration ? (
+  if (!hasIntegration) {
+    return null;
+  }
+
+  return (
     <Section
       title={<SectionTitle title={HOST_METRIC_GROUP_TITLES.kubernetes} />}
       data-test-subj="infraAssetDetailsKubernetesChartsSection"
@@ -74,5 +78,5 @@ export const KubernetesCharts = React.forwardRef<
         ))}
       </ChartsGrid>
     </Section>
-  ) : null;
+  );
 });

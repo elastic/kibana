@@ -6,6 +6,7 @@
  */
 
 import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { useBoolean } from '../../../../hooks/use_boolean';
 
@@ -32,6 +33,9 @@ export const Popover = ({
             e.stopPropagation();
             togglePopover();
           }}
+          css={css`
+            display: flex;
+          `}
           data-test-subj={props['data-test-subj']}
         >
           <EuiIcon

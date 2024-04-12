@@ -51,7 +51,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
                   values={{
                     link: (
                       <EuiLink
-                        data-test-subj="hostsViewMetricsDocumentationLink"
+                        data-test-subj="infraAssetDetailsViewHostMetricsDocumentationLink"
                         href={`${HOST_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                         className={cx({

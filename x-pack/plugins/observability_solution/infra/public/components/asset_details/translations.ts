@@ -11,7 +11,7 @@ export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.infra.assetDetails.notA
   defaultMessage: 'N/A',
 });
 
-export const HOST_METRIC_GROUP_TITLES: Record<string, string> = {
+export const HOST_METRIC_GROUP_TITLES = {
   cpu: i18n.translate('xpack.infra.metricsGroup.cpu', {
     defaultMessage: 'CPU',
   }),
