@@ -771,7 +771,16 @@ const expectAssetsInstalled = ({
         test_logs: 'logs-all_assets.test_logs-*',
         test_metrics: 'metrics-all_assets.test_metrics-*',
       },
+      data_streams: [
+        { name: 'test_logs', pattern: 'logs-all_assets.test_logs-*', display_name: 'Test Dataset' },
+        {
+          name: 'test_metrics',
+          pattern: 'metrics-all_assets.test_metrics-*',
+          display_name: 'Test Dataset',
+        },
+      ],
       name: 'all_assets',
+      display_name: 'All Assets Installed/Uninstalled Test',
       version: '0.1.0',
       install_version: '0.1.0',
       install_status: 'installed',
