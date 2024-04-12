@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { ChainTool } from 'langchain/tools/chain';
+import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
+
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
