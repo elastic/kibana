@@ -1239,9 +1239,8 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
-  );
+  const normalizedDataStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME);
+  const toSaveESIndexPatterns = generateESIndexPatterns(normalizedDataStreams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1258,7 +1257,7 @@ export async function createInstallation(options: {
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
-    data_streams: generateESDataStreams(packageInfo.data_streams),
+    data_streams: generateESDataStreams(normalizedDataStreams),
     name: pkgName,
     display_name: packageInfo.title,
     version: pkgVersion,
