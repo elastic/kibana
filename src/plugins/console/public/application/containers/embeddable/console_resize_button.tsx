@@ -1,0 +1,132 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { EuiResizableButton, useEuiTheme, keys } from '@elastic/eui';
+
+const CONSOLE_MIN_HEIGHT = 200;
+
+const getMouseOrTouchY = (
+  e: TouchEvent | MouseEvent | React.MouseEvent | React.TouchEvent
+): number => {
+  // Some Typescript fooling is needed here
+  const y = (e as TouchEvent).targetTouches
+    ? (e as TouchEvent).targetTouches[0].pageY
+    : (e as MouseEvent).pageY;
+  return y;
+};
+
+export interface EmbeddedConsoleResizeButtonProps {
+  consoleHeight: number;
+  setConsoleHeight: React.Dispatch<React.SetStateAction<number>>;
+}
+
+export const EmbeddedConsoleResizeButton = ({
+  consoleHeight,
+  setConsoleHeight,
+}: EmbeddedConsoleResizeButtonProps) => {
+  const { euiTheme } = useEuiTheme();
+  const [maxConsoleHeight, setMaxConsoleHeight] = useState<number>(800);
+  const initialConsoleHeight = useRef(consoleHeight);
+  const initialMouseY = useRef(0);
+  const euiBaseSize = parseInt(euiTheme.size.base, 10);
+
+  useEffect(() => {
+    function handleResize() {
+      const winHeight = window.innerHeight;
+      const bodyStyle = getComputedStyle(document.body);
+      const headerOffset = parseInt(
+        bodyStyle.getPropertyValue('--euiFixedHeadersOffset') ?? '0px',
+        10
+      );
+
+      const newMaxConsoleHeight = Math.max(
+        winHeight - headerOffset - euiBaseSize,
+        CONSOLE_MIN_HEIGHT
+      );
+      // Calculate and save the console max height. This is the window height minus the header
+      // offset minuse the base size to allow a small buffer for grabbing the resize button.
+      if (maxConsoleHeight !== newMaxConsoleHeight) {
+        setMaxConsoleHeight(newMaxConsoleHeight);
+      }
+      if (consoleHeight > newMaxConsoleHeight && newMaxConsoleHeight > CONSOLE_MIN_HEIGHT) {
+        setConsoleHeight(newMaxConsoleHeight);
+      }
+    }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [maxConsoleHeight, euiBaseSize, consoleHeight, setConsoleHeight]);
+  const onResizeMouseMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      const currentMouseY = getMouseOrTouchY(e);
+      const mouseOffset = (currentMouseY - initialMouseY.current) * -1;
+      const changedConsoleHeight = initialConsoleHeight.current + mouseOffset;
+
+      const newConsoleHeight = Math.min(
+        Math.max(changedConsoleHeight, CONSOLE_MIN_HEIGHT),
+        maxConsoleHeight
+      );
+
+      setConsoleHeight(newConsoleHeight);
+    },
+    [maxConsoleHeight, setConsoleHeight]
+  );
+  const onResizeMouseUp = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      initialMouseY.current = 0;
+
+      window.removeEventListener('mousemove', onResizeMouseMove);
+      window.removeEventListener('mouseup', onResizeMouseUp);
+      window.removeEventListener('touchmove', onResizeMouseMove);
+      window.removeEventListener('touchend', onResizeMouseUp);
+    },
+    [onResizeMouseMove]
+  );
+  const onResizeMouseDown = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      initialMouseY.current = getMouseOrTouchY(e);
+      initialConsoleHeight.current = consoleHeight;
+
+      // Window event listeners instead of React events are used
+      // in case the user's mouse leaves the component
+      window.addEventListener('mousemove', onResizeMouseMove);
+      window.addEventListener('mouseup', onResizeMouseUp);
+      window.addEventListener('touchmove', onResizeMouseMove);
+      window.addEventListener('touchend', onResizeMouseUp);
+    },
+    [consoleHeight, onResizeMouseUp, onResizeMouseMove]
+  );
+  const onResizeKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const KEYBOARD_OFFSET = 10;
+
+      switch (e.key) {
+        case keys.ARROW_UP:
+          e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
+          setConsoleHeight((height) => Math.min(height + KEYBOARD_OFFSET, maxConsoleHeight));
+          break;
+        case keys.ARROW_DOWN:
+          e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
+          setConsoleHeight((height) => Math.max(height - KEYBOARD_OFFSET, CONSOLE_MIN_HEIGHT));
+      }
+    },
+    [maxConsoleHeight, setConsoleHeight]
+  );
+
+  return (
+    <EuiResizableButton
+      indicator="border"
+      isHorizontal={false}
+      onMouseDown={onResizeMouseDown}
+      onTouchStart={onResizeMouseDown}
+      onKeyDown={onResizeKeyDown}
+    />
+  );
+};

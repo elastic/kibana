@@ -31,9 +31,11 @@ import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
 import './_index.scss';
+import { EmbeddedConsoleResizeButton } from './console_resize_button';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
-const CONSOLE_MIN_HEIGHT = 480;
+const DEFAULT_CONSOLE_HEIGHT = '600';
+const CONSOLE_HEIGHT_STORAGE_KEY = 'sense:embeddedConsoleHeight';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
@@ -50,8 +52,11 @@ export const EmbeddableConsole = ({
   alternateView,
   isMonacoEnabled,
 }: EmbeddableConsoleDependencies) => {
-  const [consoleHeight, setConsoleHeight] = useState<number>(800);
   const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  const [consoleHeight, setConsoleHeight] = useState<number>(
+    parseInt(localStorage.getItem(CONSOLE_HEIGHT_STORAGE_KEY) ?? DEFAULT_CONSOLE_HEIGHT, 10)
+  );
+
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
     store.initialValue,
@@ -78,6 +83,7 @@ export const EmbeddableConsole = ({
       '--embedded-console-height': `${consoleHeight}px`,
       '--embedded-console-bottom': `-${consoleHeight}px`,
     });
+    localStorage.setItem(CONSOLE_HEIGHT_STORAGE_KEY, consoleHeight.toString());
   }, [consoleHeight, setGlobalCSSVariables]);
 
   const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
@@ -131,27 +137,36 @@ export const EmbeddableConsole = ({
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <div className="embeddableConsole__controls">
-              <EuiButtonEmpty
-                color="text"
-                iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                onClick={toggleConsole}
-                className="embeddableConsole__controls--button"
-                data-test-subj="consoleEmbeddedControlBar"
-                data-telemetry-id="console-embedded-controlbar-button"
-              >
-                {i18n.translate('console.embeddableConsole.title', {
-                  defaultMessage: 'Console',
-                })}
-              </EuiButtonEmpty>
-              {alternateView && (
-                <div className="embeddableConsole__controls--altViewButton-container">
-                  <alternateView.ActivationButton
-                    activeView={showAlternateView}
-                    onClick={clickAlternateViewActivateButton}
-                  />
-                </div>
+            <div>
+              {isOpen && (
+                <EmbeddedConsoleResizeButton
+                  consoleHeight={consoleHeight}
+                  setConsoleHeight={setConsoleHeight}
+                />
               )}
+
+              <div className="embeddableConsole__controls">
+                <EuiButtonEmpty
+                  color="text"
+                  iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                  onClick={toggleConsole}
+                  className="embeddableConsole__controls--button"
+                  data-test-subj="consoleEmbeddedControlBar"
+                  data-telemetry-id="console-embedded-controlbar-button"
+                >
+                  {i18n.translate('console.embeddableConsole.title', {
+                    defaultMessage: 'Console',
+                  })}
+                </EuiButtonEmpty>
+                {alternateView && (
+                  <div className="embeddableConsole__controls--altViewButton-container">
+                    <alternateView.ActivationButton
+                      activeView={showAlternateView}
+                      onClick={clickAlternateViewActivateButton}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </EuiThemeProvider>
           {showConsole ? (
