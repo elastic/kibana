@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, lastValueFrom } from 'rxjs';
+import { filter } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -170,64 +170,70 @@ async function executor(
     });
   });
 
-  const systemMessage = buildSystemMessage(functionClient, execOptions.params.rule, state);
-
-  await lastValueFrom(
-    client
-      .complete({
-        functionClient,
-        persist: true,
-        isPublic: true,
-        connectorId: execOptions.params.connector,
-        signal: new AbortController().signal,
-        kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
-        messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: systemMessage,
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: execOptions.params.message,
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'get_connectors',
-                arguments: JSON.stringify({}),
-                trigger: MessageRole.Assistant as const,
-              },
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              name: 'get_connectors',
-              content: JSON.stringify({
-                connectors: connectorsList,
-              }),
-            },
-          },
-        ],
-      })
-      .pipe(
-        filter(
-          (event): event is ChatCompletionChunkEvent =>
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk
-        )
-      )
-      .pipe(concatenateChatCompletionChunks())
+  const systemMessage = functionClient
+    .getContexts()
+    .find((def) => def.name === 'core')?.description;
+  const backgroundInstruction = getBackgroundProcessInstruction(
+    functionClient,
+    execOptions.params.rule,
+    state
   );
+
+  client
+    .complete({
+      functionClient,
+      persist: true,
+      isPublic: true,
+      connectorId: execOptions.params.connector,
+      signal: new AbortController().signal,
+      kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
+      instructions: [backgroundInstruction],
+      messages: [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.System,
+            content: systemMessage,
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            content: execOptions.params.message,
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'get_connectors',
+              arguments: JSON.stringify({}),
+              trigger: MessageRole.Assistant as const,
+            },
+          },
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            name: 'get_connectors',
+            content: JSON.stringify({
+              connectors: connectorsList,
+            }),
+          },
+        },
+      ],
+    })
+    .pipe(
+      filter(
+        (event): event is ChatCompletionChunkEvent =>
+          event.type === StreamingChatResponseEventType.ChatCompletionChunk
+      )
+    )
+    .pipe(concatenateChatCompletionChunks());
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
@@ -244,29 +250,24 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
-        alertState:
-          alerts.new.count > 0
-            ? 'new'
-            : alerts.ongoing.count > 0
-            ? 'ongoing'
-            : alerts.recovered.count > 0
-            ? 'recovered'
-            : 'unknown',
       };
     },
   };
 };
 
-function buildSystemMessage(functionClient: ChatFunctionClient, rule: RuleType, state: AlertState) {
-  let systemMessage = functionClient.getContexts().find((def) => def.name === 'core')?.description;
-  systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
+function getBackgroundProcessInstruction(
+  functionClient: ChatFunctionClient,
+  rule: RuleType,
+  state: AlertState
+) {
+  let instruction = `You are called as a background process because the alert ${JSON.stringify(
     rule
   )} ${state === 'new' ? 'fired' : 'recovered'}.`;
-  systemMessage +=
+  instruction +=
     ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
-  systemMessage +=
+  instruction +=
     ' input if tasked to execute actions. You can generate multiple responses in a row.';
-  systemMessage += ' If available, include the link to the conversation at the end of your answer.';
+  instruction += ' If available, include the link to the conversation at the end of your answer.';
 
-  return systemMessage;
+  return instruction;
 }
