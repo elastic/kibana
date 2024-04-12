@@ -203,6 +203,12 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
 
+          // find backfills with no query params
+          const findNoQueryParamsResponse = await supertestWithoutAuth
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
           // find backfills for rule id that does not exist
           const findNoRulesResponse = await supertestWithoutAuth
             .post(
@@ -303,6 +309,36 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
 
+          // find backfill with sort and page, sort by start ascending and first page
+          const findWithSortAndPageResponse1 = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?per_page=1&page=1&sort_field=start&sort_order=asc`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
+          // find backfill with sort and page, sort by start ascending and second page
+          const findWithSortAndPageResponse2 = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?per_page=1&page=2&sort_field=start&sort_order=asc`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
+          // find backfill with sort by start descending
+          const findWithSortResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?sort_field=start&sort_order=desc`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
           switch (scenario.id) {
             // User can't do anything in this space
             case 'no_kibana_privileges at space1':
@@ -322,6 +358,10 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithStartAndEndBothRulesResponse,
                 findWithStartAndEndOneRuleResponse,
                 findWithStartAndEndNoRulesResponse,
+                findNoQueryParamsResponse,
+                findWithSortAndPageResponse1,
+                findWithSortAndPageResponse2,
+                findWithSortResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
@@ -355,6 +395,10 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithStartAndEndBothRulesResponse,
                 findWithStartAndEndOneRuleResponse,
                 findWithStartAndEndNoRulesResponse,
+                findNoQueryParamsResponse,
+                findWithSortAndPageResponse1,
+                findWithSortAndPageResponse2,
+                findWithSortResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(200);
               });
@@ -508,6 +552,71 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               expect(resultFindWithStartAndEndNoRulesResponse.per_page).to.eql(10);
               expect(resultFindWithStartAndEndNoRulesResponse.total).to.eql(0);
               expect(resultFindWithStartAndEndNoRulesResponse.data).to.eql([]);
+
+              const resultFindNoQueryParams = findNoQueryParamsResponse.body;
+              expect(resultFindNoQueryParams.page).to.eql(1);
+              expect(resultFindNoQueryParams.per_page).to.eql(10);
+              expect(resultFindNoQueryParams.total).to.eql(2);
+              expect(resultFindNoQueryParams.data.length).to.eql(2);
+
+              testExpectedBackfill1(
+                resultFindNoQueryParams.data.find((b: { id: string }) => b.id === backfillId1),
+                backfillId1,
+                ruleId1,
+                space.id
+              );
+              testExpectedBackfill2(
+                resultFindNoQueryParams.data.find((b: { id: string }) => b.id === backfillId2),
+                backfillId2,
+                ruleId2,
+                space.id
+              );
+
+              const resultFindWithSortAndPageResponse1 = findWithSortAndPageResponse1.body;
+              expect(resultFindWithSortAndPageResponse1.page).to.eql(1);
+              expect(resultFindWithSortAndPageResponse1.per_page).to.eql(1);
+              expect(resultFindWithSortAndPageResponse1.total).to.eql(2);
+              expect(resultFindWithSortAndPageResponse1.data.length).to.eql(1);
+              testExpectedBackfill1(
+                resultFindWithSortAndPageResponse1.data[0],
+                backfillId1,
+                ruleId1,
+                space.id
+              );
+
+              const resultFindWithSortAndPageResponse2 = findWithSortAndPageResponse2.body;
+              expect(resultFindWithSortAndPageResponse2.page).to.eql(2);
+              expect(resultFindWithSortAndPageResponse2.per_page).to.eql(1);
+              expect(resultFindWithSortAndPageResponse2.total).to.eql(2);
+              expect(resultFindWithSortAndPageResponse2.data.length).to.eql(1);
+              testExpectedBackfill2(
+                resultFindWithSortAndPageResponse2.data[0],
+                backfillId2,
+                ruleId2,
+                space.id
+              );
+
+              const resultFindWithSort = findWithSortResponse.body;
+              expect(resultFindWithSort.page).to.eql(1);
+              expect(resultFindWithSort.per_page).to.eql(10);
+              expect(resultFindWithSort.total).to.eql(2);
+              expect(resultFindWithSort.data.length).to.eql(2);
+
+              testExpectedBackfill1(
+                resultFindWithSort.data.find((b: { id: string }) => b.id === backfillId1),
+                backfillId1,
+                ruleId1,
+                space.id
+              );
+              testExpectedBackfill2(
+                resultFindWithSort.data.find((b: { id: string }) => b.id === backfillId2),
+                backfillId2,
+                ruleId2,
+                space.id
+              );
+              const start1 = new Date(resultFindWithSort.data[0].start).valueOf();
+              const start2 = new Date(resultFindWithSort.data[1].start).valueOf();
+              expect(start1).to.be.greaterThan(start2);
 
               break;
             default:

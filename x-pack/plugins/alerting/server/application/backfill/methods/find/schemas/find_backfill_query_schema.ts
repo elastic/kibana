@@ -14,12 +14,11 @@ export const findBackfillQuerySchema = schema.object(
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleIds: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
+    sortField: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   },
   {
-    validate({ ruleIds, start, end }) {
-      if (!ruleIds && !start && !end) {
-        return `Expected one of [ruleIds], [start], or [end] to be defined`;
-      }
+    validate({ start, end }) {
       if (start) {
         const parsedStart = Date.parse(start);
         if (isNaN(parsedStart)) {

@@ -14,14 +14,11 @@ export const findQuerySchema = schema.object(
     per_page: schema.number({ defaultValue: 10, min: 0 }),
     rule_ids: schema.maybe(schema.string()),
     start: schema.maybe(schema.string()),
+    sort_field: schema.maybe(schema.oneOf([schema.literal('createdAt'), schema.literal('start')])),
+    sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   },
   {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    validate({ rule_ids, start, end }) {
-      if (!rule_ids && !start && !end) {
-        return `Expected one of [rule_ids], [start], or [end] to be defined`;
-      }
-
+    validate({ start, end }) {
       if (start) {
         const parsedStart = Date.parse(start);
         if (isNaN(parsedStart)) {

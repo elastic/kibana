@@ -15,10 +15,14 @@ export const transformRequest = ({
   per_page,
   rule_ids,
   start,
+  sort_field,
+  sort_order,
 }: FindBackfillRequestQueryV1): FindBackfillParams => ({
   end,
   page,
   perPage: per_page,
   ruleIds: rule_ids,
   start,
+  sortField: sort_field,
+  sortOrder: sort_order,
 });

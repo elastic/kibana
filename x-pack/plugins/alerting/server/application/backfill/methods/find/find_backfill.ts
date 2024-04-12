@@ -94,6 +94,8 @@ export async function findBackfill(
           ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
           : authorizationFilter) ?? filterKueryNode,
       ...(hasReferenceArray.length > 0 ? { hasReference: hasReferenceArray } : {}),
+      ...(params.sortField ? { sortField: params.sortField } : {}),
+      ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
     });
 
     const transformedData: Backfill[] = data.map((so: SavedObject<AdHocRunSO>) => {

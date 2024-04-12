@@ -236,6 +236,50 @@ describe('findBackfill()', () => {
     });
   });
 
+  test('should successfully find backfill with no filter', async () => {
+    const result = await rulesClient.findBackfill({ page: 1, perPage: 10 });
+
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
+      fieldNames: {
+        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+      },
+      type: 'kql',
+    });
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+      filter: authDslFilter,
+      page: 1,
+      perPage: 10,
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'ad_hoc_run_find',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
+      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+    });
+
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+    });
+  });
+
   test('should successfully find backfill with rule id', async () => {
     const result = await rulesClient.findBackfill({ page: 1, perPage: 10, ruleIds: 'abc' });
 
@@ -567,14 +611,59 @@ describe('findBackfill()', () => {
     });
   });
 
+  test('should pass sort options to savedObjectsClient.find', async () => {
+    const result = await rulesClient.findBackfill({
+      page: 1,
+      perPage: 10,
+      sortField: 'createdAt',
+      sortOrder: 'asc',
+    });
+
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith('rule', {
+      fieldNames: {
+        consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+        ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+      },
+      type: 'kql',
+    });
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+      filter: authDslFilter,
+      page: 1,
+      perPage: 10,
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      sortField: 'createdAt',
+      sortOrder: 'asc',
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'ad_hoc_run_find',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: `backfill for rule "my rule name"`,
+        },
+      },
+      message: 'User has found ad hoc run for ad_hoc_run_params [id=1]',
+    });
+
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+    });
+  });
+
   describe('error handling', () => {
     test('should throw error when params are invalid', async () => {
-      await expect(
-        rulesClient.findBackfill({ page: 1, perPage: 10 })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10}\\" - Expected one of [ruleIds], [start], or [end] to be defined"`
-      );
-
       await expect(
         rulesClient.findBackfill({
           // @ts-expect-error
@@ -616,6 +705,36 @@ describe('findBackfill()', () => {
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"end\\":\\"foo\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [end]: query end must be valid date"`
+      );
+      await expect(
+        rulesClient.findBackfill({
+          page: 1,
+          perPage: 10,
+          // @ts-expect-error
+          sortField: 'abc',
+          start: '2024-03-29T02:07:55Z',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `
+"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"sortField\\":\\"abc\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [sortField]: types that failed validation:
+- [sortField.0]: expected value to equal [createdAt]
+- [sortField.1]: expected value to equal [start]"
+`
+      );
+      await expect(
+        rulesClient.findBackfill({
+          page: 1,
+          perPage: 10,
+          // @ts-expect-error
+          sortOrder: 'abc',
+          start: '2024-03-29T02:07:55Z',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `
+"Failed to find backfills: Could not validate find parameters \\"{\\"page\\":1,\\"perPage\\":10,\\"sortOrder\\":\\"abc\\",\\"start\\":\\"2024-03-29T02:07:55Z\\"}\\" - [sortOrder]: types that failed validation:
+- [sortOrder.0]: expected value to equal [asc]
+- [sortOrder.1]: expected value to equal [desc]"
+`
       );
 
       expect(authorization.getFindAuthorizationFilter).not.toHaveBeenCalled();
