@@ -22,6 +22,7 @@ import {
 const LATEST_SERVERLESS_VERSION = '2023-10-31';
 
 import { OasConverter } from './oas_converter';
+import { createOperationIdCounter, OperationIdCounter } from './operation_id_counter';
 
 export const openApiVersion = '3.0.0';
 
@@ -40,13 +41,14 @@ export const generateOpenApiDocument = (
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
   const converter = new OasConverter();
+  const getOpId = createOperationIdCounter();
   const paths: OpenAPIV3.PathsObject = {};
   for (const router of appRouters.routers) {
-    const result = processRouter(router, converter, opts.pathStartsWith);
+    const result = processRouter(router, converter, getOpId, opts.pathStartsWith);
     Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    const result = processVersionedRouter(router, converter, opts.pathStartsWith);
+    const result = processVersionedRouter(router, converter, getOpId, opts.pathStartsWith);
     Object.assign(paths, result.paths);
   }
   return {
@@ -74,17 +76,6 @@ export const generateOpenApiDocument = (
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
   };
-};
-
-const operationIdCounters = new Map<string, number>();
-const getOperationId = (name: string): string => {
-  // Aliases an operationId to ensure it is unique across
-  // multiple method+path combinations sharing a name.
-  // "search" -> "search#0", "search#1", etc.
-  const operationIdCount = operationIdCounters.get(name) ?? 0;
-  const aliasedName = name + '#' + operationIdCount.toString();
-  operationIdCounters.set(name, operationIdCount + 1);
-  return aliasedName;
 };
 
 const extractRequestBody = (
@@ -146,6 +137,7 @@ const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 
 const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
+  getOpId: OperationIdCounter,
   pathStartsWith?: string
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
@@ -194,7 +186,7 @@ const processVersionedRouter = (
             : undefined,
           responses: extractVersionedResponses(route, converter),
           parameters,
-          operationId: getOperationId(route.path),
+          operationId: getOpId(route.path),
         },
       };
 
@@ -236,7 +228,12 @@ const extractResponses = (route: InternalRouterRoute, converter: OasConverter) =
     : responses;
 };
 
-const processRouter = (appRouter: Router, converter: OasConverter, pathStartsWith?: string) => {
+const processRouter = (
+  appRouter: Router,
+  converter: OasConverter,
+  getOpId: OperationIdCounter,
+  pathStartsWith?: string
+) => {
   const routes = prepareRoutes(
     appRouter.getRoutes({ excludeVersionedRoutes: true }),
     pathStartsWith
@@ -280,7 +277,7 @@ const processRouter = (appRouter: Router, converter: OasConverter, pathStartsWit
             : undefined,
           responses: extractResponses(route, converter),
           parameters,
-          operationId: getOperationId(route.path),
+          operationId: getOpId(route.path),
         },
       };
       assignToPathsObject(paths, route.path, path);
