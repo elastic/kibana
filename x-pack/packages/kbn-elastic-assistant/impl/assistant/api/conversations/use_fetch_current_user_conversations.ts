@@ -8,8 +8,8 @@
 import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 
@@ -24,6 +24,8 @@ export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
   onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
   signal?: AbortSignal | undefined;
+  refetchOnWindowFocus?: boolean;
+  isAssistantEnabled: boolean;
 }
 
 /**
@@ -40,6 +42,8 @@ export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
+  refetchOnWindowFocus = true,
+  isAssistantEnabled,
 }: UseFetchCurrentUserConversationsParams) => {
   const query = {
     page: 1,
@@ -50,19 +54,26 @@ export const useFetchCurrentUserConversations = ({
     ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
     query.page,
     query.perPage,
-    ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+    API_VERSIONS.public.v1,
   ];
 
-  return useQuery([cachingKeys, query], async () => {
-    const res = await http.fetch<FetchConversationsResponse>(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-      {
-        method: 'GET',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-        query,
-        signal,
+  return useQuery(
+    [cachingKeys, query],
+    async () => {
+      if (!isAssistantEnabled) {
+        return {};
       }
-    );
-    return onFetch(res);
-  });
+      const res = await http.fetch<FetchConversationsResponse>(
+        ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+        {
+          method: 'GET',
+          version: API_VERSIONS.public.v1,
+          query,
+          signal,
+        }
+      );
+      return onFetch(res);
+    },
+    { refetchOnWindowFocus }
+  );
 };

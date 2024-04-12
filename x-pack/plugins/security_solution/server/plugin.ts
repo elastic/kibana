@@ -559,7 +559,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      assistantStreamingEnabled: config.experimentalFeatures.assistantStreamingEnabled,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
@@ -645,6 +644,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       productFeaturesService,
       savedObjectsClient,
+      connectorActions: plugins.actions,
     });
 
     if (plugins.taskManager) {

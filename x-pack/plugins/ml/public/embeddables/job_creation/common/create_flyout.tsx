@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';

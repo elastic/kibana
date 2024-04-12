@@ -17,7 +17,11 @@ import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+} from '../../utils/create_query';
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
@@ -31,12 +35,21 @@ export const SourcesPanelForStartChat: React.FC = () => {
     defaultValue: {},
   });
 
+  const {
+    field: { onChange: sourceFieldsOnChange },
+  } = useController({
+    name: ChatFormFields.sourceFields,
+    defaultValue: {},
+  });
+
   useEffect(() => {
     if (fields) {
       const defaultFields = getDefaultQueryFields(fields);
+      const defaultSourceFields = getDefaultSourceFields(fields);
       elasticsearchQueryOnChange(createQuery(defaultFields, fields));
+      sourceFieldsOnChange(defaultSourceFields);
     }
-  }, [fields, elasticsearchQueryOnChange]);
+  }, [fields, elasticsearchQueryOnChange, sourceFieldsOnChange]);
 
   return (
     <StartChatPanel

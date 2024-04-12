@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isObject } from 'lodash';
+import { isObject, chunk } from 'lodash';
 
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -16,13 +16,16 @@ import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
-import type { EventsAndTerms } from './wrap_new_terms_alerts';
+import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
+import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
+import type { EventsAndTerms } from './types';
 import type {
   RecentTermsAggResult,
   DocFetchAggResult,
   NewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
+import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
@@ -35,14 +38,17 @@ import {
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
-  const { logger } = createOptions;
+  const { logger, licensing, experimentalFeatures } = createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -104,6 +110,7 @@ export const createNewTermsAlertType = (
           alertTimestampOverride,
           publicBaseUrl,
           inputIndexFields,
+          alertWithSuppression,
         },
         services,
         params,
@@ -137,6 +144,11 @@ export const createNewTermsAlertType = (
         name: 'historyWindowStart',
       });
 
+      const isAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: params.alertSuppression,
+        licensing,
+        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForNewTermsRuleEnabled,
+      });
       let afterKey;
 
       const result = createSearchAfterReturnType();
@@ -191,6 +203,32 @@ export const createNewTermsAlertType = (
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
 
         const createAlertsHook: CreateAlertsHook = async (aggResult) => {
+          const wrapHits = (eventsAndTerms: EventsAndTerms[]) =>
+            wrapNewTermsAlerts({
+              eventsAndTerms,
+              spaceId,
+              completeRule,
+              mergeStrategy,
+              indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
+              publicBaseUrl,
+            });
+
+          const wrapSuppressedHits = (eventsAndTerms: EventsAndTerms[]) =>
+            wrapSuppressedNewTermsAlerts({
+              eventsAndTerms,
+              spaceId,
+              completeRule,
+              mergeStrategy,
+              indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
+              publicBaseUrl,
+              primaryTimestamp,
+              secondaryTimestamp,
+            });
+
           const eventsAndTerms: EventsAndTerms[] = (
             aggResult?.aggregations?.new_terms.buckets ?? []
           ).map((bucket) => {
@@ -201,27 +239,61 @@ export const createNewTermsAlertType = (
             };
           });
 
-          const wrappedAlerts = wrapNewTermsAlerts({
-            eventsAndTerms,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            indicesToQuery: inputIndex,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-          });
+          let bulkCreateResult: Omit<
+            GenericBulkCreateResponse<NewTermsFieldsLatest>,
+            'suppressedItemsCount'
+          > = {
+            errors: [],
+            success: true,
+            enrichmentDuration: '0',
+            bulkCreateDuration: '0',
+            createdItemsCount: 0,
+            createdItems: [],
+            alertsWereTruncated: false,
+          };
 
-          const bulkCreateResult = await bulkCreate(
-            wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount,
-            createEnrichEventsFunction({
-              services,
-              logger: ruleExecutionLogger,
-            })
-          );
+          // wrap and create alerts by chunks
+          // large number of matches, processed in possibly 10,000 size of events and terms
+          // can significantly affect Kibana performance
+          const eventAndTermsChunks = chunk(eventsAndTerms, 5 * params.maxSignals);
 
-          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+          for (let i = 0; i < eventAndTermsChunks.length; i++) {
+            const eventAndTermsChunk = eventAndTermsChunks[i];
+
+            if (isAlertSuppressionActive) {
+              bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
+                eventsAndTerms: eventAndTermsChunk,
+                toReturn: result,
+                wrapHits,
+                bulkCreate,
+                services,
+                ruleExecutionLogger,
+                tuple,
+                alertSuppression: params.alertSuppression,
+                wrapSuppressedHits,
+                alertTimestampOverride,
+                alertWithSuppression,
+                experimentalFeatures,
+              });
+            } else {
+              const wrappedAlerts = wrapHits(eventAndTermsChunk);
+
+              bulkCreateResult = await bulkCreate(
+                wrappedAlerts,
+                params.maxSignals - result.createdSignalsCount,
+                createEnrichEventsFunction({
+                  services,
+                  logger: ruleExecutionLogger,
+                })
+              );
+
+              addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+            }
+
+            if (bulkCreateResult.alertsWereTruncated) {
+              break;
+            }
+          }
 
           return bulkCreateResult;
         };
@@ -229,7 +301,7 @@ export const createNewTermsAlertType = (
         // separate route for multiple new terms
         // it uses paging through composite aggregation
         if (params.newTermsFields.length > 1) {
-          await multiTermsComposite({
+          const bulkCreateResult = await multiTermsComposite({
             filterArgs,
             buckets: bucketsForField,
             params,
@@ -241,7 +313,12 @@ export const createNewTermsAlertType = (
             runOpts: execOptions.runOpts,
             afterKey,
             createAlertsHook,
+            isAlertSuppressionActive,
           });
+
+          if (bulkCreateResult?.alertsWereTruncated) {
+            break;
+          }
         } else {
           // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
           // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
@@ -326,7 +403,11 @@ export const createNewTermsAlertType = (
             const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
             if (bulkCreateResult.alertsWereTruncated) {
-              result.warningMessages.push(getMaxSignalsWarning());
+              result.warningMessages.push(
+                isAlertSuppressionActive
+                  ? getSuppressionMaxSignalsWarning()
+                  : getMaxSignalsWarning()
+              );
               break;
             }
           }

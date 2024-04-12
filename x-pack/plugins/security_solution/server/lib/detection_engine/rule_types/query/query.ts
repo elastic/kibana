@@ -75,6 +75,7 @@ export const queryExecutor = async ({
             bucketHistory,
             groupByFields: ruleParams.alertSuppression.groupBy,
             eventsTelemetry,
+            experimentalFeatures,
           })
         : {
             ...(await searchAfterAndBulkCreate({

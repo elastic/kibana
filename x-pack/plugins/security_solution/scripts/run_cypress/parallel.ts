@@ -478,14 +478,26 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         ),
         ...retryResults,
       ] as CypressCommandLine.CypressRunResult[]);
-      const hasFailedTests = _.some(
-        // only fail the job if retry failed as well
-        retryResults,
-        (result) =>
-          (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-          (result as CypressCommandLine.CypressRunResult)?.totalFailed
-      );
-      if (hasFailedTests) {
+      const hasFailedTests = (
+        runResults: Array<
+          | CypressCommandLine.CypressFailedRunResult
+          | CypressCommandLine.CypressRunResult
+          | undefined
+        >
+      ) =>
+        _.some(
+          // only fail the job if retry failed as well
+          runResults,
+          (runResult) =>
+            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
+        );
+
+      const hasFailedInitialTests = hasFailedTests(initialResults);
+      const hasFailedRetryTests = hasFailedTests(retryResults);
+
+      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
+      if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
         throw createFailError('Not all tests passed');
       }
     },

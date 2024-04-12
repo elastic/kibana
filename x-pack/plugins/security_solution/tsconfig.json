@@ -175,6 +175,12 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
+    "@kbn/openapi-generator",
+    "@kbn/unified-data-table",
+    "@kbn/unified-doc-viewer",
+    "@kbn/dom-drag-drop",
+    "@kbn/unified-field-list",
+    "@kbn/resizable-layout",
     "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
@@ -187,6 +193,7 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/data-service"
   ]
 }

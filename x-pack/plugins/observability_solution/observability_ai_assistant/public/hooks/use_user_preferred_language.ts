@@ -7,19 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
-const USE_KIBANA_LOCALE_SETTING = 'Use Kibana locale setting';
-const USE_BROWSER_LANGUAGE_SETTING = 'Use browser language setting';
-
-const SPECIAL_OPTIONS = [
-  {
-    label: USE_KIBANA_LOCALE_SETTING,
-  },
-  {
-    label: USE_BROWSER_LANGUAGE_SETTING,
-  },
-];
+import { aiAssistantResponseLanguage } from '../../common/utils/advanced_settings';
+import { useKibana } from './use_kibana';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 // Data taken from https://github.com/L-P/native-language-list/blob/master/data/langs.json
@@ -163,39 +152,46 @@ const languages: { [key: string]: string } = {
   zu: 'isiZulu',
 };
 
-const LANGUAGE_OPTIONS = SPECIAL_OPTIONS.concat(
-  Object.values(languages).map((language) => ({
-    label: language,
-  }))
-);
+const KIBANA_LOCALE_SETTING = {
+  value: 'locale_setting',
+  label: 'Kibana locale setting',
+};
+
+const BROWSER_LANGUAGE_SETTING = {
+  value: 'browser_setting',
+  label: 'Browser language setting',
+};
+
+export const DEFAULT_LANGUAGE_OPTION = KIBANA_LOCALE_SETTING;
+export const LANGUAGE_OPTIONS = [
+  KIBANA_LOCALE_SETTING,
+  BROWSER_LANGUAGE_SETTING,
+  ...Object.entries(languages).map(([value, label]) => ({ value, label })),
+];
 
 export type UseUserPreferredLanguageResult = ReturnType<typeof useUserPreferredLanguage>;
 
-export const SELECTED_LANGUAGE_LOCAL_STORAGE_KEY =
-  'xpack.observabilityAiAssistant.responseLanguage';
-
 export function useUserPreferredLanguage() {
-  const [selectedLanguage, setSelectedLanguage] = useLocalStorage(
-    SELECTED_LANGUAGE_LOCAL_STORAGE_KEY,
-    USE_KIBANA_LOCALE_SETTING
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const selectedLanguage = uiSettings.get<string>(
+    aiAssistantResponseLanguage,
+    DEFAULT_LANGUAGE_OPTION.value
   );
 
   const getPreferredLanguage = useCallback(() => {
-    if (selectedLanguage === USE_KIBANA_LOCALE_SETTING) {
+    if (selectedLanguage === KIBANA_LOCALE_SETTING.value) {
       return getLanguageFromKibanaSettings();
-    } else if (selectedLanguage === USE_BROWSER_LANGUAGE_SETTING) {
+    } else if (selectedLanguage === BROWSER_LANGUAGE_SETTING.value) {
       return getLanguageFromBrowserSetting();
     } else {
-      return selectedLanguage || 'English';
+      return languages[selectedLanguage] || 'English';
     }
   }, [selectedLanguage]);
 
-  return {
-    selectedLanguage,
-    setSelectedLanguage,
-    LANGUAGE_OPTIONS,
-    getPreferredLanguage,
-  };
+  return { selectedLanguage, getPreferredLanguage };
 }
 
 function getLanguageFromKibanaSettings() {

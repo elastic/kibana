@@ -90,6 +90,11 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const containerClassName = css`
+  min-width: 0;
+  max-height: 100%;
+`;
+
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
@@ -154,12 +159,6 @@ export function ChatBody({
     }
   }
 
-  const containerClassName = css`
-    background: white;
-    min-width: 0;
-    max-height: 100%;
-  `;
-
   const headerContainerClassName = css`
     padding-right: ${showLinkToConversationsApp ? '32px' : '0'};
   `;
@@ -221,7 +220,10 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({ title: initialTitle, messages });
+    const content = JSON.stringify({
+      title: initialTitle,
+      messages: conversation.value?.messages ?? messages,
+    });
 
     navigator.clipboard?.writeText(content || '');
   };

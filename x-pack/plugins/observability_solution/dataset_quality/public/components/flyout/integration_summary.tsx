@@ -16,12 +16,16 @@ import {
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
+import { IntegrationActionsMenu } from './integration_actions_menu';
 
 export function IntegrationSummary({ integration }: { integration: Integration }) {
   const { name, version } = integration;
+
+  const integrationActionsMenu = <IntegrationActionsMenu integration={integration} />;
   return (
     <FieldsList
       title={flyoutIntegrationDetailsText}
+      actionsMenu={integrationActionsMenu}
       fields={[
         {
           fieldTitle: flyoutIntegrationNameText,

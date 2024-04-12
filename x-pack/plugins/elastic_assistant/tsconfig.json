@@ -19,7 +19,6 @@
     "@kbn/licensing-plugin",
     "@kbn/securitysolution-es-utils",
     "@kbn/actions-plugin",
-    "@kbn/elastic-assistant",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
@@ -43,6 +42,8 @@
     "@kbn/config-schema",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/ml-response-stream",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",

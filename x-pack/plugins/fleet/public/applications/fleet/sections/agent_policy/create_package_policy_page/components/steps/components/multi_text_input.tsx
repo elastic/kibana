@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface Props {
   value: string[];
   onChange: (newValue: string[]) => void;
+  fieldLabel: string;
   onBlur?: () => void;
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
@@ -30,6 +31,7 @@ interface Props {
 
 interface RowProps {
   index: number;
+  fieldLabel: string;
   value: string;
   onChange: (index: number, value: string) => void;
   onDelete: (index: number) => void;
@@ -42,6 +44,7 @@ interface RowProps {
 const Row: FunctionComponent<RowProps> = ({
   index,
   value,
+  fieldLabel,
   onChange,
   onDelete,
   onBlur,
@@ -81,7 +84,11 @@ const Row: FunctionComponent<RowProps> = ({
             iconType="cross"
             disabled={isDisabled}
             aria-label={i18n.translate('xpack.fleet.multiTextInput.deleteRowButton', {
-              defaultMessage: 'Delete row',
+              defaultMessage: 'Delete "{fieldLabel}" input {index}',
+              values: {
+                fieldLabel,
+                index: index + 1,
+              },
             })}
           />
         </EuiFlexItem>
@@ -95,6 +102,7 @@ function defaultValue(value: string[]) {
 }
 
 export const MultiTextInput: FunctionComponent<Props> = ({
+  fieldLabel,
   value,
   onChange,
   onBlur,
@@ -147,6 +155,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
           <EuiFlexItem key={idx}>
             <Row
               index={idx}
+              fieldLabel={fieldLabel}
               onChange={onChangeHandler}
               onDelete={onDeleteHandler}
               onBlur={onBlur}

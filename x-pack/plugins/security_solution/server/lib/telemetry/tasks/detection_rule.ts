@@ -13,10 +13,11 @@ import {
   templateExceptionList,
   newTelemetryLogger,
   createUsageCounterLabel,
+  safeValue,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
+import type { ExceptionListItem, RuleSearchResult } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
@@ -52,14 +53,8 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           receiver.fetchLicenseInfo(),
         ]);
 
-        const clusterInfo =
-          clusterInfoPromise.status === 'fulfilled'
-            ? clusterInfoPromise.value
-            : ({} as ESClusterInfo);
-        const licenseInfo =
-          licenseInfoPromise.status === 'fulfilled'
-            ? licenseInfoPromise.value
-            : ({} as ESLicense | undefined);
+        const clusterInfo = safeValue(clusterInfoPromise);
+        const licenseInfo = safeValue(licenseInfoPromise);
 
         // Lists Telemetry: Detection Rules
 

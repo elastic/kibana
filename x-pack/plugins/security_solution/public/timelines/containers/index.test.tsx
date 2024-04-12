@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataLoadingState } from '@kbn/unified-data-table';
 import { renderHook, act } from '@testing-library/react-hooks';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import { initSortDefault, useTimelineEvents } from '.';
@@ -125,7 +126,7 @@ describe('useTimelineEvents', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<
         UseTimelineEventsProps,
-        [boolean, TimelineArgs]
+        [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
@@ -133,7 +134,7 @@ describe('useTimelineEvents', () => {
       // useEffect on params request
       await waitForNextUpdate();
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: [],
           id: TimelineId.active,
@@ -152,7 +153,7 @@ describe('useTimelineEvents', () => {
     await act(async () => {
       const { result, waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
-        [boolean, TimelineArgs]
+        [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
@@ -165,7 +166,7 @@ describe('useTimelineEvents', () => {
 
       expect(mockSearch).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: mockEvents,
           id: TimelineId.active,
@@ -184,7 +185,7 @@ describe('useTimelineEvents', () => {
     await act(async () => {
       const { result, waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
-        [boolean, TimelineArgs]
+        [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
         initialProps: { ...props },
       });
@@ -208,7 +209,7 @@ describe('useTimelineEvents', () => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
 
       expect(result.current).toEqual([
-        false,
+        DataLoadingState.loaded,
         {
           events: mockEvents,
           id: TimelineId.active,
@@ -227,7 +228,7 @@ describe('useTimelineEvents', () => {
     await act(async () => {
       const { result, waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
-        [boolean, TimelineArgs]
+        [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
         initialProps: {
           ...props,

@@ -66,7 +66,6 @@ const LogsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
-        observabilityAIAssistant={plugins.observabilityAIAssistant}
       >
         <Router history={history}>
           <KbnUrlStateStorageFromRouterProvider

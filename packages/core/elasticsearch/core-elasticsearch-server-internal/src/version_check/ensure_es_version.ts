@@ -21,7 +21,7 @@ import {
   tap,
   startWith,
   shareReplay,
-} from 'rxjs/operators';
+} from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {

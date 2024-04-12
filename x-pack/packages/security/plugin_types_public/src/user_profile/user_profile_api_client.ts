@@ -16,6 +16,14 @@ import type { Observable } from 'rxjs';
 export interface UserProfileAPIClient {
   readonly userProfile$: Observable<UserProfileData | null>;
   /**
+   * Indicates if the user profile data has been loaded from the server.
+   * Useful to distinguish between the case when the user profile data is `null` because the HTTP
+   * request has not finished or because there is no user profile data for the current user.
+   */
+  readonly userProfileLoaded$: Observable<boolean>;
+  /** Flag to indicate if the current user has a user profile. Anonymous users don't have user profiles. */
+  readonly enabled$: Observable<boolean>;
+  /**
    * Retrieves the user profile of the current user. If the profile isn't available, e.g. for the anonymous users or
    * users authenticated via authenticating proxies, the `null` value is returned.
    * @param [params] Get current user profile operation parameters.
@@ -63,6 +71,12 @@ export interface UserProfileAPIClient {
    * @param data Application data to be written (merged with existing data).
    */
   update<D extends UserProfileData>(data: D): Promise<void>;
+
+  /**
+   * Partially updates user profile data of the current user, merging the previous data with the provided data.
+   * @param data Application data to be merged with existing data.
+   */
+  partialUpdate<D extends Partial<UserProfileData>>(data: D): Promise<void>;
 }
 
 /**

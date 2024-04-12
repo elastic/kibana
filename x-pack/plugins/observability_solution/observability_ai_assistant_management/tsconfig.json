@@ -16,7 +16,12 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
     "@kbn/translations-plugin",
-    "@kbn/enterprise-search-plugin"
+    "@kbn/enterprise-search-plugin",
+    "@kbn/management-settings-types",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/observability-shared-plugin"
   ],
   "exclude": ["target/**/*"]
 }

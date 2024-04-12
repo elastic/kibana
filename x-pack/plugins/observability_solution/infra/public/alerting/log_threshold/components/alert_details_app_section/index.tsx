@@ -12,6 +12,7 @@ import {
   ALERT_CONTEXT,
   ALERT_END,
   ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -34,6 +35,7 @@ import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
+import type { Group } from './types';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -63,6 +65,16 @@ const AlertDetailsAppSection = ({
         .filter(identity)
         .join(' AND ')
     : '';
+  const groups: Group[] | undefined = rule.params.groupBy
+    ? rule.params.groupBy.flatMap((field) => {
+        const value: string = get(
+          alert.fields[ALERT_CONTEXT],
+          ['groupByKeys', ...field.split('.')],
+          null
+        );
+        return value ? { field, value } : [];
+      })
+    : undefined;
 
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
@@ -230,7 +242,12 @@ const AlertDetailsAppSection = ({
       rule.params.criteria.length === 1 && (
         <EuiFlexItem>
           <LogsHistoryChart
-            rule={{ ...rule, params: { ...rule.params, timeSize: 12, timeUnit: 'h' } }}
+            rule={{
+              ...rule,
+              params: { ...rule.params, timeSize: 12, timeUnit: 'h' },
+            }}
+            instanceId={alert.fields[ALERT_INSTANCE_ID]}
+            groups={groups}
           />
         </EuiFlexItem>
       )

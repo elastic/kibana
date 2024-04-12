@@ -51,6 +51,8 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
               http: coreStart.http,
               notifications: coreStart.notifications,
               uiSettings: coreStart.uiSettings,
+              settings: coreStart.settings,
+              docLinks: coreStart.docLinks,
               setBreadcrumbs,
             }}
           >

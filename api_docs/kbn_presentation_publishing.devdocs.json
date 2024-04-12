@@ -682,7 +682,7 @@
           },
           ">"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -696,7 +696,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -804,7 +804,7 @@
             "text": "PublishesTimeRange"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -818,7 +818,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -844,7 +844,7 @@
             "text": "PublishesUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -858,7 +858,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1046,7 +1046,7 @@
             "text": "PublishesWritableUnifiedSearch"
           }
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1060,7 +1060,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1395,27 +1395,11 @@
         "signature": [
           "(rawState: ",
           "SerializedTimeRange",
-          ", parentApi?: unknown) => { appliedTimeRange$: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined>; cleanupTimeRange: () => void; serializeTimeRange: () => ",
+          ") => { serialize: () => ",
           "SerializedTimeRange",
-          "; timeRangeApi: ",
+          "; api: ",
           "PublishesWritableTimeRange",
-          "; timeRangeComparators: ",
+          "; comparators: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1427,7 +1411,7 @@
           "SerializedTimeRange",
           ">; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1441,22 +1425,7 @@
             "signature": [
               "SerializedTimeRange"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.initializeTimeRange.$2",
-            "type": "Unknown",
-            "tags": [],
-            "label": "parentApi",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/initialize_time_range.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/initialize_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1533,6 +1502,131 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.onFetchContextChanged",
+        "type": "Function",
+        "tags": [],
+        "label": "onFetchContextChanged",
+        "description": [],
+        "signature": [
+          "({\n  api,\n  onFetch,\n  fetchOnSetup,\n}: { api: unknown; onFetch: (fetchContext: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.FetchContext",
+            "text": "FetchContext"
+          },
+          ", isCanceled: () => boolean) => void; fetchOnSetup: boolean; }) => () => void"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.onFetchContextChanged.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  api,\n  onFetch,\n  fetchOnSetup,\n}",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.onFetchContextChanged.$1.api",
+                "type": "Unknown",
+                "tags": [],
+                "label": "api",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.onFetchContextChanged.$1.onFetch",
+                "type": "Function",
+                "tags": [],
+                "label": "onFetch",
+                "description": [],
+                "signature": [
+                  "(fetchContext: ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.FetchContext",
+                    "text": "FetchContext"
+                  },
+                  ", isCanceled: () => boolean) => void"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/presentation-publishing",
+                    "id": "def-common.onFetchContextChanged.$1.onFetch.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "fetchContext",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/presentation-publishing",
+                        "scope": "common",
+                        "docId": "kibKbnPresentationPublishingPluginApi",
+                        "section": "def-common.FetchContext",
+                        "text": "FetchContext"
+                      }
+                    ],
+                    "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  },
+                  {
+                    "parentPluginId": "@kbn/presentation-publishing",
+                    "id": "def-common.onFetchContextChanged.$1.onFetch.$2",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "isCanceled",
+                    "description": [],
+                    "signature": [
+                      "() => boolean"
+                    ],
+                    "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.onFetchContextChanged.$1.fetchOnSetup",
+                "type": "boolean",
+                "tags": [],
+                "label": "fetchOnSetup",
+                "description": [],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1633,12 +1727,12 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useBatchedPublishingSubjects",
+        "id": "def-common.useBatchedOptionalPublishingSubjects",
         "type": "Function",
         "tags": [],
-        "label": "useBatchedPublishingSubjects",
+        "label": "useBatchedOptionalPublishingSubjects",
         "description": [
-          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nYou should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay."
+          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` may not be defined on initial component render.\n"
         ],
         "signature": [
           "<SubjectsType extends ",
@@ -1653,12 +1747,59 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useBatchedPublishingSubjects.$1",
+            "id": "def-common.useBatchedOptionalPublishingSubjects.$1",
             "type": "Object",
             "tags": [],
             "label": "subjects",
             "description": [
               "Publishing subjects array.\nWhen 'subjects' is expected to change, 'subjects' must be part of component react state."
+            ],
+            "signature": [
+              "[...SubjectsType]"
+            ],
+            "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useBatchedPublishingSubjects",
+        "type": "Function",
+        "tags": [],
+        "label": "useBatchedPublishingSubjects",
+        "description": [
+          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` are static and do not change over the lifetime of the component.\n"
+        ],
+        "signature": [
+          "<SubjectsType extends ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<any>[]>(...subjects_0: SubjectsType) => ",
+          "UnwrapPublishingSubjectTuple",
+          "<SubjectsType>"
+        ],
+        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useBatchedPublishingSubjects.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "subjects",
+            "description": [
+              "Publishing subjects array."
             ],
             "signature": [
               "[...SubjectsType]"
@@ -1857,6 +1998,130 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.FetchContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "FetchContext",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.isReload",
+            "type": "boolean",
+            "tags": [],
+            "label": "isReload",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.FetchContext.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/on_fetch_context_changed.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4490,7 +4755,7 @@
         "tags": [],
         "label": "PublishesTimeRange",
         "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4854,7 +5119,28 @@
               },
               " | undefined>; }; }"
             ],
-            "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PublishesTimeRange.timeslice$",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<[number, number] | undefined> | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5765,7 +6051,7 @@
           },
           " | undefined>; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5895,7 +6181,7 @@
           },
           " | undefined) => void; }"
         ],
-        "path": "packages/presentation/presentation_publishing/interfaces/unified_search/publishes_unified_search.ts",
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

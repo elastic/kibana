@@ -136,6 +136,17 @@
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.CspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1490,7 +1501,15 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<string[]>; strict: ",
+              "<string[]>; report_only: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<Readonly<{} & { form_action: string[]; }> | undefined>; strict: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

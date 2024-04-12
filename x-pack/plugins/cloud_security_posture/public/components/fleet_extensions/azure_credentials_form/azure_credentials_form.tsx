@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
-  EuiHorizontalRule,
-  EuiFormRow,
-  EuiSelect,
-  EuiFieldPassword,
-  EuiFieldText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
@@ -25,13 +25,14 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
 import { AzureCredentialsType } from '../../../../common/types_old';
-import { SetupFormat, useAzureCredentialsForm } from './hooks';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import { useAzureCredentialsForm } from './hooks';
+import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
 
@@ -39,8 +40,22 @@ interface AzureSetupInfoContentProps {
   integrationLink: string;
 }
 
-export const AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE = 'arm_template';
-export const AZURE_MANUAL_CREDENTIAL_TYPE = 'manual';
+export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
+
+export const AZURE_SETUP_FORMAT = {
+  ARM_TEMPLATE: 'arm_template',
+  MANUAL: 'manual',
+};
+
+export const AZURE_CREDENTIALS_TYPE = {
+  ARM_TEMPLATE: 'arm_template',
+  MANUAL: 'manual',
+  SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
+  SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
+  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
+    'service_principal_with_client_username_and_password',
+  MANAGED_IDENTITY: 'managed_identity',
+} as const;
 
 export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContentProps) => {
   return (
@@ -77,12 +92,12 @@ export const AzureSetupInfoContent = ({ integrationLink }: AzureSetupInfoContent
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+    id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
     testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
-    id: AZURE_MANUAL_CREDENTIAL_TYPE,
+    id: AZURE_SETUP_FORMAT.MANUAL,
     label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -253,39 +268,73 @@ const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
 export const AzureInputVarFields = ({
   fields,
+  packageInfo,
   onChange,
 }: {
   fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
+  packageInfo: PackageInfo;
   onChange: (key: string, value: string) => void;
-}) => (
-  <div>
-    {fields.map((field) => (
-      <EuiFormRow key={field.id} label={field.label} fullWidth hasChildLabel={true} id={field.id}>
+}) => {
+  return (
+    <div>
+      {fields.map((field) => (
         <>
-          {field.type === 'password' && (
-            <EuiFieldPassword
-              id={field.id}
-              type="dual"
-              fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-              data-test-subj={field.testSubj}
-            />
+          {field.type === 'password' && field.isSecret === true && (
+            <>
+              <EuiSpacer size="m" />
+              <div
+                css={css`
+                  width: 100%;
+                  .euiFormControlLayout,
+                  .euiFormControlLayout__childrenWrapper,
+                  .euiFormRow,
+                  input {
+                    max-width: 100%;
+                    width: 100%;
+                  }
+                `}
+              >
+                <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                  <LazyPackagePolicyInputVarField
+                    varDef={{
+                      ...findVariableDef(packageInfo, field.id)!,
+                      required: true,
+                      type: 'password',
+                    }}
+                    value={field.value || ''}
+                    onChange={(value) => {
+                      onChange(field.id, value);
+                    }}
+                    errors={[]}
+                    forceShowErrors={false}
+                    isEditPage={true}
+                  />
+                </Suspense>
+              </div>
+            </>
           )}
           {field.type === 'text' && (
-            <EuiFieldText
-              id={field.id}
+            <EuiFormRow
+              key={field.id}
+              label={field.label}
               fullWidth
-              value={field.value || ''}
-              onChange={(event) => onChange(field.id, event.target.value)}
-              data-test-subj={field.testSubj}
-            />
+              hasChildLabel={true}
+              id={field.id}
+            >
+              <EuiFieldText
+                id={field.id}
+                fullWidth
+                value={field.value || ''}
+                onChange={(event) => onChange(field.id, event.target.value)}
+                data-test-subj={field.testSubj}
+              />
+            </EuiFormRow>
           )}
         </>
-      </EuiFormRow>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
+};
 
 export const AzureCredentialsForm = ({
   input,
@@ -315,7 +364,7 @@ export const AzureCredentialsForm = ({
 
   useEffect(() => {
     if (!setupFormat) {
-      onSetupFormatChange(AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE);
+      onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
     }
   }, [setupFormat, onSetupFormatChange]);
 
@@ -368,13 +417,13 @@ export const AzureCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
+      {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && !isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !isPackageVersionValidForManualFields && (
         <TemporaryManualSetup integrationLink={integrationLink} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && isPackageVersionValidForManualFields && (
         <>
           <AzureCredentialTypeSelector
             type={azureCredentialsType}
@@ -389,6 +438,7 @@ export const AzureCredentialsForm = ({
           <EuiSpacer size="m" />
           <AzureInputVarFields
             fields={fields}
+            packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}
@@ -398,7 +448,7 @@ export const AzureCredentialsForm = ({
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+              id="xpack.csp.azureIntegration.manualCredentialType.documentation"
               defaultMessage="Read the {documentation} for more details"
               values={{
                 documentation: (

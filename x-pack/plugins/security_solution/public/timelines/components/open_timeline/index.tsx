@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -55,6 +56,7 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -157,6 +159,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineEnabled'
+    );
 
     const {
       customTemplateTimelineCount,
@@ -245,7 +250,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: defaultHeaders,
+              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
@@ -256,7 +261,15 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [
+        startTransaction,
+        timelineSavedObjectId,
+        refetch,
+        dispatch,
+        dataViewId,
+        selectedPatterns,
+        unifiedComponentsInTimelineEnabled,
+      ]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -353,6 +366,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
+          unifiedComponentsInTimelineEnabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

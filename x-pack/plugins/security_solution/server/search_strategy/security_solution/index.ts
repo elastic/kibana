@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';

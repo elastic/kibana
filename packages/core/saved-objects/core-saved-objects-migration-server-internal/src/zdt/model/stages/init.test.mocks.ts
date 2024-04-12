@@ -13,6 +13,8 @@ export const generateAdditiveMappingDiffMock = jest.fn();
 export const getAliasActionsMock = jest.fn();
 export const checkIndexCurrentAlgorithmMock = jest.fn();
 
+export const getCreationAliasesMock = jest.fn();
+
 jest.doMock('../../utils', () => {
   const realModule = jest.requireActual('../../utils');
   return {
@@ -23,6 +25,7 @@ jest.doMock('../../utils', () => {
     generateAdditiveMappingDiff: generateAdditiveMappingDiffMock,
     getAliasActions: getAliasActionsMock,
     checkIndexCurrentAlgorithm: checkIndexCurrentAlgorithmMock,
+    getCreationAliases: getCreationAliasesMock,
   };
 });
 

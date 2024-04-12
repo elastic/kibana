@@ -99,6 +99,8 @@ import {
 } from './alerts_service';
 import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 
@@ -118,6 +120,12 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
+  registerConnectorAdapter<
+    RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(
+    adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+  ): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -216,6 +224,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -378,6 +387,14 @@ export class AlertingPlugin {
     });
 
     return {
+      registerConnectorAdapter: <
+        RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+      >(
+        adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+      ) => {
+        this.connectorAdapterRegistry.register(adapter);
+      },
       registerType: <
         Params extends RuleTypeParams = never,
         ExtractedParams extends RuleTypeParams = never,
@@ -507,6 +524,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
     });
 
@@ -573,6 +591,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {

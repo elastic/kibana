@@ -79,6 +79,11 @@ describe('sql/esql query helpers', () => {
 
       const idxPattern10 = getIndexPatternFromESQLQuery('FROM foo-1, remote_cluster:foo-2, foo-3');
       expect(idxPattern10).toBe('foo-1, remote_cluster:foo-2, foo-3');
+
+      const idxPattern11 = getIndexPatternFromESQLQuery(
+        'FROM foo-1, foo-2 | where event.reason like "*Disable: changed from [true] to [false]*"'
+      );
+      expect(idxPattern11).toBe('foo-1, foo-2');
     });
   });
 

@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-notebooks",
+  "owner": "@elastic/enterprise-search-frontend",
+  "description": "Plugin to provide access to and rendering of python notebooks for use in the persistent developer console.",
+  "plugin": {
+    "id": "searchNotebooks",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "search",
+      "notebooks"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

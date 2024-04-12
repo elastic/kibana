@@ -9,6 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
 
+const integrationActions = {
+  overview: 'Overview',
+  template: 'Template',
+  viewDashboards: 'ViewDashboards',
+};
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
@@ -20,6 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('svlLogsSynthtraceClient');
+  const retry = getService('retry');
+  const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality flyout', () => {
@@ -112,6 +120,165 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetSelectorText =
         await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.eql(testDatasetName);
+    });
+
+    it('Integration actions menu is present with correct actions', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+      const actions = await Promise.all(
+        Object.values(integrationActions).map((action) =>
+          PageObjects.datasetQuality.getIntegrationActionButtonByAction(action)
+        )
+      );
+
+      expect(actions.length).to.eql(3);
+    });
+
+    it('Integration dashboard action hidden for integrations without dashboards', async () => {
+      const bitbucketDatasetName = 'atlassian_bitbucket.audit';
+      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.installPackage({
+        name: 'atlassian_bitbucket',
+        version: '1.14.0',
+      });
+
+      // Index 10 logs for `atlassian_bitbucket.audit` dataset
+      await synthtrace.index(getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }));
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+      await testSubjects.missingOrFail(
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+          integrationActions.viewDashboards
+        )
+      );
+    });
+
+    it('Integration overview action should navigate to the integration overview page', async () => {
+      const bitbucketDatasetName = 'atlassian_bitbucket.audit';
+      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.installPackage({
+        name: 'atlassian_bitbucket',
+        version: '1.14.0',
+      });
+
+      // Index 10 logs for `atlassian_bitbucket.audit` dataset
+      await synthtrace.index(getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }));
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+        integrationActions.overview
+      );
+
+      await action.click();
+
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        const parsedUrl = new URL(currentUrl);
+
+        expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+      });
+    });
+
+    it('Integration template action should navigate to the index template page', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+        integrationActions.template
+      );
+
+      await action.click();
+
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        const parsedUrl = new URL(currentUrl);
+        expect(parsedUrl.pathname).to.contain(
+          `/app/management/data/index_management/templates/logs-${apacheAccessDatasetName}`
+        );
+      });
+    });
+
+    it('Integration dashboard action should navigate to the selected dashboard', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+
+      // Add initial integrations
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+
+      // Index 10 logs for `logs-apache.access` dataset
+      await synthtrace.index(
+        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
+      );
+
+      await PageObjects.datasetQuality.navigateTo();
+
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+        integrationActions.viewDashboards
+      );
+
+      await action.click();
+
+      const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
+      const firstDashboardButton = await dashboardButtons[0];
+      const dashboardText = await firstDashboardButton.getVisibleText();
+
+      await firstDashboardButton.click();
+
+      const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+
+      expect(breadcrumbText).to.eql(dashboardText);
     });
   });
 }

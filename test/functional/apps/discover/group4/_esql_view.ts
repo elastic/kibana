@@ -19,11 +19,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
   const retry = getService('retry');
+  const browser = getService('browser');
   const find = getService('find');
   const esql = getService('esql');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
     'discover',
+    'dashboard',
     'header',
     'timePicker',
     'unifiedFieldList',
@@ -81,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
-        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
+        expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
@@ -322,6 +325,175 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-toggle-query-history-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('TextBasedLangEditor-queryHistory-error');
+      });
+    });
+
+    describe('sorting', () => {
+      it('should sort correctly', async () => {
+        const savedSearchName = 'testSorting';
+
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const testQuery = 'from logstash-* | sort @timestamp | limit 100';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains an initial value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '1,623';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields'
+        );
+
+        await dataGrid.clickDocSortDesc('bytes', 'Sort High-Low');
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the highest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
+
+        await PageObjects.discover.saveSearch(savedSearchName);
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
+        await browser.refresh();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value after reload', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '483';
+        });
+
+        await PageObjects.discover.clickNewSearchButton();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await PageObjects.discover.loadSavedSearch(savedSearchName);
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same highest value after reopening',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 2);
+            const text = await cell.getVisibleText();
+            return text === '483';
+          }
+        );
+
+        await dataGrid.clickDocSortDesc('bytes', 'Sort Low-High');
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the lowest value', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '0';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
+
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await dataGrid.clickDocSortDesc('extension', 'Sort A-Z');
+
+        await retry.waitFor('first cell contains the lowest value for extension', async () => {
+          const cell = await dataGrid.getCellElement(0, 3);
+          const text = await cell.getVisibleText();
+          return text === 'css';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n2'
+        );
+
+        await browser.refresh();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same lowest value after reload', async () => {
+          const cell = await dataGrid.getCellElement(0, 2);
+          const text = await cell.getVisibleText();
+          return text === '0';
+        });
+
+        await retry.waitFor(
+          'first cell contains the same lowest value for extension after reload',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 3);
+            const text = await cell.getVisibleText();
+            return text === 'css';
+          }
+        );
+
+        await PageObjects.discover.saveSearch(savedSearchName);
+
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.addSavedSearch(savedSearchName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same lowest value as dashboard panel',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 2);
+            const text = await cell.getVisibleText();
+            return text === '0';
+          }
+        );
+
+        await retry.waitFor(
+          'first cell contains the lowest value for extension as dashboard panel',
+          async () => {
+            const cell = await dataGrid.getCellElement(0, 3);
+            const text = await cell.getVisibleText();
+            return text === 'css';
+          }
+        );
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n2'
+        );
       });
     });
   });

@@ -26,11 +26,11 @@ export interface AiAssistantManagementObservabilityPluginStart {}
 export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface StartDependencies {
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   serverless?: ServerlessPluginStart;
   enterpriseSearch?: EnterpriseSearchPublicStart;
 }

@@ -7,7 +7,7 @@
 
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
 import { Logger } from '@kbn/core/server';

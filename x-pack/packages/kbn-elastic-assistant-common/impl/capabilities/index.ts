@@ -15,5 +15,4 @@ export type AssistantFeatures = { [K in keyof typeof defaultAssistantFeatures]: 
  */
 export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
-  assistantStreamingEnabled: false,
 });

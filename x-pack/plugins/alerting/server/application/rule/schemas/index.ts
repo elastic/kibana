@@ -18,8 +18,8 @@ export {
 
 export {
   actionParamsSchema,
-  actionDomainSchema,
-  actionSchema,
+  defaultActionDomainSchema,
+  systemActionDomainSchema,
   actionAlertsFilterSchema,
 } from './action_schemas';
 

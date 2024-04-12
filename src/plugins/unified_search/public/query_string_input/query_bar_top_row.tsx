@@ -20,7 +20,7 @@ import {
 } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { throttle } from 'lodash';
 import {
   EuiFlexGroup,

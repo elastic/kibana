@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
-import { of } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -31,7 +31,7 @@ export const createAppMockRenderer = (
   queryClientContext?: QueryClientProviderProps['context']
 ): AppMockRenderer => {
   const services = createStartServicesMock();
-  const theme$ = of({ darkMode: false });
+  const core = coreMock.createStart();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -53,7 +53,7 @@ export const createAppMockRenderer = (
   const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={core.theme}>
           <QueryClientProvider client={queryClient} context={queryClientContext}>
             {children}
           </QueryClientProvider>

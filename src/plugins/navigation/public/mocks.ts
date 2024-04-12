@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { Plugin } from '.';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
@@ -27,7 +28,7 @@ const createStartContract = (): jest.Mocked<Start> => {
       AggregateQueryTopNavMenu: jest.fn(),
     },
     addSolutionNavigation: jest.fn(),
-    isSolutionNavigationEnabled: jest.fn(),
+    isSolutionNavEnabled$: of(false),
   };
   return startContract;
 };

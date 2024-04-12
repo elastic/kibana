@@ -7,7 +7,7 @@ synchronize_lexer_grammar () {
   destination_file="./packages/kbn-esql-ast/src/antlr/esql_lexer.g4"
 
   # Copy the file
-  cp "$source_file" "$destination_file" 
+  cp "$source_file" "$destination_file"
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -15,11 +15,11 @@ synchronize_lexer_grammar () {
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
-  sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file" 
+  sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file"
 
   # Insert "options { caseInsensitive = true; }" one line below
   sed -i -e '/lexer grammar esql_lexer;/a\
-  options { caseInsensitive = true; }' "$destination_file" 
+  options { caseInsensitive = true; }' "$destination_file"
 
   echo "File copied and modified successfully."
 }
@@ -30,7 +30,7 @@ synchronize_parser_grammar () {
   destination_file="./packages/kbn-esql-ast/src/antlr/esql_parser.g4"
 
   # Copy the file
-  cp "$source_file" "$destination_file" 
+  cp "$source_file" "$destination_file"
 
   # Insert the license header
   temp_file=$(mktemp)
@@ -38,10 +38,10 @@ synchronize_parser_grammar () {
   mv "$temp_file" "$destination_file"
 
   # Replace the line containing "parser grammar" with "parser grammar esql_parser;"
-  sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file" 
+  sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file"
 
   # Replace options {tokenVocab=EsqlBaseLexer;} with options {tokenVocab=esql_lexer;}
-  sed -i -e 's/options {tokenVocab=EsqlBaseLexer;}/options {tokenVocab=esql_lexer;}/' "$destination_file" 
+  sed -i -e 's/options {tokenVocab=EsqlBaseLexer;}/options {tokenVocab=esql_lexer;}/' "$destination_file"
 
   echo "File copied and modified successfully."
 }
@@ -51,17 +51,17 @@ report_main_step () {
 }
 
 main () {
-  cd "$PARENT_DIR" 
+  cd "$PARENT_DIR"
 
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch
-  git clone https://github.com/elastic/elasticsearch --depth 1 
+  git clone https://github.com/elastic/elasticsearch --depth 1
 
   rm -rf open-source
-  git clone https://github.com/elastic/open-source --depth 1 
+  git clone https://github.com/elastic/open-source --depth 1
 
-  cd "$KIBANA_DIR" 
+  cd "$KIBANA_DIR"
 
   license_header=$(cat "$PARENT_DIR/open-source/legal/elastic-license-2.0-header.txt")
 
@@ -105,24 +105,23 @@ main () {
   .buildkite/scripts/bootstrap.sh
 
   # Build ANTLR stuff
-  cd ./packages/kbn-esql-ast/src  
-  yarn build:antlr4:esql 
+  cd ./packages/kbn-esql-ast/src
+  yarn build:antlr4:esql
 
   # Make a commit
   BRANCH_NAME="esql_grammar_sync_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
-  git add esql/antlr/*
+  git add antlr/*
   git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
 
-  git remote add kibanamachine https://github.com/kibanamachine/kibana.git
-  git push kibanamachine "$BRANCH_NAME"
+  git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --draft --title "$PR_TITLE" --body "$PR_BODY" --base main --head "kibanamachine:${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:Visualizations' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
 }
 
 main

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect, useCallback } from 'react';
+import React, { useReducer, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
@@ -38,10 +38,12 @@ import {
   RuleTypeMetaData,
   TriggersActionsUiConfig,
   RuleNotifyWhenType,
+  RuleUiAction,
+  RuleAction,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
-import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
+import { getRuleReducer } from './rule_reducer';
 import { updateRule } from '../../lib/rule_api/update';
 import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
@@ -60,6 +62,14 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
   }
 );
 
+// Separate function for determining if an untyped action has a group property or not, which helps determine if
+// it is a default action or a system action. Consolidated here to deal with type definition complexity
+const actionHasDefinedGroup = (action: RuleUiAction): action is RuleAction => {
+  if (!('group' in action)) return false;
+  // If the group property is present, ensure that it isn't null or undefined
+  return Boolean(action.group);
+};
+
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
 
@@ -75,10 +85,16 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action) => ({
-      ...action,
-      frequency,
-    }));
+
+    clonedRule.actions = clonedRule.actions.map((action: RuleUiAction) => {
+      if (actionHasDefinedGroup(action)) {
+        return {
+          ...action,
+          frequency,
+        };
+      }
+      return action;
+    });
   }
   return clonedRule;
 };
@@ -100,7 +116,8 @@ export const RuleEdit = <
   ...props
 }: RuleEditProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
-  const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
+  const ruleReducer = useMemo(() => getRuleReducer<Rule>(actionTypeRegistry), [actionTypeRegistry]);
+  const [{ rule }, dispatch] = useReducer(ruleReducer, {
     rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -121,6 +138,8 @@ export const RuleEdit = <
   const {
     http,
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -160,7 +179,8 @@ export const RuleEdit = <
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    config
+    config,
+    actionTypeRegistry
   );
 
   const checkForChangesAndCloseFlyout = () => {
@@ -205,7 +225,8 @@ export const RuleEdit = <
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });

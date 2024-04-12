@@ -2010,7 +2010,7 @@
         "tags": [],
         "label": "OptInConfig",
         "description": [
-          "\n"
+          "\nOptions for the optIn API"
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,

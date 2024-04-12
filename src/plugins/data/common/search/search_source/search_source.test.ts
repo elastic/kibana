@@ -14,7 +14,7 @@ import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
 import { SearchSourceSearchOptions } from './types';

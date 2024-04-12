@@ -495,7 +495,7 @@ describe('actionTypeRegistry', () => {
       expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
     });
 
-    test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
+    test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has system connectors', async () => {
       mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
@@ -504,7 +504,7 @@ describe('actionTypeRegistry', () => {
           'system-connector-test.system-action',
           'system-action-type'
         )
-      ).toEqual(false);
+      ).toEqual(true);
     });
 
     test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {

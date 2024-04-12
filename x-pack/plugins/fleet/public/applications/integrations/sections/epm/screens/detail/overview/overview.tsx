@@ -214,6 +214,8 @@ export const OverviewPage: React.FC<Props> = memo(
           isSelected: selectedItemId === id,
           onClick: () => selectItem(id),
           ...options,
+          // skip rendering empty items while preserving the header hierarchy
+          renderItem: name === '' ? () => null : undefined,
         };
       },
       [selectedItemId]

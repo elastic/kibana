@@ -229,6 +229,7 @@ describe('ConversationSettings', () => {
       [welcomeConvo.title]: {
         ...mockConvos[welcomeConvo.title],
         apiConfig: {
+          actionTypeId: mockConnector.actionTypeId,
           connectorId: mockConnector.id,
           model: undefined,
           provider: undefined,
@@ -240,6 +241,7 @@ describe('ConversationSettings', () => {
         [welcomeConvo.title]: {
           ...mockConvos[welcomeConvo.title],
           apiConfig: {
+            actionTypeId: mockConnector.actionTypeId,
             connectorId: mockConnector.id,
             model: undefined,
             provider: undefined,
@@ -327,6 +329,7 @@ describe('ConversationSettings', () => {
         ...mockConvo,
         id: 'not-the-right-id',
         apiConfig: {
+          actionTypeId: mockConnector.actionTypeId,
           connectorId: mockConnector.id,
           model: undefined,
           provider: undefined,
