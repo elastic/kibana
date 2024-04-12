@@ -10,3 +10,4 @@ export { assetCriticalityUpsertRoute } from './upsert';
 export { assetCriticalityGetRoute } from './get';
 export { assetCriticalityDeleteRoute } from './delete';
 export { assetCriticalityPrivilegesRoute } from './privileges';
+export { assetCriticalityCSVUploadRoute } from './upload_csv';

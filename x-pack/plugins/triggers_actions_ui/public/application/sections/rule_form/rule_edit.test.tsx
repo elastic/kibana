@@ -210,6 +210,7 @@ describe('rule_edit', () => {
     await setup();
     expect(wrapper.find('[data-test-subj="editRuleFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedRuleButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="showEditedRequestButton"]').exists()).toBeTruthy();
   });
 
   it('displays a toast message on save for server errors', async () => {

@@ -448,7 +448,13 @@ function getSystemActionTypeWithKibanaPrivileges() {
     getKibanaPrivileges: () => ['cases:cases/createCase'],
     validate: {
       params: {
-        schema: schema.any(),
+        /**
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        schema: schema.object({
+          index: schema.maybe(schema.string()),
+          reference: schema.maybe(schema.string()),
+        }),
       },
       config: {
         schema: schema.any(),
