@@ -10,13 +10,13 @@ import { act, render, fireEvent } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
-import { useActionStatus } from '../hooks';
-import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
+import { useActionStatus } from '../../hooks';
+import { useGetAgentPolicies, useStartServices } from '../../../../../hooks';
 
-import { AgentActivityFlyout } from './agent_activity_flyout';
+import { AgentActivityFlyout } from '.';
 
-jest.mock('../hooks');
-jest.mock('../../../../hooks');
+jest.mock('../../hooks');
+jest.mock('../../../../../hooks');
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
@@ -32,6 +32,19 @@ describe('AgentActivityFlyout', () => {
   const mockAbortUpgrade = jest.fn();
   const mockSetSearch = jest.fn();
   const mockSetSelectedStatus = jest.fn();
+
+  const component = (refreshAgentActivity: boolean = false) => (
+    <IntlProvider timeZone="UTC" locale="en">
+      <AgentActivityFlyout
+        onClose={mockOnClose}
+        onAbortSuccess={mockOnAbortSuccess}
+        refreshAgentActivity={refreshAgentActivity}
+        setSearch={mockSetSearch}
+        setSelectedStatus={mockSetSelectedStatus}
+        agentPolicies={[]}
+      />
+    </IntlProvider>
+  );
 
   beforeEach(() => {
     mockOnClose.mockReset();
@@ -63,21 +76,58 @@ describe('AgentActivityFlyout', () => {
     jest.useRealTimers();
   });
 
-  const renderComponent = () => {
-    return render(
-      <IntlProvider timeZone="UTC" locale="en">
-        <AgentActivityFlyout
-          onClose={mockOnClose}
-          onAbortSuccess={mockOnAbortSuccess}
-          refreshAgentActivity={false}
-          setSearch={mockSetSearch}
-          setSelectedStatus={mockSetSelectedStatus}
-        />
-      </IntlProvider>
-    );
-  };
+  it('should render a loader while actions are loading and then render actions', async () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action2',
+        nbAgentsActionCreated: 5,
+        nbAgentsAck: 0,
+        version: '8.5.0',
+        startTime: '2022-09-15T10:00:00.000Z',
+        type: 'UPGRADE',
+        nbAgentsActioned: 5,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        hasRolloutPeriod: true,
+      },
+    ];
+    mockUseActionStatus
+      .mockReturnValueOnce({
+        currentActions: mockActionStatuses,
+        abortUpgrade: mockAbortUpgrade,
+        isFirstLoading: true,
+      })
+      .mockReturnValueOnce({
+        currentActions: mockActionStatuses,
+        abortUpgrade: mockAbortUpgrade,
+        isFirstLoading: false,
+      });
 
-  it('should render agent activity for in progress upgrade', () => {
+    const result = render(component());
+
+    expect(result.getByText('Agent activity')).toBeInTheDocument();
+    expect(result.queryByTestId('loading')).toBeInTheDocument();
+    expect(result.queryByTestId('upgradeInProgressTitle')).not.toBeInTheDocument();
+
+    result.rerender(component());
+    expect(result.queryByTestId('loading')).not.toBeInTheDocument();
+    expect(result.queryByTestId('upgradeInProgressTitle')).toBeInTheDocument();
+  });
+
+  it('should render an empty state after loading if there are no actions', () => {
+    mockUseActionStatus.mockReturnValue({
+      currentActions: [],
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
+    const result = render(component());
+
+    expect(result.queryByText('No activity to display')).toBeInTheDocument();
+  });
+
+  it('should render agent activity for in progress upgrade', async () => {
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -97,9 +147,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -140,9 +190,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -178,9 +228,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -218,9 +268,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '2 agents upgraded'
@@ -249,9 +299,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -280,9 +330,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -316,9 +366,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent unenrollment expired'
@@ -349,9 +399,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent upgrade cancelled'
@@ -382,9 +432,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 1 agent assigned to a new policy'
@@ -419,9 +469,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 3 agents actioned'
@@ -453,9 +503,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Policy changed'
@@ -487,9 +537,9 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
-      isFirstLoading: true,
+      isFirstLoading: false,
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '3 agents applied policy change'
@@ -541,7 +591,7 @@ describe('AgentActivityFlyout', () => {
         return {
           currentActions: [failedAction],
           abortUpgrade: mockAbortUpgrade,
-          isFirstLoading: true,
+          isFirstLoading: false,
         };
       } else {
         return {
@@ -551,7 +601,7 @@ describe('AgentActivityFlyout', () => {
         };
       }
     });
-    const result = renderComponent();
+    const result = render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')).toBe(null);
@@ -562,17 +612,7 @@ describe('AgentActivityFlyout', () => {
 
     expect(result.getByText('Agent 1 is not upgradeable')).toBeInTheDocument();
 
-    result.rerender(
-      <IntlProvider timeZone="UTC" locale="en">
-        <AgentActivityFlyout
-          onClose={mockOnClose}
-          onAbortSuccess={mockOnAbortSuccess}
-          refreshAgentActivity={true}
-          setSearch={mockSetSearch}
-          setSelectedStatus={mockSetSelectedStatus}
-        />
-      </IntlProvider>
-    );
+    result.rerender(component(true));
 
     expect(
       result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
