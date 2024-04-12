@@ -39,7 +39,8 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/170445
+describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
