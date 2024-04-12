@@ -102,6 +102,9 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
 
 export type RuleEditComponent = typeof RuleEdit;
 
+/**
+ * @deprecated V1 Rule Form, use RuleForm from `@kbn/alerts_ui_shared` instead
+ */
 export const RuleEdit = <
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData extends RuleTypeMetaData = RuleTypeMetaData
