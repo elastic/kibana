@@ -14,6 +14,7 @@ import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
+import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
@@ -22,6 +23,12 @@ export interface NavigationPublicSetup {
 }
 
 export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComponentGetter'>;
+export type AddSolutionNavigationArg = Omit<SolutionNavigation, 'sideNavComponent'> & {
+  /** Data test subj for the side navigation */
+  dataTestSubj?: string;
+  /** Panel content provider for the side navigation */
+  panelContentProvider?: PanelContentProvider;
+};
 
 export interface NavigationPublicStart {
   ui: {
@@ -33,7 +40,7 @@ export interface NavigationPublicStart {
     ) => ReturnType<typeof createTopNav>;
   };
   /** Add a solution navigation to the header nav switcher. */
-  addSolutionNavigation: (solutionNavigation: SolutionNavigation) => void;
+  addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
 }

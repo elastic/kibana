@@ -24,6 +24,7 @@ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' a
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
+export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -210,7 +211,15 @@ export const LOCAL_STORAGE_KEYS = {
  * Connectors
  */
 
+export enum CASES_CONNECTOR_SUB_ACTION {
+  RUN = 'run',
+}
+
 export const NONE_CONNECTOR_ID: string = 'none';
+export const CASES_CONNECTOR_ID = '.cases';
+export const CASES_CONNECTOR_TITLE = 'Cases';
+
+export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
 
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field
