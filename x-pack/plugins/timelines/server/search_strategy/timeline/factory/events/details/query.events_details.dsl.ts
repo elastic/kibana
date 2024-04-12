@@ -61,7 +61,7 @@ export const buildTimelineDetailsQuery = ({
       // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
       runtime_mappings: runtimeMappings,
       stored_fields: ['*'],
-      _source: false,
+      _source: true,
     },
     size: 1,
   };

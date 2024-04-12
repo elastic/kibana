@@ -6,23 +6,34 @@
  */
 
 import { Replacements } from '../../schemas';
+import { AnonymizationFieldResponse } from '../../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const getIsDataAnonymizable = (rawData: string | Record<string, string[]>): boolean =>
   typeof rawData !== 'string';
 
-export const isAllowed = ({ allowSet, field }: { allowSet: Set<string>; field: string }): boolean =>
-  allowSet.has(field);
-
-export const isDenied = ({ allowSet, field }: { allowSet: Set<string>; field: string }): boolean =>
-  !allowSet.has(field);
-
-export const isAnonymized = ({
-  allowReplacementSet,
+export const isAllowed = ({
+  anonymizationFields,
   field,
 }: {
-  allowReplacementSet: Set<string>;
+  anonymizationFields: AnonymizationFieldResponse[];
   field: string;
-}): boolean => allowReplacementSet.has(field);
+}): boolean => anonymizationFields.find((a) => a.field === field)?.allowed ?? false;
+
+export const isDenied = ({
+  anonymizationFields,
+  field,
+}: {
+  anonymizationFields: AnonymizationFieldResponse[];
+  field: string;
+}): boolean => !(anonymizationFields.find((a) => a.field === field)?.allowed ?? false);
+
+export const isAnonymized = ({
+  anonymizationFields,
+  field,
+}: {
+  anonymizationFields: AnonymizationFieldResponse[];
+  field: string;
+}): boolean => anonymizationFields.find((a) => a.field === field)?.anonymized ?? false;
 
 export const replaceAnonymizedValuesWithOriginalValues = ({
   messageContent,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Message } from '../../assistant_context/types';
+import type { ClientMessage } from '../../assistant_context/types';
 import { getCombinedMessage, getSystemMessages } from './helpers';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { mockSystemPrompt } from '../../mock/system_prompt';
@@ -13,8 +13,7 @@ import { mockAlertPromptContext } from '../../mock/prompt_context';
 import type { SelectedPromptContext } from '../prompt_context/types';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'alert data',
 };
@@ -39,7 +38,7 @@ describe('helpers', () => {
     });
 
     describe('when isNewChat is true and selectedSystemPrompt is defined', () => {
-      let result: Message[];
+      let result: ClientMessage[];
 
       beforeEach(() => {
         result = getSystemMessages({ isNewChat: true, selectedSystemPrompt: mockSystemPrompt });
@@ -63,7 +62,7 @@ describe('helpers', () => {
 
   describe('getCombinedMessage', () => {
     it('returns correct content for a new chat with a system prompt', async () => {
-      const message: Message = await getCombinedMessage({
+      const message: ClientMessage = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
@@ -85,7 +84,7 @@ User prompt text`);
     });
 
     it('returns correct content for a new chat WITHOUT a system prompt', async () => {
-      const message: Message = await getCombinedMessage({
+      const message: ClientMessage = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
@@ -106,7 +105,7 @@ User prompt text`);
     });
 
     it('returns the correct content for an existing chat', async () => {
-      const message: Message = await getCombinedMessage({
+      const message: ClientMessage = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: false,
         promptText: 'User prompt text',
@@ -125,7 +124,7 @@ User prompt text`);
     });
 
     it('returns the expected role', async () => {
-      const message: Message = await getCombinedMessage({
+      const message: ClientMessage = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
@@ -139,7 +138,7 @@ User prompt text`);
     });
 
     it('returns a valid timestamp', async () => {
-      const message: Message = await getCombinedMessage({
+      const message: ClientMessage = await getCombinedMessage({
         currentReplacements: {},
         isNewChat: true,
         promptText: 'User prompt text',
@@ -152,8 +151,25 @@ User prompt text`);
 
     describe('when there is data to anonymize', () => {
       const mockPromptContextWithDataToAnonymize: SelectedPromptContext = {
-        allow: ['field1', 'field2'],
-        allowReplacement: ['field1', 'field2'],
+        contextAnonymizationFields: {
+          total: 0,
+          page: 1,
+          perPage: 1000,
+          data: [
+            {
+              id: 'field1',
+              field: 'field1',
+              anonymized: true,
+              allowed: true,
+            },
+            {
+              id: 'field2',
+              field: 'field2',
+              anonymized: true,
+              allowed: true,
+            },
+          ],
+        },
         promptContextId: 'test-prompt-context-id',
         rawData: {
           field1: ['foo', 'bar', 'baz'],
@@ -185,7 +201,7 @@ User prompt text`);
       it('returns the expected content when `isNewChat` is false', async () => {
         const isNewChat = false; // <-- not a new chat
 
-        const message: Message = await getCombinedMessage({
+        const message: ClientMessage = await getCombinedMessage({
           currentReplacements: {},
           getAnonymizedValue: mockGetAnonymizedValue,
           isNewChat,

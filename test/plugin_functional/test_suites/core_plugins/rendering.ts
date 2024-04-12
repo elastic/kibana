@@ -161,9 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
-        'navigation.solutionNavigation.featureOn (boolean)',
         'navigation.solutionNavigation.enabled (boolean)',
-        'navigation.solutionNavigation.optInStatus (alternatives)',
         'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
@@ -341,6 +339,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
         'share.new_version.enabled (boolean)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (alternatives)',
         /**
          * Rule form V2 feature flags
          */

@@ -10,6 +10,10 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
+  EuiDescriptionListDescription,
+  EuiIcon,
+  EuiText,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -63,6 +67,7 @@ interface VisualizeQueryResponsev1 {
   };
   content: {
     message: string;
+    errorMessages: string[];
   };
 }
 
@@ -87,6 +92,8 @@ interface VisualizeESQLProps {
   userOverrides?: unknown;
   /** User's preferation chart type as it comes from the model */
   preferredChartType?: ChartType;
+  /** Error messages returned by the query validator */
+  errorMessages?: string[];
   ObservabilityAIAssistantMultipaneFlyoutContext: ObservabilityAIAssistantPublicStart['ObservabilityAIAssistantMultipaneFlyoutContext'];
 }
 
@@ -104,6 +111,7 @@ export function VisualizeESQL({
   userOverrides,
   preferredChartType,
   ObservabilityAIAssistantMultipaneFlyoutContext,
+  errorMessages,
 }: VisualizeESQLProps) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -114,7 +122,6 @@ export function VisualizeESQL({
   const dataViewAsync = useAsync(() => {
     return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern]);
-
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -184,10 +191,10 @@ export function VisualizeESQL({
 
   // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
-    if (lensLoadEvent && lensInput?.attributes) {
+    if (lensInput?.attributes) {
       return {
         attributes: lensInput?.attributes,
-        lensEvent: lensLoadEvent,
+        lensEvent: lensLoadEvent ?? { adapters: {} },
         onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
           if (lensInput) {
             const newInput = {
@@ -235,6 +242,30 @@ export function VisualizeESQL({
   return (
     <>
       <EuiFlexGroup direction="column">
+        {Boolean(errorMessages?.length) && (
+          <>
+            <EuiText size="s">
+              {i18n.translate('xpack.observabilityAiAssistant.lensESQLFunction.errorMessage', {
+                defaultMessage: 'There were some errors in the generated query',
+              })}
+            </EuiText>
+            <EuiDescriptionList data-test-subj="observabilityAiAssistantErrorsList">
+              {errorMessages?.map((error, index) => {
+                return (
+                  <EuiDescriptionListDescription key={index}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="error" color="danger" size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{error}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiDescriptionListDescription>
+                );
+              })}
+            </EuiDescriptionList>
+          </>
+        )}
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
             <EuiToolTip
@@ -320,6 +351,10 @@ export function registerVisualizeQueryRenderFunction({
       const typedResponse = response as VisualizeQueryResponse;
 
       const columns = 'data' in typedResponse ? typedResponse.data.columns : typedResponse.content;
+      const errorMessages =
+        'content' in typedResponse && 'errorMessages' in typedResponse.content
+          ? typedResponse.content.errorMessages
+          : [];
 
       if ('data' in typedResponse && 'userOverrides' in typedResponse.data) {
         userOverrides = typedResponse.data.userOverrides;
@@ -389,6 +424,7 @@ export function registerVisualizeQueryRenderFunction({
           onActionClick={onActionClick}
           userOverrides={userOverrides}
           preferredChartType={preferredChartType}
+          errorMessages={errorMessages}
         />
       );
     }
