@@ -14,10 +14,14 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiCode,
+  EuiIcon,
+  EuiToolTip,
   Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
@@ -55,18 +59,51 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
   const columns: Array<EuiBasicTableColumn<ConnectorSyncJob>> = [
     {
       field: 'completed_at',
-      name: i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
-        defaultMessage: 'Last sync',
-      }),
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="searchConnectors.syncJobs.lastSync.columnTitle.tooltip"
+              defaultMessage="The timestamp of a given job's {completed_at}. This is when syncs finish, either successfully, in error, or by being canceled."
+              values={{ completed_at: <EuiCode>completed_at</EuiCode> }}
+            />
+          }
+        >
+          <>
+            {i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
+              defaultMessage: 'Last sync',
+            })}
+            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (lastSync: string) =>
         lastSync ? <FormattedDateTime date={new Date(lastSync)} /> : '--',
       sortable: true,
       truncateText: false,
     },
     {
-      name: i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
-        defaultMessage: 'Sync duration',
-      }),
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="searchConnectors.syncJobs.syncDuration.columnTitle.tooltip"
+              defaultMessage="The time between when a sync started ({started_at}) and when it terminated ({completed_at}) (whether successfully, in error, or canceled). Note that this does not include the time the job may have spent in a “pending” stage, waiting for a worker to pick it up."
+              values={{
+                completed_at: <EuiCode>completed_at</EuiCode>,
+                started_at: <EuiCode>completed_at</EuiCode>,
+              }}
+            />
+          }
+        >
+          <>
+            {i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
+              defaultMessage: 'Sync duration',
+            })}
+            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (syncJob: ConnectorSyncJob) => durationToText(getSyncJobDuration(syncJob)),
       truncateText: false,
     },
