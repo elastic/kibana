@@ -10,5 +10,5 @@ import { i18n } from '@kbn/i18n';
 export const DOCS_UNIT = (totalCount: number) =>
   i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.storage.docs.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {doc} other {docs}}`,
+    defaultMessage: `{totalCount, plural, =1 {Doc} other {Docs}}`,
   });

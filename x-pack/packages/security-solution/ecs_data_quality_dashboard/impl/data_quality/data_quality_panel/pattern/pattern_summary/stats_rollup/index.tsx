@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { EMPTY_STAT, getIncompatibleStatColor } from '../../../../helpers';
-import { useDataQualityContext } from '../../../data_quality_context';
 import { StatLabel } from '../../../stat_label';
 import * as i18n from '../../../stat_label/translations';
 
@@ -49,7 +48,6 @@ const StatsRollupComponent: React.FC<Props> = ({
   pattern,
   sizeInBytes,
 }) => {
-  const { isILMAvailable } = useDataQualityContext();
   const incompatibleDescription = useMemo(
     () => <StatLabel line1={i18n.INCOMPATIBLE} line2={i18n.FIELDS} />,
     []
@@ -122,7 +120,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         </IndicesStatContainer>
       </EuiFlexItem>
 
-      {isILMAvailable && (
+      {Number.isInteger(sizeInBytes) && (
         <EuiFlexItem grow={false}>
           <IndicesStatContainer>
             <EuiToolTip
