@@ -32,19 +32,11 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { isEqual } from 'lodash';
-import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { URL_PARAM_ARRAY_EXCEPTION_MSG } from '@kbn/alerts-ui-shared/src/alert_filter_controls/translations';
-import type { FilterGroupHandler, FilterControlConfig } from '@kbn/alerts-ui-shared';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
-import {
-  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
-  DEFAULT_DETECTION_PAGE_FILTERS,
-} from '../../../../common/constants';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -96,8 +88,6 @@ import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_fil
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
-import { useInitializeUrlParam } from '../../../common/utils/global_query_string';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -107,11 +97,6 @@ const StyledFullHeightContainer = styled.div`
   flex-direction: column;
   flex: 1 1 auto;
 `;
-
-const SECURITY_ALERT_DATA_VIEW = {
-  id: 'security_solution_alerts_dv',
-  name: 'Security Solution Alerts DataView',
-};
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -186,29 +171,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: isLoadingIndexPattern,
     indexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
-  const spaceId = useSpaceId();
-
-  const [filterControlsUrlState, setFilterControlsUrlState] = useState<FilterControlConfig[]>();
-
-  const onUrlParamInit = (param: FilterControlConfig[] | null) => {
-    if (!param) {
-      setFilterControlsUrlState([]);
-      return;
-    }
-    try {
-      if (!Array.isArray(param)) {
-        throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
-      }
-      setFilterControlsUrlState(param);
-    } catch (err) {
-      // if there is an error ignore url Param
-      // eslint-disable-next-line no-console
-      console.error(err);
-      setFilterControlsUrlState([]);
-    }
-  };
-
-  useInitializeUrlParam(URL_PARAM_KEY.pageFilter, onUrlParamInit);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
@@ -218,12 +180,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const loading = userInfoLoading || listsConfigLoading;
   const {
-    http,
-    notifications,
     application: { navigateToUrl },
     timelines: timelinesUi,
     data,
-    dataViews,
   } = useKibana().services;
 
   const { filterManager } = data.query;
@@ -334,7 +293,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
+  const onFiltersChange = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
     if (newFilters.length) {
       const newStatusFilter = newFilters.find(
@@ -384,19 +343,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [isAlertTableLoading, loading]
   );
 
-  const dataViewSpec = useMemo(
-    () =>
-      indexPattern
-        ? {
-            id: SECURITY_ALERT_DATA_VIEW.id,
-            name: SECURITY_ALERT_DATA_VIEW.name,
-            allowNoIndex: true,
-            title: indexPattern.title,
-          }
-        : null,
-    [indexPattern]
-  );
-
   const AlertPageFilters = useMemo(
     () =>
       !arePageFiltersEnabled ? (
@@ -420,46 +366,28 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : dataViewSpec ? (
-        <AlertFilterControls
-          controlsUrlState={filterControlsUrlState}
-          spaceId={spaceId}
-          featureIds={[AlertConsumers.SIEM]}
+      ) : (
+        <DetectionEngineFilters
           filters={topLevelFilters}
-          onFiltersChange={pageFiltersUpdateHandler}
+          onFiltersChange={onFiltersChange}
           query={query}
           timeRange={{
             from,
             to,
             mode: 'absolute',
           }}
-          chainingSystem="HIERARCHICAL"
           onInit={setDetectionPageFilterHandler}
-          defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
-          dataViewSpec={dataViewSpec}
-          services={{
-            http,
-            notifications,
-            dataViews,
-            storage: Storage,
-          }}
-          ControlGroupRenderer={ControlGroupRenderer}
-          maxControls={4}
+          indexPattern={indexPattern}
         />
-      ) : null,
+      ),
     [
       arePageFiltersEnabled,
-      dataViewSpec,
-      dataViews,
-      filterControlsUrlState,
       from,
-      http,
-      notifications,
+      indexPattern,
       onFilterGroupChangedCallback,
-      pageFiltersUpdateHandler,
+      onFiltersChange,
       query,
       showUpdating,
-      spaceId,
       statusFilter,
       timelinesUi,
       to,

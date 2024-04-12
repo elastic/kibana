@@ -54,6 +54,10 @@ export interface FilterGroupProps
    */
   controlsUrlState?: FilterControlConfig[];
   /**
+   * Setter for the controls url state
+   */
+  setControlsUrlState?: (controls: FilterControlConfig[]) => void;
+  /**
    * Init callback
    */
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;

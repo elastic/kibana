@@ -57,6 +57,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     spaceId,
     onInit,
     controlsUrlState,
+    setControlsUrlState,
     maxControls = Infinity,
     ControlGroupRenderer,
     Storage,
@@ -65,6 +66,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
+  const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
 
@@ -108,6 +110,15 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     storageKey: localStoragePageFilterKey,
     shouldSync: isViewMode,
   });
+
+  useEffect(() => {
+    if (controlGroupInputUpdates) {
+      const formattedFilters = getFilterItemObjListFromControlInput(controlGroupInputUpdates);
+      if (!formattedFilters) return;
+      if (controlGroupInputUpdates.viewMode !== 'view') return;
+      setControlsUrlState?.(formattedFilters);
+    }
+  }, [controlGroupInputUpdates, setControlsUrlState]);
 
   const [showFiltersChangedBanner, setShowFiltersChangedBanner] = useState(false);
 
@@ -188,7 +199,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   useEffect(() => {
-    if (controlsUrlState) {
+    if (controlsUrlState && !urlStateInitialized) {
       try {
         if (!Array.isArray(controlsUrlState)) {
           throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
@@ -214,6 +225,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
         // eslint-disable-next-line no-console
         console.error(err);
       }
+      setUrlStateInitialized(true);
     }
 
     if (!controlGroup) {
@@ -240,6 +252,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     getStoredControlInput,
     handleInputUpdates,
     switchToEditMode,
+    urlStateInitialized,
   ]);
 
   const onControlGroupLoadHandler = useCallback(

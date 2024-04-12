@@ -8,7 +8,7 @@ import { encode } from '@kbn/rison';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 
-import { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
@@ -98,11 +98,10 @@ const assertFilterControlsWithFilterObject = (
 
   filterObject.forEach((filter, idx) => {
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
-      const selectedOptionsText =
-        filter.selectedOptions && filter.selectedOptions.length > 0
-          ? filter.selectedOptions.join('')
-          : '';
-      expect(sub.text().replace(',', '').replace(' ', '')).to.have.string(selectedOptionsText);
+      const controlText = sub.text();
+      filter.selectedOptions?.forEach((option) => {
+        expect(controlText).to.have.string(option);
+      });
     });
   });
 };
