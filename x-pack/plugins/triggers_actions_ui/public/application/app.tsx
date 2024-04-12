@@ -46,6 +46,8 @@ import {
   legacyRouteToRuleDetails,
   routeToConnectors,
   legacyRouteToAlerts,
+  createRuleRoute,
+  editRuleRoute,
 } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
@@ -53,6 +55,9 @@ import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
+import { CreateRulePage } from './sections/create_rule';
+import { EditRulePage } from './sections/edit_rule';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -127,6 +132,12 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
+        {getIsExperimentalFeatureEnabled('ruleFormV2') && (
+          <Route path={editRuleRoute} component={EditRulePage} />
+        )}
+        {getIsExperimentalFeatureEnabled('ruleFormV2') && (
+          <Route path={createRuleRoute} component={CreateRulePage} />
+        )}
         <Route
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
