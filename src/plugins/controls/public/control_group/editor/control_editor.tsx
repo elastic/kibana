@@ -129,8 +129,8 @@ export const ControlEditor = ({
       if (!mounted) return;
 
       const initialId =
-        controlGroup.getOutput().dataViewIds?.[0] ??
         embeddable?.getInput().dataViewId ??
+        controlGroup.getOutput().dataViewIds?.[0] ??
         getRelevantDataViewId?.() ??
         (await getDefaultId());
       if (initialId) {
