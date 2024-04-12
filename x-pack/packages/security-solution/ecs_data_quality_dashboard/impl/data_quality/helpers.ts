@@ -287,6 +287,8 @@ export const getSizeInBytes = ({
   stats: Record<string, MeteringStatsIndex> | null;
 }): number | undefined => (stats && stats[indexName]?.size_in_bytes) ?? undefined;
 
+export const getFallbackValue = (fallback: boolean) => (fallback ? 0 : undefined);
+
 export const getTotalDocsCount = ({
   indexNames,
   stats,
@@ -506,7 +508,7 @@ export const formatStorageResult = ({
   ilmPhase: result.ilmPhase,
   markdownComments: result.markdownComments,
   ecsVersion: report.ecsVersion,
-  indexId: report.indexId,
+  indexId: report.indexId ?? '', // ---> we don't have this field when isILMAvailable is false
   error: result.error,
 });
 

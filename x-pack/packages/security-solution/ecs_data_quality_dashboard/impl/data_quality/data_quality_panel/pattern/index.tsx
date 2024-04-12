@@ -33,6 +33,7 @@ import {
 } from './helpers';
 import {
   getDocsCount,
+  getFallbackValue,
   getIndexId,
   getIndexNames,
   getTotalDocsCount,
@@ -335,7 +336,7 @@ const PatternComponent: React.FC<Props> = ({
             ilmExplainPhaseCounts={ilmExplainPhaseCounts}
             pattern={pattern}
             patternDocsCount={patternRollup?.docsCount ?? 0}
-            patternSizeInBytes={patternRollup?.sizeInBytes}
+            patternSizeInBytes={patternRollup?.sizeInBytes ?? getFallbackValue(isILMAvailable)}
           />
           <EuiSpacer />
         </EuiFlexItem>
