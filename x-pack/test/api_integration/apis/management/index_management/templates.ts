@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import { TemplateDeserialized, allowAutoCreateRadioIds } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
@@ -372,6 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
         const templateName = `deprecated_template-${getRandomString()}`;
         const indexTemplate: TemplateDeserialized = {
           _kbnMeta: { hasDatastream: false, type: 'default' },
+          allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
           name: templateName,
           indexPatterns: [getRandomString()],
           template: {},
