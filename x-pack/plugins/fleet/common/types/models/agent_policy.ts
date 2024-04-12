@@ -7,16 +7,13 @@
 
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { agentPolicyStatuses, agentLoggingLevels } from '../../constants';
+import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
-
-type AgentLoggingLevelKeys = keyof typeof agentLoggingLevels;
-export type AgentLoggingLevel = typeof agentLoggingLevels[AgentLoggingLevelKeys];
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
 // x-pack/plugins/fleet/server/services/agent_policy.ts#L571
@@ -123,9 +120,6 @@ export interface FullAgentPolicy {
       enabled: boolean;
       uninstall_token_hash: string;
       signing_key: string;
-    };
-    logging?: {
-      level: AgentLoggingLevel;
     };
   };
   secret_references?: PolicySecretReference[];
