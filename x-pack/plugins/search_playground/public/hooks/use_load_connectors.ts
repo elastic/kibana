@@ -27,46 +27,44 @@ type OpenAIConnector = UserConfiguredActionConnector<
   Record<string, unknown>
 >;
 
-const mapLLMToActionParam: Record<
-  LLMs,
+const connectorTypeToLLM: Array<{
+  actionId: string;
+  actionProvider?: string;
+  match: (connector: ActionConnector) => boolean;
+  transform: (connector: ActionConnector) => PlaygroundConnector;
+}> = [
   {
-    actionId: string;
-    actionProvider?: string;
-    match: (connector: ActionConnector) => boolean;
-    transform: (connector: ActionConnector) => PlaygroundConnector;
-  }
-> = {
-  [LLMs.openai_azure]: {
     actionId: OPENAI_CONNECTOR_ID,
     actionProvider: OpenAiProviderType.AzureAi,
     match: (connector) =>
+      connector.actionTypeId === OPENAI_CONNECTOR_ID &&
       (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.AzureAi,
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIAzureConnectorTitle', {
         defaultMessage: 'OpenAI Azure',
       }),
+      type: LLMs.openai_azure,
     }),
   },
-  [LLMs.openai]: {
+  {
     actionId: OPENAI_CONNECTOR_ID,
     match: (connector) =>
+      connector.actionTypeId === OPENAI_CONNECTOR_ID &&
       (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.OpenAi,
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {
         defaultMessage: 'OpenAI',
       }),
+      type: LLMs.openai,
     }),
   },
-};
+];
 
-type PlaygroundConnector = ActionConnector & { title: string };
+type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
-export const useLoadConnectors = (): UseQueryResult<
-  Record<LLMs, PlaygroundConnector>,
-  IHttpFetchError
-> => {
+export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttpFetchError> => {
   const {
     services: { http, notifications },
   } = useKibana();
@@ -76,19 +74,15 @@ export const useLoadConnectors = (): UseQueryResult<
     async () => {
       const queryResult = await loadConnectors({ http });
 
-      return Object.entries(mapLLMToActionParam).reduce<Partial<Record<LLMs, PlaygroundConnector>>>(
-        (result, [llm, { actionId, match, transform }]) => {
-          const targetConnector = queryResult.find(
-            (connector) =>
-              !connector.isMissingSecrets &&
-              connector.actionTypeId === actionId &&
-              (match?.(connector) ?? true)
-          );
+      return queryResult.reduce<PlaygroundConnector[]>((result, connector) => {
+        const { transform } = connectorTypeToLLM.find(({ match }) => match(connector)) || {};
 
-          return targetConnector ? { ...result, [llm]: transform(targetConnector) } : result;
-        },
-        {}
-      );
+        if (!connector.isMissingSecrets && !!transform) {
+          return [...result, transform(connector)];
+        }
+
+        return result;
+      }, []);
     },
     {
       retry: false,
