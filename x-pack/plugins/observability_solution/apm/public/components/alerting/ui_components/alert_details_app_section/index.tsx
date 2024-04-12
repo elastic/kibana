@@ -39,7 +39,6 @@ import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 export function AlertDetailsAppSection({
   rule,
@@ -167,8 +166,6 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <AlertDetailContextualInsights alert={alert} />
-
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
