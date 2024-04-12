@@ -43,7 +43,7 @@ export function fetchTextBased(
     dataView,
     inputQuery,
     titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
-      defaultMessage: 'ES|QL',
+      defaultMessage: 'Table',
     }),
     descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
