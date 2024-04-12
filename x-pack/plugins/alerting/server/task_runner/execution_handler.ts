@@ -459,7 +459,7 @@ export class ExecutionHandler<
 
     const connectorAdapterActionParams = connectorAdapter.buildActionParams({
       alerts: summarizedAlerts,
-      rule: { id: rule.id, tags: rule.tags, name: rule.name },
+      rule: { id: rule.id, tags: rule.tags, name: rule.name, consumer: rule.consumer },
       ruleUrl: ruleUrl?.absoluteUrl,
       spaceId,
       params: action.params,
