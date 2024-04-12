@@ -26,7 +26,7 @@ export function LinkDashboard({
   assetType: InfraCustomDashboardAssetType;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { canLinkOrEdit } = useSavedObjectsPermissions();
+  const { canSave } = useSavedObjectsPermissions();
 
   const onClick = useCallback(() => setIsModalVisible(true), []);
   const onClose = useCallback(() => setIsModalVisible(false), []);
@@ -36,7 +36,7 @@ export function LinkDashboard({
       <EuiToolTip
         position="top"
         content={
-          !canLinkOrEdit ? (
+          !canSave ? (
             <p data-test-subj="infraCannotAddDashboardTooltip">
               {i18n.translate(
                 'xpack.infra.linkDashboard.tooltip.youDoNotHavePermissionToUseThisFeature',
@@ -56,14 +56,14 @@ export function LinkDashboard({
             iconType="plusInCircle"
             data-test-subj="infraLinkDashboardMenu"
             onClick={onClick}
-            disabled={!canLinkOrEdit}
+            disabled={!canSave}
           >
             {i18n.translate('xpack.infra.assetDetails.dashboards.linkNewDashboardButtonLabel', {
               defaultMessage: 'Link new dashboard',
             })}
           </EuiButtonEmpty>
         ) : (
-          <EuiButton data-test-subj="infraAddDashboard" onClick={onClick} disabled={!canLinkOrEdit}>
+          <EuiButton data-test-subj="infraAddDashboard" onClick={onClick} disabled={!canSave}>
             {i18n.translate('xpack.infra.assetDetails.dashboards.linkButtonLabel', {
               defaultMessage: 'Link dashboard',
             })}

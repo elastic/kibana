@@ -21,7 +21,7 @@ const TEST_CURRENT_DASHBOARD = {
 describe('Custom Dashboards Actions', () => {
   it('should render the edit dashboard action when the user can edit', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: true,
+      canSave: true,
       canDelete: true,
     }));
     render(
@@ -38,7 +38,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the edit dashboard action when the user cannot edit', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: false,
+      canSave: false,
       canDelete: true,
     }));
     render(
@@ -56,7 +56,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the link dashboard action when the user can link a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: true,
+      canSave: true,
       canDelete: true,
     }));
     render(<LinkDashboard onRefresh={() => {}} assetType="host" />);
@@ -66,7 +66,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the link dashboard action when the user cannot link a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: false,
+      canSave: false,
       canDelete: true,
     }));
     render(<LinkDashboard onRefresh={() => {}} assetType="host" />);
@@ -76,7 +76,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the link new dashboard action when the user can link a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: true,
+      canSave: true,
       canDelete: true,
     }));
     render(<LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" />);
@@ -85,7 +85,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the link new dashboard action when the user cannot link a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: false,
+      canSave: false,
       canDelete: true,
     }));
     render(<LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" />);
@@ -94,7 +94,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: true,
+      canSave: true,
       canDelete: true,
     }));
     render(
@@ -109,7 +109,7 @@ describe('Custom Dashboards Actions', () => {
   });
   it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
     jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
-      canLinkOrEdit: true,
+      canSave: true,
       canDelete: false,
     }));
     render(

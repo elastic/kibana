@@ -14,12 +14,12 @@ export const useSavedObjectsPermissions = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const canLinkOrEdit = capabilities.savedObjectsManagement.edit === true;
+  const canSave = capabilities.savedObjectsManagement.edit === true;
 
   const canDelete = capabilities.savedObjectsManagement.delete === true;
 
   return {
-    canLinkOrEdit,
+    canSave,
     canDelete,
   };
 };
