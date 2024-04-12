@@ -126,7 +126,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }
         ),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/security',
+        path: '/app/management/kibana/aiAssistantManagementSecurity',
         showOnHomePage: false,
         category: 'admin',
       });
