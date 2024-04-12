@@ -12,7 +12,7 @@ import type {
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
 import { SaveDashboardModal } from './save_dashboard_modal';
-import { useSavedObjectsPermissions } from '../../../hooks/use_saved_objects_permissions';
+import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
 
 export function LinkDashboard({
   onRefresh,
@@ -26,7 +26,7 @@ export function LinkDashboard({
   assetType: InfraCustomDashboardAssetType;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { canSave } = useSavedObjectsPermissions();
+  const { canSave } = useSavedObjectUserPermissions();
 
   const onClick = useCallback(() => setIsModalVisible(true), []);
   const onClose = useCallback(() => setIsModalVisible(false), []);

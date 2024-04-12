@@ -20,7 +20,7 @@ const TEST_CURRENT_DASHBOARD = {
 
 describe('Custom Dashboards Actions', () => {
   it('should render the edit dashboard action when the user can edit', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -37,7 +37,7 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the edit dashboard action when the user cannot edit', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -55,7 +55,7 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the link dashboard action when the user can link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -65,7 +65,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link dashboard action when the user cannot link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -75,7 +75,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link new dashboard action when the user can link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -84,7 +84,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
   it('should render the link new dashboard action when the user cannot link a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: false,
       canDelete: true,
     }));
@@ -93,7 +93,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
   it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: true,
     }));
@@ -108,7 +108,7 @@ describe('Custom Dashboards Actions', () => {
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
   });
   it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
-    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+    jest.spyOn(hooks, 'useSavedObjectUserPermissions').mockImplementation(() => ({
       canSave: true,
       canDelete: false,
     }));

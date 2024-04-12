@@ -15,7 +15,7 @@ import type {
 import { useDeleteCustomDashboard } from '../../../hooks/use_custom_dashboards';
 import { useFetchCustomDashboards } from '../../../hooks/use_fetch_custom_dashboards';
 import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
-import { useSavedObjectsPermissions } from '../../../hooks/use_saved_objects_permissions';
+import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
 
 export function UnlinkDashboard({
   currentDashboard,
@@ -32,7 +32,7 @@ export function UnlinkDashboard({
   const [, setUrlState] = useAssetDetailsUrlState();
   const { deleteCustomDashboard, isDeleteLoading } = useDeleteCustomDashboard();
   const { dashboards, loading } = useFetchCustomDashboards({ assetType });
-  const { canDelete } = useSavedObjectsPermissions();
+  const { canDelete } = useSavedObjectUserPermissions();
 
   const onClick = useCallback(() => setIsModalVisible(true), []);
   const onCancel = useCallback(() => setIsModalVisible(false), []);

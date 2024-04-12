@@ -11,7 +11,7 @@ import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { useSavedObjectsPermissions } from '../../../hooks/use_saved_objects_permissions';
+import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
 import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function EditDashboard({
@@ -24,7 +24,7 @@ export function EditDashboard({
   assetType: InfraCustomDashboardAssetType;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { canSave } = useSavedObjectsPermissions();
+  const { canSave } = useSavedObjectUserPermissions();
 
   const onClick = useCallback(() => setIsModalVisible(!isModalVisible), [isModalVisible]);
 

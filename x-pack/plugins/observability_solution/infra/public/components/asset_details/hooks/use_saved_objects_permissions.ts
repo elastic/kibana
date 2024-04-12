@@ -7,7 +7,7 @@
 
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const useSavedObjectsPermissions = () => {
+export const useSavedObjectUserPermissions = () => {
   const {
     services: {
       application: { capabilities },
