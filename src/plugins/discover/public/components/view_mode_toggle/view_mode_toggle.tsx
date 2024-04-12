@@ -90,7 +90,7 @@ export const DocumentViewModeToggle = ({
             <EuiTab
               isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
               onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
-              data-test-subj="dscViewModeFieldStatsButton"
+              data-test-subj="dscViewModePatternAnalysisButton"
             >
               <FormattedMessage
                 id="discover.viewModes.patternAnalysis.label"
