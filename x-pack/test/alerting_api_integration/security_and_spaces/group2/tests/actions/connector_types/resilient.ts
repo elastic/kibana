@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ResilientSimulator } from '@kbn/actions-simulators-plugin/server/resilient_simulation';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function resilientTest({ getService }: FtrProviderContext) {
