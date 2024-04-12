@@ -57,9 +57,8 @@ export type {
  */
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
+    PublishesDataViews,
     PublishesUnifiedSearch {}
-
-export interface MlEmbeddableBaseApiWithDataViews extends MlEmbeddableBaseApi, PublishesDataViews {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -164,17 +163,17 @@ export interface SingleMetricViewerEmbeddableState
     SingleMetricViewerEmbeddableCustomInput {}
 
 export type SingleMetricViewerEmbeddableApi =
-  MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
+  DefaultEmbeddableApi<SingleMetricViewerEmbeddableState> &
     PublishesWritablePanelTitle &
     SingleMetricViewerComponentApi;
 
 export interface SingleMetricViewerComponentApi {
   functionDescription: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
-  selectedDetectorIndex: PublishingSubject<number | undefined>;
+  selectedDetectorIndex: PublishingSubject<number>;
   selectedEntities: PublishingSubject<MlEntity | undefined>;
 
-  updateUserInput: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
+  updateUserInput: (input: SingleMetricViewerEmbeddableUserInput) => void;
 }
 
 export interface AnomalyChartsServices {

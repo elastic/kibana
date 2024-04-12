@@ -35,6 +35,7 @@ import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 import { getServices } from './get_services';
+import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
@@ -79,7 +80,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const refresh$ = new BehaviorSubject<void>(undefined);
 
       const api = buildApi(
-        // @ts-ignore
         {
           ...titlesApi,
           ...timeRangeApi,
@@ -144,6 +144,15 @@ export const getSingleMetricViewerEmbeddableFactory = (
             onDestroy();
             subscriptions.unsubscribe();
           });
+
+          useReactEmbeddableExecutionContext(
+            services[0].executionContext,
+            // TODO https://github.com/elastic/kibana/issues/180055
+            // @ts-ignore
+            parentApi?.executionContext?.value ?? { name: 'dashboard' },
+            ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+            uuid
+          );
 
           const selectedJobId = singleMetricViewerData?.jobIds[0];
           // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,

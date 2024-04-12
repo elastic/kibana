@@ -68,7 +68,7 @@ export function createEditSingleMetricViewerPanelAction(
           } as SingleMetricViewerEmbeddableInput
         );
 
-        context.embeddable.updateUserInput(result);
+        context.embeddable.updateUserInput(result as SingleMetricViewerEmbeddableInput);
         context.embeddable.setPanelTitle(result.panelTitle);
       } catch (e) {
         return Promise.reject();
