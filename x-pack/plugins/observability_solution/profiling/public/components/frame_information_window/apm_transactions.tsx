@@ -14,19 +14,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../common';
 import { AsyncStatus } from '../../hooks/use_async';
+import { useAnyOfProfilingParams } from '../../hooks/use_profiling_params';
+import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import type { APMTransactionsPerService } from '../../services';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   serviceNames: Record<string, number>;
-  timeFrom: string;
-  timeTo: string;
   functionName: string;
 }
 
-export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }: Props) {
+export function APMTransactions({ functionName, serviceNames }: Props) {
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useAnyOfProfilingParams('/functions/*', '/flamegraphs/*');
+  const timeRange = useTimeRange({ rangeFrom, rangeTo });
+
   const {
     services: { fetchTopNFunctionAPMTransactions },
     setup: { observabilityShared },
@@ -36,13 +42,13 @@ export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }
     ({ http }) => {
       return fetchTopNFunctionAPMTransactions({
         http,
-        timeFrom: 1712444400000,
-        timeTo: 1713049199999,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
         functionName,
-        serviceNames: Object.keys(serviceNames),
+        serviceNames: Object.keys(...serviceNames),
       });
     },
-    [fetchTopNFunctionAPMTransactions, functionName, serviceNames]
+    [fetchTopNFunctionAPMTransactions, functionName, serviceNames, timeRange.end, timeRange.start]
   );
 
   const columns: Array<EuiBasicTableColumn<APMTransactionsPerService>> = [
@@ -83,7 +89,7 @@ export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }
             </EuiLink>
           );
         }
-        return 'N/A';
+        return NOT_AVAILABLE_LABEL;
       },
     },
   ];
@@ -105,7 +111,7 @@ export function APMTransactions({ functionName, serviceNames, timeTo, timeFrom }
       })}
       items={data}
       columns={columns}
-      pagination={{ itemsPerPage: 5, showPerPageOptions: false }}
+      pagination={{ pageSize: 5, showPerPageOptions: false }}
     />
   );
 }
