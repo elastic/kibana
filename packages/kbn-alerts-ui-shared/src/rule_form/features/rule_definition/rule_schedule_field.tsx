@@ -72,7 +72,7 @@ export const RuleScheduleField: React.FC = () => {
   const displayedIntervalError = useMemo(
     () =>
       hasIntervalError
-        ? intervalError.map((error, i) => <span key={`intervalError-${i}`}>{error.text}</span>)
+        ? intervalError.map((error, i) => <span key={`intervalError-${i}`}>{error}</span>)
         : undefined,
     [intervalError, hasIntervalError]
   );
