@@ -6,9 +6,8 @@
  */
 
 import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
-import type { Subscription, Observable } from 'rxjs';
-import { from } from 'rxjs';
-import { mergeMap, last, map, toArray } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { map } from 'rxjs';
 import { chunk } from 'lodash';
 import type {
   IKibanaSearchRequest,
@@ -18,6 +17,8 @@ import type {
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getProcessedFields } from '@kbn/ml-data-grid';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type {
   AggregatableFieldOverallStats,
@@ -46,31 +47,10 @@ import {
   MAX_CONCURRENT_REQUESTS,
 } from '../constants/index_data_visualizer_viewer';
 import { displayError } from '../../common/util/display_error';
-
-/**
- * Helper function to run forkJoin
- * with restrictions on how many input observables can be subscribed to concurrently
- */
-export function rateLimitingForkJoin<T>(
-  observables: Array<Observable<T>>,
-  maxConcurrentRequests = MAX_CONCURRENT_REQUESTS
-): Observable<T[]> {
-  return from(observables).pipe(
-    mergeMap(
-      (observable, index) =>
-        observable.pipe(
-          last(),
-          map((value) => ({ index, value }))
-        ),
-      maxConcurrentRequests
-    ),
-    toArray(),
-    map((indexedObservables) =>
-      indexedObservables.sort((l, r) => l.index - r.index).map((obs) => obs.value)
-    )
-  );
-}
-
+import {
+  fetchDataWithTimeout,
+  rateLimitingForkJoin,
+} from '../search_strategy/requests/fetch_utils';
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
   esql = false,
   searchStrategyParams: TParams | undefined,
@@ -88,7 +68,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   } = useDataVisualizerKibana();
 
   const [stats, setOverallStats] = useState<OverallStats>(getDefaultPageState().overallStats);
-  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<Set<string> | undefined>();
+  const [populatedFieldsInIndex, setPopulatedFieldsInIndex] = useState<
+    | Set<string>
+    // request to fields caps has not been made yet
+    | undefined
+    // null is set when field caps api is too slow, and we should not retry anymore
+    | null
+  >();
 
   const [fetchState, setFetchState] = useReducer(
     getReducer<DataStatsFetchProgress>(),
@@ -96,18 +82,25 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   );
 
   const abortCtrl = useRef(new AbortController());
+  const populatedFieldsAbortCtrl = useRef(new AbortController());
+
   const searchSubscription$ = useRef<Subscription>();
 
   useEffect(
     function updatePopulatedFields() {
       let unmounted = false;
 
-      if (!searchStrategyParams) return;
+      // If null, that means we tried to fetch populated fields already but it timed out
+      // so don't try again
+      if (!searchStrategyParams || populatedFieldsInIndex === null) return;
 
       const { index, searchQuery, timeFieldName, earliest, latest, runtimeFieldMap } =
         searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
+        populatedFieldsAbortCtrl.current.abort();
+        populatedFieldsAbortCtrl.current = new AbortController();
+
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
         if (timeFieldName !== undefined && (earliest === undefined || latest === undefined)) {
@@ -123,25 +116,33 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
         // Getting non-empty fields for the index pattern
         // because then we can absolutely exclude these from subsequent requests
-        const nonEmptyFields = await data.dataViews.getFieldsForWildcard({
-          pattern: index,
-          indexFilter: {
-            bool: {
-              filter: filterCriteria,
+        const nonEmptyFields = await fetchDataWithTimeout<Promise<FieldSpec[]>>(
+          data.dataViews.getFieldsForWildcard({
+            pattern: index,
+            indexFilter: {
+              bool: {
+                filter: filterCriteria,
+              },
             },
-          },
-          includeEmptyFields: false,
-        });
+            includeEmptyFields: false,
+          }),
+          populatedFieldsAbortCtrl.current
+        );
+
         if (!unmounted) {
-          setPopulatedFieldsInIndex(
-            new Set([
-              ...nonEmptyFields.map((field) => field.name),
-              // Field caps API don't know about runtime fields
-              // so by default we expect runtime fields to be populated
-              // so we can later check as needed
-              ...Object.keys(runtimeFieldMap ?? {}),
-            ])
-          );
+          if (Array.isArray(nonEmptyFields)) {
+            setPopulatedFieldsInIndex(
+              new Set([
+                ...nonEmptyFields.map((field) => field.name),
+                // Field caps API don't know about runtime fields
+                // so by default we expect runtime fields to be populated
+                // so we can later check as needed
+                ...Object.keys(runtimeFieldMap ?? {}),
+              ])
+            );
+          } else {
+            setPopulatedFieldsInIndex(null);
+          }
         }
       };
 
@@ -198,12 +199,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };
 
-      const aggregatableFields = originalAggregatableFields.filter((field) =>
-        populatedFieldsInIndex.has(field.name)
-      );
-      const nonAggregatableFields = originalNonAggregatableFields.filter((fieldName) =>
-        populatedFieldsInIndex.has(fieldName)
-      );
+      const hasPopulatedFieldsInfo = isDefined(populatedFieldsInIndex);
+      const aggregatableFields = hasPopulatedFieldsInfo
+        ? originalAggregatableFields.filter((field) => populatedFieldsInIndex.has(field.name))
+        : originalAggregatableFields;
+      const nonAggregatableFields = hasPopulatedFieldsInfo
+        ? originalNonAggregatableFields.filter((fieldName) => populatedFieldsInIndex.has(fieldName))
+        : originalNonAggregatableFields;
 
       const documentCountStats = await getDocumentCountStats(
         data.search,
@@ -394,7 +396,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
   const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
-    abortCtrl.current.abort();
+    abortCtrl.current?.abort();
+    populatedFieldsAbortCtrl.current?.abort();
   }, []);
 
   // auto-update

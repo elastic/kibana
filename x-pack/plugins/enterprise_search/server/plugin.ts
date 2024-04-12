@@ -163,7 +163,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
-    const isCloud = !!cloud.cloudId;
+    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
