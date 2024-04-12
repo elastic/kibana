@@ -219,8 +219,11 @@ export const postActionsConnectorExecuteRoute = (
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+              actionTypeId,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+              model: request.body.model,
+              assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
             });
             return response.ok({
               body: result,
@@ -295,8 +298,14 @@ export const postActionsConnectorExecuteRoute = (
             });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+            actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
+            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
+            // tracked here: https://github.com/elastic/security-team/issues/7363
+            assistantStreamingEnabled:
+              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
           });
 
           return response.ok<
@@ -309,9 +318,12 @@ export const postActionsConnectorExecuteRoute = (
             onLlmResponse(error.message, {}, true);
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+            actionTypeId: request.body.actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
             errorMessage: error.message,
+            assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
           });
 
           return resp.error({
