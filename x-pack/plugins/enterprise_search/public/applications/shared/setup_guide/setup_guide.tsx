@@ -41,8 +41,8 @@ interface Props {
 
 export const SetupGuideLayout: React.FC<Props> = ({ children, productName, productEuiIcon }) => {
   const { cloud } = useValues(KibanaLogic);
-  const isCloudEnabled = Boolean(cloud.isCloudEnabled);
-  const cloudDeploymentLink = cloud.deploymentUrl || '';
+  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+  const cloudDeploymentLink = cloud?.deploymentUrl || '';
 
   return (
     <EuiPage className="setupGuide" data-test-subj="setupGuide">

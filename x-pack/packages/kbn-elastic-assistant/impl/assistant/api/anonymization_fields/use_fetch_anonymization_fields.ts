@@ -12,6 +12,7 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
 
 export interface UseFetchAnonymizationFieldsParams {
   http: HttpSetup;

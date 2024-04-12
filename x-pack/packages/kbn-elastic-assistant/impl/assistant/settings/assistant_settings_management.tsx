@@ -30,6 +30,7 @@ import {
 } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
+import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
@@ -68,7 +69,10 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
+      assistantAvailability: { isAssistantEnabled },
     } = useAssistantContext();
+
+    const { data: anonymizationFields } = useFetchAnonymizationFields({ http, isAssistantEnabled });
 
     // Connector details
     const { data: connectors } = useLoadConnectors({
@@ -81,21 +85,26 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const {
       conversationSettings,
       setConversationSettings,
-      defaultAllow,
-      defaultAllowReplacement,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
-      setUpdatedDefaultAllow,
-      setUpdatedDefaultAllowReplacement,
+      assistantStreamingEnabled,
+      setUpdatedAssistantStreamingEnabled,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
-      resetSettings,
       conversationsSettingsBulkActions,
+      updatedAnonymizationData,
       setConversationsSettingsBulkActions,
-    } = useSettingsUpdater(conversations);
+      anonymizationFieldsBulkActions,
+      setAnonymizationFieldsBulkActions,
+      setUpdatedAnonymizationData,
+      resetSettings,
+    } = useSettingsUpdater(
+      conversations,
+      anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
+    );
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -248,6 +257,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               allSystemPrompts={systemPromptSettings}
               selectedConversation={selectedConversation}
               isDisabled={selectedConversation == null}
+              assistantStreamingEnabled={assistantStreamingEnabled}
+              setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
               onSelectedConversationChange={onHandleSelectedConversationChange}
               http={http}
             />
@@ -277,11 +288,11 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (
             <AnonymizationSettings
-              defaultAllow={defaultAllow}
-              defaultAllowReplacement={defaultAllowReplacement}
-              pageSize={5}
-              setUpdatedDefaultAllow={handleChange(setUpdatedDefaultAllow)}
-              setUpdatedDefaultAllowReplacement={handleChange(setUpdatedDefaultAllowReplacement)}
+              defaultPageSize={5}
+              anonymizationFields={updatedAnonymizationData}
+              anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
+              setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}
+              setUpdatedAnonymizationData={setUpdatedAnonymizationData}
             />
           )}
           {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
