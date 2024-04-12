@@ -267,18 +267,13 @@ export class LensVisService {
     }
 
     if (externalVisContext && queryParams.isPlainRecord) {
-      // externalVisContext can be based on an unfamiliar suggestion, but it was saved somehow, so try to restore it too
+      // externalVisContext can be based on an unfamiliar suggestion (not a part of allSuggestions), but it was saved before, so we try to restore it too
       const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext,
         queryParams,
       });
 
-      if (
-        derivedSuggestion &&
-        // it should be in a group of available lens suggestions
-        // for example, Pie is a subtype of Donut charts
-        allSuggestions.find((s) => s.visualizationId === derivedSuggestion.visualizationId)
-      ) {
+      if (derivedSuggestion) {
         availableSuggestionsWithType.push({
           suggestion: derivedSuggestion,
           type: UnifiedHistogramSuggestionType.lensSuggestion,
