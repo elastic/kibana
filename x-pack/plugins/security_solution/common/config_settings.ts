@@ -7,10 +7,6 @@
 
 export interface ConfigSettings {
   /**
-   * Security solution internal side navigation enabled
-   */
-  sideNavEnabled: boolean;
-  /**
    * Index Lifecycle Management (ILM) feature enabled.
    */
   ILMEnabled: boolean;
@@ -25,7 +21,6 @@ export interface ConfigSettings {
  * This object is then used to validate and parse the value entered.
  */
 export const defaultSettings: ConfigSettings = Object.freeze({
-  sideNavEnabled: true,
   ILMEnabled: true,
   ESQLEnabled: true,
 });

@@ -7084,6 +7084,16 @@
               }
             }
           }
+        },
+        "casesSystemAction": {
+          "properties": {
+            "totalCasesCreated": {
+              "type": "long"
+            },
+            "totalRules": {
+              "type": "long"
+            }
+          }
         }
       }
     },

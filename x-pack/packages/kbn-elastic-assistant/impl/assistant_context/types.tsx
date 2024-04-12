@@ -66,6 +66,9 @@ export interface AssistantTelemetry {
     role: string;
     isEnabledKnowledgeBase: boolean;
     isEnabledRAGAlerts: boolean;
+    actionTypeId: string;
+    model?: string;
+    provider?: string;
   }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {
