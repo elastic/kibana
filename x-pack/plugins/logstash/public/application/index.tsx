@@ -41,7 +41,7 @@ export const renderApp = async (
   const pipelineService = new PipelineService(core.http, pipelinesService);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <Router history={history}>
         <Routes>
           <Route
