@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import type { StartPlugins } from '../../../../plugin_contract';
 import type { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -17,7 +17,6 @@ import { riskEngineSettingsRoute } from './settings';
 
 export const registerRiskEngineRoutes = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
   config: ConfigType,
   getStartServices: StartServicesAccessor<StartPlugins>
 ) => {

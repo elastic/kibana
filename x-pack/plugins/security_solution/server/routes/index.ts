@@ -60,17 +60,9 @@ import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/s
 import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
 import { registerRiskEngineRoutes } from '../lib/entity_analytics/risk_engine/routes';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
-import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
-import {
-  assetCriticalityStatusRoute,
-  assetCriticalityUpsertRoute,
-  assetCriticalityGetRoute,
-  assetCriticalityDeleteRoute,
-  assetCriticalityPrivilegesRoute,
-  assetCriticalityCSVUploadRoute,
-} from '../lib/entity_analytics/asset_criticality/routes';
+import { registerAssetCriticalityRoutes } from '../lib/entity_analytics/asset_criticality/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerRiskScoreRoutes } from '../lib/entity_analytics/risk_score/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -154,18 +146,9 @@ export const initRoutes = (
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
   }
 
-  registerRiskEngineRoutes(router, logger, config, getStartServices);
-  if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger);
-    riskScoreCalculationRoute(router, logger);
-  }
-
-  assetCriticalityStatusRoute(router, logger);
-  assetCriticalityUpsertRoute(router, logger);
-  assetCriticalityGetRoute(router, logger);
-  assetCriticalityDeleteRoute(router, logger);
-  assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  assetCriticalityCSVUploadRoute(router, logger, config, getStartServices);
+  registerRiskEngineRoutes(router, config, getStartServices);
+  registerRiskScoreRoutes(router, logger, config);
+  registerAssetCriticalityRoutes(router, logger, config, getStartServices);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
