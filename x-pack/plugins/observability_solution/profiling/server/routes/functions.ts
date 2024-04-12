@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -63,25 +64,28 @@ export function registerTopNFunctionsSearchRoute({
           },
         };
 
-        const [topNFunctions, newtopNFunctions] = await Promise.all([
-          profilingDataAccess.services.fetchFunctions({
-            core,
-            esClient,
-            startIndex,
-            endIndex,
-            totalSeconds: endSecs - startSecs,
-            query,
-          }),
-          profilingDataAccess.services.fetchESFunctions({
-            core,
-            esClient,
-            query,
-            aggregationField: 'service.name',
-          }),
-        ]);
+        const useStacktracesAPI = await core.uiSettings.client.get<boolean>(
+          profilingFetchTopNFunctionsFromStacktraces
+        );
+
+        const topNFunctions = useStacktracesAPI
+          ? await profilingDataAccess.services.fetchFunctions({
+              core,
+              esClient,
+              startIndex,
+              endIndex,
+              totalSeconds: endSecs - startSecs,
+              query,
+            })
+          : await profilingDataAccess.services.fetchESFunctions({
+              core,
+              esClient,
+              query,
+              aggregationField: 'service.name',
+            });
 
         return response.ok({
-          body: newtopNFunctions,
+          body: topNFunctions,
         });
       } catch (error) {
         return handleRouteHandlerError({

@@ -53,6 +53,8 @@ export interface ProfilingESClient {
   }): Promise<BaseFlameGraph>;
   topNFunctions(params: {
     query: QueryDslQueryContainer;
+    limit?: number;
+    sampleSize?: number;
     indices?: string[];
     stacktraceIdsField?: string;
     aggregationField?: AggregationField;

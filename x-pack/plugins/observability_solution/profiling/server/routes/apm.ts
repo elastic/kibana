@@ -16,8 +16,6 @@ import { getClient } from './compat';
 const querySchema = schema.object({
   timeFrom: schema.number(),
   timeTo: schema.number(),
-  // startIndex: schema.number(),
-  // endIndex: schema.number(),
   functionName: schema.string(),
   serviceNames: schema.arrayOf(schema.string()),
 });
@@ -53,14 +51,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
 
         const esClient = await getClient(context);
 
-        const {
-          timeFrom,
-          timeTo,
-          // startIndex,
-          // endIndex,
-          functionName,
-          serviceNames,
-        }: QuerySchemaType = request.query;
+        const { timeFrom, timeTo, functionName, serviceNames }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -88,6 +79,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
               aggregationField: 'transaction.name',
               indices: transactionIndices.split(','),
               stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+              limit: 1000,
             });
             const apmFunction = apmFunctions.TopN.find(
               (topNFunction) => topNFunction.Frame.FunctionName === functionName

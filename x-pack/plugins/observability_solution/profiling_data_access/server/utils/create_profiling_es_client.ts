@@ -163,6 +163,8 @@ export function createProfilingEsClient({
       pervCPUWattArm64,
       pervCPUWattX86,
       azureCostDiscountRate,
+      sampleSize,
+      limit,
     }) {
       const controller = new AbortController();
 
@@ -173,6 +175,8 @@ export function createProfilingEsClient({
             path: encodeURI('/_profiling/topn/functions'),
             body: {
               query,
+              sample_size: sampleSize,
+              limit,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
               aggregation_field: aggregationField,

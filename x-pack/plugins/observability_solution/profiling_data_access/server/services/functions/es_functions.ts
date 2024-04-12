@@ -32,6 +32,7 @@ export interface FetchFunctionsParams {
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   aggregationField?: AggregationField;
+  limit?: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -44,6 +45,7 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     stacktraceIdsField,
     query,
     aggregationField,
+    limit,
   }: FetchFunctionsParams) => {
     const [
       co2PerKWH,
@@ -67,6 +69,8 @@ export function createFetchESFunctions({ createProfilingEsClient }: RegisterServ
     const profilingEsClient = createProfilingEsClient({ esClient });
 
     const esTopNFunctions = await profilingEsClient.topNFunctions({
+      sampleSize: targetSampleSize,
+      limit,
       query,
       indices,
       stacktraceIdsField,

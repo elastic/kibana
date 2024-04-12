@@ -10433,7 +10433,13 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
-        }
+        },
+        "observability:profilingFetchTopNFunctionsFromStacktraces": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
       }
     },
     "static_telemetry": {
