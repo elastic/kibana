@@ -7,6 +7,7 @@
 import React, { useRef, memo, useEffect } from 'react';
 
 import type { EuiDataGridSetCellProps, EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { EventsTrSupplement } from '../../styles';
 import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
@@ -46,16 +47,24 @@ const AdditionalRowComp: React.FC<AdditionalRowProps> = memo(
     if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;
 
     return (
-      <EventsTrSupplement>
-        <StatefulRowRenderer
-          ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-          containerRef={containerRef}
-          event={event}
-          lastFocusedAriaColindex={rowIndex - 1}
-          rowRenderers={enabledRowRenderers}
-          timelineId={timelineId}
-        />
-      </EventsTrSupplement>
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        data-test-subj={`timeline-row-renderer-${rowIndex}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EventsTrSupplement>
+            <StatefulRowRenderer
+              ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
+              containerRef={containerRef}
+              event={event}
+              lastFocusedAriaColindex={rowIndex - 1}
+              rowRenderers={enabledRowRenderers}
+              timelineId={timelineId}
+            />
+          </EventsTrSupplement>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

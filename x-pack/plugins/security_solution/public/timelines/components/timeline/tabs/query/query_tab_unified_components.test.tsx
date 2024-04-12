@@ -134,8 +134,7 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-// Failing: See https://github.com/elastic/kibana/issues/179831
-describe.skip('query tab with unified timeline', () => {
+describe('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -200,6 +199,38 @@ describe.skip('query tab with unified timeline', () => {
       },
       SPECIAL_TEST_TIMEOUT
     );
+    it('should show row-renderers correctly by default', async () => {
+      renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+    });
+
+    it('should hide row-renderers when disabled', async () => {
+      renderTestComponents();
+      await waitFor(() => {
+        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+      });
+
+      expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
+      expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('disable-all'));
+
+      expect(
+        within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+      ).not.toBeChecked();
+
+      fireEvent.click(screen.getByLabelText('Closes this modal window'));
+
+      expect(screen.queryByTestId('row-renderers-modal')).toBeFalsy();
+
+      expect(screen.queryByTestId('timeline-row-renderer-0')).toBeFalsy();
+    });
   });
 
   describe('pagination', () => {
@@ -247,7 +278,9 @@ describe.skip('query tab with unified timeline', () => {
   });
 
   describe('columns', () => {
-    it(
+    // Failing: See https://github.com/elastic/kibana/issues/179831
+    // currently moving /removing columns results in infinite loop
+    it.skip(
       'should move column left/right correctly ',
       async () => {
         const { container } = renderTestComponents();
@@ -284,8 +317,10 @@ describe.skip('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it(
-      'should remove column left/right ',
+    // Failing: See https://github.com/elastic/kibana/issues/179831
+    // currently moving /removing columns results in infinite loop
+    it.skip(
+      'should remove column',
       async () => {
         const { container } = renderTestComponents();
 
@@ -476,8 +511,7 @@ describe.skip('query tab with unified timeline', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179845
-  describe.skip('left controls', () => {
+  describe('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -556,7 +590,7 @@ describe.skip('query tab with unified timeline', () => {
 
   describe('unified fields list', () => {
     it(
-      'should add the column when clicked on X sign',
+      'should remove the column when clicked on X sign',
       async () => {
         const field = {
           name: 'event.severity',
@@ -588,7 +622,7 @@ describe.skip('query tab with unified timeline', () => {
     );
 
     it(
-      'should remove the column when clicked on ⊕ sign',
+      'should add the column when clicked on ⊕ sign',
       async () => {
         const field = {
           name: 'agent.id',

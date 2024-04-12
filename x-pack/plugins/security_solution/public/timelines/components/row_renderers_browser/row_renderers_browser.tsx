@@ -119,6 +119,7 @@ const RowRenderersBrowserComponent = ({
         sortable: false,
         width: '32px',
         render: idColumnRenderCallback,
+        'data-test-subj': 'renderer-checkbox',
       },
       {
         field: 'name',
@@ -126,18 +127,21 @@ const RowRenderersBrowserComponent = ({
         sortable: true,
         width: '10%',
         render: nameColumnRenderCallback,
+        'data-test-subj': 'renderer-name',
       },
       {
         field: 'description',
         name: 'Description',
         width: '25%',
         render: (description: React.ReactNode) => description,
+        'data-test-subj': 'renderer-description',
       },
       {
         field: 'example',
         name: 'Example',
         width: '65%',
         render: ExampleWrapperComponent,
+        'data-test-subj': 'renderer-example',
       },
       {
         field: 'searchableDescription',
@@ -145,6 +149,7 @@ const RowRenderersBrowserComponent = ({
         sortable: false,
         width: '0px',
         render: renderSearchableDescriptionNoop,
+        'data-test-subj': 'renderer-searchable-description',
       },
     ],
     [idColumnRenderCallback, nameColumnRenderCallback]
