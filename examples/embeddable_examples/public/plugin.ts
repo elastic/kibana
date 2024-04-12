@@ -24,8 +24,8 @@ import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { registerFieldListEmbeddable } from './react_embeddables/field_list/register_field_list_embeddable';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 
@@ -52,12 +52,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
   public start(core: CoreStart, deps: StartDeps) {
     registerCreateFieldListAction(deps.uiActions);
-    registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
-      const { getFieldListFactory } = await import(
-        './react_embeddables/field_list/field_list_react_embeddable'
-      );
-      return getFieldListFactory(core, deps);
-    });
+    registerFieldListEmbeddable(core, deps);
 
     registerCreateEuiMarkdownAction(deps.uiActions);
     registerReactEmbeddableFactory(EUI_MARKDOWN_ID, async () => {
