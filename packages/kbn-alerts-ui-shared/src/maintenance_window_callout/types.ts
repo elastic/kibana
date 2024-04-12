@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { WeekdayStr, Options } from '@kbn/rrule';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',

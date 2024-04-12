@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export async function fetchAlertIndexNames({

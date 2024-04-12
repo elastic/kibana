@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { BASE_RAC_ALERTS_API_PATH, EMPTY_AAD_FIELDS } from '../constants';
 

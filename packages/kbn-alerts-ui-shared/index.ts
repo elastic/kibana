@@ -21,5 +21,4 @@ export * from './src/alert_fields_table';
 export * from './src/rule_type_modal';
 export * from './src/rule_form';
 
-export * from './src/common/helpers/parse_duration';
 export * from './src/common/helpers/rule_circuit_breaker_error_message';
