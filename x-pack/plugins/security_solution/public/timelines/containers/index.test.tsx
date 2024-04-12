@@ -113,7 +113,7 @@ describe('useTimelineEvents', () => {
     endDate: '',
     id: TimelineId.active,
     indexNames: ['filebeat-*'],
-    fields: [],
+    fields: ['@timestamp', 'event.kind'],
     filterQuery: '',
     startDate: '',
     limit: 25,
@@ -267,7 +267,96 @@ describe('useTimelineEvents', () => {
     });
   });
 
-  test.todo('should not query again when a field is removed');
-  test.todo('should when a removed field is added back');
-  test.todo('should query when a new field is added');
+  test('should query again when a new field is added', async () => {
+    await act(async () => {
+      const { waitForNextUpdate, rerender } = renderHook<
+        UseTimelineEventsProps,
+        [DataLoadingState, TimelineArgs]
+      >((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      // useEffect on params request
+      await waitForNextUpdate();
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitForNextUpdate();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mockClear();
+
+      rerender({
+        ...props,
+        startDate,
+        endDate,
+        fields: ['@timestamp', 'event.kind', 'event.category'],
+      });
+
+      await waitForNextUpdate();
+
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('should not query again when a field is removed', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate, rerender } = renderHook<
+        UseTimelineEventsProps,
+        [DataLoadingState, TimelineArgs]
+      >((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      // useEffect on params request
+      await waitForNextUpdate();
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitForNextUpdate();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mockClear();
+
+      rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+
+      // since there is no new update in useEffect, it should throw an timeout error
+      await expect(waitForNextUpdate()).rejects.toThrowError();
+
+      expect(mockSearch).toHaveBeenCalledTimes(0);
+    });
+  });
+  test('should not query again when a removed field is added back', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate, rerender } = renderHook<
+        UseTimelineEventsProps,
+        [DataLoadingState, TimelineArgs]
+      >((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      // useEffect on params request
+      await waitForNextUpdate();
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitForNextUpdate();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mockClear();
+
+      // remove `event.kind` from default fields
+      rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+
+      // since there is no new update in useEffect, it should throw an timeout error
+      await expect(waitForNextUpdate()).rejects.toThrowError();
+
+      expect(mockSearch).toHaveBeenCalledTimes(0);
+
+      // request default Fields
+      rerender({ ...props, startDate, endDate });
+
+      // since there is no new update in useEffect, it should throw an timeout error
+      await expect(waitForNextUpdate()).rejects.toThrowError();
+
+      expect(mockSearch).toHaveBeenCalledTimes(0);
+    });
+  });
 });
