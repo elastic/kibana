@@ -15,7 +15,7 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { validateSystemActions } from '../../../../lib/validate_system_actions';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
@@ -682,10 +682,12 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           value: [...genActions, ...genSystemActions],
         };
 
-        await validateSystemActions({
+        await validateAndAuthorizeSystemActions({
           actionsClient,
+          actionsAuthorization: context.actionsAuthorization,
           connectorAdapterRegistry: context.connectorAdapterRegistry,
           systemActions: genSystemActions,
+          rule: { consumer: updatedRule.consumer },
         });
 
         try {

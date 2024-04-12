@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { concat, last, map, Observable, shareReplay, withLatestFrom } from 'rxjs';
+import { concat, last, mergeMap, Observable, shareReplay, withLatestFrom } from 'rxjs';
 import {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -17,7 +17,7 @@ import {
 } from './concatenate_chat_completion_chunks';
 
 export function emitWithConcatenatedMessage(
-  callback?: (concatenatedMessage: ConcatenatedMessage) => ConcatenatedMessage
+  callback?: (concatenatedMessage: ConcatenatedMessage) => Promise<ConcatenatedMessage>
 ): (
   source$: Observable<ChatCompletionChunkEvent>
 ) => Observable<ChatCompletionChunkEvent | MessageAddEvent> {
@@ -30,13 +30,13 @@ export function emitWithConcatenatedMessage(
         concatenateChatCompletionChunks(),
         last(),
         withLatestFrom(source$),
-        map(([message, chunkEvent]) => {
+        mergeMap(async ([message, chunkEvent]) => {
           const next: MessageAddEvent = {
             type: StreamingChatResponseEventType.MessageAdd as const,
             id: chunkEvent.id,
             message: {
               '@timestamp': new Date().toISOString(),
-              ...(callback ? callback(message) : message),
+              ...(callback ? await callback(message) : message),
             },
           };
 

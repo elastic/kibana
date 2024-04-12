@@ -13,8 +13,7 @@ import { mockAlertPromptContext } from '../../mock/prompt_context';
 import type { SelectedPromptContext } from '../prompt_context/types';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
-  allow: [],
-  allowReplacement: [],
+  contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContextId: mockAlertPromptContext.id,
   rawData: 'alert data',
 };
@@ -152,8 +151,25 @@ User prompt text`);
 
     describe('when there is data to anonymize', () => {
       const mockPromptContextWithDataToAnonymize: SelectedPromptContext = {
-        allow: ['field1', 'field2'],
-        allowReplacement: ['field1', 'field2'],
+        contextAnonymizationFields: {
+          total: 0,
+          page: 1,
+          perPage: 1000,
+          data: [
+            {
+              id: 'field1',
+              field: 'field1',
+              anonymized: true,
+              allowed: true,
+            },
+            {
+              id: 'field2',
+              field: 'field2',
+              anonymized: true,
+              allowed: true,
+            },
+          ],
+        },
         promptContextId: 'test-prompt-context-id',
         rawData: {
           field1: ['foo', 'bar', 'baz'],

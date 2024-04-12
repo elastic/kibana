@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, merge, noop, omit, pick, take } from 'lodash';
+import { findLastIndex, last, merge, noop, omit, pick, take } from 'lodash';
 import {
   filter,
   isObservable,
@@ -25,6 +25,8 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { withTokenBudget } from '../../../common/utils/with_token_budget';
+import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -43,6 +45,7 @@ import {
 } from '../../../common/functions/types';
 import {
   MessageRole,
+  UserInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -149,6 +152,7 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    instructions?: Array<string | UserInstruction>;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -157,6 +161,7 @@ export class ObservabilityAIAssistantClient {
         const conversationId = params.conversationId || '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
+        const requestInstructions = params.instructions || [];
 
         const tokenCountResult = {
           prompt: 0,
@@ -206,20 +211,24 @@ export class ObservabilityAIAssistantClient {
 
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
-
           const isUserMessage = lastMessage?.message.role === MessageRole.User;
 
-          const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+          const indexOfLastUserMessage = findLastIndex(
+            nextMessages,
+            ({ message }) => message.role === MessageRole.User && !message.name
+          );
 
-          const contextFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
+          const hasNoContextRequestAfterLastUserMessage =
+            indexOfLastUserMessage !== -1 &&
+            nextMessages
+              .slice(indexOfLastUserMessage)
+              .every(({ message }) => message.function_call?.name !== 'context');
 
-          const isAssistantMessageWithFunctionRequest =
-            lastMessage?.message.role === MessageRole.Assistant &&
-            !!lastMessage?.message.function_call?.name;
+          const shouldInjectContext =
+            functionClient.hasFunction('context') && hasNoContextRequestAfterLastUserMessage;
 
-          if (contextFirst) {
-            const addedMessage = {
+          if (shouldInjectContext) {
+            const contextFunctionRequest = {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
@@ -238,26 +247,26 @@ export class ObservabilityAIAssistantClient {
             subscriber.next({
               type: StreamingChatResponseEventType.MessageAdd,
               id: v4(),
-              message: addedMessage,
+              message: contextFunctionRequest,
             });
 
-            return await next(nextMessages.concat(addedMessage));
+            return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
             const functions =
               numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
+            const spanName =
+              lastMessage.message.name && lastMessage.message.name !== 'context'
+                ? 'function_response'
+                : 'user_message';
+
             const response$ = (
-              await chatWithTokenCountIncrement(
-                lastMessage.message.name && lastMessage.message.name !== 'context'
-                  ? 'function_response'
-                  : 'user_message',
-                {
-                  messages: nextMessages,
-                  connectorId,
-                  signal,
-                  functions,
-                }
-              )
+              await chatWithTokenCountIncrement(spanName, {
+                messages: nextMessages,
+                connectorId,
+                signal,
+                functions,
+              })
             ).pipe(emitWithConcatenatedMessage(), shareReplay());
 
             response$.subscribe({
@@ -281,9 +290,10 @@ export class ObservabilityAIAssistantClient {
             );
           }
 
-          if (isAssistantMessageWithFunctionRequest) {
-            const functionCallName = lastMessage.message.function_call!.name;
+          const functionCallName = lastMessage?.message.function_call?.name;
+          const isAssistantMessage = lastMessage?.message.role === MessageRole.Assistant;
 
+          if (isAssistantMessage && functionCallName) {
             if (functionClient.hasAction(functionCallName)) {
               this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
 
@@ -511,12 +521,21 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
-          if (!signal.aborted) {
-            this.dependencies.logger.error(error);
-          }
-          subscriber.error(error);
-        });
+        this.resolveInstructions(requestInstructions)
+          .then((instructions) => {
+            return next(
+              extendSystemMessage(messages, [
+                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
+                instructions,
+              ])
+            );
+          })
+          .catch((error) => {
+            if (!signal.aborted) {
+              this.dependencies.logger.error(error);
+            }
+            subscriber.error(error);
+          });
 
         const titlePromise =
           !conversationId && !title && persist
@@ -773,6 +792,7 @@ export class ObservabilityAIAssistantClient {
           },
         },
       ],
+      functionCall: 'title_conversation',
       connectorId,
       signal,
     });
@@ -911,17 +931,28 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
-    const [systemMessage, ...rest] = messages;
+  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
+    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+      this.dependencies.user,
+      this.dependencies.namespace
+    );
 
-    const extendedSystemMessage: Message = {
-      ...systemMessage,
-      message: {
-        ...systemMessage.message,
-        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
-      },
-    };
+    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
+      return '';
+    }
 
-    return [extendedSystemMessage].concat(rest);
+    const priorityInstructions = requestInstructions.map((instruction) =>
+      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
+    );
+    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
+    const instructions = priorityInstructions.concat(
+      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
+    );
+
+    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
+
+    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
+
+    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
   };
 }
