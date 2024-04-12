@@ -69,6 +69,8 @@ export const ALERTS_URL = '/app/security/alerts';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
+export const ENTITY_ANALYTICS_ASSET_CRITICALITY_URL =
+  '/app/security/entity_analytics_asset_criticality';
 
 export const exceptionsListDetailsUrl = (listId: string) =>
   `/app/security/exceptions/details/${listId}`;

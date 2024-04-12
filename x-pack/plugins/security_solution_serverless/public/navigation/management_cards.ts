@@ -4,36 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type {
-  AppDefinition,
-  CardNavExtensionDefinition,
-} from '@kbn/management-cards-navigation/src/types';
-import { getNavigationPropsFromId, SecurityPageName } from '@kbn/security-solution-navigation';
+import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
+import {
+  getNavigationPropsFromId,
+  SecurityPageName,
+  ExternalPageName,
+} from '@kbn/security-solution-navigation';
 import type { Services } from '../common/services';
-import { ExternalPageName } from './links/constants';
-import type { ProjectPageName } from './links/types';
 
-const SecurityManagementCards = new Map<ProjectPageName, AppDefinition['category']>([
+const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['category']>([
   [ExternalPageName.visualize, 'content'],
   [ExternalPageName.maps, 'content'],
   [SecurityPageName.entityAnalyticsManagement, 'alerts'],
 ]);
 
 export const enableManagementCardsLanding = (services: Services) => {
-  const { management, application } = services;
+  const { securitySolution, management, application } = services;
 
-  services.getProjectNavLinks$().subscribe((projectNavLinks) => {
-    const cardNavDefinitions = projectNavLinks.reduce<Record<string, CardNavExtensionDefinition>>(
-      (acc, projectNavLink) => {
-        if (SecurityManagementCards.has(projectNavLink.id)) {
-          const { appId, deepLinkId, path } = getNavigationPropsFromId(projectNavLink.id);
+  securitySolution.getNavLinks$().subscribe((navLinks) => {
+    const cardNavDefinitions = navLinks.reduce<Record<string, CardNavExtensionDefinition>>(
+      (acc, navLink) => {
+        if (SecurityManagementCards.has(navLink.id)) {
+          const { appId, deepLinkId, path } = getNavigationPropsFromId(navLink.id);
 
-          acc[projectNavLink.id] = {
-            category: SecurityManagementCards.get(projectNavLink.id) ?? 'other',
-            title: projectNavLink.title,
-            description: projectNavLink.description ?? '',
-            icon: projectNavLink.landingIcon ?? '',
+          acc[navLink.id] = {
+            category: SecurityManagementCards.get(navLink.id) ?? 'other',
+            title: navLink.title,
+            description: navLink.description ?? '',
+            icon: navLink.landingIcon ?? '',
             href: application.getUrlForApp(appId, { deepLinkId, path }),
             skipValidation: true,
           };
