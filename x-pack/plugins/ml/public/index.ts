@@ -32,7 +32,7 @@ export type { MlSummaryJob } from '../common/types/anomaly_detection_jobs';
 export type { JobExistResult, JobStat } from '../common/types/data_recognizer';
 export type { DataRecognizerConfigResponse } from '../common/types/modules';
 
-export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
+export type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from './embeddables';
 
 export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
 export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';

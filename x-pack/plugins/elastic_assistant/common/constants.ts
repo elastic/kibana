@@ -33,4 +33,4 @@ export const CAPABILITIES = `${BASE_PATH}/capabilities`;
 /**
  Licensing requirements
  */
-export const MINIMUM_AI_ASSISTANT_LICENSE = 'platinum' as const;
+export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
