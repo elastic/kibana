@@ -81,7 +81,7 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
  * Mount/props helper
  */
 interface LicensingLogicProps {
-  license$: Observable<ILicense>;
+  license$: Observable<ILicense | undefined>;
   canManageLicense: boolean;
 }
 export const mountLicensingLogic = (props: LicensingLogicProps) => {

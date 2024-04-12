@@ -35,16 +35,12 @@ export const SetUpConnectorPanelForStartChat: React.FC = () => {
 
   return connectors && !isConnectorListLoading ? (
     <>
-      {!!Object.keys(connectors).length && showCallout && (
+      {!!connectors.length && showCallout && (
         <EuiCallOut
           title={i18n.translate('xpack.searchPlayground.emptyPrompts.setUpConnector.settled', {
-            defaultMessage:
-              '{connectorsNames} {count, plural, one {connector} other {connectors}} added',
+            defaultMessage: '{connectorName} connector added',
             values: {
-              connectorsNames: Object.values(connectors)
-                .map((connector) => connector.title)
-                .join(', '),
-              count: Object.values(connectors).length,
+              connectorName: connectors[0].title,
             },
           })}
           iconType="check"
