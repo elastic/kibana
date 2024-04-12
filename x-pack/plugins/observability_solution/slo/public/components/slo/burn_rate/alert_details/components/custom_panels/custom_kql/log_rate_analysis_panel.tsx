@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_END } from '@kbn/rule-data-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { colorTransformer, Color } from '@kbn/observability-shared-plugin/common';
+import { colorTransformer } from '@kbn/observability-shared-plugin/common';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
@@ -247,8 +247,8 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
             esSearchQuery={esSearchQuery}
             timeRange={timeRange}
             initialAnalysisStart={initialAnalysisStart}
-            barColorOverride={colorTransformer(Color.color0)}
-            barHighlightColorOverride={colorTransformer(Color.color1)}
+            barColorOverride={colorTransformer('color0')}
+            barHighlightColorOverride={colorTransformer('color1')}
             onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'analytics',
