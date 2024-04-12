@@ -23,7 +23,7 @@ const Container = styled.div`
 `;
 
 const Wrapper = styled.div<{ maxWidth?: number }>`
-  max-width: ${(props) => props.maxWidth || 1200}px;
+  ${(props) => (props.maxWidth === 0 ? '' : `max-width: ${props.maxWidth || 1200}px;`)}
   margin-left: auto;
   margin-right: auto;
   padding-top: ${(props) => props.theme.eui.euiSizeXL};

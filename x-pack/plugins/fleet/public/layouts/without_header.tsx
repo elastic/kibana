@@ -11,6 +11,8 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  margin-left: ${(props) => props.theme.eui.euiSizeXL};
+  margin-right: ${(props) => props.theme.eui.euiSizeXL};
 
   // Set the min height to the viewport size minus the height of any global Kibana headers
   min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
