@@ -266,4 +266,8 @@ describe('useTimelineEvents', () => {
       expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
+
+  test.todo('should not query again when a field is removed');
+  test.todo('should when a removed field is added back');
+  test.todo('should query when a new field is added');
 });

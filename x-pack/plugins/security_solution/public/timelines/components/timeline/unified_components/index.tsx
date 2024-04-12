@@ -210,6 +210,9 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
               columnId: id,
               columnType,
               sortDirection: direction,
+              // esTypes is needed so that the sort object remains consistent with the
+              // default sort value and does not creates an unnecessary search request
+              esTypes: id === '@timestamp' ? ['date'] : [],
             } as SortColumnTimeline;
           }),
         })

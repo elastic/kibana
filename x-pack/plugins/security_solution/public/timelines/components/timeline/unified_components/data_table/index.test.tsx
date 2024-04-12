@@ -46,6 +46,7 @@ const TestComponent = (props: TestComponentProps) => {
     <TestProviders store={store}>
       <TimelineDataTable
         columns={initialEnrichedColumns}
+        columnIds={initialEnrichedColumns.map((c) => c.id)}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}

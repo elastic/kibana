@@ -365,16 +365,21 @@ export const useTimelineEventsHandler = ({
         ? activePage
         : 0;
 
+      /*
+       * optimization to avoid unnecessary network request when a field
+       * has already been fetched
+       *
+       */
+
       let finalFieldRequest = fields;
 
-      // check if currentRequest fieldRequested is subset of prevRequest fieldRequested
-
-      if (
-        prevRequest?.fieldRequested?.length > 0 &&
-        fields?.length > 0 &&
-        fields.every((field) => prevRequest.fieldRequested.includes(field))
-      ) {
-        finalFieldRequest = prevRequest.fields;
+      const newFieldsRequested = fields.filter(
+        (field) => !prevRequest?.fieldRequested?.includes(field)
+      );
+      if (newFieldsRequested.length > 0) {
+        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+      } else {
+        finalFieldRequest = prevRequest?.fieldRequested ?? [];
       }
 
       const currentRequest = {
