@@ -1,7 +1,113 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateOpenApiDocument happy path for @kbn/config-schema generates the expected OpenAPI document 1`] = `
+exports[`generateOpenApiDocument @kbn/config-schema generates references as in the expected format 1`] = `
 Object {
+  "components": Object {
+    "schemas": Object {
+      "my.id": Object {
+        "maxLength": 1,
+        "type": "string",
+      },
+      "my.name": Object {
+        "maxLength": 1,
+        "type": "string",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "/foo/{id}#1",
+        "parameters": Array [
+          Object {
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+          Object {
+            "description": undefined,
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": Object {
+              "$ref": "#/components/schemas/my.id",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "name": Object {
+                    "$ref": "#/components/schemas/my.name",
+                  },
+                  "other": Object {
+                    "type": "string",
+                  },
+                },
+                "required": Array [
+                  "name",
+                  "other",
+                ],
+                "type": "object",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {
+                  "maxLength": 10,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+            },
+            "description": "No description",
+          },
+        },
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+    Object {
+      "apiKeyAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;
+
+exports[`generateOpenApiDocument @kbn/config-schema generates the expected OpenAPI document 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {},
+  },
   "externalDocs": undefined,
   "info": Object {
     "description": undefined,

@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**
- * Heavily adapted version of https://github.com/jlalmes/trpc-openapi
- */
-
 import type { OpenAPIV3 } from 'openapi-types';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
@@ -25,7 +21,7 @@ import {
 
 const LATEST_SERVERLESS_VERSION = '2023-10-31';
 
-import { convert, convertPathParameters, convertQuery } from './oas_converters';
+import { OasConverter } from './oas_converter';
 
 export const openApiVersion = '3.0.0';
 
@@ -43,12 +39,15 @@ export const generateOpenApiDocument = (
   appRouters: { routers: Router[]; versionedRouters: CoreVersionedRouter[] },
   opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
+  const converter = new OasConverter();
   const paths: OpenAPIV3.PathsObject = {};
   for (const router of appRouters.routers) {
-    Object.assign(paths, processRouter(router, opts.pathStartsWith));
+    const result = processRouter(router, converter, opts.pathStartsWith);
+    Object.assign(paths, result.paths);
   }
   for (const router of appRouters.versionedRouters) {
-    Object.assign(paths, processVersionedRouter(router, opts.pathStartsWith));
+    const result = processVersionedRouter(router, converter, opts.pathStartsWith);
+    Object.assign(paths, result.paths);
   }
   return {
     openapi: openApiVersion,
@@ -63,6 +62,7 @@ export const generateOpenApiDocument = (
       },
     ],
     paths,
+    components: converter.getSchemaComponents(),
     security: [
       {
         basicAuth: [],
@@ -88,12 +88,13 @@ const getOperationId = (name: string): string => {
 };
 
 const extractRequestBody = (
-  route: VersionedRouterRoute
+  route: VersionedRouterRoute,
+  converter: OasConverter
 ): OpenAPIV3.RequestBodyObject['content'] => {
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
     const schemas = extractValidationSchemaFromVersionedHandler(handler);
     if (!schemas?.request) return acc;
-    const schema = convert(schemas.request.body);
+    const schema = converter.convert(schemas.request.body);
     return {
       ...acc,
       [getVersionedContentString(handler.options.version)]: {
@@ -102,14 +103,18 @@ const extractRequestBody = (
     };
   }, {} as OpenAPIV3.RequestBodyObject['content']);
 };
-const extractVersionedResponses = (route: VersionedRouterRoute): OpenAPIV3.ResponsesObject => {
+
+const extractVersionedResponses = (
+  route: VersionedRouterRoute,
+  converter: OasConverter
+): OpenAPIV3.ResponsesObject => {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
     const schemas = extractValidationSchemaFromVersionedHandler(handler);
     if (!schemas?.response) return acc;
     const statusCodes = Object.keys(schemas.response);
     for (const statusCode of statusCodes) {
       const maybeSchema = schemas.response[statusCode as unknown as number].body;
-      const schema = convert(maybeSchema);
+      const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
         description: route.options.description ?? 'No description',
@@ -140,8 +145,9 @@ const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 
 
 const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
+  converter: OasConverter,
   pathStartsWith?: string
-): OpenAPIV3.PathsObject => {
+) => {
   const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
@@ -163,11 +169,11 @@ const processVersionedRouter = (
         let pathObjects: OpenAPIV3.ParameterObject[] = [];
         let queryObjects: OpenAPIV3.ParameterObject[] = [];
         if (reqParams) {
-          pathObjects = convertPathParameters(reqParams, pathParams);
+          pathObjects = converter.convertPathParameters(reqParams, pathParams);
         }
         const reqQuery = schemas.request?.query as unknown;
         if (reqQuery) {
-          queryObjects = convertQuery(reqQuery);
+          queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
           getVersionedHeaderParam(newestVersion, versions),
@@ -183,10 +189,10 @@ const processVersionedRouter = (
         [route.method]: {
           requestBody: hasBody
             ? {
-                content: extractRequestBody(route),
+                content: extractRequestBody(route, converter),
               }
             : undefined,
-          responses: extractVersionedResponses(route),
+          responses: extractVersionedResponses(route, converter),
           parameters,
           operationId: getOperationId(route.path),
         },
@@ -199,19 +205,20 @@ const processVersionedRouter = (
       throw e;
     }
   }
-  return paths;
+  return { paths };
 };
 
 type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
 
-const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject => {
-  if (!route.validationSchemas) return {};
+const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
+  const responses: OpenAPIV3.ResponsesObject = {};
+  if (!route.validationSchemas) return responses;
   const validationSchemas = getResponseValidation(route.validationSchemas);
 
   return !!validationSchemas
     ? Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
         (acc, [statusCode, schema]) => {
-          const oasSchema = convert(schema.body);
+          const oasSchema = converter.convert(schema.body);
           acc[statusCode] = {
             ...acc[statusCode],
             description: route.options.description ?? 'No description',
@@ -224,12 +231,12 @@ const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject
           };
           return acc;
         },
-        {}
+        responses
       )
-    : {};
+    : responses;
 };
 
-const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.PathsObject => {
+const processRouter = (appRouter: Router, converter: OasConverter, pathStartsWith?: string) => {
   const routes = prepareRoutes(
     appRouter.getRoutes({ excludeVersionedRoutes: true }),
     pathStartsWith
@@ -247,11 +254,11 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
         let queryObjects: OpenAPIV3.ParameterObject[] = [];
         const reqParams = validationSchemas.params as unknown;
         if (reqParams) {
-          pathObjects = convertPathParameters(reqParams, pathParams);
+          pathObjects = converter.convertPathParameters(reqParams, pathParams);
         }
         const reqQuery = validationSchemas.query as unknown;
         if (reqQuery) {
-          queryObjects = convertQuery(reqQuery);
+          queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
           getVersionedHeaderParam(LATEST_SERVERLESS_VERSION, [LATEST_SERVERLESS_VERSION]),
@@ -266,12 +273,12 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
             ? {
                 content: {
                   [getVersionedContentString(LATEST_SERVERLESS_VERSION)]: {
-                    schema: convert(validationSchemas.body),
+                    schema: converter.convert(validationSchemas.body),
                   },
                 },
               }
             : undefined,
-          responses: extractResponses(route),
+          responses: extractResponses(route, converter),
           parameters,
           operationId: getOperationId(route.path),
         },
@@ -283,7 +290,7 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
       throw e;
     }
   }
-  return paths;
+  return { paths };
 };
 
 const assignToPathsObject = (

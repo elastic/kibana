@@ -26,7 +26,7 @@ const createVersionedRouter = (args: {
 };
 
 describe('generateOpenApiDocument', () => {
-  describe('happy path for @kbn/config-schema', () => {
+  describe('@kbn/config-schema', () => {
     const testSchema = schema.object({
       string: schema.string({ maxLength: 10, minLength: 1 }),
       maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
@@ -116,6 +116,48 @@ describe('generateOpenApiDocument', () => {
                 ],
               }),
             ],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('generates references as in the expected format', () => {
+      const sharedIdSchema = schema.string({ maxLength: 1, id: 'my.id' });
+      const sharedNameSchema = schema.string({ maxLength: 1, id: 'my.name' });
+      const otherSchema = schema.object({ name: sharedNameSchema, other: schema.string() });
+      expect(
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: '/foo/{id}',
+                    method: 'get',
+                    validationSchemas: {
+                      request: {
+                        params: schema.object({ id: sharedIdSchema }),
+                        body: otherSchema,
+                      },
+                      response: {
+                        200: {
+                          body: schema.string({ maxLength: 10, minLength: 1 }),
+                        },
+                      },
+                    },
+                    options: { tags: ['foo'] },
+                    handler: jest.fn(),
+                  },
+                ],
+              }),
+            ],
+            versionedRouters: [],
           },
           {
             title: 'test',
