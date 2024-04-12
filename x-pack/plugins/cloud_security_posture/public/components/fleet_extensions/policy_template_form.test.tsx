@@ -61,7 +61,7 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
-import { ThemeProvider } from '@emotion/react';
+import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -124,33 +124,36 @@ describe('<CspPolicyTemplateForm />', () => {
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     agentlessPolicy?: AgentPolicy;
-  }) => (
-    <ThemeProvider theme={() => ({ eui: { euiSizeXS: '4px' } })}>
-      <TestProvider>
-        {edit && (
-          <CspPolicyTemplateForm
-            policy={newPolicy as PackagePolicy}
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={true}
-            agentPolicy={agentPolicy}
-            agentlessPolicy={agentlessPolicy}
-          />
-        )}
-        {!edit && (
-          <CspPolicyTemplateForm
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={false}
-            agentPolicy={agentPolicy}
-            agentlessPolicy={agentlessPolicy}
-          />
-        )}
-      </TestProvider>
-    </ThemeProvider>
-  );
+  }) => {
+    const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
+    return (
+      <FleetAppWrapper>
+        <TestProvider>
+          {edit && (
+            <CspPolicyTemplateForm
+              policy={newPolicy as PackagePolicy}
+              newPolicy={newPolicy}
+              onChange={onChange}
+              packageInfo={packageInfo}
+              isEditPage={true}
+              agentPolicy={agentPolicy}
+              agentlessPolicy={agentlessPolicy}
+            />
+          )}
+          {!edit && (
+            <CspPolicyTemplateForm
+              newPolicy={newPolicy}
+              onChange={onChange}
+              packageInfo={packageInfo}
+              isEditPage={false}
+              agentPolicy={agentPolicy}
+              agentlessPolicy={agentlessPolicy}
+            />
+          )}
+        </TestProvider>
+      </FleetAppWrapper>
+    );
+  };
 
   it('updates package policy namespace to default when it changes', () => {
     const policy = getMockPolicyK8s();

@@ -201,6 +201,20 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
 };
 
+export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+  const indices = await dataViews.getIndices({
+    showAllIndices: false,
+    pattern: '*:*',
+    isRollupIndex: () => false,
+  });
+  const finalIndicesList = indices.filter((source) => {
+    const [_, index] = source.name.split(':');
+    return !index.startsWith('.') && !Boolean(source.item.indices);
+  });
+
+  return finalIndicesList.map((source) => ({ name: source.name, hidden: false }));
+};
+
 // refresh the esql cache entry after 10 minutes
 const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 
