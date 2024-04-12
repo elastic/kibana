@@ -387,6 +387,10 @@ export interface RuleTypeParamsExpressionProps<
   ruleThrottle: string;
   alertNotifyWhen: RuleNotifyWhenType;
   setRuleParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
+  /**
+   * @deprecated Use setRuleParams instead.
+   * Expression components should never set any properties besides params.
+   */
   setRuleProperty: <Prop extends keyof Rule>(
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
@@ -425,6 +429,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<any>>;
 }
 
+/**
+ * @deprecated Use RuleFormValidationErrorObject from @kbn/alerts-ui-shared instead
+ */
 export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
 }

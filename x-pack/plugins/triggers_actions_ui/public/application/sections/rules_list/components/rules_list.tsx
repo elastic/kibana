@@ -47,6 +47,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { getCreateRuleRoute, getEditRuleRoute } from '../../../lib/get_rule_v2_routes';
 import {
   Rule,
   RuleTableItem,
@@ -111,7 +112,13 @@ import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
+/**
+ * @deprecated V1 Rule Form, remove when V2 is enabled without feature flag
+ */
 const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
+/**
+ * @deprecated V1 Rule Form, remove when V2 is enabled without feature flag
+ */
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
@@ -211,6 +218,7 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isRuleFormV2Enabled = getIsExperimentalFeatureEnabled('ruleFormV2');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -312,8 +320,14 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    setEditFlyoutVisibility(true);
-    setCurrentRuleToEdit(ruleItem);
+    if (isRuleFormV2Enabled) {
+      history.push(getEditRuleRoute(ruleItem.id), {
+        referrer: window.location.href,
+      });
+    } else {
+      setEditFlyoutVisibility(true);
+      setCurrentRuleToEdit(ruleItem);
+    }
   };
 
   const onRunRule = async (id: string) => {
@@ -1006,9 +1020,16 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              setRuleTypeIdToCreate(ruleTypeId);
-              setRuleTypeModalVisibility(false);
-              setRuleFlyoutVisibility(true);
+              if (isRuleFormV2Enabled) {
+                history.push(getCreateRuleRoute(ruleTypeId), {
+                  referrer: window.location.href,
+                  consumer: initialSelectedConsumer,
+                });
+              } else {
+                setRuleTypeModalVisibility(false);
+                setRuleTypeIdToCreate(ruleTypeId);
+                setRuleFlyoutVisibility(true);
+              }
             }}
             http={http}
             toasts={toasts}
@@ -1016,6 +1037,9 @@ export const RulesList = ({
             filteredRuleTypes={filteredRuleTypes}
           />
         )}
+        {/**
+         * V1 Rule Form, remove when V2 is enabled without feature flag
+         */}
         {ruleFlyoutVisible && (
           <Suspense fallback={<div />}>
             <RuleAdd
@@ -1033,6 +1057,9 @@ export const RulesList = ({
             />
           </Suspense>
         )}
+        {/**
+         * V1 Rule Form, remove when V2 is enabled without feature flag
+         */}
         {editFlyoutVisible && currentRuleToEdit && (
           <Suspense fallback={<div />}>
             <RuleEdit

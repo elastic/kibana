@@ -46,6 +46,10 @@ jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
 }));
 
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 
 jest.mock('../../../lib/capabilities', () => ({
