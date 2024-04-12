@@ -16,7 +16,14 @@ import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
 
-  const isLoading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const isLoading = useSelector(
+    service,
+    (state) =>
+      state.matches('integrations.fetching') ||
+      state.matches('datasets.fetching') ||
+      state.matches('degradedDocs.fetching')
+  );
+
   const {
     timeRange,
     integrations: selectedIntegrations,
