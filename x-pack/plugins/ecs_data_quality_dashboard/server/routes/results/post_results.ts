@@ -33,6 +33,7 @@ export const postResultsRoute = (
       },
       async (context, request, response) => {
         const services = await context.resolve(['core', 'dataQualityDashboard']);
+
         const resp = buildResponse(response);
 
         let index: string;
@@ -43,6 +44,14 @@ export const postResultsRoute = (
           return resp.error({
             body: `${API_RESULTS_INDEX_NOT_AVAILABLE}: ${err.message}`,
             statusCode: 503,
+          });
+        }
+
+        const currentUser = services.core.security.authc.getCurrentUser();
+        if (!currentUser) {
+          return resp.error({
+            body: 'Unable to retrieve current user',
+            statusCode: 500,
           });
         }
 
@@ -70,7 +79,11 @@ export const postResultsRoute = (
           }
 
           // Index the result
-          const body = { '@timestamp': Date.now(), ...request.body };
+          const body = {
+            ...request.body,
+            '@timestamp': Date.now(),
+            checkedBy: currentUser.profile_uid,
+          };
           const outcome = await client.asInternalUser.index({ index, body });
 
           return response.ok({ body: { result: outcome.result } });

@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 export const ResultDocument = t.type({
   batchId: t.string,
   indexName: t.string,
+  indexPattern: t.string,
   isCheckAll: t.boolean,
   checkedAt: t.number,
   docsCount: t.number,

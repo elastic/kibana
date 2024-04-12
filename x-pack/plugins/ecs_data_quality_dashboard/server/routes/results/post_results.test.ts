@@ -14,6 +14,8 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { resultDocument } from './results.mock';
 import type { CheckIndicesPrivilegesParam } from './privileges';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { API_CURRENT_USER_ERROR_MESSAGE } from '../../translations';
 
 const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
@@ -22,6 +24,8 @@ jest.mock('./privileges', () => ({
   checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
     mockCheckIndicesPrivileges(params),
 }));
+
+const USER_PROFILE_UID = 'mocked_profile_uid';
 
 describe('postResultsRoute route', () => {
   describe('indexation', () => {
@@ -46,6 +50,9 @@ describe('postResultsRoute route', () => {
       context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
         [resultDocument.indexName]: {},
       });
+      context.core.security.authc.getCurrentUser.mockReturnValue({
+        profile_uid: USER_PROFILE_UID,
+      } as AuthenticatedUser);
       postResultsRoute(server.router, logger);
     });
 
@@ -55,7 +62,7 @@ describe('postResultsRoute route', () => {
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(mockIndex).toHaveBeenCalledWith({
-        body: { ...resultDocument, '@timestamp': expect.any(Number) },
+        body: { ...resultDocument, '@timestamp': expect.any(Number), checkedBy: USER_PROFILE_UID },
         index: await context.dataQualityDashboard.getResultsIndexName(),
       });
 
@@ -86,6 +93,14 @@ describe('postResultsRoute route', () => {
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
     });
+
+    it('handles current user retrieval error', async () => {
+      context.core.security.authc.getCurrentUser.mockReturnValueOnce(null);
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: API_CURRENT_USER_ERROR_MESSAGE, status_code: 500 });
+    });
   });
 
   describe('request index authorization', () => {
@@ -107,6 +122,9 @@ describe('postResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
+      context.core.security.authc.getCurrentUser.mockReturnValue({
+        profile_uid: USER_PROFILE_UID,
+      } as AuthenticatedUser);
       context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
         [resultDocument.indexName]: {},
       });

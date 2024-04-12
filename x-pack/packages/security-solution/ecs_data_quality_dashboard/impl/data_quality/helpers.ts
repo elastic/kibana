@@ -453,6 +453,7 @@ export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
 export interface StorageResult {
   batchId: string;
   indexName: string;
+  indexPattern: string;
   isCheckAll: boolean;
   checkedAt: number;
   docsCount: number;
@@ -483,6 +484,7 @@ export const formatStorageResult = ({
 }): StorageResult => ({
   batchId: report.batchId,
   indexName: result.indexName,
+  indexPattern: result.pattern,
   isCheckAll: report.isCheckAll,
   checkedAt: result.checkedAt ?? Date.now(),
   docsCount: result.docsCount ?? 0,
