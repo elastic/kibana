@@ -22,7 +22,7 @@ import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,
@@ -58,6 +58,7 @@ import {
   getWrappedInPipesCode,
   parseErrors,
   getIndicesList,
+  getRemoteIndicesList,
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
@@ -390,7 +391,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
-        return await getIndicesList(dataViews);
+        const [remoteIndices, localIndices] = await Promise.all([
+          getRemoteIndicesList(dataViews),
+          getIndicesList(dataViews),
+        ]);
+        return [...localIndices, ...remoteIndices];
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
