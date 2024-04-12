@@ -165,4 +165,22 @@ describe('ConfiguredSettings', () => {
       })
     );
   });
+
+  it('should not render field if hidden', () => {
+    const result = render([
+      {
+        name: 'agent.limits.go_max_procs',
+        hidden: true,
+        title: 'GO_MAX_PROCS',
+        description: 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'agent_limits_go_max_procs',
+        },
+        schema: z.number().int().min(0).default(0),
+      },
+    ]);
+
+    expect(result.queryByText('GO_MAX_PROCS')).toBeNull();
+  });
 });

@@ -68,15 +68,17 @@ export function ConfiguredSettings({
 }) {
   return (
     <>
-      {configuredSettings.map((configuredSetting) => {
-        const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
+      {configuredSettings
+        .filter((configuredSetting) => !configuredSetting.hidden)
+        .map((configuredSetting) => {
+          const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
-        if (!Component) {
-          throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
-        }
+          if (!Component) {
+            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
+          }
 
-        return <Component key={configuredSetting.name} {...configuredSetting} />;
-      })}
+          return <Component key={configuredSetting.name} {...configuredSetting} />;
+        })}
     </>
   );
 }
