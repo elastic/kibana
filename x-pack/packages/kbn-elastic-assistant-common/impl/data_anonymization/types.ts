@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AnonymizationFieldResponse } from '../schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+
 export interface AnonymizedValues {
   /** The original values were transformed to these anonymized values */
   anonymizedValues: string[];
@@ -22,15 +24,13 @@ export interface AnonymizedData {
 }
 
 export type GetAnonymizedValues = ({
-  allowReplacementSet,
-  allowSet,
+  anonymizationFields,
   currentReplacements,
   field,
   getAnonymizedValue,
   rawData,
 }: {
-  allowReplacementSet: Set<string>;
-  allowSet: Set<string>;
+  anonymizationFields?: AnonymizationFieldResponse[];
   currentReplacements: Record<string, string> | undefined;
   field: string;
   getAnonymizedValue: ({

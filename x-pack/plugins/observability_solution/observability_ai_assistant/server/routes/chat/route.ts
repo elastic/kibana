@@ -25,6 +25,15 @@ const chatCompleteBaseRt = t.type({
       conversationId: t.string,
       title: t.string,
       responseLanguage: t.string,
+      instructions: t.array(
+        t.union([
+          t.string,
+          t.type({
+            doc_id: t.string,
+            text: t.string,
+          }),
+        ])
+      ),
     }),
   ]),
 });
@@ -42,6 +51,15 @@ const chatCompletePublicRt = t.intersection([
   chatCompleteBaseRt,
   t.type({
     body: t.partial({
+      instructions: t.array(
+        t.union([
+          t.string,
+          t.type({
+            doc_id: t.string,
+            text: t.string,
+          }),
+        ])
+      ),
       actions: t.array(functionRt),
     }),
   }),
@@ -128,6 +146,7 @@ async function chatComplete(
       persist,
       screenContexts,
       responseLanguage,
+      instructions,
     },
   } = params;
 
@@ -153,6 +172,7 @@ async function chatComplete(
     signal: controller.signal,
     functionClient,
     responseLanguage,
+    instructions,
   });
 
   return response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled));

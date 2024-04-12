@@ -22,6 +22,7 @@ import {
 import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
 
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
@@ -84,6 +85,7 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
 }));
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
+const appendConversationMessages = jest.fn();
 const mockContext = {
   elasticAssistant: {
     actions: {
@@ -108,7 +110,11 @@ const mockContext = {
     getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
       getConversation: jest.fn().mockResolvedValue(existingConversation),
       updateConversation: jest.fn().mockResolvedValue(existingConversation),
-      appendConversationMessages: jest.fn().mockResolvedValue(existingConversation),
+      appendConversationMessages:
+        appendConversationMessages.mockResolvedValue(existingConversation),
+    }),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
     }),
   },
   core: {
@@ -127,6 +133,7 @@ const mockRequest = {
     actionTypeId: '.gen-ai',
     isEnabledKnowledgeBase: true,
     isEnabledRAGAlerts: false,
+    replacements: {},
   },
   events: {
     aborted$: NEVER,
@@ -284,8 +291,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -320,8 +329,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -453,8 +464,10 @@ describe('postActionsConnectorExecuteRoute', () => {
       body: {
         ...mockRequest.body,
         isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
         replacements: [],
         isEnabledRAGAlerts: true,
       },
@@ -472,6 +485,41 @@ describe('postActionsConnectorExecuteRoute', () => {
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
               });
+            }),
+          };
+        }),
+      },
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('Adds error to conversation history', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        conversationId: '99999',
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+              expect(appendConversationMessages.mock.calls[1][0].messages[0]).toEqual(
+                expect.objectContaining({
+                  content: 'simulated error',
+                  isError: true,
+                  role: 'assistant',
+                })
+              );
             }),
           };
         }),

@@ -24,7 +24,7 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
+    grepTags: '@serverless --@skipInServerless',
   },
   e2e: {
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
