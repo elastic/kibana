@@ -391,9 +391,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
-        const remoteIndices = await getRemoteIndicesList(dataViews);
-        const normalIndices = await getIndicesList(dataViews);
-        return [...normalIndices, ...remoteIndices];
+        const [remoteIndices, localIndices] = await Promise.all([
+          getRemoteIndicesList(dataViews),
+          getIndicesList(dataViews),
+        ]);
+        return [...localIndices, ...remoteIndices];
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
