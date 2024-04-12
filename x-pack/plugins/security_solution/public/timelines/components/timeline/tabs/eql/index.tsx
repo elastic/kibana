@@ -15,8 +15,11 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
+import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
@@ -25,7 +28,7 @@ import { Footer, footerHeight } from '../../footer';
 import { calculateTotalPages } from '../../helpers';
 import { TimelineRefetch } from '../../refetch_timeline';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../../common/components/super_date_picker';
@@ -58,6 +61,16 @@ import {
 } from '../shared/layout';
 import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import memoizeOne from 'memoize-one';
+import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
+import { getColumnHeaders } from '../../body/column_headers/helpers';
+
+const memoizedGetColumnHeaders: (
+  headers: ColumnHeaderOptions[],
+  browserFields: BrowserFields,
+  isEventRenderedView: boolean
+) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -97,6 +110,18 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const currentTimeline = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? TimelineId.active)
+  );
+
+  const { sampleSize } = currentTimeline;
+
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
   const canQueryTimeline = () =>
@@ -106,15 +131,26 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     !isEmpty(end) &&
     !isBlankTimeline;
 
+  const defaultColumns = useMemo(
+    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
+    [unifiedComponentsInTimelineEnabled]
+  );
+
+  const localColumns = useMemo(
+    () => (isEmpty(columns) ? defaultColumns : columns),
+    [columns, defaultColumns]
+  );
+
+  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
+
   const getTimelineQueryFields = () => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const columnFields = columnsHeader.map((c) => c.id);
+    const columnFields = augumentedColumnHeaders.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
   };
 
   const [
-    queryLoadingState,
+    dataLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
@@ -125,7 +161,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: 'eql',
-    limit: itemsPerPage,
+    limit: unifiedComponentsInTimelineEnabled ? sampleSize : itemsPerPage,
     runtimeMappings,
     skip: !canQueryTimeline(),
     startDate: start,
@@ -134,9 +170,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const isQueryLoading = useMemo(
     () =>
-      queryLoadingState === DataLoadingState.loading ||
-      queryLoadingState === DataLoadingState.loadingMore,
-    [queryLoadingState]
+      dataLoadingState === DataLoadingState.loading ||
+      dataLoadingState === DataLoadingState.loadingMore,
+    [dataLoadingState]
   );
 
   const handleOnPanelClosed = useCallback(() => {
@@ -161,127 +197,167 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT]
   );
 
+  const header = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" direction="column" grow={false}>
+        <EuiFlexItem grow={false}>
+          <StyledEuiFlyoutHeader
+            data-test-subj={`${activeTab}-tab-flyout-header`}
+            hasBorder={false}
+          >
+            <TabHeaderContainer data-test-subj="timelineHeader">
+              <EuiFlexGroup
+                className="euiScrollBar"
+                alignItems="flexStart"
+                gutterSize="s"
+                data-test-subj="timeline-date-picker-container"
+                responsive={false}
+              >
+                {timelineFullScreen && setTimelineFullScreen != null && (
+                  <ExitFullScreen
+                    fullScreen={timelineFullScreen}
+                    setFullScreen={setTimelineFullScreen}
+                  />
+                )}
+                <EuiFlexItem grow={false}>
+                  {activeTab === TimelineTabs.eql && (
+                    <Sourcerer scope={SourcererScopeName.timeline} />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <SuperDatePicker
+                    width="auto"
+                    id={InputsModelId.timeline}
+                    timelineId={timelineId}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TimelineDatePickerLock />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </TabHeaderContainer>
+          </StyledEuiFlyoutHeader>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EqlQueryBarTimeline timelineId={timelineId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
   return (
     <>
-      <InPortal node={eqlEventsCountPortalNode}>
-        {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
-      </InPortal>
-      <TimelineRefetch
-        id={`${timelineId}-${TimelineTabs.eql}`}
-        inputId={InputsModelId.timeline}
-        inspect={inspect}
-        loading={isQueryLoading}
-        refetch={refetch}
-      />
-      <FullWidthFlexGroup>
-        <ScrollableFlexItem grow={2}>
-          <EuiFlexGroup gutterSize="s" direction="column">
-            <EuiFlexItem grow={false}>
-              <StyledEuiFlyoutHeader
-                data-test-subj={`${activeTab}-tab-flyout-header`}
-                hasBorder={false}
-              >
-                <TabHeaderContainer data-test-subj="timelineHeader">
-                  <EuiFlexGroup
-                    className="euiScrollBar"
-                    alignItems="flexStart"
-                    gutterSize="s"
-                    data-test-subj="timeline-date-picker-container"
-                    responsive={false}
-                  >
-                    {timelineFullScreen && setTimelineFullScreen != null && (
-                      <ExitFullScreen
-                        fullScreen={timelineFullScreen}
-                        setFullScreen={setTimelineFullScreen}
+      {unifiedComponentsInTimelineEnabled ? (
+        <>
+          <InPortal node={eqlEventsCountPortalNode}>
+            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+          </InPortal>
+          <UnifiedTimelineBody
+            header={header}
+            columns={augumentedColumnHeaders}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+            itemsPerPage={itemsPerPage}
+            itemsPerPageOptions={itemsPerPageOptions}
+            sort={NO_SORTING}
+            events={events}
+            refetch={refetch}
+            dataLoadingState={dataLoadingState}
+            totalCount={isBlankTimeline ? 0 : totalCount}
+            onEventClosed={onEventClosed}
+            expandedDetail={expandedDetail}
+            showExpandedDetails={showExpandedDetails}
+            onChangePage={loadPage}
+            activeTab={activeTab}
+            updatedAt={refreshedAt}
+            isTextBasedQuery={false}
+            pageInfo={pageInfo}
+          />
+        </>
+      ) : (
+        <>
+          <InPortal node={eqlEventsCountPortalNode}>
+            {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
+          </InPortal>
+          <TimelineRefetch
+            id={`${timelineId}-${TimelineTabs.eql}`}
+            inputId={InputsModelId.timeline}
+            inspect={inspect}
+            loading={isQueryLoading}
+            refetch={refetch}
+          />
+          <FullWidthFlexGroup>
+            <ScrollableFlexItem grow={2}>
+              <EuiFlexGroup gutterSize="s" direction="column">
+                {header}
+                <EuiFlexItem grow={true}>
+                  <EventDetailsWidthProvider>
+                    <StyledEuiFlyoutBody
+                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
+                      className="timeline-flyout-body"
+                    >
+                      <StatefulBody
+                        activePage={pageInfo.activePage}
+                        browserFields={browserFields}
+                        data={isBlankTimeline ? EMPTY_EVENTS : events}
+                        id={timelineId}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        sort={NO_SORTING}
+                        tabType={TimelineTabs.eql}
+                        totalPages={calculateTotalPages({
+                          itemsCount: totalCount,
+                          itemsPerPage,
+                        })}
+                        leadingControlColumns={leadingControlColumns}
+                        trailingControlColumns={trailingControlColumns}
                       />
-                    )}
-                    <EuiFlexItem grow={false}>
-                      {activeTab === TimelineTabs.eql && (
-                        <Sourcerer scope={SourcererScopeName.timeline} />
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <SuperDatePicker
-                        width="auto"
-                        id={InputsModelId.timeline}
-                        timelineId={timelineId}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <TimelineDatePickerLock />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </TabHeaderContainer>
-              </StyledEuiFlyoutHeader>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EqlQueryBarTimeline timelineId={timelineId} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EventDetailsWidthProvider>
-                <StyledEuiFlyoutBody
-                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
-                  className="timeline-flyout-body"
-                >
-                  <StatefulBody
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    data={isBlankTimeline ? EMPTY_EVENTS : events}
-                    id={timelineId}
-                    refetch={refetch}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    sort={NO_SORTING}
-                    tabType={TimelineTabs.eql}
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCount,
-                      itemsPerPage,
-                    })}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
-                  />
-                </StyledEuiFlyoutBody>
+                    </StyledEuiFlyoutBody>
 
-                <StyledEuiFlyoutFooter
-                  data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
-                  className="timeline-flyout-footer"
-                >
-                  {!isBlankTimeline && (
-                    <Footer
-                      activePage={pageInfo?.activePage ?? 0}
-                      data-test-subj="timeline-footer"
-                      updatedAt={refreshedAt}
-                      height={footerHeight}
-                      id={timelineId}
-                      isLive={isLive}
-                      isLoading={isQueryLoading || loadingSourcerer}
-                      itemsCount={isBlankTimeline ? 0 : events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangePage={loadPage}
-                      totalCount={isBlankTimeline ? 0 : totalCount}
-                    />
-                  )}
-                </StyledEuiFlyoutFooter>
-              </EventDetailsWidthProvider>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ScrollableFlexItem>
-        {showExpandedDetails && (
-          <>
-            <VerticalRule />
-            <ScrollableFlexItem grow={1}>
-              <DetailsPanel
-                browserFields={browserFields}
-                runtimeMappings={runtimeMappings}
-                tabType={TimelineTabs.eql}
-                scopeId={timelineId}
-                handleOnPanelClosed={handleOnPanelClosed}
-              />
+                    <StyledEuiFlyoutFooter
+                      data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
+                      className="timeline-flyout-footer"
+                    >
+                      {!isBlankTimeline && (
+                        <Footer
+                          activePage={pageInfo?.activePage ?? 0}
+                          data-test-subj="timeline-footer"
+                          updatedAt={refreshedAt}
+                          height={footerHeight}
+                          id={timelineId}
+                          isLive={isLive}
+                          isLoading={isQueryLoading || loadingSourcerer}
+                          itemsCount={isBlankTimeline ? 0 : events.length}
+                          itemsPerPage={itemsPerPage}
+                          itemsPerPageOptions={itemsPerPageOptions}
+                          onChangePage={loadPage}
+                          totalCount={isBlankTimeline ? 0 : totalCount}
+                        />
+                      )}
+                    </StyledEuiFlyoutFooter>
+                  </EventDetailsWidthProvider>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </ScrollableFlexItem>
-          </>
-        )}
-      </FullWidthFlexGroup>
+          </FullWidthFlexGroup>
+        </>
+      )}
+      {showExpandedDetails && (
+        <>
+          <VerticalRule />
+          <ScrollableFlexItem grow={1}>
+            <DetailsPanel
+              browserFields={browserFields}
+              runtimeMappings={runtimeMappings}
+              tabType={TimelineTabs.eql}
+              scopeId={timelineId}
+              handleOnPanelClosed={handleOnPanelClosed}
+            />
+          </ScrollableFlexItem>
+        </>
+      )}
     </>
   );
 };
