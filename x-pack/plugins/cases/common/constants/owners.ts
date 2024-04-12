@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { APP_ID } from './application';
 import type { Owner } from './types';
 
@@ -23,6 +24,7 @@ interface RouteInfo {
   label: string;
   iconType: string;
   appRoute: string;
+  validRuleConsumers?: readonly AlertConsumers[];
 }
 
 export const OWNER_INFO: Record<Owner, RouteInfo> = {
@@ -32,6 +34,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Security',
     iconType: 'logoSecurity',
     appRoute: '/app/security',
+    validRuleConsumers: [AlertConsumers.SIEM],
   },
   [OBSERVABILITY_OWNER]: {
     id: OBSERVABILITY_OWNER,
@@ -39,6 +42,16 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Observability',
     iconType: 'logoObservability',
     appRoute: '/app/observability',
+    validRuleConsumers: [
+      // only valid in serverless
+      AlertConsumers.OBSERVABILITY,
+      AlertConsumers.APM,
+      AlertConsumers.INFRASTRUCTURE,
+      AlertConsumers.LOGS,
+      AlertConsumers.SLO,
+      AlertConsumers.UPTIME,
+      AlertConsumers.MONITORING,
+    ],
   },
   [GENERAL_CASES_OWNER]: {
     id: GENERAL_CASES_OWNER,
@@ -46,5 +59,6 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Stack',
     iconType: 'casesApp',
     appRoute: '/app/management/insightsAndAlerting',
+    validRuleConsumers: [AlertConsumers.ML, AlertConsumers.STACK_ALERTS, AlertConsumers.EXAMPLE],
   },
 } as const;

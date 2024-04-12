@@ -30,13 +30,13 @@ describe('KibanaLogic', () => {
     it('gracefully handles missing configs', () => {
       mountKibanaLogic({ ...mockKibanaValues, config: undefined } as any);
 
-      expect(KibanaLogic.values.config).toEqual({});
+      expect(KibanaLogic.values.config).toEqual(null);
     });
 
     it('gracefully handles non-cloud installs', () => {
       mountKibanaLogic({ ...mockKibanaValues, cloud: undefined } as any);
 
-      expect(KibanaLogic.values.cloud).toEqual({});
+      expect(KibanaLogic.values.cloud).toEqual(null);
     });
   });
 
