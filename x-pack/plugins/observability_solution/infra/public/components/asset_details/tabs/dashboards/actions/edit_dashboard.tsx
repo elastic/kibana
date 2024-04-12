@@ -11,20 +11,21 @@ import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
+import { useSavedObjectsPermissions } from '../../../hooks/use_saved_objects_permissions';
 import { SaveDashboardModal } from './save_dashboard_modal';
 
 export function EditDashboard({
   onRefresh,
   currentDashboard,
   assetType,
-  canLinkOrEdit,
 }: {
   onRefresh: () => void;
   currentDashboard: DashboardItemWithTitle;
   assetType: InfraCustomDashboardAssetType;
-  canLinkOrEdit: boolean;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { canLinkOrEdit } = useSavedObjectsPermissions();
+
   const onClick = useCallback(() => setIsModalVisible(!isModalVisible), [isModalVisible]);
 
   return (

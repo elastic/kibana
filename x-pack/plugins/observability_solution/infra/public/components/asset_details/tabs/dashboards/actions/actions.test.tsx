@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
+import * as hooks from '../../../hooks/use_saved_objects_permissions';
 
 const TEST_CURRENT_DASHBOARD = {
   title: 'Test Dashboard',
@@ -19,12 +20,15 @@ const TEST_CURRENT_DASHBOARD = {
 
 describe('Custom Dashboards Actions', () => {
   it('should render the edit dashboard action when the user can edit', () => {
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: true,
+      canDelete: true,
+    }));
     render(
       <EditDashboard
         onRefresh={() => {}}
         currentDashboard={TEST_CURRENT_DASHBOARD}
         assetType="host"
-        canLinkOrEdit
       />
     );
     expect(screen.getByTestId('infraEditCustomDashboardMenu')).not.toBeDisabled();
@@ -33,12 +37,15 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the edit dashboard action when the user cannot edit', () => {
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: false,
+      canDelete: true,
+    }));
     render(
       <EditDashboard
         onRefresh={() => {}}
         currentDashboard={TEST_CURRENT_DASHBOARD}
         assetType="host"
-        canLinkOrEdit={false}
       />
     );
 
@@ -48,55 +55,68 @@ describe('Custom Dashboards Actions', () => {
     );
   });
   it('should render the link dashboard action when the user can link a dashboard', () => {
-    render(<LinkDashboard onRefresh={() => {}} assetType="host" canLinkOrEdit />);
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: true,
+      canDelete: true,
+    }));
+    render(<LinkDashboard onRefresh={() => {}} assetType="host" />);
 
     expect(screen.getByTestId('infraAddDashboard')).not.toBeDisabled();
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link dashboard action when the user cannot link a dashboard', () => {
-    render(<LinkDashboard onRefresh={() => {}} assetType="host" canLinkOrEdit={false} />);
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: false,
+      canDelete: true,
+    }));
+    render(<LinkDashboard onRefresh={() => {}} assetType="host" />);
 
     expect(screen.getByTestId('infraAddDashboard')).toBeDisabled();
     expect(screen.getByTestId('infraAddDashboard')).toHaveTextContent('Link dashboard');
   });
   it('should render the link new dashboard action when the user can link a dashboard', () => {
-    render(
-      <LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" canLinkOrEdit />
-    );
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: true,
+      canDelete: true,
+    }));
+    render(<LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" />);
     expect(screen.getByTestId('infraLinkDashboardMenu')).not.toBeDisabled();
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
   it('should render the link new dashboard action when the user cannot link a dashboard', () => {
-    render(
-      <LinkDashboard
-        onRefresh={() => {}}
-        newDashboardButton
-        assetType="host"
-        canLinkOrEdit={false}
-      />
-    );
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: false,
+      canDelete: true,
+    }));
+    render(<LinkDashboard onRefresh={() => {}} newDashboardButton assetType="host" />);
     expect(screen.getByTestId('infraLinkDashboardMenu')).toBeDisabled();
     expect(screen.getByTestId('infraLinkDashboardMenu')).toHaveTextContent('Link new dashboard');
   });
   it('should render the unlink dashboard action when the user can unlink a dashboard', () => {
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: true,
+      canDelete: true,
+    }));
     render(
       <UnlinkDashboard
         onRefresh={() => {}}
         assetType="host"
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        canDelete
       />
     );
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).not.toBeDisabled();
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).toHaveTextContent('Unlink dashboard');
   });
   it('should render the unlink dashboard action when the user cannot unlink a dashboard', () => {
+    jest.spyOn(hooks, 'useSavedObjectsPermissions').mockImplementation(() => ({
+      canLinkOrEdit: true,
+      canDelete: false,
+    }));
     render(
       <UnlinkDashboard
         onRefresh={() => {}}
         assetType="host"
         currentDashboard={TEST_CURRENT_DASHBOARD}
-        canDelete={false}
       />
     );
     expect(screen.getByTestId('infraUnLinkDashboardMenu')).toBeDisabled();
