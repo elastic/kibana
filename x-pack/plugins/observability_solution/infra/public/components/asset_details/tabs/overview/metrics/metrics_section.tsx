@@ -25,7 +25,7 @@ import {
 } from '../../../hooks/use_metrics_charts';
 
 interface Props {
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
@@ -45,7 +45,7 @@ export const MetricsSection = (props: Props) => {
 };
 
 export const MetricsSectionCompact = ({
-  assetName,
+  assetId,
   metricsDataView,
   logsDataView,
   dateRange,
@@ -59,9 +59,9 @@ export const MetricsSectionCompact = ({
   return (
     <Section title={MetricsSectionTitle} collapsible>
       <MetricsGrid
-        assetName={assetName}
+        assetId={assetId}
         dateRange={dateRange}
-        filterFieldName={model.fields.name}
+        queryField={model.fields.name}
         charts={charts}
         data-test-subj="infraAssetDetailsHostMetricsChart"
       />
@@ -69,7 +69,7 @@ export const MetricsSectionCompact = ({
   );
 };
 
-const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
+const HostMetricsSection = ({ assetId, metricsDataView, logsDataView, dateRange }: Props) => {
   const model = findInventoryModel('host');
   const charts = useHostPageViewMetricsCharts({
     metricsDataViewId: metricsDataView?.id,
@@ -79,18 +79,18 @@ const HostMetricsSection = ({ assetName, metricsDataView, logsDataView, dateRang
   return (
     <Section title={MetricsSectionTitle} collapsible>
       <MetricsGrid
-        assetName={assetName}
+        assetId={assetId}
         dateRange={dateRange}
         data-test-subj="infraAssetDetailsHostMetricsChart"
         charts={charts}
-        filterFieldName={model.fields.name}
+        queryField={model.fields.id}
       />
     </Section>
   );
 };
 
 const KubenetesMetricsSection = ({
-  assetName,
+  assetId,
   metricsDataView,
   dateRange,
 }: Omit<Props, 'logsDataView'>) => {
@@ -100,18 +100,18 @@ const KubenetesMetricsSection = ({
   return (
     <Section dependsOn={['kubernetes.node']} title={KubernetesMetricsSectionTitle} collapsible>
       <MetricsGrid
-        assetName={assetName}
+        assetId={assetId}
         dateRange={dateRange}
         data-test-subj="infraAssetDetailsKubernetesMetricsChart"
         charts={charts}
-        filterFieldName={model.fields.name}
+        queryField={model.fields.name}
       />
     </Section>
   );
 };
 
 const ContainerMetricsSection = ({
-  assetName,
+  assetId,
   metricsDataView,
   dateRange,
 }: Omit<Props, 'logsDataView'>) => {
@@ -123,11 +123,11 @@ const ContainerMetricsSection = ({
   return (
     <Section title={MetricsSectionTitle} collapsible>
       <MetricsGrid
-        assetName={assetName}
+        assetId={assetId}
         dateRange={dateRange}
         data-test-subj="infraAssetDetailsContainerMetricsChart"
         charts={charts}
-        filterFieldName={model.fields.name}
+        queryField={model.fields.name}
       />
     </Section>
   );

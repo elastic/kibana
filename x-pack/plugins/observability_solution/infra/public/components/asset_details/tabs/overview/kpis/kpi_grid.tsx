@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
@@ -24,7 +24,7 @@ export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
 
   const filters = useMemo(() => {
     return [
-      buildCombinedHostsFilter({
+      buildCombinedAssetFilter({
         field: 'host.name',
         values: [assetName],
         dataView,

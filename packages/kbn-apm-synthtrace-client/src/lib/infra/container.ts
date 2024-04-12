@@ -18,11 +18,14 @@ interface ContainerDocument extends Fields {
   'metricset.name'?: string;
 }
 
-export class Container extends Entity<ContainerDocument> {
+class Container extends Entity<ContainerDocument> {
   metrics() {
     return new ContainerMetrics({
       ...this.fields,
       'kubernetes.container.cpu.usage.limit.pct': 46,
+      'kubernetes.container.memory.usage.limit.pct': 30,
+      'docker.cpu.total.pct': 25,
+      'docker.memory.usage.pct': 20,
     });
   }
 
@@ -38,11 +41,14 @@ export class Container extends Entity<ContainerDocument> {
 
 export interface ContainerMetricsDocument extends ContainerDocument {
   'kubernetes.container.cpu.usage.limit.pct': number;
+  'kubernetes.container.memory.usage.limit.pct': number;
+  'docker.cpu.total.pct': number;
+  'docker.memory.usage.pct': number;
 }
 
 class ContainerMetrics extends Serializable<ContainerMetricsDocument> {}
 
-export function container(id: string, uid: string, nodeName: string) {
+export function container(id: string, uid: string, nodeName: string): Container {
   return new Container({
     'container.id': id,
     'kubernetes.pod.uid': uid,

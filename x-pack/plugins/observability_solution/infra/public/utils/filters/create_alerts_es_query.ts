@@ -8,7 +8,7 @@ import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import { buildCombinedHostsFilter } from './build';
+import { buildCombinedAssetFilter } from './build';
 import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 import { HOST_NAME_FIELD } from '../../../common/constants';
 
@@ -28,7 +28,7 @@ export const createAlertsEsQuery = ({
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
-  const hostsFilter = buildCombinedHostsFilter({
+  const hostsFilter = buildCombinedAssetFilter({
     field: HOST_NAME_FIELD,
     values: hostNodeNames,
   });

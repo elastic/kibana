@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { HostKpiCharts } from '../../../../../components/asset_details';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
@@ -26,7 +26,7 @@ export const KpiCharts = () => {
   const filters = shouldUseSearchCriteria
     ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
     : [
-        buildCombinedHostsFilter({
+        buildCombinedAssetFilter({
           field: 'host.name',
           values: hostNodes.map((p) => p.name),
           dataView,

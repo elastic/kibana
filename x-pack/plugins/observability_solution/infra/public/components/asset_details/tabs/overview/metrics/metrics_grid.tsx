@@ -11,23 +11,23 @@ import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { Chart } from './chart';
 
 interface Props {
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
-  filterFieldName: string;
+  queryField: string;
   charts: Array<LensConfig & { id: string }>;
   ['data-test-subj']: string;
 }
 
-export const MetricsGrid = ({ assetName, dateRange, filterFieldName, charts, ...props }: Props) => {
+export const MetricsGrid = ({ assetId, dateRange, queryField, charts, ...props }: Props) => {
   return (
     <EuiFlexGrid columns={2} gutterSize="s" data-test-subj={`${props['data-test-subj']}Grid`}>
       {charts.map((chartProp, index) => (
         <EuiFlexItem key={index} grow={false}>
           <Chart
             {...chartProp}
-            assetName={assetName}
+            assetId={assetId}
             dateRange={dateRange}
-            filterFieldName={filterFieldName}
+            queryField={queryField}
             data-test-subj={props['data-test-subj']}
           />
         </EuiFlexItem>

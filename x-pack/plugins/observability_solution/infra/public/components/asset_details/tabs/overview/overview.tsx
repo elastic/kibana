@@ -44,7 +44,7 @@ export const Overview = () => {
       dateRange={state.dateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
-      assetName={asset.name}
+      assetId={asset.id}
       assetType={asset.type}
     />
   ) : (
@@ -52,7 +52,7 @@ export const Overview = () => {
       dateRange={state.dateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
-      assetName={asset.name}
+      assetId={asset.id}
     />
   );
   const metadataSummarySection = isFullPageView ? (

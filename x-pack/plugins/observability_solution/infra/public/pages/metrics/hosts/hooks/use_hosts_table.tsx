@@ -29,7 +29,7 @@ import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
-import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -151,7 +151,7 @@ export const useHostsTable = () => {
       return [];
     }
     const selectedHostNames = selectedItems.map(({ name }) => name);
-    const newFilter = buildCombinedHostsFilter({
+    const newFilter = buildCombinedAssetFilter({
       field: 'host.name',
       values: selectedHostNames,
       dataView,

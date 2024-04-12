@@ -14,7 +14,7 @@ import {
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-export const buildCombinedHostsFilter = ({
+export const buildCombinedAssetFilter = ({
   field,
   values,
   dataView,
