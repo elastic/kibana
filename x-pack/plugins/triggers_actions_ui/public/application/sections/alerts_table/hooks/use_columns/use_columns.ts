@@ -15,14 +15,25 @@ import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
-export interface UseColumnsArgs {
-  featureIds: AlertConsumers[];
+export interface UseColumnsArgsTemp {
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
   defaultColumns: EuiDataGridColumn[];
   initialBrowserFields?: BrowserFields;
 }
+export type UseColumnsArgs = UseColumnsArgsTemp &
+  (
+    | {
+        // @deprecated should use ruleTypeIds
+        featureIds: AlertConsumers[];
+        ruleTypeIds?: never;
+      }
+    | {
+        featureIds?: never;
+        ruleTypeIds: string[];
+      }
+  );
 
 export interface UseColumnsResp {
   columns: EuiDataGridColumn[];
@@ -150,16 +161,21 @@ const persist = ({
 
 export const useColumns = ({
   featureIds,
+  ruleTypeIds,
   storageAlertsTable,
   storage,
   id,
   defaultColumns,
   initialBrowserFields,
 }: UseColumnsArgs): UseColumnsResp => {
-  const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
-    featureIds,
-    initialBrowserFields,
-  });
+  const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities(
+    featureIds
+      ? {
+          featureIds,
+          initialBrowserFields,
+        }
+      : { ruleTypeIds, initialBrowserFields }
+  );
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
     let cols = storageAlertsTable.current.columns;

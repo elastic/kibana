@@ -47,51 +47,75 @@ export const ruleRegistrySearchStrategyProvider = (
   const requestUserEs = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
-      // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
-      // is different than every other solution so we need to special case
-      // those requests.
-      let siemRequest = false;
-      let params = {};
-      if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
-        siemRequest = true;
-      } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
+      if (request.featureIds && request.ruleTypeIds) {
         throw new Error(
-          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
+          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing feature IDs and rule type IDs.`
         );
       }
-      request.featureIds.forEach((featureId) => {
-        if (!isValidFeatureId(featureId)) {
-          logger.warn(
-            `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
+      let siemRequest = false;
+      let params = {};
+      if (request.ruleTypeIds && request.ruleTypeIds.length === 0) {
+        throw new Error(
+          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing empty rule type IDs`
+        );
+      } else if (request.featureIds) {
+        // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
+        // is different than every other solution so we need to special case
+        // those requests.
+        if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
+          siemRequest = true;
+        } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
+          throw new Error(
+            `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
           );
         }
-      });
+        request.featureIds.forEach((featureId) => {
+          if (!isValidFeatureId(featureId)) {
+            logger.warn(
+              `Found invalid feature '${featureId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this feature will be searched.`
+            );
+          }
+        });
+      }
 
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);
-      const getAsync = async (featureIds: string[]) => {
+      const getAuthzObject = async (featureIds?: string[], ruleTypeIds?: string[]) => {
         const [space, authorization] = await Promise.all([
           getActiveSpace(),
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
         let authzFilter;
-        const fIds = new Set(featureIds);
-        if (!siemRequest && featureIds.length > 0) {
+        const optionsAuth = featureIds
+          ? {
+              featureIds: new Set(featureIds),
+            }
+          : {
+              ruleTypeIds: new Set(ruleTypeIds),
+            };
+        if (
+          !siemRequest &&
+          ((featureIds && featureIds.length > 0) || (ruleTypeIds && ruleTypeIds.length > 0))
+        ) {
           authzFilter = (await getAuthzFilter(
             authorization,
             ReadOperations.Find,
-            fIds
+            optionsAuth
           )) as estypes.QueryDslQueryContainer;
         }
 
         const authorizedRuleTypes =
-          featureIds.length > 0
-            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
+          (featureIds && featureIds.length > 0) || (ruleTypeIds && ruleTypeIds.length > 0)
+            ? await authorization.getAuthorizedRuleTypes(
+                AlertingAuthorizationEntity.Alert,
+                optionsAuth
+              )
             : [];
 
         return { space, authzFilter, authorizedRuleTypes };
       };
-      return from(getAsync(request.featureIds)).pipe(
+
+      return from(getAuthzObject(request.featureIds, request.ruleTypeIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
           const allRuleTypes = authorizedRuleTypes.map((art: { id: string }) => art.id);
           const ruleTypes = (allRuleTypes ?? []).filter(

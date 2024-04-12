@@ -15,6 +15,7 @@ export const transformAggregateQueryRequest: RewriteRequestCase<AggregateOptions
   has_reference: hasReference,
   filter_consumers: filterConsumers,
   filter,
+  rule_type_ids: ruleTypeIds,
 }) => ({
   defaultSearchOperator,
   ...(hasReference ? { hasReference } : {}),
@@ -22,4 +23,5 @@ export const transformAggregateQueryRequest: RewriteRequestCase<AggregateOptions
   ...(search ? { search } : {}),
   ...(filterConsumers ? { filterConsumers } : {}),
   ...(filter ? { filter } : {}),
+  ...(ruleTypeIds ? { ruleTypeIds } : {}),
 });

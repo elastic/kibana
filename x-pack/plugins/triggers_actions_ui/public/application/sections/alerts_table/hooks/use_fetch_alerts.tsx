@@ -28,8 +28,7 @@ import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../t
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 
-export interface FetchAlertsArgs {
-  featureIds: ValidFeatureId[];
+export interface FetchAlertsArgsTemps {
   fields: QueryDslFieldAndFormat[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pagination: {
@@ -42,8 +41,18 @@ export interface FetchAlertsArgs {
   sort: SortCombinations[];
   skip: boolean;
 }
-
-type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip' | 'onPageChange'>;
+export type FetchAlertsArgs = FetchAlertsArgsTemps &
+  (
+    | {
+        featureIds: ValidFeatureId[];
+        ruleTypeIds?: never;
+      }
+    | {
+        featureIds?: never;
+        ruleTypeIds: string[];
+      }
+  );
+type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'ruleTypeIds' | 'skip' | 'onPageChange'>;
 
 type Refetch = () => void;
 
@@ -69,7 +78,7 @@ export interface FetchAlertResp {
 type AlertResponseState = Omit<FetchAlertResp, 'getInspectQuery' | 'refetch'>;
 interface AlertStateReducer {
   loading: boolean;
-  request: Omit<FetchAlertsArgs, 'skip' | 'onPageChange'>;
+  request: AlertRequest;
   response: AlertResponseState;
 }
 
@@ -88,7 +97,6 @@ type AlertActions =
 const initialAlertState: AlertStateReducer = {
   loading: false,
   request: {
-    featureIds: [],
     fields: [],
     query: {
       bool: {},
@@ -151,9 +159,11 @@ export type UseFetchAlerts = ({
   onLoaded,
   onPageChange,
   runtimeMappings,
+  ruleTypeIds,
   skip,
   sort,
 }: FetchAlertsArgs) => [boolean, FetchAlertResp];
+
 const useFetchAlerts = ({
   featureIds,
   fields,
@@ -161,6 +171,7 @@ const useFetchAlerts = ({
   pagination,
   onLoaded,
   onPageChange,
+  ruleTypeIds,
   runtimeMappings,
   skip,
   sort,
@@ -199,9 +210,22 @@ const useFetchAlerts = ({
         abortCtrl.current = new AbortController();
         dispatch({ type: 'loading', loading: true });
         if (data && data.search) {
+          const searchParams = {
+            ...request,
+            fields,
+            query,
+          };
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
-              { ...request, featureIds, fields, query },
+              featureIds
+                ? {
+                    ...searchParams,
+                    featureIds,
+                  }
+                : {
+                    ...searchParams,
+                    ruleTypeIds,
+                  },
               {
                 strategy: 'privateRuleRegistryAlertsSearchStrategy',
                 abortSignal: abortCtrl.current.signal,
@@ -281,14 +305,14 @@ const useFetchAlerts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, featureIds, query, fields, onLoaded]
+    [skip, data, featureIds, ruleTypeIds, fields, query, onLoaded]
   );
 
   // FUTURE ENGINEER
   // This useEffect is only to fetch the alert when these props below changed
   // fields, pagination, sort, runtimeMappings
   useEffect(() => {
-    if (featureIds.length === 0) {
+    if ((featureIds && featureIds.length === 0) || (ruleTypeIds && ruleTypeIds.length === 0)) {
       return;
     }
     const newAlertRequest = {
@@ -308,13 +332,17 @@ const useFetchAlerts = ({
         request: newAlertRequest,
       });
     }
-  }, [featureIds, fields, pagination, sort, runtimeMappings]);
+  }, [featureIds, fields, pagination, sort, runtimeMappings, ruleTypeIds]);
 
   // FUTURE ENGINEER
   // This useEffect is only to fetch the alert when query props changed
   // because we want to reset the pageIndex of pagination to 0
   useEffect(() => {
-    if (featureIds.length === 0 || !prevAlertRequest.current) {
+    if (
+      (featureIds && featureIds.length === 0) ||
+      (ruleTypeIds && ruleTypeIds.length === 0) ||
+      !prevAlertRequest.current
+    ) {
       return;
     }
     const resetPagination = {
@@ -338,10 +366,10 @@ const useFetchAlerts = ({
       });
       onPageChange(resetPagination);
     }
-  }, [featureIds, onPageChange, query]);
+  }, [featureIds, onPageChange, query, ruleTypeIds]);
 
   useEffect(() => {
-    if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {
+    if (!deepEqual(alertRequest, prevAlertRequest.current)) {
       fetchAlerts(alertRequest);
     }
   }, [alertRequest, fetchAlerts]);

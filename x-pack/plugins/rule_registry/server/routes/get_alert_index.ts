@@ -22,7 +22,9 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
         query: buildRouteValidation(
           t.exact(
             t.partial({
+              // @deprecated use ruletypes
               features: t.string,
+              ruletypes: t.string,
             })
           )
         ),
@@ -35,10 +37,29 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { features } = request.query;
-        const indexName = await alertsClient.getAuthorizedAlertsIndices(
-          features?.split(',') ?? validFeatureIds
-        );
+        const { features, ruletypes } = request.query;
+
+        if (features && ruletypes) {
+          throw new Error(
+            `The find index API is unable to accommodate requests containing feature IDs and rule type IDs.`
+          );
+        }
+
+        const indexName = features
+          ? await alertsClient.getAuthorizedAlertsIndicesByFeatureIds(
+              features?.split(',') ?? validFeatureIds
+            )
+          : ruletypes
+          ? await alertsClient.getAuthorizedAlertsIndicesByRuleTypeIds(ruletypes?.split(',') ?? [])
+          : null;
+
+        if (indexName == null) {
+          return response.notFound({
+            body: {
+              message: `alert index was not found with features being ${features} or rule types being ${ruletypes}`,
+            },
+          });
+        }
         return response.ok({
           body: { index_name: indexName },
         });

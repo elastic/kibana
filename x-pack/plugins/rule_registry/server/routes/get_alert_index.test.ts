@@ -19,7 +19,9 @@ describe('getAlertsIndexRoute', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rac.getAuthorizedAlertsIndices.mockResolvedValue(['alerts-security.alerts']);
+    clients.rac.getAuthorizedAlertsIndicesByFeatureIds.mockResolvedValue([
+      'alerts-security.alerts',
+    ]);
 
     getAlertsIndexRoute(server.router);
   });
@@ -64,7 +66,9 @@ describe('getAlertsIndexRoute', () => {
   });
 
   test('returns error status if rac client "getAuthorizedAlertsIndices" fails', async () => {
-    clients.rac.getAuthorizedAlertsIndices.mockRejectedValue(new Error('Unable to get index'));
+    clients.rac.getAuthorizedAlertsIndicesByFeatureIds.mockRejectedValue(
+      new Error('Unable to get index')
+    );
     const response = await server.inject(getReadIndexRequest(), context);
 
     expect(response.status).toEqual(500);

@@ -29,7 +29,11 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import {
+  RuleTypeParams,
+  PluginStartContract as AlertingStart,
+  AuthorizationOptions,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
@@ -85,6 +89,16 @@ export interface ConstructorOptions {
   getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
+type AlertsClientAuthorizationOptions =
+  | {
+      featureIds: string[];
+      ruleTypeIds?: never;
+    }
+  | {
+      featureIds?: never;
+      ruleTypeIds: string[];
+    };
+
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   status: string;
@@ -119,16 +133,15 @@ interface GetAlertParams {
   index?: string;
 }
 
-interface GetAlertSummaryParams {
+type GetAlertSummaryParams = {
   id?: string;
   gte: string;
   lte: string;
-  featureIds: string[];
   filter?: estypes.QueryDslQueryContainer[];
   fixedInterval?: string;
-}
+} & AlertsClientAuthorizationOptions;
 
-interface SingleSearchAfterAndAudit {
+type SingleSearchAfterAndAudit = {
   id?: string | null | undefined;
   query?: string | object | undefined;
   aggs?: Record<string, any> | undefined;
@@ -139,9 +152,16 @@ interface SingleSearchAfterAndAudit {
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
-  featureIds?: string[];
-}
-
+} & (
+  | {
+      featureIds?: string[];
+      ruleTypeIds?: never;
+    }
+  | {
+      featureIds?: never;
+      ruleTypeIds?: string[];
+    }
+);
 /**
  * Provides apis to interact with alerts as data
  * ensures the request is authorized to perform read / write actions
@@ -289,6 +309,7 @@ export class AlertsClient {
     sort,
     lastSortIds = [],
     featureIds,
+    ruleTypeIds,
   }: SingleSearchAfterAndAudit) {
     try {
       const alertSpaceId = this.spaceId;
@@ -308,7 +329,11 @@ export class AlertsClient {
           alertSpaceId,
           operation,
           config,
-          featureIds ? new Set(featureIds) : undefined
+          featureIds
+            ? {
+                featureIds: new Set(featureIds),
+              }
+            : { ruleTypeIds: new Set(ruleTypeIds) }
         ),
         aggs,
         _source,
@@ -449,14 +474,10 @@ export class AlertsClient {
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
     config: EsQueryConfig,
-    featuresIds?: Set<string>
+    options: AuthorizationOptions
   ) {
     try {
-      const authzFilter = (await getAuthzFilter(
-        this.authorization,
-        operation,
-        featuresIds
-      )) as Filter;
+      const authzFilter = (await getAuthzFilter(this.authorization, operation, options)) as Filter;
       const spacesFilter = getSpacesFilter(alertSpaceId) as unknown as Filter;
       let esQuery;
       if (id != null) {
@@ -519,7 +540,8 @@ export class AlertsClient {
       null,
       alertSpaceId,
       operation,
-      config
+      config,
+      {}
     );
 
     while (hasSortIds) {
@@ -633,9 +655,14 @@ export class AlertsClient {
     featureIds,
     filter,
     fixedInterval = '1m',
+    ruleTypeIds,
   }: GetAlertSummaryParams) {
     try {
-      const indexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+      const indexToUse = featureIds
+        ? await this.getAuthorizedAlertsIndicesByFeatureIds(featureIds)
+        : ruleTypeIds
+        ? await this.getAuthorizedAlertsIndicesByRuleTypeIds(ruleTypeIds)
+        : null;
 
       if (isEmpty(indexToUse)) {
         throw Boom.badRequest('no featureIds were provided for getting alert summary');
@@ -974,6 +1001,7 @@ export class AlertsClient {
     featureIds,
     index,
     query,
+    ruleTypeIds,
     search_after: searchAfter,
     size,
     sort,
@@ -981,7 +1009,6 @@ export class AlertsClient {
     _source,
   }: {
     aggs?: object;
-    featureIds?: string[];
     index?: string;
     query?: object;
     search_after?: Array<string | number>;
@@ -989,11 +1016,16 @@ export class AlertsClient {
     sort?: estypes.SortOptions[];
     track_total_hits?: boolean | number;
     _source?: string[];
-  }) {
+  } & AlertsClientAuthorizationOptions) {
     try {
       let indexToUse = index;
       if (featureIds && !isEmpty(featureIds)) {
-        const tempIndexToUse = await this.getAuthorizedAlertsIndices(featureIds);
+        const tempIndexToUse = await this.getAuthorizedAlertsIndicesByFeatureIds(featureIds);
+        if (!isEmpty(tempIndexToUse)) {
+          indexToUse = (tempIndexToUse ?? []).join();
+        }
+      } else if (ruleTypeIds && !isEmpty(ruleTypeIds)) {
+        const tempIndexToUse = await this.getAuthorizedAlertsIndicesByRuleTypeIds(ruleTypeIds);
         if (!isEmpty(tempIndexToUse)) {
           indexToUse = (tempIndexToUse ?? []).join();
         }
@@ -1025,11 +1057,34 @@ export class AlertsClient {
     }
   }
 
-  public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
+  public async getAuthorizedAlertsIndicesByFeatureIds(
+    featureIds: string[]
+  ): Promise<string[] | undefined> {
     try {
       const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
         AlertingAuthorizationEntity.Alert,
-        new Set(featureIds)
+        { featureIds: new Set(featureIds) }
+      );
+      const indices = this.getAlertIndicesAlias(
+        authorizedRuleTypes.map((art: { id: any }) => art.id),
+        this.spaceId
+      );
+
+      return indices;
+    } catch (exc) {
+      const errMessage = `getAuthorizedAlertsIndices failed to get authorized rule types: ${exc}`;
+      this.logger.error(errMessage);
+      throw Boom.failedDependency(errMessage);
+    }
+  }
+
+  public async getAuthorizedAlertsIndicesByRuleTypeIds(
+    ruleTypeIds: string[]
+  ): Promise<string[] | undefined> {
+    try {
+      const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
+        AlertingAuthorizationEntity.Alert,
+        { ruleTypeIds: new Set(ruleTypeIds) }
       );
       const indices = this.getAlertIndicesAlias(
         authorizedRuleTypes.map((art: { id: any }) => art.id),
@@ -1081,20 +1136,26 @@ export class AlertsClient {
 
   public async getBrowserFields({
     featureIds,
+    ruleTypeIds,
     indices,
     metaFields,
     allowNoIndex,
   }: {
-    featureIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
-  }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
+  } & AlertsClientAuthorizationOptions): Promise<{
+    browserFields: BrowserFields;
+    fields: FieldDescriptor[];
+  }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const ruleTypeList = this.getRuleList();
     const fieldsForAAD = new Set<string>();
     for (const rule of ruleTypeList) {
-      if (featureIds.includes(rule.producer) && rule.hasFieldsForAAD) {
+      if (
+        ((featureIds && featureIds.includes(rule.producer)) || ruleTypeIds?.includes(rule.id)) &&
+        rule.hasFieldsForAAD
+      ) {
         (rule.fieldsForAAD ?? []).forEach((f) => {
           fieldsForAAD.add(f);
         });
@@ -1118,7 +1179,7 @@ export class AlertsClient {
     if (producer === AlertConsumers.SIEM) {
       throw Boom.badRequest(`Security solution rule type is not supported`);
     }
-    const indices = await this.getAuthorizedAlertsIndices([producer]);
+    const indices = await this.getAuthorizedAlertsIndicesByRuleTypeIds([ruleTypeId]);
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices ?? [],

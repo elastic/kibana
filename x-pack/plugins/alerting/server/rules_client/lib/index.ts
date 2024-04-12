@@ -23,3 +23,4 @@ export { migrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actio
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';
 export { addGeneratedActionValues } from './add_generated_action_values';
 export { incrementRevision } from './increment_revision';
+export { buildAuthorizationOptions } from './build_authorization_options';
