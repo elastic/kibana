@@ -36,6 +36,13 @@ const networkLinks: LinkItem = {
   ],
   links: [
     {
+      id: SecurityPageName.networkFlows,
+      title: i18n.translate('xpack.securitySolution.appLinks.network.flows', {
+        defaultMessage: 'Flows',
+      }),
+      path: `${NETWORK_PATH}/flows`,
+    },
+    {
       id: SecurityPageName.networkDns,
       title: i18n.translate('xpack.securitySolution.appLinks.network.dns', {
         defaultMessage: 'DNS',
@@ -90,6 +97,13 @@ const usersLinks: LinkItem = {
   ],
   links: [
     {
+      id: SecurityPageName.usersAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.users.allUsers', {
+        defaultMessage: 'All users',
+      }),
+      path: `${USERS_PATH}/allUsers`,
+    },
+    {
       id: SecurityPageName.usersAuthentications,
       title: i18n.translate('xpack.securitySolution.appLinks.users.authentications', {
         defaultMessage: 'Authentications',
@@ -136,7 +150,15 @@ const hostsLinks: LinkItem = {
   ],
   links: [
     {
-      id: SecurityPageName.uncommonProcesses,
+      id: SecurityPageName.hostsAll,
+      title: i18n.translate('xpack.securitySolution.appLinks.hosts.allHosts', {
+        defaultMessage: 'All hosts',
+      }),
+      path: `${HOSTS_PATH}/allHosts`,
+      isBeta: false,
+    },
+    {
+      id: SecurityPageName.hostsUncommonProcesses,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.uncommonProcesses', {
         defaultMessage: 'Uncommon Processes',
       }),
@@ -165,7 +187,7 @@ const hostsLinks: LinkItem = {
       path: `${HOSTS_PATH}/hostRisk`,
     },
     {
-      id: SecurityPageName.sessions,
+      id: SecurityPageName.hostsSessions,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.sessions', {
         defaultMessage: 'Sessions',
       }),

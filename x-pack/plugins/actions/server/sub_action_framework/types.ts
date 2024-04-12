@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -30,6 +31,7 @@ export interface ServiceParams<Config, Secrets> {
   logger: Logger;
   secrets: Secrets;
   services: Services;
+  request?: KibanaRequest;
 }
 
 export type SubActionRequestParams<R> = {
