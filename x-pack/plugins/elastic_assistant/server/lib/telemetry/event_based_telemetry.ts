@@ -73,6 +73,9 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   isEnabledKnowledgeBase: boolean;
   isEnabledRAGAlerts: boolean;
+  assistantStreamingEnabled: boolean;
+  actionTypeId: string;
+  model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
@@ -88,6 +91,25 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
         description: 'Is RAG Alerts enabled',
       },
     },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
+      },
+    },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana action type id',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -95,6 +117,9 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
   isEnabledKnowledgeBase: boolean;
   isEnabledRAGAlerts: boolean;
+  assistantStreamingEnabled: boolean;
+  actionTypeId: string;
+  model?: string;
 }> = {
   eventType: 'invoke_assistant_error',
   schema: {
@@ -114,6 +139,25 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Is RAG Alerts enabled',
+      },
+    },
+    assistantStreamingEnabled: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is streaming enabled',
+      },
+    },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana action type id',
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
       },
     },
   },
