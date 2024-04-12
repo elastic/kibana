@@ -60,8 +60,11 @@ export const checkDataStreamsInPolicyDetails = () => {
   cy.getBySel('PackagePoliciesTableLink')
     .invoke('text')
     .then((text) => {
+      console.log({ text });
       const version = extractSemanticVersion(text) as string;
+      console.log({ version });
       const isVersionWithStreams = satisfies(version, '>=1.12.0');
+      console.log({ isVersionWithStreams });
       if (isVersionWithStreams) {
         cy.contains('dataset: osquery_manager.result').should('exist');
       } else {
