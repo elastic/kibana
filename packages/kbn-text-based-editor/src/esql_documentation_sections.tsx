@@ -106,6 +106,16 @@ Also, similar to the index fields, once an aggregation is performed, a metadata 
 FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
+
+The \`OPTIONS\` directive of the FROM command allows you to configure the way ES|QL accesses the data to be queried. The argument passed to this directive is a comma-separated list of option name-value pairs, with the option name and the corresponding value double-quoted.
+
+For example:
+
+\`\`\`
+FROM index_pattern [OPTIONS "option1"="value1"[,...[,"optionN"="valueN"]]]
+\`\`\`
+
+Learn more about the \`OPTIONS\` directive in the [main documentation page](https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-index-options.html#esql-index-options).
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -870,7 +880,7 @@ ROW y=12.9, x=.6
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
         {
-          defaultMessage: 'AUTO_BUCKET',
+          defaultMessage: 'BUCKET',
         }
       ),
       description: (
@@ -879,14 +889,14 @@ ROW y=12.9, x=.6
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
             {
-              defaultMessage: `### AUTO_BUCKET
-Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`AUTO_BUCKET\`with \`STATS ... BY\` to create a date histogram.
+              defaultMessage: `### BUCKET
+Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`BUCKET\`with \`STATS ... BY\` to create a date histogram.
 
 You provide a target number of buckets, a start date, and an end date, and it picks an appropriate bucket size to generate the target number of buckets or fewer. For example, this asks for at most 20 buckets over a whole year, which picks monthly buckets:
 
 \`\`\`
 ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=AUTO_BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket=BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 \`\`\`
 
 Returning:
@@ -898,12 +908,12 @@ The goal isn't to provide *exactly* the target number of buckets, it's to pick a
 range that people are comfortable with that provides at most the target number of
 buckets.
 
-If you ask for more buckets then \`AUTO_BUCKET\` can pick a smaller range. For example,
+If you ask for more buckets then \`BUCKET\` can pick a smaller range. For example,
 asking for at most 100 buckets in a year will get you week long buckets:
 
 \`\`\`
 ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=AUTO_BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket=BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 \`\`\`
 
 Returning:
@@ -911,14 +921,14 @@ Returning:
 1985-07-09T00:00:00.000Z | 1985-07-08T00:00:00.000Z
 \`\`\`
 
-\`AUTO_BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`AUTO_BUCKET\` with \`WHERE\` to filter rows.
+\`BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`BUCKET\` with \`WHERE\` to filter rows.
 
 A more complete example might look like:
 
 \`\`\`
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| EVAL bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 | STATS AVG(salary) BY bucket
 | SORT bucket
 \`\`\`
@@ -933,7 +943,7 @@ Returning:
 54539.75 | 1985-11-01T00:00:00.000
 \`\`\`
 
-NOTE: \`AUTO_BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
+NOTE: \`BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1787,6 +1797,40 @@ The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearc
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        {
+          defaultMessage: 'MV_LAST',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            {
+              defaultMessage: `### MV_LAST
+Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
+  
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_LAST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | baz
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
@@ -1928,6 +1972,71 @@ Returning:
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction',
+        {
+          defaultMessage: 'MV_SORT',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSortFunction.markdown',
+            {
+              defaultMessage: `### MV_SORT
+Sorts a multivalue expression in lexicographical order.
+
+Example:
+
+\`\`\`
+ROW a = [4, 2, -3, 2]
+| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
+\`\`\`
+
+
+Valid order options are \`ASC\` and \`DESC\`, default is \`ASC\`.
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction',
+        {
+          defaultMessage: 'MV_SLICE',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSliceFunction.markdown',
+            {
+              defaultMessage: `### MV_SLICE
+Returns a subset of the multivalued field using the start and end index values.
+
+
+Example:
+
+\`\`\`
+ROW a = [1, 2, 2, 3]
+| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
+\`\`\`
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction',
         {
           defaultMessage: 'MV_SUM',
@@ -1963,31 +2072,33 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction',
         {
-          defaultMessage: 'MV_LAST',
+          defaultMessage: 'MV_ZIP',
         }
       ),
       description: (
         <Markdown
           readOnly
           markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvZipFunction.markdown',
             {
-              defaultMessage: `### MV_LAST
-Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
-  
-\`\`\`
-ROW a="foo;bar;baz" 
-| EVAL first_a = MV_LAST(SPLIT(a, ";"))
-\`\`\`
+              defaultMessage: `### MV_ZIP
+Combines the values from two multivalued fields with a delimiter that joins them together.
 
-Returning:
+
+Example:
 
 \`\`\`
-foo;bar;baz | baz
+ROW a = ["x", "y", "z"], b = ["1", "2"]
+| EVAL c = mv_zip(a, b, "-")
+| KEEP a, b, c
 \`\`\`
-            `,
+
+Specifying a delimiter is optional. If omitted, the default delimiter \`,\` is used.
+
+
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -2168,6 +2279,36 @@ ROW message = "   some text  ",  color = " red "
 | EVAL color = RTRIM(color)
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction',
+        {
+          defaultMessage: 'SIGNUM',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.signumFunction.markdown',
+            {
+              defaultMessage: `### SIGNUM
+Returns the sign of the given number. Returns \`-1\` for negative numbers, \`0\` for \`0\` and \`1\` for positive numbers.
+
+Example:
+
+\`\`\`
+ROW d = 100.0
+| EVAL s = SIGNUM(d)
 \`\`\`
               `,
               description:
@@ -3486,7 +3627,7 @@ FROM employees
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction',
         {
-          defaultMessage: 'ST_CENTROID',
+          defaultMessage: 'ST_CENTROID_AGG',
         }
       ),
       description: (
@@ -3495,12 +3636,14 @@ FROM employees
           markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
             {
-              defaultMessage: `### ST_CENTROID
+              defaultMessage: `### ST_CENTROID_AGG
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
 Calculates the spatial centroid over a field with spatial point geometry type.
 
 \`\`\`
 FROM airports
-| STATS centroid=ST_CENTROID(location)
+| STATS centroid=ST_CENTROID_AGG(location)
 \`\`\`
               `,
               description:
@@ -3545,6 +3688,267 @@ FROM employees
         />
       ),
     },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction',
+        {
+          defaultMessage: 'VALUES',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.valuesFunction.markdown',
+            {
+              defaultMessage: `### VALUES
+
+**WARNING: Do not use \`VALUES\` on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use \`MV_SORT\`.
+
+Accepts an expression of any type except \`geo_point\`, \`cartesian_point\`, \`geo_shape\`, or \`cartesian_shape\`.
+
+
+Example:
+
+\`\`\`
+  FROM employees
+| EVAL first_letter = SUBSTRING(first_name, 0, 1)
+| STATS first_name=MV_SORT(VALUES(first_name)) BY first_letter
+| SORT first_letter
+\`\`\`
+
+> _**WARNING:** This can use a significant amount of memory and ES|QL doesn’t yet grow aggregations beyond memory. So this aggregation will work until it is used to collect more values than can fit into memory. Once it collects too many values it will fail the query with a [Circuit Breaker Error](https://www.elastic.co/guide/en/elasticsearch/reference/current/circuit-breaker-errors.html)._
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+  ],
+};
+
+export const spatialFunctions = {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.spatialFunctions', {
+    defaultMessage: 'Spatial functions',
+  }),
+  description: i18n.translate(
+    'textBasedEditor.query.textBasedLanguagesEditor.spatialFunctionsDocumentationESQLDescription',
+    {
+      defaultMessage: `ES|QL supports these spatial functions:`,
+    }
+  ),
+  items: [
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stcontainsFunction',
+        {
+          defaultMessage: 'ST_CONTAINS',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stcontainsFunction.markdown',
+            {
+              defaultMessage: `### ST_CONTAINS
+
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Returns whether the first geometry contains the second geometry.
+This is the inverse of the \`ST_WITHIN\` function.
+
+Example:
+
+\`\`\`
+FROM airport_city_boundaries
+| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
+| KEEP abbrev, airport, region, city, city_location
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    // ST_DISJOINT
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stdisjointFunction',
+        {
+          defaultMessage: 'ST_DISJOINT',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stdisjointFunction.markdown',
+            {
+              defaultMessage: `### ST_DISJOINT
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Returns whether the two geometries or geometry columns are disjoint.
+
+This is the inverse of the \`ST_INTERSECTS\` function.
+
+Example:
+
+\`\`\`
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stintersectsFunction',
+        {
+          defaultMessage: 'ST_INTERSECTS',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stintersectsFunction.markdown',
+            {
+              defaultMessage: `### ST_INTERSECTS
+
+
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Returns true if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons). This is the inverse of the \`ST_DISJOINT\` function. 
+
+Example:
+
+\`\`\`
+FROM airports
+| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+\`\`\`
+
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stwithinFunction',
+        {
+          defaultMessage: 'ST_WITHIN',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stwithinFunction.markdown',
+            {
+              defaultMessage: `### ST_WITHIN
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Returns whether the first geometry is within the second geometry.
+This is the inverse of the \`ST_CONTAINS\` function.
+
+Example:
+
+\`\`\`
+FROM airport_city_boundaries
+| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
+| KEEP abbrev, airport, region, city, city_location
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stxFunction',
+        {
+          defaultMessage: 'ST_X',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stxFunction.markdown',
+            {
+              defaultMessage: `### ST_X
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+
+Extracts the \`x\` coordinate from the supplied point. If the point is of type \`geo_point\` this is equivalent to extracting the \`longitude\` value.
+
+Example:
+
+\`\`\`
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x =  ST_X(point), y = ST_Y(point)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.styFunction',
+        {
+          defaultMessage: 'ST_Y',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.styFunction.markdown',
+            {
+              defaultMessage: `### ST_Y
+**WARNING: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.**
+
+Extracts the \`y\` coordinate from the supplied point. If the point is of type \`geo_point\` this is equivalent to extracting the \`latitude\` value.
+
+Example:
+
+\`\`\`
+ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
+| EVAL x =  ST_X(point), y = ST_Y(point)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
   ],
 };
 
@@ -3576,12 +3980,16 @@ export const operators = {
 These binary comparison operators are supported:
 
 * equality: \`==\`
-* case insensitive equality \`=~\`
 * inequality: \`!=\`
 * less than: \`<\`
 * less than or equal: \`<=\`
-* larger than: \`>\`
-* larger than or equal: \`>=\`
+* greater than: \`>\`
+* greater than or equal: \`>=\`
+* add: \`+\`
+* subtract: \`-\`
+* multiply: \`*\`
+* divide: \`/\`
+* modulus: \`%\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
