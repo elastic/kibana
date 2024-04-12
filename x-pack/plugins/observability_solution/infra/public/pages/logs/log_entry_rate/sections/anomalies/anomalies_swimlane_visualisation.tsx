@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import moment from 'moment';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
-} from '@kbn/ml-plugin/public';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { partitionField } from '../../../../../../common/infra_ml';
+import React, { useMemo } from 'react';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-plugin/public';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
+import { partitionField } from '../../../../../../common/infra_ml';
 import { TimeRange } from '../../../../../../common/time/time_range';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
 interface Props {
   timeRange: TimeRange;
@@ -38,33 +34,39 @@ export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
 };
 
 export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
-  const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
-  const factory = embeddablePlugin?.getEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+  const { ml } = useKibanaContextForPlugin().services;
 
-  const embeddableInput: AnomalySwimlaneEmbeddableInput = useMemo(() => {
+  const formattedTimeRange = useMemo(() => {
     return {
-      id: 'LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE', // NOTE: This is the only embeddable on the anomalies page, a static string will do.
-      jobIds,
-      swimlaneType: 'viewBy',
-      timeRange: {
-        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-      },
-      refreshConfig: REFRESH_CONFIG,
-      viewBy: partitionField,
-      filters: [],
-      query: {
-        language: 'kuery',
-        query: selectedDatasets
-          .map((dataset) => `${partitionField} : ${dataset !== '' ? dataset : '""'}`)
-          .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
-      },
+      from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
     };
-  }, [jobIds, timeRange.startTime, timeRange.endTime, selectedDatasets]);
+  }, [timeRange.startTime, timeRange.endTime]);
 
-  if (!factory) {
+  const query = useMemo(() => {
+    return {
+      language: 'kuery',
+      query: selectedDatasets
+        .map((dataset) => `${partitionField} : ${dataset !== '' ? dataset : '""'}`)
+        .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
+    };
+  }, [selectedDatasets]);
+
+  const AnomalySwimLane = ml?.components.AnomalySwimLane;
+  if (!AnomalySwimLane) {
     return <MissingEmbeddableFactoryCallout embeddableType={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE} />;
   }
 
-  return <EmbeddableRenderer input={embeddableInput} factory={factory} />;
+  return (
+    <AnomalySwimLane
+      id="LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE"
+      executionContext={{ name: 'infra_logs' }}
+      jobIds={jobIds}
+      swimlaneType="viewBy"
+      viewBy={partitionField}
+      refreshConfig={REFRESH_CONFIG}
+      timeRange={formattedTimeRange}
+      query={query}
+    />
+  );
 };

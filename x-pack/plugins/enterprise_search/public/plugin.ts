@@ -25,7 +25,7 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { IndexManagementPluginStart } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginStart } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -76,24 +76,24 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
-  security: SecurityPluginSetup;
-  share: SharePluginSetup;
+  security?: SecurityPluginSetup;
+  share?: SharePluginSetup;
 }
 
 export interface PluginsStart {
-  charts: ChartsPluginStart;
+  charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
-  indexManagement: IndexManagementPluginStart;
-  lens: LensPublicStart;
-  licensing: LicensingPluginStart;
-  ml: MlPluginStart;
-  searchConnectors: SearchConnectorsPluginStart;
-  searchPlayground: SearchPlaygroundPluginStart;
-  security: SecurityPluginStart;
-  share: SharePluginStart;
+  data?: DataPublicPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
+  indexManagement?: IndexManagementPluginStart;
+  lens?: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  ml?: MlPluginStart;
+  searchConnectors?: SearchConnectorsPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
+  security?: SecurityPluginStart;
+  share?: SharePluginStart;
 }
 
 export interface ESConfig {
@@ -404,7 +404,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    share.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
+    share?.url.locators.create<CreatIndexLocatorParams>(new CreatIndexLocatorDefinition());
 
     if (config.canDeployEntSearch) {
       core.application.register({

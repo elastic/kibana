@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, MessageRole } from '../types';
+import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -34,15 +34,15 @@ import { StartNewChat } from './start_new_chat';
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 
-const buildFormData = (formData: ChatForm) => ({
+const buildFormData = (formData: ChatForm): ChatRequestData => ({
+  connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
   prompt: formData[ChatFormFields.prompt],
   indices: formData[ChatFormFields.indices].join(),
-  api_key: formData[ChatFormFields.openAIKey],
   citations: formData[ChatFormFields.citations],
-  elasticsearchQuery: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-  summarization_model: formData[ChatFormFields.summarizationModel],
+  elasticsearch_query: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+  summarization_model: formData[ChatFormFields.summarizationModel].value,
   source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
-  docSize: formData[ChatFormFields.docSize],
+  doc_size: formData[ChatFormFields.docSize],
 });
 
 export const Chat = () => {
@@ -106,6 +106,9 @@ export const Chat = () => {
             borderRight: euiTheme.border.thin,
             paddingTop: euiTheme.size.l,
             paddingBottom: euiTheme.size.l,
+            // don't allow the chat to shrink below 66.6% of the screen
+            flexBasis: 0,
+            minWidth: '66.6%',
           }}
         >
           <EuiFlexGroup direction="column" className="eui-fullHeight">
@@ -210,7 +213,7 @@ export const Chat = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
           <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -165,6 +165,16 @@ export const buildConstantsDefinitions = (
     sortText: 'A',
   }));
 
+export const buildValueDefinitions = (values: string[]): SuggestionRawDefinition[] =>
+  values.map((value) => ({
+    label: `"${value}"`,
+    text: `"${value}"`,
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+      defaultMessage: 'Literal value',
+    }),
+    kind: 'Value',
+  }));
+
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
   return {
     label,

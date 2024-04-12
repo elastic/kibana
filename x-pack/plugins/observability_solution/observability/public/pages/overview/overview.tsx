@@ -44,7 +44,6 @@ const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
 export function OverviewPage() {
   const {
-    charts,
     http,
     observabilityAIAssistant,
     triggersActionsUi: {
@@ -154,10 +153,6 @@ export function OverviewPage() {
     [bucketSize, relativeEnd, relativeStart]
   );
 
-  const chartProps = {
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
-
   useEffect(() => {
     setEsQuery(
       buildEsQuery({
@@ -235,7 +230,6 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              chartProps={chartProps}
               featureIds={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize

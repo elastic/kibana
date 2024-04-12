@@ -6,9 +6,8 @@
  */
 
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
-import type { HasType, PublishingSubject } from '@kbn/presentation-publishing';
-import type { JobId } from '../../shared';
-import type { AnomalyExplorerChartsEmbeddableType } from '../constants';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlEmbeddableBaseApi } from '../types';
 
 export interface AnomalyChartsFieldSelectionApi {
@@ -17,6 +16,5 @@ export interface AnomalyChartsFieldSelectionApi {
 }
 
 export interface AnomalyChartsEmbeddableApi
-  extends HasType<AnomalyExplorerChartsEmbeddableType>,
-    MlEmbeddableBaseApi,
+  extends MlEmbeddableBaseApi,
     AnomalyChartsFieldSelectionApi {}
