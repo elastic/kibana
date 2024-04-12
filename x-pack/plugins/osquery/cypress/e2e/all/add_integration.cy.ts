@@ -143,7 +143,8 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Upgrade policy with existing packs', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170445
+  describe.skip('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     const [policyName, integrationName, packName] = generateRandomStringName(3);
     let policyId: string;
