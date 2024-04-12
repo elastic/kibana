@@ -1,0 +1,5 @@
+# This pipeline can be used to upload any tested pipeline in the Elastic-wide buildkite infrastructure to be tested
+
+steps:
+  - label: Upload tested pipeline
+    command: buildkite-agent pipeline upload ${TESTED_PIPELINE_PATH:-.buildkite/pipelines/pipeline_to_test.yml}

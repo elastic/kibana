@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '30m',
@@ -106,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -181,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -286,7 +283,6 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -363,8 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/179181
-  describe.skip('aggregated or scripted job', function () {
+  describe('aggregated or scripted job', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -381,8 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
     for (const testData of supportedTestSuites) {
-      // FAILING ES FORWARD COMPATIBILITY: https://github.com/elastic/kibana/issues/179167
-      describe.skip(testData.suiteTitle, function () {
+      describe(testData.suiteTitle, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
