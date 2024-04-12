@@ -60,6 +60,7 @@ export const HoverActionPopover = ({
         button={children}
         isOpen={isPopoverOpen}
         anchorPosition={anchorPosition}
+        closePopover={closePopoverPlaceholder}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
@@ -73,7 +74,7 @@ export const HoverActionPopover = ({
           {uiFieldActions.map((action) => (
             <EuiToolTip content={action.label} key={action.id}>
               <EuiButtonIcon
-                data-test-subj="logsExplorerHoverActionPopoverButton"
+                data-test-subj="unifiedDocViewLogsOverviewHoverActionPopoverButton"
                 size="xs"
                 iconType={action.iconType}
                 aria-label={action.label}
@@ -86,3 +87,5 @@ export const HoverActionPopover = ({
     </div>
   );
 };
+
+const closePopoverPlaceholder = () => {};

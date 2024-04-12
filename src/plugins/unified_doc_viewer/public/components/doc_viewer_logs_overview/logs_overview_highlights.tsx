@@ -57,7 +57,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewService"
             field={fieldConstants.SERVICE_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.SERVICE_NAME_FIELD]}
-            label={ServiceLabel}
+            label={serviceLabel}
             value={flattenedDoc[fieldConstants.SERVICE_NAME_FIELD]}
             width={fieldWidth}
           />
@@ -67,7 +67,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewHostName"
             field={fieldConstants.HOST_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.HOST_NAME_FIELD]}
-            label={HostNameLabel}
+            label={hostNameLabel}
             value={flattenedDoc[fieldConstants.HOST_NAME_FIELD]}
             width={fieldWidth}
           />
@@ -77,7 +77,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewTrace"
             field={fieldConstants.TRACE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.TRACE_ID_FIELD]}
-            label={TraceLabel}
+            label={traceLabel}
             value={flattenedDoc[fieldConstants.TRACE_ID_FIELD]}
             width={fieldWidth}
           />
@@ -87,7 +87,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewClusterName"
             field={fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
-            label={OrchestratorClusterNameLabel}
+            label={orchestratorClusterNameLabel}
             value={flattenedDoc[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
             width={fieldWidth}
           />
@@ -97,7 +97,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewResourceId"
             field={fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
-            label={OrchestratorResourceIdLabel}
+            label={orchestratorResourceIdLabel}
             value={flattenedDoc[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
             width={fieldWidth}
           />
@@ -121,7 +121,7 @@ export function LogsOverviewHighlights({
                 )}
               />
             }
-            label={CloudProviderLabel}
+            label={cloudProviderLabel}
             value={flattenedDoc[fieldConstants.CLOUD_PROVIDER_FIELD]}
             width={fieldWidth}
           />
@@ -131,7 +131,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewCloudRegion"
             field={fieldConstants.CLOUD_REGION_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_REGION_FIELD]}
-            label={CloudRegionLabel}
+            label={cloudRegionLabel}
             value={flattenedDoc[fieldConstants.CLOUD_REGION_FIELD]}
             width={fieldWidth}
           />
@@ -141,7 +141,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewCloudAz"
             field={fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
-            label={CloudAvailabilityZoneLabel}
+            label={cloudAvailabilityZoneLabel}
             value={flattenedDoc[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
             width={fieldWidth}
           />
@@ -151,7 +151,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewCloudProjectId"
             field={fieldConstants.CLOUD_PROJECT_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
-            label={CloudProjectIdLabel}
+            label={cloudProjectIdLabel}
             value={flattenedDoc[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
             width={fieldWidth}
           />
@@ -161,7 +161,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewCloudInstanceId"
             field={fieldConstants.CLOUD_INSTANCE_ID_FIELD}
             formattedValue={formattedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
-            label={CloudInstanceIdLabel}
+            label={cloudInstanceIdLabel}
             value={flattenedDoc[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
             width={fieldWidth}
           />
@@ -178,7 +178,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewLogPathFile"
             field={fieldConstants.LOG_FILE_PATH_FIELD}
             formattedValue={formattedDoc[fieldConstants.LOG_FILE_PATH_FIELD]}
-            label={LogPathFileLabel}
+            label={logPathFileLabel}
             value={flattenedDoc[fieldConstants.LOG_FILE_PATH_FIELD]}
             width={fieldWidth}
           />
@@ -188,7 +188,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewDataset"
             field={fieldConstants.DATASTREAM_DATASET_FIELD}
             formattedValue={formattedDoc[fieldConstants.DATASTREAM_DATASET_FIELD]}
-            label={DatasetLabel}
+            label={datasetLabel}
             value={flattenedDoc[fieldConstants.DATASTREAM_DATASET_FIELD]}
             width={fieldWidth}
           />
@@ -198,7 +198,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewNamespace"
             field={fieldConstants.DATASTREAM_NAMESPACE_FIELD}
             formattedValue={formattedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
-            label={NamespaceLabel}
+            label={namespaceLabel}
             value={flattenedDoc[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
             width={fieldWidth}
             useBadge
@@ -209,7 +209,7 @@ export function LogsOverviewHighlights({
             data-test-subj="unifiedDocViewLogsOverviewLogShipper"
             field={fieldConstants.AGENT_NAME_FIELD}
             formattedValue={formattedDoc[fieldConstants.AGENT_NAME_FIELD]}
-            label={ShipperLabel}
+            label={shipperLabel}
             value={flattenedDoc[fieldConstants.AGENT_NAME_FIELD]}
             width={fieldWidth}
           />
@@ -219,15 +219,15 @@ export function LogsOverviewHighlights({
   );
 }
 
-const ServiceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
+const serviceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.service', {
   defaultMessage: 'Service',
 });
 
-const TraceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.trace', {
+const traceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.trace', {
   defaultMessage: 'Trace',
 });
 
-const HostNameLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.hostName', {
+const hostNameLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.hostName', {
   defaultMessage: 'Host name',
 });
 
@@ -252,64 +252,64 @@ const otherAccordionTitle = i18n.translate(
   }
 );
 
-const OrchestratorClusterNameLabel = i18n.translate(
+const orchestratorClusterNameLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.orchestratorClusterName',
   {
     defaultMessage: 'Orchestrator cluster Name',
   }
 );
 
-const OrchestratorResourceIdLabel = i18n.translate(
+const orchestratorResourceIdLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.orchestratorResourceId',
   {
     defaultMessage: 'Orchestrator resource ID',
   }
 );
 
-const CloudProviderLabel = i18n.translate(
+const cloudProviderLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.cloudProvider',
   {
     defaultMessage: 'Cloud provider',
   }
 );
 
-const CloudRegionLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudRegion', {
+const cloudRegionLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.cloudRegion', {
   defaultMessage: 'Cloud region',
 });
 
-const CloudAvailabilityZoneLabel = i18n.translate(
+const cloudAvailabilityZoneLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.cloudAvailabilityZone',
   {
     defaultMessage: 'Cloud availability zone',
   }
 );
 
-const CloudProjectIdLabel = i18n.translate(
+const cloudProjectIdLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.cloudProjectId',
   {
     defaultMessage: 'Cloud project ID',
   }
 );
 
-const CloudInstanceIdLabel = i18n.translate(
+const cloudInstanceIdLabel = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.label.cloudInstanceId',
   {
     defaultMessage: 'Cloud instance ID',
   }
 );
 
-const LogPathFileLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.logPathFile', {
+const logPathFileLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.logPathFile', {
   defaultMessage: 'Log path file',
 });
 
-const NamespaceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.namespace', {
+const namespaceLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.namespace', {
   defaultMessage: 'Namespace',
 });
 
-const DatasetLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.dataset', {
+const datasetLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.dataset', {
   defaultMessage: 'Dataset',
 });
 
-const ShipperLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
+const shipperLabel = i18n.translate('unifiedDocViewer.docView.logsOverview.label.shipper', {
   defaultMessage: 'Shipper',
 });

@@ -30,17 +30,20 @@ export function getDocumentOverview(
 
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
   const level =
-    Array.isArray(levelArray) && levelArray.length ? levelArray[0].toLowerCase() : undefined;
+    Array.isArray(levelArray) && levelArray.length ? levelArray[0].toLowerCase() : levelArray;
   const messageArray = doc.flattened[fieldConstants.MESSAGE_FIELD];
-  const message = Array.isArray(messageArray) && messageArray.length ? messageArray[0] : undefined;
+  const message =
+    Array.isArray(messageArray) && messageArray.length ? messageArray[0] : messageArray;
   const errorMessageArray = doc.flattened[fieldConstants.ERROR_MESSAGE_FIELD];
   const errorMessage =
-    Array.isArray(errorMessageArray) && errorMessageArray.length ? errorMessageArray[0] : undefined;
+    Array.isArray(errorMessageArray) && errorMessageArray.length
+      ? errorMessageArray[0]
+      : errorMessageArray;
   const eventOriginalArray = doc.flattened[fieldConstants.EVENT_ORIGINAL_FIELD];
   const eventOriginal =
     Array.isArray(eventOriginalArray) && eventOriginalArray.length
       ? eventOriginalArray[0]
-      : undefined;
+      : eventOriginalArray;
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);
 
   // Service

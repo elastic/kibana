@@ -74,7 +74,11 @@ export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
 
   const contentField = hasMessageField && (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="logsExplorerFlyoutLogMessage">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        data-test-subj="unifiedDocViewLogsOverviewMessage"
+      >
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
@@ -115,7 +119,11 @@ export function LogsOverviewHeader({ doc }: { doc: DocumentOverview }) {
       initialIsOpen={true}
       data-test-subj="unifiedDocViewLogsOverviewHeader"
     >
-      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logsExplorerFlyoutDetail">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        data-test-subj="unifiedDocViewLogsOverviewDetail"
+      >
         {hasMessageField ? contentField : logLevelAndTimestamp}
       </EuiFlexGroup>
     </EuiAccordion>
