@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FeaturesRegistry } from '@kbn/discover-features-registry';
 import { DataTableRecord } from '@kbn/discover-utils';
+import { FeaturesRegistry } from '../../../common';
 
 /**
  * Features types

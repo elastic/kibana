@@ -716,8 +716,6 @@
       "@kbn/discover-customization-examples-plugin/*": ["examples/discover_customization_examples/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
-      "@kbn/discover-features-registry": ["packages/kbn-discover-features-registry"],
-      "@kbn/discover-features-registry/*": ["packages/kbn-discover-features-registry/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],
       "@kbn/discover-plugin/*": ["src/plugins/discover/*"],
       "@kbn/discover-shared-plugin": ["src/plugins/discover_shared"],

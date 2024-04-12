@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FeaturesRegistry } from '@kbn/discover-features-registry';
+import { FeaturesRegistry } from '../../../common';
 import { DiscoverFeature } from './types';
 
 export class DiscoverFeaturesService {

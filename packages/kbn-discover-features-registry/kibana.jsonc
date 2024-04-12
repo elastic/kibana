@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/discover-features-registry",
-  "owner": "@elastic/kibana-data-discovery"
-}

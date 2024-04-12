@@ -7,4 +7,3 @@
  */
 
 export { FeaturesRegistry } from './features_registry';
-export * from './types';
