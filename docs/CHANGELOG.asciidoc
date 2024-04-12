@@ -83,7 +83,7 @@ Fleet::
 Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
 * Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
 Lens & Visualizations::
-* Fixes custom styling for TSVB visualizations ({kibana-pull}180053[#180053]).
+* Fixes custom styling for TSVB markdown visualizations ({kibana-pull}180053[#180053]).
 Machine Learning::
 * Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
 * AIOps: Fixes text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
