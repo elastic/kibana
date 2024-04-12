@@ -161,6 +161,42 @@ describe('ManifestManager', () => {
       expect(manifest?.getAllArtifacts()).toStrictEqual([]);
     });
 
+    test('Retrieves empty unified manifest successfully but uses semanticVersion from existing legacy SO manifest', async () => {
+      const semanticVersion = '1.14.0';
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManager = new ManifestManager(
+        buildManifestManagerContextMock({
+          savedObjectsClient,
+          experimentalFeatures: ['unifiedManifestEnabled'],
+        })
+      );
+
+      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
+        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+          return {
+            attributes: {
+              artifacts: [
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+              ],
+              semanticVersion,
+            },
+          };
+        } else {
+          return null;
+        }
+      });
+
+      manifestManager.getAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => []);
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual(semanticVersion);
+      expect(manifest?.getSavedObjectVersion()).toStrictEqual('WzQ3NzAsMV0=');
+      expect(manifest?.getAllArtifacts()).toStrictEqual([]);
+    });
+
     test('Retrieves non empty manifest succesfully from Unified Saved Object', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const manifestManagerContext = buildManifestManagerContextMock({
@@ -1940,6 +1976,25 @@ describe('ManifestManager', () => {
             attributes: { ...expectedEmptyLegacyManifestSO.attributes, artifacts: [] },
           });
         });
+
+        test('should return empty artifacts array when unified manifest saved object is empty but semanticVersion was provided', async () => {
+          const semanticVersion = '1.14.0';
+          const emptyUnifiedManifestSO: InternalUnifiedManifestSchema[] = [];
+          const expectedEmptyLegacyManifestSO = createLegacyManifestSO();
+          expect(
+            manifestManager.transformUnifiedManifestSOtoLegacyManifestSO(
+              emptyUnifiedManifestSO,
+              semanticVersion
+            )
+          ).toEqual({
+            ...expectedEmptyLegacyManifestSO,
+            attributes: {
+              ...expectedEmptyLegacyManifestSO.attributes,
+              artifacts: [],
+              semanticVersion,
+            },
+          });
+        });
       });
       describe('transformLegacyManifestSOtoUnifiedManifestSO', () => {
         const unifiedManifestSO = createUnifiedManifestSO();
@@ -1951,6 +2006,27 @@ describe('ManifestManager', () => {
               []
             )
           ).toEqual(unifiedManifestSO.map((item) => ({ ...item, id: undefined })));
+        });
+
+        test('should properly transform legacy manifest to unified manifest saved object with empty exising unified manifest so and propagate semanticVersion from the manifest', async () => {
+          const semanticVersion = '1.14.0';
+          const expectedLegacyManifestSOWithSemanticVersion = createLegacyManifestSO({
+            semanticVersion,
+          }).attributes;
+          const unifiedManifestSOWithSemanticVersion = createUnifiedManifestSO(semanticVersion);
+
+          expect(
+            manifestManager.transformLegacyManifestSOtoUnifiedManifestSO(
+              expectedLegacyManifestSOWithSemanticVersion,
+              []
+            )
+          ).toEqual(
+            unifiedManifestSOWithSemanticVersion.map((item) => ({
+              ...item,
+              id: undefined,
+              created: undefined,
+            }))
+          );
         });
 
         test('should properly transform legacy manifest to unified manifest saved object with existing unified manifest so', async () => {

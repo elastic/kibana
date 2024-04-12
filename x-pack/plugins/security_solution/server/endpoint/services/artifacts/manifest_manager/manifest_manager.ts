@@ -526,7 +526,19 @@ export class ManifestManager {
       let manifestSo;
       if (this.experimentalFeatures.unifiedManifestEnabled) {
         const unifiedManifestsSo = await this.getAllUnifiedManifestsSOFromCache();
-        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
+        // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+        // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+        // behind for package policy to pick it up.
+        if (unifiedManifestsSo.length === 0) {
+          const legacyManifestSo = await this.getManifestClient().getManifest();
+          const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
+          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
+            unifiedManifestsSo,
+            legacySemanticVersion
+          );
+        } else {
+          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
+        }
       } else {
         manifestSo = await this.getManifestClient().getManifest();
       }
@@ -888,7 +900,8 @@ export class ManifestManager {
   }
 
   public transformUnifiedManifestSOtoLegacyManifestSO(
-    unifiedManifestsSo: InternalUnifiedManifestSchema[]
+    unifiedManifestsSo: InternalUnifiedManifestSchema[],
+    semanticVersion?: string
   ): {
     version: string;
     attributes: {
@@ -925,7 +938,7 @@ export class ManifestManager {
             []
           ),
         ],
-        semanticVersion: globalUnifiedManifest?.semanticVersion ?? '1.0.0',
+        semanticVersion: (semanticVersion || globalUnifiedManifest?.semanticVersion) ?? '1.0.0',
         schemaVersion: this.schemaVersion,
       },
     };
@@ -948,10 +961,18 @@ export class ManifestManager {
             (item) => item.policyId === policyId
           );
 
+          // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+          // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+          // behind for package policy to pick it up.
+          const semanticVersion =
+            (policyId === '.global' && !unifiedManifestsSo.length
+              ? manifestSo?.semanticVersion
+              : existingUnifiedManifestSo?.semanticVersion) ?? '1.0.0';
+
           acc[policyId] = {
             policyId,
             artifactIds: [artifactId],
-            semanticVersion: existingUnifiedManifestSo?.semanticVersion ?? '1.0.0',
+            semanticVersion,
             id: existingUnifiedManifestSo?.id,
           };
         }
