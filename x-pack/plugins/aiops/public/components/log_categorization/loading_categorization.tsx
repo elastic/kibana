@@ -29,16 +29,16 @@ export const LoadingCategorization: FC<Props> = ({ onClose }) => (
       <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
         <EuiFlexGrid columns={1}>
           <EuiFlexItem>
-            <EuiLoadingElastic size="xxl" />
+            <EuiLoadingElastic size="xl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <h2>
+              <h4>
                 <FormattedMessage
                   id="xpack.aiops.categorizeFlyout.loading.title"
                   defaultMessage="Loading pattern analysis"
                 />
-              </h2>
+              </h4>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

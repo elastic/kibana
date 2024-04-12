@@ -99,7 +99,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
   const [previousAdditionalConfigsHash, setPreviousAdditionalConfigsHash] = useState<number | null>(
     null
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean | null>(null);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
@@ -115,6 +115,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
     function initFields() {
       setCurrentDocumentStatsHash(null);
       setSelectedField(null);
+      setLoading(null);
       const { dataViewFields, messageField } = getMessageField(dataView);
       setFields(dataViewFields);
       setSelectedField(messageField);
@@ -414,9 +415,9 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationPageProps> = ({
         <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
           <>
             <FieldValidationCallout validationResults={fieldValidationResult} />
-            {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
+            {(loading ?? true) === true ? <LoadingCategorization onClose={onClose} /> : null}
             <InformationText
-              loading={loading}
+              loading={loading ?? true}
               categoriesLength={data?.categories?.length ?? null}
               eventRateLength={eventRate.length}
               fields={fields}
