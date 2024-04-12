@@ -31,7 +31,7 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
     'cartesian_point',
     'cartesian_shape',
   ].map((type) => ({
-    name: `${type}Field`,
+    name: `${camelCase(type)}Field`,
     type,
   })),
   { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
@@ -772,6 +772,10 @@ describe('autocomplete', () => {
         'dateField',
         'booleanField',
         'ipField',
+        'geoPointField',
+        'geoShapeField',
+        'cartesianPointField',
+        'cartesianShapeField',
         'any#Char$Field',
         'kubernetes.something.something',
       ]);
@@ -1076,23 +1080,10 @@ describe('autocomplete', () => {
                 i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
 
-              const allSignaturesCompatibleWithPreviousParams = fn.signatures.filter(
-                (_signature) => {
-                  return _signature.params.slice(0, i).every((p, j) => {
-                    if (p.type === 'any') {
-                      return true;
-                    }
-                    return p.type === signature.params[j].type;
-                  });
-                }
-              );
               const allPossibleParamTypes = Array.from(
-                new Set(
-                  allSignaturesCompatibleWithPreviousParams.map((_signature) => {
-                    return _signature.params[i].type;
-                  })
-                )
+                new Set(fn.signatures.map((s) => s.params[i].type))
               );
+
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 param.literalOptions?.length
