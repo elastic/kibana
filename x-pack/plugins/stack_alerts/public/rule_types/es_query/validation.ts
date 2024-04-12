@@ -17,6 +17,8 @@ import {
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
 } from '../../../common/constants';
 import { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
@@ -144,7 +146,9 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams, isServerless?: bool
       })
     );
   }
-  const maxSize = isServerless ? 100 : 10000;
+  const maxSize = isServerless
+    ? ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS
+    : ES_QUERY_MAX_HITS_PER_EXECUTION;
   if ((size && size < 0) || size > maxSize) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {

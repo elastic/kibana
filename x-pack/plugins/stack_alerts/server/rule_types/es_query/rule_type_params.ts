@@ -19,13 +19,14 @@ import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,
 } from '../../../common/constants';
-import { ComparatorFnNames } from '../../../common';
+import {
+  ComparatorFnNames,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+} from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
-
-export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
-export const SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION = 100;
 
 // rule type parameters
 export type EsQueryRuleParams = TypeOf<typeof EsQueryRuleParamsSchema>;
@@ -214,14 +215,14 @@ function validateParams(anyParams: unknown): string | undefined {
   }
 }
 
-export function validateServerless(anyParams: EsQueryRuleParams) {
-  const { size } = anyParams;
-  if (size > SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION) {
+export function validateServerless(params: EsQueryRuleParams) {
+  const { size } = params;
+  if (size > ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS) {
     throw new Error(
       i18n.translate('xpack.stackAlerts.esQuery.serverless.sizeErrorMessage', {
         defaultMessage: '[size]: must be less than or equal to {maxSize}',
         values: {
-          maxSize: SERVERLESS_ES_QUERY_MAX_HITS_PER_EXECUTION,
+          maxSize: ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
         },
       })
     );
