@@ -935,12 +935,12 @@ export class ManifestManager {
     manifestSo: InternalManifestSchema,
     unifiedManifestsSo: InternalUnifiedManifestSchema[]
   ): Array<Omit<InternalUnifiedManifestUpdateSchema, 'id'> & { id?: string }> {
-    return manifestSo.artifacts.reduce(
+    const manifestObject = manifestSo.artifacts.reduce(
       (
-        acc: Array<InternalUnifiedManifestBaseSchema & { id?: string }>,
+        acc: Record<string, InternalUnifiedManifestBaseSchema & { id?: string }>,
         { artifactId, policyId = '.global' }
       ) => {
-        const existingPolicy = acc.find((item) => item.policyId === policyId);
+        const existingPolicy = acc[policyId];
         if (existingPolicy) {
           existingPolicy.artifactIds.push(artifactId);
         } else {
@@ -948,23 +948,29 @@ export class ManifestManager {
             (item) => item.policyId === policyId
           );
 
-          acc.push({
+          acc[policyId] = {
             policyId,
             artifactIds: [artifactId],
             semanticVersion: existingUnifiedManifestSo?.semanticVersion ?? '1.0.0',
             id: existingUnifiedManifestSo?.id,
-          });
+          };
         }
         return acc;
       },
-      []
+      {}
     );
+    return Object.values(manifestObject);
   }
 
   public prepareUnifiedManifestsSOUpdates(
     unifiedManifestsSo: Array<Omit<InternalUnifiedManifestUpdateSchema, 'id'> & { id?: string }>,
     existingUnifiedManifestsSo: InternalUnifiedManifestSchema[]
   ) {
+    const existingManifestsObj: Record<string, InternalUnifiedManifestSchema> = {};
+    existingUnifiedManifestsSo.forEach((manifest) => {
+      existingManifestsObj[manifest.id] = manifest;
+    });
+
     const { unifiedManifestsToUpdate, unifiedManifestsToCreate } = unifiedManifestsSo.reduce(
       (
         acc: {
@@ -975,14 +981,9 @@ export class ManifestManager {
       ) => {
         if (unifiedManifest.id !== undefined) {
           // Manifest with id exists in SO, check if it needs to be updated
-          const existingUnifiedManifest = existingUnifiedManifestsSo.find(
-            (item) => item.id === unifiedManifest.id
-          );
+          const existingUnifiedManifest = existingManifestsObj[unifiedManifest.id];
           // Update SO if the artifactIds changed.
-          if (
-            !existingUnifiedManifest ||
-            !isEqual(existingUnifiedManifest.artifactIds, unifiedManifest.artifactIds)
-          ) {
+          if (!isEqual(existingUnifiedManifest.artifactIds, unifiedManifest.artifactIds)) {
             acc.unifiedManifestsToUpdate.push({
               ...unifiedManifest,
               semanticVersion: this.setNewSemanticVersion(unifiedManifest.semanticVersion),
@@ -998,12 +999,11 @@ export class ManifestManager {
       { unifiedManifestsToUpdate: [], unifiedManifestsToCreate: [] }
     );
 
-    // Find unified manifests that need to be deleted - they are not in the new manifest but are in the existing one.
     const unifiedManifestsToDelete = existingUnifiedManifestsSo.reduce(
       (acc: string[], { policyId, id }) => {
         const existingPolicy = unifiedManifestsSo.find((item) => item.policyId === policyId);
         if (!existingPolicy) {
-          return [...acc, id];
+          acc.push(id);
         }
         return acc;
       },
