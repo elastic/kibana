@@ -11,7 +11,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { isFullValidatorContainer } from '@kbn/core-http-server';
+import { getResponseValidation } from '@kbn/core-http-server';
 import { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
 import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
@@ -206,9 +206,7 @@ type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
 
 const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject => {
   if (!route.validationSchemas) return {};
-  const validationSchemas = isFullValidatorContainer(route.validationSchemas)
-    ? route.validationSchemas.response
-    : undefined;
+  const validationSchemas = getResponseValidation(route.validationSchemas);
 
   return !!validationSchemas
     ? Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
@@ -232,7 +230,10 @@ const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject
 };
 
 const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.PathsObject => {
-  const routes = prepareRoutes(appRouter.getRoutes(true), pathStartsWith);
+  const routes = prepareRoutes(
+    appRouter.getRoutes({ excludeVersionedRoutes: true }),
+    pathStartsWith
+  );
 
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {

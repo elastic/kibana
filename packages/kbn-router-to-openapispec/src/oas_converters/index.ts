@@ -9,11 +9,10 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters, OpenAPIConverter } from '../type';
 
-import { zodConverter } from './zod';
 import { kbnConfigSchemaConverter } from './kbn_config_schema/kbn_config_schema';
 import { catchAllConverter } from './catch_all';
 
-const CONVERTERS: OpenAPIConverter[] = [kbnConfigSchemaConverter, zodConverter, catchAllConverter];
+const CONVERTERS: OpenAPIConverter[] = [kbnConfigSchemaConverter, catchAllConverter];
 const getConverter = (schema: unknown): OpenAPIConverter => {
   return CONVERTERS.find((c) => c.is(schema))!;
 };
