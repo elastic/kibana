@@ -77,12 +77,13 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
-export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from './hooks/use_user_preferred_language';
+export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from '../common/ui_settings/language_options';
+
 export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
-} from '../common/utils/advanced_settings';
+} from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPublicSetup,
