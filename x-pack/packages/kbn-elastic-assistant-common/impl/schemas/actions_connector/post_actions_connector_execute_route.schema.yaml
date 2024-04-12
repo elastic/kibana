@@ -61,6 +61,10 @@ paths:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:
                   type: number
+                langSmithProject:
+                  type: string
+                langSmithApiKey:
+                  type: string
       responses:
         '200':
           description: Successful static response

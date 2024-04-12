@@ -960,7 +960,6 @@ The top values of a specified field ranked by the chosen metric.
               defaultMessage: 'Rank direction',
             })}
             data-test-subj="indexPattern-terms-orderDirection-groups"
-            name="orderDirection"
             buttonSize="compressed"
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
               defaultMessage: 'Rank direction',

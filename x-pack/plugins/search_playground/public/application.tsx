@@ -32,7 +32,11 @@ export const renderApp = (
         <I18nProvider>
           <Router basename={appBasePath}>
             <navigation.ui.TopNavMenu appName={PLUGIN_ID} />
-            <PlaygroundProvider>
+            <PlaygroundProvider
+              defaultValues={{
+                indices: [],
+              }}
+            >
               <KibanaPageTemplate
                 pageChrome={[
                   i18n.translate('xpack.searchPlayground.breadcrumb', {

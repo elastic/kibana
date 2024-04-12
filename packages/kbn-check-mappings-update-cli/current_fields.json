@@ -203,6 +203,13 @@
   "cases-connector-mappings": [
     "owner"
   ],
+  "cases-rules": [
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -479,6 +486,7 @@
   ],
   "infrastructure-ui-source": [],
   "ingest-agent-policies": [
+    "advanced_settings",
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",

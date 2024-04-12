@@ -201,7 +201,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await retry.tryForTime(30000, async () => {
         await this.searchAlerts(ruleName);
         const statusControl = await testSubjects.find(controlName);
-        const title = await statusControl.getAttribute('title');
+        const title = (await statusControl.getAttribute('title')) ?? '';
         expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
     },
