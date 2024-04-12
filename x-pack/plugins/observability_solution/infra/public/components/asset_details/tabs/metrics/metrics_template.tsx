@@ -145,7 +145,7 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
               width: 100%;
               ${useEuiMaxBreakpoint('xl')} {
                 flex-direction: row;
-                gap: ${euiTheme.size.xl};
+                gap: 0px ${euiTheme.size.xl};
                 flex-wrap: wrap;
               }
             `}
