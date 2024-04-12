@@ -89,7 +89,7 @@ telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: false
+xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
