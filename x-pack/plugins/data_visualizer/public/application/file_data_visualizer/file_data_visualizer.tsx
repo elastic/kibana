@@ -15,7 +15,7 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 
-interface Props {
+export interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
 }
