@@ -7,9 +7,9 @@
 
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { HasType, PublishingSubject } from '@kbn/presentation-publishing';
-import type { JobId } from '../../shared';
 import type { AnomalyExplorerChartsEmbeddableType } from '../constants';
 import type { MlEmbeddableBaseApi } from '../types';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 export interface AnomalyChartsFieldSelectionApi {
   jobIds: PublishingSubject<JobId[]>;

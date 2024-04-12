@@ -13,11 +13,11 @@ import type {
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
-import type { JobId } from '../../shared';
 import type { AnomalySwimLaneEmbeddableType } from '../constants';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;

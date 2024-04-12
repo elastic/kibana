@@ -16,7 +16,7 @@ import {
 import type { BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { type AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import type { JobId } from '../../shared';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 export type CommonInput = { jobIds: string[] } & EmbeddableInput;
 
