@@ -39,7 +39,7 @@ exports[`HeaderSection it renders 1`] = `
                   <EuiTitle
                     size="l"
                   >
-                    <h4
+                    <h2
                       data-test-subj="header-section-title"
                     >
                       <span
@@ -47,7 +47,7 @@ exports[`HeaderSection it renders 1`] = `
                       >
                         Test title
                       </span>
-                    </h4>
+                    </h2>
                   </EuiTitle>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ContentTabIds, type Tab } from '../../components/asset_details/types';
 
 export const commonFlyoutTabs: Tab[] = [
@@ -50,5 +52,18 @@ export const commonFlyoutTabs: Tab[] = [
     name: i18n.translate('xpack.infra.nodeDetails.tabs.osquery', {
       defaultMessage: 'Osquery',
     }),
+  },
+  {
+    id: ContentTabIds.DASHBOARDS,
+    name: i18n.translate('xpack.infra.infra.nodeDetails.tabs.dashboards', {
+      defaultMessage: 'Dashboards',
+    }),
+    append: (
+      <EuiBadge color="accent">
+        {i18n.translate('xpack.infra.customDashboards.newLabel', {
+          defaultMessage: 'NEW',
+        })}
+      </EuiBadge>
+    ),
   },
 ];

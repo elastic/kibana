@@ -49,11 +49,11 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
   buildDataTableRecord,
+  isLegacyTableEnabled,
 } from '@kbn/discover-utils';
 import { columnActions, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
@@ -389,8 +389,12 @@ export class SavedSearchEmbeddable
     }
   };
 
-  private getSort(sort: SortPair[] | undefined, dataView?: DataView) {
-    return getSortForEmbeddable(sort, dataView, this.services.uiSettings);
+  private getSort(
+    sort: SortPair[] | undefined,
+    dataView: DataView | undefined,
+    isTextBasedQueryMode: boolean
+  ) {
+    return getSortForEmbeddable(sort, dataView, this.services.uiSettings, isTextBasedQueryMode);
   }
 
   private initializeSearchEmbeddableProps() {
@@ -417,7 +421,7 @@ export class SavedSearchEmbeddable
       filters: savedSearch.searchSource.getField('filter') as Filter[],
       dataView,
       isLoading: false,
-      sort: this.getSort(savedSearch.sort, dataView),
+      sort: this.getSort(savedSearch.sort, dataView, this.isTextBasedSearch(savedSearch)),
       rows: [],
       searchDescription: savedSearch.description,
       description: savedSearch.description,
@@ -573,7 +577,11 @@ export class SavedSearchEmbeddable
     );
 
     searchProps.columns = columnState.columns || [];
-    searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
+    searchProps.sort = this.getSort(
+      this.input.sort || savedSearch.sort,
+      searchProps?.dataView,
+      this.isTextBasedSearch(savedSearch)
+    );
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
     searchProps.rowHeightState = this.input.rowHeight ?? savedSearch.rowHeight;
@@ -629,9 +637,10 @@ export class SavedSearchEmbeddable
       return;
     }
 
+    const isTextBasedQueryMode = this.isTextBasedSearch(savedSearch);
     const viewMode = getValidViewMode({
       viewMode: savedSearch.viewMode,
-      isTextBasedQueryMode: this.isTextBasedSearch(savedSearch),
+      isTextBasedQueryMode,
     });
 
     if (
@@ -669,7 +678,10 @@ export class SavedSearchEmbeddable
       return;
     }
 
-    const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
+    const useLegacyTable = isLegacyTableEnabled({
+      uiSettings: this.services.uiSettings,
+      isTextBasedQueryMode,
+    });
     const query = savedSearch.searchSource.getField('query');
     const props = {
       savedSearch,

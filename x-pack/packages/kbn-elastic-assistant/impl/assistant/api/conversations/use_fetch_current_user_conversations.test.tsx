@@ -22,7 +22,11 @@ const http = {
 };
 const onFetch = jest.fn();
 
-const defaultProps = { http, onFetch } as unknown as UseFetchCurrentUserConversationsParams;
+const defaultProps = {
+  http,
+  onFetch,
+  isAssistantEnabled: true,
+} as unknown as UseFetchCurrentUserConversationsParams;
 
 const createWrapper = () => {
   const queryClient = new QueryClient();

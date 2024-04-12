@@ -456,7 +456,7 @@ Once transformed we use an index operation to overwrite the outdated document wi
 
 ### Next action
 
-`checkTargetMappings`
+`checkTargetTypesMappings`
 
 Compare the calculated mappings' hashes against those stored in the `<index>.mappings._meta`.
 

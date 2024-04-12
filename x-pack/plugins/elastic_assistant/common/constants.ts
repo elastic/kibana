@@ -29,3 +29,8 @@ export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
 
 // Capabilities
 export const CAPABILITIES = `${BASE_PATH}/capabilities`;
+
+/**
+ Licensing requirements
+ */
+export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;

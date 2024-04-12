@@ -245,7 +245,7 @@ describe('autocomplete', () => {
           // simulate the editor behaviour for sorting suggestions
           .sort((a, b) => (a.sortText || '').localeCompare(b.sortText || ''));
         for (const [index, receivedSuggestion] of suggestionInertTextSorted.entries()) {
-          if (typeof expected[index] === 'string') {
+          if (typeof expected[index] !== 'object') {
             expect(receivedSuggestion.text).toEqual(expected[index]);
           } else {
             // check all properties that are defined in the expected suggestion
@@ -1054,38 +1054,47 @@ describe('autocomplete', () => {
       if (fn.name !== 'auto_bucket') {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
-            if (i < signature.params.length - 1) {
+            if (i < signature.params.length) {
               const canHaveMoreArgs =
+                i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-                [
-                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType(
-                    'eval',
-                    param.type,
-                    { evalMath: true },
-                    undefined,
-                    [fn.name]
-                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
-                ]
+                param.literalOptions?.length
+                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(param.type).map((f) =>
+                        canHaveMoreArgs ? `${f},` : f
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        param.type,
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                    ]
               );
               testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
-                [
-                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
-                  ...getFunctionSignaturesByReturnType(
-                    'eval',
-                    param.type,
-                    { evalMath: true },
-                    undefined,
-                    [fn.name]
-                  ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
-                ]
+                param.literalOptions?.length
+                  ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(param.type).map((f) =>
+                        canHaveMoreArgs ? `${f},` : f
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        param.type,
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                    ]
               );
             }
           });

@@ -117,7 +117,7 @@
               "\nFetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`."
             ],
             "signature": [
-              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\", defaultValue: Data) => Promise<Data>"
+              "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"navigation.solutionNavEnabled\", defaultValue: Data) => Promise<Data>"
             ],
             "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
@@ -133,7 +133,7 @@
                   "The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames }."
                 ],
                 "signature": [
-                  "\"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\""
+                  "\"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"navigation.solutionNavEnabled\""
                 ],
                 "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
@@ -227,7 +227,7 @@
           "\nThe names of the feature flags declared in Kibana.\nValid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.\n"
         ],
         "signature": [
-          "\"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\""
+          "\"security-solutions.add-integrations-url\" | \"security-solutions.guided-onboarding-content\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"navigation.solutionNavEnabled\""
         ],
         "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
