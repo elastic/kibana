@@ -32,13 +32,19 @@ import {
   type HandleErrorCallback,
 } from '../../search_strategy/esql_requests/handle_error';
 
-export interface Column {
+interface ESQLColumn {
   type: string;
   name: string;
+}
+interface ESQLResponse {
+  rawResponse: { columns: ESQLColumn[]; all_columns: ESQLColumn[]; values: unknown[][] };
+}
+export interface Column extends ESQLColumn {
   secondaryType: string;
 }
 
 interface Data {
+  totalFields?: number;
   timeFieldName?: string;
   columns?: Column[];
   totalCount?: number;
@@ -159,6 +165,7 @@ export const getInitialData = (): Data => ({
   columns: undefined,
   totalCount: undefined,
   exampleDocs: undefined,
+  totalFields: undefined,
 });
 
 const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
@@ -253,7 +260,7 @@ export const useESQLOverallStatsData = (
         // And use this one query to
         // 1) identify populated/empty fields
         // 2) gather examples for populated text fields
-        const columnsResp = await runRequest(
+        const columnsResp = (await runRequest(
           {
             params: {
               // Doing this to match with the default limit
@@ -264,7 +271,7 @@ export const useESQLOverallStatsData = (
             },
           },
           { strategy: ESQL_SEARCH_STRATEGY }
-        );
+        )) as ESQLResponse | undefined;
         setQueryHistoryStatus(false);
 
         const columnInfo = columnsResp?.rawResponse
@@ -339,21 +346,9 @@ export const useESQLOverallStatsData = (
         setOverallStatsProgress({
           loaded: 50,
         });
-        const aggregatableNotExistsFields: Array<{
-          fieldName: string;
-          name: string;
-          type: string;
-          supportedAggs: Set<string>;
-          secondaryType: string;
-          aggregatable: boolean;
-        }> = [];
+        const aggregatableNotExistsFields: AggregatableField[] = [];
 
-        const nonAggregatableNotExistsFields: Array<{
-          fieldName: string;
-          name: string;
-          type: string;
-          secondaryType: string;
-        }> = [];
+        const nonAggregatableNotExistsFields: NonAggregatableField[] = [];
 
         const fields = columns
           // Some field types are not supported by ESQL yet
@@ -374,6 +369,7 @@ export const useESQLOverallStatsData = (
                   ...field,
                   fieldName: field.name,
                   secondaryType: getSupportedFieldType(field.type),
+                  existsInDocs: false,
                 });
               }
             } else {
@@ -421,11 +417,11 @@ export const useESQLOverallStatsData = (
             totalCount,
             onError,
           });
+          if (!stats) return;
           stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
           stats.nonAggregatableNotExistsFields = nonAggregatableNotExistsFields;
-          stats.totalFields = columns.length;
 
-          setTableData({ overallStats: stats });
+          setTableData({ overallStats: stats, totalFields: columns.length });
           setOverallStatsProgress({
             loaded: 100,
             isRunning: false,
@@ -443,7 +439,7 @@ export const useESQLOverallStatsData = (
             const examples = [
               ...new Set(columnsResp?.rawResponse?.values.map((row) => row[idx])),
             ].slice(0, 10);
-            return { fieldName, examples };
+            return { fieldName, examples: examples as string[] };
           });
 
           setTableData({ exampleDocs });

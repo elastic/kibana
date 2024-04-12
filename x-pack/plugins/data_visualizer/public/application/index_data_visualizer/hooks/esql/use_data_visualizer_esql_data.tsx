@@ -270,6 +270,7 @@ export const useESQLDataVisualizerData = (
     documentCountStats,
     totalCount,
     overallStats,
+    totalFields,
     overallStatsProgress,
     columns,
     cancelOverallStatsRequest,
@@ -499,7 +500,7 @@ export const useESQLDataVisualizerData = (
     if (!overallStats) return;
 
     let _visibleFieldsCount = 0;
-    const _totalFieldsCount = overallStats.totalFields;
+    const _totalFieldsCount = totalFields ?? 0;
 
     if (showEmptyFields === true) {
       _visibleFieldsCount = _totalFieldsCount;
@@ -509,7 +510,7 @@ export const useESQLDataVisualizerData = (
         overallStats.nonAggregatableExistsFields.length;
     }
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
-  }, [overallStats, showEmptyFields]);
+  }, [overallStats, showEmptyFields, totalFields]);
 
   useEffect(
     () => {
