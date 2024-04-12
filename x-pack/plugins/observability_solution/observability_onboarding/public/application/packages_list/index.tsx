@@ -18,7 +18,8 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef, Suspense, useState } from 'react';
+import React, { useRef, Suspense, useState } from 'react';
+import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
@@ -129,24 +130,14 @@ const PackageListGridWrapper = ({
 const WithAvailablePackages = React.forwardRef(
   (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
-    const [reloadRetry, setReloadRetry] = useState(0);
-    const [errorLoading, setErrorLoading] = useState(false);
-    const [loadingModule, setLoadingModule] = React.useState(true);
 
-    useEffect(() => {
-      async function load() {
-        setErrorLoading(false);
-        setLoadingModule(true);
-        try {
-          ref.current = await fetchAvailablePackagesHook();
-        } catch (e) {
-          setErrorLoading(true);
-        } finally {
-          setLoadingModule(false);
-        }
-      }
-      load();
-    }, [reloadRetry]);
+    const {
+      error: errorLoading,
+      retry: retryAsyncLoad,
+      loading: asyncLoading,
+    } = useAsyncRetry(async () => {
+      ref.current = await fetchAvailablePackagesHook();
+    });
 
     if (errorLoading)
       return (
@@ -171,7 +162,7 @@ const WithAvailablePackages = React.forwardRef(
             color="warning"
             data-test-subj="xpack.observability_onboarding.asyncLoadFailureCallout.button"
             onClick={() => {
-              if (!loadingModule) setReloadRetry(reloadRetry + 1);
+              if (!asyncLoading) retryAsyncLoad();
             }}
           >
             <FormattedMessage
@@ -182,7 +173,7 @@ const WithAvailablePackages = React.forwardRef(
         </EuiCallOut>
       );
 
-    if (loadingModule || ref.current === null) return <Loading />;
+    if (asyncLoading || ref.current === null) return <Loading />;
 
     return (
       <PackageListGridWrapper
