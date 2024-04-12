@@ -26,13 +26,6 @@ export async function getDataViewByTextBasedQueryLang(
   if ('esql' in query) {
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   }
-  // we should find a better way to work with ESQL queries which dont need a dataview
-  if (!indexPatternFromQuery && currentDataView) {
-    // Here the user used either the ROW or SHOW META / SHOW INFO commands
-    // if we use the current dataview will create this error https://github.com/elastic/kibana/issues/163417
-    // so we are creating an adhoc dataview without an @timestamp timeFieldName
-    return await getESQLAdHocDataview(currentDataView.name, services.dataViews);
-  }
 
   if (
     currentDataView?.isPersisted() ||
@@ -40,7 +33,9 @@ export async function getDataViewByTextBasedQueryLang(
   ) {
     const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+    // If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
+    // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
+    if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';
     }
     return dataViewObj;
