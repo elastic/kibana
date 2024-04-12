@@ -1131,7 +1131,7 @@ async function getFunctionArgsSuggestions(
         }
         return [];
       })
-      .filter(Boolean);
+      .filter(nonNullable);
 
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
