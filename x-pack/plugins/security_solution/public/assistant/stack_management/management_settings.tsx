@@ -18,7 +18,11 @@ import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conve
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 
 export const ManagementSettings = React.memo(() => {
-  const { baseConversations, http } = useAssistantContext();
+  const {
+    baseConversations,
+    http,
+    assistantAvailability: { isAssistantEnabled },
+  } = useAssistantContext();
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -28,6 +32,7 @@ export const ManagementSettings = React.memo(() => {
   const { data: conversations } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
+    isAssistantEnabled,
   });
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
