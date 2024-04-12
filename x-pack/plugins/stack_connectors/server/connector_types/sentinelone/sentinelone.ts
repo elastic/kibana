@@ -295,10 +295,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   protected getResponseErrorMessage(error: AxiosError): string {
     const appendResponseBody = (message: string): string => {
-      const responseBody =
-        error.response?.data && error.response?.config?.responseType !== 'stream'
-          ? JSON.stringify(error.response?.data)
-          : '';
+      const responseBody = JSON.stringify(error.response?.data ?? {});
 
       if (responseBody) {
         return `${message}\nResponse body: ${responseBody}`;
