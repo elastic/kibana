@@ -7,10 +7,16 @@
 
 import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
 
-import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Stats } from '../helpers';
 
-export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptContext): Stats => {
+export const getStats = ({
+  anonymizationFields = [],
+  rawData,
+}: {
+  anonymizationFields?: AnonymizationFieldResponse[];
+  rawData?: string | Record<string, string[]>;
+}): Stats => {
   const ZERO_STATS = {
     allowed: 0,
     anonymized: 0,
@@ -18,21 +24,30 @@ export const getStats = ({ allow, allowReplacement, rawData }: SelectedPromptCon
     total: 0,
   };
 
-  if (typeof rawData === 'string') {
+  if (!rawData) {
+    return {
+      allowed: anonymizationFields.reduce((acc, data) => (data.allowed ? acc + 1 : acc), 0),
+      anonymized: anonymizationFields.reduce((acc, data) => (data.anonymized ? acc + 1 : acc), 0),
+      denied: anonymizationFields.reduce(
+        (acc, data) => (data.allowed === false ? acc + 1 : acc),
+        0
+      ),
+      total: anonymizationFields.length,
+    };
+  } else if (typeof rawData === 'string') {
     return ZERO_STATS;
   } else {
     const rawFields = Object.keys(rawData);
 
-    const allowReplacementSet = new Set(allowReplacement);
-    const allowSet = new Set(allow);
-
     return rawFields.reduce<Stats>(
       (acc, field) => ({
-        allowed: acc.allowed + (isAllowed({ allowSet, field }) ? 1 : 0),
+        allowed: acc.allowed + (isAllowed({ anonymizationFields, field }) ? 1 : 0),
         anonymized:
           acc.anonymized +
-          (isAllowed({ allowSet, field }) && isAnonymized({ allowReplacementSet, field }) ? 1 : 0),
-        denied: acc.denied + (isDenied({ allowSet, field }) ? 1 : 0),
+          (isAllowed({ anonymizationFields, field }) && isAnonymized({ anonymizationFields, field })
+            ? 1
+            : 0),
+        denied: acc.denied + (isDenied({ anonymizationFields, field }) ? 1 : 0),
         total: acc.total + 1,
       }),
       ZERO_STATS

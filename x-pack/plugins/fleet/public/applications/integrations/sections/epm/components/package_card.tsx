@@ -140,9 +140,10 @@ export function PackageCard({
           data-test-subj="xpack.fleet.packageCard.collectionButton"
           iconType="package"
         >
-          {i18n.translate('xpack.fleet.packageCard.collectionButton.copy', {
-            defaultMessage: 'View collection',
-          })}
+          <FormattedMessage
+            id="xpack.fleet.packageCard.collectionButton.copy"
+            defaultMessage="View collection"
+          />
         </EuiButton>
       </EuiFlexItem>
     );

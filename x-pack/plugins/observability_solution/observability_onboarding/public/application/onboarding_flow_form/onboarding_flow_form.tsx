@@ -9,17 +9,18 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { FunctionComponent } from 'react';
 import {
+  EuiAvatar,
   EuiCheckableCard,
-  EuiTitle,
-  EuiText,
-  EuiPanel,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAvatar,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 
@@ -75,9 +76,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingUseCase' });
-  const [selectedId, setSelectedId] = useState<string>();
   const customMargin = useCustomMargin();
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
+
+  const [searchParams, setSearchParams] = useSearchParams();
   const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
   const [integrationSearch, setIntegrationSearch] = useState('');
 
@@ -120,14 +122,15 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   </EuiText>
                 </>
               }
-              checked={selectedId === option.id}
-              onChange={() => setSelectedId(option.id)}
+              checked={option.id === searchParams.get('category')}
+              onChange={() =>
+                setSearchParams({ category: option.id }, { replace: true })
+              }
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-
-      {selectedId && (
+      {searchParams.get('category') && (
         <>
           <EuiSpacer />
           <TitleWithIcon
