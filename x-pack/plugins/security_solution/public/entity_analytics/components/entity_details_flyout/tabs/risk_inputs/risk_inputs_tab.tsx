@@ -25,7 +25,7 @@ import {
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
-import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
+import { AssetCriticalityBadge } from '../../../asset_criticality';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
@@ -118,7 +118,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         name: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.riskInputColumn"
-            defaultMessage="Risk contribution"
+            defaultMessage="Rule name"
           />
         ),
         truncateText: true,
@@ -248,7 +248,7 @@ const RiskInputsAssetCriticalitySection: React.FC<{
         />
       </EuiText>
       <EuiSpacer size="s" />
-      <AssetCriticalityBadgeAllowMissing
+      <AssetCriticalityBadge
         criticalityLevel={criticalityLevel}
         dataTestSubj="risk-inputs-asset-criticality-badge"
       />

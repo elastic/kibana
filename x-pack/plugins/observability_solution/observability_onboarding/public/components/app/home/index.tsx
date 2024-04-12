@@ -86,7 +86,7 @@ export function Home() {
           <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
               {i18n.translate('xpack.observability_onboarding.home.title', {
-                defaultMessage: 'Collect and analyze logs',
+                defaultMessage: 'Onboard Observability data',
               })}
             </h1>
           </EuiTitle>

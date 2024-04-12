@@ -209,5 +209,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('loginBackToLoginLink');
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
     });
+
+    it('correctly handles unexpected post-authentication errors', async () => {
+      const supertest = getService('supertest');
+      await PageObjects.security.loginSelector.login('basic', 'basic1');
+
+      await supertest.get('/authentication/app/not_auth_flow').expect(200);
+      await supertest.get('/authentication/app/not_auth_flow?statusCode=400').expect(400);
+      await supertest.get('/authentication/app/not_auth_flow?statusCode=500').expect(500);
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/not_auth_flow?statusCode=401`
+      );
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+
+      await supertest.get('/authentication/app/auth_flow').expect(200);
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/auth_flow?statusCode=400`
+      );
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+
+      await browser.navigateTo(
+        `${deployment.getHostPort()}/authentication/app/auth_flow?statusCode=500`
+      );
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+    });
   });
 }

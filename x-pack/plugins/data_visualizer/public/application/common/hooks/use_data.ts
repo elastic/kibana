@@ -18,6 +18,7 @@ import type { Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useDataDriftStateManagerContext } from '../../data_drift/use_state_manager';
 import type { InitialSettings } from '../../data_drift/use_data_drift_result';
 import {
@@ -25,7 +26,6 @@ import {
   useDocumentCountStats,
 } from './use_document_count_stats';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import { useTimeBuckets } from './use_time_buckets';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -57,7 +57,7 @@ export const useData = (
 
   const [lastRefresh, setLastRefresh] = useState(0);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,

@@ -14,7 +14,7 @@ import {
   TIMELINE_QUERY,
   NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
@@ -29,27 +29,27 @@ import {
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-const defaultTimeline = getTimeline();
+const mockTimeline = getTimeline();
 
 describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(TIMELINES_URL);
     deleteTimelines();
-    createTimeline(defaultTimeline)
+    createTimeline(mockTimeline)
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
         cy.wrap(timelineId).as('timelineId');
-        addNoteToTimeline(defaultTimeline.notes, timelineId);
+        addNoteToTimeline(mockTimeline.notes, timelineId);
         openTimelineById(timelineId);
         pinFirstEvent();
-        addFilter(defaultTimeline.filter);
+        addFilter(mockTimeline.filter);
       });
   });
 
   it('should display the right query and filters', () => {
-    cy.get(TIMELINE_QUERY).should('have.text', `${defaultTimeline.query}`);
-    cy.get(TIMELINE_FILTER(defaultTimeline.filter)).should('exist');
+    cy.get(TIMELINE_QUERY).should('have.text', `${mockTimeline.query}`);
+    cy.get(TIMELINE_FILTER(mockTimeline.filter)).should('exist');
   });
 
   it('should be able to add event note', () => {
@@ -64,7 +64,7 @@ describe('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
       .and('match', /Unpin the event in row 2/);
   });
 
-  it('should have an unlock icon', { tags: '@brokenInServerless' }, () => {
+  it('should have an unlock icon', { tags: '@skipInServerless' }, () => {
     cy.get(UNLOCKED_ICON).should('be.visible');
   });
 });

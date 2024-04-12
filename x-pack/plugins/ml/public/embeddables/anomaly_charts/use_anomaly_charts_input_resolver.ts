@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { combineLatest, of, Subject } from 'rxjs';
-import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { MlStartDependencies } from '../../plugin';

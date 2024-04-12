@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
@@ -35,6 +36,7 @@ export interface LeftPanelProps extends FlyoutPanelProps {
 }
 
 export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
+  const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
@@ -64,6 +66,11 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
         indexName,
         scopeId,
       },
+    });
+    telemetry.reportDetailsFlyoutTabClicked({
+      tableId: scopeId,
+      panel: 'left',
+      tabId,
     });
   };
 

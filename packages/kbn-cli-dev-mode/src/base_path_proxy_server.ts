@@ -13,7 +13,7 @@ import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
 import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
 

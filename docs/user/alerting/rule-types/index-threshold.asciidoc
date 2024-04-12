@@ -44,6 +44,9 @@ It determines how far back to search for documents and uses the time field set i
 7. Set the check interval, which defines how often to evaluate the rule conditions. 
 Generally this value should be set to a value that is smaller than the time window, to avoid gaps in detection.
 
+8. In the advanced options, you can change the number of consecutive runs that must meet the rule conditions before an alert occurs.
+The default value is `1`.
+
 If data is available and all clauses have been defined, a preview chart will render the threshold value and display a line chart showing the value for the last 30 intervals.
 This can provide an indication of recent values and their proximity to the threshold, and help you tune the clauses.
 

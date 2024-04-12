@@ -45,7 +45,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -53,8 +53,8 @@ import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public'
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import {
-  ObservabilityAIAssistantPluginSetup,
-  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -66,11 +66,9 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -78,15 +76,11 @@ import {
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  SLOS_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { SloDetailsLocatorDefinition } from './locators/slo_details';
-import { SloEditLocatorDefinition } from './locators/slo_edit';
-import { SloListLocatorDefinition } from './locators/slo_list';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
@@ -112,6 +106,9 @@ export interface ConfigSchema {
     thresholdRule?: {
       enabled: boolean;
     };
+    ruleFormV2?: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -119,7 +116,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -146,7 +143,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -213,15 +210,6 @@ export class Plugin
         },
       ],
     },
-    {
-      id: 'slos',
-      title: i18n.translate('xpack.observability.slosLinkTitle', {
-        defaultMessage: 'SLOs',
-      }),
-      visibleIn: [],
-      order: 8002,
-      path: SLOS_PATH,
-    },
     getCasesDeepLinks({
       basePath: CASES_PATH,
       extend: {
@@ -259,12 +247,6 @@ export class Plugin
     const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
       new RuleDetailsLocatorDefinition()
     );
-
-    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
-      new SloDetailsLocatorDefinition()
-    );
-    const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
-    const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
     const logsExplorerLocator =
       pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
@@ -331,53 +313,6 @@ export class Plugin
       logsExplorerLocator
     );
 
-    const assertPlatinumLicense = async () => {
-      const licensing = await pluginsSetup.licensing;
-      const license = await firstValueFrom(licensing.license$);
-
-      const hasPlatinumLicense = license.hasAtLeast('platinum');
-      if (hasPlatinumLicense) {
-        const registerSloOverviewEmbeddableFactory = async () => {
-          const { SloOverviewEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
-          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloOverviewEmbeddableFactory();
-        const registerSloAlertsEmbeddableFactory = async () => {
-          const { SloAlertsEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-          );
-          const factory = new SloAlertsEmbeddableFactoryDefinition(
-            coreSetup.getStartServices,
-            kibanaVersion
-          );
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloAlertsEmbeddableFactory();
-
-        const registerSloErrorBudgetEmbeddableFactory = async () => {
-          const { SloErrorBudgetEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/error_budget/slo_error_budget_embeddable_factory'
-          );
-          const factory = new SloErrorBudgetEmbeddableFactoryDefinition(coreSetup.getStartServices);
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloErrorBudgetEmbeddableFactory();
-
-        const registerAsyncSloAlertsUiActions = async () => {
-          if (pluginsSetup.uiActions) {
-            const { registerSloAlertsUiActions } = await import('./ui_actions');
-            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
-          }
-        };
-        registerAsyncSloAlertsUiActions();
-      }
-    };
-
-    assertPlatinumLicense();
-
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
         id: observabilityFeatureId,
@@ -422,7 +357,7 @@ export class Plugin
                 : [];
 
               const isAiAssistantEnabled =
-                pluginsStart.observabilityAIAssistant.service.isEnabled();
+                pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
               const aiAssistantLink =
                 isAiAssistantEnabled &&
@@ -439,6 +374,18 @@ export class Plugin
                     ]
                   : [];
 
+              const sloLink = coreStart.application.capabilities.slo?.read
+                ? [
+                    {
+                      label: i18n.translate('xpack.observability.sloLinkTitle', {
+                        defaultMessage: 'SLOs',
+                      }),
+                      app: 'slo',
+                      path: '/',
+                    },
+                  ]
+                : [];
+
               // Reformat the visible links to be NavigationEntry objects instead of
               // AppDeepLink objects.
               //
@@ -449,8 +396,17 @@ export class Plugin
               // properties used by the deepLinks.
               //
               // See https://github.com/elastic/kibana/issues/103325.
-              const otherLinks: NavigationEntry[] = deepLinks
-                .filter((link) => (link.visibleIn ?? []).length > 0)
+              const otherLinks = deepLinks.filter((link) => (link.visibleIn ?? []).length > 0);
+              const alertsLink: NavigationEntry[] = otherLinks
+                .filter((link) => link.id === 'alerts')
+                .map((link) => ({
+                  app: observabilityAppId,
+                  label: link.title,
+                  path: link.path ?? '',
+                }));
+
+              const casesLink: NavigationEntry[] = otherLinks
+                .filter((link) => link.id === 'cases')
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
@@ -461,7 +417,13 @@ export class Plugin
                 {
                   label: '',
                   sortKey: 100,
-                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
+                  entries: [
+                    ...overviewLink,
+                    ...alertsLink,
+                    ...sloLink,
+                    ...casesLink,
+                    ...aiAssistantLink,
+                  ],
                 },
               ];
             })
@@ -476,9 +438,7 @@ export class Plugin
       useRulesLink: createUseRulesLink(),
       rulesLocator,
       ruleDetailsLocator,
-      sloDetailsLocator,
-      sloEditLocator,
-      sloListLocator,
+      config,
     };
   }
 
@@ -499,22 +459,11 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
-    const kibanaVersion = this.initContext.env.packageInfo.version;
-    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
     return {
+      config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
-        config,
-        core: coreStart,
-        isDev: this.initContext.env.mode.dev,
-        kibanaVersion,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-        isServerless: !!pluginsStart.serverless,
-      }),
     };
   }
 }

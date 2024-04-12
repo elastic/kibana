@@ -24,3 +24,15 @@ export * from './evaluation/get_evaluate_route.gen';
 
 // Capabilities Schemas
 export * from './capabilities/get_capabilities_route.gen';
+
+// Conversations Schemas
+export * from './conversations/bulk_crud_conversations_route.gen';
+export * from './conversations/common_attributes.gen';
+export * from './conversations/crud_conversation_route.gen';
+export * from './conversations/find_conversations_route.gen';
+
+// Actions Connector Schemas
+export * from './actions_connector/post_actions_connector_execute_route.gen';
+
+// KB Schemas
+export * from './knowledge_base/crud_kb_route.gen';

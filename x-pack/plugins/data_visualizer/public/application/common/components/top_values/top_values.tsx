@@ -55,10 +55,17 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues, fieldName, sampleCount } = stats;
+  const { topValues: originalTopValues, fieldName, sampleCount } = stats;
 
-  if (topValues?.length === 0) return null;
-  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
+  if (originalTopValues?.length === 0) return null;
+  const totalDocuments = Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
+
+  const topValues = originalTopValues.map((bucket) => ({
+    ...bucket,
+    percent:
+      typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
+  }));
+
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
@@ -118,7 +125,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
         {Array.isArray(topValues)
           ? topValues.map((value) => {
               const fieldValue = value.key_as_string ?? (value.key ? value.key.toString() : '');
-              const displayValue = fieldValue ?? EMPTY_EXAMPLE;
+              const displayValue = fieldValue === '' ? EMPTY_EXAMPLE : fieldValue;
+
               return (
                 <EuiFlexGroup gutterSize="xs" alignItems="center" key={displayValue}>
                   <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
@@ -127,7 +135,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                       max={1}
                       color={barColor}
                       size="xs"
-                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : fieldValue}
+                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : displayValue}
                       className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined

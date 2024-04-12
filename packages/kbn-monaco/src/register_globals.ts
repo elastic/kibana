@@ -13,7 +13,14 @@ import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
-import { ConsoleLang } from './console';
+import {
+  ConsoleLang,
+  ConsoleOutputLang,
+  CONSOLE_THEME_ID,
+  CONSOLE_OUTPUT_THEME_ID,
+  buildConsoleTheme,
+  buildConsoleOutputTheme,
+} from './console';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
@@ -23,6 +30,7 @@ const langSpecificWorkerIds = [
   monaco.languages.json.jsonDefaults.languageId,
   YAML_LANG_ID,
   ConsoleLang.ID,
+  ConsoleOutputLang.ID,
 ];
 
 /**
@@ -33,11 +41,14 @@ registerLanguage(PainlessLang);
 registerLanguage(SQLLang);
 registerLanguage(ESQLLang);
 registerLanguage(ConsoleLang);
+registerLanguage(ConsoleOutputLang);
 
 /**
  * Register custom themes
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
+registerTheme(CONSOLE_THEME_ID, buildConsoleTheme());
+registerTheme(CONSOLE_OUTPUT_THEME_ID, buildConsoleOutputTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 

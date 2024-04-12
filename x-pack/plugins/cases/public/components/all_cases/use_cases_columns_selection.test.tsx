@@ -18,7 +18,7 @@ jest.mock('./use_cases_columns_configuration');
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as jest.Mock;
 
-const localStorageKey = 'testAppId.cases.list.tableColumns';
+const localStorageKey = 'securitySolution.cases.list.tableColumns';
 const casesColumnsConfig = {
   title: {
     field: 'title',

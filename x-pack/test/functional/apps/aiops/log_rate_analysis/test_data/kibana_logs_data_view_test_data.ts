@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import { kibanaSampleDataLogsSignificantTermsBase } from '@kbn/aiops-test-utils/kibana_sample_data_logs/significant_terms';
 
 import type { TestData } from '../../types';
 
@@ -21,10 +22,10 @@ export const kibanaLogsDataViewTestData: TestData = {
   fieldSelectorApplyAvailable: true,
   action: {
     type: 'LogPatternAnalysis',
-    tableRowId: '1064853178',
+    tableRowId: '822370508',
     expected: {
       queryBar:
-        'clientip:30.156.16.164 AND host.keyword:elastic-elastic-elastic.org AND ip:30.156.16.163 AND response.keyword:404 AND machine.os.keyword:win xp AND geo.dest:IN AND geo.srcdest:US\\:IN',
+        'clientip:"30.156.16.164" AND geo.dest:"IN" AND geo.srcdest:"US:IN" AND host.keyword:"elastic-elastic-elastic.org" AND response.keyword:"404" AND ip:"30.156.16.163" AND machine.os.keyword:"win xp" AND agent.keyword:"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24" AND tags.keyword:"info" AND extension.keyword:""',
       totalDocCount: 100,
     },
   },
@@ -41,87 +42,36 @@ export const kibanaLogsDataViewTestData: TestData = {
         searchQueryLanguage: 'kuery',
         searchString: '',
         wp: {
-          bMax: 1684368000000,
-          bMin: 1682899200000,
-          dMax: 1685491200000,
-          dMin: 1684886400000,
+          bMax: 1685059200000,
+          bMin: 1683590400000,
+          dMax: 1685232000000,
+          dMin: 1685145600000,
         },
       },
     },
     analysisGroupsTable: [
       {
         group:
-          '* clientip: 30.156.16.164* host.keyword: elastic-elastic-elastic.org* ip: 30.156.16.163* referer: http://www.elastic-elastic-elastic.com/success/timothy-l-kopra* response.keyword: 404Showing 5 out of 8 items. 8 items unique to this group.',
+          '* clientip: 30.156.16.164* geo.dest: IN* geo.srcdest: US:IN* host.keyword: elastic-elastic-elastic.org* response.keyword: 404Showing 5 out of 11 items. 11 items unique to this group.',
         docCount: '100',
       },
     ],
     filteredAnalysisGroupsTable: [
       {
         group:
-          '* clientip: 30.156.16.164* host.keyword: elastic-elastic-elastic.org* ip: 30.156.16.163* response.keyword: 404* machine.os.keyword: win xpShowing 5 out of 7 items. 7 items unique to this group.',
+          '* clientip: 30.156.16.164* geo.dest: IN* geo.srcdest: US:IN* host.keyword: elastic-elastic-elastic.org* response.keyword: 404Showing 5 out of 10 items. 10 items unique to this group.',
         docCount: '100',
       },
     ],
-    analysisTable: [
-      {
-        fieldName: 'clientip',
-        fieldValue: '30.156.16.164',
-        logRate: 'Chart type:bar chart',
-        pValue: '3.10e-13',
-        impact: 'High',
-      },
-      {
-        fieldName: 'geo.dest',
-        fieldValue: 'IN',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.000716',
-        impact: 'Medium',
-      },
-      {
-        fieldName: 'geo.srcdest',
-        fieldValue: 'US:IN',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.000716',
-        impact: 'Medium',
-      },
-      {
-        fieldName: 'host.keyword',
-        fieldValue: 'elastic-elastic-elastic.org',
-        logRate: 'Chart type:bar chart',
-        pValue: '7.14e-9',
-        impact: 'High',
-      },
-      {
-        fieldName: 'ip',
-        fieldValue: '30.156.16.163',
-        logRate: 'Chart type:bar chart',
-        pValue: '3.28e-13',
-        impact: 'High',
-      },
-      {
-        fieldName: 'machine.os.keyword',
-        fieldValue: 'win xp',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.0000997',
-        impact: 'Medium',
-      },
-      {
-        fieldName: 'referer',
-        fieldValue: 'http://www.elastic-elastic-elastic.com/success/timothy-l-kopra',
-        logRate: 'Chart type:bar chart',
-        pValue: '4.74e-13',
-        impact: 'High',
-      },
-      {
-        fieldName: 'response.keyword',
-        fieldValue: '404',
-        logRate: 'Chart type:bar chart',
-        pValue: '0.00000604',
-        impact: 'Medium',
-      },
-    ],
+    analysisTable: kibanaSampleDataLogsSignificantTermsBase.map((d) => ({
+      ...d,
+      logRate: 'Chart type:bar chart',
+      impact: 'High',
+    })),
     fieldSelectorPopover: [
+      'agent.keyword',
       'clientip',
+      'extension.keyword',
       'geo.dest',
       'geo.srcdest',
       'host.keyword',
@@ -129,6 +79,8 @@ export const kibanaLogsDataViewTestData: TestData = {
       'machine.os.keyword',
       'referer',
       'response.keyword',
+      'tags.keyword',
     ],
+    prompt: 'change-point',
   },
 };

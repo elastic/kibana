@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
@@ -52,7 +53,8 @@ export const useCasesAddToExistingCaseModal = ({
     toastContent: successToaster?.content,
   });
 
-  const { dispatch, appId } = useCasesContext();
+  const { dispatch } = useCasesContext();
+  const { appId } = useApplication();
   const casesToasts = useCasesToast();
   const { mutateAsync: createAttachments } = useCreateAttachments();
   const { startTransaction } = useAddAttachmentToExistingCaseTransaction();

@@ -669,6 +669,27 @@
       }
     }
   },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -837,6 +858,11 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "doc_values": false,
+            "index": false,
+            "type": "boolean"
           }
         }
       },
@@ -997,6 +1023,10 @@
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
+      },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
       },
       "latest_install_failed_attempts": {
         "enabled": false,
@@ -1554,15 +1584,16 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
-        "type": "keyword"
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       },
-      "kuery": {
-        "type": "text"
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -1580,6 +1611,10 @@
   },
   "ingest-agent-policies": {
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {
@@ -2429,6 +2464,9 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },

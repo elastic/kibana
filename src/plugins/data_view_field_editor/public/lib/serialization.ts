@@ -22,6 +22,7 @@ export const deserializeField = (dataView: DataView, field?: DataViewField): Fie
     type: editType,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
+    customDescription: field.customDescription,
     popularity: field.count,
     format: dataView.getFormatterForFieldNoDefault(field.name)?.toJSON(),
     fields: field.runtimeField?.fields,

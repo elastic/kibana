@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -22,49 +21,14 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
+  CustomThresholdSearchSourceFields,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../components/custom_threshold/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
-import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
-import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
-
-const sloBurnRateDefaultActionMessage = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.defaultActionMessage',
-  {
-    defaultMessage: `\\{\\{context.reason\\}\\}
-
-\\{\\{rule.name\\}\\} is active with the following conditions:
-
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
-
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
-`,
-  }
-);
-const sloBurnRateDefaultRecoveryMessage = i18n.translate(
-  'xpack.observability.slo.rules.burnRate.defaultRecoveryMessage',
-  {
-    defaultMessage: `\\{\\{context.reason\\}\\}
-
-\\{\\{rule.name\\}\\} has recovered.
-
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
-
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
-`,
-  }
-);
 
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
@@ -97,39 +61,12 @@ export const registerObservabilityRuleTypes = async (
   uiSettings: IUiSettingsClient,
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
 ) => {
-  observabilityRuleTypeRegistry.register({
-    id: SLO_BURN_RATE_RULE_TYPE_ID,
-    description: i18n.translate('xpack.observability.slo.rules.burnRate.description', {
-      defaultMessage: 'Alert when your SLO burn rate is too high over a defined period of time.',
-    }),
-    format: ({ fields }) => {
-      return {
-        reason: fields[ALERT_REASON] ?? '-',
-        link: `/app/observability/slos/${fields[SLO_ID_FIELD]}?instanceId=${
-          fields[SLO_INSTANCE_ID_FIELD] ?? '*'
-        }`,
-      };
-    },
-    iconClass: 'bell',
-    documentationUrl(docLinks) {
-      return `${docLinks.links.observability.sloBurnRateRule}`;
-    },
-    ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
-    validate: validateBurnRateRule,
-    requiresAppContext: false,
-    defaultActionMessage: sloBurnRateDefaultActionMessage,
-    defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
-    alertDetailsAppSection: lazy(
-      () => import('../components/slo/burn_rate/alert_details/alert_details_app_section')
-    ),
-    priority: 100,
-  });
   const validateCustomThresholdWithUiSettings = ({
     criteria,
     searchConfiguration,
   }: {
     criteria: CustomMetricExpressionParams[];
-    searchConfiguration: SerializedSearchSourceFields;
+    searchConfiguration: CustomThresholdSearchSourceFields;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -179,6 +116,6 @@ export const registerObservabilityRuleTypes = async (
           '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
         )
     ),
-    priority: 5,
+    priority: 110,
   });
 };

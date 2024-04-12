@@ -17,7 +17,7 @@ import {
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -96,7 +96,9 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -170,6 +172,7 @@ describe('Task Runner', () => {
     const mockLegacyAlertsClient = legacyAlertsClientMock.create();
     const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
     const maintenanceWindowClient = maintenanceWindowClientMock.create();
+    const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
     type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
       actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -210,6 +213,7 @@ describe('Task Runner', () => {
         .fn()
         .mockReturnValue(rulesSettingsClientMock.create()),
       getMaintenanceWindowClientWithRequest: jest.fn().mockReturnValue(maintenanceWindowClient),
+      connectorAdapterRegistry,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -554,6 +558,7 @@ describe('Task Runner', () => {
               [EVENT_ACTION]: 'open',
               [EVENT_KIND]: 'signal',
               [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],

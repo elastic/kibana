@@ -28,6 +28,8 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
   }
 >;
 
+export type DashboardItem = DashboardCrudTypes['Item'];
+
 /**
  * Grid type for React Grid Layout
  */
@@ -59,9 +61,14 @@ export interface SavedDashboardPanel {
   version?: string;
 }
 
+type ControlGroupAttributesV1 = Pick<
+  RawControlGroupAttributes,
+  'panelsJSON' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettingsJSON'
+>;
+
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions */
 export type DashboardAttributes = {
-  controlGroupInput?: RawControlGroupAttributes;
+  controlGroupInput?: ControlGroupAttributesV1;
   refreshInterval?: RefreshInterval;
   timeRestore: boolean;
   optionsJSON?: string;

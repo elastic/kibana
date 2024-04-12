@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana';
 import { getField } from '../../shared/utils';
 import { AlertReasonPreviewPanel, DocumentDetailsPreviewPanelKey } from '../../preview';
 import {
@@ -26,6 +27,7 @@ import { useRightPanelContext } from '../context';
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
 export const Reason: FC = () => {
+  const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
     useRightPanelContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
@@ -52,7 +54,11 @@ export const Reason: FC = () => {
         },
       },
     });
-  }, [eventId, openPreviewPanel, indexName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      tableId: scopeId,
+      panel: 'preview',
+    });
+  }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);
 
   const viewPreview = useMemo(
     () => (

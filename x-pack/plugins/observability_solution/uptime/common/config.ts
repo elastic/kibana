@@ -11,10 +11,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+  experimental: schema.maybe(
+    schema.object({
+      ruleFormV2Enabled: schema.maybe(schema.boolean({ defaultValue: false })),
+    })
+  ),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
+  exposeToBrowser: {
+    experimental: true,
+  },
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
+export type ExperimentalFeatures = UptimeConfig['experimental'];

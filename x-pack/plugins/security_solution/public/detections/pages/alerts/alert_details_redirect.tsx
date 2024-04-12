@@ -71,7 +71,7 @@ export const AlertDetailsRedirect = () => {
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
 
-  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.eventFlyout);
+  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
 
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
@@ -79,7 +79,7 @@ export const AlertDetailsRedirect = () => {
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
-    [URL_PARAM_KEY.eventFlyout]: resolveFlyoutParams(
+    [URL_PARAM_KEY.flyout]: resolveFlyoutParams(
       { index, alertId, isSecurityFlyoutEnabled },
       currentFlyoutParams
     ),

@@ -11,6 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
@@ -77,6 +78,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
+  const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -110,8 +112,13 @@ export const InsightsTab: React.FC = memo(() => {
           scopeId,
         },
       });
+      telemetry.reportDetailsFlyoutTabClicked({
+        tableId: scopeId,
+        panel: 'left',
+        tabId: optionId,
+      });
     },
-    [eventId, indexName, scopeId, openLeftPanel]
+    [eventId, indexName, scopeId, openLeftPanel, telemetry]
   );
 
   return (

@@ -88,11 +88,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -172,11 +180,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -256,11 +272,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -340,11 +364,19 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "container.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.grouping_key": Object {
       "required": false,
       "type": "keyword",
     },
     "error.grouping_name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "host.name": Object {
       "required": false,
       "type": "keyword",
     },
@@ -746,6 +778,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -1794,6 +1831,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -2840,6 +2882,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -3888,6 +3935,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -4934,6 +4986,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,
@@ -5988,6 +6045,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -7035,6 +7097,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.depth": Object {
       "array": false,
       "required": true,
@@ -8081,6 +8148,11 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.alert.consecutive_matches": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.depth": Object {
       "array": false,

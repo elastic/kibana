@@ -1634,6 +1634,20 @@
             "path": "packages/kbn-unified-field-list/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.BucketedAggregation.areExamples",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "areExamples",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3929,7 +3943,7 @@
                 "section": "def-common.BucketedAggregation",
                 "text": "BucketedAggregation"
               },
-              "<string | number> | undefined"
+              "<string | number | boolean> | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
             "deprecated": false,
@@ -3950,7 +3964,7 @@
                 "section": "def-common.BucketedAggregation",
                 "text": "BucketedAggregation"
               },
-              "<string | number> | undefined"
+              "<string | number | boolean> | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
             "deprecated": false,
@@ -4091,7 +4105,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"other\" | \"normal\" | undefined"
+              "\"normal\" | \"other\" | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_stats/field_top_values_bucket.tsx",
             "deprecated": false,
@@ -4258,7 +4272,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {

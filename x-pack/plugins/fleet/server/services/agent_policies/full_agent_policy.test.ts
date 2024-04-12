@@ -93,6 +93,15 @@ jest.mock('../output', () => {
       type: 'elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
     },
+    'test-remote-id': {
+      id: 'test-remote-id',
+      is_default: true,
+      is_default_monitoring: true,
+      name: 'default',
+      // @ts-ignore
+      type: 'remote_elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+    },
   };
   return {
     outputService: {
@@ -373,6 +382,23 @@ describe('getFullAgentPolicy', () => {
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
     expect(agentPolicy?.outputs.default).toBeDefined();
+  });
+
+  it('should use output id as the default policy id when remote elasticsearch', async () => {
+    mockAgentPolicy({
+      id: 'policy',
+      status: 'active',
+      package_policies: [],
+      is_managed: false,
+      namespace: 'default',
+      revision: 1,
+      data_output_id: 'test-remote-id',
+      monitoring_output_id: 'test-remote-id',
+    });
+
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy?.outputs['test-remote-id']).toBeDefined();
   });
 
   it('should return the sourceURI from the agent policy', async () => {
@@ -686,6 +712,22 @@ describe('getFullAgentPolicy', () => {
         },
       },
       revision: 1,
+    });
+  });
+
+  it('should return a policy with advanced settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_limits_go_max_procs: 2,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      agent: {
+        limits: { go_max_procs: 2 },
+      },
     });
   });
 });

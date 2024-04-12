@@ -26,11 +26,11 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridCustomToolbarProps,
-  EuiDataGridToolBarVisibilityOptions,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -49,7 +49,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
-  DataTableColumnTypes,
+  DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   CustomControlColumnConfiguration,
@@ -67,7 +67,10 @@ import {
 } from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
-import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
+import {
+  DataTableCompareToolbarBtn,
+  DataTableDocumentToolbarBtn,
+} from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
@@ -78,17 +81,9 @@ import {
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { useRowHeight } from '../hooks/use_row_height';
-
-export interface UnifiedDataTableRenderCustomToolbarProps {
-  toolbarProps: EuiDataGridCustomToolbarProps;
-  gridProps: {
-    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
-  };
-}
-
-export type UnifiedDataTableRenderCustomToolbar = (
-  props: UnifiedDataTableRenderCustomToolbarProps
-) => React.ReactElement;
+import { CompareDocuments } from './compare_documents';
+import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
+import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 
 export type SortOrder = [string, string];
 
@@ -123,10 +118,10 @@ export interface UnifiedDataTableProps {
   columns: string[];
   /**
    * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, pass column types (which are available separately in the fetch request) down here.
-   * Check available utils in `utils/get_column_types.ts`
+   * For displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.
+   * Check available utils in `utils/get_columns_meta.ts`
    */
-  columnTypes?: DataTableColumnTypes;
+  columnsMeta?: DataTableColumnsMeta;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -282,7 +277,7 @@ export interface UnifiedDataTableProps {
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
     displayedColumns: string[],
-    columnTypes?: DataTableColumnTypes
+    columnsMeta?: DataTableColumnsMeta
   ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
@@ -366,6 +361,16 @@ export interface UnifiedDataTableProps {
    * Optional row line height override. Default is 1.6em.
    */
   rowLineHeightOverride?: string;
+  /**
+   * Set to true to allow users to compare selected documents
+   */
+  enableComparisonMode?: boolean;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -375,7 +380,7 @@ const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 export const UnifiedDataTable = ({
   ariaLabelledBy,
   columns,
-  columnTypes,
+  columnsMeta,
   showColumnTokens,
   configHeaderRowHeight,
   headerRowHeightState,
@@ -429,8 +434,10 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  cellActionsMetadata,
   customGridColumnsConfiguration,
   customControlColumnsConfiguration,
+  enableComparisonMode,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -438,20 +445,22 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
+  const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
+  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
-    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
     // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => !!idMap.get(docId));
+    const result = selectedDocs.filter((docId) => !!getDocById(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
     }
     return result;
-  }, [selectedDocs, rows, isFilterActive]);
+  }, [selectedDocs, rows?.length, isFilterActive, getDocById]);
 
   const displayedRows = useMemo(() => {
     if (!rows) {
@@ -636,11 +645,11 @@ export const UnifiedDataTable = ({
       canPrependTimeFieldColumn(
         activeColumns,
         timeFieldName,
-        columnTypes,
+        columnsMeta,
         showTimeCol,
         isPlainRecord
       ),
-    [timeFieldName, isPlainRecord, showTimeCol, columnTypes]
+    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
   );
 
   const visibleColumns = useMemo(
@@ -670,14 +679,17 @@ export const UnifiedDataTable = ({
         : undefined,
     [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
   );
-  const cellActionsMetadata = useMemo(() => ({ dataViewId: dataView.id }), [dataView]);
+  const allCellActionsMetadata = useMemo(
+    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+    [dataView, cellActionsMetadata]
+  );
 
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
-    metadata: cellActionsMetadata,
+    metadata: allCellActionsMetadata,
   });
 
   const {
@@ -723,13 +735,13 @@ export const UnifiedDataTable = ({
         onFilter,
         editField,
         visibleCellActions,
-        columnTypes,
+        columnsMeta,
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
       }),
     [
-      columnTypes,
+      columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
       dataView,
@@ -774,24 +786,21 @@ export const UnifiedDataTable = ({
     [sort, visibleColumns]
   );
 
-  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       if (isSortEnabled) {
-        if (isPlainRecord) {
-          setInmemorySortingColumns(sortingColumnsData);
-        } else if (onSort) {
+        if (onSort) {
           onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
         }
       }
     },
-    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
+    [onSort, isSortEnabled]
   );
 
   const sorting = useMemo(() => {
     if (isSortEnabled) {
       return {
-        columns: isPlainRecord ? inmemorySortingColumns : sortingColumns,
+        columns: sortingColumns,
         onSort: onTableSort,
       };
     }
@@ -799,7 +808,7 @@ export const UnifiedDataTable = ({
       columns: sortingColumns,
       onSort: () => {},
     };
-  }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
+  }, [isSortEnabled, sortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
@@ -828,19 +837,39 @@ export const UnifiedDataTable = ({
 
     return (
       <>
-        {usedSelectedDocs.length ? (
-          <DataTableDocumentToolbarBtn
-            isFilterActive={isFilterActive}
-            rows={rows!}
-            selectedDocs={usedSelectedDocs}
-            setSelectedDocs={setSelectedDocs}
-            setIsFilterActive={setIsFilterActive}
-          />
-        ) : null}
+        {Boolean(usedSelectedDocs.length) && (
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            {enableComparisonMode && usedSelectedDocs.length > 1 && (
+              <EuiFlexItem grow={false}>
+                <DataTableCompareToolbarBtn
+                  selectedDocs={usedSelectedDocs}
+                  setIsCompareActive={setIsCompareActive}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <DataTableDocumentToolbarBtn
+                isPlainRecord={isPlainRecord}
+                isFilterActive={isFilterActive}
+                rows={rows!}
+                selectedDocs={usedSelectedDocs}
+                setSelectedDocs={setSelectedDocs}
+                setIsFilterActive={setIsFilterActive}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         {externalAdditionalControls}
       </>
     );
-  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
+  }, [
+    externalAdditionalControls,
+    usedSelectedDocs,
+    isPlainRecord,
+    isFilterActive,
+    enableComparisonMode,
+    rows,
+  ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
     () =>
@@ -932,6 +961,8 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -972,6 +1003,8 @@ export const UnifiedDataTable = ({
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
         <div
+          ref={setDataGridWrapper}
+          key={isCompareActive ? 'comparisonTable' : 'docTable'}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -980,32 +1013,55 @@ export const UnifiedDataTable = ({
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
         >
-          <EuiDataGridMemoized
-            aria-describedby={randomId}
-            aria-labelledby={ariaLabelledBy}
-            columns={euiGridColumns}
-            columnVisibility={columnsVisibility}
-            data-test-subj="docTable"
-            leadingControlColumns={customLeadingControlColumn}
-            onColumnResize={onResize}
-            pagination={paginationObj}
-            renderCellValue={renderCellValue}
-            ref={dataGridRef}
-            rowCount={rowCount}
-            schemaDetectors={schemaDetectors}
-            sorting={sorting as EuiDataGridSorting}
-            toolbarVisibility={toolbarVisibility}
-            rowHeightsOptions={rowHeightsOptions}
-            inMemory={inMemory}
-            gridStyle={gridStyleOverride ?? GRID_STYLE}
-            renderCustomGridBody={renderCustomGridBody}
-            renderCustomToolbar={renderCustomToolbarFn}
-            trailingControlColumns={customTrailingControlColumn}
-          />
+          {isCompareActive ? (
+            <CompareDocuments
+              id={dataGridId}
+              wrapper={dataGridWrapper}
+              consumer={consumer}
+              ariaDescribedBy={randomId}
+              ariaLabelledBy={ariaLabelledBy}
+              dataView={dataView}
+              isPlainRecord={isPlainRecord}
+              selectedFieldNames={visibleColumns}
+              selectedDocs={selectedDocs}
+              schemaDetectors={schemaDetectors}
+              forceShowAllFields={defaultColumns}
+              showFullScreenButton={showFullScreenButton}
+              fieldFormats={fieldFormats}
+              getDocById={getDocById}
+              setSelectedDocs={setSelectedDocs}
+              setIsCompareActive={setIsCompareActive}
+            />
+          ) : (
+            <EuiDataGridMemoized
+              id={dataGridId}
+              aria-describedby={randomId}
+              aria-labelledby={ariaLabelledBy}
+              columns={euiGridColumns}
+              columnVisibility={columnsVisibility}
+              data-test-subj="docTable"
+              leadingControlColumns={customLeadingControlColumn}
+              onColumnResize={onResize}
+              pagination={paginationObj}
+              renderCellValue={renderCellValue}
+              ref={dataGridRef}
+              rowCount={rowCount}
+              schemaDetectors={schemaDetectors}
+              sorting={sorting as EuiDataGridSorting}
+              toolbarVisibility={toolbarVisibility}
+              rowHeightsOptions={rowHeightsOptions}
+              inMemory={inMemory}
+              gridStyle={gridStyleOverride ?? GRID_STYLE}
+              renderCustomGridBody={renderCustomGridBody}
+              renderCustomToolbar={renderCustomToolbarFn}
+              trailingControlColumns={customTrailingControlColumn}
+            />
+          )}
         </div>
         {loadingState !== DataLoadingState.loading &&
           !usedSelectedDocs.length && // hide footer when showing selected documents
-          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+          isPaginationEnabled &&
+          !isCompareActive && ( // we hide the footer for Surrounding Documents page
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
@@ -1039,7 +1095,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnTypes)}
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
       </span>
     </UnifiedDataTableContext.Provider>
   );

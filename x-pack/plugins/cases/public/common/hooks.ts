@@ -6,10 +6,10 @@
  */
 
 import { STACK_APP_ID } from '../../common/constants';
-import { useCasesContext } from '../components/cases_context/use_cases_context';
+import { useApplication } from './lib/kibana/use_application';
 
 export const useIsMainApplication = () => {
-  const { appId } = useCasesContext();
+  const { appId } = useApplication();
 
   return appId === STACK_APP_ID;
 };

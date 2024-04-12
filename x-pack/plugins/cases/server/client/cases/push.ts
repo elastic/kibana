@@ -43,7 +43,7 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type { ExternalServiceResponse } from '../../../common/types/api';
 
 /**

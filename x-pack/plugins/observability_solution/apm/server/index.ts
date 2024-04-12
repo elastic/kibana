@@ -78,6 +78,7 @@ const configSchema = schema.object({
      * enabling this feature flag.
      */
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
+    ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({

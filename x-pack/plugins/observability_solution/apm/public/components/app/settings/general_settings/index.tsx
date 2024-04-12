@@ -22,6 +22,7 @@ import {
   apmEnableProfilingIntegration,
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
+  apmEnableServiceInventoryTableSearchBar,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -55,6 +56,7 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
     apmEnableContinuousRollups,
     enableAgentExplorerView,
     apmEnableTableSearchBar,
+    apmEnableServiceInventoryTableSearchBar,
   ];
 
   if (isProfilingIntegrationEnabled) {
@@ -80,7 +82,7 @@ export function GeneralSettings() {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useEditableSettings('apm', apmSettingsKeys);
+  } = useEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
     try {

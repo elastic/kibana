@@ -54,10 +54,11 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
+  RuleActionKey,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -66,12 +67,12 @@ import {
   RuleTypeModel,
   Rule,
   IErrorObject,
-  RuleAction,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
+  RuleUiAction,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -262,7 +263,7 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+          rule.consumer === ALERTING_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
             : item.ruleType!.producer === rule.consumer
         );
@@ -360,7 +361,7 @@ export const RuleForm = ({
   );
 
   const setActions = useCallback(
-    (updatedActions: RuleAction[]) => setRuleProperty('actions', updatedActions),
+    (updatedActions: RuleUiAction[]) => setRuleProperty('actions', updatedActions),
     [setRuleProperty]
   );
 
@@ -372,9 +373,9 @@ export const RuleForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = <Key extends keyof RuleAction>(
+  const setActionProperty = <Key extends RuleActionKey>(
     key: Key,
-    value: RuleAction[Key] | null,
+    value: RuleActionParam | null,
     index: number
   ) => {
     dispatch({ command: { type: 'setRuleActionProperty' }, payload: { key, value, index } });
@@ -438,7 +439,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
+    if (rule.consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
 
@@ -632,7 +633,7 @@ export const RuleForm = ({
     }
 
     // No help text if there is an error
-    if (errors['schedule.interval'].length > 0) {
+    if (errors['schedule.interval'].length) {
       return '';
     }
 
@@ -910,7 +911,7 @@ export const RuleForm = ({
       rule.ruleTypeId &&
       selectedRuleType ? (
         <>
-          {errors.actionConnectors.length >= 1 ? (
+          {!!errors.actionConnectors.length ? (
             <>
               <EuiSpacer />
               <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
@@ -982,13 +983,13 @@ export const RuleForm = ({
                 defaultMessage="Name"
               />
             }
-            isInvalid={errors.name.length > 0 && rule.name !== undefined}
+            isInvalid={!!errors.name.length && rule.name !== undefined}
             error={errors.name}
           >
             <EuiFieldText
               fullWidth
               autoFocus={true}
-              isInvalid={errors.name.length > 0 && rule.name !== undefined}
+              isInvalid={!!errors.name.length && rule.name !== undefined}
               name="name"
               data-test-subj="ruleNameInput"
               value={rule.name || ''}
@@ -1118,7 +1119,7 @@ export const RuleForm = ({
               </EuiFlexGroup>
             </EuiFormRow>
             <EuiSpacer />
-            {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
+            {!!errors.ruleTypeId.length && rule.ruleTypeId !== undefined ? (
               <>
                 <EuiSpacer />
                 <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />

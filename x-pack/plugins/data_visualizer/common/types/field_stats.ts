@@ -10,7 +10,7 @@ import type { Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { TimeBucketsInterval } from '../services/time_buckets';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -93,8 +93,8 @@ export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
-  topValuesSampleSize: number;
-  topValuesSamplerShardSize: number;
+  topValuesSampleSize?: number;
+  topValuesSamplerShardSize?: number;
 }
 
 export interface DateFieldStats {

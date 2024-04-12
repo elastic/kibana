@@ -319,12 +319,24 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           fleet: {
             all: capabilities.fleetv2.all as boolean,
             setup: false,
+            agents: {
+              read: capabilities.fleetv2.agents_read as boolean,
+              all: capabilities.fleetv2.agents_all as boolean,
+            },
+            agentPolicies: {
+              read: capabilities.fleetv2.agent_policies_read as boolean,
+              all: capabilities.fleetv2.agent_policies_all as boolean,
+            },
+            settings: {
+              read: capabilities.fleetv2.settings_read as boolean,
+              all: capabilities.fleetv2.settings_all as boolean,
+            },
           },
           integrations: {
             all: capabilities.fleet.all as boolean,
             read: capabilities.fleet.read as boolean,
           },
-          isSuperuser: false,
+          subfeatureEnabled: this.experimentalFeatures.subfeaturePrivileges ?? false,
         }),
         packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
         endpointExceptionsPrivileges:

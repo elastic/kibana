@@ -6,10 +6,10 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import type { Message } from '@kbn/elastic-assistant-common';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
-import { RequestBody } from './types';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -30,27 +30,16 @@ export const getLangChainMessages = (
   assistantMessages: Array<Pick<Message, 'content' | 'role'>>
 ): BaseMessage[] => assistantMessages.map(getLangChainMessage);
 
-export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
-  content: prompt,
-  role: 'user',
-});
-
 export const requestHasRequiredAnonymizationParams = (
-  request: KibanaRequest<unknown, unknown, RequestBody>
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>
 ): boolean => {
-  const { allow, allowReplacement, replacements } = request?.body ?? {};
-
-  const allowIsValid =
-    Array.isArray(allow) &&
-    allow.length > 0 && // at least one field must be in the allow list
-    allow.every((item) => typeof item === 'string');
-
-  const allowReplacementIsValid =
-    Array.isArray(allowReplacement) && allowReplacement.every((item) => typeof item === 'string');
+  const { replacements } = request?.body ?? {};
 
   const replacementsIsValid =
     typeof replacements === 'object' &&
-    Object.keys(replacements).every((key) => typeof replacements[key] === 'string');
+    Object.keys(replacements).every(
+      (key) => typeof key === 'string' && typeof replacements[key] === 'string'
+    );
 
-  return allowIsValid && allowReplacementIsValid && replacementsIsValid;
+  return replacementsIsValid;
 };

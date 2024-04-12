@@ -26,6 +26,7 @@ import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
 import { transformCreateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { validateRequiredGroupInDefaultActions } from '../../../lib/validate_required_group_in_default_actions';
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(
@@ -40,6 +41,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -52,10 +54,19 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
+            /**
+             * Throws an error if the group is not defined in default actions
+             */
+            validateRequiredGroupInDefaultActions(createRuleData.actions, (connectorId: string) =>
+              actionsClient.isSystemAction(connectorId)
+            );
+
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
-              data: transformCreateBodyV1<RuleParamsV1>(createRuleData),
+              data: transformCreateBodyV1<RuleParamsV1>(createRuleData, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              ),
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

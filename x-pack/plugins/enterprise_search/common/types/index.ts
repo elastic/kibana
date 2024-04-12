@@ -43,8 +43,6 @@ export interface ProductFeatures {
   hasIncrementalSyncEnabled: boolean;
   hasNativeConnectors: boolean;
   hasWebCrawler: boolean;
-  // Temp Feature Flag for AI Playground page
-  showAIPlayground: boolean;
 }
 
 export interface SearchOAuth {

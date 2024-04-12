@@ -10,7 +10,8 @@ import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type {
+import {
+  getLatestMappingsVirtualVersionMap,
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
@@ -28,8 +29,10 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
   mustRelocateDocuments: boolean;
+  indexTypes: string[];
   indexTypesMap: IndexTypesMap;
-  targetMappings: IndexMapping;
+  hashToVersionMap: Record<string, string>;
+  targetIndexMappings: IndexMapping;
   preMigrationScript?: string;
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
@@ -39,6 +42,16 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   esCapabilities: ElasticsearchCapabilities;
 }
 
+const TEMP_INDEX_MAPPINGS: IndexMapping = {
+  dynamic: false,
+  properties: {
+    type: { type: 'keyword' },
+    typeMigrationVersion: {
+      type: 'version',
+    },
+  },
+};
+
 /**
  * Construct the initial state for the model
  */
@@ -46,8 +59,10 @@ export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
   mustRelocateDocuments,
+  indexTypes,
   indexTypesMap,
-  targetMappings,
+  hashToVersionMap,
+  targetIndexMappings,
   preMigrationScript,
   coreMigrationVersionPerType,
   migrationVersionPerType,
@@ -62,16 +77,6 @@ export const createInitialState = ({
     coreMigrationVersionPerType,
     migrationVersionPerType,
   });
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      typeMigrationVersion: {
-        type: 'version',
-      },
-    },
-  };
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
   const excludeFilterHooks = Object.fromEntries(
@@ -101,19 +106,13 @@ export const createInitialState = ({
     );
   }
 
-  const targetIndexMappings: IndexMapping = {
-    ...targetMappings,
-    _meta: {
-      ...targetMappings._meta,
-      indexTypesMap,
-    },
-  };
-
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
     mustRelocateDocuments,
+    indexTypes,
     indexTypesMap,
+    hashToVersionMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
@@ -124,7 +123,7 @@ export const createInitialState = ({
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
-    tempIndexMappings: reindexTargetMappings,
+    tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
@@ -138,6 +137,7 @@ export const createInitialState = ({
     logs: [],
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
+    latestMappingsVersions: getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,
     esCapabilities,

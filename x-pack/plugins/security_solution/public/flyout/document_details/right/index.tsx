@@ -6,15 +6,17 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useTabs } from './hooks/use_tabs';
+import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabType } from './tabs';
-import * as tabs from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
@@ -35,22 +37,15 @@ export interface RightPanelProps extends FlyoutPanelProps {
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
+  const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
     useRightPanelContext();
 
+  // if the flyout is expandable we render all 3 tabs (overview, table and json)
+  // if the flyout is not, we render only table and json
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
-  const tabsDisplayed = useMemo(() => {
-    return flyoutIsExpandable
-      ? [tabs.overviewTab, tabs.tableTab, tabs.jsonTab]
-      : [tabs.tableTab, tabs.jsonTab];
-  }, [flyoutIsExpandable]);
-
-  const selectedTabId = useMemo(() => {
-    const defaultTab = tabsDisplayed[0].id;
-    if (!path) return defaultTab;
-    return tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
-  }, [path, tabsDisplayed]);
+  const { tabsDisplayed, selectedTabId } = useTabs({ flyoutIsExpandable, path });
 
   const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
     openRightPanel({
@@ -63,6 +58,15 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
         indexName,
         scopeId,
       },
+    });
+
+    // saving which tab is currently selected in the right panel in local storage
+    storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
+
+    telemetry.reportDetailsFlyoutTabClicked({
+      tableId: scopeId,
+      panel: 'right',
+      tabId,
     });
   };
 

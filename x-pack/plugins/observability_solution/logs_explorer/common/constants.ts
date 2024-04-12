@@ -91,3 +91,6 @@ export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
   'log.',
   'service.',
 ];
+
+export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
+export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];

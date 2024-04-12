@@ -12,8 +12,8 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
-import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { getGroupTableItems } from './get_group_table_items';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';

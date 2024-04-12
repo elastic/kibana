@@ -6,9 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RequestBody } from '../lib/langchain/types';
 
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 describe('getPluginNameFromRequest', () => {
   const contextRequestHeaderEncoded = encodeURIComponent(
@@ -25,7 +25,7 @@ describe('getPluginNameFromRequest', () => {
     headers: {
       'x-kbn-context': contextRequestHeaderEncoded,
     },
-  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,7 +44,7 @@ describe('getPluginNameFromRequest', () => {
       headers: {
         'x-kbn-context': undefined,
       },
-    } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+    } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
     const pluginName = getPluginNameFromRequest({
       request: invalidRequest,
       defaultPluginName: DEFAULT_PLUGIN_NAME,
@@ -57,7 +57,7 @@ describe('getPluginNameFromRequest', () => {
       headers: {
         'x-kbn-context': 'asdfku',
       },
-    } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+    } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
     const pluginName = getPluginNameFromRequest({
       request: invalidRequest,
       defaultPluginName: DEFAULT_PLUGIN_NAME,

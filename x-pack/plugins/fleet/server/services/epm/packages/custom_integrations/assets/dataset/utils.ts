@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+
 import type { CustomPackageDatasetConfiguration } from '../../../install';
 
 export const generateDatastreamEntries = (
@@ -22,6 +24,12 @@ export const generateDatastreamEntries = (
       release: 'ga' as const,
       // NOTE: This ensures our default.yml pipeline is used as the default_pipeline in the index template
       ingest_pipeline: 'default',
+      elasticsearch: {
+        // TODO: Needs to be cast because https://github.com/elastic/elasticsearch-specification/pull/2445 hasn't landed yet, can be removed once it has
+        'index_template.mappings': {
+          subobjects: false,
+        } as MappingTypeMapping,
+      },
     };
   });
 };

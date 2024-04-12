@@ -44,7 +44,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
         const riskScoreDataClient = securityContext.getRiskScoreDataClient();
         const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
-
+        const securityConfig = await securityContext.getConfig();
         const assetCriticalityService = assetCriticalityServiceFactory({
           assetCriticalityDataClient,
           uiSettingsClient: coreContext.uiSettings.client,
@@ -79,6 +79,11 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
 
           const afterKeys = userAfterKeys ?? {};
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
+          const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
+            securityConfig.entityAnalytics
+          );
+
+          const alertSampleSizePerShard = entityAnalyticsConfig?.alertSampleSizePerShard;
 
           const result = await riskScoreService.calculateAndPersistScores({
             afterKeys,
@@ -90,6 +95,7 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
             range,
             runtimeMappings,
             weights,
+            alertSampleSizePerShard,
           });
 
           return response.ok({ body: result });

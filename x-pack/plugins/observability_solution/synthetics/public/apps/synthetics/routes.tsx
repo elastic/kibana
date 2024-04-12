@@ -188,7 +188,7 @@ export const PageRouter: FC = () => {
 
   apiService.addInspectorRequest = addInspectorRequest;
 
-  const isUnPrivileged = useSyntheticsPrivileges();
+  const isUnprivileged = useSyntheticsPrivileges();
 
   return (
     <Routes>
@@ -205,12 +205,12 @@ export const PageRouter: FC = () => {
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
               <SyntheticsPageTemplateComponent
-                pageHeader={isUnPrivileged ? undefined : pageHeader}
+                pageHeader={isUnprivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                {isUnPrivileged || <RouteComponent />}
+                {isUnprivileged || <RouteComponent />}
               </SyntheticsPageTemplateComponent>
             </div>
           </Route>

@@ -74,7 +74,7 @@ describe('RiskInputsTab', () => {
 
     expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
-      'Risk contributionRule Name'
+      'Rule nameRule Name'
     );
   });
 

@@ -36,12 +36,12 @@ const SystemPromptComponent: React.FC<Props> = ({
     if (editingSystemPromptId !== undefined) {
       return (
         allSystemPrompts?.find((p) => p.id === editingSystemPromptId) ??
-        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId)
+        allSystemPrompts?.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId)
       );
     } else {
       return undefined;
     }
-  }, [allSystemPrompts, conversation?.apiConfig.defaultSystemPromptId, editingSystemPromptId]);
+  }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
 
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 

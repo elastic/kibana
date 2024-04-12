@@ -17,6 +17,7 @@ import { HOST_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
 import { APM_HOST_FILTER_FIELD } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
+import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 export const ServicesContent = ({
   hostName,
@@ -25,9 +26,14 @@ export const ServicesContent = ({
   hostName: string;
   dateRange: TimeRange;
 }) => {
+  const { isServerlessEnv } = useKibanaEnvironmentContext();
   const linkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial/apm',
+  });
+  const serverlessLinkProps = useLinkProps({
+    app: 'apm',
+    pathname: '/onboarding',
   });
   const params = useMemo(
     () => ({
@@ -87,7 +93,10 @@ export const ServicesContent = ({
             defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
-                <EuiLink data-test-subj="assetDetailsTooltiAPMTutorialLink" href={linkProps.href}>
+                <EuiLink
+                  data-test-subj="assetDetailsTooltiAPMTutorialLink"
+                  href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
+                >
                   <FormattedMessage
                     id="xpack.infra.assetDetails.table.services.noServices.tutorialLink"
                     defaultMessage="here"

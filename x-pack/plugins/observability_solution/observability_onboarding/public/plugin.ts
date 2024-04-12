@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -39,6 +40,7 @@ export interface ObservabilityOnboardingPluginSetupDeps {
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
+  cloudExperiments?: CloudExperimentsPluginStart;
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
@@ -61,7 +63,7 @@ export class ObservabilityOnboardingPlugin
 {
   private locators?: ObservabilityOnboardingPluginLocators;
 
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
@@ -74,6 +76,7 @@ export class ObservabilityOnboardingPlugin
 
     const pluginSetupDeps = plugins;
 
+    const isServerless = this.ctx.env.packageInfo.buildFlavor === 'serverless';
     // set xpack.observability_onboarding.ui.enabled: true
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
@@ -97,16 +100,62 @@ export class ObservabilityOnboardingPlugin
 
           createCallApi(core);
 
+          const experimentalOnboardingFlowEnabled =
+            isServerless &&
+            !!(await (
+              corePlugins as ObservabilityOnboardingPluginStartDeps
+            ).cloudExperiments?.getVariation(
+              'observability_onboarding.experimental_onboarding_flow_enabled',
+              false
+            ));
+
           return renderApp({
             core: coreStart,
             deps: pluginSetupDeps,
             appMountParameters,
+            experimentalOnboardingFlowEnabled,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
           });
         },
         visibleIn: [],
       });
+
+      // Register the experimental version of the onboarding app on a dedicated path `/app/experimental-onboarding` for testing
+      if (isServerless) {
+        core.application.register({
+          id: `${PLUGIN_ID}_EXPERIMENTAL`,
+          title: 'Observability Onboarding (Beta)',
+          appRoute: '/app/experimental-onboarding',
+          order: 8500,
+          euiIconType: 'logoObservability',
+          category: DEFAULT_APP_CATEGORIES.observability,
+          keywords: [],
+          async mount(appMountParameters: AppMountParameters) {
+            // Load application bundle and Get start service
+            const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all(
+              [import('./application/app'), core.getStartServices()]
+            );
+
+            const { createCallApi } = await import(
+              './services/rest/create_call_api'
+            );
+
+            createCallApi(core);
+
+            return renderApp({
+              core: coreStart,
+              deps: pluginSetupDeps,
+              appMountParameters,
+              experimentalOnboardingFlowEnabled: true,
+              corePlugins:
+                corePlugins as ObservabilityOnboardingPluginStartDeps,
+              config,
+            });
+          },
+          visibleIn: [],
+        });
+      }
     }
 
     this.locators = {
@@ -120,8 +169,8 @@ export class ObservabilityOnboardingPlugin
     };
   }
   public start(
-    core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
+    _core: CoreStart,
+    _plugins: ObservabilityOnboardingPluginStartDeps
   ) {
     return {
       locators: this.locators,

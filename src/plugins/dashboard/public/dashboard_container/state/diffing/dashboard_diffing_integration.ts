@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, Observable, of, startWith, switchMap } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
@@ -107,7 +108,7 @@ export function startDiffingDashboardState(
   /**
    *  Create an observable stream of unsaved changes from all react embeddable children
    */
-  const reactEmbeddableUnsavedChanges = this.reactEmbeddableChildren.pipe(
+  const reactEmbeddableUnsavedChanges = this.children$.pipe(
     map((children) => Object.keys(children)),
     distinctUntilChanged(deepEqual),
     debounceTime(CHANGE_CHECK_DEBOUNCE),
@@ -115,13 +116,15 @@ export function startDiffingDashboardState(
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
       if (newChildIds.length === 0) return of([]);
+      const childrenThatPublishUnsavedChanges = Object.entries(this.children$.value).filter(
+        ([childId, child]) => apiPublishesUnsavedChanges(child)
+      ) as Array<[string, PublishesUnsavedChanges]>;
+
+      if (childrenThatPublishUnsavedChanges.length === 0) return of([]);
+
       return combineLatest(
-        newChildIds.map((childId) =>
-          this.reactEmbeddableChildren.value[childId].unsavedChanges.pipe(
-            map((unsavedChanges) => {
-              return { childId, unsavedChanges };
-            })
-          )
+        childrenThatPublishUnsavedChanges.map(([childId, child]) =>
+          child.unsavedChanges.pipe(map((unsavedChanges) => ({ childId, unsavedChanges })))
         )
       );
     }),

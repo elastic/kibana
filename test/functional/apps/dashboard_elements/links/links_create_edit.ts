@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
 
           await dashboard.waitForRenderComplete();
-          await dashboardPanelActions.saveToLibrary('Some more links');
+          await dashboardPanelActions.legacySaveToLibrary('Some more links');
           await testSubjects.existOrFail('addPanelToLibrarySuccess');
         });
 

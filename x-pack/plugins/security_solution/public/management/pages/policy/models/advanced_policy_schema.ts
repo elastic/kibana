@@ -210,6 +210,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -423,6 +445,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.capture_command_line',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.capture_command_line',
+      {
+        defaultMessage:
+          'Include process command line in all events that are related to this process. Default: false.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -601,6 +634,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           "A value of 'false' overrides other config settings that would enable kernel file write events. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.filewrite_sync',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.filewrite_sync',
+      {
+        defaultMessage:
+          'Send file kernel driver write notifications synchronously where possible.  May improve the reliability of file write and malware-on-write enrichments at the cost of system responsiveness. Default: false.',
       }
     ),
   },
@@ -1067,6 +1111,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.fanotify.seccomp_restricted',
+    first_supported_version: '8.13.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.seccomp_restricted',
+      {
+        defaultMessage:
+          'Prevent the Defend permission checking thread from calling the open/openat syscalls when running on kernels which require FAN_OPEN_PERM (older than 5.0). Will avoid potential deadlocks with other anti-virus vendors at the cost of racy hash-based trusted application entries. Ignored when running on newer kernels. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.context_manipulation_detection',
     first_supported_version: '8.4',
     documentation: i18n.translate(
@@ -1118,6 +1173,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'When only process events are being collected, this option will disable file descriptor tracking probes. This can be used to reduce Endpoint processing at the expense of missing fchdir based working directory changes. This only applies if the capture_mode is kprobe or if auto resolves tracefs (kprobe) probes. ebpf based event collection ignores this setting. Default is false.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.enable_caps',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.enable_caps',
+      {
+        defaultMessage:
+          'This setting ensures thread capability arrays are not pruned from Linux process events before being sent to Elasticsearch. At the expense of higher Endpoint data volumes, a true value will ensure capability matching detection rules running within the Elastic stack can match. Detection rules running within Elastic Defend are unaffected because capabilities are conditionally pruned after rule processing. Default is false.',
       }
     ),
   },
@@ -1597,6 +1663,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'A comma-separated list of feature flags. Currently no feature flags are supported.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.global.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.ca_cert',
+      {
+        defaultMessage:
+          'PEM-encoded certificate for security artifacts server certificate authority.',
       }
     ),
   },

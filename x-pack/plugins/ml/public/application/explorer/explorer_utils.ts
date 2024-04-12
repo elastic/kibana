@@ -26,6 +26,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -51,7 +52,6 @@ import {
 } from './explorer_constants';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlResultsService } from '../services/results_service';
-import type { TimeRangeBounds } from '../util/time_buckets';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 
 export interface ExplorerJob {

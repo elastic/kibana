@@ -31,7 +31,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(formulaAPI, dataViews);
+    const builder = new LensConfigBuilder(dataViews, formulaAPI);
 
     return builder.build(params) as Promise<LensAttributes>;
   }, [params.chartType, params.dataset, dataViews]);

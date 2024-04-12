@@ -29,7 +29,6 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const { toasts } = notificationServiceMock.createSetupContract();
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockTelemetryEvents = {
@@ -63,21 +62,14 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={mockAssistantAvailability}
             augmentMessageCodeBlocks={jest.fn()}
-            baseAllow={[]}
-            baseAllowReplacement={[]}
             basePath={'https://localhost:5601/kbn'}
-            defaultAllow={[]}
-            defaultAllowReplacement={[]}
             docLinks={{
               ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            getInitialConversations={mockGetInitialConversations}
-            setConversations={jest.fn()}
-            setDefaultAllow={jest.fn()}
-            setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
+            baseConversations={{}}
           >
             <DataQualityProvider
               httpFetch={http.fetch}

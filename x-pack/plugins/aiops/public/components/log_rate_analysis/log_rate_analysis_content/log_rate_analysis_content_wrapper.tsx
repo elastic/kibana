@@ -11,7 +11,7 @@ import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';

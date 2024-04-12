@@ -110,7 +110,9 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx');
 
         // Check that the privileges are correct
-        expect(fullAgentPolicy.output_permissions.default[packagePolicyId].indices).to.eql([
+        expect(
+          (Object.values(fullAgentPolicy.output_permissions)[0] as any)[packagePolicyId].indices
+        ).to.eql([
           { names: ['logs-*-*'], privileges: ['auto_configure', 'create_doc'] },
           { names: ['metrics-*-*'], privileges: ['auto_configure', 'create_doc'] },
         ]);

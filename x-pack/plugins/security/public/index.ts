@@ -25,6 +25,8 @@ export { ALL_SPACES_ID } from '../common/constants';
 export type {
   AuthenticationServiceStart,
   AuthenticationServiceSetup,
+  AuthorizationServiceStart,
+  AuthorizationServiceSetup,
   SecurityNavControlServiceStart,
   UserMenuLink,
   UserProfileBulkGetParams,

@@ -1,6 +1,5 @@
 // Charts themes available app-wide
 @import '@elastic/charts/dist/theme';
-@import '@elastic/eui/src/themes/charts/theme';
 
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.

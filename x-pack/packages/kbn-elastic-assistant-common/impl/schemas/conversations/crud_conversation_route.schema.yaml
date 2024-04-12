@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Create Conversation API endpoint
+  version: '2023-10-31'
+paths:
+  /api/elastic_assistant/conversations:
+    post:
+      operationId: CreateConversation
+      x-codegen-enabled: true
+      description: Create a conversation
+      summary: Create a conversation
+      tags:
+        - Conversation API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+  
+  /api/elastic_assistant/conversations/{id}:
+    get:
+      operationId: ReadConversation
+      x-codegen-enabled: true
+      description: Read a single conversation
+      summary: Read a single conversation
+      tags:
+        - Conversations API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    put:
+      operationId: UpdateConversation
+      x-codegen-enabled: true
+      description: Update a single conversation
+      summary: Update a conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    delete:
+      operationId: DeleteConversation
+      x-codegen-enabled: true
+      description: Deletes a single conversation using the `id` field.
+      summary: Deletes a single conversation using the `id` field.
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+  
+  /api/elastic_assistant/conversations/{id}/messages:
+    post:
+      operationId: AppendConversationMessage
+      x-codegen-enabled: true
+      description: Append a message to the conversation
+      summary: Append a message to the conversation
+      tags:
+        - Conversation API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation's `id` value.
+          schema:
+            $ref: './common_attributes.schema.yaml#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './common_attributes.schema.yaml#/components/schemas/ConversationMessageCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

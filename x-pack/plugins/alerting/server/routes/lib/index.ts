@@ -18,7 +18,7 @@ export type {
 } from './rewrite_request_case';
 export { verifyAccessAndContext } from './verify_access_and_context';
 export { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
-export { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
+export { rewriteActionsReq, rewriteSystemActionsReq } from './rewrite_actions';
 export { actionsSchema } from './actions_schema';
 export { rewriteRule, rewriteRuleLastRun } from './rewrite_rule';
 export { rewriteNamespaces } from './rewrite_namespaces';

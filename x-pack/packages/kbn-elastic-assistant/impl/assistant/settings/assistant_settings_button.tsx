@@ -7,21 +7,25 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  defaultConnector?: AIConnector;
   isSettingsModalVisible: boolean;
   selectedConversation: Conversation;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
+  conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
+  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -29,13 +33,16 @@ interface Props {
  */
 export const AssistantSettingsButton: React.FC<Props> = React.memo(
   ({
-    defaultConnectorId,
-    defaultProvider,
+    defaultConnector,
     isDisabled = false,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
     selectedConversation,
-    setSelectedConversationId,
+    onConversationSelected,
+    conversations,
+    refetchConversationsState,
+    anonymizationFields,
+    refetchAnonymizationFieldsResults,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -48,13 +55,19 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       cleanupAndCloseModal();
     }, [cleanupAndCloseModal]);
 
-    const handleSave = useCallback(() => {
-      cleanupAndCloseModal();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-      });
-    }, [cleanupAndCloseModal, toasts]);
+    const handleSave = useCallback(
+      async (success: boolean) => {
+        cleanupAndCloseModal();
+        await refetchConversationsState();
+        if (success) {
+          toasts?.addSuccess({
+            iconType: 'check',
+            title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+          });
+        }
+      },
+      [cleanupAndCloseModal, refetchConversationsState, toasts]
+    );
 
     const handleShowConversationSettings = useCallback(() => {
       setSelectedSettingsTab(CONVERSATIONS_TAB);
@@ -76,12 +89,14 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
 
         {isSettingsModalVisible && (
           <AssistantSettings
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             selectedConversation={selectedConversation}
-            setSelectedConversationId={setSelectedConversationId}
+            onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
+            conversations={conversations}
+            anonymizationFields={anonymizationFields}
+            refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}
       </>

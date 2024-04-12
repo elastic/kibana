@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
+import { formatBytes } from '@kbn/formatters';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
@@ -144,7 +145,7 @@ export const getDatasetQualityTableColumns = ({
 
         return (
           <EuiButtonIcon
-            data-test-subj="datasetQualityGetDatasetQualityTableColumnsButton"
+            data-test-subj="datasetQualityExpandButton"
             size="m"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
@@ -194,8 +195,9 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: sizeColumnName,
-      field: 'size',
+      field: 'sizeBytes',
       sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => formatBytes(dataStreamStat.sizeBytes || 0),
       width: '100px',
     },
     {

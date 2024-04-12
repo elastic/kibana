@@ -13,7 +13,53 @@ import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { ConfigKey, LegacyConfigKey, secretKeys } from '../../common/constants/monitor_management';
 import { monitorMigrations } from './migrations/monitors';
 
-const legacyConfigKeys = Object.values(LegacyConfigKey);
+const attributesToIncludeInAAD = new Set([
+  ConfigKey.APM_SERVICE_NAME,
+  ConfigKey.CUSTOM_HEARTBEAT_ID,
+  ConfigKey.CONFIG_ID,
+  ConfigKey.CONFIG_HASH,
+  ConfigKey.ENABLED,
+  ConfigKey.FORM_MONITOR_TYPE,
+  ConfigKey.HOSTS,
+  ConfigKey.IGNORE_HTTPS_ERRORS,
+  ConfigKey.MONITOR_SOURCE_TYPE,
+  ConfigKey.JOURNEY_FILTERS_MATCH,
+  ConfigKey.JOURNEY_FILTERS_TAGS,
+  ConfigKey.JOURNEY_ID,
+  ConfigKey.MAX_REDIRECTS,
+  ConfigKey.MODE,
+  ConfigKey.MONITOR_TYPE,
+  ConfigKey.NAME,
+  ConfigKey.NAMESPACE,
+  ConfigKey.LOCATIONS,
+  ConfigKey.PLAYWRIGHT_OPTIONS,
+  ConfigKey.ORIGINAL_SPACE,
+  ConfigKey.PORT,
+  ConfigKey.PROXY_URL,
+  ConfigKey.PROXY_USE_LOCAL_RESOLVER,
+  ConfigKey.RESPONSE_BODY_INDEX,
+  ConfigKey.RESPONSE_HEADERS_INDEX,
+  ConfigKey.RESPONSE_BODY_MAX_BYTES,
+  ConfigKey.RESPONSE_STATUS_CHECK,
+  ConfigKey.REQUEST_METHOD_CHECK,
+  ConfigKey.REVISION,
+  ConfigKey.SCHEDULE,
+  ConfigKey.SCREENSHOTS,
+  ConfigKey.IPV4,
+  ConfigKey.IPV6,
+  ConfigKey.PROJECT_ID,
+  ConfigKey.TEXT_ASSERTION,
+  ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
+  ConfigKey.TLS_CERTIFICATE,
+  ConfigKey.TLS_VERIFICATION_MODE,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.TAGS,
+  ConfigKey.TIMEOUT,
+  ConfigKey.THROTTLING_CONFIG,
+  ConfigKey.URLS,
+  ConfigKey.WAIT,
+  ConfigKey.MONITOR_QUERY_ID,
+]);
 
 export const LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
   type: syntheticsMonitorType,
@@ -26,6 +72,25 @@ export const LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
      * In practice, all secrets should be stored as a single JSON
      * payload on the `secrets` key. This ensures performant decryption. */
     ...secretKeys,
+  ]),
+  attributesToIncludeInAAD: new Set([
+    LegacyConfigKey.SOURCE_ZIP_URL,
+    LegacyConfigKey.SOURCE_ZIP_USERNAME,
+    LegacyConfigKey.SOURCE_ZIP_PASSWORD,
+    LegacyConfigKey.SOURCE_ZIP_FOLDER,
+    LegacyConfigKey.SOURCE_ZIP_PROXY_URL,
+    LegacyConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES,
+    LegacyConfigKey.ZIP_URL_TLS_CERTIFICATE,
+    LegacyConfigKey.ZIP_URL_TLS_KEY,
+    LegacyConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE,
+    LegacyConfigKey.ZIP_URL_TLS_VERIFICATION_MODE,
+    LegacyConfigKey.ZIP_URL_TLS_VERSION,
+    LegacyConfigKey.THROTTLING_CONFIG,
+    LegacyConfigKey.IS_THROTTLING_ENABLED,
+    LegacyConfigKey.DOWNLOAD_SPEED,
+    LegacyConfigKey.UPLOAD_SPEED,
+    LegacyConfigKey.LATENCY,
+    ...attributesToIncludeInAAD,
   ]),
 };
 
@@ -41,12 +106,7 @@ export const SYNTHETICS_MONITOR_ENCRYPTED_TYPE = {
      * payload on the `secrets` key. This ensures performant decryption. */
     ...secretKeys,
   ]),
-  attributesToExcludeFromAAD: new Set([
-    ConfigKey.ALERT_CONFIG,
-    ConfigKey.METADATA,
-    ConfigKey.MAX_ATTEMPTS,
-    ...legacyConfigKeys,
-  ]),
+  attributesToIncludeInAAD,
 };
 
 export const getSyntheticsMonitorSavedObjectType = (

@@ -15,6 +15,7 @@ import {
 } from '../types';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_END,
   ALERT_FLAPPING,
@@ -154,6 +155,7 @@ const fetchedAlert1 = {
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
+  [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
@@ -184,6 +186,7 @@ const fetchedAlert2 = {
   [EVENT_ACTION]: 'active',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
+  [ALERT_CONSECUTIVE_MATCHES]: 0,
   [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true, false],
@@ -214,6 +217,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
+  [ALERT_CONSECUTIVE_MATCHES]: 1,
   [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
@@ -260,6 +264,7 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_END]: date,
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
   [ALERT_STATUS]: 'recovered',
+  [ALERT_CONSECUTIVE_MATCHES]: 0,
   ...overrides,
 });
 
@@ -670,6 +675,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
+                [ALERT_CONSECUTIVE_MATCHES]: 1,
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
@@ -777,7 +783,7 @@ describe('Alerts Client', () => {
                 },
               },
               // ongoing alert doc
-              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc' }),
+              getOngoingIndexedAlertDoc({ [ALERT_UUID]: 'abc', [ALERT_CONSECUTIVE_MATCHES]: 0 }),
             ],
           });
         });
@@ -950,6 +956,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
+                [ALERT_CONSECUTIVE_MATCHES]: 1,
                 [ALERT_DURATION]: 72000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
@@ -997,6 +1004,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
+                [ALERT_CONSECUTIVE_MATCHES]: 0,
                 [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
@@ -1334,7 +1342,10 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          expect(await alertsClient.persistAlerts()).toBe(void 0);
+          expect(await alertsClient.persistAlerts()).toStrictEqual({
+            alertIds: [],
+            maintenanceWindowIds: [],
+          });
 
           expect(logger.debug).toHaveBeenCalledWith(
             `Resources registered and installed for test context but "shouldWrite" is set to false.`
@@ -1921,13 +1932,11 @@ describe('Alerts Client', () => {
             // @ts-ignore
             .mockResolvedValueOnce({});
 
-          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery({
-            ...getParamsByUpdateMaintenanceWindowIds,
-            maintenanceWindows: [
-              ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
-              { id: 'mw3' } as unknown as MaintenanceWindow,
-            ],
-          });
+          // @ts-expect-error
+          const result = await alertsClient.updateAlertsMaintenanceWindowIdByScopedQuery([
+            ...getParamsByUpdateMaintenanceWindowIds.maintenanceWindows,
+            { id: 'mw3' } as unknown as MaintenanceWindow,
+          ]);
 
           expect(alert1.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
           expect(alert2.getMaintenanceWindowIds()).toEqual(['mw3', 'mw1']);
@@ -2693,6 +2702,7 @@ describe('Alerts Client', () => {
 
           expect(keys(publicAlertsClient)).toEqual([
             'report',
+            'isTrackedAlert',
             'setAlertData',
             'getAlertLimitValue',
             'setAlertLimitReached',
@@ -2770,6 +2780,22 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.alert.getUuid()).toEqual('abc');
           expect(recoveredAlert.alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
           expect(recoveredAlert.hit).toBeUndefined();
+        });
+      });
+
+      describe('isTrackedAlert()', () => {
+        test('should return true if alert was active in a previous execution, false otherwise', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+          });
+          expect(alertsClient.isTrackedAlert('1')).toBe(true);
+          expect(alertsClient.isTrackedAlert('2')).toBe(true);
+          expect(alertsClient.isTrackedAlert('3')).toBe(false);
         });
       });
     });

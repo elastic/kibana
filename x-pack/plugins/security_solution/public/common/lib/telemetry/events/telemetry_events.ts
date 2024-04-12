@@ -25,7 +25,12 @@ import {
   assistantMessageSentEvent,
   assistantQuickPrompt,
 } from './ai_assistant';
+import { insightsGeneratedEvent } from './insights';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
+import {
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+} from './document_details';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -143,6 +148,7 @@ export const telemetryEvents = [
   assistantMessageSentEvent,
   assistantQuickPrompt,
   assistantSettingToggledEvent,
+  insightsGeneratedEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
@@ -155,4 +161,6 @@ export const telemetryEvents = [
   dataQualityIndexCheckedEvent,
   dataQualityCheckAllClickedEvent,
   breadCrumbClickedEvent,
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
 ];

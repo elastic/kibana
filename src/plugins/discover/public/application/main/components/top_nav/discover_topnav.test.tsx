@@ -11,7 +11,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
@@ -19,8 +18,6 @@ import type { SearchBarCustomization, TopNavCustomization } from '../../../../cu
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-setHeaderActionMenuMounter(jest.fn());
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),

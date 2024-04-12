@@ -556,6 +556,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -637,6 +638,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -662,6 +664,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -706,6 +709,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -759,6 +763,7 @@ describe('helpers', () => {
           },
         ],
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -788,6 +793,7 @@ describe('helpers', () => {
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
         investigation_fields: { field_names: ['foo', 'bar'] },
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -818,6 +824,7 @@ describe('helpers', () => {
         timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
         investigation_fields: undefined,
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -847,6 +854,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
@@ -876,6 +884,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);

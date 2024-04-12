@@ -8,10 +8,10 @@
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerElasticsearchFunction({
-  registerFunction,
+  functions,
   resources,
 }: FunctionRegistrationParameters) {
-  registerFunction(
+  functions.registerFunction(
     {
       name: 'elasticsearch',
       contexts: ['core'],

@@ -11,6 +11,7 @@ import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import {
   getColumnWidthFromType,
   getColumnHeaders,
@@ -83,6 +84,17 @@ describe('helpers', () => {
         columnHeaderType: 'not-filtered',
         id: field,
         initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+        esTypes: ['date'],
+        type: 'date',
+      });
+    });
+
+    test('should return the expected metadata in case of unified header', () => {
+      const inputHeaders = defaultUdtHeaders;
+      expect(getColumnHeader('@timestamp', inputHeaders)).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        initialWidth: 215,
         esTypes: ['date'],
         type: 'date',
       });

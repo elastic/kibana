@@ -8,20 +8,20 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
-import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
-import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
-import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
-import { topTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms';
-import { topTermsGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms_groups';
+import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-test-utils/artificial_logs/significant_log_patterns';
+import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups_textfield';
+import { topTerms } from '@kbn/aiops-test-utils/artificial_logs/top_terms';
+import { topTermsGroups } from '@kbn/aiops-test-utils/artificial_logs/top_terms_groups';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import {
   frequentItemSetsLargeArraysGroups,
   frequentItemSetsLargeArraysSignificantItems,
-} from '../../../functional/apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
+} from '@kbn/aiops-test-utils/frequent_item_sets_large_arrays';
 
 import type { TestData } from './types';
 

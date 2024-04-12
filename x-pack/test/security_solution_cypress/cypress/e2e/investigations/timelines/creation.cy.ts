@@ -23,9 +23,8 @@ import {
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
-import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
+import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
-import { deleteTimelines } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -49,6 +48,8 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
+const mockTimeline = getTimeline();
+
 describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     deleteTimelines();
@@ -56,13 +57,13 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
 
   it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
     login();
-    createTimelineTemplate(getTimeline());
+    createTimelineTemplate();
     visit(TIMELINE_TEMPLATES_URL);
     selectCustomTemplates();
     expandEventAction();
     clickingOnCreateTimelineFormTemplateBtn();
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+    cy.get(TIMELINE_QUERY).should('have.text', mockTimeline.query);
   });
 
   it('should be able to create timeline with crud privileges', () => {
@@ -70,7 +71,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
     createNewTimeline();
-    addNameAndDescriptionToTimeline(getTimeline());
+    addNameAndDescriptionToTimeline(mockTimeline);
     cy.get(TIMELINE_PANEL).should('be.visible');
   });
 
@@ -94,12 +95,12 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(getTimeline());
+    addNameAndDescriptionToTimeline(mockTimeline);
     populateTimeline();
     goToQueryTab();
 
-    addFilter(getTimeline().filter);
-    cy.get(TIMELINE_FILTER(getTimeline().filter)).should('exist');
+    addFilter(mockTimeline.filter);
+    cy.get(TIMELINE_FILTER(mockTimeline.filter)).should('exist');
 
     pinFirstEvent();
     cy.get(PIN_EVENT)
@@ -110,10 +111,10 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
 
     // TODO: fix this
     // While typing the note, cypress encounters this -> Error: ResizeObserver loop completed with undelivered notifications.
-    // addNotesToTimeline(getTimeline().notes);
+    // addNotesToTimeline(mockTimeline.notes);
     // cy.get(TIMELINE_TAB_CONTENT_GRAPHS_NOTES)
     //   .find(NOTES_TEXT)
-    //   .should('have.text', getTimeline().notes);
+    //   .should('have.text', mockTimeline.notes);
   });
 
   it('should show the different timeline states', () => {

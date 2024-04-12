@@ -31,7 +31,7 @@ export interface UseGrouping<T> {
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit'
+  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'unit' | 'groupsUnit'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`

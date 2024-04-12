@@ -50,4 +50,10 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('startsWithSpecialChar', (val: string) => {
     return /^[^a-zA-Z0-9]/.test(val);
   });
+  handlebarsInstance.registerHelper(
+    'replace',
+    (val: string, searchValue: string, replaceValue: string) => {
+      return val.replace(searchValue, replaceValue);
+    }
+  );
 }

@@ -7,7 +7,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';

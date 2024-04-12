@@ -27,18 +27,19 @@ import { ComponentTemplatesProvider, MappingsEditorProvider } from './components
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-export const renderApp = (
-  elem: HTMLElement | null,
-  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
-) => {
-  if (!elem) {
-    return () => undefined;
-  }
+export interface IndexManagementAppContextProps {
+  core: CoreStart;
+  dependencies: AppDependencies;
+}
 
+export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps> = ({
+  children,
+  core,
+  dependencies,
+}) => {
   const { i18n, docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } =
-    dependencies;
+  const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -64,7 +65,7 @@ export const renderApp = (
     executionContext,
   };
 
-  render(
+  return (
     <I18nContext>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaReactContextProvider>
@@ -72,16 +73,30 @@ export const renderApp = (
             <AppContextProvider value={dependencies}>
               <MappingsEditorProvider>
                 <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                  <GlobalFlyoutProvider>
-                    <App history={history} />
-                  </GlobalFlyoutProvider>
+                  <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
                 </ComponentTemplatesProvider>
               </MappingsEditorProvider>
             </AppContextProvider>
           </Provider>
         </KibanaReactContextProvider>
       </KibanaThemeProvider>
-    </I18nContext>,
+    </I18nContext>
+  );
+};
+
+export const renderApp = (
+  elem: HTMLElement | null,
+  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
+) => {
+  if (!elem) {
+    return () => undefined;
+  }
+  const { history } = dependencies;
+
+  render(
+    <IndexManagementAppContext core={core} dependencies={dependencies}>
+      <App history={history} />
+    </IndexManagementAppContext>,
     elem
   );
 

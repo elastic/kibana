@@ -128,6 +128,48 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should not allow updating default action without group', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const updatedData = {
+        name: 'bcd',
+        tags: ['bar'],
+        params: {
+          foo: true,
+          risk_score: 40,
+          severity: 'medium',
+        },
+        schedule: { interval: '12s' },
+        actions: [
+          {
+            // group is missing
+            id: 'test-id',
+            params: {},
+          },
+        ],
+        throttle: '1m',
+        notify_when: 'onThrottleInterval',
+      };
+
+      const response = await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData);
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Group is not defined in action test-id',
+      });
+    });
+
     describe('legacy', () => {
       it('should handle update alert request appropriately', async () => {
         const { body: createdAlert } = await supertest

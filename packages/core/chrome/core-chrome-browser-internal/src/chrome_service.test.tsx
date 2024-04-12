@@ -10,7 +10,7 @@ import { registerAnalyticsContextProviderMock } from './chrome_service.test.mock
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';

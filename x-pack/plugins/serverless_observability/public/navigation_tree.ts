@@ -49,19 +49,6 @@ export const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
-          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
-            defaultMessage: 'Visualizations',
-          }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
           link: 'observability-overview:alerts',
         },
         {
@@ -77,7 +64,10 @@ export const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          link: 'observability-overview:slos',
+          title: i18n.translate('xpack.serverlessObservability.nav.slo', {
+            defaultMessage: 'SLOs',
+          }),
+          link: 'slo',
         },
         {
           id: 'aiops',

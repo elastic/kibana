@@ -9,7 +9,7 @@ import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
-import { bufferCount, take } from 'rxjs/operators';
+import { bufferCount, take } from 'rxjs';
 import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -72,11 +72,6 @@ const pluginInitializerContextParams = {
     warn_threshold: 5000,
   },
   worker_utilization_running_average_window: 5,
-  requeue_invalid_tasks: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
   metrics_reset_interval: 3000,
   claim_strategy: 'default',
   request_timeouts: {

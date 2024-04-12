@@ -17,7 +17,6 @@ import { FlyoutPanel } from './flyout_panel';
 interface SyncJobDocumentsPanelProps {
   added: number;
   removed: number;
-  total: number;
   volume: number;
 }
 
@@ -26,19 +25,13 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
     {
       field: 'added',
       name: i18n.translate('searchConnectors.index.syncJobs.documents.added', {
-        defaultMessage: 'Added',
+        defaultMessage: 'Upserted',
       }),
     },
     {
       field: 'removed',
       name: i18n.translate('searchConnectors.index.syncJobs.documents.removed', {
-        defaultMessage: 'Removed',
-      }),
-    },
-    {
-      field: 'total',
-      name: i18n.translate('searchConnectors.index.syncJobs.documents.total', {
-        defaultMessage: 'Total',
+        defaultMessage: 'Deleted',
       }),
     },
     {

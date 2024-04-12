@@ -22,6 +22,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
@@ -192,19 +193,30 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Allow auto create */}
-              {isLegacy !== true && (
-                <>
-                  <EuiDescriptionListTitle>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
-                      defaultMessage="Allow auto create"
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    {getDescriptionText(allowAutoCreate)}
-                  </EuiDescriptionListDescription>
-                </>
-              )}
+              {isLegacy !== true &&
+                allowAutoCreate !== allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION && (
+                  <>
+                    <EuiDescriptionListTitle>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.templateForm.stepReview.summaryTab.allowAutoCreateLabel"
+                        defaultMessage="Allow auto create"
+                      />
+                    </EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      {allowAutoCreate === allowAutoCreateRadioIds.TRUE_RADIO_OPTION ? (
+                        <FormattedMessage
+                          id="xpack.idxMgmt.templateForm.stepReview.summaryTab.yesDescriptionText"
+                          defaultMessage="Yes"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.idxMgmt.templateForm.stepReview.summaryTab.noDescriptionText"
+                          defaultMessage="No"
+                        />
+                      )}
+                    </EuiDescriptionListDescription>
+                  </>
+                )}
 
               {/* components */}
               {isLegacy !== true && (

@@ -13,7 +13,6 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
 import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
 import * as pluginContext from '../../../hooks/use_plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -25,6 +24,7 @@ import { waitFor } from '@testing-library/react';
 import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
+import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -45,14 +45,15 @@ mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.moc
 
 mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 
-const { ObservabilityAIAssistantActionMenuItem, ObservabilityAIAssistantContextualInsight } =
+const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
-
+const prependMock = jest.fn().mockImplementation((args) => args);
+mockUseKibanaReturnValue.services.http.basePath.prepend = prependMock;
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(() => ({
     services: {
@@ -71,6 +72,17 @@ const config = {
   },
 } as ConfigSchema;
 
+const getFormatterMock = jest.fn();
+const createRuleTypeRegistryMock = () => ({
+  getFormatter: getFormatterMock,
+  registerFormatter: () => {},
+  list: () => ['ruleType1', 'ruleType2'],
+});
+
+export const createObservabilityRuleTypeRegistryMock = () =>
+  createRuleTypeRegistryMock() as ObservabilityRuleTypeRegistry &
+    ReturnType<typeof createRuleTypeRegistryMock>;
+
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
   core: {} as CoreStart,
@@ -78,13 +90,13 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
-  ObservabilityAIAssistantActionMenuItem,
   ObservabilityAIAssistantContextualInsight,
 }));
 
 describe('ObservabilityActions component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
   });
 
   const setup = async (pageId: string) => {
@@ -214,5 +226,27 @@ describe('ObservabilityActions component', () => {
     expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
       0
     );
+  });
+
+  it('should show a valid url when clicking  "View in app"', async () => {
+    getFormatterMock.mockReturnValue(
+      jest.fn().mockReturnValue({
+        reason: 'a reason',
+        link: 'http://localhost:5620/app/o11y/log-explorer',
+        hasBasePath: false,
+      })
+    );
+    const wrapper = await setup(RULE_DETAILS_PAGE_ID);
+
+    expect(
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props
+    ).toEqual(expect.objectContaining({ href: 'http://localhost:5620/app/o11y/log-explorer' }));
+
+    prependMock.mockClear();
+
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseOver');
+      expect(prependMock).toBeCalledTimes(1);
+    });
   });
 });

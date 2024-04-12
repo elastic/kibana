@@ -126,5 +126,33 @@ export interface RouteValidatorOptions {
  * Route validations config and options merged into one object
  * @public
  */
-export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
+export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q, B> &
   RouteValidatorOptions;
+
+/**
+ * Map of status codes to response schemas.
+ * @public
+ */
+export interface RouteValidatorFullConfigResponse {
+  [statusCode: number]: { body: ObjectType | Type<any> };
+  unsafe?: {
+    body?: boolean;
+  };
+}
+
+/**
+ * An alternative form to register both request schema and all response schemas.
+ * @public
+ */
+export interface RouteValidatorRequestAndResponses<P, Q, B> {
+  request: RouteValidatorFullConfigRequest<P, Q, B>;
+  response?: RouteValidatorFullConfigResponse;
+}
+
+/**
+ * Type container for schemas used in route related validations
+ * @public
+ */
+export type RouteValidator<P, Q, B> =
+  | RouteValidatorFullConfigRequest<P, Q, B>
+  | RouteValidatorRequestAndResponses<P, Q, B>;

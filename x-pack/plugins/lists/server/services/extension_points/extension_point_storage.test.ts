@@ -36,14 +36,6 @@ describe('When using ExtensionPointStorage', () => {
     expect(storageService.get('exceptionsListPreCreateItem')).toBeUndefined();
   });
 
-  it('should capture `.stack` from where extension point was registered', () => {
-    storageService.add(preCreateExtensionPointMock);
-
-    expect(storageService.getExtensionRegistrationSource(preCreateExtensionPointMock)).toContain(
-      'extension_point_storage.test'
-    );
-  });
-
   it('should clear() all extensions', () => {
     storageService.clear();
 

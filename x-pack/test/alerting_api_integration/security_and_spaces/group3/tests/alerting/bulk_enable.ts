@@ -513,5 +513,71 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should return the actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [
+                {
+                  id: createdAction.id,
+                  group: 'default',
+                  params: {},
+                },
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                },
+              ],
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids: [createdRule1.id] })
+          .auth(user.username, user.password);
+
+        const action = response.body.rules[0].actions[0];
+        const systemAction = response.body.rules[0].actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            actionTypeId: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            actionTypeId: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
+      });
+    });
   });
 };

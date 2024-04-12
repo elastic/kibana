@@ -54,6 +54,15 @@ jest.mock('../use_load_connectors', () => ({
   isSuccess: true,
 });
 
+const defaultConvo: Conversation = {
+  id: 'conversation_id',
+  category: 'assistant',
+  messages: [],
+  apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+  replacements: {},
+  title: 'conversation_id',
+};
+
 describe('ConnectorSelectorInline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -65,6 +74,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -72,34 +82,26 @@ describe('ConnectorSelectorInline', () => {
   });
 
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
-    const conversation: Conversation = {
-      id: 'conversation_id',
-      messages: [],
-      apiConfig: {},
-    };
     const { getByText } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
-          selectedConversation={conversation}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
     expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
   });
   it('Clicking add connector button opens the connector selector', () => {
-    const conversation: Conversation = {
-      id: 'conversation_id',
-      messages: [],
-      apiConfig: {},
-    };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
-          selectedConversation={conversation}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -109,17 +111,13 @@ describe('ConnectorSelectorInline', () => {
   });
   it('On connector change, update conversation API config', () => {
     const connectorTwo = mockConnectors[1];
-    const conversation: Conversation = {
-      id: 'conversation_id',
-      messages: [],
-      apiConfig: {},
-    };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
-          selectedConversation={conversation}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -129,26 +127,29 @@ describe('ConnectorSelectorInline', () => {
     expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
     expect(setApiConfig).toHaveBeenCalledWith({
       apiConfig: {
+        actionTypeId: '.gen-ai',
         connectorId: connectorTwo.id,
-        connectorTypeTitle: 'OpenAI',
         model: undefined,
         provider: 'OpenAI',
       },
-      conversationId: 'conversation_id',
+      conversation: {
+        apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
+        replacements: {},
+        category: 'assistant',
+        id: 'conversation_id',
+        messages: [],
+        title: 'conversation_id',
+      },
     });
   });
   it('On connector change to add new connector, onchange event does nothing', () => {
-    const conversation: Conversation = {
-      id: 'conversation_id',
-      messages: [],
-      apiConfig: {},
-    };
     const { getByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
-          selectedConversation={conversation}
+          selectedConversation={defaultConvo}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );

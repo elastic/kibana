@@ -8,8 +8,9 @@
 import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
-import { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-server';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';

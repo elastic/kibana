@@ -7,7 +7,7 @@
  */
 
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
-import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IAsyncSearchOptions, IKibanaSearchResponse } from '..';
 import { isAbortResponse, isRunningResponse } from '..';

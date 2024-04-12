@@ -12,7 +12,8 @@
       "usageCollection",
       "security",
       "cloud",
-      "fleet"
+      "fleet",
+      "observabilityAIAssistant"
     ],
     "requiredPlugins": [
       "charts",
@@ -22,7 +23,6 @@
       "licensing",
       "observability",
       "observabilityShared",
-      "observabilityAIAssistant",
       "unifiedSearch",
       "share",
       "embeddable",
@@ -30,8 +30,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
-      "observabilityAIAssistant"
+      "kibanaUtils"
     ]
   }
 }

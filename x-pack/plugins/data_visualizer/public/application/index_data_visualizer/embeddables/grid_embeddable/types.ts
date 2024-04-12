@@ -47,7 +47,7 @@ export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<ESQL
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
-export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000' | '1000000' | 'none';
+export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 
 export interface ESQLDataVisualizerIndexBasedAppState extends DataVisualizerIndexBasedAppState {
   limitSize: ESQLDefaultLimitSizeOption;
