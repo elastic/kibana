@@ -13,12 +13,15 @@ const updateAnonymizationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.assistant.updateAnonymizationSubFeatureName',
     {
-      defaultMessage: 'Update Anonymization',
+      defaultMessage: 'Field Selection and Anonymization',
     }
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description',
-    { defaultMessage: 'Update anonymization fields.' }
+    {
+      defaultMessage:
+        'Change the default fields that are allowed to be used by the AI Assistant and AI Insights. Anonymize any of the content for the selected fields.',
+    }
   ),
   privilegeGroups: [
     {
@@ -30,7 +33,7 @@ const updateAnonymizationSubFeature: SubFeatureConfig = {
           name: i18n.translate(
             'securitySolutionPackages.features.featureRegistry.assistant.updateAnonymizationSubFeatureDetails',
             {
-              defaultMessage: 'Update anonymization fields',
+              defaultMessage: 'Allow changes',
             }
           ),
           includeIn: 'all',
