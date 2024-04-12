@@ -60,7 +60,7 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
     console.log('MESSAGESlength', messages.length);
     console.log({
       keys: Object.keys(messages[0]),
-      role: messages[0].role,
+      role: messages[0]._getType(),
       content: messages[0].content,
     });
     if (!messages.length) {
@@ -72,9 +72,7 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
         if (typeof message.content !== 'string') {
           throw new Error('Multimodal messages are not supported.');
         }
-        bedrockMessages.push(
-          getMessageContentAndRole(message.content, i === 0 ? 'system' : 'user')
-        );
+        bedrockMessages.push(getMessageContentAndRole(message.content, message._getType()));
       });
     } else {
       if (typeof messages[0].content !== 'string') {
