@@ -73,7 +73,7 @@ The 8.13.2 release includes the following bug fixes.
 === Bug Fixes
 Canvas::
 * Fixes text settings to be honored in Canvas markdown elements ({kibana-pull}179948[#179948]).
-* Fixes custom styling for Canvas Workpads ({kibana-pull}180070[#180070]).
+* Fixes custom styling for Canvas markdown Workpads ({kibana-pull}180070[#180070]).
 Discover::
 * Fixes keyboard navigation for search input on the document viewer flyout ({kibana-pull}180022[#180022]).
 Elastic Security::
