@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { Observable } from 'rxjs';
 
@@ -16,7 +16,7 @@ export type {
   UserProfileGetCurrentParams,
 } from '@kbn/core-user-profile-browser';
 
-export type UserProfileAPIClient = Omit<UserProfileService, 'getUserProfile$'> & {
+export type UserProfileAPIClient = CoreUserProfileDelegateContract & {
   readonly userProfile$: Observable<UserProfileData | null>;
   /**
    * Indicates if the user profile data has been loaded from the server.
