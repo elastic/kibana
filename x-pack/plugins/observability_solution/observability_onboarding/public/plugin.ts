@@ -122,7 +122,7 @@ export class ObservabilityOnboardingPlugin
       });
 
       // Register the experimental version of the onboarding app on a dedicated path `/app/experimental-onboarding` for testing
-      if (!isServerless) {
+      if (isServerless) {
         core.application.register({
           id: `${PLUGIN_ID}_EXPERIMENTAL`,
           title: 'Observability Onboarding (Beta)',
