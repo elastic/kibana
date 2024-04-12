@@ -39,6 +39,12 @@ export class ResponseActionsNotSupportedError extends ResponseActionsClientError
   }
 }
 
+export class UnsupportedResponseActionsAgentTypeError extends ResponseActionsClientError {
+  constructor(message: string, statusCode = 501, meta?: unknown) {
+    super(message, statusCode, meta);
+  }
+}
+
 export class ResponseActionsConnectorNotConfiguredError extends ResponseActionsClientError {
   constructor(
     connectorTypeId: string,
