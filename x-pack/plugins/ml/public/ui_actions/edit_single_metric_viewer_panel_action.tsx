@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
+import { apiPublishesViewMode } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isSingleMetricViewerEmbeddableContext } from './open_in_single_metric_viewer_action';
@@ -74,10 +75,11 @@ export function createEditSingleMetricViewerPanelAction(
       }
     },
     async isCompatible(context: EmbeddableApiContext) {
-      return (
-        isSingleMetricViewerEmbeddableContext(context) &&
-        context.embeddable.viewMode?.getValue() === 'edit'
-      );
+      let viewMode: ViewMode | undefined;
+      if (apiPublishesViewMode(context.embeddable)) {
+        viewMode = context.embeddable.viewMode.getValue();
+      }
+      return isSingleMetricViewerEmbeddableContext(context) && viewMode === 'edit';
     },
   };
 }
