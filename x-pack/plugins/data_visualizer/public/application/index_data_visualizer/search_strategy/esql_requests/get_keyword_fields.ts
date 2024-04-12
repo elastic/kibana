@@ -37,8 +37,9 @@ export const getESQLKeywordFieldStats = async ({
       `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
         field.name
       )}) BY ${getSafeESQLName(field.name)}
-    | LIMIT 10
-    | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC`;
+    | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC
+    | LIMIT 10`;
+
     return {
       field,
       request: {
@@ -63,8 +64,13 @@ export const getESQLKeywordFieldStats = async ({
         if (!resp) return;
 
         if (isFulfilled(resp)) {
-          const results = resp.value?.rawResponse.values as Array<[BucketCount, BucketTerm]>;
+          const results = resp.value?.rawResponse?.values as Array<[BucketCount, BucketTerm]>;
+
           if (results) {
+            const topValuesSampleSize = results.reduce((acc, row) => {
+              return row[0] + acc;
+            }, 0);
+
             const terms = results.map((row) => ({
               key: row[1],
               doc_count: row[0],
@@ -73,7 +79,8 @@ export const getESQLKeywordFieldStats = async ({
             return {
               fieldName: field.name,
               topValues: terms,
-              isTopValuesSampled: false,
+              isTopValuesSampled: true,
+              topValuesSampleSize,
             } as StringFieldStats;
           }
           return;

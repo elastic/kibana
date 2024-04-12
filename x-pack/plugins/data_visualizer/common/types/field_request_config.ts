@@ -62,6 +62,7 @@ export interface FieldVisStats {
   };
   fieldName?: string;
   isTopValuesSampled?: boolean;
+  topValuesSampleSize?: number;
   max?: number;
   median?: number;
   min?: number;

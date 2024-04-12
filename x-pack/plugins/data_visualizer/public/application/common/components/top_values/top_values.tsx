@@ -55,54 +55,76 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   } = useDataVisualizerKibana();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues: originalTopValues, fieldName, sampleCount } = stats;
-
+  const { topValues: originalTopValues, fieldName, sampleCount, topValuesSampleSize } = stats;
   if (originalTopValues?.length === 0) return null;
   const totalDocuments = Math.min(sampleCount ?? 0, stats.totalDocuments ?? 0);
 
   const topValues = originalTopValues.map((bucket) => ({
     ...bucket,
     percent:
-      typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
+      typeof bucket.percent === 'number'
+        ? bucket.percent
+        : bucket.doc_count / (topValuesSampleSize ?? totalDocuments),
   }));
 
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
 
-  const countsElement = (
-    <EuiText color="subdued" size="xs">
-      {totalDocuments > (sampleCount ?? 0) ? (
+  const getMessage = () => {
+    if (topValuesSampleSize !== undefined) {
+      return (
         <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
-          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleValuesLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {value} other {values}}."
           values={{
-            sampledDocuments: sampleCount,
+            sampledDocuments: topValuesSampleSize,
             sampledDocumentsFormatted: (
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(sampleCount)}
+                  .convert(topValuesSampleSize)}
               </strong>
             ),
           }}
         />
-      ) : (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
-          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-          values={{
-            totalDocuments,
-            totalDocumentsFormatted: (
-              <strong>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(totalDocuments ?? 0)}
-              </strong>
-            ),
-          }}
-        />
-      )}
+      );
+    }
+    return totalDocuments > (sampleCount ?? 0) ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
+        defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        values={{
+          sampledDocuments: sampleCount,
+          sampledDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampleCount)}
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
+        defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+        values={{
+          totalDocuments,
+          totalDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(totalDocuments ?? 0)}
+            </strong>
+          ),
+        }}
+      />
+    );
+  };
+  const countsElement = (
+    <EuiText color="subdued" size="xs">
+      {getMessage()}
     </EuiText>
   );
 
