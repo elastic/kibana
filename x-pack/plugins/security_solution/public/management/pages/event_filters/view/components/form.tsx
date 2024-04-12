@@ -144,7 +144,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
-    const [hasWildcardWithWrongOperator, sethasWildcardWithWrongOperator] =
+    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] =
       useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => [eventsIndexPattern], []);
@@ -421,7 +421,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         // handle wildcard with wrong operator case
         arg.exceptionItems[0]?.entries.forEach((e) => {
           if (validateHasWildcardWithWrongOperator({ operator: e.type, value: e.value })) {
-            sethasWildcardWithWrongOperator(true);
+            setHasWildcardWithWrongOperator(true);
           }
         });
 

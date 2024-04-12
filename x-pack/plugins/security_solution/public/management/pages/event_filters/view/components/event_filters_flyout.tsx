@@ -73,7 +73,9 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       getInitialExceptionFromEvent(data)
     );
 
-    const [confirmModalLabels, setConfirmModalLabels] = useState<ArtifactConfirmModalLabelProps>();
+    const [confirmModalLabels, setConfirmModalLabels] = useState<
+      ArtifactConfirmModalLabelProps | undefined
+    >();
 
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 

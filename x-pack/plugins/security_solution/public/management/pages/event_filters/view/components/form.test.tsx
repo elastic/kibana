@@ -497,7 +497,7 @@ describe('Event filter form', () => {
         },
       ];
       rerender();
-      expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
+      await expect(renderResult.findByTestId('wildcardWithWrongOperatorCallout')).not.toBeNull();
     });
   });
 
