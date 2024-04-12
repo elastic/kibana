@@ -256,7 +256,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await inspector.open();
         const requestNames = await inspector.getRequestNames();
-        expect(requestNames).to.contain('ES|QL');
+        expect(requestNames).to.contain('Table');
         expect(requestNames).to.contain('Visualization');
       });
     });
