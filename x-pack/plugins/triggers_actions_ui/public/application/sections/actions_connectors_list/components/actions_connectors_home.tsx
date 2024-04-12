@@ -12,7 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
-import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
+import { routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
@@ -126,7 +126,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
             <Route exact path={routeToLogs} component={renderLogsList} />
             <Route
               exact
-              path={[routeToConnectors, routeToConnectorEdit]}
+              path={routeToConnectors}
               component={suspendedComponentWithProps(ConnectorsList, 'xl')}
             />
           </Routes>

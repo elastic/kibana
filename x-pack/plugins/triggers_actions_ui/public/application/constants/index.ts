@@ -22,7 +22,6 @@ export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
-export const routeToConnectorEdit = `/connectors/:connectorId`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
 export const legacyRouteToAlerts = `/alerts`;

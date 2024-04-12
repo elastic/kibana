@@ -571,7 +571,6 @@ export const ActionTypeForm = ({
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}
-                    producerId={producerId}
                   />
                   {warning ? (
                     <>
