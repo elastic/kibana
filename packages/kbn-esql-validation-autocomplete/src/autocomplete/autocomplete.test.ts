@@ -20,7 +20,17 @@ import { SuggestionRawDefinition } from './types';
 const triggerCharacters = [',', '(', '=', ' '];
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
+  ...[
+    'string',
+    'number',
+    'date',
+    'boolean',
+    'ip',
+    'geo_point',
+    'geo_shape',
+    'cartesian_point',
+    'cartesian_shape',
+  ].map((type) => ({
     name: `${type}Field`,
     type,
   })),
@@ -71,7 +81,7 @@ const policies = [
  */
 function getFunctionSignaturesByReturnType(
   command: string,
-  expectedReturnType: string,
+  _expectedReturnType: string | string[],
   {
     agg,
     evalMath,
@@ -83,6 +93,10 @@ function getFunctionSignaturesByReturnType(
   paramsTypes?: string[],
   ignored?: string[]
 ) {
+  const expectedReturnType = Array.isArray(_expectedReturnType)
+    ? _expectedReturnType
+    : [_expectedReturnType];
+
   const list = [];
   if (agg) {
     list.push(...statsAggregationFunctionDefinitions);
@@ -103,7 +117,8 @@ function getFunctionSignaturesByReturnType(
         return false;
       }
       const filteredByReturnType = signatures.filter(
-        ({ returnType }) => expectedReturnType === 'any' || returnType === expectedReturnType
+        ({ returnType }) =>
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -137,18 +152,20 @@ function getFunctionSignaturesByReturnType(
     });
 }
 
-function getFieldNamesByType(requestedType: string) {
+function getFieldNamesByType(_requestedType: string | string[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
-    .filter(({ type }) => requestedType === 'any' || type === requestedType)
+    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-function getLiteralsByType(type: string) {
-  if (type === 'time_literal') {
+function getLiteralsByType(_type: string | string[]) {
+  const type = Array.isArray(_type) ? _type : [_type];
+  if (type.includes('time_literal')) {
     // return only singular
     return timeLiterals.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
-  if (type === 'chrono_literal') {
+  if (type.includes('chrono_literal')) {
     return chronoLiterals.map(({ name }) => name);
   }
   return [];
@@ -1058,22 +1075,42 @@ describe('autocomplete', () => {
               const canHaveMoreArgs =
                 i + 1 < (signature.minParams ?? 0) ||
                 signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
+
+              const allSignaturesCompatibleWithPreviousParams = fn.signatures.filter(
+                (_signature) => {
+                  return _signature.params.slice(0, i).every((p, j) => {
+                    if (p.type === 'any') {
+                      return true;
+                    }
+                    return p.type === signature.params[j].type;
+                  });
+                }
+              );
+              const allPossibleParamTypes = Array.from(
+                new Set(
+                  allSignaturesCompatibleWithPreviousParams.map((_signature) => {
+                    return _signature.params[i].type;
+                  })
+                )
+              );
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 param.literalOptions?.length
                   ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(param.type).map((f) =>
+                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
                         canHaveMoreArgs ? `${f},` : f
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        param.type,
+                        allPossibleParamTypes,
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                        canHaveMoreArgs ? `${d},` : d
+                      ),
                     ]
               );
               testSuggestions(
@@ -1083,17 +1120,19 @@ describe('autocomplete', () => {
                 param.literalOptions?.length
                   ? param.literalOptions.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
                   : [
-                      ...getFieldNamesByType(param.type).map((f) =>
+                      ...getFieldNamesByType(allPossibleParamTypes).map((f) =>
                         canHaveMoreArgs ? `${f},` : f
                       ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        param.type,
+                        allPossibleParamTypes,
                         { evalMath: true },
                         undefined,
                         [fn.name]
                       ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-                      ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                      ...getLiteralsByType(allPossibleParamTypes).map((d) =>
+                        canHaveMoreArgs ? `${d},` : d
+                      ),
                     ]
               );
             }
