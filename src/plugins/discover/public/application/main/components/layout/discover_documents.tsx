@@ -418,7 +418,7 @@ function DiscoverDocumentsComponent({
                   settings={grid}
                   onFilter={onAddFilter as DocViewFilterFn}
                   onSetColumns={onSetColumns}
-                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  onSort={onSort}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
                   configHeaderRowHeight={3}
@@ -426,7 +426,7 @@ function DiscoverDocumentsComponent({
                   onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
-                  isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
+                  isSortEnabled={true}
                   isPlainRecord={isTextBasedQuery}
                   rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                   onUpdateRowsPerPage={onUpdateRowsPerPage}
