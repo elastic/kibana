@@ -141,7 +141,7 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
-export { Color, colorTransformer } from './color_palette';
+export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
 
