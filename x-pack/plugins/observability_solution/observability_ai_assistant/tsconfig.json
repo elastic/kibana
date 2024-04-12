@@ -45,7 +45,6 @@
     "@kbn/expect",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
-    "@kbn/safer-lodash-set",
     "@kbn/cloud-plugin",
     "@kbn/serverless"
   ],
