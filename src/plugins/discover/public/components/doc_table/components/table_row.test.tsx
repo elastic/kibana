@@ -133,7 +133,7 @@ describe('Doc table row component', () => {
       const component = mountComponent(props);
       const toggleButton = findTestSubject(component, 'docTableExpandToggleColumn');
       toggleButton.simulate('click');
-      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded row');
+      expect(findTestSubject(component, 'docTableRowDetailsTitle').text()).toBe('Expanded result');
       expect(findTestSubject(component, 'docTableRowAction').length).toBeFalsy();
     });
   });

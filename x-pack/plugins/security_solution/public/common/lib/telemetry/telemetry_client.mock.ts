@@ -29,4 +29,5 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportAddRiskInputToTimelineClicked: jest.fn(),
   reportDetailsFlyoutOpened: jest.fn(),
   reportDetailsFlyoutTabClicked: jest.fn(),
+  reportInsightsGenerated: jest.fn(),
 });

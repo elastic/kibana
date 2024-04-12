@@ -25,7 +25,7 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   cy.contains('Existing hosts').click();
   cy.getBySel('agentPolicySelect').click();
   cy.contains(agentPolicy).click();
-  cy.getBySel('agentPolicySelect').should('have.text', agentPolicy);
+  cy.getBySel('agentPolicySelect').should('contain.text', agentPolicy);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();

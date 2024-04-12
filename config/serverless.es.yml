@@ -35,7 +35,6 @@ xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webh
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
 
 # Disable Dev tools
-xpack.grokdebugger.enabled: false
 xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
