@@ -73,8 +73,8 @@ describe('useLoadConnectors', () => {
       const { result, waitForNextUpdate } = renderHook(() => useLoadConnectors());
       await waitForNextUpdate();
 
-      await expect(result.current).resolves.toStrictEqual({
-        openai: {
+      await expect(result.current).resolves.toStrictEqual([
+        {
           actionTypeId: '.gen-ai',
           config: {
             apiProvider: 'OpenAI',
@@ -82,8 +82,9 @@ describe('useLoadConnectors', () => {
           id: '1',
           isMissingSecrets: false,
           title: 'OpenAI',
+          type: 'openai',
         },
-        openai_azure: {
+        {
           actionTypeId: '.gen-ai',
           config: {
             apiProvider: 'Azure OpenAI',
@@ -91,8 +92,9 @@ describe('useLoadConnectors', () => {
           id: '3',
           isMissingSecrets: false,
           title: 'OpenAI Azure',
+          type: 'openai_azure',
         },
-      });
+      ]);
     });
   });
 
