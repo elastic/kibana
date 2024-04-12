@@ -153,10 +153,10 @@ export const calculateAuthz = ({
     integrations: {
       readPackageInfo: hasFleetAll || fleet.setup || integrations.all || integrations.read,
       readInstalledPackages: integrations.all || integrations.read,
-      installPackages: hasFleetAll && integrations.all,
-      upgradePackages: hasFleetAll && integrations.all,
-      removePackages: hasFleetAll && integrations.all,
-      uploadPackages: hasFleetAll && integrations.all,
+      installPackages: writeIntegrationPolicies && integrations.all,
+      upgradePackages: writeIntegrationPolicies && integrations.all,
+      removePackages: writeIntegrationPolicies && integrations.all,
+      uploadPackages: writeIntegrationPolicies && integrations.all,
 
       readPackageSettings: hasFleetAll && integrations.all,
       writePackageSettings: hasFleetAll && integrations.all,
