@@ -9,6 +9,7 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import semver from 'semver';
+import { css } from '@emotion/css';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiTextTruncate,
@@ -101,7 +102,7 @@ export function RelatedIntegrationField({
         error={packageErrorMessage?.message ?? versionErrorMessage?.message}
       >
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={8}>
+          <EuiFlexItem grow={8} className={ROW_OVERFLOW_FIX_STYLE}>
             <EuiComboBox<Integration>
               options={integrationOptions}
               renderOption={renderIntegrationOption}
@@ -116,7 +117,7 @@ export function RelatedIntegrationField({
               data-test-subj="relatedIntegrationComboBox"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem grow={3} className={MIN_WIDTH_VERSION_CONSTRAIN_STYLE}>
             <EuiFieldText
               placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
               prepend={i18n.INTEGRATION_VERSION}
@@ -144,6 +145,18 @@ export function RelatedIntegrationField({
     </EuiPanel>
   );
 }
+
+const ROW_OVERFLOW_FIX_STYLE = css`
+  overflow: hidden;
+`;
+
+/**
+ * Minimum width has been determined empirically like that
+ * semver value like `^1.2.3` doesn't overflow
+ */
+const MIN_WIDTH_VERSION_CONSTRAIN_STYLE = css`
+  min-width: 150px;
+`;
 
 function filterOutUsedIntegrations(
   integrations: Integration[],
