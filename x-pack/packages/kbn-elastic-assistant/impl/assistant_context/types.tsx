@@ -84,4 +84,6 @@ export interface AssistantAvailability {
   hasConnectorsAllPrivilege: boolean;
   // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
   hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
 }

@@ -15,6 +15,7 @@ import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
 import * as i18n from './translations';
 import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
+import { useAssistantContext } from '../../assistant_context';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -57,6 +58,9 @@ const ContextEditorComponent: React.FC<Props> = ({
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
   const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
+  const {
+    assistantAvailability: { hasUpdateAIAssistantAnonymization },
+  } = useAssistantContext();
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
     () => ({
@@ -76,7 +80,10 @@ const ContextEditorComponent: React.FC<Props> = ({
     [selected]
   );
 
-  const columns = useMemo(() => getColumns({ onListUpdated, rawData }), [onListUpdated, rawData]);
+  const columns = useMemo(
+    () => getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization }),
+    [hasUpdateAIAssistantAnonymization, onListUpdated, rawData]
+  );
 
   const rows = useMemo(
     () =>

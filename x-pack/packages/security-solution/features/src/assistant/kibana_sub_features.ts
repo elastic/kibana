@@ -7,31 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
+import { APP_ID } from '../constants';
 
-// This is a sample sub-feature that can be used for future implementations
-// @ts-expect-error unused variable
-const createConversationSubFeature: SubFeatureConfig = {
+const updateAnonymizationSubFeature: SubFeatureConfig = {
   name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName',
+    'securitySolutionPackages.features.featureRegistry.assistant.updateAnonymizationSubFeatureName',
     {
-      defaultMessage: 'Create Conversations',
+      defaultMessage: 'Update Anonymization',
     }
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description',
-    { defaultMessage: 'Create custom conversations.' }
+    { defaultMessage: 'Update anonymization fields.' }
   ),
   privilegeGroups: [
     {
       groupType: 'independent',
       privileges: [
         {
-          api: [],
-          id: 'create_conversation',
+          api: [`${APP_ID}-updateAIAssistantAnonymization`],
+          id: 'update_anonymization',
           name: i18n.translate(
-            'securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails',
+            'securitySolutionPackages.features.featureRegistry.assistant.updateAnonymizationSubFeatureDetails',
             {
-              defaultMessage: 'Create conversations',
+              defaultMessage: 'Update anonymization fields',
             }
           ),
           includeIn: 'all',
@@ -39,7 +38,7 @@ const createConversationSubFeature: SubFeatureConfig = {
             all: [],
             read: [],
           },
-          ui: ['createConversation'],
+          ui: ['updateAIAssistantAnonymization'],
         },
       ],
     },
@@ -47,17 +46,14 @@ const createConversationSubFeature: SubFeatureConfig = {
 };
 
 export enum AssistantSubFeatureId {
-  createConversation = 'createConversationSubFeature',
+  updateAnonymization = 'updateAnonymizationSubFeature',
 }
 
 /**
  * Sub-features that will always be available for Security Assistant
  * regardless of the product type.
  */
-export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [
-  // This is a sample sub-feature that can be used for future implementations
-  // AssistantSubFeatureId.createConversation,
-];
+export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] => [];
 
 /**
  * Defines all the Security Assistant subFeatures available.
@@ -65,7 +61,6 @@ export const getAssistantBaseKibanaSubFeatureIds = (): AssistantSubFeatureId[] =
  */
 export const assistantSubFeaturesMap = Object.freeze(
   new Map<AssistantSubFeatureId, SubFeatureConfig>([
-    // This is a sample sub-feature that can be used for future implementations
-    // [AssistantSubFeatureId.createConversation, createConversationSubFeature],
+    [AssistantSubFeatureId.updateAnonymization, updateAnonymizationSubFeature],
   ])
 );
