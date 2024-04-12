@@ -12,5 +12,11 @@ export const clickAssignButton = () => {
 };
 
 export const uploadAssetCriticalityFile = () => {
-  cy.get(FILE_PICKER).attachFile('asset_criticality.csv').trigger('change');
+  cy.get(FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(
+      'user,user-001,medium_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact\nhost,host-003,invalid_value'
+    ),
+    fileName: 'asset_criticality.csv',
+    lastModified: Date.now(),
+  });
 };

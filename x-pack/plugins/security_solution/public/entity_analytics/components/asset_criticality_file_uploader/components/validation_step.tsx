@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { ValidatedFile } from '../types';
+import { buildAnnotationsFromError } from '../helpers';
 
 export interface AssetCriticalityValidationStepProps {
   validatedFile: ValidatedFile;
@@ -38,10 +39,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
     const { validLines, invalidLines, size: fileSize, name: fileName } = validatedFile;
     const { euiTheme } = useEuiTheme();
     const { telemetry } = useKibana().services;
-    const annotations = invalidLines.errors.reduce<Record<number, string>>((acc, e) => {
-      acc[e.index] = e.error;
-      return acc;
-    }, {});
+    const annotations = buildAnnotationsFromError(invalidLines.errors);
 
     const onConfirmClick = () => {
       telemetry.reportAssetCriticalityCsvImported({

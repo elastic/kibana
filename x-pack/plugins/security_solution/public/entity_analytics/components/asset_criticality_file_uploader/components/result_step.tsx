@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { buildAnnotationsFromError } from '../helpers';
 
 export const AssetCriticalityResultStep: React.FC<{
   result?: AssetCriticalityCsvUploadResponse;
@@ -28,7 +29,7 @@ export const AssetCriticalityResultStep: React.FC<{
 }> = React.memo(({ result, validLinesAsText, errorMessage, onReturn }) => {
   const { euiTheme } = useEuiTheme();
 
-  if (result === undefined || errorMessage !== undefined) {
+  if (errorMessage !== undefined) {
     return (
       <>
         <EuiCallOut
@@ -42,11 +43,15 @@ export const AssetCriticalityResultStep: React.FC<{
           color="danger"
           iconType="error"
         >
-          {errorMessage && errorMessage}
+          {errorMessage}
         </EuiCallOut>
         <ResultStepFooter onReturn={onReturn} />
       </>
     );
+  }
+
+  if (result === undefined) {
+    return null;
   }
 
   if (result.stats.failed === 0) {
@@ -71,10 +76,7 @@ export const AssetCriticalityResultStep: React.FC<{
     );
   }
 
-  const annotations = result.errors.reduce<Record<number, string>>((acc, e) => {
-    acc[e.index] = e.message;
-    return acc;
-  }, {});
+  const annotations = buildAnnotationsFromError(result.errors);
 
   return (
     <>
@@ -112,9 +114,7 @@ export const AssetCriticalityResultStep: React.FC<{
           css={css`
             border: 1px solid ${euiTheme.colors.warning};
           `}
-          lineNumbers={{
-            annotations,
-          }}
+          lineNumbers={{ annotations }}
         >
           {validLinesAsText}
         </EuiCodeBlock>

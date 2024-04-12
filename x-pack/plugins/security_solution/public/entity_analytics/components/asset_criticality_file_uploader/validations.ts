@@ -14,7 +14,7 @@ import {
 import { SUPPORTED_FILE_EXTENSIONS, SUPPORTED_FILE_TYPES } from './constants';
 
 export interface RowValidationErrors {
-  error: string;
+  message: string;
   index: number;
 }
 
@@ -37,7 +37,7 @@ export const validateParsedContent = (
         acc.valid.push(row);
       } else {
         acc.invalid.push(row);
-        acc.errors.push({ error: parsedRow.error, index: errorIndex });
+        acc.errors.push({ message: parsedRow.error, index: errorIndex });
         errorIndex++;
       }
 

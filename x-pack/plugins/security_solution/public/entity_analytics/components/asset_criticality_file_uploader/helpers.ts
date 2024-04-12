@@ -37,3 +37,15 @@ export const isValidationStep = (state: ReducerState): state is ValidationStepSt
 
 export const isResultStep = (state: ReducerState): state is ResultStepState =>
   state.step === FileUploaderSteps.RESULT;
+
+export const buildAnnotationsFromError = (
+  errors: Array<{ message: string; index: number }>
+): Record<number, string> => {
+  const annotations: Record<number, string> = {};
+
+  errors.forEach((e) => {
+    annotations[e.index] = e.message;
+  });
+
+  return annotations;
+};
