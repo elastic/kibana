@@ -388,7 +388,7 @@ function convertBuildkitePipeline(
             'ELASTIC_SLACK_NOTIFICATIONS_ENABLED',
             env
           ),
-          allow_rebuilds: valueOrDefault(pipeline.allow_rebuilds, false),
+          allow_rebuilds: valueOrDefault(pipeline.allow_rebuilds, true),
           branch_configuration: pipeline.branch_configuration,
           cancel_intermediate_builds: pipeline.cancel_intermediate_builds,
           default_branch: pipeline.default_branch,
@@ -410,7 +410,7 @@ function convertBuildkitePipeline(
             ),
             skip_pull_request_builds_for_existing_commits: valueOrDefault(
               providerSettings.skip_builds_for_existing_commits,
-              true
+              false
             ),
           },
           teams,
