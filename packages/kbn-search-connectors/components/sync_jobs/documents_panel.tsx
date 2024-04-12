@@ -12,8 +12,8 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiIcon, EuiToolTip, EuiCode } from
 import { ByteSizeValue } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutPanel } from './flyout_panel';
-import {FormattedMessage} from "react-intl";
 
 interface SyncJobDocumentsPanelProps {
   added: number;
