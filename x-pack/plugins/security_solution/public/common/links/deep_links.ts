@@ -6,13 +6,15 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
+import { combineLatestWith } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import { appLinks$ } from './links';
 import type { AppLinkItems } from './types';
 
-export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
+type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
 
-const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
+// TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
+const classicFormatter: DeepLinksFormatter = (appLinks) =>
   appLinks.map((appLink) => {
     const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
     if (!appLink.globalSearchDisabled) {
@@ -30,7 +32,31 @@ const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
       ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
       ...(appLink.links && appLink.links?.length
         ? {
-            deepLinks: defaultDeepLinksFormatter(appLink.links),
+            deepLinks: classicFormatter(appLink.links),
+          }
+        : {}),
+    };
+    return deepLink;
+  });
+
+const solutionFormatter: DeepLinksFormatter = (appLinks) =>
+  appLinks.map((appLink) => {
+    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
+    if (!appLink.globalSearchDisabled) {
+      visibleIn.add('globalSearch');
+    }
+    if (!appLink.sideNavDisabled) {
+      visibleIn.add('sideNav');
+    }
+    const deepLink: AppDeepLink = {
+      id: appLink.id,
+      path: appLink.path,
+      title: appLink.title,
+      visibleIn: Array.from(visibleIn),
+      ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+      ...(appLink.links && appLink.links?.length
+        ? {
+            deepLinks: solutionFormatter(appLink.links),
           }
         : {}),
     };
@@ -42,11 +68,15 @@ const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
  */
 export const registerDeepLinksUpdater = (
   appUpdater$: Subject<AppUpdater>,
-  formatter: DeepLinksFormatter = defaultDeepLinksFormatter
+  isSolutionNavigationEnabled$: Subject<boolean>
 ): Subscription => {
-  return appLinks$.subscribe((appLinks) => {
-    appUpdater$.next(() => ({
-      deepLinks: formatter(appLinks),
-    }));
-  });
+  return appLinks$
+    .pipe(combineLatestWith(isSolutionNavigationEnabled$))
+    .subscribe(([appLinks, isSolutionNavigationEnabled]) => {
+      appUpdater$.next(() => ({
+        deepLinks: isSolutionNavigationEnabled
+          ? solutionFormatter(appLinks)
+          : classicFormatter(appLinks),
+      }));
+    });
 };
