@@ -262,8 +262,11 @@ function buildSystemMessage(functionClient: ChatFunctionClient, rule: RuleType, 
   systemMessage += ` You are called as a background process because the alert ${JSON.stringify(
     rule
   )} ${state === 'new' ? 'fired' : 'recovered'}.`;
-  systemMessage += ` As a background process you are not interacting with a user. Only generate a single answer and wrap all your findings in that answer.`;
-  systemMessage += ` If available, include the link to the conversation at the end of your answer.`;
+  systemMessage +=
+    ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
+  systemMessage +=
+    ' input if tasked to execute actions. You can generate multiple responses in a row.';
+  systemMessage += ' If available, include the link to the conversation at the end of your answer.';
 
   return systemMessage;
 }
