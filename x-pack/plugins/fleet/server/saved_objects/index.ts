@@ -537,11 +537,6 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
-        /* deprecated */
-        es_index_patterns: {
-          dynamic: false,
-          properties: {},
-        },
         data_streams: {
           dynamic: false,
           properties: {
@@ -644,6 +639,14 @@ export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 },
               };
             },
+          },
+        ],
+      },
+      '4': {
+        changes: [
+          {
+            type: 'data_removal',
+            removedAttributePaths: ['es_index_patterns'],
           },
         ],
       },

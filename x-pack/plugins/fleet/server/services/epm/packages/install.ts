@@ -29,10 +29,7 @@ import type {
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
-import {
-  generateESIndexPatterns,
-  generateTemplateIndexPattern,
-} from '../elasticsearch/template/template';
+import { generateTemplateIndexPattern } from '../elasticsearch/template/template';
 import type {
   ArchivePackage,
   BulkInstallPackageInfo,
@@ -1240,7 +1237,6 @@ export async function createInstallation(options: {
   const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const normalizedDataStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME);
-  const toSaveESIndexPatterns = generateESIndexPatterns(normalizedDataStreams);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1256,7 +1252,6 @@ export async function createInstallation(options: {
     installed_kibana_space_id: options.spaceId,
     installed_es: [],
     package_assets: [],
-    es_index_patterns: toSaveESIndexPatterns,
     data_streams: generateESDataStreams(normalizedDataStreams),
     name: pkgName,
     display_name: packageInfo.title,
@@ -1464,7 +1459,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
     soClient,
     installedPkgWithAssets.installation.name,
     [],
-    generateESIndexPatterns([dataStream]),
     generateESDataStreams([dataStream])
   );
 }

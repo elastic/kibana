@@ -954,10 +954,6 @@
   },
   "epm-packages": {
     "properties": {
-      "es_index_patterns": {
-        "dynamic": false,
-        "properties": {}
-      },
       "experimental_data_stream_features": {
         "properties": {
           "data_stream": {

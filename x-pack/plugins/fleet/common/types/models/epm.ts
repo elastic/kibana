@@ -475,7 +475,6 @@ export type InstallationInfo = {
 } & Omit<
   Installation,
   | 'package_assets'
-  | 'es_index_patterns'
   | 'install_version'
   | 'install_started_at'
   | 'keep_policies_up_to_date'
@@ -589,7 +588,6 @@ export interface Installation {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
   package_assets?: PackageAssetReference[];
-  es_index_patterns: Record<string, string>;
   data_streams?: EsDataStream[];
   name: string;
   display_name?: string;

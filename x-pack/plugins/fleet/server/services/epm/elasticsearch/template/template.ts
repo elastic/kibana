@@ -804,24 +804,6 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
   }
 }
 
-/**
- * Returns a map of the data stream path fields to elasticsearch index pattern.
- * @param dataStreams an array of RegistryDataStream objects
- */
-export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
-): Record<string, string> {
-  if (!dataStreams) {
-    return {};
-  }
-
-  const patterns: Record<string, string> = {};
-  for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
-  }
-  return patterns;
-}
-
 const flattenFieldsToNameAndType = (
   fields: Fields,
   path: string = ''
