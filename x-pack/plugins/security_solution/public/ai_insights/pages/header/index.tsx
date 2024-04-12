@@ -5,28 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
-
-const GENERATE = i18n.translate(
-  'xpack.securitySolution.aiInsights.poweredByGenerativeAi.generateButton',
-  {
-    defaultMessage: 'Generate',
-  }
-);
-
-const LOADING = i18n.translate(
-  'xpack.securitySolution.aiInsights.poweredByGenerativeAi.loadingButton',
-  {
-    defaultMessage: 'Loading...',
-  }
-);
+import * as i18n from './translations';
 
 interface Props {
   connectorId: string | undefined;
@@ -64,15 +50,20 @@ const HeaderComponent: React.FC<Props> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          data-test-subj="generate"
-          size="s"
-          disabled={disabled}
-          isLoading={isLoading}
-          onClick={onGenerate}
+        <EuiToolTip
+          content={connectorId == null ? i18n.SELECT_A_CONNECTOR : null}
+          data-test-subj="generateTooltip"
         >
-          {isLoading ? LOADING : GENERATE}
-        </EuiButton>
+          <EuiButton
+            data-test-subj="generate"
+            size="s"
+            disabled={disabled}
+            isLoading={isLoading}
+            onClick={onGenerate}
+          >
+            {isLoading ? i18n.LOADING : i18n.GENERATE}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

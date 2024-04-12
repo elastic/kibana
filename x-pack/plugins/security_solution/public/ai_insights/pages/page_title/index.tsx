@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
-const AI_INSIGHTS_PAGE_TITLE = i18n.translate('xpack.securitySolution.aiInsights.pageTitle', {
-  defaultMessage: 'AI insights',
-});
+import * as i18n from './translations';
 
 const BETA_BADGE_SIZE = 24; // px
 
@@ -24,7 +27,7 @@ const PageTitleComponent: React.FC = () => {
     <EuiFlexGroup alignItems="center" data-test-subj="pageTitle" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="title" size="l">
-          <h1>{AI_INSIGHTS_PAGE_TITLE}</h1>
+          <h1>{i18n.AI_INSIGHTS_PAGE_TITLE}</h1>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -40,15 +43,17 @@ const PageTitleComponent: React.FC = () => {
         `}
         grow={false}
       >
-        <EuiIcon
-          css={css`
-            transform: translate(3px, 2px);
-          `}
-          color="hollow"
-          data-test-subj="betaIcon"
-          size="m"
-          type="beta"
-        />
+        <EuiToolTip content={i18n.BETA}>
+          <EuiIcon
+            css={css`
+              transform: translate(3px, 2px);
+            `}
+            color="hollow"
+            data-test-subj="betaIcon"
+            size="m"
+            type="beta"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

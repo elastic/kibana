@@ -34,6 +34,13 @@ export const LEARN_MORE = i18n.translate(
   }
 );
 
+export const SELECT_A_CONNECTOR = i18n.translate(
+  'xpack.securitySolution.aiInsights.pages.emptyPrompt.selectAConnectorLabel',
+  {
+    defaultMessage: 'Select a connector',
+  }
+);
+
 export const START_GENERATING_INSIGHTS = i18n.translate(
   'xpack.securitySolution.aiInsights.pages.emptyPrompt.startGeneratingInsightsLabel',
   {

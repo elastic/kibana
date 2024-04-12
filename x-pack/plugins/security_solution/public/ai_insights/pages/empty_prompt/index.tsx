@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
@@ -88,19 +89,25 @@ const EmptyPromptComponent: React.FC<Props> = ({
     []
   );
 
-  const actions = useMemo(
-    () => (
-      <EuiButton
-        color="primary"
-        data-test-subj="generate"
-        disabled={!hasAssistantPrivilege || isLoading || isDisabled}
-        onClick={onGenerate}
+  const actions = useMemo(() => {
+    const disabled = !hasAssistantPrivilege || isLoading || isDisabled;
+
+    return (
+      <EuiToolTip
+        content={disabled ? i18n.SELECT_A_CONNECTOR : null}
+        data-test-subj="generateTooltip"
       >
-        {i18n.GENERATE}
-      </EuiButton>
-    ),
-    [hasAssistantPrivilege, isDisabled, isLoading, onGenerate]
-  );
+        <EuiButton
+          color="primary"
+          data-test-subj="generate"
+          disabled={disabled}
+          onClick={onGenerate}
+        >
+          {i18n.GENERATE}
+        </EuiButton>
+      </EuiToolTip>
+    );
+  }, [hasAssistantPrivilege, isDisabled, isLoading, onGenerate]);
 
   return (
     <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
