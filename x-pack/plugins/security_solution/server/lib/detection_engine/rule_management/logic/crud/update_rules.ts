@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable complexity */
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -32,12 +33,26 @@ export const updateRules = async ({
     return null;
   }
 
+  const requiredFieldsWithEcs = (ruleUpdate.required_fields ?? []).map(
+    (requiredFieldWithoutEcs) => {
+      const isEcsField = Boolean(
+        ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
+      );
+
+      return {
+        ...requiredFieldWithoutEcs,
+        ecs: isEcsField,
+      };
+    }
+  );
+
   const alertActions =
     ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
+
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
     tags: ruleUpdate.tags ?? [],
@@ -58,7 +73,7 @@ export const updateRules = async ({
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
       relatedIntegrations: ruleUpdate.related_integrations ?? [],
-      requiredFields: ruleUpdate.required_fields ?? [],
+      requiredFields: requiredFieldsWithEcs,
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,

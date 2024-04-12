@@ -11,6 +11,7 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
 import {
@@ -491,7 +492,7 @@ export const convertPatchAPIToInternalSchema = (
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
+    // required_fields?: RequiredFieldArray;
   },
   immutable = false,
   defaultEnabled = true
@@ -501,6 +502,17 @@ export const convertCreateAPIToInternalSchema = (
 
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
+
+  const requiredFieldsWithEcs = (input.required_fields ?? []).map((requiredFieldWithoutEcs) => {
+    const isEcsField = Boolean(
+      ecsFieldMap[requiredFieldWithoutEcs.name]?.type === requiredFieldWithoutEcs.type
+    );
+
+    return {
+      ...requiredFieldWithoutEcs,
+      ecs: isEcsField,
+    };
+  });
 
   return {
     name: input.name,
@@ -537,7 +549,7 @@ export const convertCreateAPIToInternalSchema = (
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
       relatedIntegrations: input.related_integrations ?? [],
-      requiredFields: input.required_fields ?? [],
+      requiredFields: requiredFieldsWithEcs,
       setup: input.setup ?? '',
       ...typeSpecificParams,
     },
