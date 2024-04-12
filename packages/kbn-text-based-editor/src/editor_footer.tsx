@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiCode,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import type { MonacoMessage } from './helpers';
@@ -40,14 +41,24 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
             target="_blank"
             data-test-subj="TextBasedLangEditor-feedback-link"
           >
-            <EuiIcon
-              type="editorComment"
-              color="primary"
-              size="m"
-              css={css`
-                margin-right: ${euiTheme.size.s};
-              `}
-            />
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'textBasedEditor.query.textBasedLanguagesEditor.submitFeedback',
+                {
+                  defaultMessage: 'Submit feedback',
+                }
+              )}
+            >
+              <EuiIcon
+                type="editorComment"
+                color="primary"
+                size="m"
+                css={css`
+                  margin-right: ${euiTheme.size.s};
+                `}
+              />
+            </EuiToolTip>
           </EuiLink>
         </EuiFlexItem>
       )}
@@ -135,9 +146,6 @@ export const EditorFooter = memo(function EditorFooter({
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
-  // boxShadow: !isCodeEditorExpanded
-  // ? `inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color}`
-  // : 'none',
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
       // update the query first
@@ -310,31 +318,41 @@ export const EditorFooter = memo(function EditorFooter({
                     />
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      display="base"
-                      color="primary"
-                      onClick={runQuery}
-                      iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
-                      size="s"
-                      isLoading={isLoading && !allowQueryCancellation}
-                      isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                      data-test-subj="TextBasedLangEditor-run-query-button"
-                      aria-label={
-                        allowQueryCancellation && isLoading
-                          ? i18n.translate(
-                              'textBasedEditor.query.textBasedLanguagesEditor.cancel',
-                              {
-                                defaultMessage: 'Cancel',
-                              }
-                            )
-                          : i18n.translate(
-                              'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                              {
-                                defaultMessage: 'Run query',
-                              }
-                            )
-                      }
-                    />
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
+                        {
+                          defaultMessage: 'Run query',
+                        }
+                      )}
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        color="primary"
+                        onClick={runQuery}
+                        iconType={allowQueryCancellation && isLoading ? 'cross' : 'refresh'}
+                        size="s"
+                        isLoading={isLoading && !allowQueryCancellation}
+                        isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                        data-test-subj="TextBasedLangEditor-run-query-button"
+                        aria-label={
+                          allowQueryCancellation && isLoading
+                            ? i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.cancel',
+                                {
+                                  defaultMessage: 'Cancel',
+                                }
+                              )
+                            : i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
+                                {
+                                  defaultMessage: 'Run query',
+                                }
+                              )
+                        }
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

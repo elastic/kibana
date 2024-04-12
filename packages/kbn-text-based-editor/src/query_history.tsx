@@ -47,16 +47,35 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="TextBasedLangEditor-toggle-query-history-icon">
-          <EuiIcon
-            type="clock"
-            color="primary"
-            size="m"
-            onClick={toggleHistory}
-            css={css`
-              margin-right: ${euiTheme.size.s};
-              cursor: pointer;
-            `}
-          />
+          <EuiToolTip
+            position="top"
+            content={
+              isHistoryOpen
+                ? i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel',
+                    {
+                      defaultMessage: 'Hide recent queries',
+                    }
+                  )
+                : i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.showQueriesLabel',
+                    {
+                      defaultMessage: 'Show recent queries',
+                    }
+                  )
+            }
+          >
+            <EuiIcon
+              type="clock"
+              color="primary"
+              size="m"
+              onClick={toggleHistory}
+              css={css`
+                margin-right: ${euiTheme.size.s};
+                cursor: pointer;
+              `}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
