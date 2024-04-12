@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
+
 export const getOriginalAlertIds = ({
   alertIds,
   replacements,
 }: {
   alertIds: string[];
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }): string[] =>
   alertIds.map((alertId) => (replacements != null ? replacements[alertId] ?? alertId : alertId));

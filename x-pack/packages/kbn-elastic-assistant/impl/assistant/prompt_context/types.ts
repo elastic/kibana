@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import type { ReactNode } from 'react';
 
@@ -58,7 +59,7 @@ export interface PromptContext {
   /**
    * Replacements associated with the context, i.e. replacements for an insight provided as context
    */
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 
   /**
    * An optional user prompt that's filled in, but not sent, when the Elastic AI Assistant opens
@@ -82,7 +83,7 @@ export interface SelectedPromptContext {
   /** this data is not anonymized  */
   rawData: string | Record<string, string[]>;
   /** replacements associated with the context, i.e. replacements for an insight provided as context */
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 /**

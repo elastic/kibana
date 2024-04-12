@@ -6,11 +6,12 @@
  */
 
 import { EuiMarkdownFormat } from '@elastic/eui';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 export interface Props {
   markdown: string;
-  replacements: Record<string, string>;
+  replacements: Replacements;
 }
 
 const ReplacementsContextViewerComponent: React.FC<Props> = ({ markdown, replacements }) => {

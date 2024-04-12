@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
+
 import { getTacticLabel, getTacticMetadata } from '../helpers';
 import type { AlertsInsight } from '../types';
 
@@ -35,7 +37,7 @@ export const getMarkdownWithOriginalValues = ({
   replacements,
 }: {
   markdown: string;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }): string => {
   if (replacements == null) {
     return markdown;
@@ -52,7 +54,7 @@ export const getAlertsInsightMarkdown = ({
   replacements,
 }: {
   insight: AlertsInsight;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }): string => {
   const title = getMarkdownFields(insight.title);
   const entitySummaryMarkdown = getMarkdownFields(insight.entitySummaryMarkdown);

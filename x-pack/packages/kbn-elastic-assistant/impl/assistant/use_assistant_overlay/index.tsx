@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
@@ -70,7 +71,7 @@ export const useAssistantOverlay = (
   /**
    * Optionally provide a map of replacements associated with the context, i.e. replacements for an insight that's provided as context
    */
-  replacements?: Record<string, string> | null
+  replacements?: Replacements | null
 ): UseAssistantOverlay => {
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);

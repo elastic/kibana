@@ -8,6 +8,7 @@
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback } from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
@@ -30,7 +31,7 @@ export const useAddToExistingCase = ({
   }: {
     alertIds: string[];
     markdownComments: string[];
-    replacements?: Record<string, string>;
+    replacements?: Replacements;
   }) => void;
 } => {
   const { cases } = useKibana().services;
@@ -51,7 +52,7 @@ export const useAddToExistingCase = ({
     }: {
       alertIds: string[];
       markdownComments: string[];
-      replacements?: Record<string, string>;
+      replacements?: Replacements;
     }) => {
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         comment: x,

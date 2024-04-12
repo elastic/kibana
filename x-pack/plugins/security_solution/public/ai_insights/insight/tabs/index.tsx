@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -14,7 +15,7 @@ import type { AlertsInsight } from '../../types';
 interface Props {
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
   showAnonymized?: boolean;
 }
 

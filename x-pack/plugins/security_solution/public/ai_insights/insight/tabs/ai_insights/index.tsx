@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
-// import { SendToTimelineButton } from '../../../../assistant/send_to_timeline';
 import { AttackChain } from '../../../attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../../detections/components/alerts_table/actions';
@@ -22,7 +22,7 @@ import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 interface Props {
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
   showAnonymized?: boolean;
 }
 

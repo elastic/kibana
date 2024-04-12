@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import React, { useMemo } from 'react';
 
@@ -14,7 +15,7 @@ import type { AlertsInsight } from '../../../types';
 
 interface Props {
   insight: AlertsInsight;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 const AlertsComponent: React.FC<Props> = ({ insight, replacements }) => {

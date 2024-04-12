@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { Replacements } from '@kbn/elastic-assistant-common';
+
 export const getReplacementsRecords = (
   replacements: Array<{ value: string; uuid: string }>
-): Record<string, string> =>
+): Replacements =>
   replacements.reduce<Record<string, string>>(
     (acc, { value, uuid }) => ({ ...acc, [uuid]: value }),
     {}
   );
 
 export const getReplacementsArray = (
-  replacements: Record<string, string>
+  replacements: Replacements
 ): Array<{ value: string; uuid: string }> =>
   Object.entries(replacements).map(([uuid, value]) => ({ uuid, value }));

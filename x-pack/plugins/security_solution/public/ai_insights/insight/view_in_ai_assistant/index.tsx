@@ -6,6 +6,7 @@
  */
 
 import { AssistantAvatar, useAssistantContext } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
@@ -16,7 +17,7 @@ interface Props {
   compact?: boolean;
   conversationTitle?: string;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 const ViewInAiAssistantComponent: React.FC<Props> = ({

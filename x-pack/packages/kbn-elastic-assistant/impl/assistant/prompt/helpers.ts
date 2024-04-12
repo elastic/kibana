@@ -47,7 +47,7 @@ export function getCombinedMessage({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   isNewChat: boolean;

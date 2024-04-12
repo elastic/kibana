@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 import { AlertsBadge } from './alerts_badge';
@@ -18,7 +19,7 @@ import type { AlertsInsight } from '../../types';
 interface Props {
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 const ActionsComponent: React.FC<Props> = ({ insight, promptContextId, replacements }) => {

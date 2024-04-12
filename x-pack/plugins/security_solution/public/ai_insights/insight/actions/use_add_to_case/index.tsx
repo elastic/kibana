@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import React, { useCallback, useMemo } from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -32,7 +33,7 @@ export const useAddToNewCase = ({
   }: {
     alertIds: string[];
     markdownComments: string[];
-    replacements?: Record<string, string>;
+    replacements?: Replacements;
   }) => void;
 } => {
   const { cases } = useKibana().services;
@@ -51,7 +52,7 @@ export const useAddToNewCase = ({
       alertIds: string[];
       headerContent?: React.ReactNode;
       markdownComments: string[];
-      replacements?: Record<string, string>;
+      replacements?: Replacements;
     }) => {
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         comment: x,
@@ -88,7 +89,7 @@ export const useAddToNewCase = ({
     }: {
       alertIds: string[];
       markdownComments: string[];
-      replacements?: Record<string, string>;
+      replacements?: Replacements;
     }) => {
       if (onClick) {
         onClick();

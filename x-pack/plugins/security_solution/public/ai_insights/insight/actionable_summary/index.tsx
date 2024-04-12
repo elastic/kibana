@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
 import { InsightMarkdownFormatter } from '../../insight_markdown_formatter';
@@ -15,7 +16,7 @@ import { ViewInAiAssistant } from '../view_in_ai_assistant';
 interface Props {
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
   showAnonymized?: boolean;
 }
 

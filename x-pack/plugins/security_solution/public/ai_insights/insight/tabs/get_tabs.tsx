@@ -6,6 +6,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
 import { AiInsights } from './ai_insights';
@@ -27,7 +28,7 @@ export const getTabs = ({
 }: {
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
   showAnonymized?: boolean;
 }): TabInfo[] => [
   {

@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -27,7 +29,7 @@ interface Props {
   conversationTitle?: string;
   insight: AlertsInsight;
   promptContextId: string | undefined;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 const TakeActionComponent: React.FC<Props> = ({

@@ -8,6 +8,7 @@
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionableSummary } from './actionable_summary';
@@ -29,7 +30,7 @@ interface Props {
   initialIsOpen?: boolean;
   insight: AlertsInsight;
   onToggle?: (newState: 'open' | 'closed') => void;
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
   showAnonymized?: boolean;
 }
 
