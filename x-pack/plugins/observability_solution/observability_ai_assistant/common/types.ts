@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IconType } from '@elastic/eui';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
@@ -118,6 +119,12 @@ export interface ScreenContextActionDefinition<TArguments = undefined> {
   respond: ScreenContextActionRespondFunction<TArguments>;
 }
 
+export interface StarterPrompt {
+  title: string;
+  prompt: string;
+  icon: IconType;
+}
+
 export interface ObservabilityAIAssistantScreenContext {
   screenDescription?: string;
   data?: Array<{
@@ -126,4 +133,5 @@ export interface ObservabilityAIAssistantScreenContext {
     value: any;
   }>;
   actions?: ScreenContextActionDefinition[];
+  starterPrompts?: StarterPrompt[];
 }
