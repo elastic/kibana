@@ -48,18 +48,6 @@ export const DAYS = (timeValue: string) =>
     values: { timeValue },
   });
 
-export const YEARS = (timeValue: string) =>
-  i18n.translate('xpack.cases.systemActions.casesConnector.yearsLabel', {
-    defaultMessage: '{timeValue, plural, one {year} other {years}}',
-    values: { timeValue },
-  });
-
-export const MONTHS = (timeValue: string) =>
-  i18n.translate('xpack.cases.systemActions.casesConnector.monthsLabel', {
-    defaultMessage: '{timeValue, plural, one {month} other {months}}',
-    values: { timeValue },
-  });
-
 export const WEEKS = (timeValue: string) =>
   i18n.translate('xpack.cases.systemActions.casesConnector.weeksLabel', {
     defaultMessage: '{timeValue, plural, one {week} other {weeks}}',
