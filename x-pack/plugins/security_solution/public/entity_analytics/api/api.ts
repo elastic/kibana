@@ -34,6 +34,9 @@ import type { RiskEngineSettingsResponse } from '../../../common/api/entity_anal
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
+export interface DeleteAssetCriticalityResponse {
+  deleted: true;
+}
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
@@ -126,6 +129,19 @@ export const useEntityAnalyticsRoutes = () => {
         }),
       });
 
+    const deleteAssetCriticality = async (
+      params: Pick<AssetCriticality, 'idField' | 'idValue'>
+    ): Promise<{ deleted: true }> => {
+      await http.fetch(ASSET_CRITICALITY_URL, {
+        version: '1',
+        method: 'DELETE',
+        query: { id_value: params.idValue, id_field: params.idField },
+      });
+
+      // spoof a response to allow us to better distnguish a delete from a create in use_asset_criticality.ts
+      return { deleted: true };
+    };
+
     /**
      * Get asset criticality
      */
@@ -178,6 +194,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
+      deleteAssetCriticality,
       fetchAssetCriticality,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
