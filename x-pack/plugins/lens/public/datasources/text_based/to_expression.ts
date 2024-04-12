@@ -48,13 +48,10 @@ function getExpressionForLayer(
       titleForInspector: i18n.translate('xpack.lens.inspectorTextBasedRequestDataTitle', {
         defaultMessage: 'Visualization',
       }),
-      descriptionForInspector: i18n.translate(
-        'xpack.lens.inspectorTextBasedRequestDescriptionDocument',
-        {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the data for the visualization.',
-        }
-      ),
+      descriptionForInspector: i18n.translate('xpack.lens.inspectorTextBasedRequestDescription', {
+        defaultMessage:
+          'This request queries Elasticsearch to fetch the data for the visualization.',
+      }),
     });
 
     textBasedQueryToAst.chain.push({

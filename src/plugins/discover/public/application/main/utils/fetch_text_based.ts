@@ -42,15 +42,12 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestDataTitle', {
+    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
       defaultMessage: 'ES|QL',
     }),
-    descriptionForInspector: i18n.translate(
-      'discover.inspectorTextBasedRequestDescriptionDocument',
-      {
-        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-      }
-    ),
+    descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
   })
     .then((ast) => {
       if (ast) {
