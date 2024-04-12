@@ -1120,6 +1120,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
+/src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
