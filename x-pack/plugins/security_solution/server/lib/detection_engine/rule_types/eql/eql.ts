@@ -150,7 +150,7 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
-        if (isAlertSuppressionActive && completeRule.ruleParams.alertSuppression) {
+        if (isAlertSuppressionActive) {
           result.warningMessages.push(
             'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
           );
