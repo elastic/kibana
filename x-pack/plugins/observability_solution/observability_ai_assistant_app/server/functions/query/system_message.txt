@@ -83,6 +83,7 @@ MIN
 PERCENTILE
 ST_CENTROID
 SUM
+VALUES
 
 ### Mathematical functions
 
@@ -254,4 +255,12 @@ FROM logs-*
 | WHERE @timestamp <= NOW() - 24 hours
 | STATS count = COUNT(*) by log.level
 | SORT count DESC
+```
+
+returns all first names for each first letter
+```esql
+FROM employees
+| EVAL first_letter = SUBSTRING(first_name, 0, 1)
+| STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter
+| SORT first_letter
 ```
