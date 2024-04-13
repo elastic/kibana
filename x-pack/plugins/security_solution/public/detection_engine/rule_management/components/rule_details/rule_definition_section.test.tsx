@@ -119,7 +119,7 @@ describe('RuleDefinitionSection', () => {
       );
     });
 
-    test('should not render anything when isSuppressionEnabled is false', () => {
+    test('does not render suppression fields when isSuppressionEnabled is false', () => {
       const rule: Partial<RuleResponse> = {
         alert_suppression: {
           group_by: ['field1', 'field2'],
@@ -140,7 +140,8 @@ describe('RuleDefinitionSection', () => {
         screen.queryByTestId('alertSuppressionMissingFieldPropertyTitle')
       ).not.toBeInTheDocument();
     });
-    test('should not render anything when alert_suppression property is not present in the rule', () => {
+
+    test('does not render suppression fields when alert_suppression property is not present in the rule', () => {
       const rule: Partial<RuleResponse> = {};
 
       jest
