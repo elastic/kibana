@@ -41,11 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   async function cleanUpTransform(transformId: string) {
-    const destinationIndex = generateDestIndex(transformId);
-
-    await transform.api.stopTransform(transformId);
     await transform.api.cleanTransformIndices();
-    await transform.api.deleteIndices(destinationIndex);
+    await transform.api.deleteIndices(generateDestIndex(transformId));
   }
 
   // If transform was created with sufficient permissions -> should create and start
@@ -234,9 +231,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await transform.api.stopTransform(id);
-        });
         await transform.api.cleanTransformIndices();
         await asyncForEach(destinationIndices, async (destinationIndex: string) => {
           await transform.api.deleteIndices(destinationIndex);

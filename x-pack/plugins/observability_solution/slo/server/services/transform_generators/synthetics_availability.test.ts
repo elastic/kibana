@@ -24,13 +24,13 @@ describe('Synthetics Availability Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 3,
+        version: 3.1,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v3',
-        pipeline: '.slo-observability.sli.pipeline-v3',
+        index: '.slo-observability.sli-v3.1',
+        pipeline: '.slo-observability.sli.pipeline-v3.1',
       },
       frequency: '1m',
       pivot: {
@@ -87,11 +87,6 @@ describe('Synthetics Availability Transform Generator', () => {
               field: 'slo.id',
             },
           },
-          'slo.instanceId': {
-            terms: {
-              field: 'slo.instanceId',
-            },
-          },
           'slo.revision': {
             terms: {
               field: 'slo.revision',
@@ -132,12 +127,6 @@ describe('Synthetics Availability Transform Generator', () => {
           'slo.id': {
             script: {
               source: "emit('irrelevant')",
-            },
-            type: 'keyword',
-          },
-          'slo.instanceId': {
-            script: {
-              source: "emit('*')",
             },
             type: 'keyword',
           },

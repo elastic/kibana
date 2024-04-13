@@ -10,8 +10,8 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
@@ -32,11 +32,10 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
   transformESToPrompts,
+  transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
-import {
-  SearchEsPromptsSchema,
-  UpdatePromptSchema,
-} from '../../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -124,7 +123,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
@@ -152,7 +151,15 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
+          }
 
           const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
           if (authenticatedUser == null) {
@@ -164,7 +171,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+            const result = await dataClient?.findDocuments<EsPromptsSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -202,23 +209,18 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
               getUpdateScript({ prompt: document, isPatch: true }),
             authenticatedUser,
           });
-
-          const created = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsPromptsSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToPrompts(updated.data) : [],
-            created: created?.data ? transformESToPrompts(created.data) : [],
+            updated: docsUpdated ? transformESToPrompts(docsUpdated as EsPromptsSchema[]) : [],
+            created: created ? transformESSearchToPrompts(created.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

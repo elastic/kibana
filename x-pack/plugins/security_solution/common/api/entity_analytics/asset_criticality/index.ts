@@ -7,3 +7,4 @@
 
 export * from './common.gen';
 export * from './get_asset_criticality_status.gen';
+export * from './upload_asset_criticality_csv.gen';
