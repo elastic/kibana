@@ -51,6 +51,31 @@ function getMetricAggregation({ field, type }: { field?: string; type: MetricTyp
   };
 }
 
+function getGroupingAggregation(groupingFields: string[]) {
+  if (groupingFields.length === 0) {
+    return {
+      filters: {
+        filters: [
+          {
+            match_all: {},
+          },
+        ],
+      },
+    };
+  }
+
+  if (groupingFields.length === 1) {
+    return { terms: { field: groupingFields[0] } };
+  }
+
+  return {
+    multi_terms: {
+      terms: groupingFields.map((groupingField) => ({ field: groupingField })),
+      size: 10,
+    },
+  };
+}
+
 export async function getMetricChanges({
   index,
   filters,
@@ -73,24 +98,7 @@ export async function getMetricChanges({
     field,
   });
 
-  const groupAgg = groupBy.length
-    ? groupBy.length === 1
-      ? { terms: { field: groupBy[0] } }
-      : {
-          multi_terms: {
-            terms: groupBy.map((groupingField) => ({ field: groupingField })),
-            size: 10,
-          },
-        }
-    : {
-        filters: {
-          filters: [
-            {
-              match_all: {},
-            },
-          ],
-        },
-      };
+  const groupAgg = getGroupingAggregation(groupBy);
 
   const subAggs = {
     over_time: {

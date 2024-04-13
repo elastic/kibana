@@ -9,6 +9,7 @@ import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/commo
 import { compact, mapValues, omit, uniq } from 'lodash';
 import datemath from '@elastic/datemath';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { getTypedSearch } from '../utils/create_typed_es_client';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerGetApmDatasetInfoFunction({
@@ -56,8 +57,9 @@ export function registerGetApmDatasetInfoFunction({
           .map((index) => index.trim())
       );
 
-      const esClient = (await resources.context.core).elasticsearch.client
-        .asCurrentUser;
+      const search = getTypedSearch(
+        (await resources.context.core).elasticsearch.client.asCurrentUser
+      );
 
       const startInMs = datemath.parse(start ?? 'now-24h')!.valueOf();
       const endInMs = datemath.parse(end ?? 'now')!.valueOf();
@@ -65,7 +67,7 @@ export function registerGetApmDatasetInfoFunction({
       const indicesWithData = compact(
         await Promise.all(
           allIndices.map(async (index) => {
-            const response = await esClient.search({
+            const response = await search({
               index,
               size: 0,
               track_total_hits: 1,

@@ -21,7 +21,8 @@ export const changesFunctionParameters = {
       description: 'The end of the time range, in datemath, like now, or an ISO timestamp',
     },
     logs: {
-      description: 'Analyze changes in log patterns',
+      description:
+        'Analyze changes in log patterns. If no index is given, the default logs index pattern will be used',
       type: 'array',
       items: {
         type: 'object',
@@ -44,7 +45,7 @@ export const changesFunctionParameters = {
               'The text field that contains the message to be analyzed, usually `message`. ONLY use field names from the conversation.',
           },
         },
-        required: ['index', 'name'],
+        required: ['name'],
       },
     },
     metrics: {

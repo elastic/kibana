@@ -7,6 +7,7 @@
 import { omit, orderBy } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
 import {
@@ -20,7 +21,7 @@ export function registerChangesFunction({
   functions,
   resources: {
     logger,
-    context: { core },
+    context: { core: corePromise },
   },
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
@@ -36,8 +37,13 @@ export function registerChangesFunction({
       if (logs.length === 0 && metrics.length === 0) {
         throw new Error('No metrics or logs were defined');
       }
+
+      const core = await corePromise;
+
+      const logsIndexPattern = await core.uiSettings.client.get(aiAssistantLogsIndexPattern);
+
       const client = createElasticsearchClient({
-        client: (await core).elasticsearch.client.asCurrentUser,
+        client: core.elasticsearch.client.asCurrentUser,
         logger,
         inspect: logger.isLevelEnabled('debug'),
       });
@@ -85,7 +91,7 @@ export function registerChangesFunction({
         Promise.all([
           ...logs.map(async (log) => {
             const changes = await getLogChanges({
-              index: log.index,
+              index: log.index || logsIndexPattern,
               client,
               filters: [
                 ...commonFilters,
