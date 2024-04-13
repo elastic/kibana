@@ -17,7 +17,10 @@ import {
   TIMESTAMP,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
@@ -36,8 +39,10 @@ import {
   patchRule,
   setAlertStatus,
   fetchRule,
+  previewRuleWithExceptionEntries,
 } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>
@@ -1520,6 +1525,171 @@ export default ({ getService }: FtrProviderContext) => {
             total_search_duration_ms: expect.any(Number),
           })
         );
+      });
+
+      describe('with exceptions', () => {
+        beforeEach(async () => {
+          await deleteAllExceptions(supertest, log);
+        });
+
+        it('applies exceptions to what would otherwise be suppressed alerts', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:45:00.000Z';
+          const laterTimestamp = '2020-10-28T06:50:00.000Z';
+
+          const firstExecutionDocuments = [
+            {
+              host: { name: 'host-a', ip: '127.0.0.3' },
+              id,
+              '@timestamp': timestamp,
+            },
+            {
+              host: { name: 'host-a', ip: '127.0.0.4' },
+              id,
+              '@timestamp': timestamp,
+            },
+            {
+              host: { name: 'host-a', ip: '127.0.0.5' },
+              id,
+              '@timestamp': laterTimestamp,
+            },
+          ];
+
+          await indexListOfSourceDocuments([...firstExecutionDocuments]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRuleWithExceptionEntries({
+            supertest,
+            rule,
+            log,
+            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+            entries: [
+              [
+                {
+                  field: 'host.ip',
+                  operator: 'included',
+                  type: 'match',
+                  value: '127.0.0.4',
+                },
+              ],
+            ],
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: [ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: ['host-a'],
+              },
+            ],
+            [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+            [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // one of the three events was excluded by the exception
+          });
+        });
+      });
+
+      describe('alert enrichment', () => {
+        const kibanaServer = getService('kibanaServer');
+
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+          await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+          await kibanaServer.uiSettings.update({
+            [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+          });
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+          await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        });
+
+        it('suppressed alerts are enriched with host risk score', async () => {
+          const eventId = uuidv4();
+          await indexGeneratedSourceDocuments({
+            docsCount: 1,
+            seed: (_index, _id, timestamp) => ({
+              id: eventId,
+              '@timestamp': timestamp,
+              host: { name: 'suricata-zeek-sensor-toronto' },
+            }),
+          });
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(eventId),
+            alert_suppression: {
+              group_by: ['host.name'],
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            to: 'now',
+          };
+
+          const { previewId } = await previewRule({ supertest, rule });
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+          expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toBe('Critical');
+          expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toBe(96);
+        });
+
+        it('suppressed alerts are enriched with criticality_level', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:45:00.000Z';
+
+          const firstExecutionDocuments = [
+            {
+              host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
+              user: { name: 'root' },
+              id,
+              '@timestamp': timestamp,
+            },
+          ];
+
+          await indexListOfSourceDocuments([...firstExecutionDocuments]);
+
+          const rule: EqlRuleCreateProps = {
+            ...getEqlRuleForAlertTesting(['ecs_compliant']),
+            query: getQuery(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              missing_fields_strategy: 'suppress',
+            },
+            from: 'now-35m',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          });
+          const previewAlerts = await getPreviewAlerts({ es, previewId });
+          const fullAlert = previewAlerts[0]._source;
+
+          expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+          expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
+        });
       });
     });
 
