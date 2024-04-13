@@ -560,6 +560,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });
+    plugins.elasticAssistant.registerFeatures('management', {
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+    });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

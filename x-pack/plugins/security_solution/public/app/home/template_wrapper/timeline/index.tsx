@@ -19,7 +19,9 @@ export const Timeline = React.memo(() => {
 
   const { onAppLeave } = useKibana().services;
 
-  return <TimelineWrapper timelineId={TimelineId.active} onAppLeave={onAppLeave} />;
+  // TODO: Fix types
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return <TimelineWrapper timelineId={TimelineId.active} onAppLeave={onAppLeave!} />;
 });
 
 Timeline.displayName = 'Timeline';
