@@ -146,7 +146,7 @@ describe('RuleDefinitionSection', () => {
 
       jest
         .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: false });
+        .mockReturnValueOnce({ isSuppressionEnabled: true });
 
       render(<RuleDefinitionSection rule={rule} />);
 
