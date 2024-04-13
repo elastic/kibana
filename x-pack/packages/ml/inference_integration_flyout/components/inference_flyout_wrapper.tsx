@@ -49,10 +49,12 @@ const tabs: Tab[] = [
 interface TabProps {
   setActiveTab: (id: TabType) => void;
   activeTab: TabType;
+  setInferenceEndpointError: (error: string | undefined) => void;
 }
 const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = ({
   setActiveTab,
   activeTab,
+  setInferenceEndpointError,
 }) => {
   return (
     <EuiTabs>
@@ -60,6 +62,7 @@ const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = ({
         <EuiTab
           onClick={() => {
             setActiveTab(tab.id);
+            setInferenceEndpointError(undefined);
           }}
           isSelected={tab.id === activeTab}
           key={tab.id}
@@ -92,6 +95,7 @@ export interface InferenceFlyoutProps extends SaveMappingOnClick, DocumentationP
   trainedModels: string[];
   onInferenceEndpointChange: (inferenceId: string) => void;
   inferenceEndpointError?: string;
+  setInferenceEndpointError: (error: string | undefined) => void;
 }
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   onSaveInferenceEndpoint,
@@ -106,6 +110,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   isCreateInferenceApiLoading,
   onInferenceEndpointChange,
   inferenceEndpointError = undefined,
+  setInferenceEndpointError,
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.elasticsearch_models);
   const tabToInferenceContentMap: Record<TabType, React.ReactNode> = {
@@ -138,7 +143,11 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutProps> = ({
   const content: React.ReactNode = (
     <>
       {errorCallout}
-      <InferenceEndpointFlyoutTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <InferenceEndpointFlyoutTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setInferenceEndpointError={setInferenceEndpointError}
+      />
 
       <EuiSpacer size="l" />
       {tabContent}

@@ -325,6 +325,7 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
               supportedNlpModels={docLinks.links.enterpriseSearch.supportedNlpModels}
               nlpImportModel={docLinks.links.ml.nlpImportModel}
               isCreateInferenceApiLoading={isCreateInferenceApiLoading}
+              setInferenceEndpointError={setInferenceEndpointError}
             />
           )}
         </EuiFlexItem>

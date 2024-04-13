@@ -20,6 +20,8 @@ export const DEFAULT_VALUES: InferenceFlyoutProps = {
   onSaveInferenceEndpoint: jest.fn(),
   trainedModels: [],
   isCreateInferenceApiLoading: false,
+  onInferenceEndpointChange: jest.fn(),
+  setInferenceEndpointError: jest.fn(),
 };
 describe('<InferenceFlyoutWrapper />', () => {
   beforeEach(() => {
