@@ -262,7 +262,10 @@ export const assertAlertSuppressionPropertiesShown = (alertSuppression: AlertSup
   cy.get(ALERT_SUPPRESSION_DURATION_TITLE).should('contain', 'Suppress alerts for');
   cy.get(ALERT_SUPPRESSION_DURATION_VALUE).should('contain', `${duration.value}${duration.unit}`);
 
-  cy.get(ALERT_SUPPRESSION_MISSING_FIELD_TITLE).should('contain', 'If a suppression field is missing');
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELD_TITLE).should(
+    'contain',
+    'If a suppression field is missing'
+  );
   cy.get(ALERT_SUPPRESSION_MISSING_FIELD_VALUE).should(
     'contain',
     'Suppress and group alerts for events with missing fields'
