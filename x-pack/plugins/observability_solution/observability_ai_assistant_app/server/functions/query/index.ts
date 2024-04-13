@@ -25,6 +25,7 @@ import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plu
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import { correctQueryWithActions } from './correct_query_with_actions';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -353,14 +354,14 @@ export function registerQueryFunction({
       });
 
       return esqlResponse$.pipe(
-        emitWithConcatenatedMessage((msg) => {
+        emitWithConcatenatedMessage(async (msg) => {
           if (msg.message.function_call.name) {
             return msg;
           }
-
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
+          let esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
+          esqlQuery = await correctQueryWithActions(esqlQuery ?? '');
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 

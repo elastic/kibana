@@ -47,8 +47,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
     const {
       alertsIndexPattern,
-      allow,
-      allowReplacement,
+      anonymizationFields,
       esClient,
       onNewReplacements,
       replacements,
@@ -60,7 +59,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       func: async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
-          allow: allow ?? [],
+          anonymizationFields: anonymizationFields ?? [],
           size,
         });
 
@@ -78,8 +77,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         return JSON.stringify(
           result.hits?.hits?.map((x) =>
             transformRawData({
-              allow: allow ?? [],
-              allowReplacement: allowReplacement ?? [],
+              anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback

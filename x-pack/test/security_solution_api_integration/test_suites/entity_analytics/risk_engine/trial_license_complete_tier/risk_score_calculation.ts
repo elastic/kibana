@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
-import {
-  ENABLE_ASSET_CRITICALITY_SETTING,
-  RISK_SCORE_CALCULATION_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
@@ -29,6 +26,7 @@ import {
   getLatestRiskScoreIndexMapping,
   riskEngineRouteHelpersFactory,
   cleanRiskEngine,
+  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -80,9 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless Risk Scoring Calculation API', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-      });
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {

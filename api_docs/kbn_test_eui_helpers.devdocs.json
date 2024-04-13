@@ -204,10 +204,10 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test-eui-helpers",
-        "id": "def-common.getButtonGroupInputValue",
+        "id": "def-common.getSelectedButtonInGroup",
         "type": "Function",
         "tags": [],
-        "label": "getButtonGroupInputValue",
+        "label": "getSelectedButtonInGroup",
         "description": [],
         "signature": [
           "(testId: string) => () => HTMLElement"
@@ -218,7 +218,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-eui-helpers",
-            "id": "def-common.getButtonGroupInputValue.$1",
+            "id": "def-common.getSelectedButtonInGroup.$1",
             "type": "string",
             "tags": [],
             "label": "testId",
