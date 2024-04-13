@@ -51,29 +51,27 @@ interface TabProps {
   activeTab: TabType;
   setInferenceEndpointError: (error: string | undefined) => void;
 }
-const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = ({
-  setActiveTab,
-  activeTab,
-  setInferenceEndpointError,
-}) => {
-  return (
-    <EuiTabs>
-      {tabs.map((tab) => (
-        <EuiTab
-          onClick={() => {
-            setActiveTab(tab.id);
-            setInferenceEndpointError(undefined);
-          }}
-          isSelected={tab.id === activeTab}
-          key={tab.id}
-          data-test-subj={`${tab.id}Tab`}
-        >
-          {tab.name}
-        </EuiTab>
-      ))}
-    </EuiTabs>
-  );
-};
+const InferenceEndpointFlyoutTabs: React.FunctionComponent<TabProps> = React.memo(
+  ({ setActiveTab, activeTab, setInferenceEndpointError }) => {
+    return (
+      <EuiTabs>
+        {tabs.map((tab) => (
+          <EuiTab
+            onClick={() => {
+              setActiveTab(tab.id);
+              setInferenceEndpointError(undefined);
+            }}
+            isSelected={tab.id === activeTab}
+            key={tab.id}
+            data-test-subj={`${tab.id}Tab`}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+    );
+  }
+);
 export interface SaveMappingOnClick {
   onSaveInferenceEndpoint: (
     inferenceId: string,
