@@ -128,7 +128,7 @@ export const getTableColumns = (
                 content={i18n.translate(
                   'textBasedEditor.query.textBasedLanguagesEditor.querieshistory.success',
                   {
-                    defaultMessage: 'Query run successfully',
+                    defaultMessage: 'Query ran successfully',
                   }
                 )}
               >
