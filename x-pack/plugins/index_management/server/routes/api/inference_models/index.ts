@@ -8,9 +8,7 @@
 import { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute } from './register_get_route';
-import { registerAddInferenceModel } from './register_put_inference_route';
 
 export function registerInferenceModelRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
-  registerAddInferenceModel(dependencies);
 }

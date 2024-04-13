@@ -7,8 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
-import { IndicesStatsResponse, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig } from '@kbn/inference_integration_flyout/types';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   API_BASE_PATH,
@@ -447,18 +446,5 @@ export function useLoadInferenceModels() {
   return useRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',
-  });
-}
-export function createInferenceEndpoint(
-  modelId: string,
-  taskType: InferenceTaskType,
-  modelConfig: ModelConfig
-) {
-  return sendRequest({
-    path: `${API_BASE_PATH}/inference/${encodeURIComponent(taskType)}/${encodeURIComponent(
-      modelId
-    )}`,
-    method: 'put',
-    body: JSON.stringify({ ...modelConfig }),
   });
 }
