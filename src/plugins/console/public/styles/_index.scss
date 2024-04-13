@@ -12,10 +12,14 @@
   resize: horizontal;
 
   .ace_scroller {
-    right: 10px !important;
+    right: 6px !important;
+
+    .ace_rightAlignedText {
+      right: 10px;
+    }
   }
 
   .ace_scrollbar.ace_scrollbar-v {
-    bottom: 10px !important;
+    bottom: 6px !important;
   }
 }
