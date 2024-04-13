@@ -14,7 +14,7 @@ import {
   SyntheticsMonitorCodec,
   ServiceLocationErrorsResponse,
 } from '../../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export type UpsertMonitorResponse = ServiceLocationErrorsResponse | EncryptedSyntheticsMonitor;
 
@@ -23,7 +23,9 @@ export const createMonitorAPI = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor);
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export interface MonitorInspectResponse {
@@ -50,7 +52,10 @@ export const updateMonitorAPI = async ({
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
   id: string;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+  return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor, null, {
+    ui: true,
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitor> =>
@@ -58,6 +63,7 @@ export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<Sy
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id),
     {
       decrypted: true,
+      version: INITIAL_REST_VERSION,
     },
     SyntheticsMonitorCodec
   );

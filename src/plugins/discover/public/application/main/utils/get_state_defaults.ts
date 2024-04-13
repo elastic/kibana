@@ -48,7 +48,7 @@ export function getStateDefaults({
 
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const isTextBasedQueryMode = isTextBasedQuery(query);
-  const sort = getSortArray(savedSearch.sort ?? [], dataView!);
+  const sort = getSortArray(savedSearch.sort ?? [], dataView!, isTextBasedQueryMode);
   const columns = getDefaultColumns(savedSearch, uiSettings);
   const chartHidden = getChartHidden(storage, 'discover');
 
@@ -58,7 +58,8 @@ export function getStateDefaults({
       ? getDefaultSort(
           dataView,
           uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+          uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+          isTextBasedQueryMode
         )
       : sort,
     columns,

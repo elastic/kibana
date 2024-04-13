@@ -45,7 +45,7 @@ export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_
 export const AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
   MANUAL: 'manual',
-};
+} as const;
 
 export const AZURE_CREDENTIALS_TYPE = {
   ARM_TEMPLATE: 'arm_template',

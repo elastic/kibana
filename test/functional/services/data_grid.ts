@@ -83,7 +83,7 @@ export class DataGridService extends FtrService {
   }
 
   private getCellElementSelector(rowIndex: number = 0, columnIndex: number = 0) {
-    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`;
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`;
   }
 
   /**

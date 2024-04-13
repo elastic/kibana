@@ -39,7 +39,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   const [viewInMlLink, setViewInMlLink] = useState<string>('');
 
   const getMlUrl = async () => {
-    if (!ml.locator) {
+    if (!ml?.locator) {
       toasts.addWarning({
         title: mlNotAvailableMessage,
       });
