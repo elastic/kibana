@@ -34,12 +34,12 @@ export const getESQLKeywordFieldStats = async ({
   const keywordFields = columns.map((field) => {
     const query =
       esqlBaseQuery +
-      `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
+      `| STATS ${getSafeESQLName(`${field.name}_in_records`)} = count(MV_MIN(${getSafeESQLName(
         field.name
-      )}) BY ${getSafeESQLName(field.name)}
-    | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC
+      )})), ${getSafeESQLName(`${field.name}_in_values`)} = count(${getSafeESQLName(field.name)})
+      BY ${getSafeESQLName(field.name)}
+    | SORT ${getSafeESQLName(`${field.name}_in_records`)} DESC
     | LIMIT 10`;
-
     return {
       field,
       request: {
@@ -64,21 +64,29 @@ export const getESQLKeywordFieldStats = async ({
         if (!resp) return;
 
         if (isFulfilled(resp)) {
-          const results = resp.value?.rawResponse?.values as Array<[BucketCount, BucketTerm]>;
+          const results = resp.value?.rawResponse?.values as Array<
+            [BucketCount, BucketCount, BucketTerm]
+          >;
 
           if (results) {
             const topValuesSampleSize = results.reduce((acc, row) => {
-              return row[0] + acc;
+              return row[1] + acc;
             }, 0);
 
+            const sampledValues = results.map((row) => ({
+              key: row[2],
+              doc_count: row[1],
+            }));
+
             const terms = results.map((row) => ({
-              key: row[1],
+              key: row[2],
               doc_count: row[0],
             }));
 
             return {
               fieldName: field.name,
               topValues: terms,
+              sampledValues,
               isTopValuesSampled: true,
               topValuesSampleSize,
             } as StringFieldStats;
