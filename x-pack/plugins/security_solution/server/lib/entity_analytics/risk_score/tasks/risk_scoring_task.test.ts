@@ -20,6 +20,7 @@ import {
   removeRiskScoringTask,
   runTask,
 } from './risk_scoring_task';
+import type { ConfigType } from '../../../../config';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
@@ -27,7 +28,8 @@ const entityAnalyticsConfig = {
   riskEngine: {
     alertSampleSizePerShard: 10_000,
   },
-};
+} as unknown as ConfigType['entityAnalytics'];
+
 describe('Risk Scoring Task', () => {
   let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
   let mockRiskScoreService: ReturnType<typeof riskScoreServiceMock.create>;

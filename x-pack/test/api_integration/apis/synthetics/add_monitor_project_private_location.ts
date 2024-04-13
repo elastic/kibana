@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     let testPolicyId = '';
+    const testPolicyName = 'Fleet test server policy' + Date.now();
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -41,7 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(editedBodyError.updatedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors[0].details).eql(
-        'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
+        `Invalid locations specified. Private Location(s) 'Test private location 8' not found. Available private locations are 'Test private location 0'`
       );
       expect(editedBodyError.failedMonitors[0].reason).eql(
         "Couldn't save or update monitor because of an invalid configuration."
