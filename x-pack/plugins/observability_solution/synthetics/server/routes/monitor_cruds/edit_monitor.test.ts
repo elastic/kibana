@@ -90,7 +90,6 @@ describe('syncEditedMonitor', () => {
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
-      previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
       routeContext: {
