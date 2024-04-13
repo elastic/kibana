@@ -57,12 +57,10 @@ const getJobParams =
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
-  toasts,
-  uiSettings,
   license,
   application,
+  startServices$,
   usesUiCapabilities,
-  theme,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -150,15 +148,13 @@ export const reportingScreenshotShareProvider = ({
         content: (
           <ScreenCapturePanelContent
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
             reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
+            startServices$={startServices$}
           />
         ),
       },
@@ -184,9 +180,8 @@ export const reportingScreenshotShareProvider = ({
         title: pdfPanelTitle,
         content: (
           <ScreenCapturePanelContent
+            startServices$={startServices$}
             apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
             reportType={pdfReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
@@ -194,7 +189,6 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
-            theme={theme}
           />
         ),
       },
