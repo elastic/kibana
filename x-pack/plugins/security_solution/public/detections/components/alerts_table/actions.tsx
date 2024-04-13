@@ -42,6 +42,7 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
+import { isEqlRule } from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
@@ -275,9 +276,7 @@ export const isThresholdAlert = (ecsData: Ecs): boolean => {
 
 export const isEqlAlert = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return (
-    ruleType === 'eql' || (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'eql')
-  );
+  return isEqlRule(ruleType) || (Array.isArray(ruleType) && isEqlRule(ruleType[0]));
 };
 
 export const isNewTermsAlert = (ecsData: Ecs): boolean => {
