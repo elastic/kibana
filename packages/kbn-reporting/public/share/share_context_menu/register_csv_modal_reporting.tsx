@@ -167,14 +167,14 @@ export const reportingCsvShareProvider = ({
           dataTestSubj: 'shareReportingCopyURL',
           label: 'Post URL',
         },
-        generateReportButton: (
+        generateExportButton: (
           <FormattedMessage
             id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />
         ),
-        generateReport: generateReportingJobCSV,
+        generateExport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
         renderCopyURLButton: true,

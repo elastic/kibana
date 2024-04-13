@@ -274,14 +274,20 @@ export const reportingExportModalProvider = ({
       apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
     );
 
-    const generateReportPDF = ({ intl }: { intl: InjectedIntl }) => {
+    const generateReportPDF = ({
+      intl,
+      optimizedForPrinting = false,
+    }: {
+      intl: InjectedIntl;
+      optimizedForPrinting?: boolean;
+    }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
-        layout: { id: 'preserve_layout', dimensions },
+        layout: { id: optimizedForPrinting ? 'print' : 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
       });
@@ -316,65 +322,6 @@ export const reportingExportModalProvider = ({
             ),
             'data-test-subj': 'queueReportSuccess',
           });
-          if (onClose) {
-            onClose();
-          }
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: error.body?.message,
-          });
-        });
-    };
-
-    const generateReportPDFForPrinting = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
-      const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
-        layout: { id: 'print', dimensions },
-        objectType,
-        title: sharingData.title,
-      });
-      return apiClient
-        .createReportingJob('printablePdfV2', decoratedJobParams)
-        .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              { theme, i18n: i18nStart }
-            ),
-            'data-test-subj': 'queueReportSuccess',
-          });
-          if (onClose) {
-            onClose();
-          }
         })
         .catch((error: any) => {
           toasts.addError(error, {
@@ -428,9 +375,6 @@ export const reportingExportModalProvider = ({
             ),
             'data-test-subj': 'queueReportSuccess',
           });
-          if (onClose) {
-            onClose();
-          }
         })
         .catch((error: any) => {
           toasts.addError(error, {
@@ -453,8 +397,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      generateReportForPrinting: generateReportPDFForPrinting,
-      generateReport: generateReportPDF,
+      generateExport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
@@ -463,7 +406,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateReportButton: (
+      generateExportButton: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
           defaultMessage="Generate export"
@@ -486,9 +429,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      // avoids a bug where for printing toggled to on for PDF and then radio is selected for PNG
-      generateReportForPrinting: generateReportPNG,
-      generateReport: generateReportPNG,
+      generateExport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
@@ -497,7 +438,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateReportButton: (
+      generateExportButton: (
         <FormattedMessage
           id="reporting.pngV2.generateButtonLabel"
           defaultMessage="Generate export"

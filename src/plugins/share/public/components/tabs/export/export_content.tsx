@@ -25,16 +25,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ShareMenuItem } from '../../../types';
+import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
-  aggregateReportTypes: ShareMenuItem[];
+  aggregateReportTypes: ShareMenuItemV2[];
   intl: InjectedIntl;
 };
-
-type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'lens_csv';
 
 interface ICopyPOSTUrlProps {
   unsavedChangesExist: boolean;
@@ -64,9 +62,9 @@ const CopyPOSTUrlButton = ({ unsavedChangesExist, postUrl }: ICopyPOSTUrlProps) 
             {(copy) => (
               <EuiButtonEmpty
                 iconType="copy"
-                flush="both"
                 onClick={copy}
                 data-test-subj="shareReportingCopyURL"
+                flush="both"
               >
                 <FormattedMessage
                   id="share.modalContent.copyUrlButtonLabel"
@@ -104,13 +102,19 @@ const CopyPOSTUrlButton = ({ unsavedChangesExist, postUrl }: ICopyPOSTUrlProps) 
   );
 };
 
-const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: ExportProps) => {
-  // needed for CSV in Discover
-  const firstRadio =
-    (aggregateReportTypes[0].reportType as AllowedExports) ?? ('printablePdfV2' as const);
+const ExportContentUi = ({
+  isDirty,
+  objectType,
+  aggregateReportTypes,
+  intl,
+  onClose,
+}: ExportProps) => {
+  // needed for CSV in Discover;
+  const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
+    (aggregateReportTypes[0].reportType as SupportedExportTypes) ?? ('printablePdfV2' as const)
+  );
   const [, setIsStale] = useState(false);
-  const [isCreatingReport, setIsCreatingReport] = useState<boolean>(false);
-  const [selectedRadio, setSelectedRadio] = useState<AllowedExports>(firstRadio);
+  const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
   const isMounted = useMountedState();
 
@@ -136,12 +140,10 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   );
 
   const {
-    generateReportButton,
+    generateExportButton,
     helpText,
     renderCopyURLButton,
-    generateReport,
-    generateReportForPrinting,
-    downloadCSVLens,
+    generateExport,
     absoluteUrl,
     renderLayoutOptionSwitch,
   } = getProperties();
@@ -215,41 +217,29 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
       return <CopyPOSTUrlButton postUrl={absoluteUrl} unsavedChangesExist={isDirty} />;
   }, [absoluteUrl, isDirty, renderCopyURLButton]);
 
-  const getReport = useCallback(() => {
-    if (!generateReportForPrinting && !generateReport && !downloadCSVLens) {
-      throw new Error('Report cannot be run due to no generate report method registered');
+  const getReport = useCallback(async () => {
+    try {
+      setIsCreatingExport(true);
+      await generateExport({ intl, optimizedForPrinting: usePrintLayout });
+    } finally {
+      setIsCreatingExport(false);
+      onClose?.();
     }
-    if (objectType === 'lens' && selectedRadio === 'lens_csv') {
-      return downloadCSVLens!();
-    }
-    return usePrintLayout ? generateReportForPrinting!({ intl }) : generateReport!({ intl });
-  }, [
-    downloadCSVLens,
-    generateReport,
-    generateReportForPrinting,
-    objectType,
-    selectedRadio,
-    usePrintLayout,
-    intl,
-  ]);
+  }, [generateExport, intl, usePrintLayout, onClose]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (
       <EuiButton
         fill
         color="primary"
-        onClick={() => {
-          setIsCreatingReport(true);
-          getReport();
-          setIsCreatingReport(false);
-        }}
-        data-test-subj="generateReportButton"
-        isLoading={Boolean(isCreatingReport)}
+        onClick={getReport}
+        data-test-subj="generateExportButton"
+        isLoading={isCreatingExport}
       >
-        {generateReportButton}
+        {generateExportButton}
       </EuiButton>
     );
-  }, [generateReportButton, getReport, isCreatingReport]);
+  }, [generateExportButton, getReport, isCreatingExport]);
 
   const renderRadioOptions = () => {
     if (getRadioOptions().length > 1) {
@@ -258,7 +248,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
           <EuiRadioGroup
             options={getRadioOptions()}
             onChange={(id) => {
-              setSelectedRadio(id as AllowedExports);
+              setSelectedRadio(id as SupportedExportTypes);
               getProperties();
             }}
             name="image reporting radio group"
@@ -273,7 +263,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   };
 
   const getHelpText = () => {
-    if (objectType === 'lens' && generateReport !== undefined) {
+    if (objectType === 'lens' && generateExport !== undefined) {
       return helpText;
     } else {
       return (
