@@ -717,13 +717,7 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord } = groupingData;
-
-    const ruleName = params.rule.ruleUrl
-      ? `[${params.rule.name}](${params.rule.ruleUrl})`
-      : params.rule.name;
-
-    const groupingDescription = this.getGroupingDescription(grouping);
-    const description = `This case is auto-created by ${ruleName}. \n\n Grouping: ${groupingDescription}`;
+    const flattenGrouping = getFlattenedObject(grouping);
 
     const requiredCustomFields = buildRequiredCustomFieldsForRequest(customFieldsConfigurations);
     this.logger.debug(
@@ -739,9 +733,9 @@ export class CasesConnectorExecutor {
 
     return {
       id: caseId,
-      description,
-      tags: this.getCaseTags(params, grouping),
-      title: this.getCasesTitle(params.rule.name, oracleRecord.counter),
+      description: this.getCaseDescription(params, flattenGrouping),
+      tags: this.getCaseTags(params, flattenGrouping),
+      title: this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
       /**
        * TODO: Turn on for Security solution
@@ -752,28 +746,44 @@ export class CasesConnectorExecutor {
     };
   }
 
-  private getCasesTitle(ruleName: string, oracleCounter: number) {
-    const suffix =
-      oracleCounter === INITIAL_ORACLE_RECORD_COUNTER
-        ? '(Auto-created)'
-        : `(${oracleCounter}) (Auto-created)`;
+  private getCasesTitle(
+    params: CasesConnectorRunParams,
+    grouping: GroupedAlerts['grouping'],
+    oracleCounter: number
+  ) {
+    const groupingDescription = Object.entries(grouping)
+      .map(([_, value]) => {
+        return convertValueToString(value);
+      })
+      .join(' & ');
 
-    const ruleNameTrimmed = ruleName.slice(0, MAX_TITLE_LENGTH - suffix.length - 1);
+    const suffix = `${
+      groupingDescription.length > 0 ? ` - Grouping by ${groupingDescription}` : ''
+    }${oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''} (Auto-created)`;
 
-    return `${ruleNameTrimmed} ${suffix}`;
+    const ruleNameTrimmed = params.rule.name.slice(0, MAX_TITLE_LENGTH - suffix.length - 1);
+
+    return `${ruleNameTrimmed}${suffix}`;
   }
 
-  private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
-    const flattenGrouping = getFlattenedObject(grouping);
+  private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+    const ruleName = params.rule.ruleUrl
+      ? `[${params.rule.name}](${params.rule.ruleUrl})`
+      : params.rule.name;
 
-    return Object.entries(flattenGrouping)
+    const description = `This case was created by the Case action in ${ruleName}.`;
+
+    const groupingDescription = Object.entries(grouping)
       .map(([key, value]) => {
-        const keyAsCodeBlock = `\`${key}\``;
-        const valueAsCodeBlock = `\`${convertValueToString(value)}\``;
-
-        return `${keyAsCodeBlock} equals ${valueAsCodeBlock}`;
+        return `\`${key}: ${convertValueToString(value)}\``;
       })
       .join(' and ');
+
+    if (groupingDescription.length > 0) {
+      return `${description} The assigned alerts are grouped by ${groupingDescription}.`;
+    }
+
+    return `${description}`;
   }
 
   private getCaseTags(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
@@ -790,8 +800,7 @@ export class CasesConnectorExecutor {
   }
 
   private getGroupingAsTags(grouping: GroupedAlerts['grouping']): string[] {
-    const flattenGrouping = getFlattenedObject(grouping);
-    return Object.entries(flattenGrouping)
+    return Object.entries(grouping)
       .map(([key, value]) => [key, `${key}:${convertValueToString(value)}`])
       .flat();
   }
