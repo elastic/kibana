@@ -13,7 +13,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { Observable } from 'rxjs';
-import { StartDependencies } from '@kbn/index-management';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { AppDependencies } from './app_context';
@@ -26,6 +25,7 @@ import { setUiMetricService } from './services/api';
 import { notificationService } from './services/notification';
 import { httpService } from './services/http';
 import { ExtensionsService } from '../services/extensions_service';
+import { StartDependencies } from '../types';
 
 function initSetup({
   usageCollection,
