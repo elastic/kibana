@@ -27,7 +27,10 @@ export async function sendGetAllFleetServerAgents(onlyCount: boolean = false) {
   if (agentPolicyIds.length === 0) {
     return { allFleetServerAgents: [] };
   }
-  const kuery = `${AGENTS_PREFIX}.policy_id:${agentPolicyIds.map((id) => `"${id}"`).join(' or ')}`;
+
+  const kuery = `${AGENTS_PREFIX}.policy_id:(${agentPolicyIds
+    .map((id) => `"${id}"`)
+    .join(' or ')})`;
 
   const response = await sendGetAgents({
     kuery,
