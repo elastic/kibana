@@ -205,8 +205,6 @@ describe('Import rules route', () => {
     });
 
     describe('rule with existing rule_id', () => {
-      let mockReadRules: jest.SpyInstance;
-
       beforeEach(() => {
         mockReadRules = jest
           .spyOn(readRulesModule, 'readRules')
@@ -445,8 +443,6 @@ describe('Import rules route', () => {
     });
 
     describe('rules with existing rule_id', () => {
-      let mockReadRules: jest.SpyInstance;
-
       beforeEach(() => {
         mockReadRules = jest
           .spyOn(readRulesModule, 'readRules')
