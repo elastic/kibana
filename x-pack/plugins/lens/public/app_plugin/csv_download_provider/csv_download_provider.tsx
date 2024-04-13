@@ -108,6 +108,7 @@ export const downloadCsvShareProvider = ({
     if ('lens' !== objectType) {
       return [];
     }
+
     const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
       title: string;
       activeData: TableInspectorAdapter;
@@ -131,22 +132,21 @@ export const downloadCsvShareProvider = ({
       },
     };
 
-    const onClick = async () => {
-      await downloadCSVs({
+    const downloadCSVHandler = () =>
+      downloadCSVs({
         title,
         formatFactory: formatFactoryFn(),
         activeData,
         uiSettings,
         columnsSorting,
       });
-    };
 
     return [
       {
         ...menuItemMetadata,
-        downloadCSVLens: onClick,
-        label: 'CSV' as const,
-        reportType: 'csv',
+        label: 'CSV',
+        reportType: 'lens_csv',
+        generateExport: downloadCSVHandler,
         ...(atLeastGold()
           ? {
               helpText: (
