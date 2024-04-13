@@ -895,13 +895,13 @@ export function trainedModelsRoutes(
     /**
    * @apiGroup TrainedModels
    *
-   * @api {post} /internal/ml/trained_models/create_inference_endpoint/:taskType/:inferenceId Create Inference Endpoint
+   * @api {post} /internal/ml/inference_models/create_inference_endpoint/:taskType/:inferenceId Create Inference Endpoint
    * @apiName CreateInferenceEndpoint
    * @apiDescription Create Inference Endpoint
    */
   router.versioned
   .post({
-    path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_endpoint/{taskType}/{inferenceId}`,
+    path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/{taskType}/{inferenceId}`,
     access: 'internal',
     options: {
       tags: ['access:ml:canCreateInferenceEndpoint'],
@@ -935,5 +935,4 @@ export function trainedModelsRoutes(
       }
     )
   );
-
 }

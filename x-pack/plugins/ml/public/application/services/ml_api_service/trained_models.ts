@@ -292,7 +292,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     },
     createInferenceEndpoint(inferenceId: string,taskType: InferenceTaskType,modelConfig: ModelConfig){
       return httpService.http<estypes.InferencePutModelResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_endpoint/${taskType}/${inferenceId}`,
+        path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/${taskType}/${inferenceId}`,
         method: 'POST',
         body: JSON.stringify({ ...modelConfig }),
         version: '1',

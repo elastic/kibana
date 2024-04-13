@@ -588,7 +588,7 @@ export class ModelsProvider {
    * @param taskType
    * @param modelConfig
    */
-     async createInferenceEndpoint(inferenceId: string, taskType: InferenceTaskType, modelConfig: InferenceModelConfig) {
+  async createInferenceEndpoint(inferenceId: string, taskType: InferenceTaskType, modelConfig: InferenceModelConfig) {
 
       let esModelExists = false;
       try {
@@ -604,7 +604,6 @@ export class ModelsProvider {
       }
 
       if (esModelExists) {
-        // return {error: Boom.badRequest('Model already exists')}
         throw Boom.badRequest('Model already exists');
       }
       const putResponse = await this._client.asCurrentUser.inference.putModel({
