@@ -98,6 +98,6 @@ export const setModalConfigResponse = (
     service_settings: serviceSettings,
   };
 };
-export const isFieldEmpty = (field: string) => {
+export const isEmpty = (field: string) => {
   return field.trim() === '';
 };

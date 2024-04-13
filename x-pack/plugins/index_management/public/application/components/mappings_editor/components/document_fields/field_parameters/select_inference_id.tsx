@@ -34,11 +34,11 @@ import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
-import { useLoadInferenceModels, createInferenceEndpoint } from '../../../../../services/api';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { useLoadInferenceModels } from '../../../../../services/api';
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
@@ -139,6 +139,21 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
   }, [subscribe, onChange]);
   const selectedOptions = options.filter((option) => option.checked).find((k) => k.label);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
+  const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
+    undefined
+  );
+  const onInferenceEndpointChange = useCallback(
+    async (inferenceId: string) => {
+      const modelsExist = models ? models?.some((i) => i.model_id === inferenceId) : false;
+      if (modelsExist) {
+        setInferenceEndpointError('Inference Endpoint id already exists');
+      } else {
+        setInferenceEndpointError(undefined);
+      }
+    },
+    [models]
+  );
+
   const inferencePopover = () => {
     return (
       <EuiPopover
@@ -301,6 +316,8 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
                   </EuiFlexItem>
                 )
               }
+              onInferenceEndpointChange={onInferenceEndpointChange}
+              inferenceEndpointError={inferenceEndpointError}
               trainedModels={trainedModels}
               onSaveInferenceEndpoint={onSaveInferenceCallback}
               onFlyoutClose={onFlyoutClose}

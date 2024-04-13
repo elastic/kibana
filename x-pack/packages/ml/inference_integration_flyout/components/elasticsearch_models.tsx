@@ -29,6 +29,8 @@ interface ElasticsearchModelsProps
     SaveMappingOnClick {
   description: string;
   trainedModels: string[];
+  onInferenceEndpointChange: (inferenceId: string) => void;
+  inferenceEndpointError?: string;
 }
 export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   description,
@@ -37,6 +39,8 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
   onSaveInferenceEndpoint,
   trainedModels,
   isCreateInferenceApiLoading,
+  onInferenceEndpointChange,
+  inferenceEndpointError,
 }) => {
   const [options, setOptions] = useState(elasticsearchModelsOptions);
   const [selectedModelType, setSelectedModelType] = useState(elasticsearchModelsOptions[0].value);
@@ -196,8 +200,10 @@ export const ElasticsearchModels: React.FC<ElasticsearchModelsProps> = ({
         onSaveInferenceEndpoint={onSaveInferenceEndpoint}
         inferenceComponent={inferenceComponent}
         modelConfig={modelConfig}
-        isSaveButtonEmpty={false}
+        areRequiredFieldsEmpty={false}
         isCreateInferenceApiLoading={isCreateInferenceApiLoading}
+        onInferenceEndpointChange={onInferenceEndpointChange}
+        inferenceEndpointError={inferenceEndpointError}
       />
     </>
   );

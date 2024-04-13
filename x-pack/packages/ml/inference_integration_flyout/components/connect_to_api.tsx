@@ -7,7 +7,7 @@
 import { EuiSuperSelect } from '@elastic/eui';
 
 import React, { useMemo, useState } from 'react';
-import { connectToApiOptions, isFieldEmpty, setModalConfigResponse } from '../lib/shared_values';
+import { connectToApiOptions, isEmpty, setModalConfigResponse } from '../lib/shared_values';
 import type { ModelConfig } from '../types';
 import { Service } from '../types';
 import { InferenceFlyout } from './flyout_layout';
@@ -18,11 +18,15 @@ import { OpenaiForm } from './service_forms/openai_form';
 
 interface Props extends SaveMappingOnClick {
   description: string;
+  onInferenceEndpointChange: (inferenceId: string) => void;
+  inferenceEndpointError?: string;
 }
 export const ConnectToApi: React.FC<Props> = ({
   description,
   onSaveInferenceEndpoint,
   isCreateInferenceApiLoading,
+  onInferenceEndpointChange,
+  inferenceEndpointError,
 }) => {
   const defaultOpenaiUrl = 'https://api.openai.com/v1/embeddings';
   const defaultCohereModelId = 'embed-english-v2.0';
@@ -41,14 +45,14 @@ export const ConnectToApi: React.FC<Props> = ({
   const [openaiModelId, setOpenaiModelId] = useState('');
 
   // disable save button if required fields are empty
-  const isSaveButtonEmpty = useMemo(() => {
+  const areRequiredFieldsEmpty = useMemo(() => {
     if (selectedModelType === Service.huggingFace) {
-      return isFieldEmpty(huggingFaceModelUrl) || isFieldEmpty(huggingFaceApiKey);
+      return isEmpty(huggingFaceModelUrl) || isEmpty(huggingFaceApiKey);
     } else if (selectedModelType === Service.cohere) {
-      return isFieldEmpty(cohereApiKey);
+      return isEmpty(cohereApiKey);
     } else {
       // open ai
-      return isFieldEmpty(openaiApiKey) || isFieldEmpty(openaiModelId);
+      return isEmpty(openaiApiKey) || isEmpty(openaiModelId);
     }
   }, [
     selectedModelType,
@@ -91,14 +95,14 @@ export const ConnectToApi: React.FC<Props> = ({
     } else if (selectedModelType === Service.cohere) {
       return setModalConfigResponse(Service.cohere, {
         api_key: cohereApiKey,
-        model_id: isFieldEmpty(cohereModelId) ? defaultCohereModelId : cohereModelId,
+        model_id: isEmpty(cohereModelId) ? defaultCohereModelId : cohereModelId,
       });
     } else {
       return setModalConfigResponse(Service.openai, {
         api_key: openaiApiKey,
         model_id: openaiModelId,
-        organization_id: isFieldEmpty(openaiOrganizationId) ? undefined : openaiOrganizationId,
-        url: isFieldEmpty(openaiEndpointlUrl) ? defaultOpenaiUrl : openaiEndpointlUrl,
+        organization_id: isEmpty(openaiOrganizationId) ? undefined : openaiOrganizationId,
+        url: isEmpty(openaiEndpointlUrl) ? defaultOpenaiUrl : openaiEndpointlUrl,
       });
     }
   }, [
@@ -168,8 +172,10 @@ export const ConnectToApi: React.FC<Props> = ({
         inferenceComponent={InferenceSpecificComponent}
         service={selectedModelType}
         modelConfig={modelConfig}
-        isSaveButtonEmpty={isSaveButtonEmpty}
+        areRequiredFieldsEmpty={areRequiredFieldsEmpty}
         isCreateInferenceApiLoading={isCreateInferenceApiLoading}
+        onInferenceEndpointChange={onInferenceEndpointChange}
+        inferenceEndpointError={inferenceEndpointError}
       />
     </>
   );

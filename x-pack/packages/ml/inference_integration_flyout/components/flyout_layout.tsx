@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { isFieldEmpty, serviceTypeMap } from '../lib/shared_values';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isEmpty, serviceTypeMap } from '../lib/shared_values';
 import type { Service, ModelConfig } from '../types';
 import type { SaveMappingOnClick } from './inference_flyout_wrapper';
 import { SaveInferenceEndpoint } from './save_inference_mappings_button';
@@ -25,8 +25,10 @@ interface GenericInferenceFlyoutProps extends SaveMappingOnClick {
   inferenceComponent: React.ReactNode;
   description: string;
   service: Service;
-  isSaveButtonEmpty: boolean;
+  areRequiredFieldsEmpty: boolean;
   modelConfig: ModelConfig;
+  onInferenceEndpointChange: (inferenceId: string) => void;
+  inferenceEndpointError?: string;
 }
 
 export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
@@ -34,15 +36,34 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
   description,
   modelConfig,
   onSaveInferenceEndpoint,
-  isSaveButtonEmpty = false,
+  areRequiredFieldsEmpty = false,
   service,
   isCreateInferenceApiLoading,
+  onInferenceEndpointChange,
+  inferenceEndpointError,
 }) => {
   const [inferenceEndpointId, setInferenceEndpointId] = useState<string>('');
+  const hasError: boolean = useMemo(() => {
+    if (inferenceEndpointError !== undefined) {
+      return !isEmpty(inferenceEndpointError);
+    }
+    return false;
+  }, [inferenceEndpointError]);
 
+  const onChangingInferenceEndpoint = useCallback(
+    (value) => {
+      setInferenceEndpointId(value);
+      onInferenceEndpointChange(value);
+    },
+    [setInferenceEndpointId, onInferenceEndpointChange]
+  );
   const isSaveButtonDisabled = useMemo(() => {
-    return isFieldEmpty(inferenceEndpointId) || isSaveButtonEmpty;
-  }, [inferenceEndpointId, isSaveButtonEmpty]);
+    return (
+      isEmpty(inferenceEndpointId) ||
+      areRequiredFieldsEmpty ||
+      (inferenceEndpointError !== undefined && !isEmpty(inferenceEndpointError))
+    );
+  }, [inferenceEndpointId, areRequiredFieldsEmpty, inferenceEndpointError]);
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceEvenly">
@@ -77,6 +98,16 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
                 defaultMessage: 'Must be unique. Only letters and underscores are allowed.',
               }
             )}
+            isInvalid={hasError}
+            error={
+              <FormattedMessage
+                id="xpack.ml.addInferenceEndpoint.elasticsearchModels.inferenceEndpointIdForm.error"
+                defaultMessage="{formError}"
+                values={{
+                  formError: inferenceEndpointError,
+                }}
+              />
+            }
           >
             <EuiFieldText
               data-test-subj="inferenceEndpointId"
@@ -86,8 +117,9 @@ export const InferenceFlyout: React.FC<GenericInferenceFlyoutProps> = ({
                   defaultMessage: 'Inference endpoint id',
                 }
               )}
+              isInvalid={hasError}
               value={inferenceEndpointId}
-              onChange={(e) => setInferenceEndpointId(e.target.value)}
+              onChange={(e) => onChangingInferenceEndpoint(e.target.value)}
             />
           </EuiFormRow>
         </EuiForm>
