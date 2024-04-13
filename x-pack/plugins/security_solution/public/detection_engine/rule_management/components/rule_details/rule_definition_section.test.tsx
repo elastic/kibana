@@ -62,14 +62,12 @@ describe('RuleDefinitionSection', () => {
 
       expect(screen.getByTestId('alertSuppressionGroupByPropertyTitle')).toBeInTheDocument();
       expect(screen.getByTestId('alertSuppressionDurationPropertyTitle')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionMissingFieldPropertyTitle')).toBeInTheDocument();
       expect(screen.getByTestId('alertSuppressionGroupByPropertyValue')).toHaveTextContent(
         'field1field2'
       );
       expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent('2h');
-      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+      expect(screen.getByTestId('alertSuppressionMissingFieldsPropertyValue')).toHaveTextContent(
         ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       );
     });
@@ -88,16 +86,14 @@ describe('RuleDefinitionSection', () => {
 
       expect(screen.getByTestId('alertSuppressionGroupByPropertyTitle')).toBeInTheDocument();
       expect(screen.getByTestId('alertSuppressionDurationPropertyTitle')).toBeInTheDocument();
-      expect(
-        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionMissingFieldPropertyTitle')).toBeInTheDocument();
       expect(screen.getByTestId('alertSuppressionGroupByPropertyValue')).toHaveTextContent(
         'field1field2'
       );
       expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent(
         ALERT_SUPPRESSION_PER_RULE_EXECUTION
       );
-      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+      expect(screen.getByTestId('alertSuppressionMissingFieldsPropertyValue')).toHaveTextContent(
         ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       );
     });
@@ -116,11 +112,9 @@ describe('RuleDefinitionSection', () => {
       render(<RuleDefinitionSection rule={rule} />);
 
       expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
-      expect(
-        screen.getByTestId('alertSuppressionSuppressionFieldPropertyTitle')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('alertSuppressionMissingFieldPropertyTitle')).toBeInTheDocument();
       expect(screen.getByTestId('alertSuppressionDurationPropertyValue')).toHaveTextContent('2m');
-      expect(screen.getByTestId('alertSuppressionSuppressionFieldPropertyValue')).toHaveTextContent(
+      expect(screen.getByTestId('alertSuppressionMissingFieldsPropertyValue')).toHaveTextContent(
         ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS
       );
     });
@@ -143,7 +137,7 @@ describe('RuleDefinitionSection', () => {
       expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertSuppressionDurationPropertyTitle')).not.toBeInTheDocument();
       expect(
-        screen.queryByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+        screen.queryByTestId('alertSuppressionMissingFieldPropertyTitle')
       ).not.toBeInTheDocument();
     });
     test('should not render anything when alert_suppression property is not present in the rule', () => {
@@ -158,7 +152,7 @@ describe('RuleDefinitionSection', () => {
       expect(screen.queryByTestId('alertSuppressionGroupByPropertyTitle')).not.toBeInTheDocument();
       expect(screen.queryByTestId('alertSuppressionDurationPropertyTitle')).not.toBeInTheDocument();
       expect(
-        screen.queryByTestId('alertSuppressionSuppressionFieldPropertyTitle')
+        screen.queryByTestId('alertSuppressionMissingFieldPropertyTitle')
       ).not.toBeInTheDocument();
     });
   });
