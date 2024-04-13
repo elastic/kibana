@@ -155,7 +155,7 @@ export async function createRule<Params extends RuleParams = never>(
       actionsAuthorization: context.actionsAuthorization,
       connectorAdapterRegistry: context.connectorAdapterRegistry,
       systemActions: data.systemActions,
-      rule: { consumer: data.consumer },
+      rule: { consumer: data.consumer, producer: ruleType.producer },
     })
   );
 

@@ -687,7 +687,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
           actionsAuthorization: context.actionsAuthorization,
           connectorAdapterRegistry: context.connectorAdapterRegistry,
           systemActions: genSystemActions,
-          rule: { consumer: updatedRule.consumer },
+          rule: { consumer: updatedRule.consumer, producer: ruleType.producer },
         });
 
         try {
