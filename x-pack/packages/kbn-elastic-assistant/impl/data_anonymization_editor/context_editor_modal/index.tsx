@@ -212,7 +212,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiButtonEmpty onClick={onClose} size="s">
                   {I18n.translate('xpack.elasticAssistant.dataAnonymizationEditor.closeButton', {
