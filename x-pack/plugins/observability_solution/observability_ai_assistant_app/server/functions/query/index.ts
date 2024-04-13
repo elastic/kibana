@@ -332,18 +332,6 @@ export function registerQueryFunction({
                 to ES|QL, make sure that the functions are available and documented in ES|QL.
                 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
                 
-                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-                functions in stats commands, NOT in SORT or EVAL.
-                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-                functions are only supported in STATS commands. 
-                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-                Do not use aggregation functions anywhere else, such as SORT or EVAL.
-                Example:
-                \`\`\`esql
-                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-                \`\`\`
-                
                 `,
             },
           },
