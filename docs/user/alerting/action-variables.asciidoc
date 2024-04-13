@@ -102,83 +102,91 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 [[rule-mustache-tips]]
 === Mustache tips
 
-Rule actions pass variable values into alert notifications by using https://mustache.github.io/mustache.5.html[Mustache] template syntax (`{{variable name}}`).
+Rule actions pass variable values into alert notifications by using Mustache template syntax (`{{variable name}}`).
 
-In Mustache templates, all variables are HTML escaped by default.
-Triple braces (`{{{variable name}}}`) indicate no escaping should be done at all.
-Use this form with caution, since it could end up rendering the variable content such that the resulting parameter is invalid or formatted incorrectly. Some connectors automatically escape variable values in specific scenarios. For example:
+The subsequent sections provide tips for using Mustache with rule action variables.
+For more information, refer to https://github.com/mustache/spec or https://mustache.github.io/.
+
+[discrete]
+==== Escape characters
+
+By default, all variables in Mustache templates are HTML escaped.
+Triple braces (`{{{variable name}}}`) specify to return the content without any escaping.
+Use this form with caution, since it could end up rendering the variable content such that the resulting parameter is invalid or formatted incorrectly.
+Some connectors automatically escape variable values in specific scenarios. For example:
 
 - For the <<email-action-type,email connector>>, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
 - For the <<slack-action-type,Slack connector>>, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
 - For the <<webhook-action-type,Webhook connector>>, the `body` action configuration property escapes any characters that are invalid in JSON string values.
 
-For diagnostic or exploratory purposes, rule action variables whose values are objects (such as `rule.params` and `context`) can be referenced directly as variables.
-// TBD: Is context an object (per above) or an array (per below) or a "list" (per mustache syntax)?
-The resulting value will be a JSON representation of the object.
-For example, if the message in an action includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type.
+[discrete]
+==== Sections and implicit iterators
 
-For situations where your rule response returns arrays of data, you can use the Mustache implicit iterator (`{{.}}`):
+Rule action variables whose values are objects (such as `rule.params` and `context`) can be referenced directly as variables.
+// TBD: Is context an "object" (per above), "array" (per example below), or "list"?
+The resulting value will be a JSON representation of the object.
+For example, if the message in an action includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type. This format is generally used for diagnostic or exploratory purposes.
+
+The following example makes use of an implicit iterator (`{{.}}`) and a section, which starts with a pound (`#`) and ends with a slash (`/`).
+If your rule response returns arrays of data, you can use this syntax to loop through all the context items:
 
 [source,sh]
 --------------------------------------------------
 {{#context}}{{.}}{{/context}}
 --------------------------------------------------
 
-// TBD: This example requires more explanation
-// For example, looping through search result hits:
-//
-// [source,sh]
-// --------------------------------------------------
-// triggering data was:
-// {{#context.hits}} - {{_source.message}}
-// {{/context.hits}}
-// --------------------------------------------------
+[discrete]
+==== Dotted names
 
-You can enhance the values contained in Mustache variables when the Mustache template is rendered by rendering objects as JSON or by using Mustache lambdas, as described in the subsequent sections.
+// TBD: This example requires more explanation
+For example, looping through search result hits:
+
+[source,sh]
+--------------------------------------------------
+triggering data was:
+{{#context.hits}} - {{_source.message}}
+{{/context.hits}}
+--------------------------------------------------
 
 [discrete]
 ==== Rendering objects as JSON
 
 preview::[]
 
-Some connectors (such as the <<webhook-action-type,Webhook connector>>) expect JSON values to be passed as parameters when the connector is invoked.
-The following capabilities are available:
+Some connectors (such as the <<webhook-action-type,Webhook connector>>) expect the rule action to send JSON values.
+Array values referenced in braces have a predefined rendering by Mustache as string versions of the array elements joined with a comma (`,`).
+To render array values as JSON, access the `asJSON` property of the array, instead of the array directly.
+For example, if a Mustache variable `context.values` has the value `[1, 4, 9]`, the Mustache template `{{context.values}}` renders as `1,4,9`. The Mustache template `{{context.values.asJSON}}` renders as `[1,4,9]`.
 
-- Array values referenced in braces have a predefined rendering by Mustache as string versions of the array elements, joined with a comma (`,`). To render array values as JSON, access the `asJSON` property of the array, instead of the array directly. For example, given a Mustache variable `context.values` that has the value `[1, 4, 9]` the Mustache template `{{context.values}}` will render as `1,4,9`, and the Mustache template `{{context.values.asJSON}}` will render as `[1,4,9]`.
-
-- The <<parse-hjson-lambda,ParseHjson lambda>> Mustache lambda makes it easier to create JSON in your templates by using https://hjson.github.io/[Hjson], a syntax extension to JSON, rather than strict JSON.
+Alternatively, you can use the Mustache lambda <<parse-hjson-lambda,ParseHjson>>, which makes it easier to create JSON in your templates. It uses https://hjson.github.io/[Hjson], a syntax extension to JSON, rather than strict JSON.
 
 [discrete]
-==== Using Mustache lambdas
+==== Mustache lambdas
 
 preview::[]
 
 Mustache lambdas provide additional rendering capabilities for Mustache templates.
-A Mustache lambda is formatted like a Mustache section. For example:
+A Mustache lambda is formatted like a Mustache section; it begins with a pound and ends with a slash. 
 
-[source,sh]
-----
-{{#EvalMath}} round(context.value, 1) {{/EvalMath}}
-----
-
-In that example, the lambda `EvalMath` is passed the text `round(context.value, 1)` and renders a rounded value of the `context.value` variable.
-This pattern is used by all the provided Mustache lambdas described in the subsequent sections.
+// TBD: Are these the only lambdas that we support?
 
 [discrete]
 ===== EvalMath
 
-The EvalMath lambda will evaluate the text passed to it as <<canvas-tinymath-functions>>.
+The EvalMath lambda evaluates the text passed to it as <<canvas-tinymath-functions>>.
 
-For example, when the Mustache variable `context.value` is `3.1234`, the following template will render as `3.1`:
+The following example renders a rounded value of the `context.value` variable:
 
 [source,sh]
 ----
 {{#EvalMath}} round(context.value, 1) {{/EvalMath}}
 ----
 
+When `context.value` is `3.1234`, it is rendered as `3.1`.
+
 This lambda can access Mustache variables without having to wrap them in `{{}}`.
-However, if the value is in a string form (for example, an Elasticsearch numeric field whose source was indexed as a string), or could be escaped, escaping the value with triple quotes should allow this to work.
-For example, if the Mustache variable `context.value` is `"3.1234"`, the following template will render as `3.1`:
+However, if the value is in a string form (for example, an Elasticsearch numeric field whose source was indexed as a string) or could be escaped, escaping the value with triple quotes should work.
+For example, if the variable `context.value` is `"3.1234"`, the following template renders `3.1`:
 
 [source,sh]
 ----
@@ -213,7 +221,7 @@ For example:
 {{/ParseHjson}}
 ----
 
-When rendered, this template will generate:
+This template is rendered as follows:
  
 [source,json]
 ----
@@ -247,7 +255,7 @@ For example, the following templates all render the same value:
 The `<time zone>` parameter must be a valid time zone identifier as listed in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[TZ database time zone names], such as `"America/New_York"`.
 
 The `<date format>` parameter must be a valid date format string as described in the https://momentjs.com/docs/#/displaying/[Moment `format()` documentation].
-For example, the date format `"YYYY-MM-DD hh:mma"` will render in the following format: `"2023-04-24 11:21pm"`.
+For example, the date format `"YYYY-MM-DD hh:mma"` renders in the following format: `"2023-04-24 11:21pm"`.
 
 The date value itself should usually be referenced with triple braces since some characters in date strings may contain values that are escaped, which would prevent them from being parsed as dates.
 
@@ -304,7 +312,8 @@ If the context variable `context.value.condition0` has a value of `628.4`, it re
     formatted value: 628,40 €
 ----
 
-The `{{FormatNumber}}` and `{{EvalMath}}` lambdas can be used together to perform calculations on numbers and then format them. For example:
+The `{{FormatNumber}}` and `{{EvalMath}}` lambdas can be used together to perform calculations on numbers and then format them.
+For example:
 
 [source,sh]
 ----
@@ -339,7 +348,7 @@ The template references the following rule action variables:
 - `context.hits[]._source.event.duration`
 
 For example, if you have data like this available as Mustache variables:
-//TBD: "Available as Mustache variables" is unclear.
+//TBD: "Available as Mustache variables" is unclear. How does someone know which are available?
 
 [source,json]
 ----
