@@ -160,19 +160,6 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
   ${({ theme }) => `padding-left: ${theme.eui.euiSizeXL};`}
 `;
 
-const ConditionalToolTip: FC<{
-  children: React.ReactElement;
-  content: string;
-  showTooltip: boolean;
-}> = ({ children, content, showTooltip }) =>
-  showTooltip ? (
-    <EuiToolTip content={content} position="right">
-      {children}
-    </EuiToolTip>
-  ) : (
-    children
-  );
-
 // eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
@@ -1057,9 +1044,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </EuiToolTip>
             </RuleTypeEuiFormRow>
 
-            <ConditionalToolTip
-              showTooltip={areSuppressionFieldsDisabledBySequence}
-              content={i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP}
+            <EuiToolTip
+              position="right"
+              content={
+                areSuppressionFieldsDisabledBySequence
+                  ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
+                  : null
+              }
             >
               <RuleTypeEuiFormRow
                 $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
@@ -1076,7 +1067,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   }}
                 />
               </RuleTypeEuiFormRow>
-            </ConditionalToolTip>
+            </EuiToolTip>
 
             <IntendedRuleTypeEuiFormRow
               $isVisible={isAlertSuppressionEnabled}
