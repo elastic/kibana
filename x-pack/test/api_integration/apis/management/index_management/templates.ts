@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { TemplateDeserialized } from '@kbn/index-management-plugin/common';
+import { TemplateDeserialized, allowAutoCreateRadioIds } from '@kbn/index-management-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { templatesApi } from './lib/templates.api';
 import { templatesHelpers } from './lib/templates.helpers';
@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -119,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -145,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           'dataStream',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithDSL).sort()).to.eql(expectedWithDSLKeys);
@@ -168,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithILM).sort()).to.eql(expectedWithILMKeys);
@@ -191,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           'priority',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
         const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
 
@@ -211,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -366,6 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
         const templateName = `deprecated_template-${getRandomString()}`;
         const indexTemplate: TemplateDeserialized = {
           _kbnMeta: { hasDatastream: false, type: 'default' },
+          allowAutoCreate: allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
           name: templateName,
           indexPatterns: [getRandomString()],
           template: {},
