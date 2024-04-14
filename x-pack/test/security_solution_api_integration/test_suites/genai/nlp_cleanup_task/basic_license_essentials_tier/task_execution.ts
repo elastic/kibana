@@ -19,7 +19,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const TASK_ID = 'serverless-security:nlp-cleanup-task:1.0.0';
 
-  describe('@serverless NLP Cleanup Task in Essentials Tier', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/180703
+  describe.skip('@serverless NLP Cleanup Task in Essentials Tier', () => {
     describe('New Essentials Deployment', () => {
       it('registers and enables NLP Cleanup Task', async () => {
         const task = await kibanaServer.savedObjects.get({

@@ -46,6 +46,15 @@ export const clearYamlConfigBox = () => {
 
 describe('Outputs', () => {
   beforeEach(() => {
+    cy.intercept('GET', '/api/fleet/agents/setup', {
+      body: {
+        isReady: true,
+        is_secrets_storage_enabled: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+      },
+    });
+
     login();
   });
 

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { setupRouteService, fleetSetupRouteService } from '../../services';
 import type { GetFleetStatusResponse } from '../../types';
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest } from './use_request';
+import type { RequestError } from './use_request';
+import { sendRequest, sendRequestForRq } from './use_request';
 
 export const sendSetup = () => {
   return sendRequest({
@@ -25,6 +28,16 @@ export const sendGetFleetStatus = () => {
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
+};
+
+export const useGetFleetStatusQuery = () => {
+  return useQuery<GetFleetStatusResponse, RequestError>(['fleetStatus'], () =>
+    sendRequestForRq<GetFleetStatusResponse>({
+      path: fleetSetupRouteService.getFleetSetupPath(),
+      method: 'get',
+      version: API_VERSIONS.public.v1,
+    })
+  );
 };
 
 export const sendPostFleetSetup = ({ forceRecreate }: { forceRecreate: boolean }) => {
