@@ -25,8 +25,8 @@ export const modelAndDeploymentIdSchema = schema.object({
   deploymentId: schema.string(),
 });
 export const createInferenceSchema = schema.object({
-   taskType: schema.string(),
-   inferenceId: schema.string(),
+  taskType: schema.string(),
+  inferenceId: schema.string(),
 });
 
 export const threadingParamsSchema = schema.maybe(

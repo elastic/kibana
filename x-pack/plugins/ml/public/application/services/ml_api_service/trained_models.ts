@@ -15,6 +15,8 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
@@ -26,8 +28,6 @@ import type {
   NodesOverviewResponse,
   MemoryUsageInfo,
 } from '../../../../common/types/trained_models';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ModelConfig } from '@kbn/inference_integration_flyout/types';
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;
@@ -290,7 +290,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         version: '1',
       });
     },
-    createInferenceEndpoint(inferenceId: string,taskType: InferenceTaskType,modelConfig: ModelConfig){
+    createInferenceEndpoint(
+      inferenceId: string,
+      taskType: InferenceTaskType,
+      modelConfig: ModelConfig
+    ) {
       return httpService.http<estypes.InferencePutModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/${taskType}/${inferenceId}`,
         method: 'POST',
@@ -299,7 +303,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
   };
-
 }
 
 export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;

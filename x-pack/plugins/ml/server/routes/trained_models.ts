@@ -13,6 +13,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -37,7 +38,6 @@ import { type TrainedModelConfigResponse } from '../../common/types/trained_mode
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';
-import { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
@@ -892,7 +892,7 @@ export function trainedModelsRoutes(
       )
     );
 
-    /**
+  /**
    * @apiGroup TrainedModels
    *
    * @api {post} /internal/ml/inference_models/create_inference_endpoint/:taskType/:inferenceId Create Inference Endpoint
@@ -900,25 +900,24 @@ export function trainedModelsRoutes(
    * @apiDescription Create Inference Endpoint
    */
   router.versioned
-  .post({
-    path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/{taskType}/{inferenceId}`,
-    access: 'internal',
-    options: {
-      tags: ['access:ml:canCreateInferenceEndpoint'],
-    },
-  })
-  .addVersion(
-    {
-      version: '1',
-      validate: {
-        request: {
-          params: createInferenceSchema,
-          body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/{taskType}/{inferenceId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateInferenceEndpoint'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: createInferenceSchema,
+            body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+          },
         },
       },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { inferenceId, taskType } = request.params;
           const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
@@ -932,7 +931,6 @@ export function trainedModelsRoutes(
         } catch (e) {
           return response.customError(wrapError(e));
         }
-      }
-    )
-  );
+      })
+    );
 }

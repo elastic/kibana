@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckableCard,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,21 +20,19 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiSteps,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
+import { ElandPythonClient } from '@kbn/inference_integration_flyout';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import type { ModelItem } from './models_list';
-import { ElandPythonClient } from '@kbn/inference_integration_flyout';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
