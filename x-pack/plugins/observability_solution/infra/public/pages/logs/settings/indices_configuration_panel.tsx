@@ -43,8 +43,8 @@ export const IndicesConfigurationPanel = React.memo<{
   } = useKibanaContextForPlugin();
   const [numberOfLogsRules, setNumberOfLogsRules] = useState(0);
 
-  const [viewAffectedRulesLink, setViewAffectedRulesLink] = useState<string>();
   const rulesLocator = locators.get<RulesParams>(rulesLocatorID);
+  const viewAffectedRulesLink = rulesLocator?.useUrl({ type: [LOG_THRESHOLD_ALERT_TYPE_ID] });
 
   const trackChangeIndexSourceType = useUiTracker({ app: 'infra_logs' });
 
@@ -91,15 +91,6 @@ export const IndicesConfigurationPanel = React.memo<{
     };
     getNumberOfInfraRules();
   }, [http]);
-
-  useEffect(() => {
-    const getLink = async () => {
-      const resLink = await rulesLocator?.getUrl({ type: [LOG_THRESHOLD_ALERT_TYPE_ID] });
-      setViewAffectedRulesLink(resLink);
-    };
-
-    getLink();
-  }, [rulesLocator]);
 
   return (
     <EuiFormFieldset
