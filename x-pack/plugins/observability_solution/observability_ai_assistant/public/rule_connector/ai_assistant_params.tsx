@@ -21,7 +21,8 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
 
   useEffect(() => {
     editAction('connector', selectedConnector, index);
-  }, [editAction, selectedConnector, index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConnector, index]);
 
   return (
     <>
@@ -35,7 +36,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
           fullWidth
           data-test-subj="observabilityAiAssistantAlertConnectorSelect"
           isLoading={loading}
-          isInvalid={errors.connector.length > 0}
+          isInvalid={errors.connector?.length > 0}
           options={connectors?.map((connector) => {
             return { value: connector.id, text: connector.name };
           })}
