@@ -135,10 +135,9 @@ async function executor(
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const state = execOptions.params.alertState;
 
-  if (state !== 'new') {
-    // system connector action frequency can't be user configured. we use this
-    // flag as dedup mechanism to prevent triggering the same worfklow again.
-    // while recovered state is a valid trigger we only allow new alerts for now
+  if (state !== 'new' && state !== 'recovered') {
+    // system connector action frequency can't be user configured. we use this flag as
+    // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
     return { actionId: execOptions.actionId, status: 'ok' };
   }
 
