@@ -53,6 +53,7 @@ function dropUnknownProperties(object: CompatibleJSONSchema) {
 }
 
 export function convertSchemaToOpenApi(typeSchema: Type<any>): CompatibleJSONSchema {
+  // @ts-ignore
   const plainOpenApiSchema = joiToJsonSchema(typeSchema.getSchema(), 'open-api');
 
   return dropUnknownProperties(plainOpenApiSchema);
