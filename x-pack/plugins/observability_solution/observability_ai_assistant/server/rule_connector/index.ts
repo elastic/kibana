@@ -232,7 +232,6 @@ async function executor(
         execOptions.logger.error(err);
       },
     });
-  execOptions.logger.error(new Error('rule_connector error'));
 
   return { actionId: execOptions.actionId, status: 'ok' };
 }
