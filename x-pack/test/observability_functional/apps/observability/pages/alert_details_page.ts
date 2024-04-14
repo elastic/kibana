@@ -45,14 +45,14 @@ export default ({ getService }: FtrProviderContext) => {
           '4c87bd11-ff31-4a05-8a04-833e2da94858'
         );
 
-        retry.waitFor(
+        await retry.waitFor(
           'Overview tab to be visible',
-          async () => await testSubjects.exists('overviewTabPanel')
+          async () => await testSubjects.exists('overviewTab')
         );
 
-        retry.waitFor(
+        await retry.waitFor(
           'Metadata tab to be visible',
-          async () => await testSubjects.exists('metadataTabPanel')
+          async () => await testSubjects.exists('metadataTab')
         );
       });
 
