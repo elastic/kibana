@@ -1,6 +1,6 @@
 {
   "type": "icmp",
-  "locations": [],
+  "locations": ["dev"],
   "journey_id": "",
   "enabled": true,
   "alert": {
