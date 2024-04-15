@@ -63,7 +63,7 @@ function echoKibanaLogs {
 trap "echoKibanaLogs" EXIT
 
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
-  vagrant ssh $TEST_PACKAGE -t -c "$HOME/kibana/src/.buildkite/scripts/steps/fips/smoke_test.sh"
+  vagrant ssh $TEST_PACKAGE -t -c "/home/vagrant/kibana/src/.buildkite/scripts/steps/fips/smoke_test.sh"
 
   # TODO: Remove
   sleep 1h
