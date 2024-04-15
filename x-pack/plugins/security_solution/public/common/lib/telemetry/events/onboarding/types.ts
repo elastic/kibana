@@ -8,9 +8,11 @@ import type { RootSchema } from '@kbn/analytics-client';
 import type { StepLinkId } from '../../../../components/landing_page/onboarding/step_links/types';
 import type { TelemetryEventTypes } from '../../constants';
 
+export type Trigger = 'page_load' | 'click';
+
 export interface OnboardingHubStepOpenParams {
   stepId: string;
-  trigger: 'page_load' | 'click';
+  trigger: Trigger;
 }
 
 export interface OnboardingHubStepOpen {
@@ -31,7 +33,7 @@ export interface OnboardingHubStepLinkClicked {
 export interface OnboardingHubStepFinishedParams {
   stepId: string;
   stepLinkId?: StepLinkId;
-  trigger: 'page_load' | 'click';
+  trigger: Trigger;
 }
 
 export interface OnboardingHubStepFinished {

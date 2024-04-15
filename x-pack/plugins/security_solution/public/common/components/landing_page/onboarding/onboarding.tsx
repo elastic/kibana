@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -29,12 +29,14 @@ interface OnboardingProps {
   indicesExist?: boolean;
   productTypes: SecurityProductTypes | undefined;
   onboardingSteps: StepId[];
+  spaceId: string;
 }
 
 export const OnboardingComponent: React.FC<OnboardingProps> = ({
   indicesExist,
   productTypes,
   onboardingSteps,
+  spaceId,
 }) => {
   const {
     onStepClicked,
@@ -47,10 +49,12 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       totalStepsLeft,
       expandedCardSteps,
     },
-  } = useTogglePanel({ productTypes, onboardingSteps });
-  const productTier = productTypes?.find(
-    (product) => product.product_line === ProductLine.security
-  )?.product_tier;
+  } = useTogglePanel({ productTypes, onboardingSteps, spaceId });
+  const productTier = useMemo(
+    () =>
+      productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
+    [productTypes]
+  );
   const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
   const { telemetry } = useKibana().services;
   const onStepLinkClicked = useCallback(
@@ -78,7 +82,6 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
           productTier={productTier}
         />
       </KibanaPageTemplate.Section>
-
       <KibanaPageTemplate.Section
         bottomBorder="extended"
         grow={true}

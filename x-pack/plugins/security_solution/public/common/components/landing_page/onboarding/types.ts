@@ -11,6 +11,7 @@ import type { MutableRefObject } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ProductLine } from './configs';
 import type { StepLinkId } from './step_links/types';
+import type { Trigger } from '../../../lib/telemetry/types';
 
 export interface Section {
   cards: Card[];
@@ -200,7 +201,7 @@ export type OnStepClicked = ({
   cardId: CardId;
   sectionId: SectionId;
   isExpanded: boolean;
-  trigger: 'page_load' | 'click';
+  trigger: Trigger;
 }) => void;
 
 export type HandleStepClicked = ({
@@ -224,5 +225,5 @@ export type ToggleTaskCompleteStatus = ({
   cardId: CardId;
   sectionId: SectionId;
   undo?: boolean;
-  trigger: 'page_load' | 'click';
+  trigger: Trigger;
 }) => void;

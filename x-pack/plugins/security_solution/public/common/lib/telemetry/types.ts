@@ -64,6 +64,7 @@ export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/insights/types';
 export * from './events/data_quality/types';
+export * from './events/onboarding/types';
 export type {
   ReportEntityAlertsClickedParams,
   ReportEntityDetailsClickedParams,

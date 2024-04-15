@@ -33,12 +33,10 @@ import type {
   ReportAssetCriticalityFileSelectedParams,
   ReportAssetCriticalityCsvImportedParams,
   ReportAddRiskInputToTimelineClickedParams,
-} from './types';
-import { TelemetryEventTypes } from './constants';
-import type {
   OnboardingHubStepLinkClickedParams,
   OnboardingHubStepOpenParams,
-} from './events/onboarding/types';
+} from './types';
+import { TelemetryEventTypes } from './constants';
 
 /**
  * Client which aggregate all the available telemetry tracking functions

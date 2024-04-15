@@ -31,7 +31,6 @@ import { OnboardingActions } from '../types';
 import { findCardSectionByStepId } from '../helpers';
 import type { SecurityProductTypes } from '../configs';
 import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
-import { useSpaceId } from '../../../../hooks/use_space_id';
 import { useKibana } from '../../../../lib/kibana';
 
 const syncExpandedCardStepsToStorageFromURL = (
@@ -73,16 +72,17 @@ const syncExpandedCardStepsFromStorageToURL = (
 export const useTogglePanel = ({
   productTypes,
   onboardingSteps,
+  spaceId,
 }: {
   productTypes?: SecurityProductTypes;
   onboardingSteps: StepId[];
+  spaceId: string | undefined;
 }) => {
   const { telemetry } = useKibana().services;
   const { navigateTo } = useNavigateTo();
 
   const { hash: detailName } = useLocation();
   const stepIdFromHash = detailName.split('#')[1];
-  const spaceId = useSpaceId();
 
   const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
