@@ -20,9 +20,10 @@ import {
   useEuiMinBreakpoint,
   useIsWithinBreakpoints,
   useResizeObserver,
-  EuiLink,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, cx } from '@emotion/css';
 import { useKibanaHeader } from '../../../../hooks/use_kibana_header';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
@@ -137,32 +138,46 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
             }
           `}
         >
-          <EuiFlexGroup
-            gutterSize="s"
-            ref={quickAccessRef}
-            direction="column"
-            css={css`
-              width: 100%;
-              ${useEuiMaxBreakpoint('xl')} {
-                flex-direction: row;
-                gap: 0px ${euiTheme.size.xl};
-                flex-wrap: wrap;
-              }
-            `}
-          >
-            {quickAccessItems.map(([sectionId, label]) => (
-              <EuiLink
-                data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
-                onClick={() => onQuickAccessItemClick(sectionId)}
-                color="text"
-                css={css`
-                  padding: ${euiTheme.size.s} 0px;
-                `}
-              >
-                {label}
-              </EuiLink>
-            ))}
-          </EuiFlexGroup>
+          <div ref={quickAccessRef}>
+            <EuiListGroup
+              flush
+              css={css`
+                ${useEuiMaxBreakpoint('xl')} {
+                  flex-direction: row;
+                  flex-wrap: wrap;
+                  gap: 0px ${euiTheme.size.xl};
+                  min-width: 100%;
+                  border-bottom: ${euiTheme.border.thin};
+                }
+              `}
+            >
+              {quickAccessItems.map(([sectionId, label]) => (
+                <EuiListGroupItem
+                  data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
+                  onClick={() => onQuickAccessItemClick(sectionId)}
+                  color="text"
+                  size="s"
+                  className={cx({
+                    [css`
+                      text-decoration: underline;
+                    `]: sectionId === scrollTo,
+                  })}
+                  css={css`
+                    background-color: unset;
+                    & > button {
+                      padding-block: ${euiTheme.size.s};
+                      padding-inline: 0px;
+                    }
+                    &:hover,
+                    &:focus-within {
+                      background-color: unset;
+                    }
+                  `}
+                  label={label}
+                />
+              ))}
+            </EuiListGroup>
+          </div>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
