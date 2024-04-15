@@ -57,6 +57,23 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
+          id: 'otel-virtual',
+          type: 'virtual',
+          title: 'OpenTelemetry',
+          description: 'Collect distributed traces with OpenTelemetry',
+          name: 'otel',
+          categories: ['observability'],
+          icons: [
+            {
+              type: 'svg',
+              src: '/XXXXXXXXXXXX/plugins/home/assets/logos/opentelemetry.svg',
+            },
+          ],
+          url: `${getUrlForApp?.('apm')}/onboarding#openTelemetry` ?? '',
+          version: '',
+          integration: '',
+        },
+        {
           id: 'synthetics-virtual',
           type: 'virtual',
           title: 'Synthetic monitor',
