@@ -44,7 +44,7 @@ export const createPaletteTransformer = (palette: Palette) => (color: Color) => 
 export const colorTransformer = createPaletteTransformer(defaultPalette);
 
 export const sampleColor = (usedColors: Color[] = []): Color => {
-  const allColors = [
+  const allColors: Color[] = [
     'color0',
     'color1',
     'color2',
@@ -55,7 +55,7 @@ export const sampleColor = (usedColors: Color[] = []): Color => {
     'color7',
     'color8',
     'color9',
-  ] as Color[];
+  ];
   const available = difference(allColors, usedColors);
   return first(available) || allColors[0];
 };
