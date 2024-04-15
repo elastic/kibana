@@ -191,10 +191,10 @@ export function VisualizeESQL({
 
   // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
-    if (lensLoadEvent && lensInput?.attributes) {
+    if (lensInput?.attributes) {
       return {
         attributes: lensInput?.attributes,
-        lensEvent: lensLoadEvent,
+        lensEvent: lensLoadEvent ?? { adapters: {} },
         onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => {
           if (lensInput) {
             const newInput = {

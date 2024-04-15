@@ -44,6 +44,8 @@ import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
 import { getConnectorTemplate } from '../search_index/connector/constants';
 
+import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
+
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
@@ -51,11 +53,17 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index, isLoading, connector, updateConnectorConfigurationStatus } =
-    useValues(ConnectorViewLogic);
+  const {
+    index,
+    isLoading,
+    connector,
+    updateConnectorConfigurationStatus,
+    hasAdvancedFilteringFeature,
+  } = useValues(ConnectorViewLogic);
   const cloudContext = useCloudDetails();
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
+  const { advancedSnippet } = useValues(ConnectorFilteringLogic);
 
   const { connectorTypes } = useValues(KibanaLogic);
   const BETA_CONNECTORS = useMemo(
@@ -248,6 +256,32 @@ export const ConnectorConfiguration: React.FC = () => {
                             }
                           )}
                         />
+                      )}
+                      <EuiSpacer size="s" />
+                      {connector.status && hasAdvancedFilteringFeature && !!advancedSnippet && (
+                        <EuiCallOut
+                          title={i18n.translate(
+                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+                            { defaultMessage: 'Configuration warning' }
+                          )}
+                          iconType="iInCircle"
+                          color="warning"
+                        >
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+                            defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+                            values={{
+                              advancedSyncRulesDocs: (
+                                <EuiLink href={docLinks.syncRules} target="_blank">
+                                  {i18n.translate(
+                                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                                    { defaultMessage: 'Advanced Sync Rules' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiCallOut>
                       )}
                     </ConnectorConfigurationComponent>
                   ),

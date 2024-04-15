@@ -22,6 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import { EaInstallProgressStepId } from '../../../../common/logs_flow_progress_step_id';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
@@ -33,7 +35,6 @@ import {
 import {
   EuiStepStatus,
   InstallElasticAgentSteps,
-  ProgressStepId,
 } from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
@@ -186,6 +187,8 @@ export function InstallElasticAgent() {
     }
   }, [progressSucceded, refetchProgress]);
 
+  useFlowProgressTelemetry(progressData?.progress, 'system_logs');
+
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;
     if (progress) {
@@ -326,7 +329,7 @@ export function InstallElasticAgent() {
           installProgressSteps={
             (progressData?.progress ?? {}) as Partial<
               Record<
-                ProgressStepId,
+                EaInstallProgressStepId,
                 { status: EuiStepStatus; message?: string }
               >
             >
