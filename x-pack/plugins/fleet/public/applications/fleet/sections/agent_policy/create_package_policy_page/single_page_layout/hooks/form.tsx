@@ -340,6 +340,7 @@ export function useOnSubmit({
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
+
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
