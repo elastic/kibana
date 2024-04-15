@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { registerAssetCriticalityRoutes } from './register_asset_criticality_routes';
+export * from './asset_criticality/constants';
+export * from './risk_engine/constants';
+export * from './risk_score/constants';
