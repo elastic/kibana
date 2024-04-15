@@ -35,8 +35,7 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector } = useValues(ConnectorViewLogic);
-  const error = null;
+  const { connector, error } = useValues(ConnectorViewLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
