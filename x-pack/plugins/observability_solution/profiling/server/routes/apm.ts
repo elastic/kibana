@@ -84,8 +84,14 @@ export function registerTopNFunctionsAPMTransactionsRoute({
             const apmFunction = apmFunctions.TopN.find(
               (topNFunction) => topNFunction.Frame.FunctionName === functionName
             );
-
-            return { serviceName, transactionNames: Object.keys(apmFunction?.subGroups || {}) };
+            const subGroups = apmFunction?.subGroups || {};
+            return {
+              serviceName,
+              transactions: Object.keys(subGroups).map((key) => ({
+                name: key,
+                samples: subGroups[key],
+              })),
+            };
           })
         );
 
@@ -93,14 +99,21 @@ export function registerTopNFunctionsAPMTransactionsRoute({
 
         return response.ok({
           body: serviceNames.flatMap(
-            (serviceName): Array<{ serviceName: string; transactionName: string | null }> => {
+            (
+              serviceName
+            ): Array<{
+              serviceName: string;
+              transactionName: string | null;
+              transactionSamples: number | null;
+            }> => {
               const transactionsFromService = transactionsGroupedByService[serviceName];
-              return !!transactionsFromService?.transactionNames.length
-                ? transactionsFromService.transactionNames.map((transactionName) => ({
+              return !!transactionsFromService?.transactions.length
+                ? transactionsFromService.transactions.map((transaction) => ({
                     serviceName,
-                    transactionName,
+                    transactionName: transaction.name,
+                    transactionSamples: transaction.samples,
                   }))
-                : [{ serviceName, transactionName: null }];
+                : [{ serviceName, transactionName: null, transactionSamples: null }];
             }
           ),
         });

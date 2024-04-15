@@ -9,12 +9,12 @@ import {
   EuiAccordionProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiStat,
   EuiText,
+  EuiTextColor,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import { isEmpty } from 'lodash';
@@ -72,7 +72,6 @@ export function FrameInformationWindow({
   rank,
   compressed = false,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>('closed');
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
@@ -169,16 +168,39 @@ export function FrameInformationWindow({
           <EuiFlexItem>
             <EuiAccordion
               id="apmTransactions"
+              borders="horizontal"
+              buttonProps={{ paddingSize: 'm' }}
               buttonContent={
-                <EuiText
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {i18n.translate('xpack.profiling.frameInformationWindow.apmTransactions', {
-                    defaultMessage: 'APM Transactions',
-                  })}
-                </EuiText>
+                <div>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="apmApp" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <h3>
+                          {i18n.translate(
+                            'xpack.profiling.frameInformationWindow.apmTransactions',
+                            { defaultMessage: 'Distributed Tracing Correlation' }
+                          )}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiText size="s">
+                    <p>
+                      <EuiTextColor color="subdued">
+                        {i18n.translate(
+                          'xpack.profiling.frameInformationWindow.apmTransactions.description',
+                          {
+                            defaultMessage:
+                              'A curated view of APM services and transactions that call this function.',
+                          }
+                        )}
+                      </EuiTextColor>
+                    </p>
+                  </EuiText>
+                </div>
               }
               forceState={accordionState}
               onToggle={(isOpen) => setAccordionState(isOpen ? 'open' : 'closed')}

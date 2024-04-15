@@ -26,6 +26,7 @@ import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 export interface APMTransactionsPerService {
   serviceName: string;
   transactionName: string | null;
+  transactionSamples: number | null;
 }
 
 export interface ProfilingSetupStatus {
