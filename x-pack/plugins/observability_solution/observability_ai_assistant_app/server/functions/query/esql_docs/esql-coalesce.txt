@@ -3,10 +3,11 @@ COALESCE
 Syntax
 COALESCE(expression1 [, ..., expressionN])
 Parameters
-expressionX
-Expression to evaluate.
-DescriptionReturns the first of its arguments that is not null. If all arguments are null,
-it returns null.Example
+first
+Expression to evaluate
+rest
+Other expression to evaluate
+DescriptionReturns the first of its arguments that is not null. If all arguments are null, it returns null.Example
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
