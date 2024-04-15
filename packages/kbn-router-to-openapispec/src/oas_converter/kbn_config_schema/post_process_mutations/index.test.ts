@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { postProcessMutations } from '.';
 import { joi2JsonInternal } from '../parse';
+import { createCtx } from './context';
 
 describe('postProcessMutations', () => {
   test('walks inner objects first so that "required" fields are populated correctly', () => {
@@ -15,7 +16,7 @@ describe('postProcessMutations', () => {
       schema.object({ foo: schema.object({ bar: schema.string() }) }).getSchema()
     );
     postProcessMutations({
-      ctx: { sharedSchemas: new Map() },
+      ctx: createCtx(),
       schema: parsed,
     });
     expect(parsed).toEqual({

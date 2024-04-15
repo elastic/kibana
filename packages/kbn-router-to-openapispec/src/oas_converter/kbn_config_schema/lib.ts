@@ -13,7 +13,8 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
 import { parse } from './parse';
-import { Context } from './post_process_mutations';
+
+import { createCtx, IContext } from './post_process_mutations';
 
 export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
   if (metaFields.META_FIELD_X_OAS_REF_ID in schema) {
@@ -21,12 +22,12 @@ export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
   }
 };
 
-const removeSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
+export const removeSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
   const { [metaFields.META_FIELD_X_OAS_REF_ID]: id, ...rest } = schema as any;
   return rest;
 };
 
-export const sharedComponentIdToRef = (id: string) => {
+export const sharedComponentIdToRef = (id: string): OpenAPIV3.ReferenceObject => {
   return {
     $ref: `#/components/schemas/${id}`,
   };
@@ -95,40 +96,28 @@ export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
   return schema.getSchema();
 };
 
-/** Used to check for schemas that are members of an object schema */
-export const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
-  if (joi.isSchema(schema)) {
-    return schema._flags?.presence !== 'optional';
-  }
-  return 'optional' !== get(schema, 'flags.presence');
-};
-
-const createCtx = () => {
-  const ctx: Context = { sharedSchemas: new Map() };
-  return ctx;
-};
-
 export const convert = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const { result, shared } = parse({ schema, ctx: createCtx() });
+  const { result, shared } = parse({ schema, ctx: createCtx({ refs: true }) });
   return { schema: result, shared: Object.fromEntries(shared.entries()) };
 };
 
 const convertObjectMembersToParameterObjects = (
-  ctx: Context,
+  ctx: IContext,
   schema: joi.Schema,
   knownParameters: KnownParameters = {},
   isPathParameter = false
 ) => {
   let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
+  const required = new Map<string, boolean>();
   if (isNullableObjectType(schema)) {
-    const {
-      result: { anyOf },
-    }: { result: { anyOf: OpenAPIV3.SchemaObject[] } } = parse({ schema, ctx });
+    const { result } = parse({ schema, ctx });
+    const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
     properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
-    const { result } = parse({ schema, ctx });
-    properties = result.properties;
+    const { result } = parse({ schema, ctx }) as { result: OpenAPIV3.SchemaObject };
+    properties = (result as OpenAPIV3.SchemaObject).properties!;
+    (result.required ?? []).forEach((key) => required.set(key, true));
   } else if (isRecordType(schema)) {
     return [];
   } else {
@@ -139,7 +128,7 @@ const convertObjectMembersToParameterObjects = (
     if (!knownParameters[schemaKey] && isPathParameter) {
       throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
     }
-    const isSubSchemaRequired = isSchemaRequired(schemaObject);
+    const isSubSchemaRequired = required.has(schemaKey);
     let description: undefined | string;
     let finalSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
     if (!isReferenceObject(schemaObject)) {
@@ -161,7 +150,7 @@ const convertObjectMembersToParameterObjects = (
 
 export const convertQuery = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const ctx = createCtx();
+  const ctx = createCtx({ refs: false }); // For now context is not shared between body, params and queries
   const result = convertObjectMembersToParameterObjects(ctx, schema, {}, false);
   return {
     query: result,
@@ -177,7 +166,7 @@ export const convertPathParameters = (
   if (!isObjectType(schema) && !isNullableObjectType(schema)) {
     throw createError('Input parser for path params expected to be an object schema');
   }
-  const ctx = createCtx();
+  const ctx = createCtx(); // For now context is not shared between body, params and queries
   const result = convertObjectMembersToParameterObjects(ctx, schema, knownParameters, true);
   return {
     params: result,
@@ -191,7 +180,7 @@ export const is = (schema: unknown): boolean => {
     // We ignore "any" @kbn/config-schema for the purposes of OAS generation...
     if (
       (description.type === 'any' && !('allow' in description)) ||
-      (!isSchemaRequired(description) && isEmptyObjectAllowsUnknowns(description))
+      isEmptyObjectAllowsUnknowns(description)
     ) {
       return false;
     }

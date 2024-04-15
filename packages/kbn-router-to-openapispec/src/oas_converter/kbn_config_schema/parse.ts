@@ -8,22 +8,22 @@
 
 import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
-import { postProcessMutations } from './post_process_mutations';
-import { Context } from './post_process_mutations';
-import { processRef } from './post_process_mutations/mutations';
+import type { OpenAPIV3 } from 'openapi-types';
+import { createCtx, postProcessMutations } from './post_process_mutations';
+import type { IContext } from './post_process_mutations';
 
 interface ParseArgs {
   schema: Joi.Schema;
-  ctx?: Context;
+  ctx?: IContext;
 }
 
 export const joi2JsonInternal = (schema: Joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
-export const parse = ({ schema, ctx = { sharedSchemas: new Map() } }: ParseArgs) => {
-  const result = joi2JsonInternal(schema);
-  postProcessMutations({ schema: result, ctx });
-  const ref = processRef(ctx, result);
-  return { shared: ctx.sharedSchemas, result: ref ?? result };
+export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
+  const parsed: OpenAPIV3.SchemaObject = joi2JsonInternal(schema);
+  postProcessMutations({ schema: parsed, ctx });
+  const result = ctx.processRef(parsed);
+  return { shared: ctx.sharedSchemas, result };
 };

@@ -9,8 +9,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import { metaFields } from '@kbn/config-schema';
 import { deleteField, stripBadDefault } from './utils';
-import { processRef } from './ref';
-import { Context } from '..';
+import { IContext } from '../context';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
 
@@ -52,17 +51,15 @@ const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-const processObjectRefs = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
+const processObjectRefs = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   if (schema.properties) {
-    Object.entries(schema.properties).forEach(([key, value]) => {
-      schema.properties![key] =
-        processRef(ctx, schema.properties![key] as OpenAPIV3.SchemaObject) ??
-        schema.properties![key];
+    Object.keys(schema.properties).forEach((key) => {
+      schema.properties![key] = ctx.processRef(schema.properties![key] as OpenAPIV3.SchemaObject);
     });
   }
 };
 
-export const processObject = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
+export const processObject = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   stripBadDefault(schema);
   removeNeverType(schema);
   populateRequiredFields(schema);

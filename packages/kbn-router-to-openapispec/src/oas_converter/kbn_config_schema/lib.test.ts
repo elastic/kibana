@@ -10,7 +10,7 @@ import { schema, metaFields } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
-import { is, tryConvertToRef, isNullableObjectType, isSchemaRequired } from './lib';
+import { is, tryConvertToRef, isNullableObjectType } from './lib';
 
 describe('is', () => {
   test.each([
@@ -64,16 +64,4 @@ test('isNullableObjectType', () => {
 
   const nullableObject = schema.nullable(schema.object({}));
   expect(isNullableObjectType(nullableObject.getSchema().describe())).toBe(true);
-});
-
-test('isSchemaRequired', () => {
-  const optionalObjectSchema = schema.object({ number: schema.maybe(schema.number()) });
-  expect(isSchemaRequired(optionalObjectSchema.getSchema().describe())).toBe(false);
-  const optionalSchema1 = schema.number({ defaultValue: 1 });
-  expect(isSchemaRequired(optionalSchema1.getSchema().describe())).toBe(false);
-  const optionalSchema2 = schema.maybe(schema.number());
-  expect(isSchemaRequired(optionalSchema2.getSchema().describe())).toBe(false);
-
-  const requiredObjectSchema = schema.object({ number: schema.number() });
-  expect(isSchemaRequired(requiredObjectSchema.getSchema().describe().keys.number)).toBe(true);
 });

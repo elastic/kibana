@@ -11,8 +11,7 @@ import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
 import { deleteField, stripBadDefault } from './utils';
-import { Context } from '..';
-import { processRef } from './ref';
+import { IContext } from '../context';
 
 const {
   META_FIELD_X_OAS_MAX_LENGTH,
@@ -31,7 +30,7 @@ export const processString = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-const processAdditionalProperties = (ctx: Context, schema: OpenAPIV3.SchemaObject) => {
+const processAdditionalProperties = (ctx: IContext, schema: OpenAPIV3.SchemaObject) => {
   if (META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES in schema) {
     const fn = schema[META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES] as () => Joi.Schema<unknown>;
     const { result: additionalSchema } = parse({ ctx, schema: fn() });
@@ -42,23 +41,23 @@ const processAdditionalProperties = (ctx: Context, schema: OpenAPIV3.SchemaObjec
   }
 };
 
-export const processRecord = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
+export const processRecord = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
   if (schema.additionalProperties) {
-    schema.additionalProperties =
-      processRef(ctx, schema.additionalProperties as OpenAPIV3.SchemaObject) ??
-      schema.additionalProperties;
+    schema.additionalProperties = ctx.processRef(
+      schema.additionalProperties as OpenAPIV3.SchemaObject
+    );
   }
 };
 
-export const processMap = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
+export const processMap = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
   processAdditionalProperties(ctx, schema);
   if (schema.additionalProperties) {
-    schema.additionalProperties =
-      processRef(ctx, schema.additionalProperties as OpenAPIV3.SchemaObject) ??
-      schema.additionalProperties;
+    schema.additionalProperties = ctx.processRef(
+      schema.additionalProperties as OpenAPIV3.SchemaObject
+    );
   }
 };
 
@@ -67,4 +66,3 @@ export const processAny = (schema: OpenAPIV3.SchemaObject): void => {
 };
 
 export { processObject } from './object';
-export { processRef } from './ref';

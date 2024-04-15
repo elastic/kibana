@@ -8,9 +8,9 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { tryConvertToRef } from '../../lib';
-import type { Context } from '..';
+import type { IContext } from '../context';
 
-export const processRef = (ctx: Context, schema: OpenAPIV3.SchemaObject) => {
+export const processRef = (ctx: IContext, schema: OpenAPIV3.SchemaObject) => {
   const result = tryConvertToRef(schema);
   if (result) {
     const [id, s] = result.idSchema;

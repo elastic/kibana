@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../../parse';
+import { createCtx } from '../context';
 import { processObject } from './object';
 
 test.each([
@@ -40,7 +41,7 @@ test.each([
   ],
 ])('processObject %#', (input, result) => {
   const parsed = joi2JsonInternal(input.getSchema());
-  processObject({ sharedSchemas: new Map() }, parsed);
+  processObject(createCtx(), parsed);
   expect(parsed).toEqual(result);
 });
 
@@ -48,7 +49,7 @@ test('refs', () => {
   const fooSchema = schema.object({ n: schema.number() }, { id: 'foo' });
   const barSchema = schema.object({ foo: fooSchema, s: schema.string() });
   const parsed = joi2JsonInternal(barSchema.getSchema());
-  const ctx = { sharedSchemas: new Map() };
+  const ctx = createCtx({ refs: true });
 
   // Simulate us walking the schema
   processObject(ctx, parsed.properties.foo);

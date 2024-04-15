@@ -8,14 +8,11 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import * as mutations from './mutations';
-
-export interface Context {
-  sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;
-}
+import type { IContext } from './context';
 
 interface PostProcessMutationsArgs {
   schema: OpenAPIV3.SchemaObject;
-  ctx: Context;
+  ctx: IContext;
 }
 
 export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) => {
@@ -25,7 +22,7 @@ export const postProcessMutations = ({ ctx, schema }: PostProcessMutationsArgs) 
 
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
-const walkSchema = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
+const walkSchema = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   mutations.processAny(schema);
   if (schema.type === 'array') {
     walkSchema(ctx, schema.items as OpenAPIV3.SchemaObject);
@@ -49,10 +46,13 @@ const walkSchema = (ctx: Context, schema: OpenAPIV3.SchemaObject): void => {
       if (schema[arrayContainer]) {
         schema[arrayContainer].forEach((s: OpenAPIV3.SchemaObject, idx: number) => {
           walkSchema(ctx, s);
-          schema[arrayContainer][idx] = mutations.processRef(ctx, s) ?? schema[arrayContainer][idx];
+          schema[arrayContainer][idx] = ctx.processRef(s);
         });
         break;
       }
     }
   }
 };
+
+export { createCtx } from './context';
+export type { IContext } from './context';
