@@ -1185,18 +1185,6 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/app.tsx"
           },
           {
@@ -1322,18 +1310,6 @@
           {
             "plugin": "ingestPipelines",
             "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
           },
           {
             "plugin": "metricsDataAccess",

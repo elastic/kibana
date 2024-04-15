@@ -679,10 +679,6 @@
                 "path": "x-pack/plugins/ingest_pipelines/public/application/mount_management_section.ts"
               },
               {
-                "plugin": "logstash",
-                "path": "x-pack/plugins/logstash/public/application/index.tsx"
-              },
-              {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/public/application.tsx"
               },
