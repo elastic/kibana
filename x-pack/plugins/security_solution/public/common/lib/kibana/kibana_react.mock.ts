@@ -250,6 +250,7 @@ export const createStartServicesMock = (
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     upselling: new UpsellingService(),
     timelineFilterManager: mockTimelineFilterManager,
+    timelineDataService: dataPluginMock.createStartContract(),
   } as unknown as StartServices;
 };
 

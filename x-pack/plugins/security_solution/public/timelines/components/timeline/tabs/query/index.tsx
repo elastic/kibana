@@ -13,6 +13,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
+import { Subscription } from 'rxjs';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -20,6 +21,7 @@ import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/c
 import memoizeOne from 'memoize-one';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -47,6 +49,7 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
+import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
@@ -124,7 +127,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings, timelineFilterManager } = useKibana().services;
+  const { uiSettings, timelineFilterManager, timelineDataService } = useKibana().services;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
@@ -323,6 +326,33 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       totalCount,
     ]
   );
+
+  // <Synchronisation of the timeline data service>
+  // Sync the timerange
+  const timelineFilters = useTimelineDataFilters(isActiveTimeline(timelineId));
+  useEffect(() => {
+    timelineDataService.query.timefilter.timefilter.setTime({
+      from: timelineFilters.from,
+      to: timelineFilters.to,
+    });
+  }, [timelineDataService.query.timefilter.timefilter, timelineFilters.from, timelineFilters.to]);
+
+  // Sync the index pattern
+  useEffect(() => {
+    if (indexPattern.id) {
+      timelineDataService.dataViews.setDefault(indexPattern.id);
+    }
+  }, [timelineDataService, indexPattern]);
+
+  // Sync the base query
+  useEffect(() => {
+    timelineDataService.query.queryString.setQuery(
+      // We're using the base query of all combined queries here, to account for all
+      // of timeline's query dependencies (data providers, query etc.)
+      combinedQueries?.baseKqlQuery || { language: kqlQueryLanguage, query: '' }
+    );
+  }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
+  // </Synchronisation of the timeline data service>
 
   if (unifiedComponentsInTimelineEnabled) {
     return (

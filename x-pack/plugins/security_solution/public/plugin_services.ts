@@ -112,6 +112,17 @@ export class PluginServices {
     });
     const customDataService = this.startCustomDataService(query, startPlugins.data);
 
+    const timelineFilterManager = new FilterManager(coreStart.uiSettings);
+
+    const timelineDataService: DataPublicPluginStart = {
+      ...startPlugins.data,
+      query,
+      // @ts-expect-error
+      _name: 'timeline',
+    };
+
+    timelineDataService.query.filterManager = timelineFilterManager;
+
     return {
       ...coreStart,
       ...plugins,
@@ -129,7 +140,8 @@ export class PluginServices {
       telemetry: this.telemetry.start(),
       customDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      timelineFilterManager: new FilterManager(coreStart.uiSettings),
+      timelineFilterManager,
+      timelineDataService,
     };
   }
 

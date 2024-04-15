@@ -181,6 +181,7 @@ export type StartServices = CoreStart &
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineFilterManager: FilterManager;
+    timelineDataService: DataPublicPluginStart;
   };
 
 export interface PluginSetup {

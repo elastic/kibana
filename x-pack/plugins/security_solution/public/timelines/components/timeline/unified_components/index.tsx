@@ -146,12 +146,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       dataViews,
       dataViewFieldEditor,
       application: { capabilities },
-      data: dataPluginContract,
       uiActions,
       charts,
       docLinks,
       analytics,
       timelineFilterManager,
+      timelineDataService,
     },
   } = useKibana();
 
@@ -160,7 +160,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      data: dataPluginContract,
+      data: timelineDataService,
       uiActions,
       charts,
       core: {
@@ -173,7 +173,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       fieldFormats,
       dataViews,
       dataViewFieldEditor,
-      dataPluginContract,
+      timelineDataService,
       uiActions,
       charts,
       uiSettings,
