@@ -299,6 +299,7 @@ function valueOrDefault(value: any, defaultValue: any) {
 }
 
 function renameField(fieldName: string, newFieldName: string, obj: any) {
+  if (!obj) return {};
   if (Object.hasOwn(obj, fieldName)) {
     obj[newFieldName] = obj[fieldName];
     delete obj[fieldName];

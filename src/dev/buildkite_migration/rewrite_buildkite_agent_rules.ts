@@ -99,9 +99,11 @@ run(
 
     log.info('Applying rewrite to the following paths: \n', pathsFiltered.join('\n'));
 
+    const pathsAfterReplace = replaceToPipelineFiles(pathsFiltered);
+
     const failedRewrites: Array<{ path: string; error: Error }> = [];
 
-    const rewritePromises: Array<Promise<void>> = pathsFiltered.map((ymlPath) => {
+    const rewritePromises: Array<Promise<void>> = pathsAfterReplace.map((ymlPath) => {
       return rewriteFile(ymlPath, log).catch((e) => {
         // eslint-disable-next-line no-console
         console.error('Failed to rewrite: ' + ymlPath, e);
@@ -246,4 +248,15 @@ function removeNullish<T extends object>(obj: T): T {
     }
     return acc;
   }, {} as any);
+}
+
+function replaceToPipelineFiles(paths: string[]) {
+  return paths.flatMap((path) => {
+    const objs = yaml.loadAll(fs.readFileSync(path, 'utf8'));
+    if (objs.some((obj) => obj?.spec?.implementation?.spec?.pipeline_file)) {
+      return objs.map((e) => e?.spec?.implementation?.spec?.pipeline_file);
+    } else {
+      return [path];
+    }
+  });
 }
