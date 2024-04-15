@@ -48,7 +48,7 @@ export function RelatedIntegrationField({
       relatedIntegrationsButCurrent
     );
 
-    const options = unusedIntegrations.map(transformIntegrationToOption) ?? [];
+    const options = unusedIntegrations.map(transformIntegrationToOption);
     const fallbackSelectedOption =
       field.value.package.length > 0
         ? {

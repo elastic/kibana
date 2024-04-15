@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { UseArray } from '../../../../shared_imports';
+import { UseArray, useFormData } from '../../../../shared_imports';
 import { RelatedIntegrationsHelpInfo } from './related_integrations_help_info';
 import { RelatedIntegrationFieldRow } from './related_integration_field_row';
 import * as i18n from './translations';
@@ -31,42 +31,41 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
       <RelatedIntegrationsHelpInfo />
     </>
   );
+  const [formData] = useFormData();
 
   return (
     <UseArray path={path} initialNumberOfItems={0}>
-      {({ items, addItem, removeItem, form }) => {
-        return (
-          <EuiFormRow
-            label={label}
-            labelAppend={
-              <EuiText color="subdued" size="xs">
-                {i18n.OPTIONAL}
-              </EuiText>
-            }
-            fullWidth
-            data-test-subj={dataTestSubj}
-            hasChildLabel={false}
-          >
-            <fieldset>
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {items.map((item) => (
-                  <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
-                    <RelatedIntegrationFieldRow
-                      item={item}
-                      relatedIntegrations={form.getFormData()[path] ?? []}
-                      removeItem={removeItem}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-              {items.length > 0 && <EuiSpacer size="s" />}
-              <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
-                {i18n.ADD_INTEGRATION}
-              </EuiButtonEmpty>
-            </fieldset>
-          </EuiFormRow>
-        );
-      }}
+      {({ items, addItem, removeItem }) => (
+        <EuiFormRow
+          label={label}
+          labelAppend={
+            <EuiText color="subdued" size="xs">
+              {i18n.OPTIONAL}
+            </EuiText>
+          }
+          fullWidth
+          data-test-subj={dataTestSubj}
+          hasChildLabel={false}
+        >
+          <fieldset>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {items.map((item) => (
+                <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
+                  <RelatedIntegrationFieldRow
+                    item={item}
+                    relatedIntegrations={formData[path] ?? []}
+                    removeItem={removeItem}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+            {items.length > 0 && <EuiSpacer size="s" />}
+            <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
+              {i18n.ADD_INTEGRATION}
+            </EuiButtonEmpty>
+          </fieldset>
+        </EuiFormRow>
+      )}
     </UseArray>
   );
 }
