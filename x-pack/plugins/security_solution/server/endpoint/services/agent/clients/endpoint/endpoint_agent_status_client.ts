@@ -17,16 +17,19 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const metadataService = this.options.endpointService.getEndpointMetadataService();
     const esClient = this.options.esClient;
+    const soClient = this.options.soClient;
 
     try {
-      const hostInfoForAgents = await Promise.all(
-        agentIds.map((agentId) =>
-          metadataService.getEnrichedHostMetadata(
-            esClient,
-            this.options.endpointService.getInternalFleetServices(),
-            agentId
-          )
-        )
+      const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
+      const { data: hostInfoForAgents } = await metadataService.getHostMetadataList(
+        esClient,
+        soClient,
+        this.options.endpointService.getInternalFleetServices(),
+        {
+          page: 0,
+          pageSize: 1000,
+          kuery: agentIdsKql,
+        }
       );
 
       const allPendingActions = await getPendingActionsSummary(

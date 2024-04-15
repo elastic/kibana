@@ -74,8 +74,10 @@ export const getAgentStatusRouteHandler = (
     }
 
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const soClient = (await context.core).savedObjects.client;
     const agentStatusClient = getAgentStatusClient(agentType, {
       esClient,
+      soClient,
       endpointService: endpointContext.service,
     });
 

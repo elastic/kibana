@@ -6,6 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
@@ -16,6 +17,7 @@ import { HOST_NOT_ENROLLED } from '../../../actions/clients/lib/base_response_ac
 export interface AgentStatusClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
 }
 
 export type AgentStatusClientValidateRequestResponse =
