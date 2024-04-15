@@ -112,8 +112,6 @@ export function LatencyChart({ height, kuery }: Props) {
         transactionType,
         environment,
         bucketSizeInSeconds,
-        start,
-        end,
       })
     );
   }, [
