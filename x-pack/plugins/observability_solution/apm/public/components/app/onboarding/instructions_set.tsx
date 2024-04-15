@@ -13,8 +13,8 @@ import {
   EuiSteps,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import {
   INSTRUCTION_VARIANT,
@@ -22,6 +22,8 @@ import {
   InstructionVariant,
   InstructionSet,
 } from './instruction_variants';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { push } from '../../shared/links/url_helpers';
 
 interface AgentTab {
   id: INSTRUCTION_VARIANT;
@@ -42,18 +44,13 @@ export function InstructionsSet({
 }) {
   const tabs = getTabs(instructions.instructionVariants);
 
-  const { hash } = useLocation();
+  const {
+    query: { agent: agentQuery },
+  } = useApmParams('/onboarding');
   const history = useHistory();
-  const preselectedTab = tabs.find(({ id }) => hash.slice(1) === id);
-  const [selectedTab, setSelectedTab] = useState<string>(
-    preselectedTab?.id ?? tabs[0].id
-  );
-  const onSelectedTabChange = (tab: string) => {
-    setSelectedTab(tab);
-    history.push({
-      ...history.location,
-      hash: `#${tab}`,
-    });
+  const selectedTab = agentQuery ?? tabs[0].id;
+  const onSelectedTabChange = (agent: string) => {
+    push(history, { query: { agent } });
   };
   const { euiTheme } = useEuiTheme();
 
