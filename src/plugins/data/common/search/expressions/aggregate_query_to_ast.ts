@@ -11,10 +11,17 @@ import { AggregateQuery } from '../../query';
 import { EssqlExpressionFunctionDefinition } from './essql';
 import { EsqlExpressionFunctionDefinition } from './esql';
 
-export const aggregateQueryToAst = (
-  query: AggregateQuery,
-  timeField?: string
-): undefined | ExpressionAstFunction => {
+export const aggregateQueryToAst = ({
+  query,
+  timeField,
+  titleForInspector,
+  descriptionForInspector,
+}: {
+  query: AggregateQuery;
+  timeField?: string;
+  titleForInspector?: string;
+  descriptionForInspector?: string;
+}): undefined | ExpressionAstFunction => {
   if ('sql' in query) {
     return buildExpressionFunction<EssqlExpressionFunctionDefinition>('essql', {
       query: query.sql,
@@ -26,6 +33,8 @@ export const aggregateQueryToAst = (
       query: query.esql,
       timeField,
       locale: i18n.getLocale(),
+      titleForInspector,
+      descriptionForInspector,
     }).toAst();
   }
 };
