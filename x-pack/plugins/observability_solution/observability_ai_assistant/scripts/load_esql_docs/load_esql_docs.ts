@@ -31,7 +31,7 @@ yargs(process.argv.slice(2))
     (argv) => {
       run(
         async ({ log }) => {
-          const builtDocsDir = Path.join(__dirname, '../../../../../../built-docs');
+          const builtDocsDir = Path.join(__dirname, '../../../../../../../built-docs');
 
           log.debug(`Looking in ${builtDocsDir} for built-docs repository`);
 
@@ -205,7 +205,10 @@ yargs(process.argv.slice(2))
             return !doc.title.startsWith('ES|QL');
           });
 
-          const outDir = Path.join(__dirname, '../../server/functions/esql/docs');
+          const outDir = Path.join(
+            __dirname,
+            '../../../observability_ai_assistant_app/server/functions/query/esql_docs'
+          );
 
           log.info(`Writing ${flattened.length} documents to disk to ${outDir}`);
 
