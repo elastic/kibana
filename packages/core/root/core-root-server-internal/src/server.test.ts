@@ -35,6 +35,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { Server } from './server';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -65,6 +66,9 @@ beforeEach(() => {
   });
 
   mockElasticsearchService.start.mockResolvedValue(elasticsearchServiceMock.createInternalStart());
+  mockSavedObjectsService.start.mockResolvedValue(
+    savedObjectsServiceMock.createInternalStartContract()
+  );
 });
 
 afterEach(() => {

@@ -26,6 +26,9 @@ export interface UptimeSteps {
   elasticsearch: {
     waitTime: number;
   };
+  savedObjects: {
+    migrationTime: number;
+  };
 }
 
 export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => {
@@ -113,6 +116,16 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
                 _meta: {
                   description:
                     'Number of milliseconds Kibana waited for Elasticsearch during the its start phase',
+                },
+              },
+            },
+          },
+          savedObjects: {
+            properties: {
+              migrationTime: {
+                type: 'float',
+                _meta: {
+                  description: 'Number of milliseconds it took to run the SO migration',
                 },
               },
             },

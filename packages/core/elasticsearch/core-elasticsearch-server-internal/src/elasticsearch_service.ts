@@ -145,7 +145,7 @@ export class ElasticsearchService
     });
 
     let capabilities: ElasticsearchCapabilities;
-    let elasticsearchWaitTime;
+    let elasticsearchWaitTime: number;
 
     if (!config.skipStartupConnectionCheck) {
       const elasticsearchWaitStartTime = performance.now();

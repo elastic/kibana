@@ -391,6 +391,9 @@ export class Server {
       docLinks: docLinkStart,
       node: await this.node.start(),
     });
+    this.uptimePerStep.savedObjects = {
+      migrationTime: savedObjectsStart.telemetry.migrationDuration,
+    };
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();

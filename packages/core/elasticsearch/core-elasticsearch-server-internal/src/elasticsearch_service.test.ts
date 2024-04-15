@@ -288,7 +288,7 @@ describe('#start', () => {
     ]);
   });
 
-  it('should log an info message about connecting to ES', async () => {
+  it('logs an info message about connecting to ES', async () => {
     isValidConnectionMock.mockImplementation(async () => {
       await new Promise((r) => setTimeout(r, 50));
     });
