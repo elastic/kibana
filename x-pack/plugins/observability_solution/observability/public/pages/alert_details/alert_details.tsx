@@ -29,6 +29,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
+import { omit } from 'lodash';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -43,6 +44,7 @@ import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
+import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -95,7 +97,7 @@ export function AlertDetails() {
         {
           name: 'alert_fields',
           description: 'The fields and values for the alert',
-          value: alertDetail.formatted.fields,
+          value: getRelevantAlertFields(alertDetail),
         },
       ],
     });
@@ -170,6 +172,8 @@ export function AlertDetails() {
       <>
         <EuiSpacer size="l" />
         <AlertSummary alertSummaryFields={summaryFields} />
+        <AlertDetailContextualInsights alert={alertDetail} />
+        <EuiSpacer size="l" />
         {rule && alertDetail.formatted && (
           <AlertDetailsAppSection
             alert={alertDetail.formatted}
@@ -182,6 +186,8 @@ export function AlertDetails() {
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
+        <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} />
       </EuiPanel>
@@ -269,13 +275,27 @@ export function getScreenDescription(alertDetail: AlertData) {
   }
 
   The alert details are:
-  ${Object.entries(alertDetail.formatted.fields)
-    .map(([key, value]) => `${key}: ${value}`)
+  ${Object.entries(getRelevantAlertFields(alertDetail))
+    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  
 
   Do not repeat this information to the user, unless it is relevant for them to know. 
-  Please suggestion root causes if possilbe.
+  Please suggestion root causes if possible.
   Suggest next steps for the user to take.
-
   `);
+}
+
+function getRelevantAlertFields(alertDetail: AlertData) {
+  return omit(alertDetail.formatted.fields, [
+    'kibana.alert.rule.revision',
+    'kibana.alert.rule.execution.uuid',
+    'kibana.alert.flapping_history',
+    'kibana.alert.uuid',
+    'kibana.alert.rule.uuid',
+    'event.action',
+    'event.kind',
+    'kibana.alert.rule.tags',
+    'kibana.alert.maintenance_window_ids',
+    'kibana.alert.consecutive_matches',
+  ]);
 }
