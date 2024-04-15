@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
-import { map as _map, groupBy as _groupBy} from 'lodash';
+import { map as _map, groupBy as _groupBy } from 'lodash';
 
 import {
   FieldValidateResponse,
@@ -46,23 +46,21 @@ interface ProcessorTypeAndLabel {
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   // Get a clean list of processors that should be rendered into the UI
-  const filteredProcessors = (
-    extractProcessorDetails(mapProcessorTypeToDescriptor)
-      // Filter out any processors that are not available for the current license type
-      .filter((option) => {
-        return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
-      })
-      // Pick properties we need to build the categories
-      .map(({ value, label, category }) => ({ label, value, category }))
-  );
+  const filteredProcessors = extractProcessorDetails(mapProcessorTypeToDescriptor)
+    // Filter out any processors that are not available for the current license type
+    .filter((option) => {
+      return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
+    })
+    // Pick properties we need to build the categories
+    .map(({ value, label, category }) => ({ label, value, category }));
 
   // Group all processors by category
-  return _map(_groupBy(filteredProcessors, 'category'), (options, label) => ({
-    label,
+  return _map(_groupBy(filteredProcessors, 'category'), (options, optionLabel) => ({
+    label: optionLabel,
     options: _map(options, ({ label, value }) => ({
       label,
       value,
-    }))
+    })),
   }));
 };
 
@@ -165,7 +163,6 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
               singleSelection={{
                 asPlainText: true,
               }}
-
               data-test-subj="input"
             />
           </EuiFormRow>

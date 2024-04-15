@@ -61,20 +61,26 @@ import {
 
 const processorCategories = {
   DATA_ENRICHMENT: i18n.translate('xpack.ingestPipelines.processors.category.dataEnrichment', {
-    defaultMessage: 'Data enrichment'
+    defaultMessage: 'Data enrichment',
   }),
-  DATA_TRANSFORMATION: i18n.translate('xpack.ingestPipelines.processors.category.dataTransformation', {
-    defaultMessage: 'Data transformation'
-  }),
+  DATA_TRANSFORMATION: i18n.translate(
+    'xpack.ingestPipelines.processors.category.dataTransformation',
+    {
+      defaultMessage: 'Data transformation',
+    }
+  ),
   DATA_FILTERING: i18n.translate('xpack.ingestPipelines.processors.category.dataFiltering', {
-    defaultMessage: 'Data filtering'
+    defaultMessage: 'Data filtering',
   }),
   PIPELINE_HANDLING: i18n.translate('xpack.ingestPipelines.processors.category.pipelineHandling', {
-    defaultMessage: 'Pipeline handling'
+    defaultMessage: 'Pipeline handling',
   }),
-  ARRAY_JSON_HANDLING: i18n.translate('xpack.ingestPipelines.processors.category.arrayJsonHandling', {
-    defaultMessage: 'Array/JSON handling'
-  }),
+  ARRAY_JSON_HANDLING: i18n.translate(
+    'xpack.ingestPipelines.processors.category.arrayJsonHandling',
+    {
+      defaultMessage: 'Array/JSON handling',
+    }
+  ),
 };
 
 interface FieldDescriptor {
