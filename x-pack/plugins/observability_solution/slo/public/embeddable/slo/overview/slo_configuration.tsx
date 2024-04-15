@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import './slo_configuration.scss';
 
 import React, { useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiSpacer,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -70,7 +69,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
 
   return (
     <>
-      <EuiModalBody>
+      <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -106,8 +105,8 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalBody>
-      <EuiModalFooter>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
             id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
@@ -126,7 +125,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
             defaultMessage="Save"
           />
         </EuiButton>
-      </EuiModalFooter>
+      </EuiFlyoutFooter>
     </>
   );
 }
@@ -152,7 +151,7 @@ function GroupSloConfiguration({
 
   return (
     <>
-      <EuiModalBody className="sloOverviewEmbeddable">
+      <EuiFlyoutBody className="sloOverviewEmbeddable">
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -167,8 +166,8 @@ function GroupSloConfiguration({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalBody>
-      <EuiModalFooter>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
             id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
@@ -182,7 +181,7 @@ function GroupSloConfiguration({
             defaultMessage="Save"
           />
         </EuiButton>
-      </EuiModalFooter>
+      </EuiFlyoutFooter>
     </>
   );
 }
@@ -193,15 +192,17 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   );
 
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
-      <EuiModalHeader css={{ paddingBottom: 0, paddingRight: '24px' }}>
+    <EuiFlyout onClose={onCancel}>
+      <EuiFlyoutHeader>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <EuiModalHeaderTitle>
-              {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-                defaultMessage: 'SLO configuration',
-              })}
-            </EuiModalHeaderTitle>
+            <EuiTitle>
+              <h2>
+                {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+                  defaultMessage: 'SLO configuration',
+                })}
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
           {initialInput?.overviewMode === undefined && (
             <EuiFlexItem>
@@ -213,7 +214,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </EuiModalHeader>
+      </EuiFlyoutHeader>
       {overviewMode === 'groups' ? (
         <GroupSloConfiguration
           initialInput={initialInput as GroupSloProps}
@@ -228,6 +229,6 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
           onCancel={onCancel}
         />
       )}
-    </EuiModal>
+    </EuiFlyout>
   );
 }
