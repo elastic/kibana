@@ -134,7 +134,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           setConversationSettings((prev) => {
             return {
               ...prev,
-              [newSelectedConversation.title]: newSelectedConversation,
+              [newSelectedConversation.id]: newSelectedConversation,
             };
           });
         }
@@ -154,9 +154,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
     const onConversationDeleted = useCallback(
       (conversationTitle: string) => {
-        const conversationId = conversationSettings[conversationTitle].id;
+        const conversationId =
+          Object.values(conversationSettings).find((c) => c.title === conversationTitle)?.id ?? '';
         const updatedConversationSettings = { ...conversationSettings };
-        delete updatedConversationSettings[conversationTitle];
+        delete updatedConversationSettings[conversationId];
         setConversationSettings(updatedConversationSettings);
 
         setConversationsSettingsBulkActions({

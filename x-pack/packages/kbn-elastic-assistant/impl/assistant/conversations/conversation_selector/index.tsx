@@ -16,7 +16,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { getGenAiConfig } from '../../../connectorland/helpers';
@@ -27,8 +26,6 @@ import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   defaultConnector?: AIConnector;
@@ -81,7 +78,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     }, [conversations]);
 
     const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
-      return conversationOptions.filter((c) => c.label === selectedConversationId) ?? [];
+      return conversationOptions.filter((c) => c.id === selectedConversationId) ?? [];
     });
 
     // Callback for when user types to create a new system prompt
@@ -127,7 +124,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
         onConversationSelected(
           createdConversation
-            ? { cId: '', cTitle: createdConversation.title }
+            ? { cId: createdConversation.id, cTitle: createdConversation.title }
             : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
         );
       },
@@ -176,7 +173,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
 
       onConversationSelected({
-        cId: prevId,
+        cId: getConvoId(prevId, conversations[prevId]?.title),
         cTitle: conversations[prevId]?.title,
       });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
@@ -184,47 +181,13 @@ export const ConversationSelector: React.FC<Props> = React.memo(
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
 
       onConversationSelected({
-        cId: nextId,
+        cId: getConvoId(nextId, conversations[nextId]?.title),
         cTitle: conversations[nextId]?.title,
       });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
 
-    // Register keyboard listener for quick conversation switching
-    const onKeyDown = useCallback(
-      (event: KeyboardEvent) => {
-        if (isDisabled || conversationIds.length <= 1) {
-          return;
-        }
-
-        if (
-          event.key === 'ArrowLeft' &&
-          (isMac ? event.metaKey : event.ctrlKey) &&
-          !shouldDisableKeyboardShortcut()
-        ) {
-          event.preventDefault();
-          onLeftArrowClick();
-        }
-        if (
-          event.key === 'ArrowRight' &&
-          (isMac ? event.metaKey : event.ctrlKey) &&
-          !shouldDisableKeyboardShortcut()
-        ) {
-          event.preventDefault();
-          onRightArrowClick();
-        }
-      },
-      [
-        conversationIds.length,
-        isDisabled,
-        onLeftArrowClick,
-        onRightArrowClick,
-        shouldDisableKeyboardShortcut,
-      ]
-    );
-    useEvent('keydown', onKeyDown);
-
     useEffect(() => {
-      setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationId));
+      setSelectedOptions(conversationOptions.filter((c) => c.id === selectedConversationId));
     }, [conversationOptions, selectedConversationId]);
 
     const renderOption: (
@@ -307,7 +270,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           compressed={true}
           isDisabled={isDisabled}
           prepend={
-            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
+            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE}`} display="block">
               <EuiButtonIcon
                 iconType="arrowLeft"
                 aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
@@ -317,7 +280,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
             </EuiToolTip>
           }
           append={
-            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE} (⌘ + →)`} display="block">
+            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE}`} display="block">
               <EuiButtonIcon
                 iconType="arrowRight"
                 aria-label={i18n.NEXT_CONVERSATION_TITLE}
