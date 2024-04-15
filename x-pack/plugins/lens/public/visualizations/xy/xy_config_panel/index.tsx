@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { LegendLayout, XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
@@ -118,6 +118,15 @@ const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle
     yLeft: 'yTitle',
     yRight: 'yRightTitle',
   };
+
+const xyLegendValues = [
+  {
+    value: XYLegendValue.CurrentAndLastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
+      defaultMessage: 'Current value',
+    }),
+  },
+];
 
 export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
@@ -435,14 +444,35 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
-            allowLegendStats={nonOrdinalXAxis}
+            allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
             legendStats={state?.legend.legendStats}
-            onLegendStatsChange={(checked) => {
+            onLegendStatsChange={(legendStats) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  legendStats: checked ? [XYLegendValue.CurrentAndLastValue] : [],
+                  legendStats,
+                },
+              });
+            }}
+            legendLayout={state?.legend.layout}
+            onLegendLayoutChange={(layout) => {
+              const propertiesToModify =
+                layout === LegendLayout.List
+                  ? {
+                      layout,
+                      maxLines: 1,
+                      shouldTruncate: true,
+                    }
+                  : {
+                      layout,
+                    };
+
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  ...propertiesToModify,
                 },
               });
             }}

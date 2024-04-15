@@ -16,8 +16,9 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import {
   LegendSize,
-  ExpressionValueVisDimension,
   XYLegendValue,
+  LegendLayout,
+  ExpressionValueVisDimension,
 } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
@@ -220,7 +221,9 @@ export interface LegendConfig {
   /**
    * metrics to display in the legend
    */
+
   legendStats?: XYLegendValue[];
+  layout?: LegendLayout;
 }
 
 // Arguments to XY chart expression, with computed properties

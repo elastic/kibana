@@ -22,4 +22,5 @@ export {
   DEFAULT_LEGEND_SIZE,
   XYLegendValue,
   PartitionLegendValue,
+  LegendLayout,
 } from './constants';

@@ -15,17 +15,19 @@ import {
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiComboBox,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { XYLegendValue, LegendLayout } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
+import { nonNullable } from '../../utils';
 
-export interface LegendSettingsPopoverProps<S = XYLegendValue> {
+export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegendValue> {
   /**
    * Determines the legend display options
    */
@@ -38,6 +40,14 @@ export interface LegendSettingsPopoverProps<S = XYLegendValue> {
    * Determines the legend mode
    */
   mode: 'default' | 'show' | 'hide' | 'auto';
+  /**
+   * Determines the legend layout
+   */
+  legendLayout?: LegendLayout;
+  /**
+   * Callback on legend option change
+   */
+  onLegendLayoutChange?: (id: LegendLayout) => void;
   /**
    * Callback on display option change
    */
@@ -107,17 +117,18 @@ export interface LegendSettingsPopoverProps<S = XYLegendValue> {
    */
   onNestedLegendChange?: (event: EuiSwitchEvent) => void;
   /**
-   * value in legend status
+   * current value in legend stats
    */
-  legendStats?: S[];
+  legendStats?: LegendStats[];
   /**
-   * Callback on value in legend status change
+   * legend statistics that are allowed
    */
-  onLegendStatsChange?: (checked?: boolean) => void;
+  allowedLegendStats?: Array<{ label: string; value: LegendStats }>;
   /**
-   * If true, value in legend switch is rendered
+   * Callback on value in legend stats change
    */
-  allowLegendStats?: boolean;
+  onLegendStatsChange?: (legendStats?: LegendStats[]) => void;
+
   /**
    * Button group position
    */
@@ -181,10 +192,29 @@ const noop = () => {};
 const PANEL_STYLE = {
   width: '500px',
 };
+const legendLayoutOptions = [
+  {
+    id: `lns_legend_table`,
+    value: LegendLayout.Table,
+    label: i18n.translate('xpack.lens.xyChart.legendLayout.table', {
+      defaultMessage: 'Table',
+    }),
+  },
+  {
+    id: `lns_legend_list`,
+    value: LegendLayout.List,
+    label: i18n.translate('xpack.lens.xyChart.legendLayout.list', {
+      defaultMessage: 'List',
+    }),
+  },
+];
 
-export function LegendSettingsPopover<T = XYLegendValue>({
+export function LegendSettingsPopover<LegendStats extends string = XYLegendValue>({
+  allowedLegendStats,
   legendOptions,
   mode,
+  legendLayout,
+  onLegendLayoutChange = noop,
   onDisplayChange,
   position,
   location,
@@ -200,7 +230,6 @@ export function LegendSettingsPopover<T = XYLegendValue>({
   onNestedLegendChange = noop,
   legendStats,
   onLegendStatsChange = noop,
-  allowLegendStats,
   groupPosition = 'right',
   maxLines,
   onMaxLinesChange = noop,
@@ -209,7 +238,7 @@ export function LegendSettingsPopover<T = XYLegendValue>({
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
-}: LegendSettingsPopoverProps<T>) {
+}: LegendSettingsPopoverProps<LegendStats>) {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {
@@ -239,6 +268,59 @@ export function LegendSettingsPopover<T = XYLegendValue>({
           onChange={onDisplayChange}
         />
       </EuiFormRow>
+      {allowedLegendStats && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendValues', {
+            defaultMessage: 'Legend values',
+          })}
+          fullWidth
+        >
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.lens.shared.legendValues', {
+              defaultMessage: 'Legend values',
+            })}
+            placeholder={i18n.translate('xpack.lens.shared.legendValuesPlaceholder', {
+              defaultMessage: 'Select one or more values to display',
+            })}
+            options={allowedLegendStats}
+            selectedOptions={allowedLegendStats.filter(({ value }) => legendStats?.includes(value))}
+            onChange={(options) => {
+              const values = options.map(({ value }) => value).filter(nonNullable);
+              onLegendStatsChange(values);
+            }}
+            isClearable={true}
+            compressed
+          />
+        </EuiFormRow>
+      )}
+      {allowedLegendStats && legendStats?.length !== 0 && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendLayout', {
+            defaultMessage: 'Legend layout',
+          })}
+          fullWidth
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.shared.legendLayout', {
+              defaultMessage: 'Legend layout',
+            })}
+            buttonSize="compressed"
+            options={legendLayoutOptions}
+            idSelected={
+              legendLayoutOptions.find(({ value }) => value === legendLayout)?.id ||
+              legendLayoutOptions[0].id
+            }
+            onChange={(l) => {
+              const layout = legendLayoutOptions.find(({ id }) => id === l)!.value;
+              onLegendLayoutChange(layout);
+            }}
+          />
+        </EuiFormRow>
+      )}
+
       {mode !== 'hide' && (
         <>
           <LegendLocationSettings
@@ -267,36 +349,37 @@ export function LegendSettingsPopover<T = XYLegendValue>({
               isLegendOutside={location === 'outside'}
             />
           )}
-
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.shared.labelTruncation', {
-              defaultMessage: 'Label truncation',
-            })}
-            fullWidth
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('xpack.lens.shared.labelTruncation', {
-                    defaultMessage: 'Label truncation',
-                  })}
-                  data-test-subj="lens-legend-truncate-switch"
-                  showLabel={false}
-                  checked={shouldTruncate ?? true}
-                  onChange={onTruncateLegendChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow>
-                <MaxLinesInput
-                  disabled={!shouldTruncate}
-                  value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-                  setValue={onMaxLinesChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+          {legendLayout !== LegendLayout.List && (
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.shared.labelTruncation', {
+                defaultMessage: 'Label truncation',
+              })}
+              fullWidth
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    compressed
+                    label={i18n.translate('xpack.lens.shared.labelTruncation', {
+                      defaultMessage: 'Label truncation',
+                    })}
+                    data-test-subj="lens-legend-truncate-switch"
+                    showLabel={false}
+                    checked={shouldTruncate ?? true}
+                    onChange={onTruncateLegendChange}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow>
+                  <MaxLinesInput
+                    disabled={!shouldTruncate}
+                    value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                    setValue={onMaxLinesChange}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          )}
 
           {renderNestedLegendSwitch && (
             <EuiFormRow
@@ -315,28 +398,6 @@ export function LegendSettingsPopover<T = XYLegendValue>({
                 showLabel={false}
                 checked={Boolean(nestedLegend)}
                 onChange={onNestedLegendChange}
-              />
-            </EuiFormRow>
-          )}
-          {allowLegendStats && (
-            <EuiFormRow
-              display="columnCompressedSwitch"
-              label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-                defaultMessage: 'Show value',
-              })}
-              fullWidth
-            >
-              <EuiSwitch
-                compressed
-                label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-                  defaultMessage: 'Show value',
-                })}
-                data-test-subj="lens-legend-show-value"
-                showLabel={false}
-                checked={!!legendStats?.length}
-                onChange={(ev) => {
-                  onLegendStatsChange(ev.target.checked);
-                }}
               />
             </EuiFormRow>
           )}

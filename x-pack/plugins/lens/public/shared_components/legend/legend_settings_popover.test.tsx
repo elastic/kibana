@@ -10,6 +10,7 @@ import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_sett
 import userEvent from '@testing-library/user-event';
 import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
+import { LegendLayout, XYLegendValue } from '@kbn/visualizations-plugin/common';
 
 describe('Legend Settings', () => {
   let defaultProps: LegendSettingsPopoverProps;
@@ -124,5 +125,28 @@ describe('Legend Settings', () => {
   it('should hide switch group on hide mode', () => {
     renderLegendSettingsPopover({ mode: 'hide', renderNestedLegendSwitch: true });
     expect(screen.queryByRole('switch', { name: 'Nested' })).toBeNull();
+  });
+
+  it('should display allowed legend stats', () => {
+    const onLegendStatsChange = jest.fn();
+    renderLegendSettingsPopover({
+      allowedLegendStats: [
+        {
+          label: 'Current and last value',
+          value: XYLegendValue.CurrentAndLastValue,
+        },
+      ],
+      onLegendStatsChange,
+    });
+    expect(screen.queryByRole('button', { name: 'Legend layout' })).toBeNull();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Legend values' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
+    expect(screen.getByRole('group', { name: 'Legend layout' })).toBeInTheDocument();
+    expect(onLegendStatsChange).toBeCalledWith([XYLegendValue.CurrentAndLastValue]);
+  });
+
+  it('should not show truncation options when layout is list', () => {
+    renderLegendSettingsPopover({ legendLayout: LegendLayout.List });
+    expect(screen.queryByRole('switch', { name: 'Label truncation' })).toBeNull();
   });
 });
