@@ -9,6 +9,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
+  EuiIcon,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -108,6 +109,22 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
     !!slo.remote && slo.remote.kibanaUrl !== '';
 
+  const buildActionName = (actionName: string) => (slo: SLOWithSummaryResponse) =>
+    isRemote(slo) ? (
+      <>
+        {actionName}
+        <EuiIcon
+          type="popout"
+          size="s"
+          css={{
+            marginLeft: '10px',
+          }}
+        />
+      </>
+    ) : (
+      actionName
+    );
+
   const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
     {
       type: 'icon',
@@ -134,9 +151,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'pencil',
-      name: i18n.translate('xpack.slo.item.actions.edit', {
-        defaultMessage: 'Edit',
-      }),
+      name: buildActionName(
+        i18n.translate('xpack.slo.item.actions.edit', {
+          defaultMessage: 'Edit',
+        })
+      ),
       description: i18n.translate('xpack.slo.item.actions.edit', {
         defaultMessage: 'Edit',
       }),
@@ -185,9 +204,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'copy',
-      name: i18n.translate('xpack.slo.item.actions.clone', {
-        defaultMessage: 'Clone',
-      }),
+      name: buildActionName(
+        i18n.translate('xpack.slo.item.actions.clone', {
+          defaultMessage: 'Clone',
+        })
+      ),
       description: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
@@ -201,9 +222,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       type: 'icon',
       icon: 'trash',
-      name: i18n.translate('xpack.slo.item.actions.delete', {
-        defaultMessage: 'Delete',
-      }),
+      name: buildActionName(
+        i18n.translate('xpack.slo.item.actions.delete', {
+          defaultMessage: 'Delete',
+        })
+      ),
       description: i18n.translate('xpack.slo.item.actions.delete', {
         defaultMessage: 'Delete',
       }),
