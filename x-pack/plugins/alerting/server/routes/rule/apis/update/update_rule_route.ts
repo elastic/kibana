@@ -5,36 +5,35 @@
  * 2.0.
  */
 
-import { RuleTypeDisabledError } from '../../../../lib';
-import {
-  handleDisabledApiKeysError,
-  verifyAccessAndContext,
-  countUsageOfPredefinedIds,
-} from '../../../lib';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
-import { RouteOptions } from '../../..';
+import { IRouter } from '@kbn/core/server';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import type {
-  CreateRuleRequestBodyV1,
-  CreateRuleRequestParamsV1,
-  CreateRuleResponseV1,
-} from '../../../../../common/routes/rule/apis/create';
+  UpdateRuleRequestBodyV1,
+  UpdateRuleRequestParamsV1,
+  UpdateRuleResponseV1,
+} from '../../../../../common/routes/rule/apis/update';
 import {
-  createBodySchemaV1,
-  createParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/create';
+  updateBodySchemaV1,
+  updateParamsSchemaV1,
+} from '../../../../../common/routes/rule/apis/update';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
-import { transformCreateBodyV1 } from './transforms';
+import { transformUpdateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 
-export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
-  router.post(
+export const updateRuleRoute = (
+  router: IRouter<AlertingRequestHandlerContext>,
+  licenseState: ILicenseState
+) => {
+  router.put(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
+      path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       validate: {
-        body: createBodySchemaV1,
-        params: createParamsSchemaV1,
+        body: updateBodySchemaV1,
+        params: updateParamsSchemaV1,
       },
     },
     handleDisabledApiKeysError(
@@ -44,20 +43,14 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const actionsClient = (await context.actions).getActionsClient();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
-          const params: CreateRuleRequestParamsV1 = req.params;
-
-          countUsageOfPredefinedIds({
-            predefinedId: params?.id,
-            spaceId: rulesClient.getSpaceId(),
-            usageCounter,
-          });
+          const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {
             /**
              * Throws an error if the group is not defined in default actions
              */
-            const { actions: allActions = [] } = createRuleData;
+            const { actions: allActions = [] } = updateRuleData;
             validateRequiredGroupInDefaultActionsV1({
               actions: allActions,
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
@@ -70,18 +63,18 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
 
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
-            const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
-              data: transformCreateBodyV1<RuleParamsV1>({
-                createBody: createRuleData,
+            const updatedRule: Rule<RuleParamsV1> = (await rulesClient.update<RuleParamsV1>({
+              id: updateRuleParams.id,
+              data: transformUpdateBodyV1<RuleParamsV1>({
+                updateBody: updateRuleData,
                 actions,
                 systemActions,
               }),
-              options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type
-            const response: CreateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
+            const response: UpdateRuleResponseV1<RuleParamsV1> = {
+              body: transformRuleToRuleResponseV1<RuleParamsV1>(updatedRule),
             };
 
             return res.ok(response);

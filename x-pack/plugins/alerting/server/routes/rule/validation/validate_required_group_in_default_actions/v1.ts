@@ -7,10 +7,13 @@
 
 import Boom from '@hapi/boom';
 
-export const validateRequiredGroupInDefaultActions = (
-  actions: Array<{ id: string; group?: string }>,
-  isSystemAction: (id: string) => boolean
-) => {
+export const validateRequiredGroupInDefaultActions = ({
+  actions,
+  isSystemAction,
+}: {
+  actions: Array<{ id: string; group?: string }>;
+  isSystemAction: (id: string) => boolean;
+}) => {
   const defaultActions = actions.filter((action) => !isSystemAction(action.id));
 
   for (const action of defaultActions) {

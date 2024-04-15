@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rule';
-export * from './action';
+export type { UpdateRuleData } from './update_rule_data';
