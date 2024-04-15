@@ -48,7 +48,7 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   // and categories should only be hidden if there is only one producer BEFORE filters are applied,
   // e.g. on oblt serverless
   const hasOnlyOneProducer = useMemo(() => {
-    const producerCount = countBy(ruleTypeIndex.values(), 'producer');
+    const producerCount = countBy([...ruleTypeIndex.values()], 'producer');
     return Object.keys(producerCount).length === 1;
   }, [ruleTypeIndex]);
 
