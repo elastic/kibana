@@ -139,8 +139,8 @@ describe('cloneRuleRoute', () => {
     expect(rulesClient.clone).toHaveBeenCalledTimes(1);
     expect(rulesClient.clone.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "1",
         Object {
+          "id": "1",
           "newId": undefined,
         },
       ]
