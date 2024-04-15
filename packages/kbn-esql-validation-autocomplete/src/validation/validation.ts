@@ -29,8 +29,6 @@ import {
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  getAllArrayTypes,
-  getAllArrayValues,
   getColumnHit,
   getCommandDefinition,
   getFunctionDefinition,
@@ -73,6 +71,7 @@ import {
   retrieveMetadataFields,
   retrieveFieldsFromStringSources,
 } from './resources';
+import { collapseWrongArgumentTypeMessages } from './helpers';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -480,43 +479,6 @@ function validateFunction(
   // This is due to a special case in enrich where an implicit assignment is possible
   // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
-}
-
-/**
- * We only want to report one message when any number of the elements in an array argument is of the wrong type
- */
-function collapseWrongArgumentTypeMessages(
-  messages: ESQLMessage[],
-  arg: ESQLAstItem[],
-  funcName: string,
-  argType: string,
-  parentCommand: string,
-  references: ReferenceMaps
-) {
-  if (!messages.some(({ code }) => code === 'wrongArgumentType')) {
-    return messages;
-  }
-
-  // Replace the individual "wrong argument type" messages with a single one for the whole array
-  messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
-
-  messages.push(
-    getMessageFromId({
-      messageId: 'wrongArgumentType',
-      values: {
-        name: funcName,
-        argType,
-        value: `(${getAllArrayValues(arg).join(', ')})`,
-        givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
-      },
-      locations: {
-        min: (arg[0] as ESQLSingleAstItem).location.min,
-        max: (arg[arg.length - 1] as ESQLSingleAstItem).location.max,
-      },
-    })
-  );
-
-  return messages;
 }
 
 function validateSetting(
