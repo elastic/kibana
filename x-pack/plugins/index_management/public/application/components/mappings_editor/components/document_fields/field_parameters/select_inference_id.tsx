@@ -144,14 +144,14 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
   );
   const onInferenceEndpointChange = useCallback(
     async (inferenceId: string) => {
-      const modelsExist = models ? models?.some((i) => i.model_id === inferenceId) : false;
+      const modelsExist = options.some((i) => i.label === inferenceId);
       if (modelsExist) {
         setInferenceEndpointError('Inference Endpoint id already exists');
       } else {
         setInferenceEndpointError(undefined);
       }
     },
-    [models]
+    [options]
   );
 
   const inferencePopover = () => {
@@ -199,6 +199,7 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
             data-test-subj="addInferenceEndpointButton"
             onClick={() => {
               setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+              setInferenceEndpointError(undefined);
               setIsInferencePopoverVisible(!isInferencePopoverVisible);
             }}
           >
