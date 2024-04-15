@@ -24,6 +24,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { ConfigSchema } from '..';
 import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
@@ -36,6 +37,7 @@ import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
 import { SystemLogs } from '../routes/templates/system_logs';
 import { ExperimentalOnboardingFlow } from './experimental_onboarding_flow';
+import { ExperimentalOnboardingFeatureFlag } from '../context/experimental_onboarding_enabled';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -145,6 +147,13 @@ export function ObservabilityOnboardingAppRoot({
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
+  core.analytics.reportEvent(
+    OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType,
+    {
+      uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
+    }
+  );
+
   return (
     <div className={APP_WRAPPER_CLASS}>
       <RedirectAppLinks
@@ -181,11 +190,15 @@ export function ObservabilityOnboardingAppRoot({
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}
-                  {experimentalOnboardingFlowEnabled ? (
-                    <ExperimentalOnboardingFlow />
-                  ) : (
-                    <ObservabilityOnboardingApp />
-                  )}
+                  <ExperimentalOnboardingFeatureFlag.Provider
+                    value={experimentalOnboardingFlowEnabled}
+                  >
+                    {experimentalOnboardingFlowEnabled ? (
+                      <ExperimentalOnboardingFlow />
+                    ) : (
+                      <ObservabilityOnboardingApp />
+                    )}
+                  </ExperimentalOnboardingFeatureFlag.Provider>
                 </EuiErrorBoundary>
               </Router>
             </i18nCore.Context>
