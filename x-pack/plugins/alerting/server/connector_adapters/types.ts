@@ -9,7 +9,7 @@ import { ObjectType } from '@kbn/config-schema';
 import type { RuleTypeParams, SanitizedRule } from '../../common';
 import { CombinedSummarizedAlerts } from '../types';
 
-type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags'>;
+type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags' | 'consumer'>;
 
 export interface ConnectorAdapterParams {
   [x: string]: unknown;
@@ -38,4 +38,5 @@ export interface ConnectorAdapter<
    */
   ruleActionParamsSchema: ObjectType;
   buildActionParams: (args: BuildActionParamsArgs<RuleActionParams>) => ConnectorParams;
+  getKibanaPrivileges?: ({ consumer }: { consumer: string }) => string[];
 }

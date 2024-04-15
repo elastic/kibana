@@ -48,6 +48,7 @@
     ],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
+    "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",

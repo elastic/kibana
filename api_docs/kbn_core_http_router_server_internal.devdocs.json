@@ -20,6 +20,474 @@
     "classes": [
       {
         "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-common.CoreVersionedRouter",
+        "type": "Class",
+        "tags": [],
+        "label": "CoreVersionedRouter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-router-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
+            "section": "def-common.CoreVersionedRouter",
+            "text": "CoreVersionedRouter"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouter",
+            "text": "VersionedRouter"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          },
+          ">"
+        ],
+        "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.useVersionResolutionStrategyForInternalPaths",
+            "type": "Object",
+            "tags": [],
+            "label": "useVersionResolutionStrategyForInternalPaths",
+            "description": [],
+            "signature": [
+              "Map<string, boolean>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.from",
+            "type": "Function",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "({ router, defaultHandlerResolutionStrategy, isDev, useVersionResolutionStrategyForInternalPaths, }: ",
+              "VersionedRouterArgs",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-http-router-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
+                "section": "def-common.CoreVersionedRouter",
+                "text": "CoreVersionedRouter"
+              }
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.from.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    router,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
+                "description": [],
+                "signature": [
+                  "VersionedRouterArgs"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteConfig",
+                "text": "VersionedRouteConfig"
+              },
+              "<",
+              "Method",
+              ">) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRoute",
+                "text": "VersionedRoute"
+              },
+              "<",
+              "Method",
+              ", any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.get.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  "Method",
+                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfigOptions",
+                    "text": "RouteConfigOptions"
+                  },
+                  "<",
+                  "Method",
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteConfig",
+                "text": "VersionedRouteConfig"
+              },
+              "<",
+              "Method",
+              ">) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRoute",
+                "text": "VersionedRoute"
+              },
+              "<",
+              "Method",
+              ", any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.delete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  "Method",
+                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfigOptions",
+                    "text": "RouteConfigOptions"
+                  },
+                  "<",
+                  "Method",
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.post",
+            "type": "Function",
+            "tags": [],
+            "label": "post",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteConfig",
+                "text": "VersionedRouteConfig"
+              },
+              "<",
+              "Method",
+              ">) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRoute",
+                "text": "VersionedRoute"
+              },
+              "<",
+              "Method",
+              ", any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.post.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  "Method",
+                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfigOptions",
+                    "text": "RouteConfigOptions"
+                  },
+                  "<",
+                  "Method",
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.patch",
+            "type": "Function",
+            "tags": [],
+            "label": "patch",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteConfig",
+                "text": "VersionedRouteConfig"
+              },
+              "<",
+              "Method",
+              ">) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRoute",
+                "text": "VersionedRoute"
+              },
+              "<",
+              "Method",
+              ", any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.patch.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  "Method",
+                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfigOptions",
+                    "text": "RouteConfigOptions"
+                  },
+                  "<",
+                  "Method",
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.put",
+            "type": "Function",
+            "tags": [],
+            "label": "put",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteConfig",
+                "text": "VersionedRouteConfig"
+              },
+              "<",
+              "Method",
+              ">) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRoute",
+                "text": "VersionedRoute"
+              },
+              "<",
+              "Method",
+              ", any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.CoreVersionedRouter.put.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfig",
+                    "text": "RouteConfig"
+                  },
+                  "<unknown, unknown, unknown, ",
+                  "Method",
+                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.RouteConfigOptions",
+                    "text": "RouteConfigOptions"
+                  },
+                  "<",
+                  "Method",
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.CoreVersionedRouter.getRoutes",
+            "type": "Function",
+            "tags": [],
+            "label": "getRoutes",
+            "description": [],
+            "signature": [
+              "() => ",
+              "VersionedRouterRoute",
+              "[]"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
         "id": "def-common.HapiResponseAdapter",
         "type": "Class",
         "tags": [],
@@ -506,6 +974,113 @@
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-common.resolvers",
+        "type": "Object",
+        "tags": [],
+        "label": "resolvers",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.resolvers.oldest",
+            "type": "Function",
+            "tags": [],
+            "label": "oldest",
+            "description": [],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.oldest.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "versions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.resolvers.newest",
+            "type": "Function",
+            "tags": [],
+            "label": "newest",
+            "description": [],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.newest.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "versions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.resolvers.none",
+            "type": "Function",
+            "tags": [],
+            "label": "none",
+            "description": [],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-common.resolvers.none.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "versions",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

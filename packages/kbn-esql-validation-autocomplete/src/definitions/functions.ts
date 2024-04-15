@@ -58,6 +58,20 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'signum',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.signumDoc', {
+      defaultMessage:
+        'Returns the sign of the given number. It returns -1 for negative numbers, 0 for 0 and 1 for positive numbers.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'number',
+        examples: [`from index | eval s = signum(field)`],
+      },
+    ],
+  },
+  {
     name: 'abs',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.absDoc', {
       defaultMessage: 'Returns the absolute value.',
@@ -97,7 +111,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
     validate: validateLogFunctions,
   },
-
   {
     name: 'log',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.logDoc', {
@@ -481,13 +494,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        returnType: 'version',
+        returnType: 'string',
         examples: [`from index | EVAL version = to_version(stringField)`],
-      },
-      {
-        params: [{ name: 'field', type: 'version' }],
-        returnType: 'version',
-        examples: [`from index | EVAL version = to_version(versionField)`],
       },
     ],
   },
@@ -925,6 +933,30 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'mv_sort',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvSortDoc', {
+      defaultMessage: 'Sorts a multivalue expression in lexicographical order.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'field', type: 'any' },
+          {
+            name: 'order',
+            type: 'string',
+            optional: true,
+            literalOptions: ['asc', 'desc'],
+          },
+        ],
+        returnType: 'any',
+        examples: [
+          'row a = [4, 2, -3, 2] | eval sorted = mv_sort(a)',
+          'row a = ["b", "c", "a"] | sorted = mv_sort(a, "DESC")',
+        ],
+      },
+    ],
+  },
+  {
     name: 'mv_avg',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvAvgDoc', {
       defaultMessage:
@@ -1067,6 +1099,44 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'mv_slice',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvSliceDoc', {
+      defaultMessage:
+        'Returns a subset of the multivalued field using the start and end index values.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'multivalue', type: 'any' },
+          { name: 'start', type: 'number' },
+          { name: 'end', type: 'number' },
+        ],
+        returnType: 'number',
+        examples: ['row a = [1, 2, 2, 3] | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_zip',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvZipDoc', {
+      defaultMessage:
+        'Combines the values from two multivalued fields with a delimiter that joins them together.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'mvLeft', type: 'string' },
+          { name: 'mvRight', type: 'string' },
+          { name: 'delim', type: 'string' },
+        ],
+        returnType: 'string',
+        examples: [
+          'ROW a = ["x", "y", "z"], b = ["1", "2"] \n| EVAL c = mv_zip(a, b, "-") \n| KEEP a, b, c',
+        ],
+      },
+    ],
+  },
+  {
     name: 'pi',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.piDoc', {
       defaultMessage: 'The ratio of a circle’s circumference to its diameter.',
@@ -1102,6 +1172,549 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [],
         returnType: 'number',
         examples: ['row a = 1 | eval tau()'],
+      },
+    ],
+  },
+  // begin spatial functions
+  {
+    name: 'st_contains',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stContainsDoc', {
+      defaultMessage: 'Returns whether the first geometry contains the second geometry.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_contains(geometryA, geometryB)'],
+      },
+    ],
+  },
+  {
+    name: 'st_within',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stWithinDoc', {
+      defaultMessage: 'Returns whether the first geometry is within the second geometry.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_within(geometryA, geometryB)'],
+      },
+    ],
+  },
+  {
+    name: 'st_disjoint',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stDisjointDoc', {
+      defaultMessage: 'Returns whether the two geometries or geometry columns are disjoint.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_disjoint(geometryA, geometryB)'],
+      },
+    ],
+  },
+  {
+    name: 'st_intersects',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.stIntersectsDoc',
+      {
+        defaultMessage:
+          'Returns true if two geometries intersect. They intersect if they have any point in common, including their interior points (points along lines or within polygons).',
+      }
+    ),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_point',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'geo_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'geo_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_point',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+      {
+        params: [
+          {
+            name: 'geomA',
+            type: 'cartesian_shape',
+          },
+          {
+            name: 'geomB',
+            type: 'cartesian_shape',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_intersects(geometryA, geometryB)'],
+      },
+    ],
+  },
+  {
+    name: 'st_x',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stXDoc', {
+      defaultMessage:
+        'Extracts the x coordinate from the supplied point. If the points is of type geo_point this is equivalent to extracting the longitude value.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_x(point)'],
+      },
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_x(point)'],
+      },
+    ],
+  },
+  {
+    name: 'st_y',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.stYDoc', {
+      defaultMessage:
+        'Extracts the y coordinate from the supplied point. If the points is of type geo_point this is equivalent to extracting the latitude value.',
+    }),
+    signatures: [
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'geo_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_y(point)'],
+      },
+      {
+        params: [
+          {
+            name: 'point',
+            type: 'cartesian_point',
+          },
+        ],
+        returnType: 'boolean',
+        examples: ['from index | eval st_y(point)'],
       },
     ],
   },
