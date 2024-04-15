@@ -10,6 +10,11 @@ import { monaco } from '../monaco_imports';
 import { CONSOLE_LANG_ID } from './constants';
 import { ConsoleParserResult, ConsoleWorkerDefinition } from './types';
 
+/*
+ * This class contains logic to create a web worker where the code for the Console parser can
+ * execute without blocking the main thread. The parser only runs when the Monaco editor
+ * is used with the Console language. The parser can only be accessed via this proxy service class.
+ */
 export class ConsoleWorkerProxyService {
   private worker: monaco.editor.MonacoWebWorker<ConsoleWorkerDefinition> | undefined;
 

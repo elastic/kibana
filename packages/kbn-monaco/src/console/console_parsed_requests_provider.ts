@@ -10,6 +10,12 @@ import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { ParsedRequest } from './types';
 import { monaco } from '../monaco_imports';
 
+/*
+ * This class is a helper interface that is used in the Console plugin.
+ * The provider access the Console parser that runs in a web worker and analyzes the editor input
+ * when it changes.
+ * The parsed result contains the requests and errors which are used in the Console plugin.
+ */
 export class ConsoleParsedRequestsProvider {
   constructor(
     private workerProxyService: ConsoleWorkerProxyService,

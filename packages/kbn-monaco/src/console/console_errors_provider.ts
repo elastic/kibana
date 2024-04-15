@@ -10,6 +10,13 @@ import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { CONSOLE_LANG_ID } from './constants';
 import { monaco } from '../monaco_imports';
 
+/*
+ * This setup function runs when the Console language is registered into the Monaco editor.
+ * It adds a listener that is attached to the editor input when the Monaco editor is used
+ * with the Console language.
+ * The Console parser that runs in a web worker analyzes the editor input when it changes and
+ * if any errors are found, they are added as "error markers" to the Monaco editor.
+ */
 export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProxyService) => {
   const updateErrorMarkers = async (model: monaco.editor.IModel): Promise<void> => {
     if (model.isDisposed()) {
