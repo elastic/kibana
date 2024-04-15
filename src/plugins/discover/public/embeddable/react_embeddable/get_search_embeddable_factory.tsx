@@ -15,19 +15,13 @@ import {
   SEARCH_EMBEDDABLE_TYPE,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import {
-  FetchContext,
-  initializeTitles,
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
@@ -38,12 +32,10 @@ import { DiscoverServices } from '../../build_services';
 import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
-import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { SavedSearchEmbeddableComponent } from '../saved_search_embeddable_component';
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState, SearchProps } from '../types';
-import { updateSearchSource } from '../utils/update_search_source';
 import { initializeFetch } from './initialize_fetch';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -73,7 +65,7 @@ export const getSearchEmbeddableFactory = ({
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+      const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
       const {
         onUnmount,
         searchEmbeddableApi,
@@ -99,7 +91,6 @@ export const getSearchEmbeddableFactory = ({
           ...searchEmbeddableApi,
           dataLoading: dataLoading$,
           blockingError: blockingError$,
-          rows: rows$,
           getSavedSearch: () => {
             return undefined;
           },
@@ -141,29 +132,37 @@ export const getSearchEmbeddableFactory = ({
         }
       );
 
-      const initialSavedSearch = searchEmbeddableApi.savedSearch$.getValue();
       const unsubscribeFromFetch = initializeFetch({
-        api: { ...api, dataLoading: dataLoading$, blockingError: blockingError$, rows: rows$ },
+        api: {
+          ...api,
+          dataLoading$,
+          blockingError$,
+          searchSessionId$,
+          rows$: searchEmbeddableApi.rows$,
+          savedSearch$: searchEmbeddableApi.savedSearch$,
+        },
         discoverServices,
-        savedSearch: initialSavedSearch,
       });
 
       return {
         api,
         Component: () => {
-          const [savedSearch, rows] = useBatchedPublishingSubjects(
+          const [savedSearch, rows, searchSessionId] = useBatchedPublishingSubjects(
             searchEmbeddableApi.savedSearch$,
-            api.rows
+            searchEmbeddableApi.rows$,
+            searchSessionId$
           );
-          console.log('rows', rows);
 
           useEffect(() => {
             return () => {
-              console.log('on unmount');
               onUnmount();
               unsubscribeFromFetch();
             };
           }, []);
+
+          // useEffect(() => {
+          //   console.log({ savedSearch, rows, searchSessionId });
+          // }, [savedSearch, rows, searchSessionId]);
 
           const { dataView, columns, query, filters, viewMode } = useMemo(() => {
             const searchSourceQuery = savedSearch.searchSource.getField('query');
@@ -179,14 +178,13 @@ export const getSearchEmbeddableFactory = ({
             };
           }, [savedSearch]);
 
-          const searchProps: SearchProps = useMemo(() => {
-            // const query = savedSearch.searchSource.getField('query');
-            // const isTextBasedQueryMode = isTextBasedQuery(query);
+          const searchProps: SearchProps | undefined = useMemo(() => {
+            if (!dataView) return;
+
             return {
               services: discoverServices,
               columns,
               savedSearchId: savedSearch.id,
-              // query: savedSearch.searchSource.getField('query'),
               filters,
               dataView,
               isLoading: false,
@@ -306,26 +304,20 @@ export const getSearchEmbeddableFactory = ({
                   onAddFilter={() => {
                     console.log('on add filter');
                   }}
-                  // searchSessionId={this.input.searchSessionId}
+                  searchSessionId={searchSessionId}
                 />
               </KibanaContextProvider>
             );
           } else {
-            const props = {
-              savedSearch,
-              searchProps,
-              // useLegacyTable,
-              query,
-            };
-
-            return (
+            return searchProps ? (
               <KibanaContextProvider services={discoverServices}>
                 <CellActionsProvider
                   getTriggerCompatibleActions={(triggerId, context) => Promise.resolve([])}
                 >
                   <SavedSearchEmbeddableComponent
-                    {...props}
-                    useLegacyTable={false}
+                    searchProps={searchProps}
+                    query={query}
+                    useLegacyTable={false} // TODO
                     fetchedSampleSize={getAllowedSampleSize(
                       searchProps.sampleSizeState,
                       discoverServices.uiSettings
@@ -333,6 +325,8 @@ export const getSearchEmbeddableFactory = ({
                   />
                 </CellActionsProvider>
               </KibanaContextProvider>
+            ) : (
+              <></>
             );
           }
         },

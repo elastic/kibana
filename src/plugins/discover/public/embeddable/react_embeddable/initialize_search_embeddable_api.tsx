@@ -9,6 +9,7 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, skip } from 'rxjs';
 
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import {
@@ -16,9 +17,10 @@ import {
   SavedSearchByValueAttributes,
   SavedSearchUnwrapResult,
 } from '@kbn/saved-search-plugin/public';
+
 import { DiscoverServices } from '../../build_services';
-import { SearchEmbeddableSerializedState } from '../types';
 import { getSortForEmbeddable } from '../../utils';
+import { SearchEmbeddableSerializedState } from '../types';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,
@@ -45,8 +47,7 @@ export const initializeSearchEmbeddableApi = async (
     unwrapResult as SavedSearchUnwrapResult
   );
   const savedSearch$ = new BehaviorSubject<SavedSearch>(savedSearch);
-
-  console.log('saved search', savedSearch);
+  const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
 
   // by reference
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -60,7 +61,7 @@ export const initializeSearchEmbeddableApi = async (
   );
 
   const savedSearchToAttributes = savedSearch$.pipe(skip(1)).subscribe((newSavedSearch) => {
-    console.log('savedSearchToAttributes', newSavedSearch);
+    // console.log('savedSearchToAttributes', newSavedSearch);
     const { searchSourceJSON, references: originalReferences } =
       savedSearch.searchSource.serialize();
 
@@ -103,6 +104,7 @@ export const initializeSearchEmbeddableApi = async (
       savedObjectId$,
       attributes$,
       savedSearch$,
+      rows$,
     },
     searchEmbeddableComparators: getSearchEmbeddableComparators(),
     serializeSearchEmbeddable: () => {

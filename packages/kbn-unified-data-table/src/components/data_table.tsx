@@ -468,7 +468,6 @@ export const UnifiedDataTable = ({
   }, [selectedDocs, rows?.length, isFilterActive, getDocById]);
 
   const displayedRows = useMemo(() => {
-    console.log('rows', rows);
     if (!rows) {
       return [];
     }

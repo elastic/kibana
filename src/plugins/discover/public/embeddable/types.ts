@@ -45,7 +45,7 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
 };
 
 interface PublishesRows {
-  rows: PublishingSubject<DataTableRecord[]>;
+  rows$: PublishingSubject<DataTableRecord[]>;
 }
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
