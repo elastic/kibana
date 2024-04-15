@@ -171,7 +171,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   private buildAggregations(slo: SLODefinition) {
     if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       throw new Error(
-        'The sli.synthetics.availability indicator MUST have an occurances budgeting method.'
+        "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."
       );
     }
 

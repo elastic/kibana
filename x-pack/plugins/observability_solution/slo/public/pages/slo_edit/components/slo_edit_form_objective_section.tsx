@@ -186,7 +186,7 @@ export function SloEditFormObjectiveSection() {
             <p>
               <FormattedMessage
                 id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
-                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurances'."
+                defaultMessage="The Synthetics availability indicator requires the budgeting method to be set to 'Occurrences'."
               />
             </p>
           </EuiCallOut>

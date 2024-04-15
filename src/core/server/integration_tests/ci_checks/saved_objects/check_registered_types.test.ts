@@ -149,7 +149,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "slo-settings": "f6b5ed339470a6a2cda272bde1750adcf504a11b",
         "space": "8de4ec513e9bbc6b2f1d635161d850be7747d38e",
         "spaces-usage-stats": "3abca98713c52af8b30300e386c7779b3025a20e",
-        "synthetics-monitor": "33ddc4b8979f378edf58bcc7ba13c5c5b572f42d",
+        "synthetics-monitor": "5ceb25b6249bd26902c9b34273c71c3dce06dbea",
         "synthetics-param": "3ebb744e5571de678b1312d5c418c8188002cf5e",
         "synthetics-privates-locations": "f53d799d5c9bc8454aaa32c6abc99a899b025d5c",
         "tag": "e2544392fe6563e215bb677abc8b01c2601ef2dc",
