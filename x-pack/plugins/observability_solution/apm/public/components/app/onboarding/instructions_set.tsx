@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
 import {
   INSTRUCTION_VARIANT,
@@ -41,9 +42,18 @@ export function InstructionsSet({
 }) {
   const tabs = getTabs(instructions.instructionVariants);
 
-  const [selectedTab, setSelectedTab] = useState<string>(tabs[0].id);
+  const { hash } = useLocation();
+  const history = useHistory();
+  const preselectedTab = tabs.find(({ id }) => hash.slice(1) === id);
+  const [selectedTab, setSelectedTab] = useState<string>(
+    preselectedTab?.id ?? tabs[0].id
+  );
   const onSelectedTabChange = (tab: string) => {
     setSelectedTab(tab);
+    history.push({
+      ...history.location,
+      hash: `#${tab}`,
+    });
   };
   const { euiTheme } = useEuiTheme();
 
