@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { z } from 'zod';
 
+import { agentLoggingLevels } from '../constants';
+
 import type { SettingsConfig } from './types';
 
 export const zodStringWithDurationValidation = z
@@ -125,5 +127,22 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
       })
       .default({}),
+  },
+  {
+    name: 'agent.logging.level',
+    hidden: true,
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
+      defaultMessage: 'Agent Logging Level',
+    }),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription',
+      {
+        defaultMessage: 'Set the Agent log level. The default log level is "info".',
+      }
+    ),
+    api_field: {
+      name: 'agent_logging_level',
+    },
+    schema: z.nativeEnum(agentLoggingLevels),
   },
 ];

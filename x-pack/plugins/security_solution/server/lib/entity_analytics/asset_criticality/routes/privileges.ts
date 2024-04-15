@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -12,16 +12,15 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
-
-import type { StartPlugins } from '../../../../plugin';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+
 export const assetCriticalityPrivilegesRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({

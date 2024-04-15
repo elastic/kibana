@@ -33,6 +33,7 @@ const VideoComponent: React.FC = () => {
       cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
       sectionId: SectionId.quickStart,
       undo: false,
+      trigger: 'click',
     });
     setIsVideoPlaying(true);
   }, [toggleTaskCompleteStatus]);
