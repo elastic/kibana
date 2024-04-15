@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { StoredSLOSettings } from '../domain/models';
 
 export const SO_SLO_SETTINGS_TYPE = 'slo-settings';
-export const sloSettingsObjectId = 'slo-settings-singleton';
+export const sloSettingsObjectId = (space: string = 'default') => `slo-settings-singleton-${space}`;
 
 export const sloSettings: SavedObjectsType = {
   name: SO_SLO_SETTINGS_TYPE,

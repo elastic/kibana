@@ -18,7 +18,7 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
   try {
     const soObject = await soClient.get<StoredSLOSettings>(
       SO_SLO_SETTINGS_TYPE,
-      sloSettingsObjectId
+      sloSettingsObjectId(soClient.getCurrentNamespace())
     );
     return sloSettingsSchema.encode(soObject.attributes);
   } catch (e) {
@@ -40,7 +40,7 @@ export const storeSloSettings = async (
     SO_SLO_SETTINGS_TYPE,
     sloSettingsSchema.encode(params),
     {
-      id: sloSettingsObjectId,
+      id: sloSettingsObjectId(soClient.getCurrentNamespace()),
       overwrite: true,
     }
   );
