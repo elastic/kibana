@@ -273,6 +273,9 @@ export const createKbnClient = ({
   };
 
   if (isHttps && !noCertForSsl) {
+    log.info(
+      `Adding CA cert (from [${CA_CERT_PATH}]) to kbn client options - using HTTPS url: ${url}`
+    );
     clientOptions.certificateAuthorities = [CA_CERTIFICATE];
   }
 
