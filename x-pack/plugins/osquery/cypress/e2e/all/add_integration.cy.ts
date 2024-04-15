@@ -39,10 +39,7 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/170445
-// Failing: See https://github.com/elastic/kibana/issues/169701
-// Failing: See https://github.com/elastic/kibana/issues/170593
-describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
   before(() => {
@@ -77,8 +74,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169701
-  describe.skip('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Add and upgrade integration', { tags: ['@ess', '@serverless'] }, () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
@@ -107,8 +103,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/170593
-  describe.skip('Add integration to policy', () => {
+  describe('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
     beforeEach(() => {
@@ -148,8 +143,7 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170445
-  describe.skip('Upgrade policy with existing packs', () => {
+  describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     const [policyName, integrationName, packName] = generateRandomStringName(3);
     let policyId: string;
