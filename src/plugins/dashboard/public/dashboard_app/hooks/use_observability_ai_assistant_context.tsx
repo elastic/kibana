@@ -8,7 +8,6 @@
 
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { useEffect } from 'react';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -117,32 +116,6 @@ export function useObservabilityAIAssistantContext({
       createScreenContextAction,
     } = observabilityAIAssistant;
 
-    const axisType = {
-      type: 'string',
-      enum: ['dateHistogram', 'topValues', 'filters', 'intervals'],
-    } as const;
-
-    const xAxis = {
-      type: 'object',
-      properties: {
-        column: {
-          type: 'string',
-        },
-        type: axisType,
-      },
-    } as const;
-
-    const breakdown = {
-      type: 'object',
-      properties: {
-        column: {
-          type: 'string',
-        },
-        type: axisType,
-      },
-      required: ['column'],
-    } as const;
-
     return setScreenContext({
       screenDescription:
         'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
@@ -178,14 +151,11 @@ export function useObservabilityAIAssistantContext({
                         xy: {
                           type: 'object',
                           properties: {
-                            xAxis,
+                            xAxis: {
+                              type: 'string',
+                            },
                             yAxis: {
-                              type: 'object',
-                              properties: {
-                                column: {
-                                  type: 'string',
-                                },
-                              },
+                              type: 'string',
                             },
                             type: {
                               type: 'string',
@@ -197,10 +167,7 @@ export function useObservabilityAIAssistantContext({
                           type: 'object',
                           properties: {
                             breakdown: {
-                              type: 'object',
-                              properties: {
-                                type: axisType,
-                              },
+                              type: 'string',
                             },
                           },
                         },
@@ -212,31 +179,39 @@ export function useObservabilityAIAssistantContext({
                         },
                         pie: {
                           type: 'object',
+                          properties: {
+                            breakdown: {
+                              type: 'string',
+                            },
+                          },
                         },
                         heatmap: {
                           type: 'object',
                           properties: {
-                            timestampField: {
+                            xAxis: {
                               type: 'string',
                             },
-                            breakdown,
+                            breakdown: {
+                              type: 'string',
+                            },
                           },
-                          required: ['breakdown'],
+                          required: ['xAxis'],
                         },
                         mosaic: {
                           type: 'object',
                           properties: {
-                            timestampField: {
+                            breakdown: {
                               type: 'string',
                             },
-                            breakdown,
                           },
                           required: ['breakdown'],
                         },
                         regionmap: {
                           type: 'object',
                           properties: {
-                            breakdown,
+                            breakdown: {
+                              type: 'string',
+                            },
                           },
                           required: ['breakdown'],
                         },
@@ -246,12 +221,19 @@ export function useObservabilityAIAssistantContext({
                         tagcloud: {
                           type: 'object',
                           properties: {
-                            breakdown,
+                            breakdown: {
+                              type: 'string',
+                            },
                           },
                           required: ['breakdown'],
                         },
                         treemap: {
                           type: 'object',
+                          properties: {
+                            breakdown: {
+                              type: 'string',
+                            },
+                          },
                         },
                       },
                     },
@@ -271,15 +253,12 @@ export function useObservabilityAIAssistantContext({
                   esql: { query },
                 } = args;
 
-                const indexPattern = getIndexPatternFromESQLQuery(query);
-
-                const [columns, adhocDataView] = await Promise.all([
+                const [columns] = await Promise.all([
                   getColumns({
                     search,
                     esqlQuery: query,
                     signal,
                   }),
-                  getESQLAdHocDataview(indexPattern, dataViews),
                 ]);
 
                 const configBuilder = new LensConfigBuilder(dataViews);
@@ -303,10 +282,10 @@ export function useObservabilityAIAssistantContext({
                         {
                           seriesType: layers?.xy?.type || 'line',
                           type: 'series',
-                          xAxis: layers?.xy?.xAxis?.column || '@timestamp',
+                          xAxis: layers?.xy?.xAxis || '@timestamp',
                           yAxis: [
                             {
-                              value: layers?.xy?.yAxis?.column || firstMetricColumn!,
+                              value: layers?.xy?.yAxis || firstMetricColumn!,
                             },
                           ],
                         },
@@ -322,10 +301,21 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      breakdown: [],
+                      breakdown: [layers?.donut?.breakdown!],
                       dataset,
                     };
                     config = donutConfig;
+                    break;
+
+                  case 'pie':
+                    const pieConfig: LensPieConfig = {
+                      chartType,
+                      title,
+                      value: firstMetricColumn!,
+                      breakdown: [layers?.pie?.breakdown!],
+                      dataset,
+                    };
+                    config = pieConfig;
                     break;
 
                   case 'metric':
@@ -354,15 +344,8 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      breakdown: {
-                        field: layers?.heatmap?.breakdown?.column!,
-                        type: layers?.heatmap?.breakdown?.type || 'topValues',
-                        filters: [],
-                      },
-                      xAxis: {
-                        field: layers?.heatmap?.timestampField || '@timestamp',
-                        type: 'dateHistogram',
-                      },
+                      breakdown: layers?.heatmap?.breakdown,
+                      xAxis: layers?.heatmap?.xAxis || '@timestamp',
                       dataset,
                     };
                     config = heatmapConfig;
@@ -373,29 +356,10 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      xAxis: {
-                        field: layers?.mosaic?.timestampField || '@timestamp',
-                        type: 'dateHistogram',
-                      },
-                      breakdown: {
-                        field: layers?.mosaic?.breakdown.column!,
-                        filters: [],
-                        type: layers?.mosaic?.breakdown.type || 'topValues',
-                      },
+                      breakdown: [layers?.mosaic?.breakdown || '@timestamp'],
                       dataset,
                     };
                     config = mosaicConfig;
-                    break;
-
-                  case 'pie':
-                    const pieConfig: LensPieConfig = {
-                      chartType,
-                      title,
-                      value: firstMetricColumn!,
-                      breakdown: [],
-                      dataset,
-                    };
-                    config = pieConfig;
                     break;
 
                   case 'regionmap':
@@ -403,11 +367,7 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      breakdown: {
-                        field: layers?.regionmap?.breakdown.column!,
-                        filters: [],
-                        type: layers?.regionmap?.breakdown.type! || 'topValues',
-                      },
+                      breakdown: layers?.regionmap?.breakdown!,
                       dataset,
                     };
                     config = regionMapConfig;
@@ -428,11 +388,7 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      breakdown: {
-                        field: layers?.tagcloud?.breakdown.column!,
-                        filters: [],
-                        type: layers?.tagcloud?.breakdown.type || 'topValues',
-                      },
+                      breakdown: layers?.tagcloud?.breakdown!,
                       dataset,
                     };
                     config = tagCloudConfig;
@@ -443,7 +399,7 @@ export function useObservabilityAIAssistantContext({
                       chartType,
                       title,
                       value: firstMetricColumn!,
-                      breakdown: [],
+                      breakdown: [layers?.treemap?.breakdown || '@timestamp'],
                       dataset,
                     };
                     config = treeMapConfig;
@@ -452,6 +408,7 @@ export function useObservabilityAIAssistantContext({
 
                 const embeddableInput = (await configBuilder.build(config, {
                   embeddable: true,
+                  query: dataset,
                 })) as LensEmbeddableInput;
 
                 return dashboardAPI
