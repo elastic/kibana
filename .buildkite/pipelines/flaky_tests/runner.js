@@ -36,7 +36,7 @@ const getAgentRule = (queueName = 'n2-4-spot') => {
       queue: queueName,
     };
   }
-}
+};
 
 function getTestSuitesFromMetadata() {
   const keys = execSync('buildkite-agent meta-data keys')
