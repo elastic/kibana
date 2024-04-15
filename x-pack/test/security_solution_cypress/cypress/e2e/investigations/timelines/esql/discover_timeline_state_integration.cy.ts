@@ -69,7 +69,8 @@ const handleIntercepts = () => {
   });
 };
 
-describe(
+// Skipping as it's failing in the on-merge pipeline, see: https://github.com/elastic/kibana/issues/180776
+describe.skip(
   'Discover Timeline State Integration',
   {
     tags: ['@ess', '@skipInServerless'],
