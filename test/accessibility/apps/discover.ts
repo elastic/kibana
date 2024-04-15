@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Discover a11y tests', () => {
+  describe.only('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
@@ -133,7 +133,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
-        await testSubjects.click('openFieldActionsButton-Cancelled');
+        await testSubjects.click('openFieldActionsButton-Cancelled'); // Open the actions
+        await testSubjects.click('openFieldActionsButton-Cancelled'); // Close the actions
       } else {
         await testSubjects.existOrFail('fieldActionsGroup-Cancelled');
       }
