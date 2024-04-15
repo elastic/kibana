@@ -62,6 +62,7 @@ describe('OnboardingComponent', () => {
       EnablePrebuiltRulesSteps.enablePrebuiltRules,
       ViewAlertsSteps.viewAlerts,
     ],
+    spaceId: 'spaceId',
   };
   it('should render page title, subtitle, and description', () => {
     const { getByText } = render(<OnboardingComponent {...props} />);

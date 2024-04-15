@@ -35,6 +35,7 @@ import type {
   ReportAddRiskInputToTimelineClickedParams,
   OnboardingHubStepLinkClickedParams,
   OnboardingHubStepOpenParams,
+  OnboardingHubStepFinishedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -165,7 +166,7 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepOpen, params);
   };
 
-  public reportOnboardingHubStepFinished = (params: OnboardingHubStepOpenParams) => {
+  public reportOnboardingHubStepFinished = (params: OnboardingHubStepFinishedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepFinished, params);
   };
 

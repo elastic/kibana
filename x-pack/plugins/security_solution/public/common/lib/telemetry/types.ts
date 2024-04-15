@@ -118,7 +118,9 @@ export type TelemetryEventParams =
   | ReportDataQualityCheckAllCompletedParams
   | ReportBreadcrumbClickedParams
   | ReportDocumentDetailsTelemetryEventParams
-  | OnboardingHubStepOpenParams;
+  | OnboardingHubStepOpenParams
+  | OnboardingHubStepFinishedParams
+  | OnboardingHubStepLinkClickedParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
