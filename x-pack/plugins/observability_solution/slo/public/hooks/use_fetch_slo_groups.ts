@@ -25,6 +25,7 @@ interface SLOGroupsParams {
   page?: number;
   perPage?: number;
   groupBy?: string;
+  groupsFilter?: string[];
   kqlQuery?: string;
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
@@ -47,6 +48,7 @@ export function useFetchSloGroups({
   page = 1,
   perPage = DEFAULT_SLO_GROUPS_PAGE_SIZE,
   groupBy = 'ungrouped',
+  groupsFilter = [],
   kqlQuery = '',
   tagsFilter,
   statusFilter,
@@ -81,9 +83,16 @@ export function useFetchSloGroups({
       return '';
     }
   }, [filterDSL, tagsFilter, statusFilter, dataView]);
-
   const { data, isLoading, isSuccess, isError, isRefetching, refetch } = useQuery({
-    queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters, lastRefresh }),
+    queryKey: sloKeys.group({
+      page,
+      perPage,
+      groupBy,
+      groupsFilter,
+      kqlQuery,
+      filters,
+      lastRefresh,
+    }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
         '/internal/api/observability/slos/_groups',
@@ -92,6 +101,7 @@ export function useFetchSloGroups({
             ...(page && { page }),
             ...(perPage && { perPage }),
             ...(groupBy && { groupBy }),
+            ...(groupsFilter && { groupsFilter }),
             ...(kqlQuery && { kqlQuery }),
             ...(filters && { filters }),
           },

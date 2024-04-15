@@ -23,6 +23,7 @@ interface Props {
   direction?: SortDirection;
   filters?: Filter[];
   lastRefreshTime?: number;
+  groupsFilter?: string[];
 }
 
 export function GroupView({
@@ -31,6 +32,7 @@ export function GroupView({
   sort,
   direction,
   groupBy,
+  groupsFilter,
   filters,
   lastRefreshTime,
 }: Props) {
@@ -45,6 +47,7 @@ export function GroupView({
     statusFilter,
     filters,
     lastRefresh,
+    groupsFilter,
   });
 
   useEffect(() => {

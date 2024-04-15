@@ -36,7 +36,6 @@ export function GroupSloView({
   const [kqlQuery, setKqlQuery] = useState(initialKqlQuery);
   const [filters, setFilters] = useState(initialFilters);
   const [groups, setGroups] = useState(initialGroups);
-
   const combinedKqlQuery = buildCombinedKqlQuery({ groups, groupBy, kqlQuery });
 
   useEffect(() => {
@@ -60,11 +59,11 @@ export function GroupSloView({
       subs?.unsubscribe();
     };
   }, [filters, groupBy, groups, kqlQuery, reloadGroupSubject]);
-
   return (
     <GroupView
       sloView={sloView}
       groupBy={groupBy}
+      groupsFilter={groups}
       kqlQuery={combinedKqlQuery}
       filters={filters}
       lastRefreshTime={lastRefreshTime}
