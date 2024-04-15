@@ -28,6 +28,7 @@ import { useWithArtifactSubmitData } from '../../../../components/artifact_list_
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
+  ArtifactConfirmModalLabelProps,
 } from '../../../../components/artifact_list_page/types';
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EventFiltersForm } from './form';
