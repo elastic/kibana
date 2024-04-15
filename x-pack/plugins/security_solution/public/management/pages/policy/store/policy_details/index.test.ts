@@ -323,6 +323,7 @@ describe('policy details: ', () => {
                     logging: { file: 'info' },
                     antivirus_registration: {
                       enabled: false,
+                      mode: 'disabled',
                     },
                   },
                   mac: {

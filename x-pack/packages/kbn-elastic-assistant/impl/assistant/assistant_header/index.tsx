@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -40,6 +41,8 @@ interface OwnProps {
   title: string | JSX.Element;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  anonymizationFields: FindAnonymizationFieldsResponse;
+  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 type Props = OwnProps;
@@ -64,6 +67,8 @@ export const AssistantHeader: React.FC<Props> = ({
   setCurrentConversation,
   conversations,
   refetchConversationsState,
+  anonymizationFields,
+  refetchAnonymizationFieldsResults,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -147,6 +152,8 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
                   refetchConversationsState={refetchConversationsState}
+                  anonymizationFields={anonymizationFields}
+                  refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

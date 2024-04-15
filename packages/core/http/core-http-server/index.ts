@@ -140,7 +140,7 @@ export type {
   VersionedRouteRequestValidation,
   VersionedRouteResponseValidation,
   ApiVersion,
-  FullValidationConfig,
+  VersionedRouteValidation,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,

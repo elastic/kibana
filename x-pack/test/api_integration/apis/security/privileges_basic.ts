@@ -152,7 +152,13 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_all',
               'minimal_read',
             ],
-            securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionAssistant: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'update_anonymization',
+            ],
             securitySolutionCases: [
               'all',
               'read',
