@@ -19,7 +19,7 @@ const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean }> = ({
   const spaceId = useSpaceId();
 
   /* spaceId returns undefined if the space is loading.
-   ** We rendering the onboarding component only when spaceId is ready
+   ** We render the onboarding component only when spaceId is ready
    ** to make sure it reads the local storage data with the correct spaceId.
    */
   if (!onboardingSteps || !spaceId) {
