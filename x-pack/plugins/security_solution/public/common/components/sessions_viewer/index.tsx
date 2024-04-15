@@ -55,6 +55,13 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
           },
         },
       ],
+      must_not: [
+        {
+          term: {
+            [ENTRY_SESSION_ENTITY_ID_PROPERTY]: '',
+          },
+        },
+      ],
     },
   },
   meta: {
