@@ -92,7 +92,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
           }}
           inputAriaLabel="Editable title input field"
           heading="h1"
-          size="l"
+          size="s"
           isInvalid={hasErrors}
           isLoading={isLoading}
           isReadOnly={!permissions.update}
