@@ -20,6 +20,7 @@ export interface Asset {
 export enum ContentTabIds {
   OVERVIEW = 'overview',
   METADATA = 'metadata',
+  METRICS = 'metrics',
   PROCESSES = 'processes',
   PROFILING = 'profiling',
   ANOMALIES = 'anomalies',

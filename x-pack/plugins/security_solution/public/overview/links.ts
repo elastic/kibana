@@ -56,6 +56,7 @@ export const gettingStartedLinks: LinkItem = {
     }),
   ],
   sideNavIcon: 'launch',
+  sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
 };

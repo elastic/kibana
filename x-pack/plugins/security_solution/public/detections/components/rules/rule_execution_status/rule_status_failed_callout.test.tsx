@@ -31,6 +31,7 @@ const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
   isAssistantEnabled: true,
 };
 const queryClient = new QueryClient({
