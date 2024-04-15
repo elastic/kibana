@@ -429,7 +429,7 @@ export async function bulkGetRulesSources(
     DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
     {
       method: 'POST',
-      version: '2023-10-31',
+      version: '1',
       body: JSON.stringify(params),
       signal,
     }

@@ -84,7 +84,7 @@ export const performBulkGetRulesSourcesRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: DETECTION_ENGINE_RULES_BULK_GET_SOURCES,
       options: {
         tags: ['access:securitySolution'],
@@ -92,7 +92,7 @@ export const performBulkGetRulesSourcesRoute = (
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             body: buildRouteValidationWithZod(BulkGetRulesSourcesRequestBody),
