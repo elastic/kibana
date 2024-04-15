@@ -59,7 +59,6 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   fieldsToFetch?: string[];
   totalDocuments?: number;
   samplingOption?: SamplingOption;
-  esql?: boolean | undefined;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -108,19 +107,11 @@ export interface FieldStatisticsTableProps {
    * @param eventName
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  /**
-   * Session ID to pass to data.search to track, start, stop sessions
-   */
   searchSessionId?: string;
-  /**
-   * If true, set to support ES|QL queries
-   */
-  isPlainRecord?: boolean;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    isPlainRecord,
     dataView,
     savedSearch,
     query,
@@ -178,7 +169,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        esql: isPlainRecord,
         dataView,
         savedSearch,
         query,
@@ -207,7 +197,6 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     totalDocuments,
     stateContainer,
-    isPlainRecord,
   ]);
 
   useEffect(() => {
