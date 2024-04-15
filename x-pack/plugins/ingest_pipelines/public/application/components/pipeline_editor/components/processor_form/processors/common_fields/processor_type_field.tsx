@@ -42,19 +42,22 @@ export const extractProcessorDetails = flow(
 interface ProcessorTypeAndLabel {
   value: string;
   label: string;
+  category?: string;
 }
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
-  // Get a clean list of processors that should be rendered into the UI
-  const filteredProcessors = extractProcessorDetails(mapProcessorTypeToDescriptor)
-    // Filter out any processors that are not available for the current license type
-    .filter((option) => {
-      return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
-    })
-    // Pick properties we need to build the categories
-    .map(({ value, label, category }) => ({ label, value, category }));
+  return (
+    extractProcessorDetails(mapProcessorTypeToDescriptor)
+      // Filter out any processors that are not available for the current license type
+      .filter((option) => {
+        return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
+      })
+      // Pick properties we need to build the categories
+      .map(({ value, label, category }) => ({ label, value, category }))
+  );
+};
 
-  // Group all processors by category
+const groupProcessorsByCategory = (filteredProcessors: ProcessorTypeAndLabel[]) => {
   return _map(_groupBy(filteredProcessors, 'category'), (options, optionLabel) => ({
     label: optionLabel,
     options: _map(options, ({ label, value }) => ({
@@ -93,7 +96,12 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
   } = useKibana();
   const esDocUrl = documentation.getEsDocsBasePath();
   // Some processors are only available for certain license types
-  const processorOptions = useMemo(() => getProcessorTypesAndLabels(license), [license]);
+  const processorOptions = useMemo(() => {
+    // Get all processors
+    const processors = getProcessorTypesAndLabels(license);
+    // Group them by category so that they can be properly rendered by the EuiComboBox
+    return groupProcessorsByCategory(processors);
+  }, [license]);
 
   return (
     <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
