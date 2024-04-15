@@ -49,7 +49,9 @@ export async function findRules<Params extends RuleParams = never>(
   const { fields, filterConsumers, ...restOptions } = options || {};
 
   try {
-    findRulesParamsSchema.validate(params);
+    if (params) {
+      findRulesParamsSchema.validate(params);
+    }
   } catch (error) {
     throw Boom.badRequest(`Error validating find data - ${error.message}`);
   }
