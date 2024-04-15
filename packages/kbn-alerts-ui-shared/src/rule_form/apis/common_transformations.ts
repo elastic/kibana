@@ -7,7 +7,7 @@
  */
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import type { RuleFormRule, RuleUiAction } from '../types';
+import type { RuleFormRule, RuleUiAction, RuleExecutionStatus, RuleLastRun } from '../types';
 
 const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   const { uuid, id, connector_type_id: actionTypeId, params } = action;
@@ -36,16 +36,70 @@ const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
   };
 };
 
+const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
+  last_execution_date: lastExecutionDate,
+  last_duration: lastDuration,
+  ...rest
+}) => ({
+  lastExecutionDate,
+  lastDuration,
+  ...rest,
+});
+
+const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
+  outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
+  alerts_count: alertsCount,
+  ...rest
+}) => ({
+  outcomeMsg,
+  outcomeOrder,
+  alertsCount,
+  ...rest,
+});
+
 export const transformRule: RewriteRequestCase<RuleFormRule> = ({
   rule_type_id: ruleTypeId,
+  created_by: createdBy,
+  updated_by: updatedBy,
+  created_at: createdAt,
+  updated_at: updatedAt,
+  api_key_owner: apiKeyOwner,
+  api_key_created_by_user: apiKeyCreatedByUser,
+  notify_when: notifyWhen,
+  mute_all: muteAll,
+  muted_alert_ids: mutedInstanceIds,
+  scheduled_task_id: scheduledTaskId,
+  execution_status: executionStatus,
   actions: actions,
+  snooze_schedule: snoozeSchedule,
+  is_snoozed_until: isSnoozedUntil,
+  active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
   alert_delay: alertDelay,
   ...rest
 }: any) => ({
   ruleTypeId,
+  createdBy,
+  updatedBy,
+  createdAt,
+  updatedAt,
+  apiKeyOwner,
+  notifyWhen,
+  muteAll,
+  mutedInstanceIds,
+  snoozeSchedule,
+  executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
   actions: actions
     ? actions.map((action: AsApiContract<RuleUiAction>) => transformAction(action))
     : [],
+  scheduledTaskId,
+  isSnoozedUntil,
+  activeSnoozes,
+  ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+  ...(nextRun ? { nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
   ...rest,
 });

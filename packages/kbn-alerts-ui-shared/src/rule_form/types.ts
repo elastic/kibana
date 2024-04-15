@@ -135,3 +135,70 @@ export interface RuleFormStateValidation {
 
 // Type this correctly in the next PR in which action support is added
 export type RuleUiAction = any;
+
+// for the `typeof ThingValues[number]` types below, become string types that
+// only accept the values in the associated string arrays
+export const RuleExecutionStatusValues = [
+  'ok',
+  'active',
+  'error',
+  'pending',
+  'unknown',
+  'warning',
+] as const;
+export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
+
+export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
+export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+
+export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
+  succeeded: 0,
+  warning: 10,
+  failed: 20,
+};
+
+export enum RuleExecutionStatusErrorReasons {
+  Read = 'read',
+  Decrypt = 'decrypt',
+  Execute = 'execute',
+  Unknown = 'unknown',
+  License = 'license',
+  Timeout = 'timeout',
+  Disabled = 'disabled',
+  Validate = 'validate',
+}
+
+export enum RuleExecutionStatusWarningReasons {
+  MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
+  MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
+}
+
+export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
+
+export interface RuleExecutionStatus {
+  status: RuleExecutionStatuses;
+  lastExecutionDate: Date;
+  lastDuration?: number;
+  error?: {
+    reason: RuleExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning?: {
+    reason: RuleExecutionStatusWarningReasons;
+    message: string;
+  };
+}
+
+export interface RuleLastRun {
+  outcome: RuleLastRunOutcomes;
+  outcomeOrder?: number;
+  warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+  outcomeMsg?: string[] | null;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
+  };
+}
