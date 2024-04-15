@@ -31,12 +31,10 @@ const marks = {
  * @param {React.ComponentType<P>} BaseComponent - The component to be wrapped and measured.
  * @returns {React.FunctionComponent} - A new component that includes the render time measurement functionality.
  */
-export function withMeasureTime<P extends WithMeasureTimeProps>(
-  BaseComponent: React.ComponentType<P>
-) {
+export function withMeasureTime<P>(BaseComponent: React.ComponentType<P & WithMeasureTimeProps>) {
   performance.mark(marks.startMount);
 
-  return function WithMeasureTime(props: P) {
+  return function WithMeasureTime(props: P & WithMeasureTimeProps) {
     const hasMounted = useRef<boolean>(false);
     const measureName = props.measureName;
 
