@@ -174,13 +174,18 @@ export class CrowdstrikeConnector extends SubActionConnector<
     }
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{ errors: [{ message: string; code: number }] }>
+  ): string {
+    const errorData = error.response?.data?.errors?.[0];
+    if (errorData) {
+      return errorData.message;
+    }
+
     if (!error.response?.status) {
       return 'Unknown API Error';
     }
-    if (error.response.status === 401) {
-      return 'Unauthorized API Error';
-    }
+
     return `API Error: ${error.response?.statusText}`;
   }
 }
