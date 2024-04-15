@@ -6,6 +6,7 @@
  */
 
 import { filter } from 'rxjs';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -16,6 +17,7 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import {
   EmailParamsSchema,
   JiraParamsSchema,
@@ -58,21 +60,24 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
-const AlertStateSchema = schema.oneOf([
-  schema.literal('new'),
-  schema.literal('ongoing'),
-  schema.literal('recovered'),
-  schema.literal('unknown'),
-]);
+const AlertHitSchema = schema.object({
+  id: schema.string(),
+  reason: schema.nullable(schema.string()),
+});
+
+const AlertSummarySchema = schema.object({
+  new: schema.arrayOf(AlertHitSchema),
+  recovered: schema.arrayOf(AlertHitSchema),
+});
 
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
   rule: RuleSchema,
-  alertState: AlertStateSchema,
+  alertSummary: AlertSummarySchema,
 });
 
-type AlertState = TypeOf<typeof AlertStateSchema>;
+type AlertSummary = TypeOf<typeof AlertSummarySchema>;
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
 type RuleType = TypeOf<typeof RuleSchema>;
@@ -125,7 +130,7 @@ function renderParameterTemplates(
     connector: params.connector,
     message: params.message,
     rule: params.rule,
-    alertState: params.alertState,
+    alertSummary: params.alertSummary,
   };
 }
 
@@ -133,15 +138,19 @@ async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const state = execOptions.params.alertState;
+  const request = execOptions.request;
+  const summary = execOptions.params.alertSummary;
 
-  if (state !== 'new' && state !== 'recovered') {
-    // system connector action frequency can't be user configured. we use this flag as
+  if (!request) {
+    throw new Error('AI Assistant connector requires a kibana request');
+  }
+
+  if (summary.new.length === 0 && summary.recovered.length === 0) {
+    // connector could be executed with only ongoing actions. we use this path as
     // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
     return { actionId: execOptions.actionId, status: 'ok' };
   }
 
-  const request = execOptions.request!;
   const resources = await initResources(request);
   const client = await resources.service.getClient({ request });
   const functionClient = await resources.service.getFunctionClient({
@@ -170,7 +179,10 @@ async function executor(
   const systemMessage = functionClient
     .getContexts()
     .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = getBackgroundProcessInstruction(execOptions.params.rule, state);
+  const backgroundInstruction = getBackgroundProcessInstruction(
+    execOptions.params.rule,
+    execOptions.params.alertSummary
+  );
 
   client
     .complete({
@@ -249,28 +261,43 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
-        alertState:
-          alerts.new.count > 0
-            ? 'new'
-            : alerts.ongoing.count > 0
-            ? 'ongoing'
-            : alerts.recovered.count > 0
-            ? 'recovered'
-            : 'unknown',
+        alertSummary: getAlertSummary(alerts),
       };
     },
   };
 };
 
-function getBackgroundProcessInstruction(rule: RuleType, state: AlertState) {
-  let instruction = `You are called as a background process because the alert ${JSON.stringify(
+function getBackgroundProcessInstruction(rule: RuleType, summary: AlertSummary) {
+  let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
     rule
-  )} ${state === 'new' ? 'fired' : 'recovered'}.`;
+  )}:\n`;
+  if (summary.new.length > 0) {
+    instruction += `- ${summary.new.length} alerts have fired: ${JSON.stringify(summary.new)}\n`;
+  }
+  if (summary.recovered.length > 0) {
+    instruction += `- ${summary.recovered.length} alerts have recovered: ${JSON.stringify(
+      summary.recovered
+    )}\n`;
+  }
   instruction +=
     ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
   instruction +=
     ' input if tasked to execute actions. You can generate multiple responses in a row.';
-  instruction += ' If available, include the link to the conversation at the end of your answer.';
+  instruction += ' If available, include the link of the conversation at the end of your answer.';
 
   return instruction;
+}
+
+function getAlertSummary(alerts: CombinedSummarizedAlerts): AlertSummary {
+  const extractAlertData = (hit: AlertHit) => {
+    return {
+      id: hit._id,
+      reason: get(hit, 'kibana.alert.reason') || null,
+    };
+  };
+
+  return {
+    new: alerts.new.data.map(extractAlertData),
+    recovered: alerts.recovered.data.map(extractAlertData),
+  };
 }
