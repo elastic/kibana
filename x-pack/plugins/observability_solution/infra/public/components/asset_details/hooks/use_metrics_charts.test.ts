@@ -29,7 +29,6 @@ describe('useHostFlyoutViewMetricsCharts', () => {
       'memoryUsage',
       'normalizedLoad1m',
       'logRate',
-      'diskSpaceUsageAvailable',
       'diskUsageByMountPoint',
       'diskThroughputReadWrite',
       'diskIOReadWrite',
@@ -70,7 +69,6 @@ describe('useHostPageViewMetricsCharts', () => {
       'normalizedLoad1m',
       'loadBreakdown',
       'logRate',
-      'diskSpaceUsageAvailable',
       'diskUsageByMountPoint',
       'diskThroughputReadWrite',
       'diskIOReadWrite',
@@ -131,7 +129,8 @@ describe('useHostKpiCharts', () => {
 
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
-      expect(chart).toHaveProperty('subtitle', 'Average');
+      // diskUsage should have subtitle 'Max'
+      expect(chart).toHaveProperty('subtitle', index === 3 ? 'Max' : 'Average');
       expect(chart).toHaveProperty('decimals', 1);
     });
   });
@@ -139,7 +138,7 @@ describe('useHostKpiCharts', () => {
   it('should return an array of charts with correct options', async () => {
     const options = {
       seriesColor: 'blue',
-      subtitle: 'Custom Subtitle',
+      getSubtitle: () => 'Custom Subtitle',
     };
 
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -151,7 +150,7 @@ describe('useHostKpiCharts', () => {
 
     result.current.forEach((chart) => {
       expect(chart).toHaveProperty('seriesColor', options.seriesColor);
-      expect(chart).toHaveProperty('subtitle', options.subtitle);
+      expect(chart).toHaveProperty('subtitle', 'Custom Subtitle');
     });
   });
 });
