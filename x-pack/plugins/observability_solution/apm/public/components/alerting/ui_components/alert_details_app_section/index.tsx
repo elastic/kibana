@@ -12,6 +12,7 @@ import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -38,7 +39,6 @@ import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 
 export function AlertDetailsAppSection({
   rule,
@@ -166,8 +166,6 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <AlertDetailContextualInsights alert={alert} />
-
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
@@ -220,6 +218,7 @@ export function AlertDetailsAppSection({
           <EuiFlexItem grow={false}>
             <LatencyAlertsHistoryChart
               ruleId={alert.fields[ALERT_RULE_UUID]}
+              alertInstanceId={alert.fields[ALERT_INSTANCE_ID]}
               serviceName={serviceName}
               start={historicalRange.start}
               end={historicalRange.end}

@@ -52,6 +52,7 @@ describe('Cases Ui Plugin', () => {
       },
       security: securityMock.createSetup(),
       management: managementPluginMock.createSetupContract(),
+      triggersActionsUi: triggersActionsUiMock.createStart(),
     };
 
     pluginsStart = {

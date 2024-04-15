@@ -28,7 +28,7 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 describe(
   'Unsaved Timeline query tab',
   {
-    tags: ['@ess', '@serverless', '@brokenInServerlessQA'],
+    tags: ['@ess', '@serverless', '@skipInServerless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

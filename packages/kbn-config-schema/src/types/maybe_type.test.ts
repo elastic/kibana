@@ -7,6 +7,7 @@
  */
 
 import { schema } from '../..';
+import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
 
 test('returns value if specified', () => {
   const type = schema.maybe(schema.string());
@@ -94,6 +95,12 @@ describe('maybe + object', () => {
 
     expect(type.validate({})).toEqual({});
   });
+});
+
+test('meta', () => {
+  const maybeString = schema.maybe(schema.string());
+  const result = maybeString.getSchema().describe().metas[0];
+  expect(result).toEqual({ [META_FIELD_X_OAS_OPTIONAL]: true });
 });
 
 describe('#extendsDeep', () => {

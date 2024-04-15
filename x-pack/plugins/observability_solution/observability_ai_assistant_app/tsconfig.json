@@ -50,6 +50,9 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/shared-ux-utility",
     "@kbn/data-plugin",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-ast",
+    "@kbn/ai-assistant-management-plugin",
     "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
