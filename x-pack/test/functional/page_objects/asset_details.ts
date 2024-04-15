@@ -290,8 +290,16 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsDashboardsTab');
     },
 
+    async dashboardsTabExists() {
+      return testSubjects.exists('infraAssetDetailsDashboardsTab');
+    },
+
     async addDashboardExists() {
       await testSubjects.existOrFail('infraAddDashboard');
+    },
+
+    async getAddDashboardButton() {
+      return testSubjects.find('infraAddDashboard');
     },
 
     // APM Tab link
