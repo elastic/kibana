@@ -63,5 +63,5 @@ export const useLinkToLogsExplorer = ({
     onClick: navigateToLogsExplorer,
   });
 
-  return logsExplorerLinkProps;
+  return { ...logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };

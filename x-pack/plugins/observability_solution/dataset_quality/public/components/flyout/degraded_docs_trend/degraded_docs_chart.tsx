@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
-import { indexNameToDataStreamParts } from '../../../../common/utils';
-import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { useCreateDataView } from '../../../hooks';
+import { useDegradedDocsChart } from '../../../hooks';
 import { getLensAttributes } from './lens_attributes';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
   'ACTION_CUSTOMIZE_PANEL',
   'ACTION_CONFIGURE_IN_LENS',
+  'ACTION_OPEN_IN_DISCOVER',
   'create-ml-ad-job-action',
 ];
 
@@ -41,30 +40,22 @@ export function DegradedDocsChart({
 
   const { euiTheme } = useEuiTheme();
 
-  const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
-  const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
-    undefined
-  );
-
-  const datasetTypeIndexPattern = dataStream
-    ? `${indexNameToDataStreamParts(dataStream).type}-*-*`
-    : undefined;
-  const { dataView } = useCreateDataView({
-    indexPatternString: datasetTypeIndexPattern ?? DEFAULT_LOGS_DATA_VIEW,
-  });
-
-  const handleChartLoading = (isLoading: boolean) => {
-    setIsChartLoading(isLoading);
-  };
-
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
+  const {
+    attributes,
+    dataView,
+    filterQuery,
+    extraActions,
+    isChartLoading,
+    handleChartLoading,
+    setAttributes,
+  } = useDegradedDocsChart({ dataStream });
 
   useEffect(() => {
     if (dataView) {
-      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView);
+      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView, filterQuery);
       setAttributes(lensAttributes);
     }
-  }, [lens, euiTheme.colors.danger, dataView]);
+  }, [dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
 
   return (
     <>
@@ -88,6 +79,7 @@ export function DegradedDocsChart({
               timeRange={timeRange}
               attributes={attributes!}
               withDefaultActions={true}
+              extraActions={extraActions}
               disableTriggers={false}
               lastReloadRequestTime={lastReloadTime}
               query={{

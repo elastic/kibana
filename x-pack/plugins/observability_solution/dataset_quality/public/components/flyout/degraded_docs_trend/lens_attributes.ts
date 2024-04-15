@@ -20,7 +20,11 @@ const defaultDataView = {
   timeFieldName: '@timestamp',
 } as DataView;
 
-export function getLensAttributes(color: string, dataView: DataView = defaultDataView) {
+export function getLensAttributes(
+  color: string,
+  dataView: DataView = defaultDataView,
+  query: string = ''
+) {
   return {
     visualizationType: 'lnsXY',
     title: flyoutDegradedDocsTrendText,
@@ -130,7 +134,7 @@ export function getLensAttributes(color: string, dataView: DataView = defaultDat
       filters: [],
       query: {
         language: 'kuery',
-        query: '',
+        query,
       },
       visualization: {
         axisTitlesVisibilitySettings: {

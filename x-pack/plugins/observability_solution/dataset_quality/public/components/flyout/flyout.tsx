@@ -31,8 +31,9 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
 
   return (
     <EuiFlyout
+      outsideClickCloses={false}
       onClose={closeFlyout}
-      ownFocus={false}
+      ownFocus={true}
       data-component-name={'datasetQualityFlyout'}
       data-test-subj="datasetQualityFlyout"
     >
