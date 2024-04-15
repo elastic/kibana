@@ -47,7 +47,10 @@ export const EventHeaderTitle: FC = memo(() => {
 
     return eventKind
       ? i18n.translate('xpack.securitySolution.flyout.right.title.otherEventTitle', {
-          defaultMessage: `${startCase(eventKind)} details`,
+          defaultMessage: '{eventKind} details',
+          values: {
+            eventKind: startCase(eventKind),
+          },
         })
       : defaultTitle;
   }, [eventKind, getFieldsData, eventCategory]);
