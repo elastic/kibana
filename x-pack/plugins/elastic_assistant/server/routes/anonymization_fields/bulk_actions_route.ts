@@ -121,7 +121,7 @@ export const bulkActionAnonymizationFieldsRoute = (
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       options: {
-        tags: ['access:elasticAssistant'],
+        tags: ['access:securitySolution-updateAIAssistantAnonymization'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },
