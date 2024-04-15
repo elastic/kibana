@@ -55,7 +55,7 @@ const getRouterDefaults = () => ({
   validationSchemas: {
     request: {
       params: schema.object({ id: schema.string({ maxLength: 36 }) }),
-      query: schema.object({ page: schema.number({ max: 999, min: 1 }) }),
+      query: schema.object({ page: schema.number({ max: 999, min: 1, defaultValue: 1 }) }),
       body: testSchema,
     },
     response: {

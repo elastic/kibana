@@ -4,12 +4,8 @@ exports[`generateOpenApiDocument @kbn/config-schema generates references in the 
 Object {
   "components": Object {
     "schemas": Object {
-      "my.id": Object {
-        "maxLength": 1,
-        "type": "string",
-      },
       "my.name": Object {
-        "maxLength": 1,
+        "minLength": 1,
         "type": "string",
       },
     },
@@ -43,7 +39,8 @@ Object {
             "name": "id",
             "required": true,
             "schema": Object {
-              "$ref": "#/components/schemas/my.id",
+              "minLength": 1,
+              "type": "string",
             },
           },
         ],
@@ -233,6 +230,7 @@ Object {
             "name": "page",
             "required": false,
             "schema": Object {
+              "default": 1,
               "maximum": 999,
               "minimum": 1,
               "type": "number",
