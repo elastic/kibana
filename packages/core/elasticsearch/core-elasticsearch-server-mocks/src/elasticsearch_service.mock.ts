@@ -107,7 +107,21 @@ const createInternalSetupContractMock = () => {
   return internalSetupContract;
 };
 
-type MockedInternalElasticsearchServiceStart = jest.Mocked<InternalElasticsearchServiceStart>;
+/**
+ * export type MockedElasticSearchServiceStart = jest.Mocked<
+ *   Omit<ElasticsearchServiceStart, 'client' | 'createClient'>
+ * > & {
+ *   client: ClusterClientMock;
+ *   createClient: jest.MockedFunction<
+ *     (type: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
+ *   >;
+ * };
+ */
+
+type MockedInternalElasticsearchServiceStart = jest.Mocked<
+  Omit<InternalElasticsearchServiceStart, 'client' | 'createClient'>
+> &
+  Pick<MockedElasticSearchServiceStart, 'client' | 'createClient'>;
 
 const createInternalStartContractMock = () => {
   const startContract = createStartContractMock();
