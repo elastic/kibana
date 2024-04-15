@@ -34,7 +34,6 @@ export enum ReadOperations {
   GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
-  RunSoon = 'runSoon',
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
   ScheduleBackfill = 'scheduleBackfill',
 }
@@ -56,6 +55,7 @@ export enum WriteOperations {
   BulkEnable = 'bulkEnable',
   BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
+  RunSoon = 'runSoon',
 }
 
 export interface EnsureAuthorizedOpts {
