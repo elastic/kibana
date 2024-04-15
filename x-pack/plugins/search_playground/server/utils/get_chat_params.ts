@@ -68,7 +68,7 @@ export const getChatParams = async (
     chatPrompt = Prompt(prompt, {
       citations,
       context: true,
-      type: 'mistral',
+      type: 'anthropic',
     });
   }
 

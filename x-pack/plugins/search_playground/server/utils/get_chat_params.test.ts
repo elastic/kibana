@@ -79,7 +79,7 @@ describe('getChatParams', () => {
     expect(Prompt).toHaveBeenCalledWith('How does it work?', {
       citations: false,
       context: true,
-      type: 'mistral',
+      type: 'anthropic',
     });
     expect(ActionsClientLlm).toHaveBeenCalledWith(expect.anything());
     expect(result.chatPrompt).toContain('How does it work?');
