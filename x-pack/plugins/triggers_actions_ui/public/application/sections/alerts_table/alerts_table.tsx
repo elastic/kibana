@@ -47,8 +47,8 @@ import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
 import { AlertsTableQueryContext } from './contexts/alerts_table_context';
-
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
+
 const DefaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
@@ -213,10 +213,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 
-  const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
-    useActionsColumn({
-      options: props.alertsTableConfiguration.useActionsColumn,
-    });
+  const {
+    renderCustomActionsRow: CustomActionsRow,
+    actionsColumnWidth,
+    getSetIsActionLoadingCallback,
+  } = useActionsColumn({
+    options: props.alertsTableConfiguration.useActionsColumn,
+  });
   const casesConfig = props.alertsTableConfiguration.cases;
   const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
@@ -299,7 +302,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       fieldBrowserOptions,
       getInspectQuery,
       showInspectButton,
-      toolbarVisiblityProp: props.toolbarVisibility,
+      toolbarVisibilityProp: props.toolbarVisibility,
     });
   }, [
     bulkActionsState,
@@ -325,7 +328,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const leadingControlColumns = useMemo(() => {
     let controlColumns = [...props.leadingControlColumns];
 
-    if (renderCustomActionsRow) {
+    if (CustomActionsRow) {
       controlColumns = [
         {
           id: 'expandColumn',
@@ -348,18 +351,18 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
             return (
               <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-                {renderCustomActionsRow({
-                  alert: alerts[visibleRowIndex],
-                  ecsAlert: ecsAlertsData[visibleRowIndex],
-                  nonEcsData: oldAlertsData[visibleRowIndex],
-                  rowIndex: visibleRowIndex,
-                  setFlyoutAlert: handleFlyoutAlert,
-                  id: props.id,
-                  cveProps,
-                  setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
-                  refresh,
-                  clearSelection,
-                })}
+                <CustomActionsRow
+                  id={props.id}
+                  alert={alerts[visibleRowIndex]}
+                  ecsAlert={ecsAlertsData[visibleRowIndex]}
+                  nonEcsData={oldAlertsData[visibleRowIndex]}
+                  rowIndex={visibleRowIndex}
+                  setFlyoutAlert={handleFlyoutAlert}
+                  setIsActionLoading={getSetIsActionLoadingCallback(visibleRowIndex)}
+                  cveProps={cveProps}
+                  refresh={refresh}
+                  clearSelection={clearSelection}
+                />
               </EuiFlexGroup>
             );
           },
@@ -374,19 +377,19 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     return controlColumns;
   }, [
+    props.leadingControlColumns,
+    props.id,
+    CustomActionsRow,
+    isBulkActionsColumnActive,
     actionsColumnWidth,
+    ecsAlertsData,
     alerts,
     oldAlertsData,
-    ecsAlertsData,
-    getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
-    isBulkActionsColumnActive,
-    props.id,
-    props.leadingControlColumns,
-    renderCustomActionsRow,
     getSetIsActionLoadingCallback,
     refresh,
     clearSelection,
+    getBulkActionsLeadingControlColumn,
   ]);
 
   useEffect(() => {
@@ -532,6 +535,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         ecsData: ecsAlertsData,
         dataGridRef,
         pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
       })
     : getCellActionsStub;
 

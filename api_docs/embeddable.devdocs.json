@@ -430,15 +430,18 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Container.children",
+            "id": "def-public.Container.children$",
             "type": "Object",
             "tags": [],
-            "label": "children",
+            "label": "children$",
             "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<{ [key: string]: unknown; }>"
+            ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "embeddable",
@@ -469,53 +472,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.Container.registerPanelApi",
-            "type": "Function",
-            "tags": [],
-            "label": "registerPanelApi",
-            "description": [],
-            "signature": [
-              "<ApiType extends unknown = unknown>(id: string, api: ApiType) => void"
-            ],
-            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.Container.registerPanelApi.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.Container.registerPanelApi.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "api",
-                "description": [],
-                "signature": [
-                  "ApiType"
-                ],
-                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -746,9 +702,9 @@
             "signature": [
               "<ApiType extends unknown = unknown>(panelPackage: ",
               {
-                "pluginId": "@kbn/presentation-publishing",
+                "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
+                "docId": "kibKbnPresentationContainersPluginApi",
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
@@ -767,9 +723,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/presentation-publishing",
+                    "pluginId": "@kbn/presentation-containers",
                     "scope": "common",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "docId": "kibKbnPresentationContainersPluginApi",
                     "section": "def-common.PanelPackage",
                     "text": "PanelPackage"
                   }
@@ -792,9 +748,9 @@
             "signature": [
               "(idToRemove: string, { panelType, initialState }: ",
               {
-                "pluginId": "@kbn/presentation-publishing",
+                "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
+                "docId": "kibKbnPresentationContainersPluginApi",
                 "section": "def-common.PanelPackage",
                 "text": "PanelPackage"
               },
@@ -828,9 +784,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/presentation-publishing",
+                    "pluginId": "@kbn/presentation-containers",
                     "scope": "common",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "docId": "kibKbnPresentationContainersPluginApi",
                     "section": "def-common.PanelPackage",
                     "text": "PanelPackage"
                   }
@@ -2619,39 +2575,15 @@
             "label": "parentApi",
             "description": [],
             "signature": [
-              "(Partial<",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesViewMode",
-                "text": "PublishesViewMode"
-              },
-              "> & ",
+              "(",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PublishesLastSavedState",
-                "text": "PublishesLastSavedState"
+                "section": "def-common.PresentationContainer",
+                "text": "PresentationContainer"
               },
-              " & ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.CanAddNewPanel",
-                "text": "CanAddNewPanel"
-              },
-              " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PanelPackage",
-                "text": "PanelPackage"
-              },
-              ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
+              " & Partial<Pick<",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -7512,6 +7444,57 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.PanelIncompatibleError",
+        "type": "Class",
+        "tags": [],
+        "label": "PanelIncompatibleError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.PanelIncompatibleError",
+            "text": "PanelIncompatibleError"
+          },
+          " extends Error"
+        ],
+        "path": "src/plugins/embeddable/public/lib/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PanelIncompatibleError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.PanelIncompatibleError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.PanelNotFoundError",
         "type": "Class",
         "tags": [],
@@ -8981,15 +8964,7 @@
             "section": "def-common.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<StateType>; parentApi?: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " | undefined; onApiAvailable?: ((api: ApiType) => void) | undefined; panelProps?: Pick<",
+          "<StateType>; parentApi?: unknown; onApiAvailable?: ((api: ApiType) => void) | undefined; panelProps?: Pick<",
           {
             "pluginId": "presentationPanel",
             "scope": "public",
@@ -9071,19 +9046,12 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.ReactEmbeddableRenderer.$1.parentApi",
-                "type": "CompoundType",
+                "type": "Unknown",
                 "tags": [],
                 "label": "parentApi",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PresentationContainer",
-                    "text": "PresentationContainer"
-                  },
-                  " | undefined"
+                  "unknown"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9520,15 +9488,7 @@
         "label": "startTrackingEmbeddableUnsavedChanges",
         "description": [],
         "signature": [
-          "<StateType extends object = object>(uuid: string, parentApi: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " | undefined, comparators: ",
+          "<StateType extends object = object>(uuid: string, parentApi: unknown, comparators: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -9572,24 +9532,17 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.startTrackingEmbeddableUnsavedChanges.$2",
-            "type": "CompoundType",
+            "type": "Unknown",
             "tags": [],
             "label": "parentApi",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PresentationContainer",
-                "text": "PresentationContainer"
-              },
-              " | undefined"
+              "unknown"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           },
           {
             "parentPluginId": "embeddable",
@@ -13231,15 +13184,7 @@
                 "section": "def-common.StateComparators",
                 "text": "StateComparators"
               },
-              "<StateType>) => ApiType, uuid: string, parentApi?: ",
-              {
-                "pluginId": "@kbn/presentation-containers",
-                "scope": "common",
-                "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PresentationContainer",
-                "text": "PresentationContainer"
-              },
-              " | undefined) => Promise<{ Component: React.FC<{}>; api: ApiType; }>"
+              "<StateType>) => ApiType, uuid: string, parentApi?: unknown) => Promise<{ Component: React.FC<{}>; api: ApiType; }>"
             ],
             "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
@@ -13303,24 +13248,17 @@
               {
                 "parentPluginId": "embeddable",
                 "id": "def-public.ReactEmbeddableFactory.buildEmbeddable.$4",
-                "type": "CompoundType",
+                "type": "Unknown",
                 "tags": [],
                 "label": "parentApi",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PresentationContainer",
-                    "text": "PresentationContainer"
-                  },
-                  " | undefined"
+                  "unknown"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []

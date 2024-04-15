@@ -19,6 +19,23 @@ import { RunActionResponseSchema, StreamingResponseSchema } from '../../../commo
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
+const mockTee = jest.fn();
+
+const mockCreate = jest.fn().mockImplementation(() => ({
+  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
+}));
+
+jest.mock('openai', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    api_key: '123',
+    chat: {
+      completions: {
+        create: mockCreate,
+      },
+    },
+  })),
+}));
 
 describe('OpenAIConnector', () => {
   let mockRequest: jest.Mock;
@@ -359,6 +376,30 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
 
         await expect(connector.invokeAI(sampleOpenAiBody)).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeAsyncIterator', () => {
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.invokeAsyncIterator(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(0);
+        expect(mockCreate).toHaveBeenCalledWith(
+          {
+            ...sampleOpenAiBody,
+            stream: true,
+            model: DEFAULT_OPENAI_MODEL,
+          },
+          { signal: undefined }
+        );
+        expect(mockTee).toBeCalledTimes(1);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        mockCreate.mockImplementationOnce(() => {
+          throw new Error('API Error');
+        });
+
+        await expect(connector.invokeAsyncIterator(sampleOpenAiBody)).rejects.toThrow('API Error');
       });
     });
     describe('getResponseErrorMessage', () => {

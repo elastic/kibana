@@ -96,7 +96,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   // https://github.com/elastic/kibana/issues/179959
   it(
     'shows a modal saying that no rules can be exported if all the selected rules are prebuilt',
-    { tags: ['@brokenInServerlessQA'] },
+    { tags: ['@skipInServerless'] },
     function () {
       createAndInstallMockedPrebuiltRules(prebuiltRules);
 
@@ -111,7 +111,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   );
 
   // https://github.com/elastic/kibana/issues/179960
-  it('exports only custom rules', { tags: ['@brokenInServerlessQA'] }, function () {
+  it('exports only custom rules', { tags: ['@skipInServerless'] }, function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
     createAndInstallMockedPrebuiltRules(prebuiltRules);
@@ -164,7 +164,7 @@ describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // https://github.com/elastic/kibana/issues/180029
-    it('exports custom rules with exceptions', { tags: ['@brokenInServerlessQA'] }, function () {
+    it('exports custom rules with exceptions', { tags: ['@skipInServerless'] }, function () {
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 

@@ -14,6 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AppContextProvider } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
@@ -35,8 +36,15 @@ const queryClient = new QueryClient({
   },
 });
 
-export const render = (component: React.ReactNode, params?: { show: boolean }) => {
+export const render = (
+  component: React.ReactNode,
+  params?: { show?: boolean; coreStartMock?: Partial<ReturnType<typeof coreMock.createStart>> }
+) => {
   const history = createMemoryHistory();
+
+  const startDeps = {
+    observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
+  };
 
   return testLibRender(
     // @ts-ignore
@@ -55,27 +63,18 @@ export const render = (component: React.ReactNode, params?: { show: boolean }) =
           },
         }}
       >
-        <AppContextProvider
-          value={{
-            http: coreStart.http,
-            application: coreStart.application,
-            docLinks: coreStart.docLinks,
-            settings: coreStart.settings,
-            notifications: coreStart.notifications,
-            observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
-            uiSettings: coreStart.uiSettings,
-            setBreadcrumbs: () => {},
-          }}
-        >
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider
-              history={history}
-              router={aIAssistantManagementObservabilityRouter as any}
-            >
-              {component}
-            </RouterProvider>
-          </QueryClientProvider>
-        </AppContextProvider>
+        <KibanaContextProvider services={{ ...(params?.coreStartMock ?? coreStart), ...startDeps }}>
+          <AppContextProvider value={{ ...coreStart, ...startDeps, setBreadcrumbs: () => {} }}>
+            <QueryClientProvider client={queryClient}>
+              <RouterProvider
+                history={history}
+                router={aIAssistantManagementObservabilityRouter as any}
+              >
+                {component}
+              </RouterProvider>
+            </QueryClientProvider>
+          </AppContextProvider>
+        </KibanaContextProvider>
       </RedirectToHomeIfUnauthorized>
     </IntlProvider>
   );

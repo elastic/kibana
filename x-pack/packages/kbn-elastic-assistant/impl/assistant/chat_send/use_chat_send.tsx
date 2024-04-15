@@ -8,11 +8,12 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Message, Prompt, useAssistantContext } from '../../..';
+import { Conversation, Prompt, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
@@ -32,6 +33,7 @@ export interface UseChatSendProps {
 }
 
 export interface UseChatSend {
+  abortStream: () => void;
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
@@ -63,7 +65,7 @@ export const useChatSend = ({
     toasts,
   } = useAssistantContext();
 
-  const { isLoading, sendMessage } = useSendMessage();
+  const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
 
   const handlePromptChange = (prompt: string) => {
@@ -123,9 +125,12 @@ export const useChatSend = ({
         role: userMessage.role,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
       });
 
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
 
       setCurrentConversation({
         ...currentConversation,
@@ -135,6 +140,9 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: responseMessage.role,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
       });
@@ -183,7 +191,7 @@ export const useChatSend = ({
       replacements: {},
     });
 
-    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
     setCurrentConversation({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
@@ -224,6 +232,7 @@ export const useChatSend = ({
   ]);
 
   return {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,

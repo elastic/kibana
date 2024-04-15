@@ -12,3 +12,4 @@ export { Profiling } from './profiling/profiling';
 export { Osquery } from './osquery/osquery';
 export { Logs } from './logs/logs';
 export { Overview } from './overview/overview';
+export { Dashboards } from './dashboards/dashboards';

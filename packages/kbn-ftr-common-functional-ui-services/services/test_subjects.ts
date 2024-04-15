@@ -21,6 +21,10 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
+
 export class TestSubjects extends FtrService {
   public readonly log = this.ctx.getService('log');
   public readonly retry = this.ctx.getService('retry');
@@ -226,9 +230,11 @@ export class TestSubjects extends FtrService {
 
   public async getAttributeAll(selector: string, attribute: string): Promise<string[]> {
     this.log.debug(`TestSubjects.getAttributeAll(${selector}, ${attribute})`);
-    return await this._mapAll(selector, async (element: WebElementWrapper) => {
-      return await element.getAttribute(attribute);
-    });
+    return (
+      await this._mapAll(selector, async (element: WebElementWrapper) => {
+        return await element.getAttribute(attribute);
+      })
+    ).filter(nonNullable);
   }
 
   public async getAttribute(
@@ -240,7 +246,7 @@ export class TestSubjects extends FtrService {
           findTimeout?: number;
           tryTimeout?: number;
         }
-  ): Promise<string> {
+  ): Promise<string | null> {
     const findTimeout =
       (typeof options === 'number' ? options : options?.findTimeout) ??
       this.config.get('timeouts.find');
