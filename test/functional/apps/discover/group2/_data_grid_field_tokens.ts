@@ -32,12 +32,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   async function findFirstColumnTokens() {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.waitUntilSearchingHasFinished();
     return await findFirstFieldIcons('euiDataGridBody > dataGridHeader');
   }
 
   async function findFirstDocViewerTokens() {
-    await dataGrid.clickRowToggle({ rowIndex: 0 });
-    return await findFirstFieldIcons('docTableDetailsFlyout');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.waitUntilSearchingHasFinished();
+    let fieldTokens: string[] | undefined = [];
+    await retry.try(async () => {
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      fieldTokens = await findFirstFieldIcons('docTableDetailsFlyout');
+    });
+    return fieldTokens;
   }
 
   async function findFirstFieldIcons(elementSelector: string) {
@@ -62,8 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return firstFieldIcons;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180622
-  describe.skip('discover data grid field tokens', function () {
+  describe('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
