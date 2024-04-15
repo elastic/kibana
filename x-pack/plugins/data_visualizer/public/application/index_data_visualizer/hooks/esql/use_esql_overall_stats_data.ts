@@ -451,10 +451,10 @@ export const useESQLOverallStatsData = (
           toasts.addError(error, {
             title: fieldStatsErrorTitle,
           });
-          // Log error to console for better debugging
-          // eslint-disable-next-line no-console
-          console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
         }
+        // Log error to console for better debugging
+        // eslint-disable-next-line no-console
+        console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
