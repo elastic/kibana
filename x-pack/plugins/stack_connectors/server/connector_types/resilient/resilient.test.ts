@@ -93,14 +93,17 @@ describe('IBM Resilient connector', () => {
     config: { orgId, apiUrl },
     secrets: { apiKeyId, apiKeySecret },
   });
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
   afterAll(() => {
-    Date.now = now;
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
     jest.resetAllMocks();
-    Date.now = jest.fn().mockReturnValue(TIMESTAMP);
+    jest.setSystemTime(TIMESTAMP);
   });
 
   describe('getIncident', () => {
