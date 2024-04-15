@@ -152,7 +152,7 @@ export class ElasticsearchService
       // Ensure that the connection is established and the product is valid before moving on
       await isValidConnection(this.esNodesCompatibility$);
 
-      elasticsearchWaitTime = elasticsearchWaitStartTime - performance.now();
+      elasticsearchWaitTime = Math.round(performance.now() - elasticsearchWaitStartTime);
       this.log.info(
         `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`
       );
