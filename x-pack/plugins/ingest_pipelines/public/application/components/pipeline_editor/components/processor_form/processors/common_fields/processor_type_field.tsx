@@ -53,7 +53,7 @@ export const getProcessorTypesAndLabels = (license: ILicense | null) => {
         return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
       })
       // Pick properties we need to build the categories
-      .map(({ value, label, category, typeDescription }) => ({ label, value, category, typeDescription }))
+      .map(({ value, label, category }) => ({ label, value, category }))
   );
 
   // Group all processors by category
