@@ -421,7 +421,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
         // handle wildcard with wrong operator case
         arg.exceptionItems[0]?.entries.forEach((e) => {
-          if (validateHasWildcardWithWrongOperator({ operator: e.type, value: e.value })) {
+          if (validateHasWildcardWithWrongOperator({ operator: e.type, value: e.value ?? '' })) {
             setHasWildcardWithWrongOperator(true);
           }
         });
