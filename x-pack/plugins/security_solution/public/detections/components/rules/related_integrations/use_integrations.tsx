@@ -9,8 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { Integration } from '../../../../../common/api/detection_engine/fleet_integrations';
 import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations';
-// import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-// import * as i18n from './translations';
 
 const ONE_MINUTE = 60000;
 
@@ -19,8 +17,6 @@ export interface UseIntegrationsArgs {
 }
 
 export const useIntegrations = ({ skip = false }: UseIntegrationsArgs = {}) => {
-  // const { addError } = useAppToasts();
-
   return useQuery<Integration[]>(
     ['integrations'],
     async ({ signal }) => {
@@ -34,10 +30,6 @@ export const useIntegrations = ({ skip = false }: UseIntegrationsArgs = {}) => {
       keepPreviousData: true,
       staleTime: ONE_MINUTE * 5,
       enabled: !skip,
-      onError: (e) => {
-        // Suppressing for now to prevent excessive errors when fleet isn't configured
-        // addError(e, { title: i18n.INTEGRATIONS_FETCH_FAILURE });
-      },
     }
   );
 };
