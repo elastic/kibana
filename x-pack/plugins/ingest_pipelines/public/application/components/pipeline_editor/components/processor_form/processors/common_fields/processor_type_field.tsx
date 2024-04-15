@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiText, EuiHighlight } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
@@ -45,6 +45,7 @@ interface ProcessorTypeAndLabel {
 }
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
+  // Get a clean list of processors that should be rendered into the UI
   const filteredProcessors = (
     extractProcessorDetails(mapProcessorTypeToDescriptor)
       // Filter out any processors that are not available for the current license type
@@ -55,12 +56,12 @@ export const getProcessorTypesAndLabels = (license: ILicense | null) => {
       .map(({ value, label, category, typeDescription }) => ({ label, value, category, typeDescription }))
   );
 
+  // Group all processors by category
   return _map(_groupBy(filteredProcessors, 'category'), (options, label) => ({
     label,
-    options: _map(options, ({ label, value, typeDescription }) => ({
+    options: _map(options, ({ label, value }) => ({
       label,
       value,
-      'data-description': typeDescription,
     }))
   }));
 };
@@ -86,21 +87,6 @@ const typeConfig: FieldConfig<string> = {
       ),
     },
   ],
-};
-
-const renderOption = (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-  const { label } = option;
-
-  console.log(contentClassName);
-
-  return (
-    <>
-      <strong><EuiHighlight search={searchValue}>{label}</EuiHighlight></strong>
-      <EuiText size="s" color="subdued">
-        <p>{option['data-description']}</p>
-      </EuiText>
-    </>
-  );
 };
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
@@ -169,8 +155,6 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
                 }
               )}
               options={processorOptions}
-              rowHeight={70}
-              renderOption={renderOption}
               selectedOptions={selectedOptions}
               onCreateOption={onCreateComboOption}
               onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
