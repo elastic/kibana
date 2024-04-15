@@ -31,7 +31,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
-import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
   sendGetAgentStatus,
@@ -53,16 +53,13 @@ import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
 import {
   IntegrationBreadcrumb,
-  SelectedPolicyTab,
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
   StepSelectHosts,
 } from '../components';
 
-import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
-
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
+import { useDevToolsRequest, useOnSubmit } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
@@ -93,16 +90,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
-  );
-
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(newAgentPolicy);
-
-  const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
-  );
 
   const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
   // Fetch package info
@@ -145,54 +133,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     validationResults,
     hasAgentPolicyError,
     isInitialized,
+    selectedPolicyTab,
+    updateSelectedPolicyTab,
+    handleSetupTechnologyChange,
+    agentlessPolicy,
+    selectedSetupTechnology,
+    newAgentPolicy,
+    updateNewAgentPolicy,
   } = useOnSubmit({
     agentCount,
     packageInfo,
-    newAgentPolicy,
-    selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
     integrationToEnable: integrationInfo?.name,
   });
 
-  const setPolicyValidation = useCallback(
-    (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
-      if (selectedTab === SelectedPolicyTab.NEW) {
-        if (
-          !updatedAgentPolicy.name ||
-          updatedAgentPolicy.name.trim() === '' ||
-          !updatedAgentPolicy.namespace ||
-          updatedAgentPolicy.namespace.trim() === ''
-        ) {
-          setHasAgentPolicyError(true);
-        } else {
-          setHasAgentPolicyError(false);
-        }
-      }
-    },
-    [setHasAgentPolicyError]
-  );
-
-  const updateNewAgentPolicy = useCallback(
-    (updatedFields: Partial<NewAgentPolicy>) => {
-      const updatedAgentPolicy = {
-        ...newAgentPolicy,
-        ...updatedFields,
-      };
-      setNewAgentPolicy(updatedAgentPolicy);
-      setPolicyValidation(selectedPolicyTab, updatedAgentPolicy);
-    },
-    [setNewAgentPolicy, setPolicyValidation, newAgentPolicy, selectedPolicyTab]
-  );
-
-  const updateSelectedPolicyTab = useCallback(
-    (selectedTab) => {
-      setSelectedPolicyTab(selectedTab);
-      setPolicyValidation(selectedTab, newAgentPolicy);
-    },
-    [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
-  );
-
+  const validation = agentPolicyFormValidation(newAgentPolicy);
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
 
@@ -295,14 +251,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-
-  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      updateNewAgentPolicy,
-      updateAgentPolicy,
-      setSelectedPolicyTab,
-    });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (

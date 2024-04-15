@@ -31,7 +31,10 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import { getMaxPackageName } from '../../../../../../../../common/services';
+import {
+  generateNewAgentPolicyWithDefaults,
+  getMaxPackageName,
+} from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -45,7 +48,9 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { SetupTechnology } from '../../../../../types';
+
+import { useAgentlessPolicy, useSetupTechnology } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -91,17 +96,13 @@ const DEFAULT_PACKAGE_POLICY = {
 
 export function useOnSubmit({
   agentCount,
-  selectedPolicyTab,
-  newAgentPolicy,
   withSysMonitoring,
   queryParamsPolicyId,
   packageInfo,
   integrationToEnable,
 }: {
   packageInfo?: PackageInfo;
-  newAgentPolicy: NewAgentPolicy;
   withSysMonitoring: boolean;
-  selectedPolicyTab: SelectedPolicyTab;
   agentCount: number;
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
@@ -124,13 +125,37 @@ export function useOnSubmit({
     ...DEFAULT_PACKAGE_POLICY,
   });
 
+  const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
+    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
+  );
+
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+  );
+
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
   const { isAgentlessPolicyId } = useAgentlessPolicy();
 
+  const setPolicyValidation = useCallback(
+    (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
+      if (selectedTab === SelectedPolicyTab.NEW) {
+        if (
+          !updatedAgentPolicy.name ||
+          updatedAgentPolicy.name.trim() === '' ||
+          !updatedAgentPolicy.namespace ||
+          updatedAgentPolicy.namespace.trim() === ''
+        ) {
+          setHasAgentPolicyError(true);
+        } else {
+          setHasAgentPolicyError(false);
+        }
+      }
+    },
+    [setHasAgentPolicyError]
+  );
   // Update agent policy method
   const updateAgentPolicy = useCallback(
     (updatedAgentPolicy: AgentPolicy | undefined) => {
@@ -149,6 +174,35 @@ export function useOnSubmit({
     },
     [packageInfo, setAgentPolicy]
   );
+
+  const updateNewAgentPolicy = useCallback(
+    (updatedFields: Partial<NewAgentPolicy>) => {
+      const updatedAgentPolicy = {
+        ...newAgentPolicy,
+        ...updatedFields,
+      };
+      setNewAgentPolicy(updatedAgentPolicy);
+      setPolicyValidation(selectedPolicyTab, updatedAgentPolicy);
+    },
+    [setNewAgentPolicy, setPolicyValidation, newAgentPolicy, selectedPolicyTab]
+  );
+
+  const updateSelectedPolicyTab = useCallback(
+    (selectedTab) => {
+      setSelectedPolicyTab(selectedTab);
+      setPolicyValidation(selectedTab, newAgentPolicy);
+    },
+    [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
+  );
+
+  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
+    useSetupTechnology({
+      newAgentPolicy,
+      updateNewAgentPolicy,
+      updateAgentPolicy,
+      setSelectedPolicyTab,
+    });
+
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
@@ -252,15 +306,14 @@ export function useOnSubmit({
       force,
       overrideCreatedAgentPolicy,
     }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
+      const isAgentless = selectedSetupTechnology === SetupTechnology.AGENTLESS;
+
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
       }
-      if (
-        agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
-        formState !== 'CONFIRM'
-      ) {
+
+      if (agentCount !== 0 && !isAgentless && formState !== 'CONFIRM') {
         setFormState('CONFIRM');
         return;
       }
@@ -314,7 +367,6 @@ export function useOnSubmit({
         policy_id: agentPolicyIdToSave,
         force: forceInstall,
       });
-
       const hasAzureArmTemplate = data?.item
         ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
         : false;
@@ -325,40 +377,45 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (hasAzureArmTemplate) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      if (!isAgentless) {
+        if (hasAzureArmTemplate) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasCloudFormation) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasGoogleCloudShell) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
       }
-      if (hasCloudFormation) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
-      if (hasGoogleCloudShell) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
+
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
         const hasAgentsAssigned = agentCount && agentPolicy;
-        if (!hasAgentsAssigned && hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-          return;
-        }
-        if (!hasAgentsAssigned && hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
-          return;
-        }
-        if (!hasAgentsAssigned && hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-          return;
-        }
-        if (!hasAgentsAssigned) {
-          setFormState('SUBMITTED_NO_AGENTS');
-          return;
+        if (!isAgentless) {
+          if (!hasAgentsAssigned && hasAzureArmTemplate) {
+            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+            return;
+          }
+          if (!hasAgentsAssigned && hasCloudFormation) {
+            setFormState('SUBMITTED_CLOUD_FORMATION');
+            return;
+          }
+          if (!hasAgentsAssigned && hasGoogleCloudShell) {
+            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+            return;
+          }
+          if (!hasAgentsAssigned) {
+            setFormState('SUBMITTED_NO_AGENTS');
+            return;
+          }
         }
         onSaveNavigate(data!.item);
 
@@ -413,6 +470,7 @@ export function useOnSubmit({
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
+      selectedSetupTechnology,
     ]
   );
 
@@ -431,6 +489,13 @@ export function useOnSubmit({
     hasAgentPolicyError,
     setHasAgentPolicyError,
     isInitialized,
+    updateSelectedPolicyTab,
+    selectedPolicyTab,
+    newAgentPolicy,
+    agentlessPolicy,
+    selectedSetupTechnology,
+    handleSetupTechnologyChange,
+    updateNewAgentPolicy,
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
