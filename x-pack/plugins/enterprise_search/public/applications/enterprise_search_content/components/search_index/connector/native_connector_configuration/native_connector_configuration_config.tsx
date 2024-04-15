@@ -127,7 +127,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
           >
             <FormattedMessage
               id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
-              defaultMessage="Configuration fields might be overridden when {advancedSyncRulesDocs} are used"
+              defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
               values={{
                 advancedSyncRulesDocs: (
                   <EuiLink href={docLinks.syncRules} target="_blank">
