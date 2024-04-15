@@ -18,6 +18,7 @@ export type Alert = ParsedTechnicalFields & {
   process?: {
     pid: string;
   };
+  'event.module'?: string;
 };
 
 export interface AlertAgent {
