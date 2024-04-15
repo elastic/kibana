@@ -357,7 +357,9 @@ function validateFunction(
           messageId: 'wrongArgumentNumber',
           values: {
             fn: astFunction.name,
-            numArgs: refSignature.params.filter(({ optional }) => !optional).length,
+            numArgs:
+              refSignature.minParams ??
+              refSignature.params.filter(({ optional }) => !optional).length,
             passedArgs: astFunction.args.length,
           },
           locations: astFunction.location,
