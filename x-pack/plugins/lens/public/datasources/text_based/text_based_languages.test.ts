@@ -724,11 +724,17 @@ describe('Textbased Data Source', () => {
             },
             Object {
               "arguments": Object {
+                "descriptionForInspector": Array [
+                  "This request queries Elasticsearch to fetch the data for the visualization.",
+                ],
                 "locale": Array [
                   "en",
                 ],
                 "query": Array [
                   "FROM foo",
+                ],
+                "titleForInspector": Array [
+                  "Visualization",
                 ],
               },
               "function": "esql",

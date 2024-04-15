@@ -10,6 +10,7 @@ import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
+  aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { EuiSpacer } from '@elastic/eui';
@@ -17,7 +18,11 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../hooks/use_app_context';
 
-const settingsKeys = [aiAssistantLogsIndexPattern, aiAssistantResponseLanguage];
+const settingsKeys = [
+  aiAssistantLogsIndexPattern,
+  aiAssistantResponseLanguage,
+  aiAssistantSimulatedFunctionCalling,
+];
 
 export function UISettings() {
   const { docLinks, settings, notifications } = useAppContext();

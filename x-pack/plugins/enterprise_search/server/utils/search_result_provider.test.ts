@@ -55,7 +55,7 @@ describe('Enterprise Search search provider', () => {
     title: 'Elastic Web Crawler',
     type: 'Search',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/crawler`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`,
       prependBasePath: true,
     },
   };
@@ -67,7 +67,7 @@ describe('Enterprise Search search provider', () => {
     title: 'MongoDB',
     type: 'Search',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=connector_client&service_type=mongodb`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=mongodb`,
       prependBasePath: true,
     },
   };
@@ -79,7 +79,7 @@ describe('Enterprise Search search provider', () => {
     title: 'MongoDB',
     type: 'Search',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=native&service_type=mongodb`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=native&service_type=mongodb`,
       prependBasePath: true,
     },
   };
@@ -91,7 +91,7 @@ describe('Enterprise Search search provider', () => {
     title: 'Customized connector',
     type: 'Search',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/connector?connector_type=connector_client&service_type=`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=`,
       prependBasePath: true,
     },
   };
