@@ -16,7 +16,14 @@ const SUGGESTED_SPARSE_FIELDS = [
   'vector.tokens', // LangChain field
 ];
 
-const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'page_content_text', 'text', 'content'];
+const SUGGESTED_BM25_FIELDS = [
+  'title',
+  'body_content',
+  'page_content_text',
+  'text',
+  'content',
+  `text_field`,
+];
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
@@ -27,7 +34,18 @@ interface Matches {
   knnMatches: any[];
 }
 
-export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQuerySourceFields) {
+interface ReRankOptions {
+  rrf: boolean;
+}
+
+export function createQuery(
+  fields: IndexFields,
+  fieldDescriptors: IndicesQuerySourceFields,
+  rerankOptions: ReRankOptions = {
+    rrf: true,
+  }
+) {
+  const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
       const indexFields: string[] = fields[index];
@@ -86,14 +104,22 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
 
           // not supporting nested fields for now
           if (denseVectorField && !denseVectorField.nested) {
+            // when the knn field isn't found in all indices, we need a filter to ensure we only use the field from the correct index
+            const filter =
+              denseVectorField.indices.length < indices.length
+                ? { filter: { terms: { _index: denseVectorField.indices } } }
+                : {};
+
             return {
-              field: denseVectorField.field,
-              k: 10,
-              num_candidates: 100,
-              query_vector_builder: {
-                text_embedding: {
-                  model_id: denseVectorField.model_id,
-                  model_text: '{query}',
+              knn: {
+                field: denseVectorField.field,
+                num_candidates: 100,
+                ...filter,
+                query_vector_builder: {
+                  text_embedding: {
+                    model_id: denseVectorField.model_id,
+                    model_text: '{query}',
+                  },
                 },
               },
             };
@@ -115,18 +141,74 @@ export function createQuery(fields: IndexFields, fieldDescriptors: IndicesQueryS
     }
   );
 
-  return {
-    ...(boolMatches.queryMatches.length > 0
-      ? {
+  // for single Elser support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.queryMatches[0],
+        },
+      },
+    };
+  }
+
+  // for single Dense vector support to make it easy to read - skips bool query
+  if (boolMatches.queryMatches.length === 0 && boolMatches.knnMatches.length === 1) {
+    return {
+      retriever: {
+        standard: {
+          query: boolMatches.knnMatches[0],
+        },
+      },
+    };
+  }
+
+  const matches = [...boolMatches.queryMatches, ...boolMatches.knnMatches];
+
+  if (matches.length === 0) {
+    return {
+      retriever: {
+        standard: {
           query: {
-            bool: {
-              should: boolMatches.queryMatches,
-              minimum_should_match: 1,
-            },
+            match_all: {},
           },
-        }
-      : {}),
-    ...(boolMatches.knnMatches.length > 0 ? { knn: boolMatches.knnMatches } : {}),
+        },
+      },
+    };
+  }
+
+  // determine if we need to use a rrf query
+  if (rerankOptions.rrf) {
+    const retrievers = matches.map((clause) => {
+      return {
+        standard: {
+          query: clause,
+        },
+      };
+    });
+
+    return {
+      retriever: {
+        rrf: {
+          window_size: 100,
+          retrievers,
+        },
+      },
+    };
+  }
+
+  // No RRF - add all the matches (DENSE + BM25 + SPARSE) to the bool query
+  return {
+    retriever: {
+      standard: {
+        query: {
+          bool: {
+            should: matches,
+            minimum_should_match: 1,
+          },
+        },
+      },
+    },
   };
 }
 
