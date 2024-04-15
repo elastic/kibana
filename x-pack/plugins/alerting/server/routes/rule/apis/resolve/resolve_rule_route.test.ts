@@ -13,7 +13,8 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { ResolvedSanitizedRule } from '../../../../../common';
+import { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -25,6 +26,26 @@ beforeEach(() => {
 });
 
 describe('resolveRuleRoute', () => {
+  const action: RuleAction = {
+    group: 'default',
+    id: '2',
+    actionTypeId: 'test',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    useAlertDataForTemplate: false,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   const mockedRule: ResolvedRule<{
     bar: boolean;
   }> = {
@@ -36,18 +57,7 @@ describe('resolveRuleRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-        useAlertDataForTemplate: false,
-      },
-    ],
+    actions: [action],
     consumer: 'bar',
     name: 'abc',
     tags: ['foo'],
@@ -102,7 +112,7 @@ describe('resolveRuleRoute', () => {
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
         uuid: mockedRule.actions[0].uuid,
-        use_alert_data_for_template: mockedRule.actions[0].useAlertDataForTemplate,
+        use_alert_data_for_template: (mockedRule.actions[0] as RuleAction).useAlertDataForTemplate,
       },
     ],
     outcome: 'aliasMatch',
@@ -190,5 +200,57 @@ describe('resolveRuleRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('transforms the system actions in the response of the rules client correctly', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+    resolveRuleRoute(router, licenseState);
+    const [_, handler] = router.get.mock.calls[0];
+
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.resolve.mockResolvedValueOnce({
+      ...mockedRule,
+      actions: [action],
+      systemActions: [systemAction],
+    } as ResolvedSanitizedRule);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, actionsClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+
+    const routeRes = await handler(context, req, res);
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.systemActions).toBeUndefined();
+    // @ts-expect-error: body exists
+    expect(routeRes.body.actions).toEqual([
+      {
+        connector_type_id: 'test',
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        use_alert_data_for_template: false,
+        uuid: '123-456',
+      },
+      {
+        connector_type_id: 'test-2',
+        id: 'system_action-id',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+      },
+    ]);
   });
 });

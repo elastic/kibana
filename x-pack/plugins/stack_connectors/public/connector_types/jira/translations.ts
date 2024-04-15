@@ -96,3 +96,16 @@ export const LABELS_WHITE_SPACES = i18n.translate(
     defaultMessage: 'Labels cannot contain spaces.',
   }
 );
+
+export const INVALID_JSON_FORMAT = i18n.translate(
+  'xpack.stackConnectors.components.jira.otherFieldsFormatErrorMessage',
+  {
+    defaultMessage: 'Additional fields field must be a valid JSON object.',
+  }
+);
+
+export const OTHER_FIELDS_LENGTH_ERROR = (length: number) =>
+  i18n.translate('xpack.stackConnectors.jira.schema.additionalFieldsLengthError', {
+    values: { length },
+    defaultMessage: 'A maximum of {length} additional fields can be defined at a time.',
+  });

@@ -61,7 +61,7 @@ export function LabsFlyout({ onClose }: Props) {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useEditableSettings('apm', labsItems);
+  } = useEditableSettings(labsItems);
 
   async function handleSave() {
     try {

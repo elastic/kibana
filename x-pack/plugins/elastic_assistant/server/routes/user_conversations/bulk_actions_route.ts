@@ -26,12 +26,15 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
 import { transformToCreateScheme } from '../../ai_assistant_data_clients/conversations/create_conversation';
-import { transformESToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
+import {
+  transformESToConversations,
+  transformESSearchToConversations,
+} from '../../ai_assistant_data_clients/conversations/transforms';
 import {
   UpdateConversationSchema,
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
-import { SearchEsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 
 export interface BulkOperationError {
   message: string;
@@ -163,7 +166,7 @@ export const bulkActionConversationsRoute = (
           }
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsConversationSchema>({
+            const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -174,7 +177,7 @@ export const bulkActionConversationsRoute = (
             if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `conversations titles: "${transformESToConversations(result.data)
+                body: `conversations titles: "${transformESSearchToConversations(result.data)
                   .map((c) => c.title)
                   .join(',')}" already exists`,
               });
@@ -199,23 +202,20 @@ export const bulkActionConversationsRoute = (
             getUpdateScript: (document: UpdateConversationSchema) =>
               getUpdateScript({ conversation: document, isPatch: true }),
           });
-
-          const created = await dataClient?.findDocuments<SearchEsConversationSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsConversationSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsConversationSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToConversations(updated?.data) : [],
-            created: created?.data ? transformESToConversations(created?.data) : [],
+            updated: docsUpdated
+              ? transformESToConversations(docsUpdated as EsConversationSchema[])
+              : [],
+            created: created?.data ? transformESSearchToConversations(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

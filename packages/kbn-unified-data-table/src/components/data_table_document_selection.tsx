@@ -19,7 +19,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -40,9 +39,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   useEffect(() => {
     if (expanded && doc && expanded.id === doc.id) {
       setCellProps({
-        style: {
-          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
-        },
+        className: 'unifiedDataTable__cell--selected',
       });
     } else {
       setCellProps({ style: undefined });

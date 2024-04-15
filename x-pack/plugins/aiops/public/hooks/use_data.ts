@@ -17,8 +17,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Dictionary } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-
-import { PLUGIN_ID } from '../../common';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { GroupTableItem } from '../components/log_rate_analysis_results_table/types';
@@ -42,7 +41,7 @@ export const useData = (
   const { executionContext, uiSettings } = useAiopsAppContext();
 
   useExecutionContext(executionContext, {
-    name: PLUGIN_ID,
+    name: AIOPS_PLUGIN_ID,
     type: 'application',
     id: contextId,
   });

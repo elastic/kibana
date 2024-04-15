@@ -45,7 +45,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -106,6 +106,9 @@ export interface ConfigSchema {
     thresholdRule?: {
       enabled: boolean;
     };
+    ruleFormV2?: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -113,7 +116,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -140,7 +143,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -354,7 +357,7 @@ export class Plugin
                 : [];
 
               const isAiAssistantEnabled =
-                pluginsStart.observabilityAIAssistant.service.isEnabled();
+                pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
               const aiAssistantLink =
                 isAiAssistantEnabled &&

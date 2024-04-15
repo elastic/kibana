@@ -12,8 +12,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
-import { ExecutorType } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
@@ -21,6 +20,8 @@ import { upperCase } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import { ExecutorType } from '@kbn/alerting-plugin/server';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
@@ -51,21 +52,17 @@ export const getRuleExecutor = ({
 }: {
   basePath: IBasePath;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-}): LifecycleRuleExecutor<
-  BurnRateRuleParams,
-  BurnRateRuleTypeState,
-  BurnRateAlertState,
-  BurnRateAlertContext,
-  BurnRateAllowedActionGroups
-> =>
-  async function executor({
-    services,
-    params,
-    logger,
-    startedAt,
-    spaceId,
-    getTimeRange,
-  }): ReturnType<
+}) =>
+  async function executor(
+    options: RuleExecutorOptions<
+      BurnRateRuleParams,
+      BurnRateRuleTypeState,
+      BurnRateAlertState,
+      BurnRateAlertContext,
+      BurnRateAllowedActionGroups,
+      ObservabilitySloAlert
+    >
+  ): ReturnType<
     ExecutorType<
       BurnRateRuleParams,
       BurnRateRuleTypeState,
@@ -74,14 +71,13 @@ export const getRuleExecutor = ({
       BurnRateAllowedActionGroups
     >
   > {
-    const {
-      alertWithLifecycle,
-      savedObjectsClient: soClient,
-      scopedClusterClient: esClient,
-      alertFactory,
-      getAlertStartedDate,
-      getAlertUuid,
-    } = services;
+    const { services, params, logger, startedAt, spaceId, getTimeRange } = options;
+
+    const { savedObjectsClient: soClient, scopedClusterClient: esClient, alertsClient } = services;
+
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const slo = await sloRepository.findById(params.sloId);
@@ -96,7 +92,7 @@ export const getRuleExecutor = ({
     const results = await evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd));
 
     if (results.length > 0) {
-      const alertLimit = alertFactory.alertLimit.getValue();
+      const alertLimit = alertsClient.getAlertLimitValue();
       let hasReachedLimit = false;
       let scheduledActionsCount = 0;
       for (const result of results) {
@@ -133,9 +129,14 @@ export const getRuleExecutor = ({
           );
 
           const alertId = instanceId;
-          const alert = alertWithLifecycle({
+
+          const { uuid, start } = alertsClient.report({
             id: alertId,
-            fields: {
+            actionGroup: windowDef.actionGroup,
+            state: {
+              alertState: AlertStates.ALERT,
+            },
+            payload: {
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
@@ -144,10 +145,10 @@ export const getRuleExecutor = ({
               [SLO_INSTANCE_ID_FIELD]: instanceId,
             },
           });
-          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-          const alertUuid = getAlertUuid(alertId);
+
+          const indexedStartedAt = start ?? startedAt.toISOString();
           const alertDetailsUrl = await getAlertUrl(
-            alertUuid,
+            uuid,
             spaceId,
             indexedStartedAt,
             alertsLocator,
@@ -168,20 +169,18 @@ export const getRuleExecutor = ({
             slo,
           };
 
-          alert.scheduleActions(windowDef.actionGroup, context);
-          alert.replaceState({ alertState: AlertStates.ALERT });
+          alertsClient.setAlertData({ id: alertId, context });
           scheduledActionsCount++;
         }
       }
-      alertFactory.alertLimit.setLimitReached(hasReachedLimit);
+      alertsClient.setAlertLimitReached(hasReachedLimit);
     }
 
-    const { getRecoveredAlerts } = alertFactory.done();
-    const recoveredAlerts = getRecoveredAlerts();
+    const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
     for (const recoveredAlert of recoveredAlerts) {
-      const alertId = recoveredAlert.getId();
-      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
-      const alertUuid = recoveredAlert.getUuid();
+      const alertId = recoveredAlert.alert.getId();
+      const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
+      const alertUuid = recoveredAlert.alert.getUuid();
       const alertDetailsUrl = await getAlertUrl(
         alertUuid,
         spaceId,
@@ -206,7 +205,10 @@ export const getRuleExecutor = ({
         sloInstanceId: alertId,
       };
 
-      recoveredAlert.setContext(context);
+      alertsClient.setAlertData({
+        id: alertId,
+        context,
+      });
     }
 
     return { state: {} };

@@ -6,7 +6,13 @@
  */
 
 import { getSuggestions } from './suggestions';
-import { IconChartVerticalBullet, IconChartHorizontalBullet } from '@kbn/chart-icons';
+import {
+  IconChartVerticalBullet,
+  IconChartHorizontalBullet,
+  IconChartGaugeSemiCircle,
+  IconChartGaugeArc,
+  IconChartGaugeCircle,
+} from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { GaugeVisualizationState } from './constants';
@@ -208,10 +214,55 @@ describe('shows suggestions', () => {
           layerId: 'first',
         },
         previewIcon: IconChartVerticalBullet,
-        title: 'Gauge',
+        title: 'Vertical Bullet',
         hide: false, // shows suggestion when current is gauge
         incomplete: false,
+        score: 1,
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeSemiCircle,
+        score: 0.1,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'semiCircle',
+          ticksPosition: 'auto',
+        },
+        title: 'Semi-circular Gauge',
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeArc,
         score: 0.5,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'arc',
+          ticksPosition: 'auto',
+        },
+        title: 'Arc Gauge',
+      },
+      {
+        hide: false,
+        incomplete: false,
+        previewIcon: IconChartGaugeCircle,
+        score: 0.1,
+        state: {
+          labelMajorMode: 'auto',
+          layerId: 'first',
+          layerType: 'data',
+          metricAccessor: 'metric-column',
+          shape: 'circle',
+          ticksPosition: 'auto',
+        },
+        title: 'Circular Gauge',
       },
     ]);
   });

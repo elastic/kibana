@@ -14,6 +14,8 @@ import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';
 import { OverviewSteps, QuickStartSectionCardsId, SectionId } from '../../types';
 import { ContentWrapper } from './content_wrapper';
 
+const VIDEO_CONTENT_HEIGHT = 320;
+
 const VideoComponent: React.FC = () => {
   const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
   const ref = React.useRef<HTMLIFrameElement>(null);
@@ -37,7 +39,11 @@ const VideoComponent: React.FC = () => {
 
   return (
     <ContentWrapper>
-      <>
+      <div
+        css={css`
+          height: ${VIDEO_CONTENT_HEIGHT}px;
+        `}
+      >
         {!isVideoPlaying && !isFinishedStep && (
           <EuiFlexGroup
             css={css`
@@ -74,7 +80,7 @@ const VideoComponent: React.FC = () => {
             title={WATCH_VIDEO_BUTTON_TITLE}
           />
         )}
-      </>
+      </div>
     </ContentWrapper>
   );
 };

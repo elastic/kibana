@@ -8,10 +8,10 @@
 
 import type { Recognizer, RecognitionException } from 'antlr4';
 import { ErrorListener } from 'antlr4';
-import type { EditorError } from '../types';
+import type { MonacoEditorError } from '../types';
 
 export class ANTLRErrorListener extends ErrorListener<any> {
-  protected errors: EditorError[] = [];
+  protected errors: MonacoEditorError[] = [];
 
   syntaxError(
     recognizer: Recognizer<any>,
@@ -37,7 +37,7 @@ export class ANTLRErrorListener extends ErrorListener<any> {
     });
   }
 
-  getErrors(): EditorError[] {
+  getErrors(): MonacoEditorError[] {
     return this.errors;
   }
 }

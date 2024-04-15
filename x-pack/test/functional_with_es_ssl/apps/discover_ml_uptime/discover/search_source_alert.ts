@@ -550,14 +550,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('createRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click('.es-query-SelectOption');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       await retry.waitFor('rule name value is correct', async () => {
         await testSubjects.setValue('ruleNameInput', newAlert);
         const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
         return ruleName === newAlert;
       });
 
-      await testSubjects.click('.es-query-SelectOption');
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('queryFormType_searchSource');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

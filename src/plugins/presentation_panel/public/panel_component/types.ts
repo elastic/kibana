@@ -37,6 +37,7 @@ export interface PresentationPanelInternalProps<
   componentProps?: Omit<React.ComponentProps<PanelCompatibleComponent<ApiType, PropsType>>, 'ref'>;
 
   showShadow?: boolean;
+  showBorder?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
 

@@ -16,6 +16,8 @@ import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { loggerMock } from '@kbn/logging-mocks';
+import { handleStreamStorage } from './parse_stream';
 const request = {
   body: {
     subAction: 'invokeAI',
@@ -24,16 +26,21 @@ const request = {
 } as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 const onLlmResponse = jest.fn();
 const connectorId = 'testConnectorId';
+const mockLogger = loggerMock.create();
 const testProps: Omit<Props, 'actions'> = {
   params: {
     subAction: 'invokeAI',
     subActionParams: { messages: [{ content: 'hello', role: 'user' }] },
   },
-  llmType: '.bedrock',
+  actionTypeId: '.bedrock',
   request,
   connectorId,
   onLlmResponse,
+  logger: mockLogger,
 };
+jest.mock('./parse_stream');
+
+const mockHandleStreamStorage = handleStreamStorage as jest.Mock;
 
 describe('executeAction', () => {
   beforeEach(() => {
@@ -75,6 +82,13 @@ describe('executeAction', () => {
     expect(JSON.stringify(result)).toStrictEqual(
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
+
+    expect(mockHandleStreamStorage).toHaveBeenCalledWith({
+      actionTypeId: '.bedrock',
+      onMessageSent: onLlmResponse,
+      logger: mockLogger,
+      responseStream: readableStream,
+    });
   });
 
   it('should throw an error if the actions plugin fails to retrieve the actions client', async () => {

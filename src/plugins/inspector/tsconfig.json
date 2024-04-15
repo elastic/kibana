@@ -16,7 +16,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/std",
     "@kbn/ui-theme",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/core-lifecycle-browser"
   ],
   "exclude": [
     "target/**/*",

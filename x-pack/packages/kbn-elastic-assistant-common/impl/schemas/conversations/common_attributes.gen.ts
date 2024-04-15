@@ -64,14 +64,8 @@ export const TraceData = z.object({
 /**
  * Replacements object used to anonymize/deanomymize messsages
  */
-export type Replacement = z.infer<typeof Replacement>;
-export const Replacement = z.object({
-  /**
-   * Actual value was anonymized.
-   */
-  value: z.string(),
-  uuid: UUID,
-});
+export type Replacements = z.infer<typeof Replacements>;
+export const Replacements = z.object({}).catchall(z.string());
 
 export type Reader = z.infer<typeof Reader>;
 export const Reader = z.object({}).catchall(z.unknown());
@@ -146,6 +140,10 @@ export const ApiConfig = z.object({
    */
   connectorId: z.string(),
   /**
+   * action type Id
+   */
+  actionTypeId: z.string(),
+  /**
    * defaultSystemPromptId
    */
   defaultSystemPromptId: z.string().optional(),
@@ -211,7 +209,7 @@ export const ConversationResponse = z.object({
    * The last time conversation was updated.
    */
   createdAt: z.string(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacements.optional(),
   users: z.array(User),
   /**
    * The conversation messages.
@@ -259,7 +257,7 @@ export const ConversationUpdateProps = z.object({
    * excludeFromLastConversationStorage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacements.optional(),
 });
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;
@@ -288,7 +286,7 @@ export const ConversationCreateProps = z.object({
    * excludeFromLastConversationStorage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacements.optional(),
 });
 
 export type ConversationMessageCreateProps = z.infer<typeof ConversationMessageCreateProps>;

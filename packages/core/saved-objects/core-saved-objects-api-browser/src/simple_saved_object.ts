@@ -44,6 +44,8 @@ export interface SimpleSavedObject<T = unknown> {
   updatedAt: SavedObjectType<T>['updated_at'];
   /** The date this object was created */
   createdAt: SavedObjectType<T>['created_at'];
+  /** The user that created this object */
+  createdBy: SavedObjectType<T>['created_by'];
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.

@@ -361,7 +361,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               suppressionWindow,
               enrichAlerts,
               currentTimeOverride,
-              isRuleExecutionOnly
+              isRuleExecutionOnly,
+              maxAlerts
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -375,6 +376,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
               const writeAlerts =
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
+
+              let alertsWereTruncated = false;
 
               if (writeAlerts && alerts.length > 0) {
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
@@ -392,7 +395,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (filteredDuplicates.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const suppressionAlertSearchRequest = {
@@ -473,7 +481,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (nonSuppressedAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated,
+                  };
                 }
 
                 const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
@@ -535,6 +548,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   }
                 }
 
+                if (maxAlerts && enrichedAlerts.length > maxAlerts) {
+                  enrichedAlerts.length = maxAlerts;
+                  alertsWereTruncated = true;
+                }
+
                 const augmentedAlerts = augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
@@ -548,7 +566,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (bulkResponse == null) {
-                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                  return {
+                    createdAlerts: [],
+                    errors: {},
+                    suppressedAlerts: [],
+                    alertsWereTruncated: false,
+                  };
                 }
 
                 const createdAlerts = augmentedAlerts
@@ -594,10 +617,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   createdAlerts,
                   suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
                   errors: errorAggregator(bulkResponse.body, [409]),
+                  alertsWereTruncated,
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                return {
+                  createdAlerts: [],
+                  errors: {},
+                  suppressedAlerts: [],
+                  alertsWereTruncated: false,
+                };
               }
             },
           },

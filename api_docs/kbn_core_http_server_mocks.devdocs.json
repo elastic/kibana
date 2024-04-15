@@ -292,7 +292,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -300,7 +300,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -575,7 +575,7 @@
             "section": "def-common.SessionStorageFactory",
             "text": "SessionStorageFactory"
           },
-          "<unknown>>, [cookieOptions: ",
+          "<object>>, [cookieOptions: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -583,7 +583,7 @@
             "section": "def-common.SessionStorageCookieOptions",
             "text": "SessionStorageCookieOptions"
           },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -1783,7 +1783,7 @@
             "label": "createFactory",
             "description": [],
             "signature": [
-              "<T>() => DeepMocked<",
+              "<T extends object>() => DeepMocked<",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

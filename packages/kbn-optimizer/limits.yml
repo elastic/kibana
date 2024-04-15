@@ -32,7 +32,7 @@ pageLoadAssetSize:
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5176
-  dataViews: 55000
+  dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -126,6 +126,7 @@ pageLoadAssetSize:
   savedSearch: 16225
   screenshotMode: 17856
   screenshotting: 22870
+  searchConnectors: 30000
   searchPlayground: 19325
   searchprofiler: 67080
   security: 81771

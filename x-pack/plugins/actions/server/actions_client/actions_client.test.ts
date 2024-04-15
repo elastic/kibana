@@ -2797,7 +2797,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -2930,7 +2930,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: '.cases',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });

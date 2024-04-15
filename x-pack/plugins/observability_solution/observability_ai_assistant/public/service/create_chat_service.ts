@@ -27,6 +27,7 @@ import {
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
+  TokenCountEvent,
 } from '../../common/conversation_complete';
 import {
   FunctionRegistry,
@@ -45,7 +46,7 @@ import type {
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 import { complete } from './complete';
 
-const MIN_DELAY = 35;
+const MIN_DELAY = 10;
 
 function toObservable(response: HttpResponse<IncomingMessage>) {
   const status = response.response?.status;
@@ -163,10 +164,17 @@ export async function createChatService({
 
             const subscription = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                map(
+                  (line) =>
+                    JSON.parse(line) as
+                      | StreamingChatResponseEvent
+                      | BufferFlushEvent
+                      | TokenCountEvent
+                ),
                 filter(
                   (line): line is StreamingChatResponseEvent =>
-                    line.type !== StreamingChatResponseEventType.BufferFlush
+                    line.type !== StreamingChatResponseEventType.BufferFlush &&
+                    line.type !== StreamingChatResponseEventType.TokenCount
                 ),
                 throwSerializedChatCompletionErrors()
               )

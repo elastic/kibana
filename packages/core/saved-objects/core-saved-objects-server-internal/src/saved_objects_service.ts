@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -65,6 +65,7 @@ import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
 
 /**
  * @internal
@@ -224,7 +225,8 @@ export class SavedObjectsService
     const waitForMigrationCompletion = node.roles.backgroundTasks && !node.roles.ui;
     const migrator = this.createMigrator(
       this.config.migration,
-      elasticsearch.client.asInternalUser,
+      // override the default Client settings
+      client.asInternalUser.child(MIGRATION_CLIENT_OPTIONS),
       docLinks,
       waitForMigrationCompletion,
       node,

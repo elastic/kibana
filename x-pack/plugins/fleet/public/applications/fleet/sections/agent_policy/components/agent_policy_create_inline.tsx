@@ -114,7 +114,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         ) : (
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.createAgentPolicyTypeOfHosts"
-            defaultMessage="Type of hosts are controlled by an {agentPolicy}. Create a new agent policy to get started."
+            defaultMessage="Settings for the monitored host are configured in the {agentPolicy}. Create a new agent policy to get started."
             values={{
               agentPolicy: (
                 <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">

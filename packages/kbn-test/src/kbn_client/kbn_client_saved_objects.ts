@@ -125,6 +125,7 @@ const STANDARD_LIST_TYPES = [
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-proxy',
   'fleet-uninstall-tokens',
 ];
 

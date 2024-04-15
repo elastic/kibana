@@ -316,7 +316,7 @@ describe('CoreApp', () => {
     });
   });
 
-  it('registers expected static dirs if there are public plugins', async () => {
+  it('registers expected static dirs for all plugins with static dirs', async () => {
     const uiPlugins = emptyPlugins();
     uiPlugins.public.set('some-plugin', {
       type: PluginType.preboot,
@@ -348,6 +348,12 @@ describe('CoreApp', () => {
       requiredBundles: [],
       version: '1.0.0',
     });
+    uiPlugins.internal.set('some-plugin-3-internal', {
+      publicAssetsDir: '/foo-internal',
+      publicTargetDir: '/bar-internal',
+      requiredBundles: [],
+      version: '1.0.0',
+    });
 
     internalCoreSetup.http.staticAssets.prependServerPath.mockReturnValue('/static-assets-path');
     internalCoreSetup.http.staticAssets.getPluginServerPath.mockImplementation(
@@ -356,8 +362,8 @@ describe('CoreApp', () => {
     await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(
-      // Twice for all UI plugins + core's UI asset routes
-      uiPlugins.public.size * 2 + 2
+      // Twice for all _internal_ UI plugins + core's UI asset routes
+      uiPlugins.internal.size * 2 + 2
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/static-assets-path',
@@ -381,6 +387,15 @@ describe('CoreApp', () => {
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/plugins/some-plugin-2/assets/{path*}', // legacy
+      expect.any(String)
+    );
+
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/static-assets-path/some-plugin-3-internal/{path*}',
+      expect.any(String)
+    );
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/plugins/some-plugin-3-internal/assets/{path*}', // legacy
       expect.any(String)
     );
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import pMap from 'p-map';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 

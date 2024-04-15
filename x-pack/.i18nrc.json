@@ -4,6 +4,7 @@
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
       "packages/ml/aiops_components",
+      "packages/ml/aiops_log_pattern_analysis",
       "plugins/aiops"
     ],
     "xpack.alerting": "plugins/alerting",
@@ -106,6 +107,7 @@
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
+    "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",

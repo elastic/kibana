@@ -53,6 +53,7 @@ import { MonacoEditorService } from './monaco_editor';
 import { UsageCollectionService } from './usage_collection';
 import { SavedObjectsFinderService } from './saved_objects_finder';
 import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
+import { ESQLService } from './esql';
 
 export const services = {
   ...commonServiceProviders,
@@ -95,4 +96,5 @@ export const services = {
   menuToggle: MenuToggleService,
   usageCollection: UsageCollectionService,
   savedObjectsFinder: SavedObjectsFinderService,
+  esql: ESQLService,
 };

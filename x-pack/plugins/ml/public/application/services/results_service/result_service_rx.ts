@@ -13,7 +13,7 @@
 // to that built from the supplied entity fields.
 // Returned response contains a results property containing the requested aggregation.
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { each, get } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorType } from '@kbn/ml-error-utils';

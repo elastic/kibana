@@ -104,7 +104,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-1"
                   >
-                    <h4
+                    <h2
                       class="euiTitle emotion-euiTitle-l"
                       data-test-subj="header-section-title"
                     >
@@ -113,7 +113,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                       >
                         Authentications
                       </span>
-                    </h4>
+                    </h2>
                   </div>
                 </div>
               </div>

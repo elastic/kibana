@@ -16,8 +16,8 @@ import { IToasts } from '@kbn/core-notifications-browser';
 const conversation1 = {
   id: 'conversation1',
   title: 'Conversation 1',
-  apiConfig: { connectorId: '123' },
-  replacements: [],
+  apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
+  replacements: {},
   category: 'default',
   messages: [
     {

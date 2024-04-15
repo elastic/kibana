@@ -115,7 +115,7 @@ export function getLensAttributes(color: string, dataView: DataView = defaultDat
                     format: {
                       id: 'percent',
                       params: {
-                        decimals: 0,
+                        decimals: 3,
                       },
                     },
                     isFormulaBroken: false,
@@ -173,7 +173,7 @@ export function getLensAttributes(color: string, dataView: DataView = defaultDat
         yLeftExtent: {
           mode: 'custom',
           lowerBound: 0,
-          upperBound: 1,
+          upperBound: undefined,
         },
       },
     },

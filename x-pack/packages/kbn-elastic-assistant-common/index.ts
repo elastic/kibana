@@ -18,12 +18,11 @@ export {
   isAllowed,
   isAnonymized,
   isDenied,
-} from './impl/data_anonymization/helpers';
-
-export { transformRawData } from './impl/data_anonymization/transform_raw_data';
-export {
   replaceAnonymizedValuesWithOriginalValues,
   replaceOriginalValuesWithUuidValues,
 } from './impl/data_anonymization/helpers';
+
+export { transformRawData } from './impl/data_anonymization/transform_raw_data';
+export { handleBedrockChunk } from './impl/utils/bedrock';
 
 export * from './constants';

@@ -20,15 +20,20 @@ import {
 export function FieldsList({
   title,
   fields,
+  actionsMenu: ActionsMenu,
 }: {
   title: string;
   fields: Array<{ fieldTitle: string; fieldValue: ReactNode }>;
+  actionsMenu?: ReactNode;
 }) {
   return (
     <EuiPanel hasBorder grow={false}>
-      <EuiTitle size="s">
-        <span>{title}</span>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiTitle size="s">
+          <span>{title}</span>
+        </EuiTitle>
+        <EuiFlexItem grow={false}>{ActionsMenu}</EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup direction="column" gutterSize="none">
         {fields.map(({ fieldTitle, fieldValue }, index) => (

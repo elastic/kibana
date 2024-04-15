@@ -46,11 +46,11 @@ export class UnifiedSearchPageObject extends FtrService {
     return visibleText;
   }
 
-  public async clickCreateNewDataView() {
+  private async modifyDataView(buttonLocator: string) {
     await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('dataview-create-new');
+      return await this.testSubjects.isDisplayed(buttonLocator);
     });
-    await this.testSubjects.click('dataview-create-new');
+    await this.testSubjects.click(buttonLocator);
     await this.retry.waitForWithTimeout(
       'index pattern editor form to be visible',
       15000,
@@ -61,19 +61,12 @@ export class UnifiedSearchPageObject extends FtrService {
     await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
+  public async clickCreateNewDataView() {
+    await this.modifyDataView('dataview-create-new');
+  }
+
   public async clickEditDataView() {
-    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('indexPattern-manage-field');
-    });
-    await this.testSubjects.click('indexPattern-manage-field');
-    await this.retry.waitForWithTimeout(
-      'index pattern editor form to be visible',
-      15000,
-      async () => {
-        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
-      }
-    );
-    await (await this.find.byClassName('indexPatternEditor__form')).click();
+    await this.modifyDataView('indexPattern-manage-field');
   }
 
   public async createNewDataView(dataViewPattern: string, adHoc = false, hasTimeField = false) {

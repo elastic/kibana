@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationSearchEsMock } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
-import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { SearchEsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -20,20 +20,19 @@ export const responseMock = {
   create: httpServerMock.createResponseFactory,
 };
 
-export const getEmptyFindResult = (): FindResponse<SearchEsConversationSchema> => ({
+export const getEmptyFindResult = (): FindResponse<EsConversationSchema> => ({
   page: 1,
   perPage: 1,
   total: 0,
   data: getBasicEmptySearchResponse(),
 });
 
-export const getFindConversationsResultWithSingleHit =
-  (): FindResponse<SearchEsConversationSchema> => ({
-    page: 1,
-    perPage: 1,
-    total: 1,
-    data: getConversationSearchEsMock(),
-  });
+export const getFindConversationsResultWithSingleHit = (): FindResponse<EsConversationSchema> => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: getConversationSearchEsMock(),
+});
 
 export const getFindPromptsResultWithSingleHit = (): FindResponse<SearchEsPromptsSchema> => ({
   page: 1,
@@ -50,17 +49,16 @@ export const getFindAnonymizationFieldsResultWithSingleHit =
     data: getAnonymizationFieldsSearchEsMock(),
   });
 
-export const getBasicEmptySearchResponse =
-  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
-    took: 1,
-    timed_out: false,
-    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-    hits: {
-      hits: [],
-      total: { relation: 'eq', value: 0 },
-      max_score: 0,
-    },
-  });
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<EsConversationSchema> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});
 
 export const getConversationResponseMock = (
   timestamp: string = new Date().toISOString()
@@ -69,13 +67,14 @@ export const getConversationResponseMock = (
   title: 'test',
   apiConfig: {
     connectorId: '1',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
   createdAt: timestamp,
   namespace: 'default',
   isDefault: false,

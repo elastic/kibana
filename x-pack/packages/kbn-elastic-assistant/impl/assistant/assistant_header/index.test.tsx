@@ -79,7 +79,7 @@ describe('AssistantHeader', () => {
     const { getByText, getByTestId } = render(
       <AssistantHeader
         {...testProps}
-        currentConversation={{ ...emptyWelcomeConvo, replacements: [] }}
+        currentConversation={{ ...emptyWelcomeConvo, replacements: {} }}
       />,
       {
         wrapper: TestProviders,

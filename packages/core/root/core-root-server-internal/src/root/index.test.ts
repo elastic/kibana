@@ -9,7 +9,7 @@
 import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { filter, first } from 'rxjs/operators';
+import { filter, first } from 'rxjs';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';

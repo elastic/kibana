@@ -6,7 +6,7 @@
  */
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,9 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Response Actions support for sentinelOne agentType', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    describe('and the "responseActionsSentinelOneV1Enabled" feature flag is disabled', () => {
-      // When feature flag is enabled, this entire `describe()` block should be removed
-      it('should return an error', async () => {
+    describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
+      it('should not return feature disabled error, but a connector not found error', async () => {
         await supertest
           .post(ISOLATE_HOST_ROUTE_V2)
           .set('kbn-xsrf', 'true')
@@ -26,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: '[request body.agent_type]: feature is disabled',
+            message: 'No stack connector instance configured for [.sentinelone]',
           });
       });
     });

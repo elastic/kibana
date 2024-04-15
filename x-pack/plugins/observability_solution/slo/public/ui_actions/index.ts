@@ -17,8 +17,6 @@ export function registerSloAlertsUiActions(
 ) {
   // Initialize actions
   const editSloAlertsPanelAction = createEditSloAlertsPanelAction(core.getStartServices);
-  // Register actions
-  uiActions.registerAction(editSloAlertsPanelAction);
-  // Assign and register triggers
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction.id);
+  // Assign triggers
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction);
 }

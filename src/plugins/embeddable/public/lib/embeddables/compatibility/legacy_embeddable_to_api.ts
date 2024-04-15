@@ -69,12 +69,18 @@ export const legacyEmbeddableToApi = (
   /**
    * Shortcuts for creating publishing subjects from the input and output subjects
    */
-  const inputKeyToSubject = <T extends unknown = unknown>(
+  const inputKeyToSubject = <ValueType extends unknown = unknown>(
     key: keyof CommonLegacyInput,
     useExplicitInput?: boolean
-  ) => embeddableInputToSubject<T>(subscriptions, embeddable, key, useExplicitInput);
-  const outputKeyToSubject = <T extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
-    embeddableOutputToSubject<T>(subscriptions, embeddable, key);
+  ) =>
+    embeddableInputToSubject<ValueType, CommonLegacyInput>(
+      subscriptions,
+      embeddable,
+      key,
+      useExplicitInput
+    );
+  const outputKeyToSubject = <ValueType extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
+    embeddableOutputToSubject<ValueType, CommonLegacyOutput>(subscriptions, embeddable, key);
 
   /**
    * Support editing of legacy embeddables

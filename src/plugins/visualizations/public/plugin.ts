@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {

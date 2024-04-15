@@ -9,7 +9,7 @@ value:
   revision: 1
   running: false
   schedule:
-    interval: 10m
+    interval: 1m
   params:
     index: [".updated-index"]
     timeField: "@timestamp"
@@ -27,13 +27,13 @@ value:
   updated_by: elastic
   rule_type_id: .index-threshold
   scheduled_task_id: 4c5eda00-e74f-11ec-b72f-5b18752ff9ea
-  created_at: '2023-01-31T23:03:33.127Z'
-  updated_at: '2023-01-31T23:55:27.314Z'
+  created_at: '2024-03-26T23:13:20.985Z'
+  updated_at: '2024-03-26T23:22:59.949Z'
   mute_all: false
   muted_alert_ids: []
   execution_status:
     status: ok
-    last_execution_date: '2023-01-31T23:48:42.499Z'
+    last_execution_date: '2024-03-26T23:22:51.390Z'
     last_duration: 52
   actions:
     - group: threshold met
@@ -56,5 +56,5 @@ value:
     outcome_msg: null
     warning: null
     outcome: succeeded
-  next_run: '2023-01-31T23:49:42.432Z'
+  next_run: '2024-03-26T23:23:51.316Z'
   api_key_created_by_user: false

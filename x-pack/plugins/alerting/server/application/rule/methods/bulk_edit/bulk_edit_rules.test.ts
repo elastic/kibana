@@ -27,7 +27,6 @@ import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server'
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { NormalizedAlertAction } from '../../../../rules_client/types';
 import {
   enabledRule1,
   enabledRule2,
@@ -36,6 +35,11 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter } from '../../../../connector_adapters/types';
+import { RuleAttributes } from '../../../../data/rule/types';
+import { SavedObject } from '@kbn/core/server';
+import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
@@ -104,6 +108,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -245,14 +251,17 @@ describe('bulkEdit()', () => {
         return { state: {} };
       },
       category: 'test',
+      validLegacyConsumers: [],
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
-      validLegacyConsumers: [],
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
+
+    rulesClientParams.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
   });
 
   describe('tags operations', () => {
@@ -537,6 +546,14 @@ describe('bulkEdit()', () => {
   });
 
   describe('actions operations', () => {
+    const connectorAdapter: ConnectorAdapter = {
+      connectorTypeId: '.test',
+      ruleActionParamsSchema: schema.object({ foo: schema.string() }),
+      buildActionParams: jest.fn(),
+    };
+
+    rulesClientParams.connectorAdapterRegistry.register(connectorAdapter);
+
     beforeEach(() => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [existingDecryptedRule],
@@ -546,7 +563,7 @@ describe('bulkEdit()', () => {
     test('should add uuid to new actions', async () => {
       const existingAction = {
         frequency: {
-          notifyWhen: 'onActiveAlert',
+          notifyWhen: 'onActiveAlert' as const,
           summary: false,
           throttle: null,
         },
@@ -555,9 +572,10 @@ describe('bulkEdit()', () => {
         params: {},
         uuid: '111',
       };
+
       const newAction = {
         frequency: {
-          notifyWhen: 'onActiveAlert',
+          notifyWhen: 'onActiveAlert' as const,
           summary: false,
           throttle: null,
         },
@@ -565,9 +583,10 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
       };
+
       const newAction2 = {
         frequency: {
-          notifyWhen: 'onActiveAlert',
+          notifyWhen: 'onActiveAlert' as const,
           summary: false,
           throttle: null,
         },
@@ -586,10 +605,12 @@ describe('bulkEdit()', () => {
                 {
                   ...existingAction,
                   actionRef: 'action_0',
+                  actionTypeId: 'test-0',
                 },
                 {
                   ...newAction,
                   actionRef: 'action_1',
+                  actionTypeId: 'test-1',
                   uuid: '222',
                 },
               ],
@@ -616,7 +637,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [existingAction, newAction, newAction2] as NormalizedAlertAction[],
+            value: [existingAction, newAction, newAction2],
           },
         ],
       });
@@ -678,7 +699,11 @@ describe('bulkEdit()', () => {
           ...existingRule.attributes.executionStatus,
           lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
         },
-        actions: [existingAction, { ...newAction, uuid: '222' }],
+        actions: [
+          { ...existingAction, actionTypeId: 'test-0' },
+          { ...newAction, uuid: '222', actionTypeId: 'test-1' },
+        ],
+        systemActions: [],
         id: existingRule.id,
         snoozeSchedule: [],
       });
@@ -743,7 +768,6 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
-        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -753,11 +777,13 @@ describe('bulkEdit()', () => {
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
           shouldWrite: true,
         },
+        category: 'test',
         validLegacyConsumers: [],
       });
+
       const existingAction = {
         frequency: {
-          notifyWhen: 'onActiveAlert',
+          notifyWhen: 'onActiveAlert' as const,
           summary: false,
           throttle: null,
         },
@@ -780,7 +806,7 @@ describe('bulkEdit()', () => {
       };
       const newAction = {
         frequency: {
-          notifyWhen: 'onActiveAlert',
+          notifyWhen: 'onActiveAlert' as const,
           summary: false,
           throttle: null,
         },
@@ -834,7 +860,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [existingAction, newAction] as NormalizedAlertAction[],
+            value: [existingAction, newAction],
           },
         ],
       });
@@ -910,7 +936,650 @@ describe('bulkEdit()', () => {
         ],
         id: existingRule.id,
         snoozeSchedule: [],
+        systemActions: [],
       });
+    });
+
+    test('should add system and default actions', async () => {
+      const defaultAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+      };
+
+      const systemAction = {
+        id: 'system_action-id',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  params: {},
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  uuid: '222',
+                },
+                {
+                  params: {},
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  uuid: '222',
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test-1',
+          config: {},
+          isMissingSecrets: false,
+          name: 'test default connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [defaultAction, systemAction],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '103',
+                },
+                {
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  params: {},
+                  uuid: '104',
+                },
+              ],
+              apiKey: null,
+              apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
+              meta: { versionApiKeyLastmodified: 'v8.2.0' },
+              name: 'my rule name',
+              enabled: false,
+              updatedAt: '2019-02-12T21:01:22.479Z',
+              updatedBy: 'elastic',
+              tags: ['foo'],
+              revision: 1,
+            },
+            references: [{ id: '1', name: 'action_0', type: 'action' }],
+          },
+        ],
+        { overwrite: true }
+      );
+
+      expect(result.rules[0]).toEqual({
+        ...omit(existingRule.attributes, 'legacyId'),
+        createdAt: new Date(existingRule.attributes.createdAt),
+        updatedAt: new Date(existingRule.attributes.updatedAt),
+        executionStatus: {
+          ...existingRule.attributes.executionStatus,
+          lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
+        },
+        actions: [{ ...defaultAction, actionTypeId: 'test-1', uuid: '222' }],
+        systemActions: [{ ...systemAction, actionTypeId: 'test-2', uuid: '222' }],
+        id: existingRule.id,
+        snoozeSchedule: [],
+      });
+    });
+
+    test('should construct the refs correctly and persist the actions correctly', async () => {
+      const defaultAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+      };
+
+      const systemAction = {
+        id: 'system_action-id',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  params: {},
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  uuid: '222',
+                },
+                {
+                  params: {},
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  uuid: '222',
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test-1',
+          config: {},
+          isMissingSecrets: false,
+          name: 'test default connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [defaultAction, systemAction],
+          },
+        ],
+      });
+
+      const rule = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<
+        SavedObject<RuleAttributes>
+      >;
+
+      expect(rule[0].attributes.actions).toEqual([
+        {
+          actionRef: 'action_0',
+          actionTypeId: 'test-1',
+          frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+          group: 'default',
+          params: {},
+          uuid: '105',
+        },
+        {
+          actionRef: 'system_action:system_action-id',
+          actionTypeId: 'test-2',
+          params: {},
+          uuid: '106',
+        },
+      ]);
+    });
+
+    test('should transforms the actions correctly', async () => {
+      const defaultAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+      };
+
+      const systemAction = {
+        id: 'system_action-id',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  params: {},
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  uuid: '222',
+                },
+                {
+                  params: {},
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  uuid: '222',
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test-1',
+          config: {},
+          isMissingSecrets: false,
+          name: 'test default connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [defaultAction, systemAction],
+          },
+        ],
+      });
+
+      expect(result.rules[0].actions).toEqual([
+        { ...defaultAction, actionTypeId: 'test-1', uuid: '222' },
+      ]);
+      expect(result.rules[0].systemActions).toEqual([
+        { ...systemAction, actionTypeId: 'test-2', uuid: '222' },
+      ]);
+    });
+
+    it('should return an error if the action does not have the right attributes', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(false);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "errors": Array [
+            Object {
+              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "rule": Object {
+                "id": "1",
+                "name": "my rule name",
+              },
+            },
+          ],
+          "rules": Array [],
+          "skipped": Array [],
+          "total": 1,
+        }
+      `);
+    });
+
+    it('should throw an error if the system action contains the group', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+        group: 'default',
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.group]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
+    it('should throw an error if the system action contains the frequency', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.frequency]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
+    it('should throw an error if the system action contains the alertsFilter', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+        alertsFilter: {
+          query: { kql: 'test:1', filters: [] },
+        },
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message:
+              'Error validating bulk edit rules operations - [0.alertsFilter]: definition for this key is missing',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
+    it('should throw an error if the same system action is used twice', async () => {
+      const action = {
+        id: 'system_action-id',
+        uuid: '123',
+        params: {},
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(true);
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [action, action],
+          },
+        ],
+      });
+
+      expect(res).toEqual({
+        errors: [
+          {
+            message: 'Cannot use the same system action twice',
+            rule: {
+              id: '1',
+              name: 'my rule name',
+            },
+          },
+        ],
+        rules: [],
+        skipped: [],
+        total: 1,
+      });
+    });
+
+    it('should throw an error if the default action does not contain the group', async () => {
+      const action = {
+        id: '1',
+        params: {},
+      };
+
+      actionsClient.isSystemAction.mockReturnValue(false);
+
+      await expect(
+        rulesClient.bulkEdit({
+          filter: '',
+          operations: [
+            {
+              field: 'actions',
+              operation: 'add',
+              value: [action],
+            },
+          ],
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "errors": Array [
+            Object {
+              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "rule": Object {
+                "id": "1",
+                "name": "my rule name",
+              },
+            },
+          ],
+          "rules": Array [],
+          "skipped": Array [],
+          "total": 1,
+        }
+      `);
     });
   });
 
@@ -969,7 +1638,13 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        operations: [],
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-tag'],
+          },
+        ],
         paramsModifier,
       });
 
@@ -1038,7 +1713,13 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        operations: [],
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-tag'],
+          },
+        ],
         paramsModifier,
       });
 
@@ -1063,6 +1744,9 @@ describe('bulkEdit()', () => {
     });
 
     test('should skip operation when params modifiers does not modify index pattern array', async () => {
+      const originalValidate = bulkEditOperationsSchema.validate;
+      bulkEditOperationsSchema.validate = jest.fn();
+
       paramsModifier.mockResolvedValue({
         modifiedParams: {
           index: ['test-1', 'test-2'],
@@ -1081,6 +1765,8 @@ describe('bulkEdit()', () => {
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(0);
+
+      bulkEditOperationsSchema.validate = originalValidate;
     });
   });
 
@@ -2325,8 +3011,8 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
-        category: 'test',
         producer: 'alerts',
+        category: 'test',
         validLegacyConsumers: [],
       });
 
@@ -2371,8 +3057,8 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
-        category: 'test',
         producer: 'alerts',
+        category: 'test',
         validLegacyConsumers: [],
       });
 
@@ -2411,7 +3097,13 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        operations: [],
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 
@@ -2546,6 +3238,49 @@ describe('bulkEdit()', () => {
 
       expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
     });
+
+    test('should not validate scheduling on system actions', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test',
+                  params: {},
+                  uuid: '111',
+                },
+              ],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ] as any,
+          },
+        ],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '10m' },
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.rules).toHaveLength(1);
+    });
   });
 
   describe('paramsModifier', () => {
@@ -2579,7 +3314,13 @@ describe('bulkEdit()', () => {
 
       const result = await rulesClient.bulkEdit({
         filter: '',
-        operations: [],
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
         paramsModifier: async (params) => {
           params.index = ['test-index-*'];
 

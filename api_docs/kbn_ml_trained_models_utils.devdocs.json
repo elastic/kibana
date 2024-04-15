@@ -378,6 +378,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-trained-models-utils",
+        "id": "def-common.InferenceAPIConfigResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceAPIConfigResponse",
+        "description": [],
+        "signature": [
+          "{ model_id: string; task_type: \"text_embedding\" | \"sparse_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "InferenceServiceSettings"
+        ],
+        "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-trained-models-utils",
         "id": "def-common.ModelDefinitionResponse",
         "type": "Type",
         "tags": [],

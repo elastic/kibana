@@ -88,6 +88,7 @@ const AssistantComponent: React.FC<Props> = ({
     docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationTitle,
     getLastConversationTitle,
@@ -112,12 +113,18 @@ const AssistantComponent: React.FC<Props> = ({
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
+  const [isStreaming, setIsStreaming] = useState(false);
+
   const {
     data: conversationsData,
     isLoading,
     isError,
     refetch,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    refetchOnWindowFocus: !isStreaming,
+  });
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -173,13 +180,17 @@ const AssistantComponent: React.FC<Props> = ({
     if (!isLoading && Object.keys(conversations).length > 0) {
       const conversation =
         conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
-      if (conversation) {
-        setCurrentConversation(conversation);
-      }
+      // Set the last conversation as current conversation or use persisted or non-persisted Welcom conversation
+      setCurrentConversation(
+        conversation ??
+          conversations[WELCOME_CONVERSATION_TITLE] ??
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
+      );
     }
   }, [
     conversationTitle,
     conversations,
+    getDefaultConversation,
     getLastConversationTitle,
     isLoading,
     selectedConversationTitle,
@@ -307,9 +318,15 @@ const AssistantComponent: React.FC<Props> = ({
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
+        if (refetchedConversation) {
+          setConversations({
+            ...conversations,
+            [refetchedConversation.title]: refetchedConversation,
+          });
+        }
       }
     },
-    [allSystemPrompts, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
@@ -431,6 +448,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
@@ -448,7 +466,6 @@ const AssistantComponent: React.FC<Props> = ({
     selectedPromptContexts,
     setSelectedPromptContexts,
     setCurrentConversation,
-    refresh: refetchCurrentConversation,
   });
 
   const chatbotComments = useMemo(
@@ -456,11 +473,14 @@ const AssistantComponent: React.FC<Props> = ({
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
+            setIsStreaming,
           })}
           css={css`
             margin-right: 20px;
@@ -488,12 +508,15 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      abortStream,
       refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,

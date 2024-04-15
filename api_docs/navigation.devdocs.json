@@ -1102,23 +1102,20 @@
         },
         {
           "parentPluginId": "navigation",
-          "id": "def-public.NavigationPublicStart.isSolutionNavigationEnabled",
-          "type": "Function",
+          "id": "def-public.NavigationPublicStart.isSolutionNavEnabled$",
+          "type": "Object",
           "tags": [],
-          "label": "isSolutionNavigationEnabled",
+          "label": "isSolutionNavEnabled$",
           "description": [
-            "\nUse this handler verify if the solution navigation is enabled."
+            "Flag to indicate if the solution navigation is enabled."
           ],
           "signature": [
-            "() => boolean"
+            "Observable",
+            "<boolean>"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": [
-            "true if the solution navigation is enabled, false otherwise."
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

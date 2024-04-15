@@ -6,7 +6,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import { useMemo } from 'react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';

@@ -17,4 +17,7 @@ export const createDefaultContext = (): DefaultDataViewsContext => ({
     name: '',
     sortOrder: 'asc',
   },
+  filter: {
+    dataType: undefined,
+  },
 });

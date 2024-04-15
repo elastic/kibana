@@ -33,7 +33,7 @@ import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solut
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   getEqlRuleForAlertTesting,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
   dataGeneratorFactory,
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: specificQueryForTests,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).eql(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {

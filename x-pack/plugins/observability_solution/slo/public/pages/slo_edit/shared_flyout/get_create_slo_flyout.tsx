@@ -14,6 +14,7 @@ import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-pl
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RecursivePartial } from '@kbn/utility-types';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import { ExperimentalFeatures } from '../../../../common/config';
 import { CreateSLOForm } from '../types';
 import { PluginContext } from '../../../context/plugin_context';
 import { SloPublicPluginsStart } from '../../../types';
@@ -27,6 +28,7 @@ export const getCreateSLOFlyoutLazy = ({
   isDev,
   kibanaVersion,
   isServerless,
+  experimentalFeatures,
 }: {
   core: CoreStart;
   plugins: SloPublicPluginsStart;
@@ -35,6 +37,7 @@ export const getCreateSLOFlyoutLazy = ({
   isDev?: boolean;
   kibanaVersion: string;
   isServerless?: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   return ({
     onClose,
@@ -60,6 +63,7 @@ export const getCreateSLOFlyoutLazy = ({
             isDev,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
+            experimentalFeatures,
           }}
         >
           <QueryClientProvider client={queryClient}>

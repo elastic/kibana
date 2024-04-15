@@ -23,6 +23,7 @@ const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
   apiConfig: {
     connectorId: '123',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
@@ -375,12 +376,13 @@ describe('SystemPrompt', () => {
         id: 'second',
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '123',
           defaultSystemPromptId: undefined,
         },
         title: 'second',
         messages: [],
-        replacements: [],
+        replacements: {},
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,

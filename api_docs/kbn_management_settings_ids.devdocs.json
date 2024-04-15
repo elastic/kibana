@@ -1179,6 +1179,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
         "type": "string",
         "tags": [],

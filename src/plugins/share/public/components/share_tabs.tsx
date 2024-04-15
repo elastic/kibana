@@ -6,44 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from '@kbn/core-capabilities-common';
-import React from 'react';
-import { EuiModal } from '@elastic/eui';
-import { LocatorPublic, AnonymousAccessServiceContract } from '../../common';
-import { ShareMenuItem, UrlParamExtension, BrowserUrlService } from '../types';
+import React, { type FC } from 'react';
+import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 
-export interface ModalTabActionHandler {
-  id: string;
-  dataTestSubj: string;
-  formattedMessageId: string;
-  defaultMessage: string;
-}
+import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
+import { linkTab, embedTab } from './tabs';
 
-export interface ShareContextTabProps {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
-  objectId?: string;
-  objectType: string;
-  shareableUrl?: string;
-  shareableUrlForSavedObject?: string;
-  shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
-  };
-  shareMenuItems: ShareMenuItem[];
-  sharingData: any;
-  onClose: () => void;
-  embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
-  urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
-  objectTypeTitle?: string;
-  disabledShareUrl?: boolean;
-  isDirty: boolean;
-  isEmbedded: boolean;
-}
+export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
+  return (
+    <ShareTabsContext.Provider value={shareContext}>
+      <ShareMenuTabs />
+    </ShareTabsContext.Provider>
+  );
+};
 
-export const ShareMenuTabs = ({ onClose }: ShareContextTabProps) => {
-  return <EuiModal onClose={onClose}>{'placeholder'}</EuiModal>;
+// this file is intended to replace share_context_menu
+export const ShareMenuTabs = () => {
+  const shareContext = useShareTabsContext();
+
+  if (!shareContext) {
+    return null;
+  }
+
+  const { allowEmbed, objectType, onClose } = shareContext;
+  const tabs = [];
+  tabs.push(linkTab);
+
+  if (allowEmbed) {
+    tabs.push(embedTab);
+  }
+
+  return (
+    <TabbedModal
+      tabs={tabs}
+      modalWidth={483}
+      onClose={onClose}
+      modalTitle={`Share this ${objectType}`}
+      defaultSelectedTabId="link"
+    />
+  );
 };

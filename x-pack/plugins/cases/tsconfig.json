@@ -64,7 +64,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/core-theme-browser",
     "@kbn/serverless",
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
@@ -73,6 +72,7 @@
     "@kbn/rison",
     "@kbn/core-application-browser",
     "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

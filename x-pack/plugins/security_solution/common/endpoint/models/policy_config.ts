@@ -43,6 +43,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
@@ -96,6 +97,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -138,6 +140,7 @@ export const policyFactory = (
       malware: {
         mode: ProtectionModes.prevent,
         blocklist: true,
+        on_write_scan: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,

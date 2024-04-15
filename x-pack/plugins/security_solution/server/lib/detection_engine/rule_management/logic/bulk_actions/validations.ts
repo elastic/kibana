@@ -10,7 +10,10 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 import { isIndexPatternsBulkEditAction } from './utils';
@@ -99,12 +102,11 @@ export const validateBulkEditRule = async ({
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
 const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
-  return edit.every(({ type }) =>
-    [BulkActionEditTypeEnum.set_rule_actions, BulkActionEditTypeEnum.add_rule_actions].includes(
-      // @ts-expect-error upgrade typescript v4.9.5
-      type
-    )
-  );
+  const applicableActions: BulkActionEditType[] = [
+    BulkActionEditTypeEnum.set_rule_actions,
+    BulkActionEditTypeEnum.add_rule_actions,
+  ];
+  return edit.every(({ type }) => applicableActions.includes(type));
 };
 
 /**

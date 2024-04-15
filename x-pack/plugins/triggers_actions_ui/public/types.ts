@@ -24,6 +24,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
   EuiSuperSelectOption,
   EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
@@ -42,7 +43,7 @@ import {
   RuleActionParam,
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
-  RuleAction,
+  RuleSystemAction,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
@@ -55,6 +56,7 @@ import {
   ActionVariable,
   RuleLastRun,
   MaintenanceWindow,
+  SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -104,22 +106,31 @@ export {
   OPTIONAL_ACTION_VARIABLES,
 } from '@kbn/triggers-actions-ui-types';
 
+type RuleUiAction = RuleAction | RuleSystemAction;
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
-  'alertTypeId'
+  'alertTypeId' | 'actions' | 'systemActions'
 > & {
   ruleTypeId: AlertingSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+type ResolvedRule = Omit<
+  ResolvedSanitizedRule<RuleTypeParams>,
+  'alertTypeId' | 'actions' | 'systemActions'
+> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 
 export type {
   Rule,
   RuleAction,
+  RuleSystemAction,
+  RuleUiAction,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,
@@ -287,6 +298,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   hideInUi?: boolean;
   modalWidth?: number;
+  isSystemActionType?: boolean;
 }
 
 export interface GenericValidationResult<T> {
@@ -576,6 +588,7 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
@@ -594,7 +607,15 @@ export type GetRenderCellValue<T = unknown> = ({
   context?: T;
 }) => (
   props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+) => React.ReactNode | JSX.Element;
+
+export type GetRenderCellPopover<T = unknown> = ({
+  context,
+}: {
+  context?: T;
+}) => (
+  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
+) => React.ReactNode | JSX.Element;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -668,6 +689,7 @@ export type UseCellActions = (props: {
   dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
+  pageIndex: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
   getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
@@ -728,6 +750,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  getRenderCellPopover?: GetRenderCellPopover;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;

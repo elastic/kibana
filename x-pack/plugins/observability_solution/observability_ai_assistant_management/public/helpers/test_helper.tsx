@@ -59,6 +59,8 @@ export const render = (component: React.ReactNode, params?: { show: boolean }) =
           value={{
             http: coreStart.http,
             application: coreStart.application,
+            docLinks: coreStart.docLinks,
+            settings: coreStart.settings,
             notifications: coreStart.notifications,
             observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
             uiSettings: coreStart.uiSettings,

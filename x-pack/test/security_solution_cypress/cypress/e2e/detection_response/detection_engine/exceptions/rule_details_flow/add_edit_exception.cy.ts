@@ -61,7 +61,7 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Add/edit exception from rule details',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';

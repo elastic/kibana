@@ -137,6 +137,11 @@ export default function ({ getService }: FtrProviderContext) {
                         minimum_should_match: 1,
                       },
                     },
+                    {
+                      exists: {
+                        field: 'hosts',
+                      },
+                    },
                   ],
                 },
               },

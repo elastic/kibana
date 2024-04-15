@@ -53,6 +53,7 @@ export {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
+  apmEnableServiceInventoryTableSearchBar,
 } from './ui_settings_keys';
 
 export {

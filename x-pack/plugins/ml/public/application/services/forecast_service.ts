@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, find, each } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { MlApiServices } from './ml_api_service';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../contexts/kibana';

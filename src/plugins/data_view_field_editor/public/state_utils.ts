@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 

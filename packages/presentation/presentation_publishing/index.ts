@@ -28,8 +28,28 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
+export {
+  onFetchContextChanged,
+  type FetchContext,
+} from './interfaces/fetch/on_fetch_context_changed';
+export {
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/fetch/publishes_unified_search';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  apiHasLegacyLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  type HasLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSupportedTriggers,
@@ -44,22 +64,15 @@ export {
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
 export {
   apiPublishesBlockingError,
-  useBlockingError,
   type PublishesBlockingError,
 } from './interfaces/publishes_blocking_error';
 export {
   apiPublishesDataLoading,
-  useDataLoading,
   type PublishesDataLoading,
 } from './interfaces/publishes_data_loading';
-export {
-  apiPublishesDataViews,
-  useDataViews,
-  type PublishesDataViews,
-} from './interfaces/publishes_data_views';
+export { apiPublishesDataViews, type PublishesDataViews } from './interfaces/publishes_data_views';
 export {
   apiPublishesDisabledActionIds,
-  useDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
 export {
@@ -69,29 +82,16 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export {
   apiPublishesSavedObjectId,
-  useSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export {
   apiPublishesUnsavedChanges,
-  useUnsavedChanges,
   type PublishesUnsavedChanges,
 } from './interfaces/publishes_unsaved_changes';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
-  useViewMode,
   type PublishesViewMode,
   type PublishesWritableViewMode,
   type ViewMode,
@@ -99,8 +99,6 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
-  useDefaultPanelDescription,
-  usePanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';
@@ -113,6 +111,7 @@ export {
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
+  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,
