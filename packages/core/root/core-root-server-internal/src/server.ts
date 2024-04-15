@@ -8,7 +8,6 @@
 
 import apm from 'elastic-apm-node';
 import { firstValueFrom } from 'rxjs';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
@@ -18,7 +17,6 @@ import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-interna
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import { EnvironmentService } from '@kbn/core-environment-server-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
 import { PrebootService } from '@kbn/core-preboot-server-internal';
@@ -57,23 +55,11 @@ import { SecurityService } from '@kbn/core-security-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
+import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from './events';
 
 const coreId = Symbol('core');
-const KIBANA_STARTED_EVENT = 'kibana_started';
 
 /** @internal */
-interface UptimePerStep {
-  start: number;
-  end: number;
-}
-
-/** @internal */
-interface UptimeSteps {
-  constructor: UptimePerStep;
-  preboot: UptimePerStep;
-  setup: UptimePerStep;
-  start: UptimePerStep;
-}
 
 export class Server {
   public readonly configService: ConfigService;
@@ -258,7 +244,7 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
-    this.registerKibanaStartedEventType(analyticsSetup);
+    registerRootEvents(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -450,7 +436,11 @@ export class Server {
     startTransaction.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
-    this.reportKibanaStartedEvents(analyticsStart);
+
+    reportKibanaStartedEvent({
+      uptimeSteps: this.uptimePerStep as UptimeSteps,
+      analytics: analyticsStart,
+    });
 
     return this.coreStart;
   }
@@ -486,126 +476,5 @@ export class Server {
 
   public setupCoreConfig() {
     registerServiceConfig(this.configService);
-  }
-
-  /**
-   * Register the legacy KIBANA_STARTED_EVENT.
-   * @param analyticsSetup The {@link AnalyticsServiceSetup}
-   * @private
-   */
-  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
-    analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
-      eventType: KIBANA_STARTED_EVENT,
-      schema: {
-        uptime_per_step: {
-          properties: {
-            constructor: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until the constructor finished',
-                  },
-                },
-              },
-            },
-            preboot: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `preboot` finished',
-                  },
-                },
-              },
-            },
-            setup: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `setup` finished',
-                  },
-                },
-              },
-            },
-            start: {
-              properties: {
-                start: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` was called',
-                  },
-                },
-                end: {
-                  type: 'float',
-                  _meta: {
-                    description:
-                      'Number of seconds the Node.js process has been running until `start` finished',
-                  },
-                },
-              },
-            },
-          },
-          _meta: {
-            description:
-              'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
-          },
-        },
-      },
-    });
-  }
-
-  /**
-   * Reports the new and legacy KIBANA_STARTED_EVENT.
-   * @param analyticsStart The {@link AnalyticsServiceStart}.
-   * @private
-   */
-  private reportKibanaStartedEvents(analyticsStart: AnalyticsServiceStart) {
-    // Report the legacy KIBANA_STARTED_EVENT.
-    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
-
-    const ups = this.uptimePerStep;
-
-    // Report the metric-shaped KIBANA_STARTED_EVENT.
-    reportPerformanceMetricEvent(analyticsStart, {
-      eventName: KIBANA_STARTED_EVENT,
-      duration: ups.start!.end - ups.constructor!.start,
-      key1: 'time_to_constructor',
-      value1: ups.constructor!.start,
-      key2: 'constructor_time',
-      value2: ups.constructor!.end - ups.constructor!.start,
-      key3: 'preboot_time',
-      value3: ups.preboot!.end - ups.preboot!.start,
-      key4: 'setup_time',
-      value4: ups.setup!.end - ups.setup!.start,
-      key5: 'start_time',
-      value5: ups.start!.end - ups.start!.start,
-    });
   }
 }
