@@ -195,6 +195,13 @@
   "cases-connector-mappings": [
     "owner"
   ],
+  "cases-rules": [
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -920,6 +927,7 @@
     "alert.status.enabled",
     "alert.tls",
     "alert.tls.enabled",
+    "config_id",
     "custom_heartbeat_id",
     "enabled",
     "hash",
