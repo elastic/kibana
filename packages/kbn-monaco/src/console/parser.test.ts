@@ -39,4 +39,21 @@ describe('console parser', () => {
     const { requests } = parser(input) as ConsoleParserResult;
     expect(requests.length).toBe(2);
   });
+
+  it('parses a request with a request body', () => {
+    const input =
+      'GET _search\n' + '{\n' + '  "query": {\n' + '    "match_all": {}\n' + '  }\n' + '}';
+    const { requests } = parser(input) as ConsoleParserResult;
+    expect(requests.length).toBe(1);
+    const { method, url, data } = requests[0];
+    expect(method).toBe('GET');
+    expect(url).toBe('_search');
+    expect(data).toEqual([
+      {
+        query: {
+          match_all: {},
+        },
+      },
+    ]);
+  });
 });
