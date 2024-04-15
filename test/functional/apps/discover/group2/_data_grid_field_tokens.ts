@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
 
       firstFieldIcons = await Promise.all(
-        fieldIcons.slice(0, 10).map((fieldIcon) => fieldIcon.getAttribute('aria-label'))
+        fieldIcons.slice(0, 10).map(async (fieldIcon) => {
+          return (await fieldIcon.getAttribute('aria-label')) ?? '';
+        })
       ).catch((error) => {
         log.debug(`error in findFirstFieldIcons: ${error.message}`);
         return undefined;
@@ -60,7 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return firstFieldIcons;
   }
 
-  describe('discover data grid field tokens', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/180622
+  describe.skip('discover data grid field tokens', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
