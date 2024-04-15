@@ -36,6 +36,7 @@ import type {
   CasesPublicSetupDependencies,
   CasesPublicStartDependencies,
 } from './types';
+import { registerSystemActions } from './components/system_actions';
 
 /**
  * @public
@@ -112,6 +113,8 @@ export class CasesUiPlugin
         },
       });
     }
+
+    registerSystemActions(plugins.triggersActionsUi);
 
     return {
       attachmentFramework: {
