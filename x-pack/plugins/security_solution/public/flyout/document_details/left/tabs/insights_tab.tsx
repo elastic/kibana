@@ -93,14 +93,12 @@ export const InsightsTab: React.FC = memo(() => {
 
   // insight tabs based on whether document is alert or non-alert
   // alert: entities, threat intelligence, prevalence, correlations
-  // non-alert: entities, prevalence
+  // non-alert: entities, prevalence, correlations
   const buttonGroup = useMemo(
     () =>
       isEventKindSignal
         ? insightsButtons
-        : insightsButtons.filter(
-            (tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID
-          ),
+        : insightsButtons.filter((tab) => tab.id !== THREAT_INTELLIGENCE_TAB_ID),
     [isEventKindSignal]
   );
 
@@ -141,7 +139,7 @@ export const InsightsTab: React.FC = memo(() => {
         buttonSize="compressed"
         isFullWidth
         data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}
-        style={!isEventKindSignal ? { maxWidth: 300 } : undefined}
+        style={!isEventKindSignal ? { maxWidth: 450 } : undefined}
       />
       <EuiSpacer size="m" />
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}
