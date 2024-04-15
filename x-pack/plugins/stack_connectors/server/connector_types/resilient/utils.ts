@@ -26,7 +26,7 @@ export const getValueTextContent = (
       return { ids: value.map((item) => Number(item)) };
     }
     return {
-      ids: [],
+      ids: [Number(value)],
     };
   }
 

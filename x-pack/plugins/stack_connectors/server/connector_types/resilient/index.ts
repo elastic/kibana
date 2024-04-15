@@ -24,7 +24,6 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { ResilientConnector } from './resilient';
-import { renderParameterTemplates } from './render';
 
 export const getResilientConnectorType = (): SubActionConnectorType<
   ResilientConfig,
@@ -44,5 +43,4 @@ export const getResilientConnectorType = (): SubActionConnectorType<
     SecurityConnectorFeatureId,
   ],
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
-  renderParameterTemplates,
 });

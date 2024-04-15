@@ -24,10 +24,8 @@ import * as i18n from './translations';
 import { SUB_ACTION } from './constants';
 import {
   ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionGetIncidentTypesParamsSchema,
   ExecutorSubActionGetSeverityParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
   GetCommonFieldsResponseSchema,
   GetIncidentTypesResponseSchema,
   GetSeverityResponseSchema,
@@ -84,18 +82,6 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
       name: SUB_ACTION.FIELDS,
       method: 'getFields',
       schema: ExecutorSubActionCommonFieldsParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.INCIDENT,
-      method: 'getIncident',
-      schema: ExecutorSubActionGetIncidentParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.HANDSHAKE,
-      method: 'handshake',
-      schema: ExecutorSubActionHandshakeParamsSchema,
     });
   }
 
@@ -358,6 +344,4 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
       throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
     }
   }
-
-  public async handshake() {}
 }

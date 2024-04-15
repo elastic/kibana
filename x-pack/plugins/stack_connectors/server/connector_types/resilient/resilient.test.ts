@@ -7,7 +7,7 @@
 
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { fieldsMock, incidentTypes, severity } from './mocks';
+import { resilientFields, incidentTypes, severity } from './mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ResilientConnector } from './resilient';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -572,7 +572,7 @@ describe('IBM Resilient connector', () => {
     beforeEach(() => {
       requestMock.mockImplementation(() =>
         createAxiosResponse({
-          data: fieldsMock,
+          data: resilientFields,
         })
       );
     });
@@ -594,7 +594,7 @@ describe('IBM Resilient connector', () => {
 
     it('returns common fields correctly', async () => {
       const res = await connector.getFields();
-      expect(res).toEqual(fieldsMock);
+      expect(res).toEqual(resilientFields);
     });
 
     it('should throw an error', async () => {

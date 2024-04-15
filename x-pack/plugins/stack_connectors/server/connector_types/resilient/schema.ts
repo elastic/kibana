@@ -43,13 +43,8 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   ),
 });
 
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  id: schema.string(),
-});
-
 // Reserved for future implementation
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
-export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
 export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
 
