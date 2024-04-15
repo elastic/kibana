@@ -25,6 +25,7 @@ enum InfraRouting {
 enum AvailableComponents {
   CHART = 'chart',
   TABLE = 'table',
+  METRIC_CHART = 'metricChart',
 }
 
 // You can add more specific tracking components as needed
@@ -36,7 +37,7 @@ type ApmTargetId = `${App.APM}.${APMRouting}.${AvailableComponents}.${TargetComp
 type InfaTargetId =
   `${App.INFRA}.${InfraRouting}.${AvailableComponents}.${TargetComponent}.${Details}__${Phase}`;
 
-export interface WithMeasureTimeProps {
+export interface WithPerformanceMetricsProps {
   measureName: ApmTargetId | InfaTargetId;
   onMeasureComplete: boolean;
   onStartTracking?: boolean;

@@ -57,7 +57,7 @@ import {
 import { TryItButton } from '../../../shared/try_it_button';
 import { HealthBadge } from './health_badge';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
-import { withMeasureTime } from '@kbn/ebt-tools';
+import { withPerformanceMetrics } from '@kbn/ebt-tools';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -484,4 +484,4 @@ function ServiceListComponent({
   );
 }
 
-export const ServiceList = withMeasureTime(ServiceListComponent);
+export const ServiceList = withPerformanceMetrics(ServiceListComponent);

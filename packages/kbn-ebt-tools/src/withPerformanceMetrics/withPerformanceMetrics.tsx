@@ -7,10 +7,13 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { WithMeasureTimeProps, Phase } from './types';
+import { WithPerformanceMetricsProps, Phase } from './types';
 
 let phase: Phase;
 
+/**
+ * Defines a set of marks used for performance metrics.
+ */
 const marks = {
   startMount: 'start::mount',
   endMount: `end::mount`,
@@ -19,22 +22,23 @@ const marks = {
 };
 
 /**
- * A Higher-Order Component (HOC) that measures the time taken for the `onMeasureComplete` event of the wrapped component.
+ * A Higher-Order Component (HOC) that marks and measures perfomance metrics the time taken for the `onMeasureComplete` event of the wrapped component
+ * on mount and render.
  *
  * How it works:
- * 1. At the beginning of the `onMeasureComplete` event, a performance mark is set using the `startMark`.
- * 2. The time it takes for the `onMeasureComplete` event to complete is measured.
- * 3. At the end of the `onMeasureComplete` event, another performance mark is set using the `endMark`.
- * 4. The time between the `startMark` and `endMark` is calculated to determine the time taken for the `onMeasureComplete` event.
- * 5.
+ * 1. On first mount, a performance mark is set using the `startMount`.
+ * 2. At the end of the `onMeasureComplete` event, another performance mark is set using the `endMount`.
+ * 3. The time between the `startMount` and `endMount` is calculated to determine the time taken for the `onMeasureComplete` event.
  *
  * @param {React.ComponentType<P>} BaseComponent - The component to be wrapped and measured.
  * @returns {React.FunctionComponent} - A new component that includes the render time measurement functionality.
  */
-export function withMeasureTime<P>(BaseComponent: React.ComponentType<P & WithMeasureTimeProps>) {
+export function withPerformanceMetrics<P>(
+  BaseComponent: React.ComponentType<P & WithPerformanceMetricsProps>
+) {
   performance.mark(marks.startMount);
 
-  return function WithMeasureTime(props: P & WithMeasureTimeProps) {
+  return function WithPerformanceMetrics(props: P & WithPerformanceMetricsProps) {
     const hasMounted = useRef<boolean>(false);
     const measureName = props.measureName;
 
