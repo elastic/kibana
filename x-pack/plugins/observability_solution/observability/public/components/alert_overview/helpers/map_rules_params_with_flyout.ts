@@ -42,7 +42,7 @@ const getPctAboveThreshold = (observedValue?: number, threshold?: number[]): str
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
     defaultMessage: ' ({pctValue}% above the threshold)',
     values: {
-      pctValue: (((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2),
+      pctValue: parseFloat((((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2)),
     },
   });
 };
