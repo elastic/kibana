@@ -8,6 +8,7 @@
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { useContext } from 'react';
+import { SELECT_ROW_ARIA_LABEL } from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../../types';
 
@@ -28,6 +29,7 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   return (
     <EuiCheckbox
       id={`bulk-actions-row-cell-${rowIndex}`}
+      aria-label={SELECT_ROW_ARIA_LABEL(rowIndex + 1)}
       checked={isChecked}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.checked) {
