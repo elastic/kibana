@@ -207,11 +207,13 @@ async function getServiceChangePoints({
     },
   });
 
-  return res.map((timeseries) => ({
-    title: timeseries.stat.title,
-    grouping: timeseries.id,
-    changes: timeseries.changes,
-  }));
+  return res
+    .filter((timeseries) => timeseries.changes.length > 0)
+    .map((timeseries) => ({
+      title: timeseries.stat.title,
+      grouping: timeseries.id,
+      changes: timeseries.changes,
+    }));
 }
 
 async function getExitSpanChangePoints({
@@ -253,11 +255,13 @@ async function getExitSpanChangePoints({
     },
   });
 
-  return res.map((timeseries) => {
-    return {
-      title: timeseries.stat.title,
-      grouping: timeseries.id,
-      changes: timeseries.changes,
-    };
-  });
+  return res
+    .filter((timeseries) => timeseries.changes.length > 0)
+    .map((timeseries) => {
+      return {
+        title: timeseries.stat.title,
+        grouping: timeseries.id,
+        changes: timeseries.changes,
+      };
+    });
 }

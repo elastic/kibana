@@ -211,6 +211,8 @@ export async function getApmTimeseries({
         statResult.change_point?.type ?? {}
       )?.[0] as ChangePointType;
 
+      console.log({ changePointType });
+
       return {
         stat: statResult.stat,
         group: statResult.stat.title,
@@ -221,7 +223,9 @@ export async function getApmTimeseries({
         end,
         unit: statResult.unit,
         changes: [
-          ...(changePointType && changePointType !== 'indeterminable'
+          ...(changePointType &&
+          changePointType !== 'indeterminable' &&
+          changePointType !== 'stationary'
             ? [
                 {
                   date: statResult.change_point.bucket?.key,
