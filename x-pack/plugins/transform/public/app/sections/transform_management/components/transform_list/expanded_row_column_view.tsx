@@ -70,7 +70,7 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.transform.list.extendedStatsError"
-                defaultMessage="An error occured fetching the extended stats for this transform, showing the basic stats as a fallback."
+                defaultMessage="An error occurred fetching the extended stats for this transform. Basic stats are displayed instead."
               />
             </p>
           </EuiCallOut>
