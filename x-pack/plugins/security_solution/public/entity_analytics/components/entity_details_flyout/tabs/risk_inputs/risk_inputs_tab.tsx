@@ -30,7 +30,7 @@ import {
   isUserRiskScore,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
-import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
+import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
 
@@ -253,7 +253,7 @@ const ContextsSection: React.FC<{
               />
             ),
             value: (
-              <AssetCriticalityBadgeAllowMissing
+              <AssetCriticalityBadge
                 criticalityLevel={criticality.level}
                 dataTestSubj="risk-inputs-asset-criticality-badge"
               />
