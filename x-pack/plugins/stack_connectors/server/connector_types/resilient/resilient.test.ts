@@ -239,6 +239,20 @@ describe('IBM Resilient connector', () => {
         '[Action][IBM Resilient]: Unable to create incident. Error: Response validation failed (Error: [id]: expected value of type [number] but got [undefined]).'
       );
     });
+
+    it('should throw an error without name', async () => {
+      await expect(
+        connector.createIncident({
+          incident: {
+            description: 'desc',
+            incidentTypes: [1001],
+            severityCode: 6,
+          },
+        })
+      ).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create incident. Error: Incident name is required.'
+      );
+    });
   });
 
   describe('updateIncident', () => {

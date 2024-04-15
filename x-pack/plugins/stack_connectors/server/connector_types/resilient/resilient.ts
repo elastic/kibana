@@ -128,8 +128,12 @@ export class ResilientConnector extends CaseConnector<ResilientConfig, Resilient
   }: Record<string, unknown>): Promise<ExternalServiceIncidentResponse> {
     try {
       const incidentData = incident as Incident;
+      if (!incidentData?.name) {
+        throw new Error('Incident name is required');
+      }
+
       let data: CreateIncidentData = {
-        name: incidentData?.name,
+        name: incidentData.name,
         discovered_date: Date.now(),
       };
 

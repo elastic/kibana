@@ -278,14 +278,19 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             });
         });
 
-        it('should handle failing with a simulated success without incident', async () => {
+        it('should handle failing with a simulated success without title', async () => {
           await supertest
             .post(`/api/actions/connector/${resilientActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                subAction: 'pushToService',
-                subActionParams: { comments: [] },
+                ...mockResilient.params,
+                subActionParams: {
+                  incident: {
+                    description: 'success',
+                  },
+                  comments: [],
+                },
               },
             })
             .then((resp: any) => {
@@ -296,7 +301,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.FRAMEWORK,
                 service_message:
-                  "Cannot destructure property 'externalId' of 'incident' as it is undefined.",
+                  '[Action][IBM Resilient]: Unable to create incident. Error: Incident name is required.',
               });
             });
         });
