@@ -154,7 +154,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           filters: newFilters,
         });
       },
-      [setFilters, timelineId]
+      [timelineId, setFilters]
     );
 
     const setSavedQueryInTimeline = useCallback(
