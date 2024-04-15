@@ -80,7 +80,9 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
        * to build a URL back to Synthetics */
       ...(includesDefaultGroupings && {
         'observer.name': { terms: { field: 'observer.name' } },
+        'observer.geo.name': { terms: { field: 'observer.geo.name' } },
         'monitor.config_id': { terms: { field: 'config_id' } },
+        'monitor.name': { terms: { field: 'monitor.name' } },
       }),
       ...(hasMonitorIds && { 'monitor.id': { terms: { field: 'monitor.id' } } }),
       ...(hasTags && {
