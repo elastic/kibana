@@ -23,6 +23,9 @@ export const Playground: React.FC = () => {
     : null;
   const { searchPlayground } = useValues(KibanaLogic);
 
+  if (!searchPlayground) {
+    return null;
+  }
   return (
     <searchPlayground.PlaygroundProvider
       defaultValues={{

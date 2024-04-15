@@ -39,6 +39,11 @@ export enum FEATURE_FLAG_NAMES {
    */
   'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
   /**
+   * Used in observability onboarding plugin to enable/disable the experimental onboarding flow.
+   * Options are: `true` and `false`.
+   */
+  'observability_onboarding.experimental_onboarding_flow_enabled' = 'observability_onboarding.experimental_onboarding_flow_enabled',
+  /**
    * Used to enable the new stack navigation around solutions during the rollout period.
    */
   'navigation.solutionNavEnabled' = 'navigation.solutionNavEnabled',

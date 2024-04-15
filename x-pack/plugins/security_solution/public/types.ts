@@ -51,7 +51,6 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -73,18 +72,21 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-import type { AppLinksSwitcher, NavigationLink } from './common/links';
+import type { NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
+import type { Assets } from './assets';
+import type { Investigations } from './investigations';
+import type { MachineLearning } from './machine_learning';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -151,7 +153,6 @@ export interface StartPluginsDependencies extends StartPlugins {
 }
 
 export interface ContractStartServices {
-  extraRoutes$: Observable<RouteProps[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
   onboarding: OnboardingPageService;
@@ -185,17 +186,16 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
-  setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
-  setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
-  setExtraRoutes: (extraRoutes: RouteProps[]) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
   setOnboardingPageSettings: OnboardingPageService;
+  setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
+  getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -217,6 +217,9 @@ export interface SubPlugins {
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
+  assets: Assets;
+  investigations: Investigations;
+  machineLearning: MachineLearning;
 }
 
 // TODO: find a better way to defined these types
@@ -235,4 +238,7 @@ export interface StartedSubPlugins {
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
+  assets: ReturnType<Assets['start']>;
+  investigations: ReturnType<Investigations['start']>;
+  machineLearning: ReturnType<MachineLearning['start']>;
 }
