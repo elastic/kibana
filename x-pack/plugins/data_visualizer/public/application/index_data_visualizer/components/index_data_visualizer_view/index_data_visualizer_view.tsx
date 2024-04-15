@@ -51,7 +51,10 @@ import type { FieldVisConfig } from '../../../common/components/stats_table/type
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER,
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+} from '../../constants/index_data_visualizer_viewer';
 import type {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
@@ -221,7 +224,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
-      id: 'index_data_visualizer',
+      id: DATA_VISUALIZER_INDEX_VIEWER_ID,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
