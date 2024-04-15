@@ -41,10 +41,10 @@ export interface OtherUrlConfig {
 }
 
 export enum QuickFilterButtonTypes {
-  Opened = 'opened',
-  Closed = 'closed',
-  Started = 'started',
-  Stopped = 'stopped',
+  Opened = 'Opened',
+  Closed = 'Closed',
+  Started = 'Started',
+  Stopped = 'Stopped',
 }
 export function MachineLearningJobTableProvider(
   { getPageObject, getService }: FtrProviderContext,
@@ -57,19 +57,20 @@ export function MachineLearningJobTableProvider(
   const find = getService('find');
 
   return new (class MlJobTable {
+    // What's the reason for asserting it like this?
+    // To me this looks, like it expects only one row to exist
+    // in the table and then asserts the content of one of the columns.
+    // What if the table has more rows ?
+    // Maybe asserting on the quick filter button state or
+    // something like that would work for more general scenarios ?
     public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
       await find.clickByCssSelector(
-        `[data-test-subj="mlJobListSearchBar"] span[data-text="${capitalizeFirst(
-          quickFilterButton
-        )}"]`
+        `[data-test-subj="mlJobListSearchBar"] span[data-text="${quickFilterButton}"]`
       );
-
-      const visibleText = await testSubjects.getVisibleText('mlJobListColumnJobState');
-      expect(visibleText).to.be(quickFilterButton);
-
-      function capitalizeFirst(str: string): string {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-      }
+      const ariaPressed: boolean = await find.existsByCssSelector(
+        `[data-test-subj="mlJobListSearchBar"] button[aria-pressed="true"] span[data-text="${quickFilterButton}"]`
+      );
+      expect(ariaPressed).to.be(true);
     }
 
     public async clickJobRowCalendarWithAssertion(
@@ -513,6 +514,14 @@ export function MachineLearningJobTableProvider(
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonEditJob');
       await testSubjects.existOrFail('mlJobEditFlyout');
+    }
+
+    public async clickEditAnnotationAction(jobId: string) {
+      await testSubjects.click(this.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
+      await testSubjects.click('mlAnnotationsActionEdit');
+      await testSubjects.existOrFail('mlAnnotationFlyout', {
+        timeout: 3_000,
+      });
     }
 
     public async clickDeleteJobAction(jobId: string) {

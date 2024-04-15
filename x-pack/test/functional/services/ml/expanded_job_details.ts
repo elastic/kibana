@@ -51,11 +51,7 @@ export function MachineLearningExpandedJobDetailsProvider(
           await testSubjects.missingOrFail('clearSearchButton');
         }
 
-        await testSubjects.click(jobTable.detailsSelector(jobId, 'euiCollapsedItemActionsButton'));
-        await testSubjects.click('mlAnnotationsActionEdit');
-        await testSubjects.existOrFail('mlAnnotationFlyout', {
-          timeout: 3_000,
-        });
+        await jobTable.clickEditAnnotationAction(jobId);
 
         await testSubjects.setValue('mlAnnotationsFlyoutTextInput', newAnnotationText, {
           clearWithKeyboard: true,
