@@ -719,6 +719,7 @@ describe('getFullAgentPolicy', () => {
     mockAgentPolicy({
       advanced_settings: {
         agent_limits_go_max_procs: 2,
+        agent_logging_level: 'debug',
       },
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -727,6 +728,7 @@ describe('getFullAgentPolicy', () => {
       id: 'agent-policy',
       agent: {
         limits: { go_max_procs: 2 },
+        logging: { level: 'debug' },
       },
     });
   });

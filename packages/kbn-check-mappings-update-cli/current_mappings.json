@@ -3059,6 +3059,9 @@
           }
         }
       },
+      "config_id": {
+        "type": "keyword"
+      },
       "custom_heartbeat_id": {
         "type": "keyword"
       },
