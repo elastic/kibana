@@ -16,7 +16,7 @@ import { createReactQueryWrapper } from '../../../../common/mock';
 jest.mock('../../../../detection_engine/fleet_integrations/api');
 jest.mock('../../../../common/lib/kibana');
 
-describe('useInstalledIntegrations', () => {
+describe('useIntegrations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
