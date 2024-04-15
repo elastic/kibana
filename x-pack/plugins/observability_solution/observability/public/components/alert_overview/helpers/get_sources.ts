@@ -9,8 +9,8 @@ import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
 import {
   apmSources,
   infraSources,
-} from '../../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
-import { TopAlert } from '../../../..';
+} from '../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
+import { TopAlert } from '../../..';
 
 interface AlertFields {
   [key: string]: any;
@@ -36,7 +36,7 @@ export const getSources = (alert: TopAlert) => {
         const fieldValue = alertFields[field];
         matchedSources.push({
           field: source,
-          value: fieldValue[0],
+          value: Array.isArray(fieldValue) ? fieldValue[0] : fieldValue,
         });
       }
     });
