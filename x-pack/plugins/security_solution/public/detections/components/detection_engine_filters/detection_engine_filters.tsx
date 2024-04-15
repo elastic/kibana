@@ -60,6 +60,7 @@ export const DetectionEngineFilters = ({ indexPattern, ...props }: DetectionEngi
             name: SECURITY_ALERT_DATA_VIEW.name,
             allowNoIndex: true,
             title: indexPattern.title,
+            timeFieldName: '@timestamp',
           }
         : null,
     [indexPattern]
