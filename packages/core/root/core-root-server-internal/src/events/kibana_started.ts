@@ -23,6 +23,9 @@ export interface UptimeSteps {
   preboot: UptimePerStep;
   setup: UptimePerStep;
   start: UptimePerStep;
+  elasticsearch: {
+    waitTime: number;
+  };
 }
 
 export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => {
@@ -37,14 +40,14 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until the constructor was called',
+                    'Number of milliseconds the Node.js process has been running until the constructor was called',
                 },
               },
               end: {
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until the constructor finished',
+                    'Number of milliseconds the Node.js process has been running until the constructor finished',
                 },
               },
             },
@@ -55,14 +58,14 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `preboot` was called',
+                    'Number of milliseconds the Node.js process has been running until `preboot` was called',
                 },
               },
               end: {
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `preboot` finished',
+                    'Number of milliseconds the Node.js process has been running until `preboot` finished',
                 },
               },
             },
@@ -73,14 +76,14 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `setup` was called',
+                    'Number of milliseconds the Node.js process has been running until `setup` was called',
                 },
               },
               end: {
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `setup` finished',
+                    'Number of milliseconds the Node.js process has been running until `setup` finished',
                 },
               },
             },
@@ -91,14 +94,25 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `start` was called',
+                    'Number of milliseconds the Node.js process has been running until `start` was called',
                 },
               },
               end: {
                 type: 'float',
                 _meta: {
                   description:
-                    'Number of seconds the Node.js process has been running until `start` finished',
+                    'Number of milliseconds the Node.js process has been running until `start` finished',
+                },
+              },
+            },
+          },
+          elasticsearch: {
+            properties: {
+              waitTime: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'Number of milliseconds Kibana waited for Elasticsearch during the its start phase',
                 },
               },
             },
@@ -106,7 +120,7 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
         },
         _meta: {
           description:
-            'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
+            'Number of milliseconds the Node.js process has been running until each phase of the server execution is called and finished.',
         },
       },
     },
@@ -140,5 +154,7 @@ export const reportKibanaStartedEvent = ({
     value4: uptimeSteps.setup.end - uptimeSteps.setup.start,
     key5: 'start_time',
     value5: uptimeSteps.start.end - uptimeSteps.start.start,
+    key6: 'es_wait_time',
+    value6: uptimeSteps.elasticsearch.waitTime,
   });
 };

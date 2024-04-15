@@ -26,6 +26,7 @@ import type {
   ElasticsearchConfig,
   ElasticsearchService,
   InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
   ClusterInfo,
@@ -106,7 +107,18 @@ const createInternalSetupContractMock = () => {
   return internalSetupContract;
 };
 
-const createInternalStartContractMock = createStartContractMock;
+type MockedInternalElasticsearchServiceStart = jest.Mocked<InternalElasticsearchServiceStart>;
+
+const createInternalStartContractMock = () => {
+  const startContract = createStartContractMock();
+  const internalStartContractMock: MockedInternalElasticsearchServiceStart = {
+    ...startContract,
+    telemetry: {
+      elasticsearchWaitTime: 0,
+    },
+  };
+  return internalStartContractMock;
+};
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
@@ -133,6 +145,7 @@ const createCapabilities = (
 };
 
 export const elasticsearchServiceMock = {
+  ...elasticsearchClientMock,
   create: createMock,
   createInternalPreboot: createInternalPrebootContractMock,
   createPreboot: createPrebootContractMock,
@@ -141,6 +154,4 @@ export const elasticsearchServiceMock = {
   createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
   createCapabilities,
-
-  ...elasticsearchClientMock,
 };

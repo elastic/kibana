@@ -377,7 +377,12 @@ export class Server {
     const securityStart = this.security.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
+
     const elasticsearchStart = await this.elasticsearch.start();
+    this.uptimePerStep.elasticsearch = {
+      waitTime: elasticsearchStart.telemetry.elasticsearchWaitTime,
+    };
+
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
