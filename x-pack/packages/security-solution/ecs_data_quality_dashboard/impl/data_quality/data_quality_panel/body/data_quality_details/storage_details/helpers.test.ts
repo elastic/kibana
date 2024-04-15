@@ -70,7 +70,7 @@ describe('helpers', () => {
       );
     });
 
-    test('it returns zero when the pattern exists in the rollup, but does not have a sizeInBytes', () => {
+    test('it returns undefined when the pattern exists in the rollup, but does not have a sizeInBytes', () => {
       const pattern = 'valid-*';
 
       expect(getPatternSizeInBytes({ pattern, patternRollups: noSizeInBytes })).toBeUndefined();
