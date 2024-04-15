@@ -77,7 +77,7 @@ export function registerQueryFunction({
     {
       name: 'execute_query',
       contexts: ['core'],
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.UserOnly,
       description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',

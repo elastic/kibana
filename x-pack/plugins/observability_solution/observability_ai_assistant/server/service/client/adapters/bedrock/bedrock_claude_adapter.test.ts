@@ -171,14 +171,12 @@ describe('createBedrockClaudeAdapter', () => {
           },
         ];
 
-        expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          JSON.stringify({
-            type: 'tool_result',
-            tool: 'my_tool',
-            error: 'An internal server error occurred',
-            is_error: true,
-          })
-        );
+        expect(JSON.parse(last(callSubActionFactory({ messages }).messages)!.content)).toEqual({
+          type: 'tool_result',
+          tool: 'my_tool',
+          error: 'An internal server error occurred',
+          is_error: true,
+        });
       });
 
       it('formats function responses as JSON', () => {
@@ -211,13 +209,11 @@ describe('createBedrockClaudeAdapter', () => {
           },
         ];
 
-        expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          JSON.stringify({
-            type: 'tool_result',
-            tool: 'my_tool',
-            myResponse: { myParam: 'myValue' },
-          })
-        );
+        expect(JSON.parse(last(callSubActionFactory({ messages }).messages)!.content)).toEqual({
+          type: 'tool_result',
+          tool: 'my_tool',
+          myResponse: { myParam: 'myValue' },
+        });
       });
     });
   });
