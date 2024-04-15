@@ -17,8 +17,12 @@ interface ParseArgs {
   ctx?: Context;
 }
 
+export const joi2JsonInternal = (schema: Joi.Schema) => {
+  return joiToJsonParse(schema, 'open-api');
+};
+
 export const parse = ({ schema, ctx = { sharedSchemas: new Map() } }: ParseArgs) => {
-  const result = joiToJsonParse(schema, 'open-api');
+  const result = joi2JsonInternal(schema);
   postProcessMutations({ schema: result, ctx });
   const ref = processRef(ctx, result);
   return { shared: ctx.sharedSchemas, result: ref ?? result };
