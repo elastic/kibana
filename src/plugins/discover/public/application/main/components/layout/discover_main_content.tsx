@@ -138,6 +138,7 @@ export const DiscoverMainContent = ({
                 stateContainer={stateContainer}
                 onAddFilter={!isPlainRecord ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
+                isPlainRecord={isPlainRecord}
               />
             </>
           )}
