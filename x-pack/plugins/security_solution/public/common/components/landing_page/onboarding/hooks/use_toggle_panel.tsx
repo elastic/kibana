@@ -241,13 +241,15 @@ export const useTogglePanel = ({
         if (state.expandedCardSteps[matchedCard.id]?.expandedSteps.includes(matchedStep.id)) {
           return;
         }
+
+        // The step is opened by navigation instead of clicking directly on the step. e.g.: clicking a stepLink
         // Toggle step and sync the expanded card step to storage & reducer
         onStepClicked({
           stepId: matchedStep.id,
           cardId: matchedCard.id,
           sectionId: matchedSection.id,
           isExpanded: true,
-          trigger: 'page_load',
+          trigger: 'navigation',
         });
 
         navigateTo({

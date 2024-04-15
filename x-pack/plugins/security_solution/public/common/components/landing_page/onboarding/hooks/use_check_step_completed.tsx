@@ -56,7 +56,7 @@ export const useCheckStepCompleted = ({
         },
       });
 
-      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !isDone, trigger: 'page_load' });
+      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !isDone, trigger: 'auto_check' });
     };
     autoCheckStepCompleted();
     const currentAbortController = abortSignal.current;
