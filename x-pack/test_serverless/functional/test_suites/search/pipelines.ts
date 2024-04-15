@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { testHasEmbeddedConsole } from '../embedded_console';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects([

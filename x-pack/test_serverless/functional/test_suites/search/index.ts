@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./connectors/connectors_overview'));
     loadTestFile(require.resolve('./default_dataview'));
     loadTestFile(require.resolve('./navigation'));
+    loadTestFile(require.resolve('./pipelines'));
     loadTestFile(require.resolve('./cases/attachment_framework'));
     loadTestFile(require.resolve('./dashboards/build_dashboard'));
     loadTestFile(require.resolve('./dashboards/import_dashboard'));
@@ -21,6 +22,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./console_notebooks'));
 
     loadTestFile(require.resolve('./ml'));
-    loadTestFile(require.resolve('./pipelines/list_page'));
   });
 }
