@@ -44,7 +44,7 @@ export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_S
 export const AWS_SETUP_FORMAT = {
   CLOUD_FORMATION: 'cloud_formation',
   MANUAL: 'manual',
-};
+} as const;
 
 export const AWS_CREDENTIALS_TYPE = {
   ASSUME_ROLE: 'assume_role',
@@ -53,6 +53,7 @@ export const AWS_CREDENTIALS_TYPE = {
   SHARED_CREDENTIALS: 'shared_credentials',
   CLOUD_FORMATION: 'cloud_formation',
 } as const;
+
 export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
     <>
