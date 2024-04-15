@@ -14,6 +14,20 @@ export const RELATED_INTEGRATIONS_LABEL = i18n.translate(
   }
 );
 
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.optionalText',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const RELATED_INTEGRATION_FIELDS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.helpText',
+  {
+    defaultMessage: 'Select an integration and correct a version constraint if necessary.',
+  }
+);
+
 export const RELATED_INTEGRATION_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.relatedIntegrationAriaLabel',
   {

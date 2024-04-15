@@ -19,7 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
 } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
@@ -94,55 +93,56 @@ export function RelatedIntegrationField({
     [field]
   );
 
+  const hasError = Boolean(packageErrorMessage) || Boolean(versionErrorMessage);
+
   return (
-    <EuiPanel color="subdued">
-      <EuiFormRow
-        fullWidth
-        isInvalid={Boolean(packageErrorMessage) || Boolean(versionErrorMessage)}
-        error={packageErrorMessage?.message ?? versionErrorMessage?.message}
-      >
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={8} className={ROW_OVERFLOW_FIX_STYLE}>
-            <EuiComboBox<Integration>
-              options={integrationOptions}
-              renderOption={renderIntegrationOption}
-              selectedOptions={selectedIntegrationOptions}
-              singleSelection
-              isLoading={isInitialLoading}
-              isDisabled={!integrations}
-              onChange={handleIntegrationChange}
-              fullWidth
-              aria-label={i18n.RELATED_INTEGRATION_ARIA_LABEL}
-              isInvalid={Boolean(packageErrorMessage)}
-              data-test-subj="relatedIntegrationComboBox"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={3} className={MIN_WIDTH_VERSION_CONSTRAIN_STYLE}>
-            <EuiFieldText
-              placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
-              prepend={i18n.INTEGRATION_VERSION}
-              isLoading={isInitialLoading}
-              disabled={!field.value.package || !integrations}
-              aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
-              value={field.value.version}
-              onChange={handleVersionChange}
-              isInvalid={Boolean(versionErrorMessage)}
-              data-test-subj="relatedIntegrationVersionDependency"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="danger"
-              onClick={onRemove}
-              isDisabled={!integrations}
-              iconType="minusInCircle"
-              aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
-              data-test-subj="relatedIntegrationRemove"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    </EuiPanel>
+    <EuiFormRow
+      fullWidth
+      isInvalid={hasError}
+      error={packageErrorMessage?.message ?? versionErrorMessage?.message}
+      helpText={hasError ? undefined : i18n.RELATED_INTEGRATION_FIELDS_HELP_TEXT}
+    >
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={8} className={ROW_OVERFLOW_FIX_STYLE}>
+          <EuiComboBox<Integration>
+            options={integrationOptions}
+            renderOption={renderIntegrationOption}
+            selectedOptions={selectedIntegrationOptions}
+            singleSelection
+            isLoading={isInitialLoading}
+            isDisabled={!integrations}
+            onChange={handleIntegrationChange}
+            fullWidth
+            aria-label={i18n.RELATED_INTEGRATION_ARIA_LABEL}
+            isInvalid={Boolean(packageErrorMessage)}
+            data-test-subj="relatedIntegrationComboBox"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3} className={MIN_WIDTH_VERSION_CONSTRAIN_STYLE}>
+          <EuiFieldText
+            placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
+            prepend={i18n.INTEGRATION_VERSION}
+            isLoading={isInitialLoading}
+            disabled={!field.value.package || !integrations}
+            aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
+            value={field.value.version}
+            onChange={handleVersionChange}
+            isInvalid={Boolean(versionErrorMessage)}
+            data-test-subj="relatedIntegrationVersionDependency"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            color="danger"
+            onClick={onRemove}
+            isDisabled={!integrations}
+            iconType="trash"
+            aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
+            data-test-subj="relatedIntegrationRemove"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 }
 

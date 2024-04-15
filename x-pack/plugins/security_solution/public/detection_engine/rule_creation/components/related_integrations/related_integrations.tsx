@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { UseArray } from '../../../../shared_imports';
 import { RelatedIntegrationsHelpInfo } from './related_integrations_help_info';
 import { RelatedIntegrationFieldRow } from './related_integration_field_row';
@@ -29,7 +36,17 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
     <UseArray path={path} initialNumberOfItems={0}>
       {({ items, addItem, removeItem, form }) => {
         return (
-          <EuiFormRow label={label} fullWidth data-test-subj={dataTestSubj} hasChildLabel={false}>
+          <EuiFormRow
+            label={label}
+            labelAppend={
+              <EuiText color="subdued" size="xs">
+                {i18n.OPTIONAL}
+              </EuiText>
+            }
+            fullWidth
+            data-test-subj={dataTestSubj}
+            hasChildLabel={false}
+          >
             <fieldset>
               <EuiFlexGroup direction="column" gutterSize="s">
                 {items.map((item) => (
@@ -42,10 +59,10 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiButton size="s" fullWidth iconType="plusInCircle" onClick={addItem}>
+              {items.length > 0 && <EuiSpacer size="s" />}
+              <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
                 {i18n.ADD_INTEGRATION}
-              </EuiButton>
+              </EuiButtonEmpty>
             </fieldset>
           </EuiFormRow>
         );
