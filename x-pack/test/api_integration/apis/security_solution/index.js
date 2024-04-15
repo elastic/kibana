@@ -11,9 +11,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./events'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./host_details'));
-    loadTestFile(require.resolve('./kpi_network'));
-    loadTestFile(require.resolve('./kpi_hosts'));
-    loadTestFile(require.resolve('./matrix_dns_histogram'));
     loadTestFile(require.resolve('./network_details'));
     loadTestFile(require.resolve('./network_dns'));
     loadTestFile(require.resolve('./network_top_n_flow'));

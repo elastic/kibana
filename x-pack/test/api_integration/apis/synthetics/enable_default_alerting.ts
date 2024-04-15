@@ -6,12 +6,12 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -23,6 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
+
+    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
+      return addMonitorAPIHelper(supertest, monitor, statusCode);
+    };
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -68,23 +72,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('enables alert when new monitor is added', async () => {
       const newMonitor = httpMonitorJson;
 
-      const apiResponse = await supertest
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            created_at: apiResponse.body.created_at,
-            updated_at: apiResponse.body.updated_at,
-          },
-          secretKeys
-        )
-      );
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
