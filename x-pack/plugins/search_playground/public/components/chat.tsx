@@ -106,6 +106,9 @@ export const Chat = () => {
             borderRight: euiTheme.border.thin,
             paddingTop: euiTheme.size.l,
             paddingBottom: euiTheme.size.l,
+            // don't allow the chat to shrink below 66.6% of the screen
+            flexBasis: 0,
+            minWidth: '66.6%',
           }}
         >
           <EuiFlexGroup direction="column" className="eui-fullHeight">
@@ -210,7 +213,7 @@ export const Chat = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
           <ChatSidebar selectedIndicesCount={selectedIndicesCount} />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
@@ -54,6 +54,7 @@ import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+import { ShowRequestModal } from './show_request_modal';
 
 const defaultUpdateRuleErrorMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText',
@@ -125,6 +126,8 @@ export const RuleEdit = <
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
+  const [isShowRequestModalOpen, setIsShowRequestModalOpen] = useState<boolean>(false);
+  const [isRuleValid, setIsRuleValid] = useState<boolean>(false);
   const [ruleActionsErrors, setRuleActionsErrors] = useState<IErrorObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
@@ -138,6 +141,8 @@ export const RuleEdit = <
   const {
     http,
     notifications: { toasts },
+    i18n: i18nStart,
+    theme,
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -223,13 +228,18 @@ export const RuleEdit = <
         title: message.summary,
         ...(message.details && {
           text: toMountPoint(
-            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>,
+            { i18n: i18nStart, theme }
           ),
         }),
       });
     }
     setIsSaving(false);
   }
+
+  useEffect(() => {
+    setIsRuleValid(isValidRule(rule, ruleErrors, ruleActionsErrors));
+  }, [rule, ruleErrors, ruleActionsErrors]);
 
   return (
     <EuiPortal>
@@ -310,23 +320,23 @@ export const RuleEdit = <
                   <></>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center">
-                    {config.isUsingSecurity && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          position="top"
-                          data-test-subj="changeInPrivilegesTip"
-                          content={i18n.translate(
-                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
-                            {
-                              defaultMessage:
-                                'Saving this rule will change its privileges and might change its behavior.',
-                            }
-                          )}
+                  <EuiFlexGroup alignItems="center" gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="primary"
+                        data-test-subj="showEditedRequestButton"
+                        isDisabled={!isRuleValid}
+                        onClick={() => {
+                          setIsShowRequestModalOpen(true);
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.ruleEdit.showRequestButtonLabel"
+                          defaultMessage="Show API request"
                         />
-                      </EuiFlexItem>
-                    )}
+                      </EuiButton>
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         fill
@@ -343,6 +353,22 @@ export const RuleEdit = <
                         />
                       </EuiButton>
                     </EuiFlexItem>
+                    {config.isUsingSecurity && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          position="top"
+                          data-test-subj="changeInPrivilegesTip"
+                          content={i18n.translate(
+                            'xpack.triggersActionsUI.sections.ruleEdit.changeInPrivilegesLabel',
+                            {
+                              defaultMessage:
+                                'Saving this rule will change its privileges and might change its behavior.',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -358,6 +384,16 @@ export const RuleEdit = <
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);
             }}
+          />
+        )}
+        {isShowRequestModalOpen && (
+          <ShowRequestModal
+            onClose={() => {
+              setIsShowRequestModalOpen(false);
+            }}
+            rule={rule}
+            ruleId={rule.id}
+            edit={true}
           />
         )}
       </EuiFlyout>

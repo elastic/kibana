@@ -36,9 +36,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--navigation.solutionNavigation.featureOn=true',
+        '--xpack.cloud_integrations.experiments.enabled=true',
+        '--xpack.cloud_integrations.experiments.launch_darkly.sdk_key=a_string',
+        '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',
+        '--xpack.cloud_integrations.experiments.flag_overrides.navigation.solutionNavEnabled=true',
         '--navigation.solutionNavigation.enabled=true',
-        '--navigation.solutionNavigation.optInStatus=visible',
         '--navigation.solutionNavigation.defaultSolution=es',
         // Note: the base64 string in the cloud.id config contains the ES endpoint required in the functional tests
         '--xpack.cloud.id=ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM=',

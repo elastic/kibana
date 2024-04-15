@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       for (let i = 0; i < solutionCards.length; i++) {
         const solutionCard = solutionCards[i];
         const image = await solutionCard.findByCssSelector('img');
-        const imageSrc = await image.getAttribute('src');
+        const imageSrc = (await image.getAttribute('src')) ?? '';
         const match = myRegexp.exec(imageSrc);
         myRegexp.lastIndex = 0;
         if (match && match.length > 1) {
