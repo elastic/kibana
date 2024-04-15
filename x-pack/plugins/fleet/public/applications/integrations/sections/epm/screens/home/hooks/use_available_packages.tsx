@@ -103,6 +103,8 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
   }, []);
 };
 
+export type AvailablePackagesHookType = typeof useAvailablePackages;
+
 export const useAvailablePackages = ({
   prereleaseIntegrationsEnabled,
 }: {

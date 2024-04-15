@@ -15,21 +15,21 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { setExtensionsService } from './application/store/selectors/extension_service';
-
-import { ExtensionsService, PublicApiService } from './services';
-
 import {
   IndexManagementPluginSetup,
   SetupDependencies,
   StartDependencies,
-  ClientConfigType,
   IndexManagementPluginStart,
-} from './types';
+} from '@kbn/index-management';
+import { setExtensionsService } from './application/store/selectors/extension_service';
+import { ExtensionsService } from './services/extensions_service';
+
+import { ClientConfigType } from './types';
 
 // avoid import from index files in plugin.ts, use specific import paths
 import { PLUGIN } from '../common/constants/plugin';
 import { IndexMapping } from './application/sections/home/index_list/details_page/index_mappings_embeddable';
+import { PublicApiService } from './services/public_api_service';
 
 export class IndexMgmtUIPlugin
   implements
