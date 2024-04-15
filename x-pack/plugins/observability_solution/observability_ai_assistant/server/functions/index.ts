@@ -48,7 +48,7 @@ export const registerFunctions: RegistrationCallback = async ({
 
         You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
 
-        Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
+        Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.
 
         You MUST use the "query" function when the user wants to:
         - visualize data
