@@ -331,8 +331,11 @@ export function ServiceInventory() {
             onChangeTableSearchBarVisibility={() => {
               saveSingleSetting(apmEnableServiceInventoryTableSearchBar, !isTableSearchBarEnabled);
             }}
-            targetId="apm.services.table.services.list"
-            onEndTracking={mainStatisticsStatus === FETCH_STATUS.SUCCESS}
+            measureName="apm.services.table.services.list"
+            onMeasureComplete={
+              mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+              comparisonFetch.status === FETCH_STATUS.SUCCESS
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>

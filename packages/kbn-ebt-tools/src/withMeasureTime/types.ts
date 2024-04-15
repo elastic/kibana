@@ -36,9 +36,9 @@ type ApmTargetId = `${App.APM}.${APMRouting}.${AvailableComponents}.${TargetComp
 type InfaTargetId =
   `${App.INFRA}.${InfraRouting}.${AvailableComponents}.${TargetComponent}.${Details}__${Phase}`;
 
-export interface WithRenderTimeProps {
-  targetId: ApmTargetId | InfaTargetId;
-  onEndTracking: boolean;
+export interface WithMeasureTimeProps {
+  measureName: ApmTargetId | InfaTargetId;
+  onMeasureComplete: boolean;
   onStartTracking?: boolean;
 }
 

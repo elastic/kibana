@@ -19,7 +19,7 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
         const target = entry?.name;
         const duration = entry.duration;
 
-        console.log(entry)
+        console.log(entry);
 
         if (isDevMode) {
           if (!target) {
@@ -44,8 +44,8 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             eventName: entry.detail.eventName ?? 'time_to_render',
             duration,
             meta: {
-              target
-            }
+              target,
+            },
           });
         } catch (error) {
           if (isDevMode) {
