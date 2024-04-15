@@ -13,7 +13,7 @@ import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } fr
 import type { Agent } from '../../../../../types';
 import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../hooks';
 
-import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
+import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../common/constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 

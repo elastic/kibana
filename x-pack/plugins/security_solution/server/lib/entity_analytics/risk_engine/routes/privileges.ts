@@ -7,16 +7,14 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import type { StartPlugins } from '../../../../plugin';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getUserRiskEnginePrivileges } from '../risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  router: EntityAnalyticsRoutesDeps['router'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
