@@ -67,7 +67,7 @@ export function SettingsForm() {
         description={
           <p>
             {i18n.translate('xpack.slo.settingsForm.p.fetchSlosFromAllLabel', {
-              defaultMessage: 'Fetch Slos from all remote clusters.',
+              defaultMessage: 'Fetch SLOs from all remote clusters.',
             })}
           </p>
         }
