@@ -37,6 +37,7 @@ export interface ExceptionItemProps {
   getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
+  showValueListModal: ElementType;
 }
 
 const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
@@ -52,6 +53,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   getFormattedComments,
   onDeleteException,
   onEditException,
+  showValueListModal,
 }) => {
   const { actions, formattedComments } = useExceptionItemCard({
     listType,
@@ -93,6 +95,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
             os={exceptionItem.os_types}
             entries={exceptionItem.entries}
             dataTestSubj="exceptionItemCardConditions"
+            showValueListModal={showValueListModal}
           />
         </EuiFlexItem>
         {formattedComments.length > 0 && (

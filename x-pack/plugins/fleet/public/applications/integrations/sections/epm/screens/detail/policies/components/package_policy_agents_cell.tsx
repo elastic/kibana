@@ -79,7 +79,7 @@ export const PackagePolicyAgentsCell = ({
     );
   }
 
-  if (!hasHelpPopover) {
+  if (!hasHelpPopover || !canAddAgents) {
     return <AddAgentButton onAddAgent={onAddAgent} canAddAgents={canAddAgents} />;
   }
 
