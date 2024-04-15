@@ -28,6 +28,7 @@ import {
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
   fetchIntegrationDashboardsFailedNotifier,
+  fetchIntegrationsFailedNotifier,
   noDatasetSelected,
 } from './notifications';
 import {
@@ -120,7 +121,11 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 onError: {
                   target: 'loaded',
-                  actions: ['notifyFetchIntegrationsFailed'],
+                  actions: [
+                    'notifyFetchIntegrationsFailed',
+                    'storeEmptyIntegrations',
+                    'storeDatasets',
+                  ],
                 },
               },
             },
@@ -368,6 +373,11 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeEmptyIntegrations: assign((_context) => {
+          return {
+            integrations: [],
+          };
+        }),
         storeIntegrationDashboards: assign((context, event) => {
           return 'data' in event && 'dashboards' in event.data
             ? {
@@ -422,6 +432,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
+      notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchIntegrationsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (context) =>
