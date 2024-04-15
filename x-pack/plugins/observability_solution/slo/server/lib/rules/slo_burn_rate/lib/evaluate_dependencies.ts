@@ -15,7 +15,7 @@ import { BurnRateRuleParams } from '../types';
 import { SLO } from '../../../../domain/models';
 import { evaluate } from './evaluate';
 
-interface ActiveRule {
+export interface ActiveRule {
   rule: Rule<BurnRateRuleParams>;
   slo: SLO;
   instanceIdsToSuppress: string[];

@@ -6,11 +6,9 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { ActiveRule } from './evaluate_dependencies';
 
-export function shouldSuppressInstanceId(
-  results: EvaluateDependenciesResponse['activeRules'],
-  instanceId: string
-) {
+export function shouldSuppressInstanceId(results: ActiveRule[], instanceId: string) {
   return results.reduce((acc, res) => {
     if (acc === true) return acc;
     if (res.suppressAll === true) return true;
