@@ -198,34 +198,38 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     [handleOutputFilterUpdates]
   );
 
+  const initializeUrlState = useCallback(() => {
+    try {
+      if (!Array.isArray(controlsUrlState)) {
+        throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
+      }
+      const storedControlGroupInput = getStoredControlInput();
+      if (storedControlGroupInput) {
+        const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
+        if (
+          controlsUrlState.length &&
+          !isEqualWith(
+            panelsFormatted,
+            controlsUrlState,
+            getFilterControlsComparator('fieldName', 'title')
+          )
+        ) {
+          setShowFiltersChangedBanner(true);
+          switchToEditMode();
+        }
+      }
+      setControlsFromUrl(controlsUrlState);
+    } catch (err) {
+      // if there is an error ignore url Param
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+    setUrlStateInitialized(true);
+  }, [controlsUrlState, getStoredControlInput, switchToEditMode]);
+
   useEffect(() => {
     if (controlsUrlState && !urlStateInitialized) {
-      try {
-        if (!Array.isArray(controlsUrlState)) {
-          throw new Error(URL_PARAM_ARRAY_EXCEPTION_MSG);
-        }
-        const storedControlGroupInput = getStoredControlInput();
-        if (storedControlGroupInput) {
-          const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
-          if (
-            controlsUrlState.length &&
-            !isEqualWith(
-              panelsFormatted,
-              controlsUrlState,
-              getFilterControlsComparator('fieldName', 'title')
-            )
-          ) {
-            setShowFiltersChangedBanner(true);
-            switchToEditMode();
-          }
-        }
-        setControlsFromUrl(controlsUrlState);
-      } catch (err) {
-        // if there is an error ignore url Param
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-      setUrlStateInitialized(true);
+      initializeUrlState();
     }
 
     if (!controlGroup) {
@@ -251,6 +255,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     debouncedFilterUpdates,
     getStoredControlInput,
     handleInputUpdates,
+    initializeUrlState,
     switchToEditMode,
     urlStateInitialized,
   ]);
