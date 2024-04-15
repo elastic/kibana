@@ -50,17 +50,17 @@ export const fetchMeteringStats = (
     { headers: { 'es-secondary-authorization': secondaryAuthorization } }
   );
 
-export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[] | undefined) =>
-  meteringStatsIndices?.reduce<Record<string, MeteringStatsIndex>>((acc, curr) => {
+export const parseMeteringStats = (meteringStatsIndices: MeteringStatsIndex[]) =>
+  meteringStatsIndices.reduce<Record<string, MeteringStatsIndex>>((acc, curr) => {
     acc[curr.name] = curr;
     return acc;
   }, {});
 
 export const pickAvailableMeteringStats = (
-  indicesBuckets: Array<{ key: string }> | undefined,
-  meteringStatsIndices: Record<string, MeteringStatsIndex> | undefined
+  indicesBuckets: Array<{ key: string }>,
+  meteringStatsIndices: Record<string, MeteringStatsIndex>
 ) =>
-  indicesBuckets?.reduce((acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
+  indicesBuckets.reduce((acc: Record<string, MeteringStatsIndex>, { key }: { key: string }) => {
     if (meteringStatsIndices?.[key]) {
       acc[key] = {
         name: meteringStatsIndices?.[key].name,

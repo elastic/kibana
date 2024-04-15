@@ -168,6 +168,63 @@ describe('getIndexStatsRoute route', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(mockIndices);
   });
+
+  test('returns an empty object when "meteringStats indices" are not available', async () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: `auditbeat-*`,
+      },
+      query: {
+        isILMAvailable: false,
+        startDate: `now-7d`,
+        endDate: `now`,
+      },
+    });
+
+    const mockIndices = {};
+    (fetchMeteringStats as jest.Mock).mockResolvedValue({ indices: undefined });
+    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+      aggregations: undefined,
+    });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual(mockIndices);
+    expect(fetchAvailableIndices).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      `No metering stats indices found under pattern: auditbeat-*`
+    );
+  });
+
+  test('returns an empty object when "availableIndices" indices are not available', async () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: `auditbeat-*`,
+      },
+      query: {
+        isILMAvailable: false,
+        startDate: `now-7d`,
+        endDate: `now`,
+      },
+    });
+
+    const mockIndices = {};
+    (fetchMeteringStats as jest.Mock).mockResolvedValue(mockMeteringStatsIndex);
+    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+      aggregations: undefined,
+    });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual(mockIndices);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `No available indices found under pattern: auditbeat-*, in the given date range: now-7d - now`
+    );
+  });
 });
 
 describe('request validation', () => {

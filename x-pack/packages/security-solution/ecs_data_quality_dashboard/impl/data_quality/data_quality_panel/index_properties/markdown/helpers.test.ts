@@ -424,24 +424,21 @@ describe('helpers', () => {
   describe('getSummaryTableMarkdownHeader', () => {
     test('it returns the expected header', () => {
       const isILMAvailable = true;
-      const displayDocSize = true;
-      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
         '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|'
       );
     });
 
     test('it returns the expected header when isILMAvailable is false', () => {
       const isILMAvailable = false;
-      const displayDocSize = false;
-      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
         '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
       );
     });
 
     test('it returns the expected header when displayDocSize is false', () => {
       const isILMAvailable = false;
-      const displayDocSize = false;
-      expect(getSummaryTableMarkdownHeader(isILMAvailable, displayDocSize)).toEqual(
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
         '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
       );
     });

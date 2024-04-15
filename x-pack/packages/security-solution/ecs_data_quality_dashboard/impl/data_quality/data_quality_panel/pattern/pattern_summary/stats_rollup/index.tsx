@@ -120,7 +120,7 @@ const StatsRollupComponent: React.FC<Props> = ({
         </IndicesStatContainer>
       </EuiFlexItem>
 
-      {Number.isInteger(sizeInBytes) && (
+      {sizeInBytes != null && (
         <EuiFlexItem grow={false}>
           <IndicesStatContainer>
             <EuiToolTip

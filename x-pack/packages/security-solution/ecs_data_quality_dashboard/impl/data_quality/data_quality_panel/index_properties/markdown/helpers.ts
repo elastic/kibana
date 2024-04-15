@@ -218,9 +218,7 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
   }
 };
 
-export const getSummaryTableMarkdownHeader = (
-  includeDocSize: boolean
-): string =>
+export const getSummaryTableMarkdownHeader = (includeDocSize: boolean): string =>
   includeDocSize
     ? `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
@@ -293,7 +291,7 @@ export const getSummaryTableMarkdownComment = ({
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  `${getSummaryTableMarkdownHeader(isILMAvailable, Number.isInteger(sizeInBytes))}
+  `${getSummaryTableMarkdownHeader(isILMAvailable)}
 ${getSummaryTableMarkdownRow({
   docsCount,
   formatBytes,

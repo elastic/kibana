@@ -287,8 +287,6 @@ export const getSizeInBytes = ({
   stats: Record<string, MeteringStatsIndex> | null;
 }): number | undefined => (stats && stats[indexName]?.size_in_bytes) ?? undefined;
 
-export const getFallbackValue = (fallback: boolean) => (fallback ? 0 : undefined);
-
 export const getTotalDocsCount = ({
   indexNames,
   stats,

@@ -33,7 +33,6 @@ import {
 } from './helpers';
 import {
   getDocsCount,
-  getFallbackValue,
   getIndexId,
   getIndexNames,
   getTotalDocsCount,
@@ -273,8 +272,7 @@ const PatternComponent: React.FC<Props> = ({
         indices: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }).length,
         pattern,
         results: undefined,
-        sizeInBytes:
-          isILMAvailable
+        sizeInBytes: isILMAvailable
           ? getTotalSizeInBytes({
               indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
               stats,
