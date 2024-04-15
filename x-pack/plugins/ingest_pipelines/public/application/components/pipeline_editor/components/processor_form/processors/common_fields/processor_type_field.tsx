@@ -29,11 +29,10 @@ import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../s
 
 export const extractProcessorDetails = flow(
   Object.entries,
-  map(([type, { label, forLicenseAtLeast, category, typeDescription }]) => ({
+  map(([type, { label, forLicenseAtLeast, category }]) => ({
     label,
     value: type,
     category,
-    typeDescription,
     ...(forLicenseAtLeast ? { forLicenseAtLeast } : {}),
   })),
   (arr) => arr.sort((a, b) => a.label.localeCompare(b.label))
@@ -42,8 +41,11 @@ export const extractProcessorDetails = flow(
 interface ProcessorTypeAndLabel {
   value: string;
   label: string;
-  category?: string;
 }
+
+type ProcessorWithCategory = ProcessorTypeAndLabel & {
+  category: string;
+};
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   return (
@@ -57,7 +59,7 @@ export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   );
 };
 
-const groupProcessorsByCategory = (filteredProcessors: ProcessorTypeAndLabel[]) => {
+export const groupProcessorsByCategory = (filteredProcessors: ProcessorWithCategory[]) => {
   return _map(_groupBy(filteredProcessors, 'category'), (options, optionLabel) => ({
     label: optionLabel,
     options: _map(options, ({ label, value }) => ({
