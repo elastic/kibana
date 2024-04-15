@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-import { FullValidationConfig } from '@kbn/core-http-server';
+import { VersionedRouteValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -110,7 +110,7 @@ const FieldDescriptorSchema = schema.object({
   defaultFormatter: schema.maybe(schema.string()),
 });
 
-export const validate: FullValidationConfig<any, any, any> = {
+export const validate: VersionedRouteValidation<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request

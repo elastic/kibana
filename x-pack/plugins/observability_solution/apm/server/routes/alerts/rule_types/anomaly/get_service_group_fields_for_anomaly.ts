@@ -19,8 +19,8 @@ import {
 import { alertingEsClient } from '../../alerting_es_client';
 import {
   getApmAlertSourceFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 
 export async function getServiceGroupFieldsForAnomaly({
   apmIndices,
@@ -64,7 +64,7 @@ export async function getServiceGroupFieldsForAnomaly({
         },
       },
       aggs: {
-        ...getServiceGroupFieldsAgg({
+        ...getApmAlertSourceFieldsAgg({
           sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
         }),
       },
@@ -75,6 +75,7 @@ export async function getServiceGroupFieldsForAnomaly({
     scopedClusterClient,
     params,
   });
+
   if (!response.aggregations) {
     return {};
   }

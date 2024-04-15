@@ -13,6 +13,7 @@ import { TestProviders } from '../mock/test_providers/test_providers';
 
 jest.mock('react-use', () => ({
   useLocalStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
+  useSessionStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
 }));
 
 describe('AssistantContext', () => {

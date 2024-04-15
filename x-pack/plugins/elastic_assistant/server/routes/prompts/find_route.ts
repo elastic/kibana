@@ -8,10 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import {
   FindPromptsRequestQuery,
   FindPromptsResponse,
@@ -19,8 +16,9 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { SearchEsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
-import { transformESToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
+import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
@@ -33,7 +31,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindPromptsRequestQuery),
@@ -45,10 +43,18 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
 
         try {
           const { query } = request;
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const license = ctx.licensing.license;
+          if (!hasAIAssistantLicense(license)) {
+            return response.forbidden({
+              body: {
+                message: UPGRADE_LICENSE_MESSAGE,
+              },
+            });
+          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
-          const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+          const result = await dataClient?.findDocuments<EsPromptsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -63,7 +69,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESToPrompts(result.data),
+                data: transformESSearchToPrompts(result.data),
               },
             });
           }

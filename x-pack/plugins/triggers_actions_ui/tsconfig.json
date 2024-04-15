@@ -61,7 +61,10 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }

@@ -2266,6 +2266,10 @@
             "RecursivePartial",
             "<",
             "Theme",
+            ">; useSparklineOverrides: () => ",
+            "RecursivePartial",
+            "<",
+            "Theme",
             ">; useChartsBaseTheme: () => ",
             "Theme",
             "; }"
