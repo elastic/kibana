@@ -35,6 +35,7 @@ import {
   SystemIntegrationBanner,
   SystemIntegrationBannerState,
 } from './system_integration_banner';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 export function InstallElasticAgent() {
   const {
@@ -173,6 +174,8 @@ export function InstallElasticAgent() {
       }, 2000);
     }
   }, [progressSucceded, refetchProgress]);
+
+  useFlowProgressTelemetry(progressData?.progress, 'system_logs');
 
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;
