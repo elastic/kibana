@@ -27,6 +27,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
+    hasUpdateAIAssistantAnonymization: true,
     isAssistantEnabled: true,
   };
 
