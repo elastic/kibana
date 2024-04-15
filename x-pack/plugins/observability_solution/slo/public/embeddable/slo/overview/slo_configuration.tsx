@@ -107,6 +107,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
         <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
           <FormattedMessage
             id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
