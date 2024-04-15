@@ -76,14 +76,14 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
             })}
           >
             <EuiLink
-              color="success"
+              color="primary"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                 defaultMessage: 'Click to send request',
               })}
             >
-              <EuiIcon type="playFilled" />
+              <EuiIcon type="play" />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
