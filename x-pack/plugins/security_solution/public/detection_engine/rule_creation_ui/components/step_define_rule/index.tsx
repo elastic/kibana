@@ -1044,30 +1044,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </EuiToolTip>
             </RuleTypeEuiFormRow>
 
-            <EuiToolTip
-              position="right"
-              content={
-                areSuppressionFieldsDisabledBySequence
-                  ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                  : null
-              }
+            <RuleTypeEuiFormRow
+              $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+              data-test-subj="alertSuppressionInput"
             >
-              <RuleTypeEuiFormRow
-                $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
-                data-test-subj="alertSuppressionInput"
-              >
-                <UseField
-                  path="groupByFields"
-                  component={MultiSelectFieldsAutocomplete}
-                  componentProps={{
-                    browserFields: termsAggregationFields,
-                    disabledText: alertSuppressionUpsellingMessage,
-                    isDisabled:
-                      !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
-                  }}
-                />
-              </RuleTypeEuiFormRow>
-            </EuiToolTip>
+              <UseField
+                path="groupByFields"
+                component={MultiSelectFieldsAutocomplete}
+                componentProps={{
+                  browserFields: termsAggregationFields,
+                  isDisabled:
+                    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
+                  disabledText: areSuppressionFieldsDisabledBySequence
+                    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
+                    : alertSuppressionUpsellingMessage,
+                }}
+              />
+            </RuleTypeEuiFormRow>
 
             <IntendedRuleTypeEuiFormRow
               $isVisible={isAlertSuppressionEnabled}
