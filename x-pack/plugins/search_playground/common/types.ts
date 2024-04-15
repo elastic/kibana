@@ -43,6 +43,10 @@ export interface ChatRequestData {
 }
 
 export enum ErrorCode {
-  INVALID_API_KEY = 'invalid_api_key',
-  UNCAUGHT_EXCEPTION = 'uncaught_exception',
+  API_KEY_ERROR = 'api_key_error',
+  UNSUPPORTED_LOCATION_ERROR = 'unsupported_location_error',
+  RATE_LIMIT_OR_QUOTA_ERROR = 'rate_limit_or_quota_error',
+  ENGINE_OVERLOADED_ERROR = 'engine_overloaded_error',
+  UNCAUGHT_EXCEPTION_ERROR = 'uncaught_exception_error',
+  ENGINE_OVERLOADED = 'ENGINE_OVERLOADED',
 }

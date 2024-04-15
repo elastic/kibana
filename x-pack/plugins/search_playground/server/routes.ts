@@ -24,7 +24,12 @@ import {
   ErrorCode,
 } from './types';
 import { createError } from './utils/create_error';
-import { isInvalidApiKeyException } from './utils/exceptions';
+import {
+  isEngineOverloadError,
+  isInvalidApiKeyException,
+  isInvalidLocationSupport,
+  isRateLimiteOrQuotaError,
+} from './utils/exceptions';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -94,93 +99,119 @@ export function defineRoutes({
     errorHandler(async (context, request, response) => {
       const [, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
+      const aiClient = Assist({
+        es_client: client.asCurrentUser,
+      } as AssistClientOptionsWithClient);
+      const { messages, data } = await request.body;
+      const abortController = new AbortController();
+      const abortSignal = abortController.signal;
+      const model = new ActionsClientChatOpenAI({
+        actions,
+        logger: log,
+        request,
+        connectorId: data.connector_id,
+        model: data.summarization_model,
+        traceId: uuidv4(),
+        signal: abortSignal,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+      });
+
+      let sourceFields = {};
+
       try {
-        const aiClient = Assist({
-          es_client: client.asCurrentUser,
-        } as AssistClientOptionsWithClient);
-        const { messages, data } = await request.body;
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-        const model = new ActionsClientChatOpenAI({
-          actions,
-          logger: log,
-          request,
-          connectorId: data.connector_id,
-          model: data.summarization_model,
-          traceId: uuidv4(),
-          signal: abortSignal,
-          // prevents the agent from retrying on failure
-          // failure could be due to bad connector, we should deliver that result to the client asap
-          maxRetries: 0,
-        });
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        log.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
 
-        let sourceFields = {};
+      const chain = ConversationalChain({
+        model,
+        rag: {
+          index: data.indices,
+          retriever: createRetriever(data.elasticsearch_query),
+          content_field: sourceFields,
+          size: Number(data.doc_size),
+        },
+        prompt: Prompt(data.prompt, {
+          citations: data.citations,
+          context: true,
+          type: 'openai',
+        }),
+      });
 
-        try {
-          sourceFields = JSON.parse(data.source_fields);
-        } catch (e) {
-          log.error('Failed to parse the source fields', e);
-          throw Error(e);
-        }
+      let stream: ReadableStream<Uint8Array>;
 
-        const chain = ConversationalChain({
-          model,
-          rag: {
-            index: data.indices,
-            retriever: createRetriever(data.elasticsearch_query),
-            content_field: sourceFields,
-            size: Number(data.doc_size),
-          },
-          prompt: Prompt(data.prompt, {
-            citations: data.citations,
-            context: true,
-            type: 'openai',
-          }),
-        });
-
-        const stream = await chain.stream(aiClient, messages);
-
-        const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
-
-        const reader = (stream as ReadableStream).getReader();
-        const textDecoder = new TextDecoder();
-
-        async function pushStreamUpdate() {
-          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-            if (done) {
-              end();
-              return;
-            }
-            push(textDecoder.decode(value));
-            pushStreamUpdate();
-          });
-        }
-
-        pushStreamUpdate();
-
-        return response.ok(responseWithHeaders);
+      try {
+        stream = await chain.stream(aiClient, messages);
       } catch (error) {
         log.error('Failed to create the chat stream', error);
         if (isInvalidApiKeyException(error)) {
           return createError({
-            errorCode: ErrorCode.INVALID_API_KEY,
-            message: i18n.translate('xpack.searchPlayground.server.routes.invalidApiKeyError', {
-              defaultMessage: 'Incorrect API key provided',
+            errorCode: ErrorCode.API_KEY_ERROR,
+            message: i18n.translate('xpack.searchPlayground.server.routes.apiKeyError', {
+              defaultMessage:
+                'Invalid or Incorrect API Provided. If API Keys are valid, please check if you are a member of an organization',
             }),
             response,
             statusCode: 403,
           });
-        } else {
+        } else if (isInvalidLocationSupport(error)) {
           return createError({
-            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-            message: i18n.translate('xpack.searchPlayground.server.routes.uncaughtExceptionError', {
-              defaultMessage: 'Playground encountered an error.',
+            errorCode: ErrorCode.UNSUPPORTED_LOCATION_ERROR,
+            message: i18n.translate(
+              'xpack.searchPlayground.server.routes.unsupportedLocationError',
+              {
+                defaultMessage: 'Country, region, or territory not supported',
+              }
+            ),
+            response,
+            statusCode: 403,
+          });
+        } else if (isRateLimiteOrQuotaError(error)) {
+          return createError({
+            errorCode: ErrorCode.RATE_LIMIT_OR_QUOTA_ERROR,
+            message: i18n.translate('xpack.searchPlayground.server.routes.rateLimitOrQuotaError', {
+              defaultMessage: 'Rate liomit reached or you exceeded your current quota for requests',
             }),
             response,
-            statusCode: 502,
+            statusCode: 429,
           });
+        } else if (isEngineOverloadError(error)) {
+          return createError({
+            errorCode: ErrorCode.ENGINE_OVERLOADED,
+            message: i18n.translate('xpack.searchPlayground.server.routes.engineOverloaded', {
+              defaultMessage: ' The engine is currently overloaded, please try again later',
+            }),
+            response,
+            statusCode: 503,
+          });
+        } else {
+          throw error;
         }
       }
+
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
+      const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
+
+      async function pushStreamUpdate() {
+        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          if (done) {
+            end();
+            return;
+          }
+          push(textDecoder.decode(value));
+          pushStreamUpdate();
+        });
+      }
+
+      pushStreamUpdate();
+
+      return response.ok(responseWithHeaders);
     })
   );
 

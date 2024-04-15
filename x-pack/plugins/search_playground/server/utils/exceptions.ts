@@ -12,3 +12,12 @@ export interface SearchPlaygroundOpenAIResponseError {
 
 export const isInvalidApiKeyException = (error: SearchPlaygroundOpenAIResponseError) =>
   error.status === 401;
+
+export const isInvalidLocationSupport = (error: SearchPlaygroundOpenAIResponseError) =>
+  error.status === 403;
+
+export const isRateLimiteOrQuotaError = (error: SearchPlaygroundOpenAIResponseError) =>
+  error.status === 429;
+
+export const isEngineOverloadError = (error: SearchPlaygroundOpenAIResponseError) =>
+  error.status === 503;
