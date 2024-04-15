@@ -20,6 +20,7 @@ import type {
   SearchHit,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   NormalizedExternalConnectorClientExecuteOptions,
   NormalizedExternalConnectorClient,
@@ -42,12 +43,17 @@ import type {
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityEsDoc,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
 } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientValidateRequestResponse,
@@ -288,6 +294,84 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       if (!error) {
         try {
           await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    if (
+      !actionRequestDoc.error &&
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
+    ) {
+      await this.writeActionResponseToEndpointIndex({
+        actionId: actionRequestDoc.EndpointActions.action_id,
+        agentId: actionRequestDoc.agent.id,
+        data: {
+          command: actionRequestDoc.EndpointActions.data.command,
+        },
+      });
+    }
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async getFile(
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    // FIXME:PT define meta for get-file
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      {}
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'get-file',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.FETCH_AGENT_FILES, {
+            agentUUID: actionRequest.endpoint_ids[0],
+            files: [actionRequest.parameters.path],
+            zipPassCode: SENTINEL_ONE_ZIP_PASSCODE,
+          });
         } catch (err) {
           error = err;
         }
