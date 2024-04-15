@@ -111,7 +111,11 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
 
   private functionCache: Map<string, any>;
 
-  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>, functionCache: Map<string, any> = new Map()) {
+  constructor(
+    private readonly logger?: Logger,
+    state?: ExecutorState<Context>,
+    functionCache: Map<string, any> = new Map()
+  ) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
