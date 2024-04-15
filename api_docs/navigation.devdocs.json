@@ -1059,8 +1059,8 @@
             "Add a solution navigation to the header nav switcher."
           ],
           "signature": [
-            "(solutionNavigation: ",
-            "SolutionNavigation",
+            "(solutionNavigationAgg: ",
+            "AddSolutionNavigationArg",
             ") => void"
           ],
           "path": "src/plugins/navigation/public/types.ts",
@@ -1070,12 +1070,12 @@
             {
               "parentPluginId": "navigation",
               "id": "def-public.NavigationPublicStart.addSolutionNavigation.$1",
-              "type": "Object",
+              "type": "CompoundType",
               "tags": [],
-              "label": "solutionNavigation",
+              "label": "solutionNavigationAgg",
               "description": [],
               "signature": [
-                "SolutionNavigation"
+                "AddSolutionNavigationArg"
               ],
               "path": "src/plugins/navigation/public/types.ts",
               "deprecated": false,
