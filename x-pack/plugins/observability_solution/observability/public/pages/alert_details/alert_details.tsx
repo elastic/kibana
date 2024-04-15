@@ -43,7 +43,6 @@ import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { AlertOverview } from '../../components/alert_overview/alert_overview';
-import PageNotFound from '../404';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -130,10 +129,6 @@ export function AlertDetails() {
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
-  }
-
-  if (!alertDetail) {
-    return <PageNotFound />;
   }
 
   if (!isLoading && !alertDetail)

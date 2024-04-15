@@ -27,11 +27,11 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    it('should show 404 page when the alert does not exist', async () => {
+    it('should show error when the alert does not exist', async () => {
       await observability.alerts.common.navigateToAlertDetails('deleted-alert-Id');
       await retry.waitFor(
-        'The 404 - Not found page to be visible',
-        async () => await testSubjects.exists('pageNotFound')
+        'Error message to be visible',
+        async () => await testSubjects.exists('alertDetailsError')
       );
     });
 
