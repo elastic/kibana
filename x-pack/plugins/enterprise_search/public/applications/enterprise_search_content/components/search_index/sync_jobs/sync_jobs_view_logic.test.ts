@@ -23,7 +23,11 @@ import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
+  cancelSyncJobLoading: false,
+  cancelSyncJobStatus: Status.IDLE,
   connectorId: null,
+  selectedSyncJobCategory: 'content',
+  syncJobToCancel: null,
   syncJobs: [],
   syncJobsData: undefined,
   syncJobsLoading: true,
@@ -33,6 +37,7 @@ const DEFAULT_VALUES = {
     totalItemCount: 0,
   },
   syncJobsStatus: Status.IDLE,
+  syncTriggeredLocally: false,
 };
 
 describe('SyncJobsViewLogic', () => {
