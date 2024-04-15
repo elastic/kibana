@@ -14,6 +14,8 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
   SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesParams,
+  SentinelOneGetActivitiesResponse,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -22,8 +24,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { SENTINEL_ONE_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
-  NormalizedExternalConnectorClientExecuteOptions,
   NormalizedExternalConnectorClient,
+  NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
@@ -47,6 +49,7 @@ import type {
   ResponseActionGetFileParameters,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityEsDoc,
+  SentinelOneGetFileRequestMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
 } from '../../../../../../common/endpoint/types';
@@ -116,10 +119,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
-  private async sendAction(
+  private async sendAction<T = unknown>(
     actionType: SUB_ACTION,
     actionParams: object
-  ): Promise<ActionTypeExecutorResult<unknown>> {
+  ): Promise<ActionTypeExecutorResult<T>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
         subAction: actionType,
@@ -147,7 +150,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
 
-    return actionSendResponse;
+    return actionSendResponse as ActionTypeExecutorResult<T>;
   }
 
   /** Gets agent details directly from SentinelOne */
@@ -351,11 +354,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    // FIXME:PT define meta for get-file
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       undefined,
       {},
-      {}
+      Omit<SentinelOneGetFileRequestMeta, keyof SentinelOneActionRequestCommonMeta>
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -364,6 +366,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
+      const timestamp = new Date().toISOString();
 
       if (!error) {
         try {
@@ -381,6 +384,53 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!this.options.isAutomated && error) {
         throw error;
+      }
+
+      if (!error) {
+        const { id: agentId } = await this.getAgentDetails(actionRequest.endpoint_ids[0]);
+
+        // TODO:PT should we retry here? case it takes a bit of time to add the entry to sentinelone activity log?
+
+        const activitySearchCriteria: SentinelOneGetActivitiesParams = {
+          // Activity type for fetching a file from a host machine in SentinelOne:
+          // {
+          //   "id": 81
+          //   "action": "User Requested Fetch Files",
+          //   "descriptionTemplate": "The management user {{ username }} initiated a fetch file command to the agent {{ computer_name }} ({{ external_ip }}).",
+          // },
+          activityTypes: '81',
+          limit: 1,
+          sortBy: 'createdAt',
+          sortOrder: 'asc',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          createdAt__gte: timestamp,
+          agentIds: agentId,
+        };
+
+        // Fetch the Activity log entry for this get-file request and store needed data
+        const activityLogSearchResponse = await this.sendAction<SentinelOneGetActivitiesResponse>(
+          SUB_ACTION.GET_ACTIVITIES,
+          activitySearchCriteria
+        );
+
+        this.log.debug(
+          `Search of activity log with:\n${stringify(
+            activitySearchCriteria
+          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
+        );
+
+        if (activityLogSearchResponse.data?.data.length) {
+          const activityLogItem = activityLogSearchResponse.data?.data[0];
+
+          reqIndexOptions.meta = {
+            commandBatchUuid: activityLogItem?.data.commandBatchUuid,
+            activityId: activityLogItem?.id,
+          };
+        } else {
+          this.log.warn(
+            `Unable to find a fetch file command entry in SentinelOne activity log. May be unable to complete response action`
+          );
+        }
       }
     }
 
