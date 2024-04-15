@@ -345,7 +345,20 @@ export function ChatBody({
               className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
-                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+                <WelcomeMessage
+                  connectors={connectors}
+                  knowledgeBase={knowledgeBase}
+                  onSelectPrompt={(message) =>
+                    next(
+                      messages.concat([
+                        {
+                          '@timestamp': new Date().toISOString(),
+                          message: { content: message, role: MessageRole.User },
+                        },
+                      ])
+                    )
+                  }
+                />
               ) : (
                 <ChatTimeline
                   messages={messages}

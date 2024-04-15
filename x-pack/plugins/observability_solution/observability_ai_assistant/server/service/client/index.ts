@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, merge, noop, omit, pick, take } from 'lodash';
+import { findLastIndex, last, merge, noop, omit, pick, take } from 'lodash';
 import {
   catchError,
   filter,
@@ -157,18 +157,12 @@ export class ObservabilityAIAssistantClient {
     conversationId?: string;
     title?: string;
     instructions?: Array<string | UserInstruction>;
-    useSimulatedFunctionCalling?: boolean;
+    simulateFunctionCalling?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const {
-          messages,
-          connectorId,
-          signal,
-          functionClient,
-          persist,
-          useSimulatedFunctionCalling,
-        } = params;
+        const { messages, connectorId, signal, functionClient, persist, simulateFunctionCalling } =
+          params;
 
         const conversationId = params.conversationId || '';
         const title = params.title || '';
@@ -184,7 +178,7 @@ export class ObservabilityAIAssistantClient {
         const chatWithTokenCountIncrement: ChatFn = async (name, options) => {
           const response$ = await this.chat(name, {
             ...options,
-            useSimulatedFunctionCalling,
+            simulateFunctionCalling,
           });
 
           const incrementTokenCount = () => {
@@ -226,20 +220,24 @@ export class ObservabilityAIAssistantClient {
 
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
-
           const isUserMessage = lastMessage?.message.role === MessageRole.User;
 
-          const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+          const indexOfLastUserMessage = findLastIndex(
+            nextMessages,
+            ({ message }) => message.role === MessageRole.User && !message.name
+          );
 
-          const contextFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
+          const hasNoContextRequestAfterLastUserMessage =
+            indexOfLastUserMessage !== -1 &&
+            nextMessages
+              .slice(indexOfLastUserMessage)
+              .every(({ message }) => message.function_call?.name !== 'context');
 
-          const isAssistantMessageWithFunctionRequest =
-            lastMessage?.message.role === MessageRole.Assistant &&
-            !!lastMessage?.message.function_call?.name;
+          const shouldInjectContext =
+            functionClient.hasFunction('context') && hasNoContextRequestAfterLastUserMessage;
 
-          if (contextFirst) {
-            const addedMessage = {
+          if (shouldInjectContext) {
+            const contextFunctionRequest = {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
@@ -258,26 +256,26 @@ export class ObservabilityAIAssistantClient {
             subscriber.next({
               type: StreamingChatResponseEventType.MessageAdd,
               id: v4(),
-              message: addedMessage,
+              message: contextFunctionRequest,
             });
 
-            return await next(nextMessages.concat(addedMessage));
+            return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
             const functions =
               numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
 
+            const spanName =
+              lastMessage.message.name && lastMessage.message.name !== 'context'
+                ? 'function_response'
+                : 'user_message';
+
             const response$ = (
-              await chatWithTokenCountIncrement(
-                lastMessage.message.name && lastMessage.message.name !== 'context'
-                  ? 'function_response'
-                  : 'user_message',
-                {
-                  messages: nextMessages,
-                  connectorId,
-                  signal,
-                  functions,
-                }
-              )
+              await chatWithTokenCountIncrement(spanName, {
+                messages: nextMessages,
+                connectorId,
+                signal,
+                functions,
+              })
             ).pipe(
               emitWithConcatenatedMessage(),
               shareReplay(),
@@ -310,9 +308,10 @@ export class ObservabilityAIAssistantClient {
             );
           }
 
-          if (isAssistantMessageWithFunctionRequest) {
-            const functionCallName = lastMessage.message.function_call!.name;
+          const functionCallName = lastMessage?.message.function_call?.name;
+          const isAssistantMessage = lastMessage?.message.role === MessageRole.Assistant;
 
+          if (isAssistantMessage && functionCallName) {
             if (functionClient.hasAction(functionCallName)) {
               this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
 
@@ -584,14 +583,14 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
-      useSimulatedFunctionCalling?: boolean;
+      simulateFunctionCalling?: boolean;
     }
   ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
@@ -616,7 +615,7 @@ export class ObservabilityAIAssistantClient {
             functions,
             functionCall,
             logger: this.dependencies.logger,
-            useSimulatedFunctionCalling,
+            simulateFunctionCalling,
           });
           break;
 

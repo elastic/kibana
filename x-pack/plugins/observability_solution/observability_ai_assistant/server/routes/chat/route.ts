@@ -45,7 +45,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<Readable> => {
     const { request, params, service, context } = resources;
 
-    const [client, cloudStart, useSimulatedFunctionCalling] = await Promise.all([
+    const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
       service.getClient({ request }),
       resources.plugins.cloud?.start(),
       (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
@@ -75,7 +75,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
             functionCall,
           }
         : {}),
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
@@ -114,7 +114,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<Readable> => {
     const { request, params, service, context } = resources;
 
-    const [client, cloudStart, useSimulatedFunctionCalling] = await Promise.all([
+    const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
       service.getClient({ request }),
       resources.plugins.cloud?.start() || Promise.resolve(undefined),
       (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
@@ -160,7 +160,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       functionClient,
       responseLanguage,
       instructions,
-      useSimulatedFunctionCalling,
+      simulateFunctionCalling,
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));

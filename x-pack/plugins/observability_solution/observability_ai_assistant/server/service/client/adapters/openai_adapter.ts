@@ -82,7 +82,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
   functions,
   functionCall,
   logger,
-  useSimulatedFunctionCalling,
+  simulateFunctionCalling,
 }) => {
   const promptTokens = getOpenAIPromptTokenCount({ messages, functions });
 
@@ -101,7 +101,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
 
       let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
 
-      if (useSimulatedFunctionCalling) {
+      if (simulateFunctionCalling) {
         request = {
           messages: messagesToOpenAI(
             getMessagesWithSimulatedFunctionCalling({
@@ -143,7 +143,7 @@ export const createOpenAiAdapter: LlmApiAdapterFactory = ({
     streamIntoObservable: (readable) => {
       return eventsourceStreamIntoObservable(readable).pipe(
         processOpenAiStream({ promptTokenCount: promptTokens, logger }),
-        useSimulatedFunctionCalling
+        simulateFunctionCalling
           ? parseInlineFunctionCalls({
               logger,
             })
