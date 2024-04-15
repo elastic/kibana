@@ -162,9 +162,9 @@ export const installPackageWithVersion = (integration: string, version: string) 
 };
 
 const extractSemanticVersion = (str: string) => {
-  const match = str.match(/(\d+\.\d+\.\d+)/);
+  const match = str.match(/(Managerv\d+\.\d+\.\d+)/);
   if (match && match[1]) {
-    return match[1];
+    return match[1].replace('Managerv', '');
   } else {
     return null; // Return null if no match found
   }
