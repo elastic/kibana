@@ -16,7 +16,7 @@ import { useInternalStateSelector } from '../../services/discover_internal_state
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { getTopNavLinks } from './get_top_nav_links';
+import { useTopNavLinks } from './get_top_nav_links';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -50,27 +50,15 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        isTextBased,
-        adHocDataViews,
-        topNavCustomization,
-      }),
-    [
-      adHocDataViews,
-      dataView,
-      isTextBased,
-      onOpenInspector,
-      services,
-      stateContainer,
-      topNavCustomization,
-    ]
-  );
+  const topNavMenu = useTopNavLinks({
+    dataView,
+    services,
+    state: stateContainer,
+    onOpenInspector,
+    isTextBased,
+    adHocDataViews,
+    topNavCustomization,
+  });
 
   return {
     topNavMenu,

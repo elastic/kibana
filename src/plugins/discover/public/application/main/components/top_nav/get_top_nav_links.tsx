@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { copyToClipboard } from '@elastic/eui';
+import { useState } from 'react';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -23,7 +24,7 @@ import type { TopNavCustomization } from '../../../../customizations';
 /**
  * Helper function to build the top nav links
  */
-export const getTopNavLinks = ({
+export const useTopNavLinks = ({
   dataView,
   services,
   state,
@@ -40,6 +41,7 @@ export const getTopNavLinks = ({
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
+  const [linkCopied, setLinkCopied] = useState(false);
   const alerts = {
     id: 'alerts',
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
@@ -221,13 +223,21 @@ export const getTopNavLinks = ({
     label: i18n.translate('discover.localMenu.shareTitle', {
       defaultMessage: 'Copy link',
     }),
-    description: i18n.translate('discover.localMenu.shareSearchDescription', {
-      defaultMessage: 'Copy link to clipboard',
-    }),
-    tooltip: i18n.translate('discover.localMenu.shareSearchDescription', {
-      defaultMessage: 'Copy link to clipboard',
-    }),
-    iconType: 'link',
+    description: linkCopied
+      ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
+          defaultMessage: 'Link copied to clipboard',
+        })
+      : i18n.translate('discover.localMenu.shareSearchDescription', {
+          defaultMessage: 'Copy link to clipboard',
+        }),
+    tooltip: linkCopied
+      ? i18n.translate('discover.localMenu.shareSearchDescriptionCopied', {
+          defaultMessage: 'Link copied to clipboard',
+        })
+      : i18n.translate('discover.localMenu.shareSearchDescription', {
+          defaultMessage: 'Copy link to clipboard',
+        }),
+    iconType: linkCopied ? 'check' : 'link',
     emphasize: true,
     hideLabel: true,
     testId: 'shareTopNavButtonSm',
@@ -245,16 +255,10 @@ export const getTopNavLinks = ({
           link = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
           copyToClipboard(link);
         } else {
-          link = res.shareableUrl;
           copyToClipboard(res.shareableUrl);
         }
-        // create a toast to confirm that the link has been copied to the clipboard
-        services.notifications.toasts.addSuccess({
-          title: i18n.translate('discover.localMenu.shareLinkCopied', {
-            defaultMessage: 'Link copied to clipboard',
-          }),
-          text: link,
-        });
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 2000);
       });
     },
   };
