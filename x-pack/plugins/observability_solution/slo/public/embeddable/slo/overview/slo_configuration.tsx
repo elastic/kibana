@@ -170,19 +170,21 @@ function GroupSloConfiguration({
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
-          <FormattedMessage
-            id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton data-test-subj="sloConfirmButton" onClick={onConfirmClick} fill>
-          <FormattedMessage
-            id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Save"
-          />
-        </EuiButton>
+          <EuiButton data-test-subj="sloConfirmButton" onClick={onConfirmClick} fill>
+            <FormattedMessage
+              id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );
