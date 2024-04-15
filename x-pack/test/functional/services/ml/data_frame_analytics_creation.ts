@@ -553,7 +553,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertValidationCalloutsExists() {
       await retry.tryForTime(4000, async () => {
-        await testSubjects.existOrFail('mlValidationCallout');
+        await testSubjects.existOrFail('~mlValidationCallout');
       });
     },
 
