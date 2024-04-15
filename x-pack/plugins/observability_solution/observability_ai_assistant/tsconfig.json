@@ -46,7 +46,9 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
     "@kbn/cloud-plugin",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/stack-connectors-plugin",
   ],
   "exclude": ["target/**/*"]
 }
