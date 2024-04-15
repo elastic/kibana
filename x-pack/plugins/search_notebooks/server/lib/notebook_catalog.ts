@@ -9,8 +9,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+import { NotebookDefinition } from '@kbn/ipynb';
 
-import { NotebookCatalog, NotebookInformation, NotebookDefinition } from '../types';
+import { NotebookCatalog, NotebookInformation } from '../../common/types';
 
 const NOTEBOOKS_DATA_DIR = '../data';
 

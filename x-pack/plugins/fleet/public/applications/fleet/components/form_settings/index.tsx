@@ -7,7 +7,7 @@
 
 import { ZodFirstPartyTypeKind } from 'zod';
 import React from 'react';
-import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 
@@ -55,6 +55,27 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, (settingsConfig) =
           value={fieldValue}
           onChange={handleChange}
           isInvalid={isInvalid}
+        />
+      )}
+    />
+  );
+});
+
+settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfig) => {
+  return (
+    <SettingsFieldWrapper
+      settingsConfig={settingsConfig}
+      typeName={ZodFirstPartyTypeKind.ZodString}
+      renderItem={({ fieldKey, fieldValue, handleChange, coercedSchema }: any) => (
+        <EuiSelect
+          data-test-subj={fieldKey}
+          value={fieldValue}
+          fullWidth
+          onChange={handleChange}
+          options={Object.keys(coercedSchema.enum).map((level) => ({
+            text: level,
+            value: coercedSchema.enum[level],
+          }))}
         />
       )}
     />

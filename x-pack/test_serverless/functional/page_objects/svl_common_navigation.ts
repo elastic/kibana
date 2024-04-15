@@ -310,6 +310,27 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async clickEmbeddedConsoleControlBar() {
         await testSubjects.click('consoleEmbeddedControlBar');
       },
+      async expectEmbeddedConsoleNotebooksButtonExists() {
+        await testSubjects.existOrFail('consoleEmbeddedNotebooksButton');
+      },
+      async clickEmbeddedConsoleNotebooksButton() {
+        await testSubjects.click('consoleEmbeddedNotebooksButton');
+      },
+      async expectEmbeddedConsoleNotebooksToBeOpen() {
+        await testSubjects.existOrFail('consoleEmbeddedNotebooksContainer');
+      },
+      async expectEmbeddedConsoleNotebooksToBeClosed() {
+        await testSubjects.missingOrFail('consoleEmbeddedNotebooksContainer');
+      },
+      async expectEmbeddedConsoleNotebookListItemToBeAvailable(id: string) {
+        await testSubjects.existOrFail(`console-embedded-notebook-select-btn-${id}`);
+      },
+      async clickEmbeddedConsoleNotebook(id: string) {
+        await testSubjects.click(`console-embedded-notebook-select-btn-${id}`);
+      },
+      async expectEmbeddedConsoleNotebookToBeAvailable(id: string) {
+        await testSubjects.click(`console-embedded-notebook-select-btn-${id}`);
+      },
     },
   };
 }
