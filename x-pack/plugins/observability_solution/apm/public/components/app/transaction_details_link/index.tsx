@@ -15,15 +15,22 @@ import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirec
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
+const _15_MIN_IN_MS = 15 * 60 * 1000;
+
 export function TransactionDetailsByNameLink() {
+  const currentTime = new Date();
+  const fallbackRangeFrom = new Date(currentTime.getTime() - _15_MIN_IN_MS);
+
   const {
-    query: { rangeFrom, rangeTo, transactionName, serviceName },
+    query: {
+      rangeFrom = fallbackRangeFrom.toISOString(),
+      rangeTo = currentTime.toISOString(),
+      transactionName,
+      serviceName,
+    },
   } = useApmParams('/link-to/transaction');
 
-  const { start, end } = useTimeRange({
-    rangeFrom: rangeFrom || new Date(0).toISOString(),
-    rangeTo: rangeTo || new Date().toISOString(),
-  });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data = { transaction: null }, status } = useFetcher(
     (callApmApi) => {

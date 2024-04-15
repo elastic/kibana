@@ -24,9 +24,10 @@ import type { SetupDataCollectionInstructions } from '../server/routes/setup/get
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
 
 export interface APMTransactionsPerService {
-  serviceName: string;
-  transactionName: string | null;
-  transactionSamples: number | null;
+  [serviceName: string]: {
+    serviceName: string;
+    transactions: Array<{ name: string | null; samples: number | null }>;
+  };
 }
 
 export interface ProfilingSetupStatus {
@@ -89,7 +90,7 @@ export interface Services {
     timeTo: number;
     functionName: string;
     serviceNames: string[];
-  }) => Promise<APMTransactionsPerService[]>;
+  }) => Promise<APMTransactionsPerService>;
 }
 
 export function getServices(): Services {
@@ -180,22 +181,16 @@ export function getServices(): Services {
       )) as IndicesStorageDetailsAPIResponse;
       return eventsMetricsSizeTimeseries;
     },
-    fetchTopNFunctionAPMTransactions: async ({
-      functionName,
-      http,
-      serviceNames,
-      timeFrom,
-      timeTo,
-    }) => {
+    fetchTopNFunctionAPMTransactions: ({ functionName, http, serviceNames, timeFrom, timeTo }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         functionName,
         serviceNames: JSON.stringify(serviceNames),
       };
-      return (await http.get(paths.APMTransactions, {
+      return http.get(paths.APMTransactions, {
         query,
-      })) as Promise<APMTransactionsPerService[]>;
+      }) as Promise<APMTransactionsPerService>;
     },
   };
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiInMemoryTable,
   EuiInMemoryTableProps,
@@ -12,7 +13,7 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../common';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useAnyOfProfilingParams } from '../../hooks/use_profiling_params';
@@ -39,10 +40,19 @@ const search: EuiSearchBarProps = {
 
 const sorting: EuiInMemoryTableProps<APMTransactionsPerService[]>['sorting'] = {
   sort: {
-    field: 'transactionSamples',
+    field: 'serviceSamples',
     direction: 'desc',
   },
 };
+
+const PAGE_SIZE = 5;
+
+interface ServicesAndTransactions {
+  serviceName: string;
+  serviceSamples: number;
+  transactionName: string | null;
+  transactionSamples: number | null;
+}
 
 export function APMTransactions({ functionName, serviceNames }: Props) {
   const {
@@ -55,20 +65,58 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
     setup: { observabilityShared },
   } = useProfilingDependencies();
 
-  const { status, data = [] } = useTimeRangeAsync(
+  const [pagination, setPagination] = useState({ pageIndex: 0 });
+
+  function onTableChange({ page: { index } }: CriteriaWithPagination<ServicesAndTransactions>) {
+    setPagination({ pageIndex: index });
+  }
+
+  const { status, data: transactionsPerServiceMap = {} } = useTimeRangeAsync(
     ({ http }) => {
+      const pageStart = pagination.pageIndex * PAGE_SIZE;
+
       return fetchTopNFunctionAPMTransactions({
         http,
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         functionName,
-        serviceNames: Object.keys(serviceNames),
+        serviceNames: Object.keys(serviceNames).slice(pageStart, pageStart + PAGE_SIZE),
       });
     },
-    [fetchTopNFunctionAPMTransactions, functionName, serviceNames, timeRange.end, timeRange.start]
+    [
+      fetchTopNFunctionAPMTransactions,
+      functionName,
+      pagination.pageIndex,
+      serviceNames,
+      timeRange.end,
+      timeRange.start,
+    ]
   );
 
-  const columns: Array<EuiBasicTableColumn<APMTransactionsPerService>> = useMemo(
+  const servicesAndTransactions: ServicesAndTransactions[] = useMemo(() => {
+    return Object.keys(serviceNames).flatMap((key) => {
+      const serviceTransactions = transactionsPerServiceMap[key];
+      return serviceTransactions?.transactions?.length
+        ? serviceTransactions.transactions.map((transaction) => ({
+            serviceName: key,
+            serviceSamples: serviceNames[key],
+            transactionName: transaction.name,
+            transactionSamples: transaction.samples,
+          }))
+        : [
+            {
+              serviceName: key,
+              serviceSamples: serviceNames[key],
+              transactionName: null,
+              transactionSamples: null,
+            },
+          ];
+    });
+  }, [serviceNames, transactionsPerServiceMap]);
+
+  const isLoadingTransactions = status !== AsyncStatus.Settled;
+
+  const columns: Array<EuiBasicTableColumn<ServicesAndTransactions>> = useMemo(
     () => [
       {
         field: 'serviceName',
@@ -91,6 +139,17 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
         },
       },
       {
+        field: 'serviceSamples',
+        name: i18n.translate('xpack.profiling.apmTransactions.columns.serviceSamplesName', {
+          defaultMessage: 'Service Samples',
+        }),
+        width: '150px',
+        sortable: true,
+        render(_, { serviceSamples }) {
+          return asNumber(serviceSamples);
+        },
+      },
+      {
         field: 'transactionName',
         name: i18n.translate('xpack.profiling.apmTransactions.columns.transactionName', {
           defaultMessage: 'Transaction Name',
@@ -98,6 +157,10 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
         truncateText: true,
         sortable: true,
         render(_, { serviceName, transactionName }) {
+          if (isLoadingTransactions) {
+            return '--';
+          }
+
           if (transactionName) {
             return (
               <EuiLink
@@ -120,7 +183,12 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
           defaultMessage: 'Transaction Samples',
         }),
         sortable: true,
+        width: '150px',
         render(_, { transactionSamples }) {
+          if (isLoadingTransactions) {
+            return '--';
+          }
+
           if (transactionSamples === null) {
             return NOT_AVAILABLE_LABEL;
           }
@@ -129,6 +197,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       },
     ],
     [
+      isLoadingTransactions,
       observabilityShared.locators.apm.serviceOverview,
       observabilityShared.locators.apm.transactionDetailsByName,
     ]
@@ -136,13 +205,14 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
 
   return (
     <EuiInMemoryTable
-      loading={status !== AsyncStatus.Settled}
+      loading={isLoadingTransactions}
       tableCaption={i18n.translate('xpack.profiling.apmTransactions.tableCaption', {
         defaultMessage: 'APM Services and Transactions links',
       })}
-      items={data}
+      items={servicesAndTransactions}
       columns={columns}
-      pagination={{ pageSize: 5, showPerPageOptions: false }}
+      pagination={{ ...pagination, pageSize: PAGE_SIZE, showPerPageOptions: false }}
+      onTableChange={onTableChange}
       searchFormat="text"
       search={search}
       sorting={sorting}

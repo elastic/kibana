@@ -56,7 +56,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
         const endSecs = timeTo / 1000;
 
         const transactionsPerService = await Promise.all(
-          serviceNames.map(async (serviceName) => {
+          serviceNames.slice(0, 5).map(async (serviceName) => {
             const apmFunctions = await profilingDataAccess.services.fetchESFunctions({
               core,
               esClient,
@@ -84,38 +84,24 @@ export function registerTopNFunctionsAPMTransactionsRoute({
             const apmFunction = apmFunctions.TopN.find(
               (topNFunction) => topNFunction.Frame.FunctionName === functionName
             );
-            const subGroups = apmFunction?.subGroups || {};
-            return {
-              serviceName,
-              transactions: Object.keys(subGroups).map((key) => ({
-                name: key,
-                samples: subGroups[key],
-              })),
-            };
+
+            if (apmFunction?.subGroups) {
+              const subGroups = apmFunction.subGroups;
+              return {
+                serviceName,
+                transactions: Object.keys(subGroups).map((key) => ({
+                  name: key,
+                  samples: subGroups[key],
+                })),
+              };
+            }
           })
         );
 
         const transactionsGroupedByService = keyBy(transactionsPerService, 'serviceName');
 
         return response.ok({
-          body: serviceNames.flatMap(
-            (
-              serviceName
-            ): Array<{
-              serviceName: string;
-              transactionName: string | null;
-              transactionSamples: number | null;
-            }> => {
-              const transactionsFromService = transactionsGroupedByService[serviceName];
-              return !!transactionsFromService?.transactions.length
-                ? transactionsFromService.transactions.map((transaction) => ({
-                    serviceName,
-                    transactionName: transaction.name,
-                    transactionSamples: transaction.samples,
-                  }))
-                : [{ serviceName, transactionName: null, transactionSamples: null }];
-            }
-          ),
+          body: transactionsGroupedByService,
         });
       } catch (error) {
         return handleRouteHandlerError({
