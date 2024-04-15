@@ -12,6 +12,7 @@
       "cases"
     ],
     "requiredPlugins": [
+      "alerting",
       "actions",
       "data",
       "embeddable",
