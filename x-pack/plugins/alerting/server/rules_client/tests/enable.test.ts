@@ -26,7 +26,7 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { migrateLegacyActions } from '../lib';
 import { migrateLegacyActionsMock } from '../lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
@@ -239,7 +239,9 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+      API_KEY_PENDING_INVALIDATION_TYPE
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -299,7 +301,9 @@ describe('enable()', () => {
         namespace: 'default',
       }
     );
-    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
+      API_KEY_PENDING_INVALIDATION_TYPE
+    );
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,

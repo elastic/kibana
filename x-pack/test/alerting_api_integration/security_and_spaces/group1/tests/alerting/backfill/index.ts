@@ -8,8 +8,9 @@
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function backfillTests({ loadTestFile, getService }: FtrProviderContext) {
+export default function backfillTests({ loadTestFile }: FtrProviderContext) {
   describe('backfill rule runs', () => {
+    loadTestFile(require.resolve('./api_key'));
     loadTestFile(require.resolve('./schedule'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./find'));

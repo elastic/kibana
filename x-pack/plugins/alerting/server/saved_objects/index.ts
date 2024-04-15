@@ -34,6 +34,7 @@ import { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions'
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
+export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 
 export const RuleAttributesToEncrypt = ['apiKey'];
 
@@ -146,7 +147,7 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: 'api_key_pending_invalidation',
+    name: API_KEY_PENDING_INVALIDATION_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
@@ -186,12 +187,9 @@ export function setupSavedObjects(
     mappings: {
       dynamic: false,
       properties: {
-        // shape is defined in x-pack/plugins/alerting/server/data/ad_hoc_run/types/ad_hoc_run.ts
-        // TODO to allow invalidate api key task to query for backfill jobs still
-        // using the API key
-        // apiKeyId: {
-        //   type: 'keyword'
-        // },
+        apiKeyId: {
+          type: 'keyword',
+        },
         createdAt: {
           type: 'date',
         },
@@ -232,7 +230,7 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'api_key_pending_invalidation',
+    type: API_KEY_PENDING_INVALIDATION_TYPE,
     attributesToEncrypt: new Set(['apiKeyId']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
