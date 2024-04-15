@@ -26,7 +26,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { ChatForm, ChatFormFields } from '../../types';
 import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
@@ -36,24 +37,17 @@ interface ViewQueryFlyoutProps {
 }
 
 export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => {
-  const { watch } = useFormContext<ChatForm>();
+  const { watch, setValue } = useFormContext<ChatForm>();
   const selectedIndices: string[] = watch(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices || []);
   const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
-  const [queryFields, setQueryFields] = useState(defaultFields);
 
   const {
-    field: { onChange },
+    field: { onChange: queryFieldsOnChange, value: queryFields },
   } = useController({
-    name: ChatFormFields.elasticsearchQuery,
-    defaultValue: {},
+    name: ChatFormFields.queryFields,
+    defaultValue: defaultFields,
   });
-
-  useEffect(() => {
-    if (selectedIndices?.length > 0) {
-      setQueryFields(defaultFields);
-    }
-  }, [selectedIndices, defaultFields]);
 
   const isQueryFieldSelected = (index: string, field: string) => {
     return queryFields[index].includes(field);
@@ -61,12 +55,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
 
   const toggleQueryField = (index: string, field: string) => {
     if (isQueryFieldSelected(index, field)) {
-      setQueryFields({
+      queryFieldsOnChange({
         ...queryFields,
         [index]: queryFields[index].filter((x: string) => x !== field),
       });
     } else {
-      setQueryFields({
+      queryFieldsOnChange({
         ...queryFields,
         [index]: [...queryFields[index], field],
       });
@@ -74,8 +68,8 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
   };
 
   const saveQuery = () => {
-    onChange(createQuery(queryFields, fields));
-
+    setValue(ChatFormFields.queryFields, queryFields);
+    setValue(ChatFormFields.elasticsearchQuery, createQuery(queryFields, fields) as any);
     onClose();
   };
 

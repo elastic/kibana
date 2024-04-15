@@ -6,50 +6,23 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useController } from 'react-hook-form';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
 import { StartChatPanel } from '../start_chat_panel';
 import { CreateIndexCallout } from './create_index_callout';
-import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
 import { useQueryIndices } from '../../hooks/use_query_indices';
-import { ChatFormFields } from '../../types';
-import { useIndicesFields } from '../../hooks/use_indices_fields';
-import {
-  createQuery,
-  getDefaultQueryFields,
-  getDefaultSourceFields,
-} from '../../utils/create_query';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 
 export const SourcesPanelForStartChat: React.FC = () => {
-  const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
+  const {
+    indices: selectedIndices,
+    removeIndex,
+    addIndex,
+    loading: fieldIndicesLoading,
+  } = useSourceIndicesFields();
   const { indices, isLoading } = useQueryIndices();
-  const { fields } = useIndicesFields(selectedIndices || []);
-
-  const {
-    field: { onChange: elasticsearchQueryOnChange },
-  } = useController({
-    name: ChatFormFields.elasticsearchQuery,
-    defaultValue: {},
-  });
-
-  const {
-    field: { onChange: sourceFieldsOnChange },
-  } = useController({
-    name: ChatFormFields.sourceFields,
-    defaultValue: {},
-  });
-
-  useEffect(() => {
-    if (fields) {
-      const defaultFields = getDefaultQueryFields(fields);
-      const defaultSourceFields = getDefaultSourceFields(fields);
-      elasticsearchQueryOnChange(createQuery(defaultFields, fields));
-      sourceFieldsOnChange(defaultSourceFields);
-    }
-  }, [fields, elasticsearchQueryOnChange, sourceFieldsOnChange]);
 
   return (
     <StartChatPanel
@@ -75,7 +48,11 @@ export const SourcesPanelForStartChat: React.FC = () => {
 
       {!isLoading && !!indices?.length && (
         <EuiFlexItem>
-          <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
+          <AddIndicesField
+            selectedIndices={selectedIndices}
+            onIndexSelect={addIndex}
+            loading={fieldIndicesLoading}
+          />
         </EuiFlexItem>
       )}
 

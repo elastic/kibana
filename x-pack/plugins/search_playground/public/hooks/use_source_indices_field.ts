@@ -5,23 +5,79 @@
  * 2.0.
  */
 
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import { useQuery } from '@tanstack/react-query';
 import { useController } from 'react-hook-form';
-import { ChatFormFields } from '../types';
+import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import { useEffect, useState } from 'react';
+import { useKibana } from './use_kibana';
+import { APIRoutes, IndicesQuerySourceFields } from '../types';
+import { ChatForm, ChatFormFields, SourceFieldsData } from '../types';
+import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
 
-export const useSourceIndicesField = () => {
+export const useSourceIndicesFields = () => {
+  const { services } = useKibana();
+  const [loading, setLoading] = useState<boolean>(false);
+
   const {
-    field: { value: selectedIndices, onChange },
-  } = useController({ name: ChatFormFields.indices, defaultValue: [] });
+    field: { value: selectedIndices, onChange: onIndicesChange },
+  } = useController({
+    name: ChatFormFields.indices,
+  });
+
+  const {
+    field: { onChange: onElasticsearchQueryChange },
+  } = useController({
+    name: ChatFormFields.elasticsearchQuery,
+    defaultValue: {},
+  });
+
+  const {
+    field: { onChange: onSourceFieldsChange },
+  } = useController({
+    name: ChatFormFields.sourceFields,
+  });
+
+  const { data: fields } = useQuery<SourceFieldsData>({
+    enabled: selectedIndices.length > 0,
+    queryKey: ['fields', selectedIndices.toString()],
+    queryFn: async () => {
+      const response = await services.http.post<IndicesQuerySourceFields>(
+        APIRoutes.POST_QUERY_SOURCE_FIELDS,
+        {
+          body: JSON.stringify({ indices: selectedIndices }),
+        }
+      );
+      return response;
+    },
+  });
+
+  useEffect(() => {
+    debugger;
+    if (fields) {
+      const defaultFields = getDefaultQueryFields(fields);
+      const defaultSourceFields = getDefaultSourceFields(fields);
+      onElasticsearchQueryChange(createQuery(defaultFields, fields));
+      onSourceFieldsChange(defaultSourceFields);
+    }
+    setLoading(false);
+  }, [fields, onElasticsearchQueryChange, onSourceFieldsChange, onIndicesChange]);
+
   const addIndex = (newIndex: IndexName) => {
-    onChange([...selectedIndices, newIndex]);
+    const newIndices = [...selectedIndices, newIndex];
+    setLoading(true);
+    onIndicesChange(newIndices);
   };
+
   const removeIndex = (index: IndexName) => {
-    onChange(selectedIndices.filter((indexName: string) => indexName !== index));
+    const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
+    setLoading(true);
+    onIndicesChange(newIndices);
   };
 
   return {
-    selectedIndices,
+    indices: selectedIndices,
+    fields: fields as SourceFieldsData,
+    loading,
     addIndex,
     removeIndex,
   };
