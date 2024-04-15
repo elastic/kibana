@@ -187,7 +187,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
-        agents: getAgentRule( IS_XPACK ? 'n2-4' : 'n2-4-spot'),
+        agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
@@ -202,7 +202,7 @@ for (const testSuite of testSuites) {
           IS_XPACK ? 'xpack' : 'oss'
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
-        agents: getAgentRule( IS_XPACK ? 'n2-4' : 'n2-4-spot'),
+        agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
         concurrency: concurrency,
