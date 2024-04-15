@@ -9,10 +9,7 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { SanitizedRule, RawRule } from '../../../../types';
-import {
-  validateRuleTypeParams,
-  getRuleNotifyWhenType,
-} from '../../../../lib';
+import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
