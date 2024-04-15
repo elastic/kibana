@@ -54,9 +54,7 @@ export const AssetCriticalityUploadPage = () => {
     const errorMessage = privilegesError?.body.message ?? (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-        defaultMessage={
-          'Please enable "{ENABLE_ASSET_CRITICALITY_SETTING}" on advanced settings to access the page.'
-        }
+        defaultMessage='Please enable "{ENABLE_ASSET_CRITICALITY_SETTING}" on advanced settings to access the page.'
         values={{
           ENABLE_ASSET_CRITICALITY_SETTING,
         }}
@@ -93,7 +91,7 @@ export const AssetCriticalityUploadPage = () => {
       >
         <EuiText size="s">
           <FormattedMessage
-            id="securitySolution.entityAnalytics.assetCriticalityUploadPage.missingPermissionsCallout.description"
+            id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.missingPermissionsCallout.description"
             defaultMessage="Write permission is required for the {index} index pattern in order to access this page. Contact your administrator for further assistance."
             values={{
               index: <EuiCode>{ASSET_CRITICALITY_INDEX_PATTERN}</EuiCode>,
@@ -140,7 +138,7 @@ export const AssetCriticalityUploadPage = () => {
 
         <EuiFlexItem grow={2}>
           <EuiPanel hasBorder={true} paddingSize="l" grow={false}>
-            <EuiIcon type={'questionInCircle'} size={'xl'} />
+            <EuiIcon type="questionInCircle" size="xl" />
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
               <h3>

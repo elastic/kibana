@@ -183,17 +183,20 @@ const processAppLinks = (appLinks: AppLinkItems, linksPermissions: LinksPermissi
   }, []);
 
 export const isLinkUiSettingsAllowed = (link: LinkItem, { uiSettingsClient }: LinksPermissions) => {
-  if (link.uiSettingRequired) {
-    if (typeof link.uiSettingRequired === 'string') {
-      return uiSettingsClient.get(link.uiSettingRequired) === true;
-    }
-
-    if (typeof link.uiSettingRequired === 'object') {
-      return uiSettingsClient.get(link.uiSettingRequired.key) === link.uiSettingRequired.value;
-    }
+  if (!link.uiSettingRequired) {
+    return true;
   }
 
-  return true;
+  if (typeof link.uiSettingRequired === 'string') {
+    return uiSettingsClient.get(link.uiSettingRequired) === true;
+  }
+
+  if (typeof link.uiSettingRequired === 'object') {
+    return uiSettingsClient.get(link.uiSettingRequired.key) === link.uiSettingRequired.value;
+  }
+
+  // unsupported uiSettingRequired type
+  return false;
 };
 
 const isLinkExperimentalKeyAllowed = (
