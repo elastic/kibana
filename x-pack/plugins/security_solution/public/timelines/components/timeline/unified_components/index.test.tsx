@@ -219,7 +219,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('columns', () => {
+  // Flaky : See https://github.com/elastic/kibana/issues/179831
+  // removing/moving column current leads to infitinite loop, will be fixed in further PRs.
+  describe.skip('columns', () => {
     it(
       'should move column left correctly ',
       async () => {
@@ -298,7 +300,6 @@ describe('unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // removing column current leads to infitinite loop, will be fixed in further PRs.
     it.skip(
       'should remove column ',
       async () => {

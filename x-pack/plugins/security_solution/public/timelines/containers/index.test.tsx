@@ -300,7 +300,7 @@ describe('useTimelineEvents', () => {
 
   test('should not query again when a field is removed', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
+      const { waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
@@ -326,7 +326,7 @@ describe('useTimelineEvents', () => {
   });
   test('should not query again when a removed field is added back', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook<
+      const { waitForNextUpdate, rerender } = renderHook<
         UseTimelineEventsProps,
         [DataLoadingState, TimelineArgs]
       >((args) => useTimelineEvents(args), {
