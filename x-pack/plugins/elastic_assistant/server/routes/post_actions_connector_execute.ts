@@ -164,7 +164,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            const NEW_CHAT = i18n.translate('xpack.elasticAssistant.server.newChat', {
+            const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newChat', {
               defaultMessage: 'New chat',
             });
             if (conversation?.title === NEW_CHAT && prevMessages) {
@@ -182,7 +182,7 @@ export const postActionsConnectorExecuteRoute = (
                         {
                           role: 'assistant',
                           content: i18n.translate(
-                            'xpack.elasticAssistant.server.autoTitlePromptDescription',
+                            'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
                             {
                               defaultMessage:
                                 'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
