@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TopAlert } from '../../../../typings/alerts';
+import { TopAlert } from '../../../typings/alerts';
 import { mapRuleParamsWithFlyout } from './map_rules_params_with_flyout';
 
 describe('Map rules params with flyout', () => {
@@ -149,7 +149,7 @@ describe('Map rules params with flyout', () => {
           observedValue: [4577],
           threshold: [100],
           comparator: 'more than',
-          pctAboveThreshold: ' (4477.00% above the threshold)',
+          pctAboveThreshold: ' (4477% above the threshold)',
         },
       ],
     },
@@ -179,7 +179,7 @@ describe('Map rules params with flyout', () => {
           observedValue: '6%',
           threshold: '1%',
           comparator: '>',
-          pctAboveThreshold: ' (500.00% above the threshold)',
+          pctAboveThreshold: ' (500% above the threshold)',
         },
       ],
     },
@@ -242,7 +242,7 @@ describe('Map rules params with flyout', () => {
           observedValue: [1],
           threshold: [1],
           comparator: '>',
-          pctAboveThreshold: ' (0.00% above the threshold)',
+          pctAboveThreshold: ' (0% above the threshold)',
         },
       ],
     },
@@ -267,7 +267,7 @@ describe('Map rules params with flyout', () => {
           observedValue: ['23 s'],
           threshold: ['1.5 s'],
           comparator: '>',
-          pctAboveThreshold: ' (1424.80% above the threshold)',
+          pctAboveThreshold: ' (1424.8% above the threshold)',
         },
       ],
     },
@@ -291,7 +291,7 @@ describe('Map rules params with flyout', () => {
           observedValue: ['25%'],
           threshold: ['1.0%'],
           comparator: '>',
-          pctAboveThreshold: ' (2400.00% above the threshold)',
+          pctAboveThreshold: ' (2400% above the threshold)',
         },
       ],
     },
