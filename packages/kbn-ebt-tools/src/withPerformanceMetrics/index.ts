@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { withMeasureTime } from './withMeasureTime';
-export type { WithMeasureTimeProps } from './types';
+export { withPerformanceMetrics } from './withPerformanceMetrics';
+export type { WithPerformanceMetricsProps } from './types';
