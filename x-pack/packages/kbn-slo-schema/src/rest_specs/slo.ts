@@ -123,6 +123,7 @@ const findSLOGroupsParamsSchema = t.partial({
     page: t.string,
     perPage: t.string,
     groupBy: groupBySchema,
+    groupsFilter: t.union([t.array(t.string), t.string]),
     kqlQuery: t.string,
     filters: t.string,
   }),
