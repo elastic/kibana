@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -31,12 +31,14 @@ export function DegradedDocsChart({
   lastReloadTime,
   dataView,
   breakdownDataViewField,
+  onTimeRangeChange,
 }: {
   dataStream?: string;
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
   dataView?: DataView;
   breakdownDataViewField?: DataViewField;
+  onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
 }) {
   const {
     services: { lens },
@@ -44,6 +46,13 @@ export function DegradedDocsChart({
 
   const { attributes, filterQuery, extraActions, isChartLoading, handleChartLoading } =
     useDegradedDocsChart({ dataStream, breakdownDataViewField });
+
+  const handleBrushEnd = useCallback(
+    ({ range: [start, end] }: { range: number[] }) => {
+      onTimeRangeChange({ start: new Date(start).toISOString(), end: new Date(end).toISOString() });
+    },
+    [onTimeRangeChange]
+  );
 
   return (
     <>
@@ -75,6 +84,7 @@ export function DegradedDocsChart({
                 query: filterQuery || '',
               }}
               onLoad={handleChartLoading}
+              onBrushEnd={handleBrushEnd}
             />
           )}
         </EuiFlexGroup>

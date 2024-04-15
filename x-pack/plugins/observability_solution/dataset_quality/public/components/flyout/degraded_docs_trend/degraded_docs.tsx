@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiCode,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 
 import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
@@ -27,10 +28,12 @@ export function DegradedDocs({
   dataStream,
   timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_DATEPICKER_REFRESH },
   lastReloadTime,
+  onTimeRangeChange,
 }: {
   dataStream?: string;
   timeRange?: TimeRangeConfig;
   lastReloadTime: number;
+  onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;
 }) {
   return (
     <EuiPanel hasBorder grow={false}>
@@ -54,6 +57,7 @@ export function DegradedDocs({
         dataStream={dataStream}
         timeRange={timeRange}
         lastReloadTime={lastReloadTime}
+        onTimeRangeChange={onTimeRangeChange}
       />
     </EuiPanel>
   );

@@ -51,7 +51,7 @@ const hostsRedirectUrl = 'http://hosts/metric/';
 
 const hostsLocator = {
   getRedirectUrl: () => hostsRedirectUrl,
-} as ReturnType<
+} as unknown as ReturnType<
   typeof useKibanaContextForPlugin
 >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
 

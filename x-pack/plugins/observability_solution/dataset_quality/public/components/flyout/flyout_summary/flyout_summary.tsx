@@ -55,6 +55,13 @@ export function FlyoutSummary({
     [updateTimeRange, timeRange.refresh]
   );
 
+  const handleTimeRangeChange = useCallback(
+    ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
+      updateTimeRange({ start, end, refreshInterval: timeRange.refresh.value });
+    },
+    [updateTimeRange, timeRange.refresh]
+  );
+
   const handleRefresh = useCallback(
     (refreshProps: OnRefreshProps) => {
       updateTimeRange(refreshProps);
@@ -86,7 +93,12 @@ export function FlyoutSummary({
 
       <EuiSpacer />
 
-      <DegradedDocs dataStream={dataStream} timeRange={timeRange} lastReloadTime={lastReloadTime} />
+      <DegradedDocs
+        dataStream={dataStream}
+        timeRange={timeRange}
+        lastReloadTime={lastReloadTime}
+        onTimeRangeChange={handleTimeRangeChange}
+      />
     </>
   );
 }
