@@ -13,7 +13,6 @@ import React, {
   type ComponentProps,
   type FC,
   type ReactElement,
-  useState,
 } from 'react';
 import {
   EuiButton,
@@ -24,11 +23,9 @@ import {
   EuiModalHeaderTitle,
   EuiTabs,
   EuiTab,
-  EuiToolTip,
   type EuiTabProps,
   type CommonProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ModalContextProvider,
   useModalContext,
@@ -64,9 +61,6 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
 }
 
 const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
-  // EuiCopy equivalent
-  const [, setIsTextVisible] = useState<boolean>(false);
-
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 
@@ -80,14 +74,6 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
     return tabs.find((obj) => obj.id === selectedTabId)!;
   }, [selectedTabId, tabs]);
 
-  const afterMessage = selectedTabState.isNotSaved ? (
-    <FormattedMessage
-      id="sharedUXPackages.afterMessageSave"
-      defaultMessage="There are unsaved changes."
-    />
-  ) : (
-    <FormattedMessage id="sharedUXPackages.afterMessageClick" defaultMessage="Copied" />
-  );
   const onSelectedTabChanged = useCallback(
     (id: string) => {
       dispatch({ type: 'META_selectedTabId', payload: id });
@@ -132,20 +118,15 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       </EuiModalBody>
       {modalActionBtn?.id !== undefined && selectedTabState && (
         <EuiModalFooter>
-          <EuiToolTip content={afterMessage} onMouseOut={() => setIsTextVisible(false)}>
-            <EuiButton
-              fill
-              data-test-subj={modalActionBtn.dataTestSubj}
-              color={selectedTabState.isNotSaved ? 'warning' : 'primary'}
-              data-share-url={state.url}
-              onClick={() => {
-                modalActionBtn.handler({ state: selectedTabState });
-                setIsTextVisible(true);
-              }}
-            >
-              {modalActionBtn.label}
-            </EuiButton>
-          </EuiToolTip>
+          <EuiButton
+            fill
+            data-test-subj={modalActionBtn.dataTestSubj}
+            onClick={() => {
+              modalActionBtn.handler({ state: selectedTabState });
+            }}
+          >
+            {modalActionBtn.label}
+          </EuiButton>
         </EuiModalFooter>
       )}
     </EuiModal>
