@@ -2,11 +2,9 @@ ATAN
 
 Syntax
 Parameters
-n
+number
 Numeric expression. If null, the function returns null.
-DescriptionReturns the
-arctangent of the
-input numeric expression as an angle, expressed in radians.Supported types
+DescriptionReturns the arctangent of the input numeric expression as an angle, expressed in radians.Supported types
 Example
 ```esql
 ROW a=12.9
