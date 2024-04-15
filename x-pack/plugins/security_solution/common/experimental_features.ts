@@ -85,6 +85,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionsSentinelOneV2Enabled: false,
 
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: false,
+
   /**
    * Enables top charts on Alerts Page
    */
