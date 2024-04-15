@@ -4064,7 +4064,7 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "alertSummary": Object {
+    "alerts": Object {
       "flags": Object {
         "default": Object {
           "special": "deep",
@@ -4080,72 +4080,42 @@ Object {
           "items": Array [
             Object {
               "flags": Object {
-                "default": Object {
-                  "special": "deep",
-                },
                 "error": [Function],
                 "presence": "optional",
               },
-              "keys": Object {
-                "id": Object {
-                  "flags": Object {
-                    "error": [Function],
-                  },
-                  "rules": Array [
-                    Object {
-                      "args": Object {
-                        "method": [Function],
-                      },
-                      "name": "custom",
-                    },
-                  ],
-                  "type": "string",
+              "metas": Array [
+                Object {
+                  "x-oas-get-additional-properties": [Function],
                 },
-                "reason": Object {
-                  "flags": Object {
-                    "default": null,
-                    "error": [Function],
-                    "presence": "optional",
-                  },
-                  "matches": Array [
-                    Object {
-                      "schema": Object {
-                        "flags": Object {
-                          "error": [Function],
-                        },
-                        "rules": Array [
-                          Object {
-                            "args": Object {
-                              "method": [Function],
-                            },
-                            "name": "custom",
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "key": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
                           },
-                        ],
-                        "type": "string",
-                      },
-                    },
-                    Object {
-                      "schema": Object {
-                        "allow": Array [
-                          null,
-                        ],
-                        "flags": Object {
-                          "error": [Function],
-                          "only": true,
+                          "name": "custom",
                         },
-                        "type": "any",
-                      },
+                      ],
+                      "type": "string",
                     },
-                  ],
-                  "type": "alternatives",
+                    "value": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "type": "any",
+                    },
+                  },
+                  "name": "entries",
                 },
-              },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
-                },
-              },
-              "type": "object",
+              ],
+              "type": "record",
             },
           ],
           "type": "array",
@@ -4157,72 +4127,42 @@ Object {
           "items": Array [
             Object {
               "flags": Object {
-                "default": Object {
-                  "special": "deep",
-                },
                 "error": [Function],
                 "presence": "optional",
               },
-              "keys": Object {
-                "id": Object {
-                  "flags": Object {
-                    "error": [Function],
-                  },
-                  "rules": Array [
-                    Object {
-                      "args": Object {
-                        "method": [Function],
-                      },
-                      "name": "custom",
-                    },
-                  ],
-                  "type": "string",
+              "metas": Array [
+                Object {
+                  "x-oas-get-additional-properties": [Function],
                 },
-                "reason": Object {
-                  "flags": Object {
-                    "default": null,
-                    "error": [Function],
-                    "presence": "optional",
-                  },
-                  "matches": Array [
-                    Object {
-                      "schema": Object {
-                        "flags": Object {
-                          "error": [Function],
-                        },
-                        "rules": Array [
-                          Object {
-                            "args": Object {
-                              "method": [Function],
-                            },
-                            "name": "custom",
+              ],
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "key": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "rules": Array [
+                        Object {
+                          "args": Object {
+                            "method": [Function],
                           },
-                        ],
-                        "type": "string",
-                      },
-                    },
-                    Object {
-                      "schema": Object {
-                        "allow": Array [
-                          null,
-                        ],
-                        "flags": Object {
-                          "error": [Function],
-                          "only": true,
+                          "name": "custom",
                         },
-                        "type": "any",
-                      },
+                      ],
+                      "type": "string",
                     },
-                  ],
-                  "type": "alternatives",
+                    "value": Object {
+                      "flags": Object {
+                        "error": [Function],
+                      },
+                      "type": "any",
+                    },
+                  },
+                  "name": "entries",
                 },
-              },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
-                },
-              },
-              "type": "object",
+              ],
+              "type": "record",
             },
           ],
           "type": "array",

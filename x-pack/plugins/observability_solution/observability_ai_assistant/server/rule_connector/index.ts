@@ -6,7 +6,6 @@
  */
 
 import { filter } from 'rxjs';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -17,7 +16,6 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
 import {
   EmailParamsSchema,
   JiraParamsSchema,
@@ -60,21 +58,18 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
-const AlertHitSchema = schema.object({
-  id: schema.string(),
-  reason: schema.nullable(schema.string()),
-});
+const AlertSchema = schema.recordOf(schema.string(), schema.any());
 
 const AlertSummarySchema = schema.object({
-  new: schema.arrayOf(AlertHitSchema),
-  recovered: schema.arrayOf(AlertHitSchema),
+  new: schema.arrayOf(AlertSchema),
+  recovered: schema.arrayOf(AlertSchema),
 });
 
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
   rule: RuleSchema,
-  alertSummary: AlertSummarySchema,
+  alerts: AlertSummarySchema,
 });
 
 type AlertSummary = TypeOf<typeof AlertSummarySchema>;
@@ -130,7 +125,7 @@ function renderParameterTemplates(
     connector: params.connector,
     message: params.message,
     rule: params.rule,
-    alertSummary: params.alertSummary,
+    alerts: params.alerts,
   };
 }
 
@@ -139,13 +134,13 @@ async function executor(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const request = execOptions.request;
-  const summary = execOptions.params.alertSummary;
+  const alerts = execOptions.params.alerts;
 
   if (!request) {
     throw new Error('AI Assistant connector requires a kibana request');
   }
 
-  if (summary.new.length === 0 && summary.recovered.length === 0) {
+  if (alerts.new.length === 0 && alerts.recovered.length === 0) {
     // connector could be executed with only ongoing actions. we use this path as
     // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
     return { actionId: execOptions.actionId, status: 'ok' };
@@ -181,7 +176,7 @@ async function executor(
     .find((def) => def.name === 'core')?.description;
   const backgroundInstruction = getBackgroundProcessInstruction(
     execOptions.params.rule,
-    execOptions.params.alertSummary
+    execOptions.params.alerts
   );
 
   client
@@ -261,22 +256,25 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
-        alertSummary: getAlertSummary(alerts),
+        alerts: {
+          new: alerts.new.data,
+          recovered: alerts.recovered.data,
+        },
       };
     },
   };
 };
 
-function getBackgroundProcessInstruction(rule: RuleType, summary: AlertSummary) {
+function getBackgroundProcessInstruction(rule: RuleType, alerts: AlertSummary) {
   let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
     rule
   )}:\n`;
-  if (summary.new.length > 0) {
-    instruction += `- ${summary.new.length} alerts have fired: ${JSON.stringify(summary.new)}\n`;
+  if (alerts.new.length > 0) {
+    instruction += `- ${alerts.new.length} alerts have fired: ${JSON.stringify(alerts.new)}\n`;
   }
-  if (summary.recovered.length > 0) {
-    instruction += `- ${summary.recovered.length} alerts have recovered: ${JSON.stringify(
-      summary.recovered
+  if (alerts.recovered.length > 0) {
+    instruction += `- ${alerts.recovered.length} alerts have recovered: ${JSON.stringify(
+      alerts.recovered
     )}\n`;
   }
   instruction +=
@@ -286,18 +284,4 @@ function getBackgroundProcessInstruction(rule: RuleType, summary: AlertSummary) 
   instruction += ' If available, include the link of the conversation at the end of your answer.';
 
   return instruction;
-}
-
-function getAlertSummary(alerts: CombinedSummarizedAlerts): AlertSummary {
-  const extractAlertData = (hit: AlertHit) => {
-    return {
-      id: hit._id,
-      reason: get(hit, 'kibana.alert.reason') || null,
-    };
-  };
-
-  return {
-    new: alerts.new.data.map(extractAlertData),
-    recovered: alerts.recovered.data.map(extractAlertData),
-  };
 }
