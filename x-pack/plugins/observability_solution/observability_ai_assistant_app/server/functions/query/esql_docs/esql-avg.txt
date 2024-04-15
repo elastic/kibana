@@ -7,7 +7,7 @@ Numeric expression.
 DescriptionThe average of a numeric expression.Supported typesThe result is always a double no matter the input type.Examples
 ```esql
 FROM employees
-| STATS AVG(height)
+| STATS avg_height = AVG(height)
 ```
 
 The expression can use inline functions. For example, to calculate the average
