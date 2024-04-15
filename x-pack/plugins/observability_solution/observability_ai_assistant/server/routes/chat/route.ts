@@ -190,7 +190,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2024-03-28',
+  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
   options: {
     tags: ['access:ai_assistant'],
   },

@@ -948,6 +948,8 @@ export class ObservabilityAIAssistantClient {
 
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 
-    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
+    return `${instructionsPrompt}${instructionsWithinBudget
+      .map((instruction) => instruction.text)
+      .join('\n\n')}`;
   };
 }
