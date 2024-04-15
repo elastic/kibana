@@ -30,8 +30,20 @@ describe('SummarizationModel', () => {
 
   it('renders correctly with models', () => {
     const models = [
-      { name: 'Model1', disabled: false, icon: MockIcon, connectorId: 'connector1' },
-      { name: 'Model2', disabled: true, icon: MockIcon, connectorId: 'connector2' },
+      {
+        name: 'Model1',
+        disabled: false,
+        icon: MockIcon,
+        connectorId: 'connector1',
+        connectorName: 'nameconnector1',
+      },
+      {
+        name: 'Model2',
+        disabled: true,
+        icon: MockIcon,
+        connectorId: 'connector2',
+        connectorName: 'nameconnector2',
+      },
     ];
     const { getByTestId } = render(
       <SummarizationModel selectedModel={models[1]} models={models} onSelect={jest.fn()} />
