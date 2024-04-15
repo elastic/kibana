@@ -67,7 +67,19 @@ describe('createBedrockClaudeAdapter', () => {
       it('formats the functions', () => {
         expect(callSubActionFactory().messages[0].content).toContain(
           dedent(
-            '[{"name":"my_tool","description":"My tool","parameters":{"properties":{"myParam":{"type":"string"}}}}]'
+            JSON.stringify([
+              {
+                name: 'my_tool',
+                description: 'My tool',
+                parameters: {
+                  properties: {
+                    myParam: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ])
           )
         );
       });
@@ -124,7 +136,7 @@ describe('createBedrockClaudeAdapter', () => {
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
           dedent(`${TOOL_USE_START}
         \`\`\`json
-        {\"name\":\"my_tool\",\"input\":{\"myParam\":\"myValue\"}}
+        ${JSON.stringify({ name: 'my_tool', input: { myParam: 'myValue' } })}
         \`\`\`${TOOL_USE_END}`)
         );
       });
@@ -160,7 +172,12 @@ describe('createBedrockClaudeAdapter', () => {
         ];
 
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          '{"type":"tool_result","tool":"my_tool","error":"An internal server error occurred","is_error":true}'
+          JSON.stringify({
+            type: 'tool_result',
+            tool: 'my_tool',
+            error: 'An internal server error occurred',
+            is_error: true,
+          })
         );
       });
 
@@ -195,7 +212,11 @@ describe('createBedrockClaudeAdapter', () => {
         ];
 
         expect(last(callSubActionFactory({ messages }).messages)!.content).toContain(
-          `{\"type\":\"tool_result\",\"tool\":\"my_tool\",\"myResponse\":{\"myParam\":\"myValue\"}}`
+          JSON.stringify({
+            type: 'tool_result',
+            tool: 'my_tool',
+            myResponse: { myParam: 'myValue' },
+          })
         );
       });
     });
