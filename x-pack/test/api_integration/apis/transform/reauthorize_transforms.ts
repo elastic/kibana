@@ -41,11 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   async function cleanUpTransform(transformId: string) {
-    const destinationIndex = generateDestIndex(transformId);
-
-    await transform.api.stopTransform(transformId);
     await transform.api.cleanTransformIndices();
-    await transform.api.deleteIndices(destinationIndex);
+    await transform.api.deleteIndices(generateDestIndex(transformId));
   }
 
   // If transform was created with sufficient permissions -> should create and start
@@ -116,8 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.securityCommon.clearAllTransformApiKeys();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180503
-    describe.skip('single transform reauthorize_transforms', function () {
+    describe('single transform reauthorize_transforms', function () {
       const transformCreatedByViewerId = getTransformIdByUser(USER.TRANSFORM_VIEWER);
 
       beforeEach(async () => {
@@ -216,8 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180499
-    describe.skip('bulk reauthorize_transforms', function () {
+    describe('bulk reauthorize_transforms', function () {
       const reqBody: ReauthorizeTransformsRequestSchema = [
         USER.TRANSFORM_VIEWER,
         USER.TRANSFORM_POWERUSER,
@@ -236,9 +231,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await transform.api.stopTransform(id);
-        });
         await transform.api.cleanTransformIndices();
         await asyncForEach(destinationIndices, async (destinationIndex: string) => {
           await transform.api.deleteIndices(destinationIndex);
