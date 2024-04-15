@@ -90,76 +90,82 @@ export function defineRoutes({
     errorHandler(async (context, request, response) => {
       const [, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
+      const aiClient = Assist({
+        es_client: client.asCurrentUser,
+      } as AssistClientOptionsWithClient);
+      const { messages, data } = await request.body;
+      const abortController = new AbortController();
+      const abortSignal = abortController.signal;
+      const model = new ActionsClientChatOpenAI({
+        actions,
+        logger: log,
+        request,
+        connectorId: data.connector_id,
+        model: data.summarization_model,
+        traceId: uuidv4(),
+        signal: abortSignal,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+      });
+
+      let sourceFields = {};
+
       try {
-        const aiClient = Assist({
-          es_client: client.asCurrentUser,
-        } as AssistClientOptionsWithClient);
-        const { messages, data } = await request.body;
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-        const model = new ActionsClientChatOpenAI({
-          actions,
-          logger: log,
-          request,
-          connectorId: data.connector_id,
-          model: data.summarization_model,
-          traceId: uuidv4(),
-          signal: abortSignal,
-          // prevents the agent from retrying on failure
-          // failure could be due to bad connector, we should deliver that result to the client asap
-          maxRetries: 0,
-        });
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        log.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
 
-        let sourceFields = {};
+      const chain = ConversationalChain({
+        model,
+        rag: {
+          index: data.indices,
+          retriever: createRetriever(data.elasticsearch_query),
+          content_field: sourceFields,
+          size: Number(data.doc_size),
+        },
+        prompt: Prompt(data.prompt, {
+          citations: data.citations,
+          context: true,
+          type: 'openai',
+        }),
+      });
 
-        try {
-          sourceFields = JSON.parse(data.source_fields);
-        } catch (e) {
-          log.error('Failed to parse the source fields', e);
-          throw Error(e);
-        }
+      let stream: ReadableStream<Uint8Array>;
 
-        const chain = ConversationalChain({
-          model,
-          rag: {
-            index: data.indices,
-            retriever: createRetriever(data.elasticsearch_query),
-            content_field: sourceFields,
-            size: Number(data.doc_size),
-          },
-          prompt: Prompt(data.prompt, {
-            citations: data.citations,
-            context: true,
-            type: 'openai',
-          }),
-        });
-
-        const stream = await chain.stream(aiClient, messages);
-
-        const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
-
-        const reader = (stream as ReadableStream).getReader();
-        const textDecoder = new TextDecoder();
-
-        async function pushStreamUpdate() {
-          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-            if (done) {
-              end();
-              return;
-            }
-            push(textDecoder.decode(value));
-            pushStreamUpdate();
-          });
-        }
-
-        pushStreamUpdate();
-
-        return response.ok(responseWithHeaders);
+      try {
+        stream = await chain.stream(aiClient, messages);
       } catch (e) {
         log.error('Failed to create the chat stream', e);
 
-        throw Error(e);
+        return response.badRequest({
+          body: {
+            message: e,
+          },
+        });
       }
+
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
+      const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
+
+      async function pushStreamUpdate() {
+        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          if (done) {
+            end();
+            return;
+          }
+          push(textDecoder.decode(value));
+          pushStreamUpdate();
+        });
+      }
+
+      pushStreamUpdate();
+
+      return response.ok(responseWithHeaders);
     })
   );
 
