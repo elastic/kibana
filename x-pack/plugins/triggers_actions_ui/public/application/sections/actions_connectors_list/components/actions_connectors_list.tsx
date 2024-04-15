@@ -6,7 +6,7 @@
  */
 
 import { ClassNames } from '@emotion/react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -24,6 +24,7 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
@@ -562,10 +563,10 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             connector={editConnectorProps.initialConnector}
             tab={editConnectorProps.tab}
             onClose={() => {
-              editItem();
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
             }}
             onConnectorUpdated={(connector) => {
-              editItem(connector, editConnectorProps.tab, editConnectorProps.isFix);
+              setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
               loadActions();
             }}
             actionTypeRegistry={actionTypeRegistry}
