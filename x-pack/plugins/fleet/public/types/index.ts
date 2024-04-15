@@ -10,7 +10,6 @@ export type {
   AgentMetadata,
   AgentPolicy,
   NewAgentPolicy,
-  AgentLoggingLevel,
   SimplifiedAgentStatus,
   EnrollmentAPIKey,
   PackagePolicy,
