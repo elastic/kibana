@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
+import { EditBurnRateRuleFlyout } from './common/edit_burn_rate_rule_flyout';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from './common/burn_rate_rule_flyout';
@@ -21,21 +22,24 @@ import { SLOGroupings } from './common/slo_groupings';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
-  rules: Array<Rule<BurnRateRuleParams>> | undefined;
+  rules?: Array<Rule<BurnRateRuleParams>>;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
   activeAlerts?: number;
+  refetchRules: () => void;
 }
 
 export function SloListItem({
   slo,
   rules,
+  refetchRules,
   historicalSummary = [],
   historicalSummaryLoading,
   activeAlerts,
 }: SloListItemProps) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
+  const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
@@ -95,8 +99,10 @@ export function SloListItem({
         <EuiFlexItem grow={false}>
           <SloItemActions
             slo={slo}
+            rules={rules}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+            setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
           />
@@ -106,6 +112,13 @@ export function SloListItem({
         slo={slo}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
         setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+      />
+
+      <EditBurnRateRuleFlyout
+        rule={rules?.[0]}
+        isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
+        setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
       />
 
       {isDeleteConfirmationModalOpen ? (

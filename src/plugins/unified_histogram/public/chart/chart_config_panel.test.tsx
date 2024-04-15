@@ -13,9 +13,11 @@ import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { ChartConfigPanel } from './chart_config_panel';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
+import type { UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('ChartConfigPanel', () => {
   it('should return a jsx element to edit the visualization', async () => {
@@ -28,15 +30,20 @@ describe('ChartConfigPanel', () => {
         {...{
           services: unifiedHistogramServicesMock,
           dataView: dataViewWithTimefieldMock,
-          lensAttributesContext: {
+          visContext: {
             attributes: lensAttributes,
-          } as unknown as LensAttributesContext,
+          } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
+          onSuggestionContextChange: jest.fn(),
           isPlainRecord: true,
           lensAdapters: lensAdaptersMock,
           query: {
             esql: 'from test',
+          },
+          currentSuggestionContext: {
+            suggestion: currentSuggestionMock,
+            type: UnifiedHistogramSuggestionType.lensSuggestion,
           },
         }}
       />
@@ -55,12 +62,17 @@ describe('ChartConfigPanel', () => {
         {...{
           services: unifiedHistogramServicesMock,
           dataView: dataViewWithTimefieldMock,
-          lensAttributesContext: {
+          visContext: {
             attributes: lensAttributes,
-          } as unknown as LensAttributesContext,
+          } as unknown as UnifiedHistogramVisContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
+          onSuggestionContextChange: jest.fn(),
           isPlainRecord: false,
+          currentSuggestionContext: {
+            suggestion: currentSuggestionMock,
+            type: UnifiedHistogramSuggestionType.histogramForDataView,
+          },
         }}
       />
     );

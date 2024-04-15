@@ -277,6 +277,10 @@ export class AlertsClient<
     }
   }
 
+  public isTrackedAlert(id: string) {
+    return this.legacyAlertsClient.isTrackedAlert(id);
+  }
+
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();
   }
@@ -745,6 +749,7 @@ export class AlertsClient<
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >
       ) => this.report(alert),
+      isTrackedAlert: (id: string) => this.isTrackedAlert(id),
       setAlertData: (
         alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, RecoveryActionGroupId>
       ) => this.setAlertData(alert),

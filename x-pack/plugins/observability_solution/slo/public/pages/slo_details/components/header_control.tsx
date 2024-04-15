@@ -14,6 +14,8 @@ import type { RulesParams } from '@kbn/observability-plugin/public';
 import { rulesLocatorID } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { paths } from '../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
@@ -24,7 +26,7 @@ import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/conve
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo?: SLOWithSummaryResponse;
   isLoading: boolean;
 }
 
@@ -42,9 +44,17 @@ export function HeaderControl({ isLoading, slo }: Props) {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
+  const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
+
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const { mutate: deleteSlo } = useDeleteSlo();
+
+  const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
+    sloIds: slo ? [slo.id] : undefined,
+  });
+
+  const rules = slo ? rulesBySlo?.[slo?.id] ?? [] : [];
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -65,10 +75,15 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
+    if (rules.length === 1) {
+      setIsEditRuleFlyoutOpen(true);
+      setIsPopoverOpen(false);
+    } else {
+      const locator = locators.get<RulesParams>(rulesLocatorID);
 
-    if (slo?.id && locator) {
-      locator.navigate({ params: { sloId: slo.id } }, { replace: false });
+      if (slo?.id && locator) {
+        locator.navigate({ params: { sloId: slo.id } }, { replace: false });
+      }
     }
   };
 
@@ -168,7 +183,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
               data-test-subj="sloDetailsHeaderControlPopoverManageRules"
             >
               {i18n.translate('xpack.slo.sloDetails.headerControl.manageRules', {
-                defaultMessage: 'Manage rules',
+                defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
+                values: { count: rules.length },
               })}
             </EuiContextMenuItem>,
           ]
@@ -215,6 +231,12 @@ export function HeaderControl({ isLoading, slo }: Props) {
             )}
         />
       </EuiPopover>
+      <EditBurnRateRuleFlyout
+        rule={rules?.[0]}
+        isEditRuleFlyoutOpen={isEditRuleFlyoutOpen}
+        setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
+        refetchRules={refetchRules}
+      />
 
       {slo && isRuleFlyoutVisible ? (
         <AddRuleFlyout

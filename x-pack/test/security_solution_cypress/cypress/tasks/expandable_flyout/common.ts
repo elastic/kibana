@@ -17,10 +17,10 @@ import {
 import { openTakeActionButtonAndSelectItem } from './alert_details_right_panel';
 
 /**
- * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
+ * Find the alert row at index in the alerts table then click on the expand icon button to open the flyout
  */
-export const expandFirstAlertExpandableFlyout = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click();
+export const expandAlertAtIndexExpandableFlyout = (index = 0) => {
+  cy.get(EXPAND_ALERT_BTN).eq(index).click();
 };
 
 /**

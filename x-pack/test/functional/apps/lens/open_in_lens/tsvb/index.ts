@@ -52,11 +52,12 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        // changing the timepicker default here saves us from having to set it in Discover (~8s)
+        // The TSVB tests are using a slightly difference end date, so it needs to be set manually here
+        'timepicker:timeDefaults': `{ "from": "${PageObjects.timePicker.defaultStartTime}", "to": "Sep 22, 2015 @ 18:31:44.000" }`,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);

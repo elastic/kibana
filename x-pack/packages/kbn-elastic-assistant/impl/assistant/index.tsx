@@ -29,6 +29,7 @@ import {
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -57,6 +58,7 @@ import {
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { clearPresentationData } from '../connectorland/connector_setup/helpers';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
   conversationTitle?: string;
@@ -80,15 +82,13 @@ const AssistantComponent: React.FC<Props> = ({
   setConversationTitle,
 }) => {
   const {
-    actionTypeRegistry,
     assistantTelemetry,
     augmentMessageCodeBlocks,
     assistantAvailability: { isAssistantEnabled },
-    defaultAllow,
-    defaultAllowReplacement,
     docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationTitle,
     getLastConversationTitle,
@@ -113,12 +113,46 @@ const AssistantComponent: React.FC<Props> = ({
       mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
+  const [isStreaming, setIsStreaming] = useState(false);
+
   const {
     data: conversationsData,
     isLoading,
     isError,
     refetch,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+  } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    refetchOnWindowFocus: !isStreaming,
+    isAssistantEnabled,
+  });
+
+  const [anonymizationFields, setAnonymizationFields] = useState<FindAnonymizationFieldsResponse>({
+    data: [],
+    page: 1,
+    perPage: 5,
+    total: 0,
+  });
+  const {
+    data: anonymizationData,
+    isLoading: isLoadingAnonymizationFields,
+    isError: isErrorAnonymizationFields,
+    refetch: refetchAnonymizationFields,
+  } = useFetchAnonymizationFields({ http, isAssistantEnabled });
+
+  const refetchAnonymizationFieldsResults = useCallback(async () => {
+    const updatedAnonymizationFields = await refetchAnonymizationFields();
+    if (!updatedAnonymizationFields.isLoading && !updatedAnonymizationFields.isError) {
+      setAnonymizationFields(updatedAnonymizationFields.data);
+      return updatedAnonymizationFields.data as FindAnonymizationFieldsResponse;
+    }
+  }, [refetchAnonymizationFields]);
+
+  useEffect(() => {
+    if (!isLoadingAnonymizationFields && !isErrorAnonymizationFields) {
+      setAnonymizationFields(anonymizationData);
+    }
+  }, [anonymizationData, isErrorAnonymizationFields, isLoadingAnonymizationFields]);
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -136,7 +170,6 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
-    actionTypeRegistry,
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
@@ -175,13 +208,17 @@ const AssistantComponent: React.FC<Props> = ({
     if (!isLoading && Object.keys(conversations).length > 0) {
       const conversation =
         conversations[selectedConversationTitle ?? getLastConversationTitle(conversationTitle)];
-      if (conversation) {
-        setCurrentConversation(conversation);
-      }
+      // Set the last conversation as current conversation or use persisted or non-persisted Welcom conversation
+      setCurrentConversation(
+        conversation ??
+          conversations[WELCOME_CONVERSATION_TITLE] ??
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE })
+      );
     }
   }, [
     conversationTitle,
     conversations,
+    getDefaultConversation,
     getLastConversationTitle,
     isLoading,
     selectedConversationTitle,
@@ -309,9 +346,15 @@ const AssistantComponent: React.FC<Props> = ({
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
+        if (refetchedConversation) {
+          setConversations({
+            ...conversations,
+            [refetchedConversation.title]: refetchedConversation,
+          });
+        }
       }
     },
-    [allSystemPrompts, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
@@ -367,14 +410,18 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     const promptContext: PromptContext | undefined = promptContexts[promptContextId];
-    if (promptContext != null) {
+    if (
+      promptContext != null &&
+      !isLoadingAnonymizationFields &&
+      !isErrorAnonymizationFields &&
+      anonymizationData
+    ) {
       setAutoPopulatedOnce(true);
 
       if (!Object.keys(selectedPromptContexts).includes(promptContext.id)) {
         const addNewSelectedPromptContext = async () => {
           const newSelectedPromptContext = await getNewSelectedPromptContext({
-            defaultAllow,
-            defaultAllowReplacement,
+            anonymizationFields: anonymizationData,
             promptContext,
           });
 
@@ -399,8 +446,9 @@ const AssistantComponent: React.FC<Props> = ({
     selectedConversationTitle,
     selectedPromptContexts,
     autoPopulatedOnce,
-    defaultAllow,
-    defaultAllowReplacement,
+    isLoadingAnonymizationFields,
+    isErrorAnonymizationFields,
+    anonymizationData,
   ]);
 
   // Show missing connector callout if no connectors are configured
@@ -433,6 +481,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
@@ -450,7 +499,6 @@ const AssistantComponent: React.FC<Props> = ({
     selectedPromptContexts,
     setSelectedPromptContexts,
     setCurrentConversation,
-    refresh: refetchCurrentConversation,
   });
 
   const chatbotComments = useMemo(
@@ -458,11 +506,14 @@ const AssistantComponent: React.FC<Props> = ({
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
+            setIsStreaming,
           })}
           css={css`
             margin-right: 20px;
@@ -490,12 +541,15 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      abortStream,
       refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,
@@ -562,17 +616,18 @@ const AssistantComponent: React.FC<Props> = ({
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
+            anonymizationFields={anonymizationFields}
+            refetchAnonymizationFieldsResults={refetchAnonymizationFieldsResults}
           />
         )}
 
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
         {createCodeBlockPortals()}
 
-        {!isDisabled && (
+        {!isDisabled && !isLoadingAnonymizationFields && !isErrorAnonymizationFields && (
           <>
             <ContextPills
-              defaultAllow={defaultAllow}
-              defaultAllowReplacement={defaultAllowReplacement}
+              anonymizationFields={anonymizationData}
               promptContexts={promptContexts}
               selectedPromptContexts={selectedPromptContexts}
               setSelectedPromptContexts={setSelectedPromptContexts}

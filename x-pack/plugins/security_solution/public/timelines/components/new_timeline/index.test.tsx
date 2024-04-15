@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { NewTimelineButton } from '.';
 import { TimelineId } from '../../../../common/types';
@@ -26,6 +26,8 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
+
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const renderNewTimelineButton = (type: TimelineType) =>
   render(<NewTimelineButton type={type} />, { wrapper: TestProviders });
@@ -53,14 +55,16 @@ describe('NewTimelineButton', () => {
 
     button.click();
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.active,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: TimelineType.default,
-      updated: undefined,
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        columns: defaultHeaders,
+        dataViewId,
+        id: TimelineId.active,
+        indexNames: selectedPatterns,
+        show: true,
+        timelineType: TimelineType.default,
+        updated: undefined,
+      });
     });
   });
 
@@ -80,14 +84,16 @@ describe('NewTimelineButton', () => {
 
     button.click();
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.active,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: TimelineType.template,
-      updated: undefined,
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        columns: defaultHeaders,
+        dataViewId,
+        id: TimelineId.active,
+        indexNames: selectedPatterns,
+        show: true,
+        timelineType: TimelineType.template,
+        updated: undefined,
+      });
     });
   });
 });

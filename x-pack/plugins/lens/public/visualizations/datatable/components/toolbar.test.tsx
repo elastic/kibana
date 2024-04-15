@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getButtonGroupInputValue } from '@kbn/test-eui-helpers';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
@@ -72,10 +72,10 @@ describe('datatable toolbar', () => {
     return {
       ...rtlRender,
       togglePopover,
-      getRowHeightValue: getButtonGroupInputValue(ROW_HEIGHT_SETTINGS_TEST_ID),
+      getRowHeightValue: getSelectedButtonInGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
       getRowHeightCustomValue: () => getNumberInput(ROW_HEIGHT_SETTINGS_TEST_ID),
       selectRowHeightOption: selectOptionFromButtonGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
-      getHeaderHeightValue: getButtonGroupInputValue(HEADER_HEIGHT_SETTINGS_TEST_ID),
+      getHeaderHeightValue: getSelectedButtonInGroup(HEADER_HEIGHT_SETTINGS_TEST_ID),
       getHeaderHeightCustomValue: () => getNumberInput(HEADER_HEIGHT_SETTINGS_TEST_ID),
       selectHeaderHeightOption: selectOptionFromButtonGroup(HEADER_HEIGHT_SETTINGS_TEST_ID),
       getPaginationSwitch,

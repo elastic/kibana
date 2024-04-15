@@ -6,7 +6,7 @@
  */
 
 import { merge, of, Observable } from 'rxjs';
-import { map, scan } from 'rxjs/operators';
+import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';

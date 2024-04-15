@@ -30,7 +30,7 @@ import {
   INDICATOR_HISTOGRAM,
   INDICATOR_TIMESLICE_METRIC,
 } from '../../utils/slo/labels';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
+import { SYNTHETICS_DEFAULT_GROUPINGS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{
@@ -250,7 +250,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm
   objective: {
     target: 99,
   },
-  groupBy: ['monitor.name', 'observer.geo.name'],
+  groupBy: SYNTHETICS_DEFAULT_GROUPINGS,
 };
 
 export const COMPARATOR_GT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gtLabel', {

@@ -56,6 +56,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const container = useDashboardContainer();
     const scrollToPanelId = container.select((state) => state.componentState.scrollToPanelId);
     const highlightPanelId = container.select((state) => state.componentState.highlightPanelId);
+    const useMargins = container.select((state) => state.explicitInput.useMargins);
     const panel = container.select((state) => state.explicitInput.panels[id]);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -97,10 +98,18 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           pointer-events: none;
           opacity: 0.25;
         `
-      : css``;
+      : undefined;
 
     const renderedEmbeddable = useMemo(() => {
       const references = getReferencesForPanelId(id, container.savedObjectReferences);
+
+      const panelProps = {
+        showBadges: true,
+        showBorder: useMargins,
+        showNotifications: true,
+        showShadow: false,
+      };
+
       // render React embeddable
       if (reactEmbeddableRegistryHasKey(type)) {
         return (
@@ -109,7 +118,9 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
             maybeId={id}
             parentApi={container}
             key={`${type}_${id}`}
-            state={{ rawState: panel.explicitInput, version: panel.version, references }}
+            panelProps={panelProps}
+            onApiAvailable={(api) => container.registerChildApi(api)}
+            state={{ rawState: panel.explicitInput as object, version: panel.version, references }}
           />
         );
       }
@@ -118,14 +129,21 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         <EmbeddablePanel
           key={type}
           index={index}
-          showBadges={true}
-          showShadow={true}
-          showNotifications={true}
           onPanelStatusChange={onPanelStatusChange}
           embeddable={() => container.untilEmbeddableLoaded(id)}
+          {...panelProps}
         />
       );
-    }, [container, id, index, onPanelStatusChange, type, panel]);
+    }, [
+      id,
+      container,
+      type,
+      index,
+      useMargins,
+      onPanelStatusChange,
+      panel.explicitInput,
+      panel.version,
+    ]);
 
     return (
       <div

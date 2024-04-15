@@ -15,7 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-} from '@kbn/aiops-utils/log_rate_analysis_type';
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
@@ -49,14 +49,7 @@ interface SignificantFieldValue {
 
 export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
   const { services } = useKibanaContextForPlugin();
-  const {
-    dataViews,
-    logsShared,
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = services;
+  const { dataViews, logsShared, observabilityAIAssistant } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
@@ -186,7 +179,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     const hasLogRateAnalysisParams =
       logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
 
-    if (!hasLogRateAnalysisParams) {
+    if (!hasLogRateAnalysisParams || !observabilityAIAssistant) {
       return undefined;
     }
 
@@ -197,7 +190,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       .map((item) => Object.values(item).join(','))
       .join('\n');
 
-    return getContextualInsightMessages({
+    return observabilityAIAssistant.getContextualInsightMessages({
       message:
         'Can you identify possible causes and remediations for these log rate analysis results',
       instructions: `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
@@ -235,7 +228,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       Do not repeat the full list of field names and field values back to the user.
       Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`,
     });
-  }, [logRateAnalysisParams, getContextualInsightMessages]);
+  }, [logRateAnalysisParams, observabilityAIAssistant]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -283,9 +276,9 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {ObservabilityAIAssistantContextualInsight && messages ? (
+        {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
           <EuiFlexItem grow={false}>
-            <ObservabilityAIAssistantContextualInsight
+            <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
               title={logRateAnalysisTitle}
               messages={messages}
             />

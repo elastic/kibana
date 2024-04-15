@@ -11,13 +11,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import type { Agent } from '../../../../../types';
-import { sendPostAgentAction, useStartServices } from '../../../../../hooks';
+import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
 export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
+  const authz = useAuthz();
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const [agentLogLevel, setAgentLogLevel] = useState(
@@ -74,7 +75,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect
-          disabled={isLoading}
+          disabled={isLoading || !authz.fleet.allAgents}
           compressed={true}
           id="selectAgentLogLevel"
           value={selectedLogLevel}

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ActionGroup, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ActionGroup, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleEventLogList, RuleEventLogListProps } from './rule_event_log_list';
 import { mockRule, mockRuleType, mockRuleSummary, mockLogResponse } from './test_helpers';
@@ -50,13 +50,13 @@ const loadActionErrorLogMock = loadActionErrorLog as unknown as jest.MockedFunct
 const ruleMock = mockRule();
 
 const authorizedConsumers = {
-  [ALERTS_FEATURE_ID]: { read: true, all: true },
+  [ALERTING_FEATURE_ID]: { read: true, all: true },
 };
 
 const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
 const ruleType: RuleType = mockRuleType({
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   recoveryActionGroup,
 });

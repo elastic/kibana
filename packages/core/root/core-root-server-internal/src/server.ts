@@ -7,6 +7,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { firstValueFrom } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
@@ -55,6 +56,7 @@ import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
+import { coreConfig, type CoreConfigType } from './core_config';
 
 const coreId = Symbol('core');
 const KIBANA_STARTED_EVENT = 'kibana_started';
@@ -158,16 +160,22 @@ export class Server {
     this.uptimePerStep.constructor = { start: constructorStartUptime, end: performance.now() };
   }
 
-  public async preboot() {
+  public async preboot(): Promise<InternalCorePreboot | undefined> {
     this.log.debug('prebooting server');
+
+    const config = await firstValueFrom(this.configService.atPath<CoreConfigType>(coreConfig.path));
+    const { disablePreboot } = config.lifecycle;
+    if (disablePreboot) {
+      this.log.info('preboot phase is disabled - skipping');
+    }
+
     const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
+    // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
-
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
-
     this.nodeRoles = nodePreboot.roles;
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
@@ -176,57 +184,70 @@ export class Server {
       node: nodePreboot,
     });
 
-    // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
-    // silent deprecation warnings until `setup` stage where we'll validate config once again.
-    await ensureValidConfiguration(this.configService, { logDeprecations: false });
+    if (!disablePreboot) {
+      // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
+      // silent deprecation warnings until `setup` stage where we'll validate config once again.
+      await ensureValidConfiguration(this.configService, { logDeprecations: false });
+    }
 
-    const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
-    const contextServicePreboot = this.context.preboot({
-      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
-    });
-    const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
-
-    // setup i18n prior to any other service, to have translations ready
-    await this.i18n.preboot({ http: httpPreboot, pluginPaths });
-
-    this.capabilities.preboot({ http: httpPreboot });
-    const elasticsearchServicePreboot = await this.elasticsearch.preboot();
+    // services we need to preboot even when preboot is disabled
     const uiSettingsPreboot = await this.uiSettings.preboot();
-    await this.status.preboot({ http: httpPreboot });
-
-    const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
-    const httpResourcesPreboot = this.httpResources.preboot({
-      http: httpPreboot,
-      rendering: renderingPreboot,
-    });
-
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
-    const corePreboot: InternalCorePreboot = {
-      analytics: analyticsPreboot,
-      context: contextServicePreboot,
-      elasticsearch: elasticsearchServicePreboot,
-      http: httpPreboot,
-      uiSettings: uiSettingsPreboot,
-      httpResources: httpResourcesPreboot,
-      logging: loggingPreboot,
-      preboot: this.prebootService.preboot(),
-    };
+    let corePreboot: InternalCorePreboot | undefined;
 
-    await this.plugins.preboot(corePreboot);
+    if (!disablePreboot) {
+      const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
 
-    httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
-      coreId,
-      'core',
-      () => {
-        return new PrebootCoreRouteHandlerContext(corePreboot);
-      }
-    );
+      const contextServicePreboot = this.context.preboot({
+        pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
+      });
 
-    this.coreApp.preboot(corePreboot, uiPlugins);
+      const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
+
+      // setup i18n prior to any other service, to have translations ready
+      await this.i18n.preboot({ http: httpPreboot, pluginPaths });
+
+      this.capabilities.preboot({ http: httpPreboot });
+
+      const elasticsearchServicePreboot = await this.elasticsearch.preboot();
+
+      await this.status.preboot({ http: httpPreboot });
+
+      const renderingPreboot = await this.rendering.preboot({ http: httpPreboot, uiPlugins });
+
+      const httpResourcesPreboot = this.httpResources.preboot({
+        http: httpPreboot,
+        rendering: renderingPreboot,
+      });
+
+      corePreboot = {
+        analytics: analyticsPreboot,
+        context: contextServicePreboot,
+        elasticsearch: elasticsearchServicePreboot,
+        http: httpPreboot,
+        uiSettings: uiSettingsPreboot,
+        httpResources: httpResourcesPreboot,
+        logging: loggingPreboot,
+        preboot: this.prebootService.preboot(),
+      };
+
+      await this.plugins.preboot(corePreboot);
+
+      httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
+        coreId,
+        'core',
+        () => {
+          return new PrebootCoreRouteHandlerContext(corePreboot!);
+        }
+      );
+
+      this.coreApp.preboot(corePreboot, uiPlugins);
+    }
 
     prebootTransaction.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
+
     return corePreboot;
   }
 

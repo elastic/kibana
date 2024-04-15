@@ -37,6 +37,7 @@ import {
 import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
+import type { MlEntity } from '../../../../embeddables';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
@@ -76,7 +77,7 @@ interface SeriesControlsProps {
   functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
-  selectedEntities: Record<string, any>;
+  selectedEntities?: MlEntity;
   selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
 }

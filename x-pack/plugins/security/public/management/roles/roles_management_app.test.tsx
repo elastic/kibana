@@ -48,13 +48,15 @@ async function mountApp(basePath: string, pathname: string) {
         getStartServices: jest
           .fn()
           .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+        buildFlavor: 'traditional',
       })
       .mount({
         basePath,
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
-        theme$: themeServiceMock.createTheme$(),
+        theme: coreStart.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
   });
 
@@ -70,6 +72,7 @@ describe('rolesManagementApp', () => {
         license: licenseMock.create(),
         fatalErrors,
         getStartServices: getStartServices as any,
+        buildFlavor: 'traditional',
       })
     ).toMatchInlineSnapshot(`
       Object {

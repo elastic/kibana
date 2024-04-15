@@ -70,6 +70,7 @@ const FormattedFieldValueComponent: React.FC<{
   eventId: string;
   isAggregatable?: boolean;
   isObjectArray?: boolean;
+  isUnifiedDataTable?: boolean;
   fieldFormat?: string;
   fieldFromBrowserField?: BrowserField;
   fieldName: string;
@@ -89,6 +90,7 @@ const FormattedFieldValueComponent: React.FC<{
   eventId,
   fieldFormat,
   isAggregatable = false,
+  isUnifiedDataTable,
   fieldName,
   fieldType = '',
   fieldFromBrowserField,
@@ -130,9 +132,12 @@ const FormattedFieldValueComponent: React.FC<{
         className={classNames}
         fieldName={fieldName}
         value={value}
-        tooltipProps={{ position: 'bottom', className: dataGridToolTipOffset }}
+        tooltipProps={
+          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+        }
       />
     );
+    if (isUnifiedDataTable) return date;
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
@@ -308,7 +313,7 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
+  } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
@@ -333,6 +338,7 @@ const FormattedFieldValueComponent: React.FC<{
       <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
     );
   } else {
+    // This should not be reached for the unified data table
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
     return (

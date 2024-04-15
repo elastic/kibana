@@ -18,12 +18,10 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { LifecycleAlertService, LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
-import { PublicAlertFactory } from '@kbn/alerting-plugin/server/alert/create_alert_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
-import { Alert, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
@@ -67,6 +65,8 @@ import {
   SHORT_WINDOW,
 } from './lib/build_query';
 import { get } from 'lodash';
+import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
+import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
 
 const commonEsResponse = {
   took: 100,
@@ -106,9 +106,6 @@ describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let loggerMock: jest.Mocked<MockedLogger>;
-  let alertUuidMap: Map<string, string>;
-  let alertMock: Partial<Alert>;
-  const alertUuid = 'mockedAlertUuid';
   const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
   const alertsLocatorMock = {
     getLocation: jest.fn().mockImplementation(() => ({
@@ -117,50 +114,35 @@ describe('BurnRateRuleExecutor', () => {
   } as any as LocatorPublic<AlertsLocatorParams>;
   const ISO_DATE_REGEX =
     /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)((-(\d{2}):(\d{2})|Z)?)$/;
-  let alertWithLifecycleMock: jest.MockedFn<LifecycleAlertService>;
-  let alertFactoryMock: jest.Mocked<
-    PublicAlertFactory<BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups>
-  >;
+
   let searchSourceClientMock: jest.Mocked<ISearchStartSearchSource>;
   let uiSettingsClientMock: jest.Mocked<IUiSettingsClient>;
-  let servicesMock: RuleExecutorServices<
-    BurnRateAlertState,
-    BurnRateAlertContext,
-    BurnRateAllowedActionGroups
-  > &
-    LifecycleAlertServices<BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups>;
+  let servicesMock: jest.Mocked<
+    RuleExecutorServices<
+      BurnRateAlertState,
+      BurnRateAlertContext,
+      BurnRateAllowedActionGroups,
+      ObservabilitySloAlert
+    >
+  >;
 
   beforeEach(() => {
-    alertUuidMap = new Map<string, string>();
-    alertMock = {
-      scheduleActions: jest.fn(),
-      replaceState: jest.fn(),
-    };
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
-    alertWithLifecycleMock = jest.fn().mockImplementation(({ id }) => {
-      alertUuidMap.set(id, alertUuid);
-      return alertMock as any;
-    });
-    alertFactoryMock = {
-      create: jest.fn(),
-      done: jest.fn(),
-      alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
-    };
     loggerMock = loggingSystemMock.createLogger();
     servicesMock = {
-      alertWithLifecycle: alertWithLifecycleMock,
       savedObjectsClient: soClientMock,
       scopedClusterClient: { asCurrentUser: esClientMock, asInternalUser: esClientMock },
-      alertsClient: null,
-      alertFactory: alertFactoryMock,
+      alertsClient: publicAlertsClientMock.create(),
+      alertFactory: {
+        create: jest.fn(),
+        done: jest.fn(),
+        alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
+      },
       searchSourceClient: searchSourceClientMock,
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),
-      getAlertStartedDate: jest.fn(),
-      getAlertUuid: jest.fn().mockImplementation((id) => alertUuidMap.get(id) || 'bad-uuid'),
-      getAlertByAlertUuid: jest.fn(),
       share: {} as SharePluginStart,
       dataViews: dataViewPluginMocks.createStartContract(),
     };
@@ -208,8 +190,9 @@ describe('BurnRateRuleExecutor', () => {
       });
 
       expect(esClientMock.search).not.toHaveBeenCalled();
-      expect(alertWithLifecycleMock).not.toHaveBeenCalled();
-      expect(alertFactoryMock.done).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient!.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient!.setAlertData).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient!.getRecoveredAlerts).not.toHaveBeenCalled();
       expect(result).toEqual({ state: {} });
     });
 
@@ -239,7 +222,6 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
       const executor = getRuleExecutor({ basePath: basePathMock });
       await executor({
@@ -256,7 +238,8 @@ describe('BurnRateRuleExecutor', () => {
         getTimeRange,
       });
 
-      expect(alertWithLifecycleMock).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toBeCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
     });
 
     it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
@@ -285,7 +268,6 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
       const executor = getRuleExecutor({ basePath: basePathMock });
       await executor({
@@ -302,7 +284,8 @@ describe('BurnRateRuleExecutor', () => {
         getTimeRange,
       });
 
-      expect(alertWithLifecycleMock).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toBeCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {
@@ -331,12 +314,18 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: new Date().toISOString(),
+      }));
 
       const executor = getRuleExecutor({
         basePath: basePathMock,
         alertsLocator: alertsLocatorMock,
       });
+
       await executor({
         params: ruleParams,
         startedAt: new Date(),
@@ -351,9 +340,13 @@ describe('BurnRateRuleExecutor', () => {
         getTimeRange,
       });
 
-      expect(alertWithLifecycleMock).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toBeCalledWith({
         id: 'foo',
-        fields: {
+        actionGroup: ALERT_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
           [ALERT_REASON]:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
@@ -363,9 +356,13 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_INSTANCE_ID_FIELD]: 'foo',
         },
       });
-      expect(alertWithLifecycleMock).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toBeCalledWith({
         id: 'bar',
-        fields: {
+        actionGroup: ALERT_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
           [ALERT_REASON]:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 2,
@@ -375,32 +372,32 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_INSTANCE_ID_FIELD]: 'bar',
         },
       });
-      expect(alertMock.scheduleActions).toBeCalledWith(
-        ALERT_ACTION.id,
-        expect.objectContaining({
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'foo',
+        context: expect.objectContaining({
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
-        })
-      );
-      expect(alertMock.scheduleActions).toBeCalledWith(
-        ALERT_ACTION.id,
-        expect.objectContaining({
+        }),
+      });
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
+        id: 'bar',
+        context: expect.objectContaining({
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
-        })
-      );
-      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
+        }),
+      });
+
       expect(alertsLocatorMock.getLocation).toBeCalledWith({
         baseUrl: 'https://kibana.dev',
-        kuery: 'kibana.alert.uuid: "mockedAlertUuid"',
+        kuery: 'kibana.alert.uuid: "uuid-foo"',
         rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
         spaceId: 'irrelevant',
       });
@@ -432,7 +429,12 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: new Date().toISOString(),
+      }));
 
       const executor = getRuleExecutor({ basePath: basePathMock });
       await executor({
@@ -449,9 +451,13 @@ describe('BurnRateRuleExecutor', () => {
         getTimeRange,
       });
 
-      expect(alertWithLifecycleMock).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toBeCalledWith({
         id: 'foo',
-        fields: {
+        actionGroup: HIGH_PRIORITY_ACTION_ID,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
           [ALERT_REASON]:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 1,
@@ -461,9 +467,13 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_INSTANCE_ID_FIELD]: 'foo',
         },
       });
-      expect(alertWithLifecycleMock).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toBeCalledWith({
         id: 'bar',
-        fields: {
+        actionGroup: HIGH_PRIORITY_ACTION_ID,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
           [ALERT_REASON]:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
           [ALERT_EVALUATION_THRESHOLD]: 1,
@@ -473,27 +483,28 @@ describe('BurnRateRuleExecutor', () => {
           [SLO_INSTANCE_ID_FIELD]: 'bar',
         },
       });
-      expect(alertMock.scheduleActions).toBeCalledWith(
-        HIGH_PRIORITY_ACTION_ID,
-        expect.objectContaining({
+
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'foo',
+        context: expect.objectContaining({
           longWindow: { burnRate: 1.2, duration: '6h' },
           shortWindow: { burnRate: 1.9, duration: '30m' },
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
-        })
-      );
-      expect(alertMock.scheduleActions).toBeCalledWith(
-        HIGH_PRIORITY_ACTION_ID,
-        expect.objectContaining({
+        }),
+      });
+
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
+        id: 'bar',
+        context: expect.objectContaining({
           longWindow: { burnRate: 1.1, duration: '6h' },
           shortWindow: { burnRate: 1.5, duration: '30m' },
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
-        })
-      );
-      expect(alertMock.replaceState).toBeCalledWith({ alertState: AlertStates.ALERT });
+        }),
+      });
     });
   });
 });

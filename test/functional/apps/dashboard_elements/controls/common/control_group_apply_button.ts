@@ -36,6 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
 
+      // save the dashboard before adding controls
+      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboard.expectMissingUnsavedChangesBadge();
+
       // populate an initial set of controls and get their ids.
       await dashboardControls.createControl({
         controlType: OPTIONS_LIST_CONTROL,
@@ -56,8 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListWaitForLoading(controlIds[0]);
       await dashboardControls.rangeSliderWaitForLoading(controlIds[1]);
 
-      // save the dashboard
-      await dashboard.saveDashboard('Test Control Group Apply Button', { exitFromEditMode: false });
+      // re-save the dashboard
+      await dashboard.clickQuickSave();
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
       await dashboard.expectMissingUnsavedChangesBadge();
@@ -183,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('time slider selections', () => {
-      let valueBefore: string;
+      let valueBefore: string | null;
 
       before(async () => {
         valueBefore = await dashboardControls.getTimeSliceFromTimeSlider();

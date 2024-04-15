@@ -26,3 +26,4 @@ export { AxisTitleSettings } from './axis/title/axis_title_settings';
 export { AxisTicksSettings } from './axis/ticks/axis_ticks_settings';
 export * from './static_header';
 export * from './vis_label';
+export { ExperimentalBadge } from './experimental_badge';

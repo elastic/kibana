@@ -18,10 +18,10 @@ import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import type { SupportedFieldType } from '../../../../../common/types/job_field_type';
-import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import type {
   MetricFieldsStats,
@@ -43,6 +43,7 @@ import type {
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
 import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
+import { DEFAULT_ESQL_LIMIT } from '../../constants/esql_constants';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -105,7 +106,7 @@ export const useESQLDataVisualizerData = (
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
     timeRangeSelector: true,
     autoRefreshSelector: true,
@@ -195,7 +196,7 @@ export const useESQLDataVisualizerData = (
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery: query,
-        limitSize,
+        limit: limitSize !== undefined ? parseInt(limitSize, 10) : DEFAULT_ESQL_LIMIT,
         sessionId: undefined,
         indexPattern,
         timeFieldName: currentDataView?.timeFieldName,
@@ -337,7 +338,7 @@ export const useESQLDataVisualizerData = (
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
-    limitSize: fieldStatsRequest?.limitSize,
+    limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
   });
 
   useEffect(

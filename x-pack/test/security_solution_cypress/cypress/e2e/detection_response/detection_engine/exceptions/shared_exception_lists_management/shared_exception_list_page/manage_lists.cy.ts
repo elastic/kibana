@@ -30,13 +30,13 @@ import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../../../screens/exceptions';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 
 import { TOASTER } from '../../../../../../screens/alerts_detection_rules';
-import {
-  deleteAlertsAndRules,
-  deleteExceptionLists,
-} from '../../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 
 const EXCEPTION_LIST_NAME = 'My test list';
 const EXCEPTION_LIST_TO_DUPLICATE_NAME = 'A test list 2';

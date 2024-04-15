@@ -2702,6 +2702,7 @@ describe('Alerts Client', () => {
 
           expect(keys(publicAlertsClient)).toEqual([
             'report',
+            'isTrackedAlert',
             'setAlertData',
             'getAlertLimitValue',
             'setAlertLimitReached',
@@ -2779,6 +2780,22 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.alert.getUuid()).toEqual('abc');
           expect(recoveredAlert.alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
           expect(recoveredAlert.hit).toBeUndefined();
+        });
+      });
+
+      describe('isTrackedAlert()', () => {
+        test('should return true if alert was active in a previous execution, false otherwise', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
+          });
+          expect(alertsClient.isTrackedAlert('1')).toBe(true);
+          expect(alertsClient.isTrackedAlert('2')).toBe(true);
+          expect(alertsClient.isTrackedAlert('3')).toBe(false);
         });
       });
     });

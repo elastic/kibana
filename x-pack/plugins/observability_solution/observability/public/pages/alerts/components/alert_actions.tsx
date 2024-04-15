@@ -84,13 +84,23 @@ export function AlertActions({
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
+    const alertLink = observabilityAlert.link;
+    if (!observabilityAlert.hasBasePath && prepend) {
+      setViewInAppUrl(prepend(alertLink ?? ''));
+    } else {
+      setViewInAppUrl(alertLink);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleViewInAppUrl = useCallback(() => {
     const alertLink = observabilityAlert.link as unknown as string;
     if (!observabilityAlert.hasBasePath) {
       setViewInAppUrl(prepend(alertLink ?? ''));
     } else {
       setViewInAppUrl(alertLink);
     }
-  }, [observabilityAlert.hasBasePath, observabilityAlert.link, prepend]);
+  }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -201,6 +211,7 @@ export function AlertActions({
                 defaultMessage: 'View in app',
               })}
               color="text"
+              onMouseOver={handleViewInAppUrl}
               href={viewInAppUrl}
               iconType="eye"
               size="s"

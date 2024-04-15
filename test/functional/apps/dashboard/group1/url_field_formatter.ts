@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       const fieldLink = await visChart.getFieldLinkInVisTable(`${fieldName}: Descending`);
       const fieldValue = await fieldLink.getVisibleText();
+      await fieldLink.moveMouseTo();
       await fieldLink.click();
       await retry.try(async () => {
         await checkUrl(fieldValue);

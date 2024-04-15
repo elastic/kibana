@@ -26,7 +26,7 @@ export function SloListView({ sloList, loading, error }: Props) {
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
-  const { data: rulesBySlo } = useFetchRulesForSlo({
+  const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
@@ -58,6 +58,7 @@ export function SloListView({ sloList, loading, error }: Props) {
             }
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
+            refetchRules={refetchRules}
           />
         </EuiFlexItem>
       ))}

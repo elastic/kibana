@@ -21,7 +21,7 @@ properties:
   notify_when:
     $ref: 'notify_when.yaml'
   params:
-    $ref: '../../../../../apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
+    $ref: '../../../../../observability_solution/apm/server/routes/alerts/rule_types/docs/params_property_apm_transaction_duration.yaml'
   rule_type_id:
     type: string
     description: The ID of the rule type that you want to call when the rule is scheduled to run.

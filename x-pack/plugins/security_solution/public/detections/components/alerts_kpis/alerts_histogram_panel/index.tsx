@@ -19,7 +19,6 @@ import { sumBy } from 'lodash';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { OnEmbeddableLoaded } from '../../../../common/components/visualization_actions/types';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -59,6 +58,7 @@ import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -163,8 +163,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const visualizationId = `alerts-trend-embeddable-${uniqueQueryId}`;
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
-    const [embeddedDataAvailable, setEmbeddedDataAvailable] = useState(false);
-    const [embeddedDataLoaded, setEmbeddedDataLoaded] = useState(false);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
@@ -372,24 +370,21 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
-    const onEmbeddableLoaded: OnEmbeddableLoaded = useCallback((embeddableData) => {
-      try {
-        const parsedResponses: Array<{ aggregations: Array<{ buckets: unknown[] }> }> =
-          embeddableData.responses.map((rawResponse) => JSON.parse(rawResponse));
+    const { responses, loading } = useVisualizationResponse({
+      visualizationId,
+    });
+    const embeddedDataLoaded = !loading && !isEmpty(responses);
+    const aggregationBucketsCount = useMemo(
+      () =>
+        loading
+          ? 0
+          : sumBy(responses, (responseItem) =>
+              sumBy(Object.values(responseItem.aggregations ?? {}), 'buckets.length')
+            ),
+      [loading, responses]
+    );
 
-        const aggregationBucketsCount = sumBy(parsedResponses, (responseItem) =>
-          sumBy(Object.values(responseItem.aggregations), 'buckets.length')
-        );
-
-        setEmbeddedDataAvailable(!!aggregationBucketsCount);
-        setEmbeddedDataLoaded(true);
-      } catch (error) {
-        setEmbeddedDataLoaded(false);
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
-    }, []);
-
+    const embeddedDataAvailable = !!aggregationBucketsCount;
     const showsEmbeddedData = showHistogram && isChartEmbeddablesEnabled;
 
     const subtitle = showsEmbeddedData
@@ -471,7 +466,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 extraOptions={{
                   filters,
                 }}
-                onLoad={onEmbeddableLoaded}
                 getLensAttributes={getLensAttributes}
                 height={chartHeight ?? CHART_HEIGHT}
                 id={visualizationId}

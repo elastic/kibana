@@ -17,13 +17,11 @@ export const ChartSwitchTrigger = function ({
   icon,
   onClick,
   dataTestSubj,
-  size = 's',
 }: {
   label: string;
   icon?: IconType;
   onClick: () => void;
   dataTestSubj?: string;
-  size?: 's' | 'm';
 }) {
   return (
     <ToolbarButton
@@ -31,25 +29,10 @@ export const ChartSwitchTrigger = function ({
       aria-label={label}
       onClick={onClick}
       fullWidth
-      size={size}
+      size="s"
       fontWeight="bold"
-      label={
-        size === 'm' ? (
-          <ChartSwitchLabel label={label} icon={icon} />
-        ) : (
-          <LayerChartSwitchLabel label={label} icon={icon} />
-        )
-      }
+      label={<LayerChartSwitchLabel label={label} icon={icon} />}
     />
-  );
-};
-
-const ChartSwitchLabel = function ({ label, icon }: { label: string; icon?: IconType }) {
-  return (
-    <>
-      {icon && <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={icon} />}
-      <span className="lnsChartSwitch__summaryText">{label}</span>
-    </>
   );
 };
 

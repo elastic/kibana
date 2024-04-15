@@ -212,7 +212,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       registry: true,
       security: true,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     ransomware: { mode: ProtectionModes.off, supported: true },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
@@ -228,7 +228,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
   },
   mac: {
     events: { process: true, file: true, network: true },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {
@@ -249,7 +249,7 @@ export const eventsOnlyPolicy = (): PolicyConfig => ({
       session_data: false,
       tty_io: false,
     },
-    malware: { mode: ProtectionModes.off, blocklist: false },
+    malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     popup: {

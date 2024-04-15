@@ -6,3 +6,4 @@
  */
 
 export { SloAlertsEmbeddableFactoryDefinition } from './slo_alerts_embeddable_factory';
+export type { SLOAlertsEmbeddable } from './slo_alerts_embeddable';

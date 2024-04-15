@@ -99,7 +99,82 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.getRequestValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "getRequestValidation",
+        "description": [
+          "\nExtracts {@link RouteValidatorFullConfigRequest} from the validation container.\nThis utility is intended to be used by code introspecting router validation configuration."
+        ],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidator",
+            "text": "RouteValidator"
+          },
+          "<P, Q, B> | (() => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidator",
+            "text": "RouteValidator"
+          },
+          "<P, Q, B>)) => ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.getRequestValidation.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B>)"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-http-server",
@@ -152,10 +227,18 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.FullValidationConfig",
-                "text": "FullValidationConfig"
+                "section": "def-common.VersionedRouteValidation",
+                "text": "VersionedRouteValidation"
               },
-              "<P, Q, B>"
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteValidation",
+                "text": "VersionedRouteValidation"
+              },
+              "<P, Q, B>)"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -995,80 +1078,6 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
-        "id": "def-common.FullValidationConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "FullValidationConfig",
-        "description": [
-          "\nVersioned route validation"
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.FullValidationConfig",
-            "text": "FullValidationConfig"
-          },
-          "<P, Q, B>"
-        ],
-        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.FullValidationConfig.request",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "request",
-            "description": [
-              "\nValidation to run against route inputs: params, query and body"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.VersionedRouteRequestValidation",
-                "text": "VersionedRouteRequestValidation"
-              },
-              "<P, Q, B> | undefined"
-            ],
-            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-http-server",
-            "id": "def-common.FullValidationConfig.response",
-            "type": "Object",
-            "tags": [
-              "note"
-            ],
-            "label": "response",
-            "description": [
-              "\nValidation to run against route output"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.VersionedRouteResponseValidation",
-                "text": "VersionedRouteResponseValidation"
-              },
-              " | undefined"
-            ],
-            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.HttpAuth",
         "type": "Interface",
         "tags": [],
@@ -1508,7 +1517,7 @@
               "\nCreates cookie based session storage factory {@link SessionStorageFactory}"
             ],
             "signature": [
-              "<T>(cookieOptions: ",
+              "<T extends object>(cookieOptions: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -2766,6 +2775,19 @@
             "path": "packages/core/http/core-http-server/src/csp.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.ICspConfig.reportOnlyHeader",
+            "type": "string",
+            "tags": [],
+            "label": "reportOnlyHeader",
+            "description": [
+              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy-Report-Only` header."
+            ],
+            "path": "packages/core/http/core-http-server/src/csp.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3273,10 +3295,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts"
               },
@@ -3514,7 +3532,15 @@
               },
               {
                 "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.ts"
+              },
+              {
+                "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.ts"
               },
               {
                 "plugin": "actions",
@@ -3754,42 +3780,6 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_get_route.ts"
               },
               {
@@ -3806,7 +3796,11 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_get_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3815,6 +3809,42 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_list_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/indices/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/inference_models/register_get_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_mapping_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/nodes/register_nodes_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/settings/register_load_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/stats/register_stats_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -4373,6 +4403,14 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/jobs/register_get_route.ts"
               },
               {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
+              },
+              {
+                "plugin": "searchNotebooks",
+                "path": "x-pack/plugins/search_notebooks/server/routes/index.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
@@ -4387,10 +4425,6 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-              },
-              {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4670,14 +4704,6 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -4697,8 +4723,8 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-server-internal",
@@ -4795,10 +4821,26 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/find_rules.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -4839,6 +4881,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/get_global_execution_logs.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/get_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -5118,6 +5164,14 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/find.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/get.test.ts"
               },
               {
@@ -5270,7 +5324,15 @@
               },
               {
                 "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/get_all_system/get_all_system.test.ts"
               },
               {
                 "plugin": "actions",
@@ -5283,6 +5345,26 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types/list_types.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/connector/list_types_system/list_types_system.test.ts"
               },
               {
                 "plugin": "crossClusterReplication",
@@ -5383,6 +5465,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -5647,10 +5733,6 @@
               {
                 "plugin": "interactiveSetup",
                 "path": "src/plugins/interactive_setup/server/routes/status.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -5822,10 +5904,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts"
@@ -6280,6 +6358,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_delete_route.ts"
               },
               {
@@ -6289,6 +6371,18 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_post_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -6337,22 +6431,6 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/templates/register_simulate_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -6831,6 +6909,18 @@
                 "path": "x-pack/plugins/rollup/server/routes/api/search/register_search_route.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/plugins/search_playground/server/routes.ts"
+              },
+              {
                 "plugin": "searchprofiler",
                 "path": "x-pack/plugins/searchprofiler/server/routes/profile.ts"
               },
@@ -7052,22 +7142,6 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -7087,8 +7161,16 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-server-internal",
@@ -7137,6 +7219,30 @@
               {
                 "plugin": "@kbn/core-http-server-internal",
                 "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -7153,6 +7259,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/create.test.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/routes/execute.test.ts"
               },
               {
                 "plugin": "actions",
@@ -7193,6 +7303,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/get_oauth_access_token.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/clone_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7333,6 +7447,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/execute.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/create.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7624,11 +7742,35 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
               },
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7837,10 +7979,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -8013,10 +8151,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts"
               },
@@ -8062,7 +8196,15 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/data_streams/register_put_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -8070,7 +8212,7 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
+                "path": "x-pack/plugins/index_management/server/routes/api/mapping/register_update_mapping_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -8078,11 +8220,7 @@
               },
               {
                 "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_update_route.ts"
-              },
-              {
-                "plugin": "indexManagement",
-                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
+                "path": "x-pack/plugins/index_management/server/routes/api/templates/register_update_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8370,27 +8508,27 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-server-internal",
+                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-server-internal",
-                "path": "packages/core/http/core-http-server-internal/src/http_server.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-mocks",
@@ -8407,6 +8545,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/update.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/update_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8451,6 +8593,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/update.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8527,10 +8673,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -8703,10 +8845,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.ts"
               },
@@ -8771,6 +8909,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/bulk_enable_rules.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/bulk_enable_rules.test.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/__mocks__/server.ts"
               },
@@ -8789,6 +8931,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_delete/bulk_delete_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -8813,10 +8963,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -8988,10 +9134,6 @@
             "deprecated": false,
             "trackAdoption": true,
             "references": [
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
-              },
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts"
@@ -9419,10 +9561,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "@kbn/core-http-router-server-internal",
-                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/mocks.ts"
               }
             ],
             "returnComment": [],
@@ -10955,7 +11093,7 @@
             "label": "access",
             "description": [],
             "signature": [
-              "\"public\" | \"internal\""
+              "\"internal\" | \"public\""
             ],
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
@@ -11959,10 +12097,18 @@
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RouteValidatorFullConfig",
-                "text": "RouteValidatorFullConfig"
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
               },
-              "<P, Q, B>"
+              "<P, Q, B> | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<P, Q, B>)"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12059,7 +12205,7 @@
               "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nDefaults to 'internal' If not declared,"
             ],
             "signature": [
-              "\"public\" | \"internal\" | undefined"
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12116,6 +12262,22 @@
             ],
             "signature": [
               "{ payload?: (Method extends \"get\" | \"options\" ? undefined : number) | undefined; idleSocket?: number | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Human-friendly description of this endpoint"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -12302,6 +12464,36 @@
                 "text": "RouteMethod"
               },
               ">"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/router.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouterRoute.validationSchemas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "validationSchemas",
+            "description": [],
+            "signature": [
+              "false | (() => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<unknown, unknown, unknown>) | ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidator",
+                "text": "RouteValidator"
+              },
+              "<unknown, unknown, unknown> | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
@@ -12565,6 +12757,66 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorFullConfigResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteValidatorFullConfigResponse",
+        "description": [
+          "\nMap of status codes to response schemas."
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorFullConfigResponse.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[statusCode: number]: { body: Type<any> | ObjectType<any>; }",
+            "description": [],
+            "signature": [
+              "[statusCode: number]:  { body: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<any> | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>; }"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorFullConfigResponse.unsafe",
+            "type": "Object",
+            "tags": [],
+            "label": "unsafe",
+            "description": [],
+            "signature": [
+              "{ body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.RouteValidatorOptions",
         "type": "Interface",
         "tags": [],
@@ -12587,6 +12839,81 @@
             ],
             "signature": [
               "{ params?: boolean | undefined; query?: boolean | undefined; body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorRequestAndResponses",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteValidatorRequestAndResponses",
+        "description": [
+          "\nAn alternative form to register both request schema and all response schemas."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorRequestAndResponses",
+            "text": "RouteValidatorRequestAndResponses"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorRequestAndResponses.request",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorConfig",
+                "text": "RouteValidatorConfig"
+              },
+              "<P, Q, B> & ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorOptions",
+                "text": "RouteValidatorOptions"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteValidatorRequestAndResponses.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.RouteValidatorFullConfigResponse",
+                "text": "RouteValidatorFullConfigResponse"
+              },
+              " | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
             "deprecated": false,
@@ -14051,6 +14378,10 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -14149,7 +14480,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -14428,7 +14759,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15230,6 +15561,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes/upload_csv.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -15362,6 +15697,14 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -15407,7 +15750,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15534,7 +15877,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15751,6 +16094,10 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
@@ -15789,7 +16136,7 @@
                     "section": "def-common.RouteConfigOptions",
                     "text": "RouteConfigOptions"
                   },
-                  "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+                  "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-server/src/versioning/types.ts",
                 "deprecated": false,
@@ -15850,6 +16197,80 @@
             "description": [],
             "signature": [
               "{ body?: boolean | undefined; } | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.VersionedRouteValidation",
+        "type": "Interface",
+        "tags": [],
+        "label": "VersionedRouteValidation",
+        "description": [
+          "\nVersioned route validation"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.VersionedRouteValidation",
+            "text": "VersionedRouteValidation"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.VersionedRouteValidation.request",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nValidation to run against route inputs: params, query and body"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteRequestValidation",
+                "text": "VersionedRouteRequestValidation"
+              },
+              "<P, Q, B> | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/versioning/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.VersionedRouteValidation.response",
+            "type": "Object",
+            "tags": [
+              "note"
+            ],
+            "label": "response",
+            "description": [
+              "\nValidation to run against route output"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.VersionedRouteResponseValidation",
+                "text": "VersionedRouteResponseValidation"
+              },
+              " | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,
@@ -18127,10 +18548,42 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
-        "id": "def-common.RouteValidatorFullConfig",
+        "id": "def-common.RouteValidator",
         "type": "Type",
         "tags": [],
-        "label": "RouteValidatorFullConfig",
+        "label": "RouteValidator",
+        "description": [
+          "\nType container for schemas used in route related validations"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorFullConfigRequest",
+            "text": "RouteValidatorFullConfigRequest"
+          },
+          "<P, Q, B> | ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RouteValidatorRequestAndResponses",
+            "text": "RouteValidatorRequestAndResponses"
+          },
+          "<P, Q, B>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/route_validator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.RouteValidatorFullConfigRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "RouteValidatorFullConfigRequest",
         "description": [
           "\nRoute validations config and options merged into one object"
         ],
@@ -18285,7 +18738,7 @@
             "section": "def-common.RouteConfigOptions",
             "text": "RouteConfigOptions"
           },
-          "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+          "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
         "deprecated": false,
@@ -18353,7 +18806,7 @@
                 "section": "def-common.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<Method>, \"access\"> | undefined; access: \"public\" | \"internal\"; enableQueryVersion?: boolean | undefined; }"
+              "<Method>, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
             ],
             "path": "packages/core/http/core-http-server/src/versioning/types.ts",
             "deprecated": false,

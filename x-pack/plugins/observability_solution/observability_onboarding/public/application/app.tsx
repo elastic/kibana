@@ -35,6 +35,7 @@ import {
 import { baseRoutes, routes } from '../routes';
 import { CustomLogs } from '../routes/templates/custom_logs';
 import { SystemLogs } from '../routes/templates/system_logs';
+import { ExperimentalOnboardingFlow } from './experimental_onboarding_flow';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -132,15 +133,12 @@ export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
   deps,
+  experimentalOnboardingFlowEnabled,
   corePlugins: { observability, data },
   config,
 }: {
   appMountParameters: AppMountParameters;
-  core: CoreStart;
-  deps: ObservabilityOnboardingPluginSetupDeps;
-  corePlugins: ObservabilityOnboardingPluginStartDeps;
-  config: ConfigSchema;
-}) {
+} & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps };
@@ -183,7 +181,11 @@ export function ObservabilityOnboardingAppRoot({
                       <ObservabilityOnboardingHeaderActionMenu />
                     </HeaderMenuPortal>
                   )}
-                  <ObservabilityOnboardingApp />
+                  {experimentalOnboardingFlowEnabled ? (
+                    <ExperimentalOnboardingFlow />
+                  ) : (
+                    <ObservabilityOnboardingApp />
+                  )}
                 </EuiErrorBoundary>
               </Router>
             </i18nCore.Context>
@@ -198,33 +200,21 @@ export function ObservabilityOnboardingAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = ({
-  core,
-  deps,
-  appMountParameters,
-  corePlugins,
-  config,
-}: {
+interface RenderAppProps {
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
+  experimentalOnboardingFlowEnabled: boolean;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
   config: ConfigSchema;
-}) => {
-  const { element } = appMountParameters;
+}
 
-  ReactDOM.render(
-    <ObservabilityOnboardingAppRoot
-      appMountParameters={appMountParameters}
-      core={core}
-      deps={deps}
-      corePlugins={corePlugins}
-      config={config}
-    />,
-    element
-  );
+export const renderApp = (props: RenderAppProps) => {
+  const { element } = props.appMountParameters;
+
+  ReactDOM.render(<ObservabilityOnboardingAppRoot {...props} />, element);
   return () => {
-    corePlugins.data.search.session.clear();
+    props.corePlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

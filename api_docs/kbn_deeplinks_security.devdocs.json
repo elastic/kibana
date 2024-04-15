@@ -1,0 +1,101 @@
+{
+  "id": "@kbn/deeplinks-security",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/deeplinks-security",
+        "id": "def-common.SecurityPageName",
+        "type": "Enum",
+        "tags": [],
+        "label": "SecurityPageName",
+        "description": [],
+        "path": "packages/deeplinks/security/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-security",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"securitySolutionUI\""
+        ],
+        "path": "packages/deeplinks/security/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-security",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:network\" | \"securitySolutionUI:sessions\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:uncommon_processes\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:coverage-overview\""
+        ],
+        "path": "packages/deeplinks/security/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-security",
+        "id": "def-common.LinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "LinkId",
+        "description": [],
+        "signature": [
+          "\"\" | \"cases\" | \"rules\" | \"alerts\" | \"policy\" | \"overview\" | \"dashboards\" | \"cases_create\" | \"cases_configure\" | \"hosts\" | \"users\" | \"cloud_defend-policies\" | \"cloud_security_posture-dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"kubernetes\" | \"network\" | \"sessions\" | \"explore\" | \"assets\" | \"cloud_defend\" | \"administration\" | \"blocklist\" | \"cloud_security_posture-rules\" | \"data_quality\" | \"detections\" | \"detection_response\" | \"endpoints\" | \"event_filters\" | \"exceptions\" | \"host_isolation_exceptions\" | \"hosts-anomalies\" | \"hosts-risk\" | \"hosts-events\" | \"investigations\" | \"get_started\" | \"machine_learning-landing\" | \"network-anomalies\" | \"network-dns\" | \"network-events\" | \"network-http\" | \"network-tls\" | \"response_actions_history\" | \"rules-add\" | \"rules-create\" | \"rules-landing\" | \"threat_intelligence\" | \"timelines\" | \"timelines-templates\" | \"trusted_apps\" | \"uncommon_processes\" | \"users-anomalies\" | \"users-authentications\" | \"users-events\" | \"users-risk\" | \"entity_analytics\" | \"entity_analytics-management\" | \"coverage-overview\""
+        ],
+        "path": "packages/deeplinks/security/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-security",
+        "id": "def-common.SECURITY_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_APP_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionUI\""
+        ],
+        "path": "packages/deeplinks/security/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

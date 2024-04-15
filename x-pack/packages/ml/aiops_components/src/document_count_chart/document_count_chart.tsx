@@ -19,17 +19,20 @@ import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   getLogRateAnalysisType,
+  getSnappedTimestamps,
   getSnappedWindowParameters,
-  getWindowParameters,
+  getWindowParametersForTrigger,
+  type DocumentCountStatsChangePoint,
   type LogRateAnalysisType,
   type LogRateHistogramItem,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-log-rate-analysis';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -129,6 +132,8 @@ export interface DocumentCountChartProps {
   baselineBrush?: BrushSettings;
   /** Optional data-test-subject */
   dataTestSubj?: string;
+  /** Optional change point metadata */
+  changePoint?: DocumentCountStatsChangePoint;
 }
 
 const SPEC_ID = 'document_count';
@@ -163,6 +168,7 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    changePoint,
     dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
@@ -250,17 +256,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
-  const snapTimestamps = useMemo(() => {
-    const timestamps: number[] = [];
-    let n = timeRangeEarliest;
-
-    while (n <= timeRangeLatest + interval) {
-      timestamps.push(n);
-      n += interval;
-    }
-
-    return timestamps;
-  }, [timeRangeEarliest, timeRangeLatest, interval]);
+  const snapTimestamps = useMemo(
+    () => getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval),
+    [timeRangeEarliest, timeRangeLatest, interval]
+  );
 
   const timefilterUpdateHandler = useCallback(
     (range: TimeFilterRange) => {
@@ -306,14 +305,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          const wp =
-            typeof startRange === 'number'
-              ? getWindowParameters(
-                  startRange + interval / 2,
-                  timeRangeEarliest,
-                  timeRangeLatest + interval
-                )
-              : startRange;
+          const wp = getWindowParametersForTrigger(
+            startRange,
+            interval,
+            timeRangeEarliest,
+            timeRangeLatest,
+            changePoint
+          );
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
@@ -329,6 +327,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       }
     },
     [
+      changePoint,
       interval,
       timeRangeEarliest,
       timeRangeLatest,
@@ -436,7 +435,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <DualBrush

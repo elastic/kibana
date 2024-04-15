@@ -13,3 +13,5 @@ export const RESIZED_COLUMN_MIN_WITH = 70; // px
 
 /** The default minimum width of a column of type `date` */
 export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 190; // px
+
+export const DEFAULT_UNIFIED_TABLE_DATE_COLUMN_MIN_WIDTH = 215; // px

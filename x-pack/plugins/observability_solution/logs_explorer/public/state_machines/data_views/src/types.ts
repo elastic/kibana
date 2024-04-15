@@ -14,12 +14,20 @@ export interface DataViewsSearchParams {
   sortOrder?: SortOrder;
 }
 
+export interface DataViewsFilterParams {
+  dataType?: Extract<DataViewDescriptor['dataType'], 'logs' | undefined>; // only allow logs data type or no filter for now
+}
+
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchParams, DataViewDescriptor[]>;
+  cache: IHashedCache<WithSearch & WithFilter, DataViewDescriptor[]>;
 }
 
 export interface WithSearch {
   search: DataViewsSearchParams;
+}
+
+export interface WithFilter {
+  filter: DataViewsFilterParams;
 }
 
 export interface WithDataViews {
@@ -43,13 +51,22 @@ export interface WithNullishError {
 export type DefaultDataViewsContext = WithCache &
   WithNullishDataViews &
   WithSearch &
+  WithFilter &
   WithNullishError;
 
 type LoadingDataViewsContext = DefaultDataViewsContext;
 
-type LoadedDataViewsContext = WithCache & WithDataViews & WithSearch & WithNullishError;
+type LoadedDataViewsContext = WithCache &
+  WithDataViews &
+  WithSearch &
+  WithFilter &
+  WithNullishError;
 
-type LoadingFailedDataViewsContext = WithCache & WithNullishDataViews & WithSearch & WithError;
+type LoadingFailedDataViewsContext = WithCache &
+  WithNullishDataViews &
+  WithSearch &
+  WithFilter &
+  WithError;
 
 export type DataViewsTypestate =
   | {
@@ -89,6 +106,10 @@ export type DataViewsEvent =
   | {
       type: 'SEARCH_DATA_VIEWS';
       search: DataViewsSearchParams;
+    }
+  | {
+      type: 'FILTER_DATA_VIEWS';
+      filter: DataViewsFilterParams;
     }
   | {
       type: 'SORT_DATA_VIEWS';

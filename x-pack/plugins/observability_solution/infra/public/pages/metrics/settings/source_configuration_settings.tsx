@@ -60,7 +60,7 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings('infra_metrics', [
+  const infraUiSettings = useEditableSettings([
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
   ]);

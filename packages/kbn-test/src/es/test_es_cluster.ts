@@ -73,7 +73,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath'
   >;
   esJavaOpts?: string;
   /**
@@ -250,6 +250,7 @@ export function createTestEsCluster<
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
+          dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
           clean: true,

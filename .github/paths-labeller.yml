@@ -22,9 +22,8 @@
     - 'x-pack/test/fleet_api_integration/**/*.*'
 - 'Team:obs-ux-management':
     - 'x-pack/plugins/observability_solution/observability/**/*.*'
-- 'Team:obs-knowledge':
-    - 'src/plugins/ai_assistant_management/observability/**/*.*'
+- 'Team:Obs AI Assistant':
     - 'x-pack/plugins/observability_solution/observability_ai_assistant/**/*.*'
-    - 'x-pack/plugins/observability_solution/observability_ai_assistant_app/**/*.*'
+    - 'x-pack/plugins/observability_solution/observability_ai_assistant_*/**/*.*'
     - 'x-pack/test/observability_ai_assistant_api_integration/**/*.*'
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'

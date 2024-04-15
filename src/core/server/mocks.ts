@@ -145,8 +145,9 @@ export type CustomRequestHandlerMock<T> = {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
 
-const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
-  // @ts-expect-error upgrade typescript v4.9.5
+const createCustomRequestHandlerContextMock = <T extends Record<string, unknown>>(
+  contextParts: T
+): CustomRequestHandlerMock<T> => {
   const mock = Object.entries(contextParts).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard

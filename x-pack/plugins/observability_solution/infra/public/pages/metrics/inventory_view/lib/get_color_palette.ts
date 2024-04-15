@@ -9,8 +9,8 @@ import {
   euiPaletteCool,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteNegative,
-  euiPalettePositive,
+  euiPaletteRed,
+  euiPaletteGreen,
   euiPaletteWarm,
 } from '@elastic/eui';
 import { InventoryColorPalette } from '../../../../lib/lib';
@@ -24,9 +24,9 @@ const createColorPalette = (name: InventoryColorPalette = 'cool', steps: number 
     case 'warm':
       return euiPaletteWarm(steps);
     case 'positive':
-      return euiPalettePositive(steps);
+      return euiPaletteGreen(steps);
     case 'negative':
-      return euiPaletteNegative(steps);
+      return euiPaletteRed(steps);
     default:
       return euiPaletteCool(steps);
   }

@@ -305,6 +305,23 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  setup: {
+    type: FIELD_TYPES.TEXTAREA,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupLabel',
+      {
+        defaultMessage: 'Setup guide',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText',
+      {
+        defaultMessage:
+          'Provide instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
 };
 
 const threatIndicatorPathRequiredSchemaValue = {

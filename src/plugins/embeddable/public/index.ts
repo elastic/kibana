@@ -41,6 +41,7 @@ export {
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
+  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
@@ -100,10 +101,6 @@ export {
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
   type ReactEmbeddableRegistration,
-  type ReactEmbeddableTitlesApi,
-  type SerializedReactEmbeddableTitles,
-  initializeReactEmbeddableTitles,
-  serializeReactEmbeddableTitles,
   startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 

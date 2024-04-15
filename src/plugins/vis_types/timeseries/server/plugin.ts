@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';

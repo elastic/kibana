@@ -38,7 +38,7 @@ export enum AggregationType {
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
-const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
+export const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   id: THRESHOLD_MET_GROUP_ID,
   name: i18n.translate('xpack.apm.a.thresholdMet', {
     defaultMessage: 'Threshold met',

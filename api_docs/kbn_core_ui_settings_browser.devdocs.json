@@ -597,7 +597,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; options?: string[] | number[] | undefined; value?: unknown; scope?: ",
+          " | undefined; value?: unknown; options?: string[] | number[] | undefined; scope?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

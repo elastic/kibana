@@ -502,6 +502,55 @@
       },
       {
         "parentPluginId": "@kbn/field-utils",
+        "id": "def-common.getTextBasedColumnIconType",
+        "type": "Function",
+        "tags": [],
+        "label": "getTextBasedColumnIconType",
+        "description": [],
+        "signature": [
+          "(columnMeta: { type: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnType",
+            "text": "DatatableColumnType"
+          },
+          "; esType?: string | undefined; } | null | undefined) => string | null"
+        ],
+        "path": "packages/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.getTextBasedColumnIconType.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "columnMeta",
+            "description": [],
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumnType",
+                "text": "DatatableColumnType"
+              },
+              "; esType?: string | undefined; } | null | undefined"
+            ],
+            "path": "packages/kbn-field-utils/src/utils/get_text_based_column_icon_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/field-utils",
         "id": "def-common.isKnownFieldType",
         "type": "Function",
         "tags": [],

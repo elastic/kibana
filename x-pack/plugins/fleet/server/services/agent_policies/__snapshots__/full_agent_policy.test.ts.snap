@@ -12,7 +12,7 @@ Object {
       "logs": false,
       "metrics": true,
       "namespace": "default",
-      "use_output": "test-id",
+      "use_output": "default",
     },
     "protection": Object {
       "enabled": false,
@@ -35,7 +35,7 @@ Object {
         ],
       },
     },
-    "test-id": Object {
+    "default": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
@@ -61,7 +61,7 @@ Object {
       "preset": "balanced",
       "type": "elasticsearch",
     },
-    "test-id": Object {
+    "default": Object {
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
@@ -106,6 +106,13 @@ Object {
   "id": "agent-policy",
   "inputs": Array [],
   "output_permissions": Object {
+    "default": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+    },
     "monitoring-output-id": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
@@ -123,25 +130,18 @@ Object {
         ],
       },
     },
-    "test-id": Object {
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-    },
   },
   "outputs": Object {
-    "monitoring-output-id": Object {
+    "default": Object {
       "hosts": Array [
-        "http://es-monitoring.co:9201",
+        "http://127.0.0.1:9201",
       ],
       "preset": "balanced",
       "type": "elasticsearch",
     },
-    "test-id": Object {
+    "monitoring-output-id": Object {
       "hosts": Array [
-        "http://127.0.0.1:9201",
+        "http://es-monitoring.co:9201",
       ],
       "preset": "balanced",
       "type": "elasticsearch",

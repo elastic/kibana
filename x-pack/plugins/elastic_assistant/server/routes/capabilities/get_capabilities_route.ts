@@ -57,7 +57,6 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
             logger,
           });
           const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-
           return response.ok({ body: registeredFeatures });
         } catch (err) {
           const error = transformError(err);

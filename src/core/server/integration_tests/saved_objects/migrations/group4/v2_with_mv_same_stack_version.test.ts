@@ -138,7 +138,9 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
       indexTypesMap: {
         '.kibana': ['test_mv'],
       },
-      migrationMappingPropertyHashes: expect.any(Object),
+      mappingVersions: {
+        test_mv: '10.2.0',
+      },
     });
 
     const { saved_objects: testMvDocs } = await savedObjectsRepository.find({

@@ -249,7 +249,7 @@ export class RuleTypeRunner<
             return {
               error: createTaskRunError(
                 new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err),
-                TaskErrorSource.USER
+                TaskErrorSource.FRAMEWORK
               ),
               stackTrace: { message: err, stackTrace: err.stack },
             };

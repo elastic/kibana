@@ -28,5 +28,6 @@
     "@kbn/serverless-observability-settings",
     "@kbn/core-chrome-browser",
     "@kbn/discover-plugin",
+    "@kbn/security-plugin",
   ]
 }

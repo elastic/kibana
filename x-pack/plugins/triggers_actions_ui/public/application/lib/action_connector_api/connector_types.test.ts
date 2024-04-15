@@ -47,6 +47,7 @@ describe('loadActionTypes', () => {
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/actions/connector_types",
+        Object {},
       ]
     `);
   });
@@ -84,6 +85,133 @@ describe('loadActionTypes', () => {
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/actions/connector_types",
+        Object {
+          "query": Object {
+            "feature_id": "alerting",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call the internal list types API if includeSystemActions=true', async () => {
+    const apiResponseValue = [
+      {
+        id: '.test-system-action',
+        name: 'System action name',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: ['alerting'],
+        minimum_license_required: 'basic',
+        is_system_action_type: true,
+      },
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: ['alerting'],
+        minimum_license_required: 'basic',
+        is_system_action_type: false,
+      },
+    ];
+
+    http.get.mockResolvedValueOnce(apiResponseValue);
+
+    const resolvedValue: ActionType[] = [
+      {
+        id: '.test-system-action',
+        name: 'System action name',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: true,
+      },
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+      },
+    ];
+
+    const result = await loadActionTypes({ http, includeSystemActions: true });
+    expect(result).toEqual(resolvedValue);
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/actions/connector_types",
+        Object {},
+      ]
+    `);
+  });
+
+  test('should call the internal list types API with query parameter if specified and includeSystemActions=true', async () => {
+    const apiResponseValue = [
+      {
+        id: '.test-system-action',
+        name: 'System action name',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: ['alerting'],
+        minimum_license_required: 'basic',
+        is_system_action_type: true,
+      },
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: ['alerting'],
+        minimum_license_required: 'basic',
+        is_system_action_type: false,
+      },
+    ];
+
+    http.get.mockResolvedValueOnce(apiResponseValue);
+
+    const resolvedValue: ActionType[] = [
+      {
+        id: '.test-system-action',
+        name: 'System action name',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: true,
+      },
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        supportedFeatureIds: ['alerting'],
+        minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
+      },
+    ];
+
+    const result = await loadActionTypes({
+      http,
+      featureId: 'alerting',
+      includeSystemActions: true,
+    });
+
+    expect(result).toEqual(resolvedValue);
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/actions/connector_types",
         Object {
           "query": Object {
             "feature_id": "alerting",

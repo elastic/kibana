@@ -30,7 +30,7 @@ export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
 export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCrawler }) => {
-  const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
+  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
     deleteModalConnectorName,
@@ -66,10 +66,16 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         closeDeleteModal();
       }}
       onConfirm={() => {
-        deleteConnector({
-          connectorId,
-          shouldDeleteIndex: isCrawler ? true : shouldDeleteIndex,
-        });
+        if (isCrawler) {
+          if (deleteModalIndexName) {
+            deleteIndex({ indexName: deleteModalIndexName });
+          }
+        } else {
+          deleteConnector({
+            connectorId,
+            shouldDeleteIndex,
+          });
+        }
       }}
       cancelButtonText={
         isDeleteLoading

@@ -120,8 +120,8 @@ describe('Update conversation route', () => {
           excludeFromLastConversationStorage: true,
           ...getUpdateConversationSchemaMock(),
           apiConfig: {
+            actionTypeId: '.bedrock',
             connectorId: '123',
-            connectorTypeTitle: 'OpenAI',
             defaultSystemPromptId: 'test',
           },
         },

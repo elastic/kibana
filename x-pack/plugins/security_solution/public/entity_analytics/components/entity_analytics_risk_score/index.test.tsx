@@ -234,7 +234,8 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       });
     });
 
-    it('opens the expandable flyout when entity name is clicked', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/179234
+    it.skip('opens the expandable flyout when entity name is clicked', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,

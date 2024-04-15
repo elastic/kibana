@@ -6,24 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType, lazy, Suspense } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
 } from '../../../types/embeddable_console';
 
 type EmbeddableConsoleInternalProps = EmbeddableConsoleProps & EmbeddableConsoleDependencies;
+const Console = dynamic(async () => ({
+  default: (await import('./embeddable_console')).EmbeddableConsole,
+}));
 
-const Console = lazy<ComponentType<EmbeddableConsoleInternalProps>>(async () => {
-  return {
-    default: (await import('./embeddable_console')).EmbeddableConsole,
-  };
-});
-
-export const EmbeddableConsole: React.FC<EmbeddableConsoleInternalProps> = (props) => {
-  return (
-    <Suspense fallback={null}>
-      <Console {...props} />
-    </Suspense>
-  );
-};
+export const EmbeddableConsole = (props: EmbeddableConsoleInternalProps) => <Console {...props} />;

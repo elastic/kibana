@@ -22,9 +22,16 @@ interface RegisterRoutes {
   repository: ServerRouteRepository;
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
+  getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
 }
 
-export function registerRoutes({ repository, core, logger, plugins }: RegisterRoutes) {
+export function registerRoutes({
+  repository,
+  core,
+  logger,
+  plugins,
+  getEsCapabilities,
+}: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
@@ -56,6 +63,7 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
             logger,
             params: decodedParams,
             plugins,
+            getEsCapabilities,
           })) as any;
 
           if (data === undefined) {

@@ -6,19 +6,9 @@
  */
 
 import objectHash from 'object-hash';
-import pick from 'lodash/pick';
-import get from 'lodash/get';
-import sortBy from 'lodash/sortBy';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import {
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_INSTANCE_ID,
-  ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SignalSourceHit } from '../types';
 
 import type {
@@ -29,6 +19,7 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 
 import type { BuildReasonMessage } from './reason_formatters';
 
@@ -62,20 +53,10 @@ export const wrapSuppressedAlerts = ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const suppressedBy = completeRule?.ruleParams?.alertSuppression?.groupBy ?? [];
-
   return events.map((event) => {
-    const suppressedProps = pick(event.fields, suppressedBy) as Record<
-      string,
-      string[] | number[] | undefined
-    >;
-    const suppressionTerms = suppressedBy.map((field) => {
-      const value = suppressedProps[field] ?? null;
-      const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
-      return {
-        field,
-        value: sortedValue,
-      };
+    const suppressionTerms = getSuppressionTerms({
+      alertSuppression: completeRule?.ruleParams?.alertSuppression,
+      fields: event.fields,
     });
 
     const id = objectHash([
@@ -102,22 +83,19 @@ export const wrapSuppressedAlerts = ({
       publicBaseUrl
     );
 
-    const suppressionTime = new Date(
-      get(event.fields, primaryTimestamp) ??
-        (secondaryTimestamp && get(event.fields, secondaryTimestamp)) ??
-        baseAlert[TIMESTAMP]
-    );
-
     return {
       _id: id,
       _index: '',
       _source: {
         ...baseAlert,
-        [ALERT_SUPPRESSION_TERMS]: suppressionTerms,
-        [ALERT_SUPPRESSION_START]: suppressionTime,
-        [ALERT_SUPPRESSION_END]: suppressionTime,
-        [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-        [ALERT_INSTANCE_ID]: instanceId,
+        ...getSuppressionAlertFields({
+          primaryTimestamp,
+          secondaryTimestamp,
+          fields: event.fields,
+          suppressionTerms,
+          fallbackTimestamp: baseAlert[TIMESTAMP],
+          instanceId,
+        }),
       },
     };
   });

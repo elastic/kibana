@@ -40,7 +40,10 @@ const ServerlessTopNav = () => {
   const { services } = useKibanaContextForPlugin();
 
   return (
-    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader
+      data-test-subj="logsExplorerHeaderMenu"
+      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+    >
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogsExplorerTabs services={services} selectedTab="logs-explorer" />

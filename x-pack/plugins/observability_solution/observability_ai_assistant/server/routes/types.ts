@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type {
+  CoreRequestHandlerContext,
+  CoreStart,
+  CustomRequestHandlerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
@@ -21,6 +26,7 @@ export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandler
   // these two are here for compatibility with APM functions
   rac: RacApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  core: Promise<CoreRequestHandlerContext & { coreStart: CoreStart }>;
 }>;
 
 export interface ObservabilityAIAssistantRouteHandlerResources {

@@ -15,7 +15,7 @@ import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/c
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, Message } from '../../..';
+import { Conversation, ClientMessage } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
@@ -25,7 +25,7 @@ import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
+import { getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -58,7 +58,7 @@ export const useConnectorSetup = ({
     data: connectors,
     isSuccess: areConnectorsFetched,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ actionTypeRegistry, http });
+  } = useLoadConnectors({ http });
   const isConnectorConfigured = areConnectorsFetched && !!connectors?.length;
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -111,13 +111,13 @@ export const useConnectorSetup = ({
 
   // Create EuiCommentProps[] from conversation messages
   const commentBody = useCallback(
-    (message: Message, index: number, length: number) => {
+    (message: ClientMessage, index: number, length: number) => {
       // If timestamp is not set, set it to current time (will update conversation at end of setup)
       if (
         conversation.messages[index].timestamp == null ||
         conversation.messages[index].timestamp.length === 0
       ) {
-        conversation.messages[index].timestamp = new Date().toLocaleString();
+        conversation.messages[index].timestamp = new Date().toISOString();
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
@@ -151,7 +151,9 @@ export const useConnectorSetup = ({
     () =>
       conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
         const isUser = message.role === 'user';
-
+        const timestamp = `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${new Date(
+          message.timestamp
+        ).toLocaleString()}`;
         const commentProps: EuiCommentProps = {
           username: isUser ? i18n.CONNECTOR_SETUP_USER_YOU : i18n.CONNECTOR_SETUP_USER_ASSISTANT,
           children: commentBody(message, index, conversation.messages.length),
@@ -163,7 +165,7 @@ export const useConnectorSetup = ({
               iconType={AssistantAvatar}
             />
           ),
-          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+          timestamp,
         };
         return commentProps;
       }),
@@ -173,16 +175,13 @@ export const useConnectorSetup = ({
   const onSaveConnector = useCallback(
     async (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
-      // add action type title to new connector
-      const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
       // persist only the active conversation
-
       const updatedConversation = await setApiConfig({
         conversation,
         apiConfig: {
           ...conversation.apiConfig,
           connectorId: connector.id,
-          connectorTypeTitle,
+          actionTypeId: connector.actionTypeId,
           provider: config?.apiProvider,
           model: config?.defaultModel,
         },
@@ -195,7 +194,7 @@ export const useConnectorSetup = ({
         setIsConnectorModalVisible(false);
       }
     },
-    [actionTypeRegistry, conversation, onConversationUpdate, refetchConnectors, setApiConfig]
+    [conversation, onConversationUpdate, refetchConnectors, setApiConfig]
   );
 
   return {

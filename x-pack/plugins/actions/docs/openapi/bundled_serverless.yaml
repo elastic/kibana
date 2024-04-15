@@ -887,7 +887,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-v2:1
+          default: anthropic.claude-3-sonnet-20240229-v1:0
     secrets_properties_bedrock:
       title: Connector secrets properties for an Amazon Bedrock connector
       description: Defines secrets for connectors when type is `.bedrock`.

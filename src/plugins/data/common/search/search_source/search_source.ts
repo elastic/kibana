@@ -60,16 +60,7 @@
 
 import { setWith } from '@kbn/safer-lodash-set';
 import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
-import {
-  catchError,
-  finalize,
-  first,
-  last,
-  map,
-  shareReplay,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {

@@ -8,6 +8,7 @@
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
+  FieldWithSemanticTextInfo,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
@@ -107,6 +108,10 @@ export type Action =
   | { type: 'templates.save'; value: MappingsTemplates }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
+  | {
+      type: 'field.addSemanticText';
+      value: FieldWithSemanticTextInfo;
+    }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }
   | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }

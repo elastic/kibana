@@ -29,7 +29,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
   return {
     text,
     'data-test-subj': 'solutionNavSwitcher',
-    popoverContent: (
+    popoverContent: (closePopover) => (
       <>
         <EuiTitle size="xxxs">
           <h3>
@@ -49,6 +49,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
               data-test-subj={`solutionNavSwitcher-${id}`}
               onClick={() => {
                 onChange(id, { redirect: true });
+                closePopover();
               }}
             />,
           ])}

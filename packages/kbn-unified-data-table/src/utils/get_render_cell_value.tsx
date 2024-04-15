@@ -8,7 +8,6 @@
 
 import React, { useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
@@ -25,7 +24,7 @@ import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
-const CELL_CLASS = 'unifiedDataTable__cellValue';
+export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn = ({
   dataView,
@@ -62,22 +61,16 @@ export const getRenderCellValueFn = ({
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
-      if (!externalCustomRenderers) {
-        if (row?.isAnchor) {
-          setCellProps({
-            className: 'dscDocsGrid__cell--highlight',
-          });
-        } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
-          setCellProps({
-            style: {
-              backgroundColor: ctx.isDarkMode
-                ? themeDark.euiColorHighlight
-                : themeLight.euiColorHighlight,
-            },
-          });
-        } else {
-          setCellProps({ style: undefined });
-        }
+      if (row?.isAnchor) {
+        setCellProps({
+          className: 'unifiedDataTable__cell--highlight',
+        });
+      } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
+        setCellProps({
+          className: 'unifiedDataTable__cell--expanded',
+        });
+      } else {
+        setCellProps({ style: undefined });
       }
     }, [ctx, row, setCellProps]);
 
@@ -87,7 +80,7 @@ export const getRenderCellValueFn = ({
 
     if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
       return (
-        <>
+        <span className={CELL_CLASS}>
           {externalCustomRenderers[columnId]({
             rowIndex,
             columnId,
@@ -101,7 +94,7 @@ export const getRenderCellValueFn = ({
             fieldFormats,
             closePopover,
           })}
-        </>
+        </span>
       );
     }
 

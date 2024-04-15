@@ -9,11 +9,11 @@ import { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ApiConfig,
-  Replacement,
+  Replacements,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, Message } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -42,7 +42,7 @@ export const getConversationById = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'GET',
-      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -85,7 +85,7 @@ export const createConversation = async ({
   try {
     const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
-      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -128,7 +128,7 @@ export const deleteConversation = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
-      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+      version: API_VERSIONS.public.v1,
       signal,
     });
 
@@ -149,9 +149,9 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
   apiConfig?: ApiConfig;
-  replacements?: Replacement[];
+  replacements?: Replacements;
   excludeFromLastConversationStorage?: boolean;
   signal?: AbortSignal | undefined;
 }
@@ -197,7 +197,7 @@ export const updateConversation = async ({
         headers: {
           'Content-Type': 'application/json',
         },
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         signal,
       }
     );
