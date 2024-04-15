@@ -13,7 +13,7 @@ import { Status } from '../../../../../common/types/api';
 import { Meta } from '../../../../../common/types/pagination';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
-  CancelSyncsApiActions,
+  CancelSyncsActions,
   CancelSyncsApiLogic,
 } from '../../api/connector/cancel_syncs_api_logic';
 import {
@@ -36,7 +36,7 @@ import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 export interface IndicesActions {
   apiError: FetchIndicesApiActions['apiError'];
   apiSuccess: FetchIndicesApiActions['apiSuccess'];
-  cancelSuccess: CancelSyncsApiActions['apiSuccess'];
+  cancelSuccess: CancelSyncsActions['apiSuccess'];
   closeDeleteModal(): void;
   deleteError: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['apiError'];
   deleteIndex: Actions<DeleteIndexApiLogicArgs, DeleteIndexApiLogicValues>['makeRequest'];
