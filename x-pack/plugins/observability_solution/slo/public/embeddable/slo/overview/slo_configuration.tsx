@@ -108,24 +108,25 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
-          <FormattedMessage
-            id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.sloEmbeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlo || hasError}
-          onClick={onConfirmClick}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Save"
-          />
-        </EuiButton>
+          <EuiButton
+            data-test-subj="sloConfirmButton"
+            isDisabled={!selectedSlo || hasError}
+            onClick={onConfirmClick}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.overviewEmbeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );
