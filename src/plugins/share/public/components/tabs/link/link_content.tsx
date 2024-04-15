@@ -168,19 +168,6 @@ export const LinkContent = ({
     });
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
 
-  const renderSaveState =
-    objectType === 'lens' && isDirty ? (
-      <FormattedMessage
-        id="share.link.lens.saveUrlBox"
-        defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
-        values={{ objectType }}
-      />
-    ) : objectType === 'lens' ? (
-      shortUrlCache ?? shareableUrl
-    ) : (
-      shareableUrl ?? shortUrlCache ?? ''
-    );
-
   return (
     <>
       <EuiForm>
@@ -195,7 +182,9 @@ export const LinkContent = ({
         <EuiSpacer size="l" />
         {objectType !== 'dashboard' && (
           <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-            {renderSaveState}
+            {objectType === 'lens'
+              ? shortUrlCache ?? shareableUrl
+              : shareableUrl ?? shortUrlCache ?? ''}
           </EuiCodeBlock>
         )}
         <EuiSpacer />
@@ -204,7 +193,15 @@ export const LinkContent = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={
-              isTextCopied
+              isDirty && objectType === 'lens'
+                ? i18n.translate('share.link.unsaved', {
+                    defaultMessage:
+                      'There are unsaved changes. Before you generate a link, save the {objectType}.',
+                    values: {
+                      objectType,
+                    },
+                  })
+                : isTextCopied
                 ? i18n.translate('share.link.copied', { defaultMessage: 'Text copied' })
                 : null
             }
@@ -220,8 +217,8 @@ export const LinkContent = ({
                   : 'primary'
               }
               data-share-url={url}
-              onBlur={() => setTextCopied(false)}
-              onClick={copyUrlHelper}
+              onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
+              onClick={() => (objectType === 'lens' && isDirty ? null : copyUrlHelper())}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>

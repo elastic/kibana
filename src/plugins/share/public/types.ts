@@ -94,11 +94,11 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   requiresSavedState?: boolean;
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
-  generateExportButton?: ReactElement;
   generateExport: (args: {
     intl: InjectedIntl;
     optimizedForPrinting?: boolean;
   }) => Promise<unknown>;
+  generateExportButtonLabel?: ReactElement;
   theme?: ThemeServiceSetup;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';

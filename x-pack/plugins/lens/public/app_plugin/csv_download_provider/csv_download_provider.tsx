@@ -177,7 +177,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Export a PDF, PNG, or CSV of this visualization."
                 />
               ),
-              generateReportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate export" />
               ),
               renderLayoutOptionSwitch: false,
@@ -193,7 +193,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateReportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
               showRadios: false,

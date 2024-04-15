@@ -406,7 +406,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateExportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
           defaultMessage="Generate export"
@@ -438,7 +438,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateExportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.pngV2.generateButtonLabel"
           defaultMessage="Generate export"

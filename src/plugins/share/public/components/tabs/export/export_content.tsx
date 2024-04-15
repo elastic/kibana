@@ -43,37 +43,21 @@ const CopyPOSTUrlButton = ({ unsavedChangesExist, postUrl }: ICopyPOSTUrlProps) 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            unsavedChangesExist ? (
+        <EuiCopy textToCopy={postUrl ?? ''}>
+          {(copy) => (
+            <EuiButtonEmpty
+              iconType="copy"
+              onClick={copy}
+              data-test-subj="shareReportingCopyURL"
+              flush="both"
+            >
               <FormattedMessage
-                id="share.modalContent.unsavedStateErrorText"
-                defaultMessage="Save your work before copying this URL."
+                id="share.modalContent.copyUrlButtonLabel"
+                defaultMessage="Post URL"
               />
-            ) : (
-              <FormattedMessage
-                id="share.modalContent.savedStateErrorText"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-              />
-            )
-          }
-        >
-          <EuiCopy textToCopy={postUrl ?? ''}>
-            {(copy) => (
-              <EuiButtonEmpty
-                iconType="copy"
-                onClick={copy}
-                data-test-subj="shareReportingCopyURL"
-                flush="both"
-              >
-                <FormattedMessage
-                  id="share.modalContent.copyUrlButtonLabel"
-                  defaultMessage="Post URL"
-                />
-              </EuiButtonEmpty>
-            )}
-          </EuiCopy>
-        </EuiToolTip>
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip
@@ -140,7 +124,7 @@ const ExportContentUi = ({
   );
 
   const {
-    generateExportButton,
+    generateExportButtonLabel,
     helpText,
     renderCopyURLButton,
     generateExport,
@@ -236,10 +220,10 @@ const ExportContentUi = ({
         data-test-subj="generateExportButton"
         isLoading={isCreatingExport}
       >
-        {generateExportButton}
+        {generateExportButtonLabel}
       </EuiButton>
     );
-  }, [generateExportButton, getReport, isCreatingExport]);
+  }, [generateExportButtonLabel, getReport, isCreatingExport]);
 
   const renderRadioOptions = () => {
     if (getRadioOptions().length > 1) {
@@ -262,24 +246,11 @@ const ExportContentUi = ({
     }
   };
 
-  const getHelpText = () => {
-    if (objectType === 'lens' && generateExport !== undefined) {
-      return helpText;
-    } else {
-      return (
-        <FormattedMessage
-          id="share.helpText.goldLicense.roleNotPDFPNG"
-          defaultMessage="Export a CSV of this visualization."
-        />
-      );
-    }
-  };
-
   return (
     <>
       <EuiForm>
         <EuiSpacer size="l" />
-        {getHelpText()}
+        {helpText}
         <EuiSpacer size="m" />
         {renderRadioOptions()}
         <EuiSpacer size="xl" />
