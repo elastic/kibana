@@ -68,7 +68,9 @@ export const registerFunctions: RegistrationCallback = async ({
         When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
 
-        You MUST use the get_dataset_info function or get_apm_dataset_info function before calling the "query" or "changes" function.
+        You MUST use the get_dataset_info function ${
+          functions.hasFunction('get_apm_dataset_info') ? 'or get_apm_dataset_info' : ''
+        } function before calling the "query" or "changes" function.
 
         If a function requires an index, you MUST use the results from the dataset info functions.
 
