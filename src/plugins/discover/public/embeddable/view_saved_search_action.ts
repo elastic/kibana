@@ -19,11 +19,11 @@ import {
   getInheritedViewMode,
   HasType,
 } from '@kbn/presentation-publishing';
-import { apiHasSavedSearch, type HasSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../common';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { apiHasSavedSearch, HasSavedSearch } from './types';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 

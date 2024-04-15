@@ -32,6 +32,9 @@ export type {
 export {
   SEARCH_EMBEDDABLE_TYPE, // TODO: Move this too
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
+  apiHasSavedSearch,
+  type HasSavedSearch,
+  type HasTimeRange,
 } from './embeddable';
 export { loadSharingDataHelpers, getSortForEmbeddable } from './utils';
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';

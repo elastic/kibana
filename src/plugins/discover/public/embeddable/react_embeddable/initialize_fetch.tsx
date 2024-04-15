@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, switchMap } from 'rxjs';
 
 import {
   buildDataTableRecord,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
+import { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { FetchContext, onFetchContextChanged } from '@kbn/presentation-publishing';
+import { fetch$ } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
@@ -33,177 +33,116 @@ export function initializeFetch({
   discoverServices,
   savedSearch,
 }: {
-  api: SearchEmbeddableApi;
+  api: SearchEmbeddableApi & {
+    dataLoading: BehaviorSubject<boolean | undefined>;
+    blockingError: BehaviorSubject<Error | undefined>;
+    rows: BehaviorSubject<DataTableRecord[]>;
+  };
   discoverServices: DiscoverServices;
   savedSearch: SavedSearch;
 }) {
   const requestAdapter = new RequestAdapter();
   let abortController = new AbortController(); // ???
 
-  const onFetch = async (fetchContext: FetchContext, isCanceled: () => boolean) => {
-    console.log('onFetch', fetchContext);
-    api.blockingError.next(undefined);
-    const dataView = savedSearch.searchSource.getField('index');
-    if (!dataView) {
-      return;
-    }
-    const query = savedSearch.searchSource.getField('query');
-    const filters = savedSearch.searchSource.getField('filter') as Filter[];
+  const fetchSubscription = fetch$(api)
+    .pipe(
+      switchMap(async (fetchContext) => {
+        console.log('onFetch', fetchContext);
+        api.blockingError.next(undefined);
+        const dataView = savedSearch.searchSource.getField('index');
+        if (!dataView) {
+          return;
+        }
+        const query = savedSearch.searchSource.getField('query');
+        const filters = savedSearch.searchSource.getField('filter') as Filter[];
 
-    // Abort any in-progress requests
-    abortController.abort();
-    abortController = new AbortController();
+        // Abort any in-progress requests
+        abortController.abort();
+        abortController = new AbortController();
 
-    const searchSessionId = fetchContext.searchSessionId;
-    const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-    const useTextBased = isTextBasedQuery(query);
-    updateSearchSource(
-      savedSearch.searchSource,
-      dataView,
-      savedSearch.sort,
-      getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
-      useNewFieldsApi,
-      {
-        sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
-      }
-    );
-
-    api.dataLoading.next(true);
-    // Log request to inspector
-    requestAdapter.reset();
-
-    // searchProps.interceptedWarnings = undefined;
-    try {
-      console.log('useTextBased', useTextBased, fetchContext.query);
-      // Request text based data
-      if (useTextBased && query && !isTextBasedQuery(fetchContext.query)) {
-        const result = await fetchTextBased(
-          query!,
+        const searchSessionId = fetchContext.searchSessionId;
+        const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
+        const useTextBased = isTextBasedQuery(query);
+        updateSearchSource(
+          savedSearch.searchSource,
           dataView,
-          discoverServices.data,
-          discoverServices.expressions,
-          discoverServices.inspector,
-          abortController.signal,
-          filters,
-          fetchContext.query
+          savedSearch.sort,
+          getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
+          useNewFieldsApi,
+          {
+            sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+          }
         );
 
-        console.log('result', result);
-        api.rows.next(result.records);
-        api.dataLoading.next(false);
-        // searchProps.columnsMeta = result.textBasedQueryColumns
-        //   ? getTextBasedColumnsMeta(result.textBasedQueryColumns)
-        //   : undefined;
-        // searchProps.totalHitCount = result.records.length;
-        // searchProps.isPlainRecord = true;
-        // searchProps.isSortEnabled = true;
-        return;
-      }
+        try {
+          api.dataLoading.next(true);
+          // Log request to inspector
+          requestAdapter.reset();
 
-      // const test: KibanaExecutionContext = {
-      //   type: this.type,
-      //   name: 'discover',
-      //   id: savedSearch.id,
-      //   description: this.output.title || this.output.defaultTitle || '',
-      //   url: this.output.editUrl,
-      // };
+          if (useTextBased && query && !isTextBasedQuery(fetchContext.query)) {
+            const result = await fetchTextBased(
+              query!,
+              dataView,
+              discoverServices.data,
+              discoverServices.expressions,
+              discoverServices.inspector,
+              abortController.signal,
+              [...filters, ...(fetchContext.filters ?? [])],
+              fetchContext.query
+            );
 
-      // Request document data
-      const { rawResponse: resp } = await lastValueFrom(
-        savedSearch.searchSource.fetch$({
-          abortSignal: abortController.signal,
-          sessionId: searchSessionId,
-          inspector: {
-            adapter: requestAdapter,
-            title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
-              defaultMessage: 'Data',
-            }),
-            description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the search.',
-            }),
-          },
-          // executionContext,
-          disableWarningToasts: true,
-        })
-      );
+            console.log('result', result);
+            // searchProps.columnsMeta = result.textBasedQueryColumns
+            //   ? getTextBasedColumnsMeta(result.textBasedQueryColumns)
+            //   : undefined;
+            // searchProps.totalHitCount = result.records.length;
+            // searchProps.isPlainRecord = true;
+            // searchProps.isSortEnabled = true;
+            return { rows: result.records };
+          }
 
-      const interceptedWarnings: SearchResponseWarning[] = [];
-      discoverServices.data.search.showWarnings(requestAdapter, (warning) => {
-        interceptedWarnings.push(warning);
-        return true; // suppress the default behaviour
-      });
-      // searchProps.interceptedWarnings = interceptedWarnings;
+          const { rawResponse: resp } = await lastValueFrom(
+            savedSearch.searchSource.fetch$({
+              abortSignal: abortController.signal,
+              sessionId: searchSessionId,
+              inspector: {
+                adapter: requestAdapter,
+                title: i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
+                  defaultMessage: 'Data',
+                }),
+                description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
+                  defaultMessage:
+                    'This request queries Elasticsearch to fetch the data for the search.',
+                }),
+              },
+              // executionContext,
+              disableWarningToasts: true,
+            })
+          );
 
-      // searchProps.rows = resp.hits.hits.map((hit) =>
-      //   buildDataTableRecord(hit as EsHitRecord, searchProps.dataView)
-      // );
+          const interceptedWarnings: SearchResponseWarning[] = [];
+          discoverServices.data.search.showWarnings(requestAdapter, (warning) => {
+            interceptedWarnings.push(warning);
+            return true; // suppress the default behaviour
+          });
 
-      api.rows.next(
-        resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView))
-      );
-      // searchProps.totalHitCount = resp.hits.total as number;
-
+          return {
+            rows: resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView)),
+          };
+        } catch (error) {
+          return { error };
+        }
+      })
+    )
+    .subscribe((next) => {
       api.dataLoading.next(false);
-      // searchProps.isLoading = false;
-    } catch (error) {
-      console.log('error');
-      const cancelled = !!abortController?.signal.aborted;
-      if (!cancelled) {
-        api.dataLoading.next(false);
-        api.blockingError.next(error);
+      if (next && next.hasOwnProperty('rows') && next.rows !== undefined) {
+        api.rows.next(next.rows);
       }
+      if (next && next.hasOwnProperty('error')) {
+        api.blockingError.next(next.error);
+      }
+    });
 
-      // if (!this.destroyed && !cancelled) {
-      //   this.updateOutput({
-      //     ...this.getOutput(),
-      //     loading: false,
-      //     error,
-      //   });
-
-      //   searchProps.isLoading = false;
-      // }
-    }
-
-    // const wasAlreadyRendered = this.getOutput().rendered;
-
-    api.dataLoading.next(false);
-
-    // getCount(
-    //   dataView,
-    //   services.data,
-    //   fetchContext.filters ?? [],
-    //   fetchContext.query,
-    //   // timeRange and timeslice provided seperatly so consumers can decide
-    //   // whether to refetch data for just mask current data.
-    //   // In this example, we must refetch because we need a count within the time range.
-    //   fetchContext.timeslice
-    //     ? {
-    //         from: new Date(fetchContext.timeslice[0]).toISOString(),
-    //         to: new Date(fetchContext.timeslice[1]).toISOString(),
-    //         mode: 'absolute' as 'absolute',
-    //       }
-    //     : fetchContext.timeRange
-    // )
-    //   .then((nextCount: number) => {
-    //     if (isUnmounted || isCanceled()) {
-    //       return;
-    //     }
-    //     dataLoading$.next(false);
-    //     count$.next(nextCount);
-    //   })
-    //   .catch((err) => {
-    //     if (isUnmounted || isCanceled()) {
-    //       return;
-    //     }
-    //     dataLoading$.next(false);
-    //     error$.next(err);
-    //   });
-  };
-
-  return onFetchContextChanged({
-    api,
-    onFetch,
-    fetchOnSetup: true,
-  });
+  return () => fetchSubscription.unsubscribe();
 }

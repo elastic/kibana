@@ -143,7 +143,7 @@ export const getSearchEmbeddableFactory = ({
 
       const initialSavedSearch = searchEmbeddableApi.savedSearch$.getValue();
       const unsubscribeFromFetch = initializeFetch({
-        api,
+        api: { ...api, dataLoading: dataLoading$, blockingError: blockingError$, rows: rows$ },
         discoverServices,
         savedSearch: initialSavedSearch,
       });
