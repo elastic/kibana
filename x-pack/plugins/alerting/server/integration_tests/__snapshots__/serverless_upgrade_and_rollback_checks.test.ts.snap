@@ -9596,6 +9596,11 @@ Object {
           "type": "object",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "sloId": Object {
