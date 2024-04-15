@@ -11,7 +11,7 @@ import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/consta
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { PostResultBody } from '../../schemas/result';
-import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
+import { API_CURRENT_USER_ERROR_MESSAGE, API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { checkIndicesPrivileges } from './privileges';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
@@ -50,7 +50,7 @@ export const postResultsRoute = (
         const currentUser = services.core.security.authc.getCurrentUser();
         if (!currentUser) {
           return resp.error({
-            body: 'Unable to retrieve current user',
+            body: API_CURRENT_USER_ERROR_MESSAGE,
             statusCode: 500,
           });
         }
