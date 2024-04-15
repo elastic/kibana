@@ -182,6 +182,7 @@ export interface DocLinks {
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly syncRulesAdvanced: string;
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
@@ -358,6 +359,7 @@ export interface DocLinks {
       readonly hostRiskScore: string;
       readonly userRiskScore: string;
       readonly entityRiskScoring: string;
+      readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
   };

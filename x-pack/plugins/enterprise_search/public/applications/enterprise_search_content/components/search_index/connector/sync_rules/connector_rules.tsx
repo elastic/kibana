@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -190,7 +191,7 @@ export const ConnectorSyncRules: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      <EuiLink external href={docLinks.syncRules}>
+                      <EuiLink external href={docLinks.syncRulesAdvanced}>
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {
@@ -204,6 +205,28 @@ export const ConnectorSyncRules: React.FC = () => {
                 <EuiCodeBlock isCopyable language="json">
                   {advancedSnippet}
                 </EuiCodeBlock>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutTitle',
+                      { defaultMessage: 'Configuration' }
+                    )}
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutDescription',
+                          {
+                            defaultMessage:
+                              'This advanced sync rule might override some configuration fields.',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>

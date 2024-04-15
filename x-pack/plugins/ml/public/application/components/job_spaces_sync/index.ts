@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { JobSpacesSyncFlyout } from './job_spaces_sync_flyout';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const JobSpacesSyncFlyout = dynamic(async () => ({
+  default: (await import('./job_spaces_sync_flyout')).JobSpacesSyncFlyout,
+}));

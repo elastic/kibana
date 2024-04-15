@@ -62,6 +62,7 @@ const coreMock = {
   settings: {
     client: {
       get: () => {},
+      get$: () => new Subject(),
       set: () => {},
     },
   },
