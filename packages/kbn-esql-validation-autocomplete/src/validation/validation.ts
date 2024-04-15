@@ -435,36 +435,35 @@ function validateFunction(
       const hasMultipleElements = Array.isArray(outerArg);
       const argElements = hasMultipleElements ? outerArg : [outerArg];
       const singularType = extractSingularType(argDef.type);
-      let messagesFromAllArgElements = argElements
-        .map((arg) => {
-          return [
-            validateFunctionLiteralArg,
-            validateNestedFunctionArg,
-            validateFunctionColumnArg,
-          ].flatMap((validateFn) => {
-            return validateFn(
-              astFunction,
-              arg,
-              { ...argDef, type: singularType },
-              references,
-              parentCommand
-            );
-          });
-        })
-        .flat();
+      const messagesFromAllArgElements = argElements.flatMap((arg) => {
+        return [
+          validateFunctionLiteralArg,
+          validateNestedFunctionArg,
+          validateFunctionColumnArg,
+        ].flatMap((validateFn) => {
+          return validateFn(
+            astFunction,
+            arg,
+            { ...argDef, type: singularType },
+            references,
+            parentCommand
+          );
+        });
+      });
 
-      if (isArrayType(argDef.type) && hasMultipleElements) {
-        messagesFromAllArgElements = collapseWrongArgumentTypeMessages(
-          messagesFromAllArgElements,
-          outerArg,
-          astFunction.name,
-          argDef.type,
-          parentCommand,
-          references
-        );
-      }
-
-      failingSignature.push(...messagesFromAllArgElements);
+      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      failingSignature.push(
+        ...(shouldCollapseMessages
+          ? collapseWrongArgumentTypeMessages(
+              messagesFromAllArgElements,
+              outerArg,
+              astFunction.name,
+              argDef.type,
+              parentCommand,
+              references
+            )
+          : messagesFromAllArgElements)
+      );
     });
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);
