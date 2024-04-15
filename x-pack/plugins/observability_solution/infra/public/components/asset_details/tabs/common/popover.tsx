@@ -24,9 +24,13 @@ export const Popover = ({
   'data-test-subj'?: string;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+
   return (
     <EuiPopover
       panelPaddingSize="s"
+      focusTrapProps={{
+        returnFocus: false,
+      }}
       button={
         <button
           onClick={(e) => {
