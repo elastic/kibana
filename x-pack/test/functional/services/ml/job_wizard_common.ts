@@ -660,7 +660,7 @@ export function MachineLearningJobWizardCommonProvider(
       await this.assertDateRangeSelection(origStartDate as string, shortDurationEndDate);
     },
 
-    async goBackToJobDetailsStep() {
+    async goToJobDetailsStep() {
       await testSubjects.existOrFail('mlJobWizardJobDetailsStep', {
         timeout: 3_000,
       });
