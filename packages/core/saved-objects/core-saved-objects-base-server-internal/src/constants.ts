@@ -221,7 +221,7 @@ export const HASH_TO_VERSION_MAP = {
   'slo|dc7f35c0cf07d71bb36f154996fe10c6': '10.1.0',
   'space|c3aec2a5d4afcb75554fed96411170e1': '10.0.0',
   'spaces-usage-stats|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
-  'synthetics-monitor|50b48ccda9f2f7d73d31fd50c41bf305': '10.0.0',
+  'synthetics-monitor|918c09d935b1dcb6a84935b176262c3a': '10.1.0',
   'synthetics-param|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'synthetics-privates-locations|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'tag|83d55da58f6530f7055415717ec06474': '10.0.0',
