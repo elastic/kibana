@@ -37,8 +37,8 @@ export function registerExecuteConnectorFunction({
       const actionsClient = await (
         await resources.plugins.actions.start()
       ).getActionsClientWithRequest(resources.request);
-      await actionsClient.execute({ actionId: id, params });
-      return { content: {} };
+      const content = await actionsClient.execute({ actionId: id, params });
+      return { content };
     }
   );
 }
