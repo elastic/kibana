@@ -39,8 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Intentionally setting as @skipInQA, keeping tests running in MKI that should block release
-  describe('@ess @serverless @skipInQA Alert User Assignment - ESS & Serverless', () => {
+  // Intentionally setting as @skipInServerless, keeping tests running in MKI that should block release
+  describe('@ess @serverless @skipInServerless Alert User Assignment - ESS & Serverless', () => {
     describe('validation checks', () => {
       it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest

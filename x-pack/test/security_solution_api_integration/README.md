@@ -15,7 +15,7 @@ we have introduced the `detection_response` directory to consolidate all the int
 
 - In this directory, Mocha tagging is utilized to assign tags to specific test suites and individual test cases. This tagging system enables the ability to selectively apply tags to test suites and test cases, facilitating the exclusion of specific test cases within a test suite as needed.
 
-- There are three primary tags that have been defined: @ess, @serverless, and @brokenInServerless
+- There are three primary tags that have been defined: @ess, @serverless, and @skipInServerless
 
 - Test suites and cases are prefixed with specific tags to determine their execution in particular environments or to exclude them from specific environments. 
 
@@ -24,7 +24,7 @@ ex:
  describe('@serverless @ess create_rules', () => { ==> tests in this suite will run in both Ess and Serverless
    describe('creating rules', () => {}); 
 
-   describe('@brokenInServerless missing timestamps', () => {}); ==> tests in this suite will be excluded in Serverless
+   describe('@skipInServerless missing timestamps', () => {}); ==> tests in this suite will be excluded in Serverless
 
  ```
 
