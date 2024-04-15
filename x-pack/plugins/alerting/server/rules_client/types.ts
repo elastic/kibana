@@ -45,7 +45,6 @@ export type {
   BulkEditFields,
 } from '../application/rule/methods/bulk_edit/types';
 export type { FindOptions, FindResult } from './methods/find';
-export type { UpdateOptions } from './methods/update';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
 export type {
   GetExecutionLogByIdParams,

@@ -8,3 +8,5 @@
 // AI Assistant
 export const aiAssistantLogsIndexPattern = 'observability:aiAssistantLogsIndexPattern';
 export const aiAssistantResponseLanguage = 'observability:aiAssistantResponseLanguage';
+export const aiAssistantSimulatedFunctionCalling =
+  'observability:aiAssistantSimulatedFunctionCalling';

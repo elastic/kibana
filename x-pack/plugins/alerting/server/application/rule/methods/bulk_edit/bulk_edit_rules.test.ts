@@ -1329,7 +1329,7 @@ describe('bulkEdit()', () => {
         Object {
           "errors": Array [
             Object {
-              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "message": "Error validating bulk edit rules operations - [group]: expected value of type [string] but got [undefined]",
               "rule": Object {
                 "id": "1",
                 "name": "my rule name",
@@ -1380,7 +1380,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.group]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [group]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1434,7 +1434,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.frequency]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [frequency]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1486,7 +1486,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.alertsFilter]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [alertsFilter]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1570,7 +1570,7 @@ describe('bulkEdit()', () => {
         Object {
           "errors": Array [
             Object {
-              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "message": "Error validating bulk edit rules operations - [group]: expected value of type [string] but got [undefined]",
               "rule": Object {
                 "id": "1",
                 "name": "my rule name",
