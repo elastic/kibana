@@ -17,7 +17,7 @@ export const getTransformsStatsRequestSchema = getTransformsRequestSchema;
 export type GetTransformsStatsRequestSchema = TypeOf<typeof getTransformsStatsRequestSchema>;
 
 export const getTransformStatsQuerySchema = schema.object({
-  basic: schema.boolean(),
+  basic: schema.maybe(schema.boolean()),
 });
 
 export type GetTransformStatsQuerySchema = TypeOf<typeof getTransformStatsQuerySchema>;
