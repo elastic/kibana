@@ -10,18 +10,16 @@ import React from 'react';
 
 import { getDashboardLocatorParamsFromEmbeddable } from '@kbn/dashboard-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
-import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { mockLinksPanel } from '../../../common/mocks';
-import { LinksContext, LinksEmbeddable } from '../../embeddable/links_embeddable';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { fetchDashboard } from './dashboard_link_tools';
-
-jest.mock('./dashboard_link_tools');
+import { getMockLinksApi } from '../../react_embeddable/mocks';
+import { ResolvedLink } from '../../react_embeddable/types';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/dashboard-plugin/public');
@@ -33,31 +31,6 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
 });
 
 describe('Dashboard link component', () => {
-  const mockDashboards = [
-    {
-      id: '456',
-      status: 'success',
-      attributes: {
-        title: 'another dashboard',
-        description: 'something awesome',
-        panelsJSON: [],
-        timeRestore: false,
-        version: '1',
-      },
-    },
-    {
-      id: '123',
-      status: 'success',
-      attributes: {
-        title: 'current dashboard',
-        description: '',
-        panelsJSON: [],
-        timeRestore: false,
-        version: '1',
-      },
-    },
-  ];
-
   const defaultLinkInfo = {
     destination: '456',
     order: 1,
@@ -65,18 +38,10 @@ describe('Dashboard link component', () => {
     type: 'dashboardLink' as const,
   };
 
-  const onLoading = jest.fn();
-  const onRender = jest.fn();
-
-  let linksEmbeddable: LinksEmbeddable;
   let dashboardContainer: DashboardContainer;
   beforeEach(async () => {
     window.open = jest.fn();
-    (fetchDashboard as jest.Mock).mockResolvedValue(mockDashboards[0]);
-    linksEmbeddable = await mockLinksPanel({
-      dashboardExplicitInput: mockDashboards[1].attributes,
-    });
-    dashboardContainer = linksEmbeddable.parent as DashboardContainer;
+    dashboardContainer = buildMockDashboard();
     dashboardContainer.locator = {
       getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
       navigate: jest.fn(),
@@ -88,25 +53,21 @@ describe('Dashboard link component', () => {
   });
 
   test('by default uses navigate to open in same tab', async () => {
+    const linksApi = getMockLinksApi({
+      attributes: { links: [defaultLinkInfo] },
+      parentApi: dashboardContainer,
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={defaultLinkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
 
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    expect(fetchDashboard).toHaveBeenCalledWith(defaultLinkInfo.destination);
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-
     // renders dashboard title
-    const link = await screen.findByTestId('dashboardLink--foo');
-    expect(link).toHaveTextContent('another dashboard');
+    const link = screen.getByTestId('dashboardLink--foo');
+    expect(link).toHaveTextContent('Link 0');
 
     // does not render external link icon
     const externalIcon = within(link).queryByText('External link');
@@ -121,20 +82,18 @@ describe('Dashboard link component', () => {
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
+    const linksApi = getMockLinksApi({
+      attributes: { links: [defaultLinkInfo] },
+      parentApi: dashboardContainer,
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={defaultLinkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--foo');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
@@ -146,21 +105,18 @@ describe('Dashboard link component', () => {
       ...defaultLinkInfo,
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
     };
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi: dashboardContainer,
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={linkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    expect(fetchDashboard).toHaveBeenCalledWith(linkInfo.destination);
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
 
     // external link icon is rendered
@@ -183,45 +139,38 @@ describe('Dashboard link component', () => {
         useCurrentDateRange: false,
       },
     };
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi: dashboardContainer,
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={linkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
+
     expect(getDashboardLocatorParamsFromEmbeddable).toHaveBeenCalledWith(
-      linksEmbeddable,
+      linksApi,
       linkInfo.options
     );
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
   });
 
   test('shows an error when fetchDashboard fails', async () => {
-    (fetchDashboard as jest.Mock).mockRejectedValue(new Error('some error'));
-    const linkInfo = {
+    const linksApi = getMockLinksApi({
+      attributes: { links: [defaultLinkInfo] },
+      parentApi: dashboardContainer,
+    });
+    const resolvedLink: ResolvedLink = {
       ...defaultLinkInfo,
-      id: 'notfound',
+      title: 'Error fetching dashboard',
+      error: new Error('not found'),
     };
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={linkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent link={resolvedLink} layout={LINKS_VERTICAL_LAYOUT} api={linksApi} />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--notfound--error');
+    const link = await screen.findByTestId('dashboardLink--foo--error');
     expect(link).toHaveTextContent(DashboardLinkStrings.getDashboardErrorLabel());
   });
 
@@ -231,20 +180,22 @@ describe('Dashboard link component', () => {
       destination: '123',
       id: 'bar',
     };
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi: buildMockDashboard({
+        overrides: { title: 'current dashboard' },
+        savedObjectId: '123',
+      }),
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={linkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--bar');
+
+    const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
     userEvent.click(link);
     expect(dashboardContainer.locator?.navigate).toBeCalledTimes(0);
@@ -252,20 +203,20 @@ describe('Dashboard link component', () => {
   });
 
   test('shows dashboard title and description in tooltip', async () => {
+    const linksApi = getMockLinksApi({
+      attributes: { links: [defaultLinkInfo] },
+      parentApi: dashboardContainer,
+    });
+    const resolvedLink = {
+      ...linksApi.resolvedLinks$.value[0],
+      title: 'another dashboard',
+      description: 'something awesome',
+    };
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={defaultLinkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent link={resolvedLink} layout={LINKS_VERTICAL_LAYOUT} api={linksApi} />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--foo');
+
+    const link = screen.getByTestId('dashboardLink--foo');
     userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
@@ -278,20 +229,18 @@ describe('Dashboard link component', () => {
       ...defaultLinkInfo,
       label,
     };
+    const linksApi = getMockLinksApi({
+      attributes: { links: [linkInfo] },
+      parentApi: dashboardContainer,
+    });
     render(
-      <LinksContext.Provider value={linksEmbeddable}>
-        <DashboardLinkComponent
-          link={linkInfo}
-          layout={LINKS_VERTICAL_LAYOUT}
-          onLoading={onLoading}
-          onRender={onRender}
-        />
-      </LinksContext.Provider>
+      <DashboardLinkComponent
+        link={linksApi.resolvedLinks$.value[0]}
+        layout={LINKS_VERTICAL_LAYOUT}
+        api={linksApi}
+      />
     );
-    await waitFor(() => expect(onLoading).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(fetchDashboard).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(onRender).toHaveBeenCalledTimes(1));
-    const link = await screen.findByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--foo');
     expect(link).toHaveTextContent(label);
     userEvent.hover(link);
     const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
