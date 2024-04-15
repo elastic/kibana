@@ -4064,61 +4064,176 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "alertState": Object {
+    "alertSummary": Object {
       "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
         "error": [Function],
+        "presence": "optional",
       },
-      "matches": Array [
-        Object {
-          "schema": Object {
-            "allow": Array [
-              "new",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
+      "keys": Object {
+        "new": Object {
+          "flags": Object {
+            "error": [Function],
           },
-        },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              "ongoing",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "id": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "reason": Object {
+                  "flags": Object {
+                    "default": null,
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "matches": Array [
+                    Object {
+                      "schema": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "schema": Object {
+                        "allow": Array [
+                          null,
+                        ],
+                        "flags": Object {
+                          "error": [Function],
+                          "only": true,
+                        },
+                        "type": "any",
+                      },
+                    },
+                  ],
+                  "type": "alternatives",
+                },
+              },
+              "preferences": Object {
+                "stripUnknown": Object {
+                  "objects": false,
+                },
+              },
+              "type": "object",
             },
-            "type": "any",
-          },
+          ],
+          "type": "array",
         },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              "recovered",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
+        "recovered": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "id": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+                "reason": Object {
+                  "flags": Object {
+                    "default": null,
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "matches": Array [
+                    Object {
+                      "schema": Object {
+                        "flags": Object {
+                          "error": [Function],
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    },
+                    Object {
+                      "schema": Object {
+                        "allow": Array [
+                          null,
+                        ],
+                        "flags": Object {
+                          "error": [Function],
+                          "only": true,
+                        },
+                        "type": "any",
+                      },
+                    },
+                  ],
+                  "type": "alternatives",
+                },
+              },
+              "preferences": Object {
+                "stripUnknown": Object {
+                  "objects": false,
+                },
+              },
+              "type": "object",
             },
-            "type": "any",
-          },
+          ],
+          "type": "array",
         },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              "unknown",
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
+      },
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
         },
-      ],
-      "type": "alternatives",
+      },
+      "type": "object",
     },
     "connector": Object {
       "flags": Object {
