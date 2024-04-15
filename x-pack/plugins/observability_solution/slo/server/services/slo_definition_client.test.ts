@@ -41,7 +41,7 @@ describe('SLODefinitionClient', () => {
 
       const response = await sloDefinitionClient.execute('fixed-id', 'default');
 
-      expect(response).toEqual({ slo: slo });
+      expect(response).toEqual({ slo });
     });
 
     it('fetches the SLO Definition from the remote summary index when a remoteName is specified', async () => {
