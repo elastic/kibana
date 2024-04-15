@@ -146,6 +146,7 @@ export const RuleEdit = <
     notifications: { toasts },
     i18n: i18nStart,
     theme,
+    isServerless,
   } = useKibana().services;
 
   const setRule = (value: Rule) => {
@@ -186,7 +187,8 @@ export const RuleEdit = <
     rule as Rule,
     ruleType,
     config,
-    actionTypeRegistry
+    actionTypeRegistry,
+    isServerless
   );
 
   const checkForChangesAndCloseFlyout = () => {
