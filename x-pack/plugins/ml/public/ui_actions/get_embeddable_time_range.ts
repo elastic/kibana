@@ -7,9 +7,9 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
-import type { MlEmbeddableBaseApi } from '../embeddables';
+import type { MlEmbeddableBasicApi } from '../embeddables';
 
-export const getEmbeddableTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
+export const getEmbeddableTimeRange = (embeddable: MlEmbeddableBasicApi): TimeRange | undefined => {
   let timeRange = embeddable.timeRange$?.getValue();
 
   if (!timeRange && apiHasParentApi(embeddable) && apiPublishesTimeRange(embeddable.parentApi)) {

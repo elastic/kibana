@@ -23,6 +23,7 @@ import type {
   PublishesDataViews,
   PublishesUnifiedSearch,
   PublishingSubject,
+  PublishesTimeRange,
   PublishesWritablePanelTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -59,6 +60,10 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesDataViews,
     PublishesUnifiedSearch {}
+
+export interface MlEmbeddableBasicApi<StateType extends object = object>
+  extends DefaultEmbeddableApi<StateType>,
+    PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
@@ -163,7 +168,7 @@ export interface SingleMetricViewerEmbeddableState
     SingleMetricViewerEmbeddableCustomInput {}
 
 export type SingleMetricViewerEmbeddableApi =
-  DefaultEmbeddableApi<SingleMetricViewerEmbeddableState> &
+  MlEmbeddableBasicApi<SingleMetricViewerEmbeddableState> &
     PublishesWritablePanelTitle &
     SingleMetricViewerComponentApi;
 
