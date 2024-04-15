@@ -566,6 +566,7 @@ describe('Security links', () => {
         uiSettingRequired: undefined,
       };
       expect(isLinkUiSettingsAllowed(link, mockedPermissions)).toBeTruthy();
+      expect(mockUiSettingsClient.get).not.toHaveBeenCalled();
     });
 
     it('returns true when uiSettingRequired is a string and the corresponding UI setting is true', () => {

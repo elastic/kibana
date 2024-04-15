@@ -162,7 +162,7 @@ export interface LinkItem {
    * To enable a link when a boolean UiSetting is true, pass the key as a string.
    * To enable a link when a specific value is set for a UiSetting, pass an object with key and value.
    */
-  uiSettingRequired?: string | { key: string; value: string | number | boolean };
+  uiSettingRequired?: string | { key: string; value: unknown };
 }
 
 export type AppLinkItems = Readonly<LinkItem[]>;
