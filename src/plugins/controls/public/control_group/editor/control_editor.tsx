@@ -185,7 +185,7 @@ export const ControlEditor = ({
 
           const disabled =
             fieldRegistry && selectedField
-              ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
+              ? !fieldRegistry[selectedField]?.compatibleControlTypes.includes(controlType)
               : true;
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
@@ -304,9 +304,7 @@ export const ControlEditor = ({
                   const newDefaultTitle = field.displayName ?? field.name;
                   setDefaultTitle(newDefaultTitle);
                   setSelectedField(field.name);
-                  setSelectedControlType(
-                    fieldRegistry?.[field.displayName].compatibleControlTypes[0]
-                  );
+                  setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
                   if (!currentTitle || currentTitle === defaultTitle) {
                     setCurrentTitle(newDefaultTitle);
                   }
