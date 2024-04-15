@@ -6,44 +6,47 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, formatNumber } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { _IGNORED } from '../../../../common/es_fields';
-import {
-  BYTE_NUMBER_FORMAT,
-  MAX_HOSTS_METRIC_VALUE,
-  NUMBER_FORMAT,
-} from '../../../../common/constants';
-import {
-  flyoutDegradedDocsText,
-  flyoutDocsCountTotalText,
-  flyoutHostsText,
-  flyoutServicesText,
-  flyoutShowAllText,
-  flyoutSizeText,
-} from '../../../../common/translations';
+
 import { DataStreamDetails } from '../../../../common/api_types';
+import { useKibanaContextForPlugin } from '../../../utils';
 import { useLinkToLogsExplorer } from '../../../hooks';
-import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
+import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
+import { getSummaryKpis } from './get_summary_kpis';
 
 export function FlyoutSummaryKpis({
   dataStreamStat,
   dataStreamDetails,
   isLoading,
+  timeRange,
 }: {
   dataStreamStat: FlyoutDataset;
   dataStreamDetails?: DataStreamDetails;
   isLoading: boolean;
+  timeRange: TimeRangeConfig;
 }) {
+  const {
+    services: { observabilityShared },
+  } = useKibanaContextForPlugin();
+  const hostsLocator = observabilityShared.locators.infra.hostsLocator;
+
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
   });
 
   const kpis = useMemo(
-    () => getSummaryKpis(dataStreamDetails, logsExplorerLinkProps.href),
-    [dataStreamDetails, logsExplorerLinkProps]
+    () =>
+      getSummaryKpis({
+        dataStreamDetails,
+        timeRange,
+        degradedDocsHref: logsExplorerLinkProps.href,
+        hostsLocator,
+      }),
+    [dataStreamDetails, logsExplorerLinkProps, hostsLocator, timeRange]
   );
 
   return (
@@ -63,7 +66,7 @@ export function FlyoutSummaryKpisLoading() {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {getSummaryKpis(undefined, undefined).map(({ title }) => (
+        {getSummaryKpis({}).map(({ title }) => (
           <EuiFlexItem key={title}>
             <FlyoutSummaryKpiItemLoading title={title} />
           </EuiFlexItem>
@@ -71,80 +74,4 @@ export function FlyoutSummaryKpisLoading() {
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
-}
-
-// dataStreamDetails.sizeBytes = null indicates it's Serverless where `_stats` API isn't available
-function getSummaryKpis(
-  dataStreamDetails?: DataStreamDetails,
-  degradedDocsHref?: string
-): Array<{ title: string; value: string; link?: { label: string; href: string } }> {
-  const services = dataStreamDetails?.services ?? {};
-  const serviceKeys = Object.keys(services);
-  const countOfServices = serviceKeys
-    .map((key: string) => services[key].length)
-    .reduce((a, b) => a + b, 0);
-  const servicesLink = undefined; // TODO: Add link to APM services page when possible
-
-  const hosts = dataStreamDetails?.hosts ?? {};
-  const hostKeys = Object.keys(hosts);
-  const countOfHosts = hostKeys
-    .map((key: string) => hosts[key].length)
-    .reduce(
-      ({ count, anyHostExceedsMax }, hostCount) => ({
-        count: count + hostCount,
-        anyHostExceedsMax: anyHostExceedsMax || hostCount > MAX_HOSTS_METRIC_VALUE,
-      }),
-      { count: 0, anyHostExceedsMax: false }
-    );
-  const hostsLink = undefined; // TODO: Add link to Infra hosts when locator is available
-
-  const degradedDocsLink = degradedDocsHref
-    ? {
-        label: flyoutShowAllText,
-        href: degradedDocsHref,
-      }
-    : undefined;
-
-  return [
-    {
-      title: flyoutDocsCountTotalText,
-      value: formatNumber(dataStreamDetails?.docsCount ?? 0, NUMBER_FORMAT),
-    },
-    ...(dataStreamDetails?.sizeBytes !== null // Only show when not in Serverless
-      ? [
-          {
-            title: flyoutSizeText,
-            value: formatNumber(dataStreamDetails?.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-          },
-        ]
-      : []),
-    {
-      title: flyoutServicesText,
-      value: formatMetricValueForMax(countOfServices, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT),
-      link: servicesLink,
-    },
-    {
-      title: flyoutHostsText,
-      value: formatMetricValueForMax(
-        countOfHosts.anyHostExceedsMax ? countOfHosts.count + 1 : countOfHosts.count,
-        countOfHosts.count,
-        NUMBER_FORMAT
-      ),
-      link: hostsLink,
-    },
-    {
-      title: flyoutDegradedDocsText,
-      value: formatNumber(dataStreamDetails?.degradedDocsCount ?? 0, NUMBER_FORMAT),
-      link: degradedDocsLink,
-    },
-  ];
-}
-
-/**
- * Formats a metric value to show a '+' sign if it's above a max value e.g. 50+
- */
-function formatMetricValueForMax(value: number, max: number, numberFormat: string): string {
-  const exceedsMax = value > max;
-  const valueToShow = exceedsMax ? max : value;
-  return `${formatNumber(valueToShow, numberFormat)}${exceedsMax ? '+' : ''}`;
 }

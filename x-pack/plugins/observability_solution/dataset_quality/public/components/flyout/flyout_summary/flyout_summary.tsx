@@ -78,6 +78,7 @@ export function FlyoutSummary({
           dataStreamStat={dataStreamStat}
           dataStreamDetails={dataStreamDetails}
           isLoading={dataStreamDetailsLoading}
+          timeRange={timeRange}
         />
       ) : (
         <FlyoutSummaryKpisLoading />

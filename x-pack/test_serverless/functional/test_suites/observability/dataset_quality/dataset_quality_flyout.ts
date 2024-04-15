@@ -273,6 +273,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchTab(0);
     });
 
+    it('goes to infra hosts for hosts when show all is clicked', async () => {
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
+      await testSubjects.click(hostsShowAllSelector);
+
+      // Confirm url contains metrics/hosts
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.contain('metrics/hosts');
+
+      await browser.switchTab(0);
+    });
+
     it('Integration actions menu is present with correct actions', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
