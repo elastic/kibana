@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
+import { useToggle } from 'react-use';
 import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,22 +21,19 @@ import { useKibana } from '../../../../common/lib/kibana';
 const POPOVER_WIDTH = 320;
 
 export function RelatedIntegrationsHelpInfo(): JSX.Element {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, togglePopover] = useToggle(false);
   const { docLinks } = useKibana().services;
-
-  const onButtonClick = useCallback(() => setIsPopoverOpen((x) => !x), [setIsPopoverOpen]);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   const button = (
     <EuiButtonIcon
       iconType="questionInCircle"
-      onClick={onButtonClick}
+      onClick={togglePopover}
       aria-label="Open help popover"
     />
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrations.fieldRelatedIntegrationsHelpText"
