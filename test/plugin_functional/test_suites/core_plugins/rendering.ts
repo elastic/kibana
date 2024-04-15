@@ -124,6 +124,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
         'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
+        'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
@@ -160,9 +161,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
-        'navigation.solutionNavigation.featureOn (boolean)',
         'navigation.solutionNavigation.enabled (boolean)',
-        'navigation.solutionNavigation.optInStatus (alternatives)',
         'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',

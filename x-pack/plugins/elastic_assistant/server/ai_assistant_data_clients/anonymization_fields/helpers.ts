@@ -14,12 +14,31 @@ import {
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   CreateAnonymizationFieldSchema,
-  SearchEsAnonymizationFieldsSchema,
+  EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from './types';
 
 export const transformESToAnonymizationFields = (
-  response: estypes.SearchResponse<SearchEsAnonymizationFieldsSchema>
+  response: EsAnonymizationFieldsSchema[]
+): AnonymizationFieldResponse[] => {
+  return response.map((anonymizationFieldSchema) => {
+    const anonymizationField: AnonymizationFieldResponse = {
+      timestamp: anonymizationFieldSchema['@timestamp'],
+      createdAt: anonymizationFieldSchema.created_at,
+      field: anonymizationFieldSchema.field,
+      allowed: anonymizationFieldSchema.allowed,
+      anonymized: anonymizationFieldSchema.anonymized,
+      updatedAt: anonymizationFieldSchema.updated_at,
+      namespace: anonymizationFieldSchema.namespace,
+      id: anonymizationFieldSchema.id,
+    };
+
+    return anonymizationField;
+  });
+};
+
+export const transformESSearchToAnonymizationFields = (
+  response: estypes.SearchResponse<EsAnonymizationFieldsSchema>
 ): AnonymizationFieldResponse[] => {
   return response.hits.hits
     .filter((hit) => hit._source !== undefined)
@@ -29,14 +48,9 @@ export const transformESToAnonymizationFields = (
       const anonymizationField: AnonymizationFieldResponse = {
         timestamp: anonymizationFieldSchema['@timestamp'],
         createdAt: anonymizationFieldSchema.created_at,
-        users:
-          anonymizationFieldSchema.users?.map((user) => ({
-            id: user.id,
-            name: user.name,
-          })) ?? [],
         field: anonymizationFieldSchema.field,
-        defaultAllow: anonymizationFieldSchema.default_allow,
-        defaultAllowReplacement: anonymizationFieldSchema.default_allow_replacement,
+        allowed: anonymizationFieldSchema.allowed,
+        anonymized: anonymizationFieldSchema.anonymized,
         updatedAt: anonymizationFieldSchema.updated_at,
         namespace: anonymizationFieldSchema.namespace,
         id: hit._id,
@@ -49,39 +63,29 @@ export const transformESToAnonymizationFields = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { defaultAllow, defaultAllowReplacement, id }: AnonymizationFieldUpdateProps
+  { allowed, anonymized, id }: AnonymizationFieldUpdateProps
 ): UpdateAnonymizationFieldSchema => {
   return {
     id,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
     updated_at: updatedAt,
-    default_allow: defaultAllow,
-    default_allow_replacement: defaultAllowReplacement,
+    updated_by: user.username,
+    allowed,
+    anonymized,
   };
 };
 
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   createdAt: string,
-  { defaultAllow, defaultAllowReplacement, field }: AnonymizationFieldCreateProps
+  { allowed, anonymized, field }: AnonymizationFieldCreateProps
 ): CreateAnonymizationFieldSchema => {
   return {
     updated_at: createdAt,
     field,
-    users: [
-      {
-        id: user.profile_uid,
-        name: user.username,
-      },
-    ],
     created_at: createdAt,
-    default_allow: defaultAllow,
-    default_allow_replacement: defaultAllowReplacement,
+    created_by: user.username,
+    allowed,
+    anonymized,
   };
 };
 
@@ -94,11 +98,11 @@ export const getUpdateScript = ({
 }) => {
   return {
     source: `
-    if (params.assignEmpty == true || params.containsKey('default_allow')) {
-      ctx._source.default_allow = params.default_allow;
+    if (params.assignEmpty == true || params.containsKey('allowed')) {
+      ctx._source.allowed = params.allowed;
     }
-    if (params.assignEmpty == true || params.containsKey('default_allow_replacement')) {
-      ctx._source.default_allow_replacement = params.default_allow_replacement;
+    if (params.assignEmpty == true || params.containsKey('anonymized')) {
+      ctx._source.anonymized = params.anonymized;
     }
     ctx._source.updated_at = params.updated_at;
   `,

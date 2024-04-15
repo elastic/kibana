@@ -6,9 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo, useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { useRightPanelContext } from './context';
@@ -16,7 +17,6 @@ import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabType } from './tabs';
-import * as tabs from './tabs';
 import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
@@ -45,25 +45,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
-  const tabsDisplayed = useMemo(() => {
-    return flyoutIsExpandable
-      ? [tabs.overviewTab, tabs.tableTab, tabs.jsonTab]
-      : [tabs.tableTab, tabs.jsonTab];
-  }, [flyoutIsExpandable]);
-
-  // we give priority to the url, meaning if a value is saved in the url then we load this one
-  // if not we check the local storage and use that value if it exists
-  // if not we use the default tab
-  const selectedTabId = useMemo(() => {
-    const defaultTab = tabsDisplayed[0].id;
-    const tabSavedInlocalStorage = storage.get(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS);
-
-    if (!path) return tabSavedInlocalStorage || defaultTab;
-    return (
-      tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ??
-      (tabSavedInlocalStorage || defaultTab)
-    );
-  }, [path, storage, tabsDisplayed]);
+  const { tabsDisplayed, selectedTabId } = useTabs({ flyoutIsExpandable, path });
 
   const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
     openRightPanel({
