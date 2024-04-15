@@ -7,11 +7,13 @@
 
 import {
   Logger,
+  SavedObject,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import {
   RunContext,
   TaskInstance,
@@ -34,6 +36,7 @@ import {
 } from '../application/backfill/transforms';
 import { RuleDomain } from '../application/rule/types';
 import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { TaskRunnerFactory } from '../task_runner';
 import { RuleTypeRegistry } from '../types';
@@ -49,6 +52,7 @@ interface ConstructorOpts {
 }
 
 interface BulkQueueOpts {
+  auditLogger?: AuditLogger;
   params: ScheduleBackfillParams;
   rules: RuleDomain[];
   ruleTypeRegistry: RuleTypeRegistry;
@@ -75,6 +79,7 @@ export class BackfillClient {
   }
 
   public async bulkQueue({
+    auditLogger,
     params,
     rules,
     ruleTypeRegistry,
@@ -147,7 +152,24 @@ export class BackfillClient {
     );
 
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
-      transformAdHocRunToBackfillResult
+      (so: SavedObject<AdHocRunSO>) => {
+        if (so.error) {
+          auditLogger?.log(
+            adHocRunAuditEvent({
+              action: AdHocRunAuditAction.CREATE,
+              error: new Error(so.error.message),
+            })
+          );
+        } else {
+          auditLogger?.log(
+            adHocRunAuditEvent({
+              action: AdHocRunAuditAction.CREATE,
+              savedObject: { type: AD_HOC_RUN_SAVED_OBJECT_TYPE, id: so.id },
+            })
+          );
+        }
+        return transformAdHocRunToBackfillResult(so);
+      }
     );
 
     /**

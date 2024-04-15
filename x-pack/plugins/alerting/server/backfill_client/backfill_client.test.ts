@@ -17,6 +17,7 @@ import { BackfillClient } from './backfill_client';
 import { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../application/backfill/transforms';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
@@ -27,6 +28,7 @@ const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+const auditLogger = auditLoggerMock.create();
 
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
@@ -216,6 +218,7 @@ describe('BackfillClient', () => {
       const mockAttributes1 = getMockAdHocRunAttributes({
         overwrites: {
           start: '2023-11-16T08:00:00.000Z',
+          end: '2023-11-16T20:00:00.000Z',
           schedule: [
             {
               runAt: '2023-11-16T20:00:00.000Z',
@@ -253,6 +256,7 @@ describe('BackfillClient', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
 
       const result = await backfillClient.bulkQueue({
+        auditLogger,
         params: mockData,
         rules: mockRules,
         ruleTypeRegistry,
@@ -272,6 +276,27 @@ describe('BackfillClient', () => {
           references: [{ id: rule2.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
       ]);
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'abc', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'def', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=def]',
+      });
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {
           id: 'abc',
@@ -299,6 +324,7 @@ describe('BackfillClient', () => {
       const mockAttributes1 = getMockAdHocRunAttributes({
         overwrites: {
           start: '2023-11-16T08:00:00.000Z',
+          end: '2023-11-16T20:00:00.000Z',
           schedule: [
             {
               runAt: '2023-11-16T20:00:00.000Z',
@@ -336,6 +362,7 @@ describe('BackfillClient', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
 
       const result = await backfillClient.bulkQueue({
+        auditLogger,
         params: mockData,
         rules: mockRules,
         ruleTypeRegistry,
@@ -355,6 +382,27 @@ describe('BackfillClient', () => {
           references: [{ id: rule1.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
       ]);
+      expect(auditLogger.log).toHaveBeenCalledTimes(2);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'abc', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'def', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=def]',
+      });
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {
           id: 'abc',
@@ -383,6 +431,7 @@ describe('BackfillClient', () => {
       const mockAttributes1 = getMockAdHocRunAttributes({
         overwrites: {
           start: '2023-11-16T08:00:00.000Z',
+          end: '2023-11-16T20:00:00.000Z',
           schedule: [
             {
               runAt: '2023-11-16T20:00:00.000Z',
@@ -400,6 +449,7 @@ describe('BackfillClient', () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
 
       const result = await backfillClient.bulkQueue({
+        auditLogger,
         params: mockData,
         rules: mockRules,
         ruleTypeRegistry,
@@ -414,6 +464,17 @@ describe('BackfillClient', () => {
           references: [{ id: rule1.id, name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
         },
       ]);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'abc', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
+      });
       expect(logger.warn).toHaveBeenCalledWith(
         `No rule found for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}`
       );
@@ -500,11 +561,64 @@ describe('BackfillClient', () => {
         bulkCreateResult as SavedObjectsBulkResponse<AdHocRunSO>
       );
       const result = await backfillClient.bulkQueue({
+        auditLogger,
         params: mockData,
         rules: mockRules,
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+      });
+      expect(auditLogger.log).toHaveBeenCalledTimes(5);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'abc', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'def', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=def]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(3, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'ghi', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=ghi]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(4, {
+        error: { code: 'Error', message: 'Unable to create' },
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['creation'],
+        },
+        kibana: {},
+        message: 'Failed attempt to create ad hoc run for an ad hoc run',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(5, {
+        event: {
+          action: 'ad_hoc_run_create',
+          category: ['database'],
+          outcome: 'success',
+          type: ['creation'],
+        },
+        kibana: { saved_object: { id: 'jkl', type: 'ad_hoc_run_params' } },
+        message: 'User has created ad hoc run for ad_hoc_run_params [id=jkl]',
       });
 
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
@@ -595,6 +709,7 @@ describe('BackfillClient', () => {
       ];
 
       const result = await backfillClient.bulkQueue({
+        auditLogger,
         params: mockData,
         rules: [],
         ruleTypeRegistry,
@@ -603,6 +718,7 @@ describe('BackfillClient', () => {
       });
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
       expect(taskManagerStart.bulkSchedule).not.toHaveBeenCalled();
       expect(result).toEqual([
         {

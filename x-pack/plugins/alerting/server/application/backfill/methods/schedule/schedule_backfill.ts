@@ -18,7 +18,7 @@ import {
 } from '../../../../rules_client/common/constants';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type {
   ScheduleBackfillParam,
@@ -99,7 +99,7 @@ export async function scheduleBackfill(
         await context.authorization.ensureAuthorized({
           ruleTypeId: ruleType,
           consumer,
-          operation: ReadOperations.ScheduleBackfill,
+          operation: WriteOperations.ScheduleBackfill,
           entity: AlertingAuthorizationEntity.Rule,
         });
       } catch (error) {
@@ -127,11 +127,21 @@ export async function scheduleBackfill(
 
   let rulesToSchedule: Array<SavedObjectsFindResult<RuleAttributes>> = [];
   for await (const response of rulesFinder.find()) {
+    for (const rule of response.saved_objects) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SCHEDULE_BACKFILL,
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
+        })
+      );
+    }
+
     rulesToSchedule = [...response.saved_objects];
   }
 
   const actionsClient = await context.getActionsClient();
   return await context.backfillClient.bulkQueue({
+    auditLogger: context.auditLogger,
     params,
     rules: rulesToSchedule.map(({ id, attributes, references }) => {
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);

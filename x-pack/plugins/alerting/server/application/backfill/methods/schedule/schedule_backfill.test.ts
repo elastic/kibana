@@ -369,7 +369,30 @@ describe('scheduleBackfill()', () => {
       type: 'alert',
     });
 
+    expect(auditLogger.log).toHaveBeenCalledTimes(2);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'rule_schedule_backfill',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
+      message: 'User has scheduled backfill for rule [id=1]',
+    });
+    expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+      event: {
+        action: 'rule_schedule_backfill',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: { saved_object: { id: '2', type: RULE_SAVED_OBJECT_TYPE } },
+      message: 'User has scheduled backfill for rule [id=2]',
+    });
+
     expect(backfillClient.bulkQueue).toHaveBeenCalledWith({
+      auditLogger,
       params: mockData,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,

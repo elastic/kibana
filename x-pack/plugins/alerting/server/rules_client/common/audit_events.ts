@@ -8,6 +8,7 @@
 import { EcsEvent } from '@kbn/core/server';
 import { AuditEvent } from '@kbn/security-plugin/server';
 import { ArrayElement } from '@kbn/utility-types';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
@@ -37,9 +38,16 @@ export enum RuleAuditAction {
   SCHEDULE_BACKFILL = 'rule_schedule_backfill',
 }
 
+export enum AdHocRunAuditAction {
+  CREATE = 'ad_hoc_run_create',
+  GET = 'ad_hoc_run_get',
+  FIND = 'ad_hoc_run_find',
+  DELETE = 'ad_hoc_run_delete',
+}
+
 type VerbsTuple = [string, string, string];
 
-const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
+const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_create: ['create', 'creating', 'created'],
   rule_get: ['access', 'accessing', 'accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
@@ -91,7 +99,14 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   ],
 };
 
-const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
+const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
+  ad_hoc_run_create: ['create ad hoc run for', 'creating ad hoc run for', 'created ad hoc run for'],
+  ad_hoc_run_get: ['get ad hoc run for', 'getting ad hoc run for', 'got ad hoc run for'],
+  ad_hoc_run_find: ['find ad hoc run for', 'finding ad hoc run for', 'found ad hoc run for'],
+  ad_hoc_run_delete: ['delete ad hoc run for', 'deleting ad hoc run for', 'deleted ad hoc run for'],
+};
+
+const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_create: 'creation',
   rule_get: 'access',
   rule_resolve: 'access',
@@ -119,8 +134,22 @@ const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_schedule_backfill: 'access',
 };
 
+const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {
+  ad_hoc_run_create: 'creation',
+  ad_hoc_run_get: 'access',
+  ad_hoc_run_find: 'access',
+  ad_hoc_run_delete: 'deletion',
+};
+
 export interface RuleAuditEventParams {
   action: RuleAuditAction;
+  outcome?: EcsEvent['outcome'];
+  savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
+  error?: Error;
+}
+
+export interface AdHocRunAuditEventParams {
+  action: AdHocRunAuditAction;
   outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
@@ -133,13 +162,48 @@ export function ruleAuditEvent({
   error,
 }: RuleAuditEventParams): AuditEvent {
   const doc = savedObject ? `rule [id=${savedObject.id}]` : 'a rule';
-  const [present, progressive, past] = eventVerbs[action];
+  const [present, progressive, past] = ruleEventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
     ? `User is ${progressive} ${doc}`
     : `User has ${past} ${doc}`;
-  const type = eventTypes[action];
+  const type = ruleEventTypes[action];
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: type ? [type] : undefined,
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}
+
+export function adHocRunAuditEvent({
+  action,
+  savedObject,
+  outcome,
+  error,
+}: AdHocRunAuditEventParams): AuditEvent {
+  const doc = savedObject
+    ? `${AD_HOC_RUN_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`
+    : 'an ad hoc run';
+  const [present, progressive, past] = adHocRunEventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+  const type = adHocRunEventTypes[action];
 
   return {
     message,

@@ -69,6 +69,8 @@ describe('transformBackfillParamToAdHocRun', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      // injects end parameter
+      end: '2023-11-16T20:00:00.000Z',
       rule: {
         name: 'my rule name',
         tags: ['foo'],
