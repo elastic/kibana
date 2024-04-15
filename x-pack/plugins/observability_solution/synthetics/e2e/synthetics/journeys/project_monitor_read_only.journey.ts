@@ -25,8 +25,8 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   const monitorName = 'test-project-monitor';
 
   before(async () => {
-    await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
+    await enableMonitorManagedViaApi(params.kibanaUrl);
 
     await addTestMonitorProject(params.kibanaUrl, monitorName);
 
@@ -102,7 +102,7 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
     });
   });
 
-  step('Monitor can be repushed and overwrite any changes', async () => {
+  step('Monitor can be re-pushed and overwrite any changes', async () => {
     await addTestMonitorProject(params.kibanaUrl, monitorName);
     const repushedConfiguration = await services.getMonitor(monitorId);
     expect(repushedConfiguration).toEqual({
