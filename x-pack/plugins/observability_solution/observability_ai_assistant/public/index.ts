@@ -82,6 +82,7 @@ export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from '../common/ui_settings
 export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<
