@@ -19,7 +19,17 @@ import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 
-const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
+const fieldTypes = [
+  'number',
+  'date',
+  'boolean',
+  'ip',
+  'string',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+];
 const fields = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'number' },
@@ -538,7 +548,11 @@ describe('validation logic', () => {
           .replace(/stringField/g, '"a"')
           .replace(/dateField/g, 'now()')
           .replace(/booleanField/g, 'true')
-          .replace(/ipField/g, 'to_ip("127.0.0.1")');
+          .replace(/ipField/g, 'to_ip("127.0.0.1")')
+          .replace(/geoPointField/g, 'to_geopoint("POINT (30 10)")')
+          .replace(/geoShapeField/g, 'to_geoshape("POINT (30 10)")')
+          .replace(/cartesianPointField/g, 'to_cartesianpoint("POINT (30 10)")')
+          .replace(/cartesianShapeField/g, 'to_cartesianshape("POINT (30 10)")');
       }
 
       for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {

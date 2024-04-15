@@ -17,7 +17,9 @@ import {
   RequestHandlerContext,
   RequestHandler,
   KibanaResponseFactory,
+  AnalyticsServiceStart,
 } from '@kbn/core/server';
+
 import { map$ } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
 import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
@@ -35,8 +37,9 @@ import { getUiSettings } from './ui_settings';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface BfetchServerStartDependencies {}
+export interface BfetchServerStartDependencies {
+  analytics?: AnalyticsServiceStart;
+}
 
 export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
   onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
@@ -81,6 +84,8 @@ export class BfetchServerPlugin
       BfetchServerStartDependencies
     >
 {
+  private _analyticsService: AnalyticsServiceStart | undefined;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
@@ -103,6 +108,7 @@ export class BfetchServerPlugin
   }
 
   public start(core: CoreStart, plugins: BfetchServerStartDependencies): BfetchServerStart {
+    this._analyticsService = core.analytics;
     return {};
   }
 
@@ -110,7 +116,6 @@ export class BfetchServerPlugin
 
   private addStreamingResponseRoute =
     ({
-      getStartServices,
       router,
       logger,
     }: {
@@ -140,7 +145,12 @@ export class BfetchServerPlugin
         const compress = request.query.compress;
         return response.ok({
           headers: streamingHeaders,
-          body: createStream(handlerInstance.getResponseStream(data), logger, compress),
+          body: createStream(
+            handlerInstance.getResponseStream(data),
+            logger,
+            compress,
+            this._analyticsService
+          ),
         });
       };
 
