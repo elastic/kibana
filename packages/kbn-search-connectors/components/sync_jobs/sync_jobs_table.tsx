@@ -91,7 +91,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
               defaultMessage="The time between when a sync started ({started_at}) and when it terminated ({completed_at}) (whether successfully, in error, or canceled). Note that this does not include the time the job may have spent in a “pending” stage, waiting for a worker to pick it up."
               values={{
                 completed_at: <EuiCode>completed_at</EuiCode>,
-                started_at: <EuiCode>completed_at</EuiCode>,
+                started_at: <EuiCode>started_at</EuiCode>,
               }}
             />
           }
