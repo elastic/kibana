@@ -1299,9 +1299,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/response-ops
-/x-pack/test_serverless/functional/test_suites/search/screenshot_creation/ @elastic/response-ops
-/x-pack/test_serverless/functional/test_suites/security/screenshot_creation/ @elastic/response-ops
-/x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/ @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/search/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/common/alerting/ @elastic/response-ops
 
 # Enterprise Search
