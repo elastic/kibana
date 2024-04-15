@@ -131,15 +131,18 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
     name: 'agent.logging.level',
     hidden: true,
-    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevel', {
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle', {
       defaultMessage: 'Agent Logging Level',
     }),
-    description: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
-      defaultMessage: 'Set the Agent log level. The default log level is "info".',
-    }),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelDescription',
+      {
+        defaultMessage: 'Set the Agent log level. The default log level is "info".',
+      }
+    ),
     api_field: {
       name: 'agent_logging_level',
     },
-    schema: z.nativeEnum(agentLoggingLevels),
+    schema: z.nativeEnum(agentLoggingLevels).default(agentLoggingLevels.Info),
   },
 ];
