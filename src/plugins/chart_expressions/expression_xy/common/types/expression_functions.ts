@@ -19,6 +19,7 @@ import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import type { LegendLayout } from '@kbn/visualizations-plugin/common';
 import {
   AxisExtentModes,
   FillStyles,
@@ -214,6 +215,7 @@ export interface LegendConfig {
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
   legendSize?: LegendSize;
+  layout?: LegendLayout;
 }
 
 // Arguments to XY chart expression, with computed properties

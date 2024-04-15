@@ -329,6 +329,9 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   const legendSize = state.legend.legendSize;
+  const legendLayout = state.legend.layout;
+
+  console.log(state);
 
   const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
@@ -428,7 +431,7 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, verticalAlignment, horizontalAlignment },
               });
             }}
-            renderValueInLegendSwitch={nonOrdinalXAxis}
+            allowLegendStats={nonOrdinalXAxis}
             valueInLegend={state?.valuesInLegend}
             onValueInLegendChange={() => {
               setState({
@@ -443,6 +446,16 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: {
                   ...state.legend,
                   legendSize: newLegendSize,
+                },
+              });
+            }}
+            legendLayout={legendLayout}
+            onLayoutChange={(id) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  layout: id,
                 },
               });
             }}

@@ -293,6 +293,7 @@ export const buildXYExpression = (
       : state.legend.legendSize
       ? state.legend.legendSize
       : undefined,
+    layout: state.legend.layout,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment

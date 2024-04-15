@@ -15,10 +15,12 @@ import {
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiComboBox,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { LegendLayout } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -37,6 +39,14 @@ export interface LegendSettingsPopoverProps {
    * Determines the legend mode
    */
   mode: 'default' | 'show' | 'hide' | 'auto';
+  /**
+   * Determines the legend layout
+   */
+  legendLayout?: LegendLayout;
+  /**
+   * Callback on legend option change
+   */
+  onLayoutChange?: (id: LegendLayout) => void;
   /**
    * Callback on display option change
    */
@@ -114,9 +124,9 @@ export interface LegendSettingsPopoverProps {
    */
   onValueInLegendChange?: (event: EuiSwitchEvent) => void;
   /**
-   * If true, value in legend switch is rendered
+   * If true, legend statistics are allowed
    */
-  renderValueInLegendSwitch?: boolean;
+  allowLegendStats?: boolean;
   /**
    * Button group position
    */
@@ -181,9 +191,28 @@ const PANEL_STYLE = {
   width: '500px',
 };
 
+const legendLayoutOptions = [
+  {
+    id: `lns_legend_table`,
+    value: LegendLayout.TABLE,
+    label: i18n.translate('xpack.lens.xyChart.legendLayout.table', {
+      defaultMessage: 'Table',
+    }),
+  },
+  {
+    id: `lns_legend_list`,
+    value: LegendLayout.LIST,
+    label: i18n.translate('xpack.lens.xyChart.legendLayout.list', {
+      defaultMessage: 'List',
+    }),
+  },
+];
+
 export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
   legendOptions,
   mode,
+  legendLayout,
+  onLayoutChange = noop,
   onDisplayChange,
   position,
   location,
@@ -199,7 +228,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onNestedLegendChange = noop,
   valueInLegend,
   onValueInLegendChange = noop,
-  renderValueInLegendSwitch,
+  allowLegendStats,
   groupPosition = 'right',
   maxLines,
   onMaxLinesChange = noop,
@@ -238,6 +267,108 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onChange={onDisplayChange}
         />
       </EuiFormRow>
+      {allowLegendStats && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendValues', {
+            defaultMessage: 'Legend values',
+          })}
+          fullWidth
+        >
+          <EuiComboBox
+            aria-label={i18n.translate('xpack.lens.shared.legendValues', {
+              defaultMessage: 'Legend values',
+            })}
+            placeholder={i18n.translate('xpack.lens.shared.legendValuesPlaceholder', {
+              defaultMessage: 'Select one or more values to display',
+            })}
+            options={[
+              {
+                label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
+                  defaultMessage: 'Current value',
+                }),
+              },
+              {
+                label: i18n.translate('xpack.lens.shared.legendValues.currentValue2', {
+                  defaultMessage: 'Current value2',
+                }),
+              },
+            ]}
+            selectedOptions={
+              valueInLegend
+                ? [
+                    {
+                      label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
+                        defaultMessage: 'Current value',
+                      }),
+                    },
+                  ]
+                : []
+            }
+            onChange={() => {}}
+            isClearable={true}
+            compressed
+          />
+          {/* <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.shared.legendValues', {
+              defaultMessage: 'Legend values',
+            })}
+            data-test-subj="lens-legend-show-value"
+            showLabel={false}
+            checked={!!valueInLegend}
+            onChange={onValueInLegendChange}
+          /> */}
+        </EuiFormRow>
+      )}
+      {
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendValues', {
+            defaultMessage: 'Legend values',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.shared.legendValues', {
+              defaultMessage: 'Legend values',
+            })}
+            data-test-subj="lens-legend-show-value"
+            showLabel={false}
+            checked={!!valueInLegend}
+            onChange={onValueInLegendChange}
+          />
+        </EuiFormRow>
+      }
+
+      {!!valueInLegend && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.shared.legendLayout', {
+            defaultMessage: 'Legend layout',
+          })}
+          fullWidth
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.shared.legendLayout', {
+              defaultMessage: 'Legend layout',
+            })}
+            buttonSize="compressed"
+            options={legendLayoutOptions}
+            idSelected={
+              legendLayoutOptions.find(({ value }) => value === legendLayout)?.id ||
+              legendLayoutOptions[0].id
+            }
+            onChange={(l) => {
+              const layout = legendLayoutOptions.find(({ id }) => id === l)!.value;
+              onLayoutChange(layout);
+            }}
+          />
+        </EuiFormRow>
+      )}
+
       {mode !== 'hide' && (
         <>
           <LegendLocationSettings
@@ -314,26 +445,6 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
                 showLabel={false}
                 checked={Boolean(nestedLegend)}
                 onChange={onNestedLegendChange}
-              />
-            </EuiFormRow>
-          )}
-          {renderValueInLegendSwitch && (
-            <EuiFormRow
-              display="columnCompressedSwitch"
-              label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-                defaultMessage: 'Show value',
-              })}
-              fullWidth
-            >
-              <EuiSwitch
-                compressed
-                label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-                  defaultMessage: 'Show value',
-                })}
-                data-test-subj="lens-legend-show-value"
-                showLabel={false}
-                checked={!!valueInLegend}
-                onChange={onValueInLegendChange}
               />
             </EuiFormRow>
           )}

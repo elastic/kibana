@@ -821,6 +821,10 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
+            // TODO: use these types
+
+            // legendLayout={legend.layout}
+            showLegendExtra={isHistogramViz && valuesInLegend}
             theme={[
               {
                 barSeriesStyle: {
@@ -869,7 +873,6 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={isHistogramViz && valuesInLegend}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

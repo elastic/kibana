@@ -37,6 +37,11 @@ export enum LegendSize {
   EXTRA_LARGE = 'xlarge',
 }
 
+export enum LegendLayout {
+  TABLE = 'table',
+  LIST = 'list',
+}
+
 export const LegendSizeToPixels = {
   [LegendSize.AUTO]: undefined,
   [LegendSize.SMALL]: 80,
