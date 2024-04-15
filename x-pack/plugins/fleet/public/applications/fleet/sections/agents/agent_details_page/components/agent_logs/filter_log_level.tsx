@@ -10,7 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AGENT_LOG_LEVELS } from './constants';
+import { AGENT_LOG_LEVELS } from '../../../../../../../../common/constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 

@@ -2648,6 +2648,9 @@
             "tags": [],
             "label": "completion_status",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
             "deprecated": false,
             "trackAdoption": false

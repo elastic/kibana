@@ -53,6 +53,42 @@ export function AddCisIntegrationFormPageProvider({
       const field = await testSubjects.findAll(text);
       return field.length;
     },
+
+    fillInTextField: async (selector: string, text: string) => {
+      const textField = await testSubjects.find(selector);
+      await textField.type(text);
+    },
+
+    chooseDropDown: async (selector: string, text: string) => {
+      const credentialTypeBox = await testSubjects.find(selector);
+      const chosenOption = await testSubjects.find(text);
+      await credentialTypeBox.click();
+      await chosenOption.click();
+    },
+
+    getFieldValueInEditPage: async (field: string) => {
+      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+      const integrationList = await testSubjects.findAll('integrationNameLink');
+      await integrationList[0].click();
+      const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
+      return fieldValue;
+    },
+
+    doesStringExistInCodeBlock: async (str: string) => {
+      const flyout = await testSubjects.find('agentEnrollmentFlyout');
+      const codeBlock = await flyout.findByXpath('//code');
+      const commandsToBeCopied = await codeBlock.getVisibleText();
+      return commandsToBeCopied.includes(str);
+    },
+
+    getFieldValueInAddAgentFlyout: async (field: string, value: string) => {
+      /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
+      const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
+      await integrationList[0].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
+      return fieldValue;
+    },
   };
 
   const isRadioButtonChecked = async (selector: string) => {

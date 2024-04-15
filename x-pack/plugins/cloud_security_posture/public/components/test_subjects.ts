@@ -67,7 +67,7 @@ export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   TENANT_ID: 'cisAzureTenantId',
   CLIENT_ID: 'cisAzureClientId',
-  CLIENT_SECRET: 'cisAzureClientSecret',
+  CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
   CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
   CLIENT_USERNAME: 'cisAzureClientUsername',

@@ -73,7 +73,7 @@ const AWS_FIELD_LABEL = {
 
 export type AwsCredentialsFields = Record<
   string,
-  { label: string; type?: 'password' | 'text'; dataTestSubj: string }
+  { label: string; type?: 'password' | 'text'; isSecret?: boolean; dataTestSubj: string }
 >;
 
 export interface AwsOptionValue {
@@ -93,6 +93,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AwsCred
         type: field.type || 'text',
         value: inputVar.value,
         dataTestSubj: field.dataTestSubj,
+        isSecret: field.isSecret,
       } as const;
     });
 
@@ -156,6 +157,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsDirectAccessSecretKey',
+        isSecret: true,
       },
     },
   },
@@ -173,6 +175,7 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         label: AWS_FIELD_LABEL.secret_access_key,
         type: 'password',
         dataTestSubj: 'awsTemporaryKeysSecretAccessKey',
+        isSecret: true,
       },
       session_token: {
         label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
