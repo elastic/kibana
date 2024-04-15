@@ -12,6 +12,8 @@ import { pick } from 'lodash';
 import { Embeddable, embeddableInputToSubject } from '@kbn/embeddable-plugin/public';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
 
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -123,6 +125,9 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
       showFrozenDataTierChoice: false,
     };
 
+    const { mlCapabilities } = this.services[2];
+    const capabilities = mlCapabilities.getCapabilities();
+
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
@@ -137,18 +142,39 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
           >
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={<EmbeddableLoading />}>
-                <EmbeddableSingleMetricViewerContainer
-                  id={this.input.id}
-                  embeddableContext={this}
-                  embeddableInput$={this.getInput$()}
-                  services={this.services}
-                  refresh={this.reload$.asObservable()}
-                  onInputChange={this.updateInput.bind(this)}
-                  onOutputChange={this.updateOutput.bind(this)}
-                  onRenderComplete={this.onRenderComplete.bind(this)}
-                  onLoading={this.onLoading.bind(this)}
-                  onError={this.onError.bind(this)}
-                />
+                {capabilities?.canCreateJob === false ? (
+                  <EuiCallOut
+                    title={
+                      <FormattedMessage
+                        id="xpack.ml.singleMetricViewerEmbeddable.errorMessageTitle"
+                        defaultMessage="Unable to load the ML single metric viewer data"
+                      />
+                    }
+                    color="danger"
+                    iconType="warning"
+                    css={{ width: '100%' }}
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="xpack.ml.singleMetricViewerEmbeddable.permissionErrorMessage"
+                        defaultMessage="You do not have sufficien permissions to view this data."
+                      />
+                    </p>
+                  </EuiCallOut>
+                ) : (
+                  <EmbeddableSingleMetricViewerContainer
+                    id={this.input.id}
+                    embeddableContext={this}
+                    embeddableInput$={this.getInput$()}
+                    services={this.services}
+                    refresh={this.reload$.asObservable()}
+                    onInputChange={this.updateInput.bind(this)}
+                    onOutputChange={this.updateOutput.bind(this)}
+                    onRenderComplete={this.onRenderComplete.bind(this)}
+                    onLoading={this.onLoading.bind(this)}
+                    onError={this.onError.bind(this)}
+                  />
+                )}
               </Suspense>
             </DatePickerContextProvider>
           </KibanaContextProvider>
