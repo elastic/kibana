@@ -14,9 +14,7 @@ jest.mock('./use_load_connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 
-const mockConnectors = {
-  [LLMs.openai]: { id: 'connectorId1', title: 'OpenAI Connector' },
-};
+const mockConnectors = [{ id: 'connectorId1', title: 'OpenAI Connector', type: LLMs.openai }];
 const mockUseLoadConnectors = (data: any) => {
   (useLoadConnectors as jest.Mock).mockReturnValue({ data });
 };
@@ -33,56 +31,31 @@ describe('useLLMsModels Hook', () => {
 
     expect(result.current).toEqual([
       {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'Azure OpenAI',
-        value: undefined,
-      },
-      {
         connectorId: 'connectorId1',
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-3.5-turbo',
+        id: 'connectorId1gpt-3.5-turbo ',
+        name: 'gpt-3.5-turbo ',
+        showConnectorName: false,
         value: 'gpt-3.5-turbo',
       },
       {
         connectorId: 'connectorId1',
         disabled: false,
         icon: expect.any(Function),
-        name: 'gpt-4',
+        id: 'connectorId1gpt-4 ',
+        name: 'gpt-4 ',
+        showConnectorName: false,
         value: 'gpt-4',
       },
     ]);
   });
 
-  it('returns LLMModels as disabled when no connectors are available', () => {
-    mockUseLoadConnectors({});
+  it('returns emptyd when connectors not available', () => {
+    mockUseLoadConnectors([]);
 
     const { result } = renderHook(() => useLLMsModels());
 
-    expect(result.current).toEqual([
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'Azure OpenAI',
-        value: undefined,
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-3.5-turbo',
-        value: 'gpt-3.5-turbo',
-      },
-      {
-        connectorId: undefined,
-        disabled: true,
-        icon: expect.any(Function),
-        name: 'gpt-4',
-        value: 'gpt-4',
-      },
-    ]);
+    expect(result.current).toEqual([]);
   });
 });
