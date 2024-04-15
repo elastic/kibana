@@ -182,6 +182,7 @@ export interface DocLinks {
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly syncRulesAdvanced: string;
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
