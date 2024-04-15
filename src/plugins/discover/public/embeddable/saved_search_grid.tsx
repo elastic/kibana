@@ -31,6 +31,8 @@ export interface DiscoverGridEmbeddableProps
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
+
+  // setColumns: (columns: string[]) => void;
 }
 
 export type DiscoverGridEmbeddableSearchProps = Omit<

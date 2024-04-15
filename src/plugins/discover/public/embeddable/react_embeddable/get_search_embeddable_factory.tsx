@@ -36,6 +36,7 @@ import { SavedSearchEmbeddableComponent } from '../saved_search_embeddable_compo
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState, SearchProps } from '../types';
 import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
+import { columnActions } from '@kbn/unified-data-table';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -196,37 +197,42 @@ export const getSearchEmbeddableFactory = ({
               rows,
               searchDescription: savedSearch.description,
               description: savedSearch.description,
-              // inspectorAdapters: this.inspectorAdapters,
               searchTitle: savedSearch.title,
               onAddColumn: (columnName: string) => {
-                console.log('onAddColumn');
-                // if (!props.columns) {
-                //   return;
-                // }
-                // const updatedColumns = columnActions.addColumn(props.columns, columnName, true);
-                // this.updateInput({ columns: updatedColumns });
+                if (!savedSearch.columns) {
+                  return;
+                }
+                const updatedColumns = columnActions.addColumn(
+                  savedSearch.columns,
+                  columnName,
+                  true
+                );
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
               },
               onRemoveColumn: (columnName: string) => {
-                console.log('onRemoveColumn');
-
-                // if (!props.columns) {
-                //   return;
-                // }
-                // const updatedColumns = columnActions.removeColumn(props.columns, columnName, true);
-                // this.updateInput({ columns: updatedColumns });
+                if (!savedSearch.columns) {
+                  return;
+                }
+                const updatedColumns = columnActions.removeColumn(
+                  savedSearch.columns,
+                  columnName,
+                  true
+                );
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
               },
               onMoveColumn: (columnName: string, newIndex: number) => {
-                console.log('onMoveColumn');
-
-                // if (!props.columns) {
-                //   return;
-                // }
-                // const columns = columnActions.moveColumn(props.columns, columnName, newIndex);
-                // this.updateInput({ columns });
+                if (!savedSearch.columns) {
+                  return;
+                }
+                const updatedColumns = columnActions.moveColumn(
+                  savedSearch.columns,
+                  columnName,
+                  newIndex
+                );
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
               },
-              onSetColumns: (columns: string[]) => {
-                console.log('onSetColumn');
-                // this.updateInput({ columns });
+              onSetColumns: (updatedColumns: string[]) => {
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
               },
               onSort: (nextSort: string[][]) => {
                 console.log('onSort');

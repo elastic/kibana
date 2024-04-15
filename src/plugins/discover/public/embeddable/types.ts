@@ -90,8 +90,6 @@ export type EmbeddableComponentSearchProps = DiscoverGridEmbeddableSearchProps &
 
 export type SearchProps = EmbeddableComponentSearchProps & {
   sampleSizeState: number | undefined;
-  description?: string;
   sharedItemTitle?: string;
-  inspectorAdapters?: Adapters;
   services: DiscoverServices;
 };
