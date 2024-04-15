@@ -85,9 +85,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickOverviewTab();
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
+          it('should render 8 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+            expect(hosts.length).to.equal(8);
           });
 
           it('should show alerts', async () => {
@@ -180,9 +180,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await browser.scrollTop();
           });
 
-          it('should load 12 lens metric charts', async () => {
+          it('should load 11 lens metric charts', async () => {
             const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
-            expect(metricCharts.length).to.equal(12);
+            expect(metricCharts.length).to.equal(11);
           });
         });
 

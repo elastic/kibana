@@ -11,9 +11,9 @@ import { SavedObject } from '@kbn/core/server';
 import { SanitizedRule, RawRule } from '../../../../types';
 import {
   validateRuleTypeParams,
-  validateSystemActions,
   getRuleNotifyWhenType,
 } from '../../../../lib';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
@@ -174,10 +174,12 @@ async function updateWithOCC<Params extends RuleParams = never>(
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
-  await validateSystemActions({
+  await validateAndAuthorizeSystemActions({
     actionsClient,
+    actionsAuthorization: context.actionsAuthorization,
     connectorAdapterRegistry: context.connectorAdapterRegistry,
     systemActions: data.systemActions,
+    rule: { consumer: originalRuleSavedObject.attributes.consumer },
   });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
