@@ -12,13 +12,13 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 export const assetCriticalityDeleteRoute = (
-  router: SecuritySolutionPluginRouter,
+  router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
