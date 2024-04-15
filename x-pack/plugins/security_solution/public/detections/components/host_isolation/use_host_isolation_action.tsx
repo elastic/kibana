@@ -79,7 +79,9 @@ export const useHostIsolationAction = ({
     agentType: sentinelOneAgentId ? 'sentinel_one' : 'endpoint',
   });
 
-  const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
+  const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || ''], {
+    enabled: !!sentinelOneAgentId && sentinelOneManualHostActionsEnabled,
+  });
   const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
 
   const isHostIsolated = useMemo(() => {

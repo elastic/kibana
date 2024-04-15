@@ -12,7 +12,3 @@ export * from './details';
 export * from './overview';
 
 export * from './uncommon_processes';
-
-export * from './kpi_hosts';
-
-export * from './kpi_unique_ips';
