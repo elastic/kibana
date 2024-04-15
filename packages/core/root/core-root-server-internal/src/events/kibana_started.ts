@@ -169,5 +169,7 @@ export const reportKibanaStartedEvent = ({
     value5: uptimeSteps.start.end - uptimeSteps.start.start,
     key6: 'es_wait_time',
     value6: uptimeSteps.elasticsearch.waitTime,
+    key7: 'migration_time',
+    value7: uptimeSteps.savedObjects.migrationTime,
   });
 };
