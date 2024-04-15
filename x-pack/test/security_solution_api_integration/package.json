@@ -5,8 +5,11 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "initialize-server:genai": "node ./scripts/index.js server genai trial_license_complete_tier",
-    "run-tests:genai": "node ./scripts/index.js runner genai trial_license_complete_tier",
+    "initialize-server:genai:trial_complete": "node ./scripts/index.js server genai trial_license_complete_tier",
+    "run-tests:genai:trial_complete": "node ./scripts/index.js runner genai trial_license_complete_tier",
+
+    "initialize-server:genai:basic_essentials": "node ./scripts/index.js server genai basic_license_essentials_tier",
+    "run-tests:genai:basic_essentials": "node ./scripts/index.js runner genai basic_license_essentials_tier",
 
     "initialize-server:ea:trial_complete": "node ./scripts/index.js server entity_analytics trial_license_complete_tier",
     "run-tests:ea:trial_complete": "node ./scripts/index.js runner entity_analytics trial_license_complete_tier",
@@ -32,11 +35,19 @@
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
 
-    "genai:server:serverless": "npm run initialize-server:genai invoke_ai serverless",
-    "genai:runner:serverless": "npm run run-tests:genai invoke_ai serverless serverlessEnv",
-    "genai:qa:serverless": "npm run run-tests:genai invoke_ai serverless qaEnv",
-    "genai:server:ess": "npm run initialize-server:genai invoke_ai ess",
-    "genai:runner:ess": "npm run run-tests:genai invoke_ai ess essEnv",
+    "genai:server:serverless": "npm run initialize-server:genai:trial_complete invoke_ai serverless",
+    "genai:runner:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless serverlessEnv",
+    "genai:qa:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless qaEnv",
+    "genai:server:ess": "npm run initialize-server:genai:trial_complete invoke_ai ess",
+    "genai:runner:ess": "npm run run-tests:genai:trial_complete invoke_ai ess essEnv",
+
+    "nlp_cleanup_task:complete:server:serverless": "npm run initialize-server:genai:trial_complete nlp_cleanup_task serverless",
+    "nlp_cleanup_task:complete:runner:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless serverlessEnv",
+    "nlp_cleanup_task:complete:qa:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless qaEnv",
+
+    "nlp_cleanup_task:essentials:server:serverless": "npm run initialize-server:genai:basic_essentials nlp_cleanup_task serverless",
+    "nlp_cleanup_task:essentials:runner:serverless": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless serverlessEnv",
+    "nlp_cleanup_task:essentials:qa:serverless": "npm run run-tests:genai:basic_essentials nlp_cleanup_task serverless qaEnv",
 
     "entity_analytics:server:serverless": "npm run initialize-server:ea:trial_complete risk_engine serverless",
     "entity_analytics:runner:serverless": "npm run run-tests:ea:trial_complete risk_engine serverless serverlessEnv",
