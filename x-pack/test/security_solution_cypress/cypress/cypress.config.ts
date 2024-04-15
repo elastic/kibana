@@ -12,7 +12,7 @@ export default defineCypressConfig({
   defaultCommandTimeout: 60000,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@ess',
+    grepTags: '@ess --@skipInEss',
   },
   execTimeout: 60000,
   pageLoadTimeout: 60000,

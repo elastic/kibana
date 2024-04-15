@@ -6,9 +6,15 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { NetworkTopNFlowRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type {
+  NetworkTopNFlowCountRequestOptions,
+  NetworkTopNFlowRequestOptions,
+} from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkTopNFlowStrategyResponse } from '../../../../../../../common/search_strategy';
+import type {
+  NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowStrategyResponse,
+} from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
@@ -32,6 +38,23 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
   flowTarget: FlowTargetSourceDest.source,
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+  timerange: { interval: '12h', from: '2020-09-13T10:16:46.870Z', to: '2020-09-14T10:16:46.870Z' },
+};
+
+export const mockCountOptions: NetworkTopNFlowCountRequestOptions = {
+  defaultIndex: [
+    'apm-*-transaction*',
+    'traces-apm*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  factoryQueryType: NetworkQueries.topNFlowCount,
+  filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
+  flowTarget: FlowTargetSourceDest.source,
   timerange: { interval: '12h', from: '2020-09-13T10:16:46.870Z', to: '2020-09-14T10:16:46.870Z' },
 };
 
@@ -563,6 +586,20 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
           },
         ],
       },
+    },
+  },
+  total: 21,
+  loaded: 21,
+};
+export const mockCountStrategyResponse: IEsSearchResponse<unknown> = {
+  isPartial: false,
+  isRunning: false,
+  rawResponse: {
+    took: 191,
+    timed_out: false,
+    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
+    hits: { max_score: 0, hits: [], total: 0 },
+    aggregations: {
       top_n_flow_count: { value: 738 },
     },
   },
@@ -837,7 +874,6 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
           ignore_unavailable: true,
           body: {
             aggregations: {
-              top_n_flow_count: { cardinality: { field: 'source.ip' } },
               source: {
                 terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
                 aggs: {
@@ -920,7 +956,56 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
       ),
     ],
   },
-  pageInfo: { activePage: 0, fakeTotalCount: 50, showMorePagesIndicator: true },
+  rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
+};
+
+export const formattedCountStrategyResponse: NetworkTopNFlowCountStrategyResponse = {
+  inspect: {
+    dsl: [
+      JSON.stringify(
+        {
+          allow_no_indices: true,
+          index: [
+            'apm-*-transaction*',
+            'traces-apm*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignore_unavailable: true,
+          body: {
+            aggregations: {
+              top_n_flow_count: { cardinality: { field: 'source.ip' } },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-13T10:16:46.870Z',
+                        lte: '2020-09-14T10:16:46.870Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            _source: false,
+          },
+          size: 0,
+          track_total_hits: false,
+        },
+        null,
+        2
+      ),
+    ],
+  },
   totalCount: 738,
   rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
 };
@@ -940,7 +1025,6 @@ export const expectedDsl = {
   ignore_unavailable: true,
   body: {
     aggregations: {
-      top_n_flow_count: { cardinality: { field: 'source.ip' } },
       source: {
         terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
         aggs: {
@@ -1014,6 +1098,45 @@ export const expectedDsl = {
         format: 'strict_date_optional_time',
       },
     ],
+  },
+  size: 0,
+  track_total_hits: false,
+};
+
+export const expectedCountDsl = {
+  allow_no_indices: true,
+  index: [
+    'apm-*-transaction*',
+    'traces-apm*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  ignore_unavailable: true,
+  body: {
+    aggregations: {
+      top_n_flow_count: { cardinality: { field: 'source.ip' } },
+    },
+    query: {
+      bool: {
+        filter: [
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-09-13T10:16:46.870Z',
+                lte: '2020-09-14T10:16:46.870Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+    _source: false,
   },
   size: 0,
   track_total_hits: false,

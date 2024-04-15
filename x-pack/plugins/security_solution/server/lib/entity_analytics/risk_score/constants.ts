@@ -25,3 +25,8 @@ export const RISK_SCORING_INPUTS_COUNT_MAX = 999999;
  * This value represents the maximum possible risk score after normalization.
  */
 export const RISK_SCORING_NORMALIZATION_MAX = 100;
+
+/**
+ * This value represents the max amount of alert inputs we store, per entity, in the risk document.
+ */
+export const MAX_INPUTS_COUNT = 10;

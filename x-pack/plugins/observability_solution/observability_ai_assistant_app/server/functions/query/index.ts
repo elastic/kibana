@@ -11,6 +11,7 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -24,6 +25,7 @@ import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plu
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import { correctQueryWithActions } from './correct_query_with_actions';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -75,7 +77,7 @@ export function registerQueryFunction({
     {
       name: 'execute_query',
       contexts: ['core'],
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.UserOnly,
       description: 'Display the results of an ES|QL query',
       parameters: {
         type: 'object',
@@ -95,6 +97,7 @@ export function registerQueryFunction({
         path: '_query',
         body: {
           query,
+          version: ESQL_LATEST_VERSION,
         },
       });
 
@@ -105,17 +108,8 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. This function takes no arguments.`,
       visibility: FunctionVisibility.AssistantOnly,
-      parameters: {
-        type: 'object',
-        properties: {
-          switch: {
-            type: 'boolean',
-          },
-        },
-        required: ['switch'],
-      } as const,
     },
     async ({ messages, connectorId, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
@@ -171,13 +165,14 @@ export function registerQueryFunction({
               ${VisualizeESQLUserIntention.visualizeXy}
 
               Some examples:
-              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
               "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
               "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              
+              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
               "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
               "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
@@ -294,6 +289,8 @@ export function registerQueryFunction({
                 \`\`\`esql
                 <query>
                 \`\`\`
+
+                Respond in plain text. Do not attempt to use a function.
   
                 Prefer to use commands and functions for which you have requested documentation.
   
@@ -329,18 +326,6 @@ export function registerQueryFunction({
                 to ES|QL, make sure that the functions are available and documented in ES|QL.
                 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
                 
-                Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
-                functions in stats commands, NOT in SORT or EVAL.
-                Rationale: Only aggregation functions are supported in STATS commands, and aggregation
-                functions are only supported in STATS commands. 
-                Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
-                Do not use aggregation functions anywhere else, such as SORT or EVAL.
-                Example:
-                \`\`\`esql
-                EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
-                | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
-                \`\`\`
-                
                 `,
             },
           },
@@ -351,14 +336,14 @@ export function registerQueryFunction({
       });
 
       return esqlResponse$.pipe(
-        emitWithConcatenatedMessage((msg) => {
+        emitWithConcatenatedMessage(async (msg) => {
           if (msg.message.function_call.name) {
             return msg;
           }
-
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
+          let esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
             /```esql([\s\S]*?)```/
           )?.[1];
+          esqlQuery = await correctQueryWithActions(esqlQuery ?? '');
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 
@@ -395,7 +380,7 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: { switch: true } }))
+        startWith(createFunctionResponseMessage({ name: 'query', content: {} }))
       );
     }
   );

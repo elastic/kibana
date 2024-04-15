@@ -8,12 +8,15 @@
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
+  canImportVisContext,
   UnifiedHistogramApi,
+  UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
+  UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -26,6 +29,9 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -35,7 +41,11 @@ import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
-import { RecordRawType } from '../../services/discover_data_state_container';
+import { DataDocumentsMsg, RecordRawType } from '../../services/discover_data_state_container';
+import { useSavedSearch } from '../../services/discover_state_provider';
+
+const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
+const EMPTY_FILTERS: Filter[] = [];
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -52,6 +62,7 @@ export const useDiscoverHistogram = ({
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
+  const savedSearchState = useSavedSearch();
 
   /**
    * API initialization
@@ -219,15 +230,18 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
+  const [initialTextBasedProps] = useState(() =>
+    getUnifiedHistogramPropsForTextBased({
+      documentsValue: savedSearchData$.documents$.getValue(),
+      savedSearch: stateContainer.savedSearchState.getState(),
+    })
+  );
+
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
-    columns,
-  } = useObservable(textBasedFetchComplete$, {
-    dataView: stateContainer.internalState.getState().dataView!,
-    query: stateContainer.appState.getState().query,
-    columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
-  });
+    columns: textBasedColumns,
+  } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
 
   useEffect(() => {
     if (!isPlainRecord) {
@@ -316,13 +330,52 @@ export const useDiscoverHistogram = ({
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
-  const filtersMemoized = useMemo(
-    () => [...(filters ?? []), ...customFilters],
-    [filters, customFilters]
-  );
+  const filtersMemoized = useMemo(() => {
+    const allFilters = [...(filters ?? []), ...customFilters];
+    return allFilters.length ? allFilters : EMPTY_FILTERS;
+  }, [filters, customFilters]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+
+  const onVisContextChanged = useCallback(
+    (
+      nextVisContext: UnifiedHistogramVisContext | undefined,
+      externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+    ) => {
+      switch (externalVisContextStatus) {
+        case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
+          // if user customized the visualization manually
+          // (only this action should trigger Unsaved changes badge)
+          stateContainer.savedSearchState.updateVisContext({
+            nextVisContext,
+          });
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            undefined
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
+          // if the visualization was invalidated as incompatible and rebuilt
+          // (it will be used later for saving the visualization via Save button)
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            nextVisContext
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
+        case UnifiedHistogramExternalVisContextStatus.applied:
+          // clearing the value in the internal state so we don't use it during saved search saving
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
+            undefined
+          );
+          break;
+        case UnifiedHistogramExternalVisContextStatus.unknown:
+          // using `{}` to overwrite the value inside the saved search SO during saving
+          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation({});
+          break;
+      }
+    },
+    [stateContainer]
+  );
 
   return {
     ref,
@@ -333,12 +386,18 @@ export const useDiscoverHistogram = ({
     filters: filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
-    columns,
+    columns: isPlainRecord ? textBasedColumns : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
+    // visContext should be in sync with current query
+    externalVisContext:
+      isPlainRecord && canImportVisContext(savedSearchState?.visContext)
+        ? savedSearchState?.visContext
+        : undefined,
+    onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
   };
 };
 
@@ -412,12 +471,13 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
-    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
-    map(({ textBasedQueryColumns }) => ({
-      dataView: stateContainer.internalState.getState().dataView!,
-      query: stateContainer.appState.getState().query!,
-      columns: textBasedQueryColumns ?? [],
-    }))
+    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    map((documentsValue) => {
+      return getUnifiedHistogramPropsForTextBased({
+        documentsValue,
+        savedSearch: stateContainer.savedSearchState.getState(),
+      });
+    })
   );
 };
 
@@ -430,7 +490,27 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
-    map((state) => state.currentSuggestion),
+    map((state) => state.currentSuggestionContext),
     distinctUntilChanged(isEqual)
   );
 };
+
+function getUnifiedHistogramPropsForTextBased({
+  documentsValue,
+  savedSearch,
+}: {
+  documentsValue: DataDocumentsMsg | undefined;
+  savedSearch: SavedSearch;
+}) {
+  const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
+
+  const nextProps = {
+    dataView: savedSearch.searchSource.getField('index')!,
+    query: savedSearch.searchSource.getField('query'),
+    columns,
+  };
+
+  addLog('[UnifiedHistogram] delayed next props for text-based', nextProps);
+
+  return nextProps;
+}

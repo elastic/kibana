@@ -464,5 +464,33 @@ describe('create_query', () => {
         'search-search-labs': ['body_content'],
       });
     });
+
+    it('should return an error when no source fields', () => {
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        'search-search-labs': {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [],
+          source_fields: [],
+        },
+      };
+
+      expect(() => getDefaultSourceFields(fieldDescriptors)).toThrowError('No source fields found');
+    });
+
+    it('should return the first single field when no source fields', () => {
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        'search-search-labs': {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [],
+          source_fields: ['non_suggested_field'],
+        },
+      };
+
+      expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
+        'search-search-labs': ['non_suggested_field'],
+      });
+    });
   });
 });

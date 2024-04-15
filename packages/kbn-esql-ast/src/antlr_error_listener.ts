@@ -25,8 +25,8 @@ export class ESQLErrorListener extends ErrorListener<any> {
     const textMessage = `SyntaxError: ${message}`;
 
     const tokenPosition = getPosition(offendingSymbol);
-    const startColumn = tokenPosition?.min + 1 || column;
-    const endColumn = tokenPosition?.max + 1 || column + 1;
+    const startColumn = offendingSymbol && tokenPosition ? tokenPosition.min + 1 : column + 1;
+    const endColumn = offendingSymbol && tokenPosition ? tokenPosition.max + 1 : column + 2;
 
     this.errors.push({
       startLineNumber: line,

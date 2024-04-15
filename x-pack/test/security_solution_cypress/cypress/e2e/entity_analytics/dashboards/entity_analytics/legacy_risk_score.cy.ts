@@ -49,7 +49,7 @@ const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
 // https://github.com/elastic/kibana/issues/179686
 describe(
   'Entity Analytics Dashboard',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
