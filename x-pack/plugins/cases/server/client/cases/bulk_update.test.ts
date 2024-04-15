@@ -19,7 +19,7 @@ import {
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { update } from './update';
+import { bulkUpdate } from './bulk_update';
 
 describe('update', () => {
   const cases = {
@@ -55,7 +55,7 @@ describe('update', () => {
     });
 
     it('notifies an assignee', async () => {
-      await update(cases, clientArgs, casesClientMock);
+      await bulkUpdate(cases, clientArgs, casesClientMock);
 
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([
         {
@@ -72,7 +72,7 @@ describe('update', () => {
       expect.assertions(2);
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -104,7 +104,7 @@ describe('update', () => {
         ],
       });
 
-      await expect(update(cases, clientArgs, casesClientMock)).rejects.toThrow(
+      await expect(bulkUpdate(cases, clientArgs, casesClientMock)).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: All update fields are identical to current version.'
       );
 
@@ -130,7 +130,7 @@ describe('update', () => {
         ],
       });
 
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -172,7 +172,7 @@ describe('update', () => {
         saved_objects: [{ ...mockCases[0], attributes: { assignees: [{ uid: '1' }] } }],
       });
 
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -211,7 +211,7 @@ describe('update', () => {
         ],
       });
 
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -249,7 +249,7 @@ describe('update', () => {
         ],
       });
 
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -273,7 +273,7 @@ describe('update', () => {
 
     it('should throw an error when an invalid field is included in the request payload', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -297,7 +297,7 @@ describe('update', () => {
       const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foo' });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -337,7 +337,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -355,7 +355,7 @@ describe('update', () => {
 
     it('does not update the category if the length is too long', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -375,7 +375,7 @@ describe('update', () => {
 
     it('throws error if category is just an empty string', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -395,7 +395,7 @@ describe('update', () => {
 
     it('throws error if category is a string with empty characters', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -414,7 +414,7 @@ describe('update', () => {
     });
 
     it('should trim category', async () => {
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -471,7 +471,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -489,7 +489,7 @@ describe('update', () => {
 
     it('throws error if the title is too long', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -510,7 +510,7 @@ describe('update', () => {
 
     it('throws error if title is just an empty string', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -530,7 +530,7 @@ describe('update', () => {
 
     it('throws error if title is a string with empty characters', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -549,7 +549,7 @@ describe('update', () => {
     });
 
     it('should trim title', async () => {
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -606,7 +606,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -628,7 +628,7 @@ describe('update', () => {
         .toString();
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -648,7 +648,7 @@ describe('update', () => {
 
     it('throws error if description is just an empty string', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -668,7 +668,7 @@ describe('update', () => {
 
     it('throws error if description is a string with empty characters', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -687,7 +687,7 @@ describe('update', () => {
     });
 
     it('should trim description', async () => {
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -750,7 +750,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -888,7 +888,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -910,7 +910,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -930,7 +930,7 @@ describe('update', () => {
       const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -954,7 +954,7 @@ describe('update', () => {
         .toString();
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -974,7 +974,7 @@ describe('update', () => {
 
     it('throws error if tag is empty string', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -994,7 +994,7 @@ describe('update', () => {
 
     it('throws error if tag is a string with empty characters', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1013,7 +1013,7 @@ describe('update', () => {
     });
 
     it('should trim tags', async () => {
-      await update(
+      await bulkUpdate(
         {
           cases: [
             {
@@ -1106,7 +1106,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1156,7 +1156,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1213,7 +1213,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1264,7 +1264,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1284,7 +1284,7 @@ describe('update', () => {
 
     it('throws with duplicated customFields keys', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1315,7 +1315,7 @@ describe('update', () => {
 
     it('throws when customFields keys are not present in configuration', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1368,7 +1368,7 @@ describe('update', () => {
       ]);
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1419,7 +1419,7 @@ describe('update', () => {
       ]);
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1439,7 +1439,7 @@ describe('update', () => {
 
     it('throws when the customField types dont match the configuration', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
@@ -1481,7 +1481,7 @@ describe('update', () => {
 
     it(`throws an error when trying to update more than ${MAX_CASES_TO_UPDATE} cases`, async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: Array(MAX_CASES_TO_UPDATE + 1).fill({
               id: mockCases[0].id,
@@ -1499,7 +1499,7 @@ describe('update', () => {
 
     it('throws an error when trying to update zero cases', async () => {
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [],
           },
@@ -1542,7 +1542,7 @@ describe('update', () => {
         });
 
         await expect(
-          update(
+          bulkUpdate(
             {
               cases: [
                 {
@@ -1571,7 +1571,7 @@ describe('update', () => {
         });
 
         await expect(
-          update(
+          bulkUpdate(
             {
               cases: [
                 {
@@ -1604,7 +1604,7 @@ describe('update', () => {
         });
 
         await expect(
-          update(
+          bulkUpdate(
             {
               cases: [
                 {
