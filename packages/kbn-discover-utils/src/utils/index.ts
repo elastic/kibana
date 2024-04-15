@@ -15,5 +15,4 @@ export * from './get_log_document_overview';
 export * from './get_message_field_with_fallbacks';
 export * from './get_should_show_field_handler';
 export * from './nested_fields';
-export * from './sorting';
 export { isLegacyTableEnabled } from './is_legacy_table_enabled';
