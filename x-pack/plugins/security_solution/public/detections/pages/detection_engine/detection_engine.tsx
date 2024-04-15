@@ -293,7 +293,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const onFiltersChange = useCallback((newFilters: Filter[]) => {
+  const onFilterControlsChange = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
     if (newFilters.length) {
       const newStatusFilter = newFilters.find(
@@ -369,7 +369,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ) : (
         <DetectionEngineFilters
           filters={topLevelFilters}
-          onFiltersChange={onFiltersChange}
+          onFiltersChange={onFilterControlsChange}
           query={query}
           timeRange={{
             from,
@@ -384,8 +384,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       arePageFiltersEnabled,
       from,
       indexPattern,
+      onFilterControlsChange,
       onFilterGroupChangedCallback,
-      onFiltersChange,
       query,
       showUpdating,
       statusFilter,

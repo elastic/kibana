@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
@@ -40,15 +40,17 @@ export const DetectionEngineFilters = ({ indexPattern, ...props }: DetectionEngi
       }),
     [history]
   );
-  const [filterControlsUrlState, setFilterControlsUrlState] = useState<
-    FilterControlConfig[] | undefined
-  >(urlStorage.get(URL_PARAM_KEY.pageFilter) ?? undefined);
+  const filterControlsUrlState = useMemo(
+    () => urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter) ?? undefined,
+    [urlStorage]
+  );
 
-  useEffect(() => {
-    if (filterControlsUrlState) {
-      urlStorage.set(URL_PARAM_KEY.pageFilter, filterControlsUrlState);
-    }
-  }, [filterControlsUrlState, urlStorage]);
+  const setFilterControlsUrlState = useCallback(
+    (newFilterControls: FilterControlConfig[]) => {
+      urlStorage.set(URL_PARAM_KEY.pageFilter, newFilterControls);
+    },
+    [urlStorage]
+  );
 
   const dataViewSpec = useMemo(
     () =>
