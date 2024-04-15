@@ -72,7 +72,7 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
           content={
             <FormattedMessage
               id="searchConnectors.index.syncJobs.documents.volume.tooltip"
-              defaultMessage="The volume, in MB, of JSON data sent with {index} operations to the Elasticsearch _bulk API during this sync. The current Elasticsearch Index size may be larger, depending on index mappings and settings. It also may be smaller, if large data is substantially trimmed during any ingest processors."
+              defaultMessage="The volume, in MB, of JSON data sent with {index} operations to the Elasticsearch _bulk API during this sync. The current Elasticsearch Index size may be larger, depending on index mappings and settings. It also may be smaller, if large data is substantially trimmed by ingest processors."
               values={{ index: <EuiCode>index</EuiCode> }}
             />
           }
