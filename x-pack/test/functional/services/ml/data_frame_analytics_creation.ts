@@ -558,7 +558,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
-      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      const validationCallouts = await testSubjects.findAll('~mlValidationCallout');
       expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
