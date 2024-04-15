@@ -16,7 +16,6 @@ export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
       delete schema.default.special;
     }
   }
-  // May need to revisit this...
   if (typeof schema.default === 'function') {
     const defaultValue = schema.default();
     if (defaultValue === undefined) {

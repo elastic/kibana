@@ -54,7 +54,6 @@ const isRecordType = (schema: joi.Schema | joi.Description): boolean => {
 };
 
 // See the `schema.nullable` type in @kbn/config-schema
-// TODO: we need to generate better OAS for Kibana config schema nullable type
 export const isNullableObjectType = (schema: joi.Schema | joi.Description): boolean => {
   if (schema.type === 'alternatives') {
     const { matches } = joi.isSchema(schema) ? schema.describe() : schema;

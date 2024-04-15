@@ -125,12 +125,8 @@ const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 
   routes: R[],
   pathStartsWith?: string
 ): R[] => {
-  return (
-    routes
-      // TODO: Make this smarter?
-      .filter(pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true)
-    // TODO: Figure out how we can scope which routes we generate OAS for
-    // .filter((route) => route.options.access === 'public')
+  return routes.filter(
+    pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true
   );
 };
 
