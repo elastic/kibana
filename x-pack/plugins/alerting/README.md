@@ -692,7 +692,8 @@ When a user is granted the `read` role in the Alerting Framework, they will be a
 - `getAlertSummary`
 - `getExecutionLog`
 - `find`
-- `scheduleBackfill`
+- `findBackfill`
+- `getBackfill`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
 
@@ -706,6 +707,8 @@ When a user is granted the `all` role in the Alerting Framework, they will be ab
 - `unmuteAll`
 - `muteAlert`
 - `unmuteAlert`
+- `scheduleBackfill`
+- `deleteBackfill`
 
 Finally, all users, whether they're granted any role or not, are privileged to call the following:
 

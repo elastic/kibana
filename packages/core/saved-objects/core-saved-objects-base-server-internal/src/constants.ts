@@ -130,7 +130,7 @@ export const DEFAULT_INDEX_TYPES_MAP: IndexTypesMap = {
 export const HASH_TO_VERSION_MAP = {
   'action_task_params|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'action|0be88ebcc8560a075b6898236a202eb1': '10.0.0',
-  'ad_hoc_run_params|6718cb19f5b39b55a874cee31f859def': '10.0.0',
+  'ad_hoc_run_params|364bd28477bb78a536185b39bfb08690': '10.0.0',
   'alert|96a5a144778243a9f4fece0e71c2197f': '10.0.0',
   'api_key_pending_invalidation|16f515278a295f6245149ad7c5ddedb7': '10.0.0',
   'apm-custom-dashboards|561810b957ac3c09fcfc08f32f168e97': '10.0.0',
