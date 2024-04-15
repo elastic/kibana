@@ -41,6 +41,7 @@ import { ServerlessRoleName } from '../../support/roles';
 
 // Failing: See https://github.com/elastic/kibana/issues/170445
 // Failing: See https://github.com/elastic/kibana/issues/169701
+// Failing: See https://github.com/elastic/kibana/issues/170593
 describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
