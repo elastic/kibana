@@ -21,9 +21,9 @@ __<<logging-layouts,Layouts>>__ define how log messages are formatted and what t
 [[log-level]]
 === Log level
 
-Currently we support the following log levels: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
+Currently we support the following log levels: _off_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _all_.
 
-Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _off_.
+Levels are ordered, so _off_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _all_.
 
 A log record will be logged by the logger if its level is higher than or equal to the level of its logger. Otherwise, the log record is ignored.
 
