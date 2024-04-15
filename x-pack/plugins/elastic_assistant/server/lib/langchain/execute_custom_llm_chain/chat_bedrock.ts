@@ -56,13 +56,6 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): Promise<string> {
-    console.log('MESSAGESMESSAGES', messages);
-    console.log('MESSAGESlength', messages.length);
-    console.log({
-      keys: Object.keys(messages[0]),
-      role: messages[0]._getType(),
-      content: messages[0].content,
-    });
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
@@ -121,28 +114,4 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
 
     return content; // per the contact of _call, return a string
   }
-
-  // async *_streamResponseChunks(
-  //   messages: BaseMessage[],
-  //   options: this['ParsedCallOptions'],
-  //   runManager?: CallbackManagerForLLMRun
-  // ): AsyncGenerator<ChatGenerationChunk> {
-  //   if (!messages.length) {
-  //     throw new Error('No messages provided.');
-  //   }
-  //   if (typeof messages[0].content !== 'string') {
-  //     throw new Error('Multimodal messages are not supported.');
-  //   }
-  //   // Pass `runManager?.getChild()` when invoking internal runnables to enable tracing
-  //   // await subRunnable.invoke(params, runManager?.getChild());
-  //   for (const letter of messages[0].content.slice(0, this.n)) {
-  //     yield new ChatGenerationChunk({
-  //       message: new AIMessageChunk({
-  //         content: letter,
-  //       }),
-  //       text: letter,
-  //     });
-  //     await runManager?.handleLLMNewToken(letter);
-  //   }
-  // }
 }
