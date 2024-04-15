@@ -7,6 +7,11 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type {
+  InsightsTelemetryEvent,
+  ReportInsightsGeneratedParams,
+  ReportInsightsTelemetryEventParams,
+} from './events/insights/types';
 import type { SecurityMetadata } from '../../../actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
@@ -30,6 +35,9 @@ import type {
   ReportEntityRiskFilteredParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
 } from './events/entity_analytics/types';
 import type {
   AssistantTelemetryEvent,
@@ -48,6 +56,7 @@ import type {
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
+export * from './events/insights/types';
 export * from './events/data_quality/types';
 export type {
   ReportEntityAlertsClickedParams,
@@ -56,6 +65,9 @@ export type {
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
   ReportAddRiskInputToTimelineClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
 } from './events/entity_analytics/types';
 export * from './events/document_details/types';
 
@@ -90,6 +102,7 @@ export interface ReportBreadcrumbClickedParams {
 export type TelemetryEventParams =
   | ReportAlertsGroupingTelemetryEventParams
   | ReportAssistantTelemetryEventParams
+  | ReportInsightsTelemetryEventParams
   | ReportEntityAnalyticsTelemetryEventParams
   | ReportMLJobUpdateParams
   | ReportCellActionClickedParams
@@ -104,10 +117,14 @@ export interface TelemetryClientStart {
   reportAlertsGroupingToggled(params: ReportAlertsGroupingToggledParams): void;
   reportAlertsGroupingTakeAction(params: ReportAlertsTakeActionParams): void;
 
+  // Assistant
   reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
   reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
   reportAssistantSettingToggled(params: ReportAssistantSettingToggledParams): void;
+
+  // Insights
+  reportInsightsGenerated(params: ReportInsightsGeneratedParams): void;
 
   // Entity Analytics
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
@@ -118,7 +135,12 @@ export interface TelemetryClientStart {
   reportToggleRiskSummaryClicked(params: ReportToggleRiskSummaryClickedParams): void;
   reportRiskInputsExpandedFlyoutOpened(params: ReportRiskInputsExpandedFlyoutOpenedParams): void;
   reportAddRiskInputToTimelineClicked(params: ReportAddRiskInputToTimelineClickedParams): void;
-
+  // Entity Analytics Asset Criticality
+  reportAssetCriticalityFileSelected(params: ReportAssetCriticalityFileSelectedParams): void;
+  reportAssetCriticalityCsvPreviewGenerated(
+    params: ReportAssetCriticalityCsvPreviewGeneratedParams
+  ): void;
+  reportAssetCriticalityCsvImported(params: ReportAssetCriticalityCsvImportedParams): void;
   reportCellActionClicked(params: ReportCellActionClickedParams): void;
 
   reportAnomaliesCountClicked(params: ReportAnomaliesCountClickedParams): void;
@@ -137,6 +159,7 @@ export type TelemetryEvent =
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents
   | DocumentDetailsTelemetryEvents
+  | InsightsTelemetryEvent
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;

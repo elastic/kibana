@@ -146,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '0.8%' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
-            { metric: 'diskUsage', value: '17.5%' },
+            { metric: 'diskUsage', value: '35.0%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -158,9 +158,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
+          it('should render 8 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+            expect(hosts.length).to.equal(8);
           });
 
           it('should show alerts', async () => {

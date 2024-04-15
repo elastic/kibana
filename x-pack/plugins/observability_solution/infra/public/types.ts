@@ -75,7 +75,7 @@ export interface InfraClientSetupDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
-  ml: MlPluginSetup;
+  ml?: MlPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
   lens: LensPublicStart;
@@ -95,7 +95,7 @@ export interface InfraClientStartDeps {
   embeddable?: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
-  ml: MlPluginStart;
+  ml?: MlPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
