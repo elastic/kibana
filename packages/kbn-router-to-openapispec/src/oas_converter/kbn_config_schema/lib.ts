@@ -55,7 +55,7 @@ const isRecordType = (schema: joi.Schema | joi.Description): boolean => {
 
 // See the `schema.nullable` type in @kbn/config-schema
 // TODO: we need to generate better OAS for Kibana config schema nullable type
-const isNullableObjectType = (schema: joi.Schema | joi.Description): boolean => {
+export const isNullableObjectType = (schema: joi.Schema | joi.Description): boolean => {
   if (schema.type === 'alternatives') {
     const { matches } = joi.isSchema(schema) ? schema.describe() : schema;
     return (
@@ -91,16 +91,17 @@ function assertInstanceOfKbnConfigSchema(schema: unknown): asserts schema is Typ
   }
 }
 
-const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
+export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
   assertInstanceOfKbnConfigSchema(schema);
   return schema.getSchema();
 };
 
-const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
+/** Used to check for schemas that are members of an object schema */
+export const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
   if (joi.isSchema(schema)) {
-    return schema._flags?.presence === 'required';
+    return schema._flags?.presence !== 'optional';
   }
-  return 'required' === get(schema, 'flags.presence');
+  return 'optional' !== get(schema, 'flags.presence');
 };
 
 const createCtx = () => {
