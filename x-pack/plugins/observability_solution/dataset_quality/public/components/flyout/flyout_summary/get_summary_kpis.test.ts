@@ -6,8 +6,15 @@
  */
 
 import { formatNumber } from '@elastic/eui';
+import type { useKibanaContextForPlugin } from '../../../utils';
+import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
-import { BYTE_NUMBER_FORMAT, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
+import {
+  BYTE_NUMBER_FORMAT,
+  DEFAULT_DATEPICKER_REFRESH,
+  DEFAULT_TIME_RANGE,
+  MAX_HOSTS_METRIC_VALUE,
+} from '../../../../common/constants';
 import {
   flyoutDegradedDocsText,
   flyoutDocsCountTotalText,
@@ -32,10 +39,11 @@ const dataStreamDetails = {
   degradedDocsCount: 200,
 };
 
-const timeRange = {
+const timeRange: TimeRangeConfig = {
+  ...DEFAULT_TIME_RANGE,
+  refresh: DEFAULT_DATEPICKER_REFRESH,
   from: 'now-15m',
   to: 'now',
-  refresh: false,
 };
 
 const degradedDocsHref = 'http://exploratory-view/degraded-docs';
@@ -43,7 +51,9 @@ const hostsRedirectUrl = 'http://hosts/metric/';
 
 const hostsLocator = {
   getRedirectUrl: () => hostsRedirectUrl,
-};
+} as ReturnType<
+  typeof useKibanaContextForPlugin
+>['services']['observabilityShared']['locators']['infra']['hostsLocator'];
 
 describe('getSummaryKpis', () => {
   it('should return the correct KPIs', () => {

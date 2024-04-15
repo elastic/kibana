@@ -270,6 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
 
+      await browser.closeCurrentWindow();
       await browser.switchTab(0);
     });
 
@@ -279,11 +280,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
       await testSubjects.click(hostsShowAllSelector);
+      await browser.switchTab(1);
 
       // Confirm url contains metrics/hosts
-      const currentUrl = await browser.getCurrentUrl();
-      expect(currentUrl).to.contain('metrics/hosts');
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        const parsedUrl = new URL(currentUrl);
+        expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
+      });
 
+      await browser.closeCurrentWindow();
       await browser.switchTab(0);
     });
 
