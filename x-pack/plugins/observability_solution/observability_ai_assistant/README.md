@@ -54,7 +54,8 @@ Conversations with the AI Assistant are powered by three foundational components
 
 The LLM essentially sits between the platform and the user. Its purpose is to interpret both the messages from the user and the response from the functions called, and offer its conclusions and suggest next steps. It can suggest functions on its own, and it has read and write access to the knowledge base.
 
-The knowledge base is an Elasticsearch index, with an inference processor powered by ELSER. Kibana developers can preload embeddings into this index, and users can access them too, via plain Elasticsearch APIs or specific Kibana APIs. Additionally, the LLM can query the knowledge base for additional context and store things it has learned from a conversation.
+The knowledge base is an Elasticsearch index, with an inference processor powered by ELSER. This enables us to query the knowledge base with the users original question, using semantic search.
+Kibana developers can preload embeddings into this index, and users can access them too, via plain Elasticsearch APIs or specific Kibana APIs. Additionally, the LLM can query the knowledge base for additional context and store things it has learned from a conversation.
 
 Both the user and the LLM are able to suggest functions, that are executed on behalf (and with the privileges of) the user. Functions allow both the user and the LLM to include relevant context into the conversation. This context can be text, data, or a visual component, like a timeseries graph. Some of the functions that are available are:
 
