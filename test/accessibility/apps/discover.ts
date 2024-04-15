@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe.only('Discover a11y tests', () => {
+  describe('Discover a11y tests', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setCommonlyUsedTime('Last_7 days');
